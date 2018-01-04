@@ -1,5 +1,5 @@
 ;******************************************************************************
-;filename:    draw_month_wnd.ncl
+;filename:    draw_4p3X1_month_wnd150hPa.ncl
 ;input_data:  clim.mon.uvwnd.nc 
 ;draw the climate monthly wind of U and V 
 ;and plot the contour of U wind to indicate tej
@@ -9,20 +9,20 @@
 begin
 ;the filename of the read-in-data and figure, as well as the title of the figure
 filename   = "/home/ys17-19/renql/project/2018tej/BaseMap/mdata/clim.mon.uvwnd.nc"
-fig_name   = "/home/ys17-19/renql/project/2018tej/BaseMap/fig/12panel_3X1_month_wnd" 
-fig_title  = "Climate Monthly Wind"
+fig_name   = "/home/ys17-19/renql/project/2018tej/BaseMap/fig/4p3X1_month_wnd150hPa" 
+fig_title  = "Climate Monthly Wind 150hPa"
 left_title = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;right_title= lev+"hPa"
 fig_out    = "pdf";"x11"
 var_name   = (/"uwnd","vwnd"/)
 
 ;the number of the panel plot
-plot   = new((/3/),graphic)
-plotv  = new((/3/),graphic)
-line   = new((/3/),graphic)
+plot   = new((/12/),graphic)
+plotv  = new((/12/),graphic)
+line   = new((/12/),graphic)
 
 ;area: east Asia
-lev   = (/200,150,100/)  ;the hpa of the level
+lev   = (/150/)  ;the hpa of the level
 ;lats = -20
 ;latn = 60
 ;lonl = 20
@@ -49,16 +49,14 @@ printVarSummary(var_u)
 printVarSummary(var_v)
 
 nlon = dimsizes(var_u&lon)
-latx = new((/12,3,nlon/),float)
+latx = new((/12,nlon/),float)
 lonx = var_u&lon
-select_area = var_u(:,:,{-30.:30},:)
+select_area = var_u(:,{-30.:30},:)
 lat         = select_area&lat
 do nm = 0,11,1
-    do nl = 0, 2,1
-        do nlo = 0, nlon-1,1
-            latind = minind(select_area(nm,nl,:,nlo))
-            latx(nm,nl,nlo) = lat(latind)
-        end do
+    do nlo = 0, nlon-1,1
+        latind = minind(select_area(nm,:,nlo))
+        latx(nm,nlo) = lat(latind)
     end do
 end do
 printVarSummary(latx)
@@ -89,7 +87,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;res@mpMaxLonF        = lonr
     ;res@mpMinLonF        = lonl
     res@gsnMajorLatSpacing = 20
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLonSpacing = 40
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -165,15 +163,13 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
     
-do nm = 0, 12-1,1
-    res@gsnLeftString    = left_title(nm)
-    do nl = 0 , dimsizes(lev)-1, 1
-        res@gsnRightString = lev(nl) + "hPa"
-        plot(nl)  = gsn_csm_contour_map_ce(wks,var_u(nm,nl,:,:),res)
-        plotv(nl) = gsn_csm_vector(wks,var_u(nm,nl,:,:),var_v(nm,nl,:,:),resv)
-        overlay(plot(nl),plotv(nl))
-        print(min(var_u(nm,nl,:,:)))
-        line(nl)  = gsn_add_polyline(wks,plot(nl),lonx,latx(nm,nl,:),plres)
+do np = 0, 4-1,1
+    do nm = 3*np, 3*np+2, 1
+        plot(nm)  = gsn_csm_contour_map_ce(wks,var_u(nm,:,:),res)
+        plotv(nm) = gsn_csm_vector(wks,var_u(nm,:,:),var_v(nm,:,:),resv)
+        overlay(plot(nm),plotv(nm))
+        print(min(var_u(nm,:,:)))
+        line(nm)  = gsn_add_polyline(wks,plot(nm),lonx,latx(nm,:),plres)
     end do
     
     resp  = True    
@@ -181,7 +177,10 @@ do nm = 0, 12-1,1
     resp@txString      = fig_title
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    gsn_panel(wks,plot,(/3,1/),resp)
+    resp@gsnPanelFigureStrings = left_title(3*np:3*np+2)
+    resp@amJust                = "TopLeft"
+    resp@gsnPanelFigureStringsFontHeightF = subtitle_font
+    gsn_panel(wks,plot(3*np:3*np+2),(/3,1/),resp)
 end do
 end
 

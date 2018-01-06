@@ -9,13 +9,13 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE \" IN STRING!
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
+PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
 
 # Path of the post processed data
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/input_data2TP_NUDG_UVT/\"
+PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
 
 # Case name
-CASENAME=\"AMIP_C5PM\"
+CASENAME=\"AMIP_C5PM_TP_NUDG\"
 
 
 # Names of 2D fields
@@ -25,11 +25,11 @@ CASENAME=\"AMIP_C5PM\"
 FDNAME2D="(/\"PRECC\",\"PRECL\"/)" #often use
 
 # Names of 3D fields
-#FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
+FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
 #FDNAME3D="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"RELHUM\",\"Z3\",\"DTCOND\"/)" # hybrid coordinate
-FDNAME3D_HY="(/\"U\",\"V\",\"T\"/)" # hybrid coordinate
+#FDNAME3D_HY="(/\"U\",\"V\",\"T\"/)" # hybrid coordinate
 
 # First year of the subset
 FRSTYEAR=1979
@@ -44,13 +44,13 @@ LAYERS=30
 # Output specific pressure layers
 # CAUTION: Do not leave species between element!
 #PLEV="(/925,850,700,600,500,400,300,200,100,50/)"
-#PLEV="(/1000,925,850,700,500,200/)"
+PLEV="(/1000,925,850,700,500,200/)"
 
 
 # Process flag
-FLAG_2D=0
-FLAG_3D=0
-FLAG_3D_HY=1
+FLAG_2D=1
+FLAG_3D=1
+FLAG_3D_HY=0
 
 #-----------------------------------------------------------
 

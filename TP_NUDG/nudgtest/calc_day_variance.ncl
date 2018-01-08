@@ -1,17 +1,19 @@
 ;***************************************************************************
 ;filename:      calc_day_variance.ncl
-;output_file:   UVT850500200_day_variance.nc 
+;output_file:  i UVT850500200_day_variance.nc 
 ;read the 27 years daily U,V,T at East Asia and then remove the annual cycle 
 ;get an array of (ncase,nday,nlevel,nlat,nlon),then calculate the variance in
 ;the dim of nday (the sample size is 27*365=9855)
 ;                                            by Ql_Ren
 ;                                           2017/12/21
+;modified
+;2018/01/08 for calculate the new case TP-NUDG-6h 
 ;******************************************************************************
 begin
 ;the path of the file
-filein   = (/"/users/yangsong3/Model_Team/F/AMIP-CTRL/pro/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
-             "/users/yangsong3/Model_Team/F/TP-NUDG/pro/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
-fileout  = "/users/yangsong3/Model_Team/F/nudgtest/mdata/UVT850500200_day_variance.nc"
+filein   = (/"/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
+             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
+fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/UVT850500200_day_variance-6h.nc"
 var_name = (/"U","V","T"/)
 case     = (/"AMIP_CTRL","TP_NUDG","DIFF"/)
 years    = ispan(1979,2005,1)   ;the calculate time
@@ -76,7 +78,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "The three cases are CTRL,NUDG and DIFF" + \
+fileAtt@discription   = "The three cases are CTRL,NUDG6h and DIFF" + \
                     "and the three variables are U,V,T"
 fileattdef(ncdf,fileAtt)  
 

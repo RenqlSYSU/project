@@ -1,17 +1,19 @@
 ;***************************************************************************
-;read the 27 years U at East Asia and then calculate the month average to 
-;get an array of (ncase,nyear,nmonth,nlat,nlon),then calculate the variance in
+;filename:      calc_month_ave_year_varience.ncl
+;output_file:   Month_ave_year_varience.nc 
+;read the 27 years U,V,T at East Asia and then calculate the month average to 
+;get an array of (nvar,ncase,nyear,nmonth,nlev,nlat,nlon),then calculate the variance in
 ;the dim of nyear (the sample size is 27)
 ;                                            by Ql_Ren
-;                                           2017/12/07
+;                                           2018/01/08
 ;******************************************************************************
 begin
 ;the path of the file
-filein   = (/"/users/yangsong3/Model_Team/F/AMIP-CTRL/pro/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
-             "/users/yangsong3/Model_Team/F/TP-NUDG/pro/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
-fileout  = "/users/yangsong3/Model_Team/F/nudgtest/mdata/Month_ave_year_variance.nc"
+filein   = (/"/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
+             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
+fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/Month_ave_year_variance-6h.nc"
 var_name = (/"U","V","T"/)
-case     = (/"AMIP_CTRL","TP_NUDG","DIFF"/)
+case     = (/"AMIP_CTRL","TP_NUDG6h","DIFF"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area: east Asia
@@ -70,7 +72,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "The three cases are CTRL,NUDG and DIFF" + \
+fileAtt@discription   = "The three cases are CTRL,NUDG6h and DIFF" + \
                     "and the three variables are U,V,T"
 fileattdef(ncdf,fileAtt)  
 

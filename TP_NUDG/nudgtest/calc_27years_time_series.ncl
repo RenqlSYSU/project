@@ -1,17 +1,20 @@
 ;***************************************************************************
-;read the 27 years U,V,T at TP areas in two case (CTRL, NUDG) and then 
+;filename:      calc_27years_time_series.ncl
+;output_file:   27years_time_series.nc 
+;read the 27 years U,V,T at TP areas in three cases (CTRL, NUDG6h, NUDG24h) and then 
 ;calculate the season and area average in order to test the right of the 
 ;NUDG experiment.
 ;                                            by Ql_Ren
-;                                           2017/12/07
+;                                           2017/01/08
 ;******************************************************************************
 begin
 ;the path of the file
-filein   = (/"/users/yangsong3/Model_Team/F/AMIP-CTRL/pro/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
-             "/users/yangsong3/Model_Team/F/TP-NUDG/pro/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
-fileout  = "/users/yangsong3/Model_Team/F/nudgtest/27years_time_series.nc"
+filein   = (/"/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
+             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\ ;+year+".daily.nc"
+             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
+fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/27years_time_series.nc"
 var_name = (/"U","V","T"/)
-case     = (/"AMIP_CTRL","TP_NUDG"/)
+case     = (/"AMIP_CTRL","TP_NUDG-6h","TP_NUDG-24h"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
 
@@ -46,7 +49,7 @@ do nc = 0,ncase-1,1
         f  = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
         var(nv,nc,nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
     end do  ;the loop of the 27 years
-end do   ;the loop of the two cases 
+end do   ;the loop of the three cases 
 end do   ;the loop of the 3 variables
 var := wgt_areaave_Wrap(var,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
 
@@ -81,7 +84,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "The two case are CTRL,NUDG" + \
+fileAtt@discription   = "The two case are CTRL,NUDG6h,NUDG24h" + \
                     "and the three variables are U,V,T"
 fileattdef(ncdf,fileAtt)  
 
@@ -103,15 +106,15 @@ filevardef(ncdf,"season_series",typeof(season_series),(/"var","case","year","sea
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lev",vars&level)
-month_series@long_name = "the time series of three variables and two case of 27 years"
+month_series@long_name = "the time series of three variables and three case of 27 years"
 month_series@units     = ""
-season_series@long_name = "the time series of three variables and two case of 27 years"
+season_series@long_name = "the time series of three variables and three case of 27 years"
 season_series@units     = ""
 filevarattdef(ncdf,"month_series",month_series)
 filevarattdef(ncdf,"season_series",season_series)
 
 ncdf->var    = (/1,2,3/)  ;the three variables are U,V,T
-ncdf->case   = (/1,2/)  ;the two cases are (/"CTRL","NUDG"/)
+ncdf->case   = (/1,2,3/)  ;the two cases are (/"CTRL","NUDG6h","NUDG24h"/)
 ncdf->year   = (/years/)
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)

@@ -28,8 +28,8 @@ lonl = 20
 lonr = 220
 lev  = (/850,500,200/)  ;can used as right string
 siglvl = 0.05
-nv = 0 
-nl = 2
+;nv = 0 
+;nl = 2
 
 ;set the area of the box
 maxlon = 105
@@ -52,6 +52,8 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     plot   = new((/3/),graphic)
     line   = new((/3/),graphic)
 
+do nv = 0,2,1
+do nl = 0,2,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -196,5 +198,7 @@ do nm = 0,11,1
     resp@txFontThicknessF = title_thick
     gsn_panel(wks,plot,(/3,1/),resp)
 end do 
+end do ;for level
+end do ;for varables
 end
 

@@ -13,13 +13,11 @@ begin
 ;path   = "/users/yangsong3/renql/project/TP_NUDG/nudgtest"
 path   = "."
 filein = (/"/mdata/CTRL-Areas_preci_27y_ts.nc","/mdata/NUDG24h-Areas_preci_27y_ts.nc","/mdata/NUDG6h-Areas_preci_27y_ts.nc"/)
-fig_name = path + "/fig/4p3X1_areas_preci_27y_ts"
+fig_name = path + "/fig/4p3X1_areas_preci_27y_ts_stand"
 fig_out  = "pdf"
 fig_title= "Preci Time Series(stand) in " ; + season
-
 output_write = 0 ;1 means write some data to fname txt file
 fname = path + "/areas_seasonly_preci_ave_vari.txt"
-
 case     = (/"AMIP_CTRL","TP_NUDG-24h","TP_NUDG-6h"/) ; the legend name
 unit     = (/"mm/day"/) ;the right title
 var_name = (/"season_series"/)   ;the left title 
@@ -55,6 +53,7 @@ do nc = 0, ncase-1,1
 end do
 ave  = dim_avg_n_Wrap(var,2) ;get (ncase,narea,nseason)
 vari = dim_variance_n_Wrap(var,2) ;get (ncase,narea,nseason)
+var  = dim_standardize_n_Wrap(var,1,2) ;get standardized data
 printVarSummary(var)
 printVarSummary(vari)
 
@@ -70,6 +69,7 @@ do na = 0, narea-1,1
     write_table(fname,"a",alist,"%s %s %10.6f%10.6f%10.6f%10.6f%10.6f%10.6f%10.6f%10.6f")
 end do
 end if
+
 ;===============================================
 ;draw the figure
 ;=============================================
@@ -90,8 +90,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tiYAxisOn = False
     resxy@trXMinF = 1979
     resxy@trXMaxF = 2005
-    ;resxy@trYMinF = -3.0
-    ;resxy@trYMaxF = 15.0
+    resxy@trYMinF = -3.0
+    resxy@trYMaxF = 3.0
     
     ;resxy@tmXBLabelFontHeightF     = tick_font-0.01
     ;resxy@tmXBLabelFontThicknessF  = tick_thick-1.0 
@@ -115,10 +115,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmXMajorGridLineColor          = "gray"
     resxy@tmXMajorGridThicknessF         = 2.0
                        
-    ;resxy@gsnYRefLine            = ave
-    ;resxy@gsnYRefLineDashPatterns = (/12,12,12/)   
-    ;resxy@gsnYRefLineThicknesses  = (/3.0,3.0,3.0/)
-    ;resxy@gsnYRefLineColors       = (/"blue","red","green"/)
+    resxy@gsnYRefLine             = 0
+    resxy@gsnYRefLineDashPatterns = 0 
+    resxy@gsnYRefLineThicknesses  = 10
+    resxy@gsnYRefLineColors       = "black"
                              
     resxy@gsnCenterStringFontHeightF = subtitle_font-0.005
     resxy@gsnRightStringFontHeightF  = subtitle_font

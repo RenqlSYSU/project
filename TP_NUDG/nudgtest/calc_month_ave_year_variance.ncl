@@ -9,11 +9,15 @@
 ;******************************************************************************
 begin
 ;the path of the file
-filein   = (/"/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
-             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
-fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/Month_ave_year_variance-6h.nc"
+;filein   = (/"/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
+;             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
+;fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/Month_ave_year_variance-6h.nc"
+path    = "/users/yangsong3/renql/project/TP_NUDG"
+filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fileout = path + "/nudgtest/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "Month_ave_year_variance.nc"
 var_name = (/"U","V","T"/)
-case     = (/"AMIP_CTRL","TP_NUDG6h","DIFF"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area: east Asia
@@ -31,66 +35,59 @@ vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat = dimsizes(vars&lat)
 nlon = dimsizes(vars&lon)
 nyear = dimsizes(years)
-ncase = dimsizes(case)
 nvar  = dimsizes(var_name)
 nlev  = dimsizes(lev)
-var       = new((/nvar,ncase,nyear,365,nlev,nlat,nlon/),float)
-var_month = new((/nvar,ncase,nyear,12,nlev,nlat,nlon/),float)
-vari      = new((/nvar,ncase,12,nlev,nlat,nlon/),float)
+var       = new((/nvar,nyear,365,nlev,nlat,nlon/),float)
+var_month = new((/nvar,nyear,12,nlev,nlat,nlon/),float)
+vari      = new((/nvar,12,nlev,nlat,nlon/),float)
+ncase = dimsizes(filein)
 
+do nf = 0 , ncase-1,1
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
 do nv = 0,nvar-1,1 
-do nc = 0,ncase-2,1
     do nt = 0,nyear-1,1
-        f  = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        var(nv,nc,nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+        f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
+        var(nv,nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
     end do  ;the loop of the 27 years
-end do   ;the loop of the two cases 
 end do   ;the loop of the 3 variables
 
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
-    var_month(:,0:1,:,nm,:,:,:) = dim_avg_n_Wrap(var(:,0:1,:,select_time,:,:,:),3)
+    var_month(:,:,nm,:,:,:) = dim_avg_n_Wrap(var(:,:,select_time,:,:,:),2)
 end do
 
-vari(:,0:1,:,:,:,:) = dim_variance_n_Wrap(var_month(:,0:1,:,:,:,:,:),2)
-vari(:,2,:,:,:,:)   = vari(:,0,:,:,:,:) - vari(:,1,:,:,:,:) ;(nvar,ncase,12,nlev,nlat,nlon)
+vari(:,:,:,:,:) = dim_variance_n_Wrap(var_month(:,:,:,:,:,:),1)
 printVarSummary(vari)
-prob = ftest(vari(:,0,:,:,:,:),nyear,vari(:,1,:,:,:,:),nyear,0)   ;(nvar,12,nlev,nlat,nlon)
-printVarSummary(prob)
 
 ;====================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout)
-ncdf = addfile(fileout,"c")
+system("rm -f " + fileout(nf))
+ncdf = addfile(fileout(nf),"c")
 setfileoption(ncdf,"DefineMode",True)
 
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "The three cases are CTRL,NUDG6h and DIFF" + \
-                    "and the three variables are U,V,T"
+fileAtt@discription   = "the three variables are U,V,T"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
-dimNames = (/"var","case","month","lev","lat","lon"/)
-dimSizes = (/nvar,ncase,12,nlev,nlat,nlon/)
-dimUnlim = (/False, False,False,False,False,False/)
+dimNames = (/"var","month","lev","lat","lon"/)
+dimSizes = (/nvar,12,nlev,nlat,nlon/)
+dimUnlim = (/False,False,False,False,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;Define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"var","integer",(/"var"/))
-filevardef(ncdf,"case","integer",(/"case"/))
 filevardef(ncdf,"month","integer",(/"month"/))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"vari",typeof(vari),(/"var","case","month","lev","lat","lon"/))
-filevardef(ncdf,"prob",typeof(prob),(/"var","month","lev","lat","lon"/))
+filevardef(ncdf,"vari",typeof(vari),(/"var","month","lev","lat","lon"/))
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lev",vars&level)
@@ -99,15 +96,13 @@ filevarattdef(ncdf,"lon",vars&lon)
 ;vari@long_name = "variance of 27 years"
 vari@units   = ""
 filevarattdef(ncdf,"vari",vari)
-filevarattdef(ncdf,"prob",prob)
 
 ncdf->var    = (/1,2,3/)  ;the three variables are U,V,T
-ncdf->case   = (/1,2,3/)  ;the two cases are (/"CTRL","NUDG"/)
 ncdf->month  = ispan(1,12,1)
 ncdf->lev = (/lev/)
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)
 ncdf->vari = (/vari/)
-ncdf->prob = (/prob/)
+end do
 end
 

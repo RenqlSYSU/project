@@ -10,38 +10,46 @@
 begin
 ;the path of the file
 ;filein   = "/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.";+year+".daily.nc"
-filein   = "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR." ;+year+".daily.nc"
+;filein   = "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR." ;+year+".daily.nc"
 ;fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/CTRL-Areas_preci_27y_ts.nc"
-fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/NUDG24h-Areas_preci_27y_ts.nc"
+;fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/NUDG24h-Areas_preci_27y_ts.nc"
+path    = "/users/yangsong3/renql/project/TP_NUDG"
+filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fileout = path + "/nudgtest/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Areas_preci_27y_ts.nc"
+
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
 
 ;area of index, India,Tibet,Philippines,Maritime_continent
 area  = (/"India","Tibet","Philippines","Maritime_continent",\
-          "North China","Central East China","South China"/)
-lats = (/20 ,25  ,5   ,-10 ,34  ,28  ,20 /)
-latn = (/35 ,35  ,20  ,7.5 ,43  ,34  ,28 /)
-lonl = (/60 ,90  ,120 ,85  ,107 ,107 ,107/)
-lonr = (/80 ,103 ,140 ,120 ,122 ,122 ,122/)
+          "North China","Central East China","South China","TPnudg"/)
+lats = (/20 ,25  ,5   ,-10 ,34  ,28  ,20 ,25 /)
+latn = (/35 ,35  ,20  ,7.5 ,43  ,34  ,28 ,40 /)
+lonl = (/60 ,90  ,120 ,85  ,107 ,107 ,107,70 /)
+lonr = (/80 ,103 ,140 ,120 ,122 ,122 ,122,105/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 nyear = dimsizes(years)
 narea = dimsizes(area)
+ncase = dimsizes(filein)
 index = new((/narea,nyear,365/),float)
 month_series  = new((/narea,nyear,12/),float)
 season_series = new((/narea,nyear,4/),float)
 
+do nf = 0, ncase-1,1
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
 ;--------------------------------------------------------------
+index = 0
 do na = 0,narea-1,1
     do nt = 0,nyear-1,1
-        index(na,nt,:) = 0
         do v = 0, dimsizes(var_name)-1,1  ;the aim of this loop is to add the PRECC and PRECL 
-            f  = addfile(filein+years(nt)+".daily."+var_name(v)+".nc","r")
+            f  = addfile(filein(nf)+years(nt)+".daily."+var_name(v)+".nc","r")
             vars := f->$var_name(v)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
             index(na,nt,:) = index(na,nt,:) + wgt_areaave_Wrap(vars,1.0,1.0,0)*3600*24*1000 ;calculate the area average and get the index
         end do ;the loop of precc and precl
@@ -72,8 +80,8 @@ end do
 ;====================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout)
-ncdf = addfile(fileout,"c")
+system("rm -f " + fileout(nf))
+ncdf = addfile(fileout(nf),"c")
 setfileoption(ncdf,"DefineMode",True)
 
 ;Set All field attribution
@@ -106,11 +114,13 @@ season_series@units     = "mm/day"
 filevarattdef(ncdf,"month_series",month_series)
 filevarattdef(ncdf,"season_series",season_series)
 
-ncdf->area   = (/1,2,3,4,5,6,7/)  ;the two cases are (/"CTRL","NUDG"/)
+ncdf->area   = (/1,2,3,4,5,6,7,8/)  ;the two cases are (/"CTRL","NUDG"/)
 ncdf->year   = (/years/)
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
 ncdf->month_series = (/month_series/)
 ncdf->season_series = (/season_series/)
+end do
 end
+
 

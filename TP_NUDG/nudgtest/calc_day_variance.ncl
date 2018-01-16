@@ -1,6 +1,6 @@
 ;***************************************************************************
 ;filename:      calc_day_variance.ncl
-;output_file:  i UVT850500200_day_variance.nc 
+;output_file:   UVT850500200_day_variance.nc 
 ;read the 27 years daily U,V,T at East Asia and then remove the annual cycle 
 ;get an array of (ncase,nday,nlevel,nlat,nlon),then calculate the variance in
 ;the dim of nday (the sample size is 27*365=9855)
@@ -11,11 +11,13 @@
 ;******************************************************************************
 begin
 ;the path of the file
-filein   = (/"/users/yangsong3/renql/project/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\ ;+year+".daily.nc"
-             "/users/yangsong3/renql/project/TP_NUDG/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/) ;+year+".daily.nc"
-fileout  = "/users/yangsong3/renql/project/TP_NUDG/nudgtest/mdata/UVT850500200_day_variance-6h.nc"
+path    = "/users/yangsong3/renql/project/TP_NUDG"
+filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fileout = path + "/nudgtest/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-UVTday_variance.nc"
 var_name = (/"U","V","T"/)
-case     = (/"AMIP_CTRL","TP_NUDG","DIFF"/)
+case     = (/"AMIP_CTRL","TP_NUDG24h","TP_NUDG6h"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area: east Asia

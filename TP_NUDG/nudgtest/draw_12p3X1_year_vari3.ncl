@@ -15,7 +15,6 @@ filename = path + "/nudgtest/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "Month_av
 fig_name   = path + "/nudgtest/fig/12p3X1_year_vari"
 fig_title  = "Variance of 27 years in "
     case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
-    ;case   = (/"AMIP_CTRL","CTRL-NUDG24h","CTRL-NUDG6h"/)
 fig_out    ="pdf";"x11"
 unit       = ""
 ncase = 3 
@@ -62,8 +61,8 @@ nlon   = getfilevardimsizes(f,"lon")
 var  = new((/ncase,nmonth,nlat,nlon/),float)
 prob = new((/ncase-1,nmonth,nlat,nlon/),float)
 
-do nv = 0,2,1
-do nl = 0,2,1
+do nv = 0,0,1
+do nl = 0,0,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -77,6 +76,7 @@ do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
 var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/var_temp*100 ;get the difference between CTRL and NUDG
 end do
+
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
@@ -86,9 +86,9 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name+lev(nl)+draw_var(nv))
-    ;gsn_define_colormap(wks,"GMT_polar") 
+    gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    gsn_define_colormap(wks,"matlab_jet") 
+    ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
     res                  = True
@@ -129,13 +129,17 @@ printVarSummary(prob)
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
-;res_lin = res
-res_sig = res
+
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
-    res@cnLinesOn        = False
-    res@cnLineLabelsOn   = False  ; True
+    res@cnLinesOn        = False ;True
+    res@cnLineLabelsOn   = False
+    res@cnInfoLabelOn    = False
+    ;res@cnLineThicknessF = 0
+    ;res@gsnContourZeroLineThicknessF = 4.0
+    ;res@cnLineColor      = "blue"
    
+    res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
@@ -147,66 +151,35 @@ res_sig = res
 
     res@gsnSpreadColors      = True              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
-    res@gsnSpreadColorEnd    = 65                ; end at color 200
+    res@gsnSpreadColorEnd    = 21                ; end at color 200
     
-    res@lbLabelBarOn         = False   ; the label bar
+    res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
 
-;----------set the attribute of the contour line map-----------
-    res_lin                  = True
-    res_lin@gsnDraw          = False
-    res_lin@gsnFrame         = False
-    res_lin@cnFillOn         = False
-    res_lin@cnLinesOn        = True
-    res_lin@cnLineLabelsOn   = True
-    res_lin@cnInfoLabelOn    = False
-    
-    res_lin@cnLineThicknessF = 2
-    res_lin@gsnContourZeroLineThicknessF = 4.0
-    res_lin@gsnContourNegLineDashPattern = 5
-    res_lin@gsnContourPosLineDashPattern = 0
-    res_lin@cnLineColor      = "black"
-
-    ;res_lin@cnMonoLevelFlag     = False
-    ;res_lin@cnLineLabelInterval = 2
-    res_lin@cnLineLabelPlacementMode = "Computed"
-    res_lin@cnLineLabelDensityF  = 1
-
-    res_lin@gsnCenterString      = ""
-    res_lin@gsnRightStringFontHeightF = subtitle_font
-    res_lin@gsnLeftStringFontHeightF  = subtitle_font
-    res_lin@gsnLeftString    = " "
-    res_lin@gsnRightString   = " "
-    
-    ;res_lin@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res_lin@cnMinLevelValF        = 1          ; set min contour level
-    ;res_lin@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    ;res_lin@cnLevelSpacingF       = 20        ; set contour interval
-
 ;----------Set res sig-----------
-    ;res_sig                  = True
-    ;res_sig@gsnDraw          = False
-    ;res_sig@gsnFrame         = False
+    res_sig                  = True
+    res_sig@gsnDraw          = False
+    res_sig@gsnFrame         = False
     res_sig@cnFillOn         = True       ; Fill contours
     res_sig@cnLinesOn        = False;True      ; turn off contour lines
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnInfoLabelOn    = False
     ;res_sig@cnLineThicknessF = 2
     ;res_sig@cnLineColor     = "black"
-    res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnMonoFillPattern= True;False
-    ;res_sig@cnFillPattern    = 11
-    ;res_sig@cnMonoFillScale  = True
-    ;res_sig@cnFillScaleF     = 1.
-    ;res_sig@cnMonoFillColor  = True
-    ;res_sig@cnFillColor      = "darkslategray"
-    ;res_sig@cnFillDotSizeF   = 0.1
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 1.
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.1
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
-    res_sig@cnLevelSelectionMode ="ExplicitLevels"
-    res_sig@cnLevels             = (/0.01/)
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/0.01/)
     ;res_sig@cnFillPattern        = "GMT_gray"
-    res_sig@cnFillColors         = (/"grey30","grey50"/) ;
+    ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
     
     res_sig@gsnCenterString      = ""
     res_sig@gsnRightStringFontHeightF = subtitle_font
@@ -234,25 +207,23 @@ res_sig = res
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait"
-    resp@gsnPanelLabelBar = True
-    resp@pmLabelBarWidthF  = 0.5
-    resp@pmLabelBarHeightF = 0.05
-    resp@lbLabelFontHeightF = tick_font
-    resp@lbLabelFontThicknessF = tick_thick
+    ;resp@gsnPanelLabelBar = True
+    ;resp@pmLabelBarWidthF  = 0.5
+    ;resp@pmLabelBarHeightF = 0.05
+    ;resp@lbLabelFontHeightF = tick_font
+    ;resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
 do nm = 0,11,1
     do nc = 0, ncase-1,1
+        res@gsnLeftString   = case(nc)
         if(nc.gt.0) then
-            res_sig@gsnLeftString   = case(nc)
-            res_sig@gsnRightString  = "siglvl: " + siglvl
-            plot(nc)     = gsn_csm_contour_map_ce(wks,prob(nc-1,nm,:,:),res_sig)
-            plot2(nc-1)  = gsn_csm_contour(wks,var(nc,nm,:,:),res_lin)
-            plot2(nc-1)  = ColorNegDashZeroPosContour(plot2(nc-1),"blue","red","red")
+            res@gsnRightString  = "siglvl: " + siglvl
+            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
             overlay(plot(nc),plot2(nc-1))
         else
-            res@gsnLeftString    = case(nc)
             res@gsnRightString   = draw_var(nv) + lev(nl) + "hPa" 
             plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         end if

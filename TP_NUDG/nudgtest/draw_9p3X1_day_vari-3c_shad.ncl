@@ -1,26 +1,25 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_year_vari.ncl
-;input_data:    Month_ave_year_varience-6h.nc 
-;Draw the contour map of monthly variance of 27 years 
+;filename:   draw_9p3X1_day_vari.ncl
+;input_data: UVTday_variance.nc 
+;Draw the contour map of daily variance of 27*365 (has been removed the annual cycle)
 ;And there are three cases,1AMIP-CTRL,2TP-NUDG,3 is the difference between the above two
 ;the third case will do the significance testing, the dot mean the difference is significance
-;The data(3variables,3cases,12month,3levs) are all save in one file
+;The data(3variables,3cases,3levs) are all save in one file
 ;                                                     by Ql Ren
-;                                                    2018/01/08
+;                                                    2017/12/07
+;2018/01/17 modified for three case CTRL,(CTRL-NUDG24h)/CTRL%,(CTRL-NUDG6h)/CTRL% 
 ;*********************************************************************************
 begin
 ;the path of the file
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/nudgtest/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "Month_ave_year_variance.nc"
-fig_name   = path + "/nudgtest/fig/12p3X1_year_vari"
-fig_title  = "Variance of 27 years in "
+filename   = path + "/nudgtest/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-UVTday_variance.nc"
+fig_name   = path + "/nudgtest/fig/9p3X1_day_vari_UVT850500200-shad"
+fig_title  = "Daily Variance of 27*365" ; + var_name + " in " + lev + " hPa"
     case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
 fig_out    ="pdf";"x11"
 unit       = ""
-ncase = 3 
 draw_var = (/"U","V","T"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 
 ;area: east Asia
 lats = -20
@@ -29,8 +28,6 @@ lonl = 20
 lonr = 220
 lev  = (/850,500,200/)  ;can used as right string
 siglvl = 0.05
-;nv = 0 
-;nl = 2
 
 ;set the area of the box
 maxlon = 105
@@ -54,38 +51,41 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     plot2    = new((/2/),graphic)
     line     = new((/3/),graphic)
 
+years    = ispan(1979,2005,1)   ;the calculate time
+nyear    = dimsizes(years)
+nday     = nyear*365
+
 f = addfile(filename(0),"r")
-nmonth = dimsizes(months)
 nlat   = getfilevardimsizes(f,"lat")
 nlon   = getfilevardimsizes(f,"lon")
-var  = new((/ncase,nmonth,nlat,nlon/),float)
-prob = new((/ncase-1,nmonth,nlat,nlon/),float)
+nlev   = getfilevardimsizes(f,"lev")
+nvar   = getfilevardimsizes(f,"var")
+ncase  = dimsizes(case) 
+var  = new((/ncase,nvar,nlev,nlat,nlon/),float)
+prob = new((/ncase-1,nvar,nlev,nlat,nlon/),float)
 
-do nv = 0,0,1
-do nl = 0,0,1
 ;================================================================
 ;read data
 ;====================================================================
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
-    var(nf,:,:,:)  = f->$var_name$(nv,:,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+    var(nf,:,:,:,:)  = f->$var_name$(:,:,:,:) ;get an array (ncase,nvar,nlev,nlat,nlon)
 end do
 
-var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
+var_temp = where(var(0,:,:,:,:).eq.0,var@_FillValue,var(0,:,:,:,:))
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
-var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/var_temp*100 ;get the difference between CTRL and NUDG
+prob(nf,:,:,:,:) = ftest(var(0,:,:,:,:),nday,var(nf+1,:,:,:,:),nday,0)
+var(nf+1,:,:,:,:)= (var(0,:,:,:,:) - var(nf+1,:,:,:,:))/var_temp*100 ;get the difference between CTRL and NUDG
 end do
-
 prob = mask(prob,prob.lt.siglvl,True)
-copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
+copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(var)
 printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name+lev(nl)+draw_var(nv))
+    wks = gsn_open_wks(fig_out,fig_name)
     gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
@@ -215,26 +215,37 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-do nm = 0,11,1
+do nv = 0,2,1 ;UVT
+do nl = 0,2,1 ;850,500,200
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
         if(nc.gt.0) then
+            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+            res@cnMinLevelValF        = -90          ; set min contour level
+            res@cnMaxLevelValF        = 90 ;32        ; set max contour level
+            res@cnLevelSpacingF       = 10        ; set contour interval
             res@gsnRightString  = "siglvl: " + siglvl
-            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nv,nl,:,:),res)
+            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nv,nl,:,:),res_sig)
             overlay(plot(nc),plot2(nc-1))
         else
+            min_var = floor(min(var(nc,nv,nl,:,:))/10)*10
+            max_var = floor(min(var(nc,nv,nl,:,:))/10)*10
+            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+            res@cnMinLevelValF        = min_var       ; set min contour level
+            res@cnMaxLevelValF        = max_var       ; set max contour level
+            res@cnLevelSpacingF       = floor((max_var-min_var)/18)        ; set contour interval
+            ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
             res@gsnRightString   = draw_var(nv) + lev(nl) + "hPa" 
-            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nv,nl,:,:),res)
         end if
         line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
-        print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
+        print(max(var(nc,nv,nl,{lats:latn},{lonl:lonr})))
+        print(min(var(nc,nv,nl,{lats:latn},{lonl:lonr})))
     end do 
 
-    resp@txString      = fig_title + months(nm) 
+    resp@txString      = fig_title
     gsn_panel(wks,plot,(/3,1/),resp)
-end do ;for the month 
 end do ;for level
 end do ;for varables
 end

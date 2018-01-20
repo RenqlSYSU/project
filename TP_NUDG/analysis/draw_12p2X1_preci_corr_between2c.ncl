@@ -1,11 +1,9 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_month_preci-3c_shad.ncl
-;input_data:    CTRL-Clim_month_ave_preci.nc 
-;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
-;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
-;then do the significance testing, the dot mean the difference is significance
+;filename:      draw_12p2X1_preci_corr_between2c.ncl
+;input_data:    CTRL-Preci_corr_with_ctrl.nc 
+;Draw the shaded map of  
 ;                                                     by Ql Ren
-;                                                    2018/01/18
+;                                                    2018/01/20
 ;*********************************************************************************
 begin
 ;the path of the file

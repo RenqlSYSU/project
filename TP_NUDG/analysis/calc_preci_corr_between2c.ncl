@@ -1,7 +1,7 @@
 ;***************************************************************************
 ;filename:      calc_preci_corr_between2c.ncl
 ;output_file:   NUDG6h-Preci_corr_with_ctrl.nc 
-;read the 27 years PRECC and PRECL of two case at East AsiaI(15S£­55N£¬30-150E) 
+;read the 27 years PRECC and PRECL of two case at East AsiaI(15S-55N£¬30-150E) 
 ;and then calculate the correlation between these two cases to get (nmonth,nlat,nlon).
 ;                                            by Ql_Ren
 ;                                           2018/01/18
@@ -32,65 +32,67 @@ nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var        = new((/nyear,365,nlat,nlon/),float)
-var_month  = new((/nyear,12 ,nlat,nlon/),float)
-var_season = new((/nyear,4  ,nlat,nlon/),float)
-month_ave  = new((/      12 ,nlat,nlon/),float)
-month_vari = new((/      12 ,nlat,nlon/),float)
-season_ave = new((/       4 ,nlat,nlon/),float)
-season_vari= new((/       4 ,nlat,nlon/),float)
+var1        = new((/nyear*365,nlat,nlon/),float)
+var         = new((/nyear*365,nlat,nlon/),float)
+month_corr  = new((/      12 ,nlat,nlon/),float)
+season_corr = new((/       4 ,nlat,nlon/),float)
 
-do nf = 0 , ncase-1,1
+var1 = 0 
+do nv = 0, nvar-1, 1
+    system_order = "ls " + filein(0) + "*" + var_name(nv) + ".nc"
+    files = systemfunc(system_order)
+    f    := addfiles(files,"r")
+    ListSetType(f,"cat")
+    var1  = var1 + f[:]->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
+end do
+var1 = var1*1000*3600*24 ;convert the unit "m/s" to "mm/day"
+
+do nf = 1 , ncase-1,1
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
 var = 0
-do nt = 0,nyear-1,1
-    do nv = 0,nvar-1,1 
-        f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    end do  ;the loop of the 27 years
-end do   ;the loop of the 3 variables
-
+do nv = 0, nvar-1, 1
+    system_order = "ls " + filein(nf) + "*" + var_name(nv) + ".nc"
+    files = systemfunc(system_order)
+    f     = addfiles(files,"r")
+    ListSetType(f,"cat")
+    var  = var + f[:]->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
+end do
 var  = var*1000*3600*24
-time = cd_calendar(f->time,0)
+
+time  = cd_calendar(f[:]->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
-    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+    print(dimsizes(select_time))
+    month_corr(nm,:,:) = escorc_n(var1(select_time,:,:),var(select_time,:,:),0,0) ;get (nmonth,nlat,nlon)
 end do
 
-;----------calculate the season average-----------------------
-mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
 do ns = 0,3,1
     nm = ns*3 ;nm = 0,3,6,9
     if(nm.eq.0) then
-    var_season(:,ns,:,:) = ( var_month(:,11  ,:,:)*mdays(11)   + \
-                             var_month(:,nm  ,:,:)*mdays(nm)   + \
-                             var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
+        select_time := ind(time(:,1).eq.12.or.time(:,1).eq.1.or.time(:,1).eq.2)
     else
-    var_season(:,ns,:,:) = ( var_month(:,nm-1,:,:)*mdays(nm-1) + \
-                             var_month(:,nm  ,:,:)*mdays(nm)   + \
-                             var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
+        select_time := ind(time(:,1).ge.nm-1.and.time(:,1).le.nm+1)
     end if
+    print(dimsizes(select_time))
+    season_corr(ns,:,:) = escorc_n(var1(select_time,:,:),var(select_time,:,:),0,0) ;get (nseason,nlat,nlon)
 end do
-month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-printVarSummary(month_ave)
-printVarSummary(season_ave)
+
+printVarSummary(month_corr)
+printVarSummary(season_corr)
 
 ;====================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf))
-ncdf = addfile(fileout(nf),"c")
+system("rm -f " + fileout(nf-1))
+ncdf = addfile(fileout(nf-1),"c")
 setfileoption(ncdf,"DefineMode",True)
 
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "the monthly and seasonal average Asia precipitation climatology"
+fileAtt@discription   = "the monthly and seasonal correlation between CTRL precipitation and NUDG"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
@@ -104,29 +106,19 @@ filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lat","lon"/))
-filevardef(ncdf,"season_ave",typeof(season_ave),(/"season","lat","lon"/))
-filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
-filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
+filevardef(ncdf,"month_corr" ,typeof(month_corr) ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"season_corr",typeof(season_corr),(/"season","lat","lon"/))
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-month_ave@long_name = "precipitation rate"
-month_ave@units     = "mm/day"
-filevarattdef(ncdf,"month_ave",month_ave)
-season_ave@long_name = "precipitation rate"
-season_ave@units     = "mm/day"
-filevarattdef(ncdf,"season_ave",season_ave)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season  = (/1212,345,678,91011/)
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)
-ncdf->month_ave   = (/month_ave/)
-ncdf->season_ave  = (/season_ave/)
-ncdf->month_vari  = (/month_vari/)
-ncdf->season_vari = (/season_vari/)
+ncdf->month_corr   = (/month_corr/)
+ncdf->season_corr  = (/season_corr/)
 end do
 end
 

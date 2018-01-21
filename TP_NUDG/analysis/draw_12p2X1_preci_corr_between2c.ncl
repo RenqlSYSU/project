@@ -8,19 +8,26 @@
 ;*********************************************************************************
 begin
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"NUDG24h","NUDG6h"/) + "-Preci_corr_with_ctrl.nc"
-fig_name   = path + "/analysis/fig/12p2X1_preci_corr_between2c"
-fig_title  = "Correlation of preci in " ;+season
+fig_name   = path + "/analysis/fig/" + (/"12p2X1_preci_corr_between2c_month","4p2X1_preci_corr_between2c_season"/)
+fig_title  = "Preci Correlation with CTRL in " ;+season
     case   = (/"NUDG24h","NUDG6h"/)
 fig_out    ="pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"season_corr"/) ;this is the var_name in data file
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-months   = (/"DJF","MAM","JJA","SON"/)
-nsample  = (/90,92,92,91/)*27
+var_name = (/"month_corr","season_corr"/) ;this is the var_name in data file
+
+mon_season = 0 ;0 is to draw monthly data,1 is to draw seasonal data
+if (mon_season.eq.0) then
+    months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+    nsample  = (/31,28,31,30,31,30,31,31,30,31,30,31/)*27
+else
+    months   = (/"DJF","MAM","JJA","SON"/)
+    nsample  = (/90,92,92,91/)*27
+end if
+print(nsample)
 
 ;area: east Asia
 lats = -15 ;-20
@@ -66,7 +73,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
-    var(nf,:,:,:)  = f->$var_name(0)$ ;get an array (ncase,nmonth,nlat,nlon)
+    var(nf,:,:,:)  = f->$var_name(mon_season)$ ;get an array (ncase,nmonth,nlat,nlon)
     ;vari(nf,:,:,:) = f->$var_name(1)$ ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
@@ -84,7 +91,7 @@ printVarSummary(prob)
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
+    wks = gsn_open_wks(fig_out,fig_name(mon_season))
     gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
@@ -106,7 +113,7 @@ printVarSummary(prob)
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
     res@gsnMajorLatSpacing = 10
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLonSpacing = 20
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -138,15 +145,15 @@ printVarSummary(prob)
     ;res@gsnContourZeroLineThicknessF = 4.0
     ;res@cnLineColor      = "blue"
    
-    res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
     ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = 1          ; set min contour level
-    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    ;res@cnLevelSpacingF       = 1        ; set contour interval
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnMinLevelValF        = -0.27          ; set min contour level
+    res@cnMaxLevelValF        = 0.27        ; set max contour level
+    res@cnLevelSpacingF       = 0.03        ; set contour interval
 
     res@gsnSpreadColors      = True              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -155,7 +162,7 @@ printVarSummary(prob)
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 1
+    res@lbLabelStride        = 2
 
 ;----------Set res sig-----------
     res_sig                  = True
@@ -221,6 +228,7 @@ do nm = 0,nmonth-1,1
         plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         plot2(nc)    = gsn_csm_contour(wks,prob(nc,nm,:,:),res_sig)
         overlay(plot(nc),plot2(nc))
+        line(nc)     = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
     end do 

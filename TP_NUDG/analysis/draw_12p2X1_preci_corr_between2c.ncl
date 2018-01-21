@@ -1,25 +1,26 @@
 ;*********************************************************************
 ;filename:      draw_12p2X1_preci_corr_between2c.ncl
 ;input_data:    CTRL-Preci_corr_with_ctrl.nc 
-;Draw the shaded map of  
+;Draw the correlation shaded map between the CTRL precipitation and NUDG 
+;to see whether the precipitation is in cocurrent phase.
 ;                                                     by Ql Ren
 ;                                                    2018/01/20
 ;*********************************************************************************
 begin
 ;the path of the file
-path    = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_preci.nc"
-fig_name   = path + "/analysis/fig/12p3X1_season_preci_vari-3c"
-fig_title  = "seasonly rainfall Variance in " ;+season
-;fig_title  = "Climate Monthly Rainfall in " ;+season
-    case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
+path     = "/users/yangsong3/renql/project/TP_NUDG"
+filename = path + "/analysis/mdata/" + (/"NUDG24h","NUDG6h"/) + "-Preci_corr_with_ctrl.nc"
+fig_name   = path + "/analysis/fig/12p2X1_preci_corr_between2c"
+fig_title  = "Correlation of preci in " ;+season
+    case   = (/"NUDG24h","NUDG6h"/)
 fig_out    ="pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"season_vari"/) ;this is the var_name in data file
+var_name = (/"season_corr"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
+nsample  = (/90,92,92,91/)*27
 
 ;area: east Asia
 lats = -15 ;-20
@@ -36,12 +37,12 @@ nlat   = getfilevardimsizes(f,"lat")
 nlon   = getfilevardimsizes(f,"lon")
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
 vari = new((/ncase  ,nmonth,nlat,nlon/),float)
-prob = new((/ncase-1,nmonth,nlat,nlon/),float)
+prob = new((/ncase  ,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/3/),graphic)
-    plot2    = new((/2/),graphic)
-    line     = new((/3/),graphic)
+    plot     = new((/ncase/),graphic)
+    plot2    = new((/ncase/),graphic)
+    line     = new((/ncase/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -69,11 +70,10 @@ do nf = 0 ,ncase-1, 1
     ;vari(nf,:,:,:) = f->$var_name(1)$ ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
-var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
-do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
-;prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/var_temp*100 ;get the difference between CTRL and NUDG
+do nf = 0 ,ncase-1,1
+do nm = 0 ,nmonth-1,1
+prob(nf,nm,:,:) = rtest(var(nf,nm,:,:),nsample(nm),0)
+end do
 end do
 
 prob = mask(prob,prob.lt.siglvl,True)
@@ -138,7 +138,7 @@ printVarSummary(prob)
     ;res@gsnContourZeroLineThicknessF = 4.0
     ;res@cnLineColor      = "blue"
    
-    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
@@ -148,9 +148,9 @@ printVarSummary(prob)
     ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
     ;res@cnLevelSpacingF       = 1        ; set contour interval
 
-    res@gsnSpreadColors      = False  ;True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 11                ; start at color 17
-    res@gsnSpreadColorEnd    = 2                ; end at color 200
+    res@gsnSpreadColors      = True              ; turn of the full color map
+    res@gsnSpreadColorStart  = 2                ; start at color 17
+    res@gsnSpreadColorEnd    = 21                ; end at color 200
     
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
@@ -202,6 +202,7 @@ printVarSummary(prob)
     res@gsnCenterString      = ""
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
+    res@gsnRightString  = "siglvl: " + siglvl
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -217,36 +218,15 @@ printVarSummary(prob)
 do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
-        if(nc.gt.0) then
-            res@gsnSpreadColors       = False              ; turn of the full color map
-            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-            res@cnMinLevelValF        = -135          ; set min contour level
-            res@cnMaxLevelValF        = 135 ;32        ; set max contour level
-            res@cnLevelSpacingF       = 15        ; set contour interval
-            res@gsnRightString  = "siglvl: " + siglvl
-            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-            overlay(plot(nc),plot2(nc-1))
-        else
-            ;res@gsnSpreadColors       = True              ; turn of the full color map
-            ;res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-            ;res@cnLevels              = (/0,0.5,1,1.8,3,4,5,6,7/)
-            ;min_var = floor(min(var(nc,nm,:,:))/10)*10
-            ;max_var = floor(min(var(nc,nm,:,:))/10)*10
-            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-            res@cnMinLevelValF        = 0  ; set min contour level
-            res@cnMaxLevelValF        = 18 ; set max contour level
-            res@cnLevelSpacingF       = 1        ; set contour interval
-            res@gsnRightString   = unit ;draw_var(nv) 
-            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        end if
-        line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
+        plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+        plot2(nc)    = gsn_csm_contour(wks,prob(nc,nm,:,:),res_sig)
+        overlay(plot(nc),plot2(nc))
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
 
     resp@txString      = fig_title + months(nm) 
-    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/2,1/),resp)
 end do ;for the month 
 end
 

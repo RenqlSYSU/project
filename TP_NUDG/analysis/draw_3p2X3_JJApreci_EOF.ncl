@@ -1,6 +1,6 @@
 ;*********************************************************************************
-;filename:      draw_3panel_2X3_JJApreci_EOF.ncl
-;input_data:    Asia_JJApreci_EOFn3.nc
+;filename:      draw_3p2X3_JJApreci_EOF.ncl
+;input_data:    JJApreci_EOFn3.nc
 ;Draw the first three EOF spatial patterns and principal components of Asia JJA preci data
 ;every panel have three figures of spatial patterns (CTRL,NUDG,DIFF) 
 ;and one figure of time series which has two curves (CTRL,NUDG).
@@ -8,18 +8,37 @@
 ;                                           2017/12/18
 ;*********************************************************************************
 begin
-;the path of the file
-filename   = "/users/yangsong3/Model_Team/F/clm-month/mdata/Asia_JJApreci_EOFn3.nc"
-fig_name   = "/users/yangsong3/Model_Team/F/clm-month/fig/3panel_2X3_JJApreci_EOF"
+path       = "/users/yangsong3/renql/project/TP_NUDG"
+filename   = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-JJApreci_EOFn3.nc"
+;fig_name   = path + "/analysis/fig/3p2X3_JJApreci_daily_EOF-6h"
+fig_name   = path + "/analysis/fig/3p2X3_JJApreci_EOF-6h"
 fig_title  = "of Asia JJA preci(mm/day)"  ;"EOF" + neval + fig_title
-left_title = (/"AMIP_CTRL","TP_NUDG","AMIP_CTRL - TP_NUDG"/)
-fig_out    = "pdf";"x11"
+      case = (/"CTRL","NUDG6h","CTRL - NUDG6h"/)
+fig_out    = "pdf" ;"eps";"x11"
+unit       = "mm/day"
+;var_name   = (/"eof27d","eof27d_ts"/)
+var_name   = (/"eof27","eof27_ts"/)
 
 ;plot area 
 lats = 10
 latn = 50
 lonl = 110
 lonr = 140
+
+f = addfile(filename(0),"r")
+ncase  = dimsizes(case)
+neval  = getfilevardimsizes(f,"neval")
+ntime  = getfilevardimsizes(f,"year")
+;ntime  = getfilevardimsizes(f,"day")
+nlat   = getfilevardimsizes(f,"lat")
+nlon   = getfilevardimsizes(f,"lon")
+map_var  = new((/ncase  ,neval,nlat,nlon/),float)
+ts_var   = new((/ncase-1,neval,ntime/),float)
+pcvar    = new((/ncase-1,neval/),float)
+eval     = new((/ncase-1,neval/),float)
+ts_mean  = new((/ncase-1,neval/),float)
+sig      = new((/ncase-1,neval/),logical)
+plot     = new((/4/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -32,23 +51,26 @@ lonr = 140
    label_thick    = 5.0
    mp_thick       = 5.0
 
-;the number of the panel plot
-    plot   = new((/4/),graphic)
-
 ;================================================================
 ;read data
 ;====================================================================
-f = addfile(filename,"r")
-map_var = f->eof       ;(ncase,neval,nlat,nlon)
-ts_var  = f->eof_ts    ;(ncase,neval,nyear) 
-right_title   = f->pcvar
-center_title  = f->eval
-neval   = 3
+do nf = 0,ncase-2,1
+    f = addfile(filename(nf),"r")
+    map_var(nf,:,:,:) = f->$var_name(0)$       ;(ncase,neval,nlat,nlon)
+    ts_var (nf,:,:)   = f->$var_name(1)$       ;(ncase,neval,nyear) 
+    pcvar(nf,:)   = map_var@pcvar
+    eval(nf,:)    = map_var@eval
+    ts_mean(nf,:) = ts_var@ts_mean
+    sig(nf,:) = eofunc_north(pcvar(nf,:),ntime,True)
+end do
+map_var(2,:,:,:)  = map_var(0,:,:,:) - map_var(1,:,:,:)
+subtitle_color = where(sig,"red","black") 
 printVarSummary(map_var)
 printVarSummary(ts_var)
-printVarSummary(right_title)
-diff   = map_var(0,:,:,:) - map_var(1,:,:,:)
-copy_VarMeta(map_var(0,:,:,:),diff)
+
+;timed     = cd_calendar(f->day,0)
+;total_day = dimsizes(timed(:,0).eq.1979) 
+;time      = fspan(1979,2006-1/total_day,ntime)
 
 ;==============================================================
 ;draw figure 
@@ -126,20 +148,19 @@ copy_VarMeta(map_var(0,:,:,:),diff)
     resxy@gsnFrame      = False
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
-    resxy@gsnPaperOrientation = "landscape"
     
     resxy@xyDashPatterns     = (/0,0/)
     resxy@xyLineThicknesses = (/2.0, 2.0/)   ; make second line thicker
     resxy@xyLineColors      = (/"blue","red"/) ; change line color
     resxy@tiXAxisOn = False
     resxy@tiYAxisOn = False
-    resxy@trYMinF = -4.0
-    resxy@trYMaxF = 4.0
+    ;resxy@trYMinF = -4.0
+    ;resxy@trYMaxF = 4.0
     
-    resxy@tmXBLabelFontHeightF     = label_font
-    resxy@tmXBLabelFontThicknessF  = label_thick 
-    resxy@tmYRLabelFontHeightF     = label_font
-    resxy@tmYRLabelFontThicknessF  = label_thick
+    resxy@tmXBLabelFontHeightF     = label_font  + 0.01
+    resxy@tmXBLabelFontThicknessF  = label_thick + 0.01
+    resxy@tmYRLabelFontHeightF     = label_font  + 0.01
+    resxy@tmYRLabelFontThicknessF  = label_thick + 0.01
 
     resxy@tmXBMinorOn          = False ; Turn off x-axis (bottom) minor ticks
     resxy@tmXTMinorOn          = False ; Turn off x-axis (tottom)minor ticks
@@ -150,24 +171,26 @@ copy_VarMeta(map_var(0,:,:,:),diff)
     
     ;resxy@tmXBMajorLengthF = 0.01
     ;resxy@tmYRMajorLengthF = 0.01
-    resxy@tmXBMode           = "Manual"
-    resxy@tmYLMode           = "Manual"
-    resxy@tmXBTickSpacingF   = 3
-    resxy@tmYLTickSpacingF   = 1.0
+    ;resxy@tmXBMode           = "Manual"
+    ;resxy@tmYLMode           = "Manual"
+    ;resxy@tmXBTickSpacingF   = 3
+    ;resxy@tmYLTickSpacingF   = 1.0
 
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2
     resxy@tmXMajorGridLineColor          = "gray"
     resxy@tmXMajorGridThicknessF         = 2.0
                        
-    resxy@gsnYRefLine             = 0
-    resxy@gsnYRefLineDashPatterns = 0 ; (/12,12/)   
-    resxy@gsnYRefLineThicknesses  = 3.0 ;(/3.0,3.0/)
-    resxy@gsnYRefLineColors       = "black"  ;(/"blue","red"/)
+    ;resxy@gsnYRefLine             = 0
+    resxy@gsnYRefLineDashPatterns = (/12,12/)   
+    resxy@gsnYRefLineThicknesses  = (/3.0,3.0/)
+    resxy@gsnYRefLineColors       = (/"blue","red"/)
                              
     resxy@gsnCenterStringFontHeightF = subtitle_font-0.005
-    resxy@gsnRightStringFontHeightF  = subtitle_font
-    resxy@gsnLeftStringFontHeightF   = subtitle_font
+    resxy@gsnRightStringFontHeightF  = subtitle_font + 0.01
+    resxy@gsnLeftStringFontHeightF   = subtitle_font + 0.01
+    resxy@gsnCenterString  = ""
+    resxy@gsnLeftString    = unit
     
     ;legend
     resxy@pmLegendDisplayMode = "Always"
@@ -175,15 +198,15 @@ copy_VarMeta(map_var(0,:,:,:),diff)
     resxy@lgPerimOn           = False
     resxy@lgPerimFill         = "SolidFill"
     resxy@lgPerimFillColor    = "white"
-    resxy@xyExplicitLegendLabels = left_title(0:1)
+    resxy@xyExplicitLegendLabels = case(0:1)
     resxy@lgLabelFontColor       = "black"
-    resxy@lgLabelFontThicknessF  = label_thick
-    resxy@lgLabelFontHeightF     = label_font
-    resxy@pmLegendWidthF   = 0.1
+    resxy@lgLabelFontThicknessF  = label_thick + 0.01
+    resxy@lgLabelFontHeightF     = label_font + 0.01
+    resxy@pmLegendWidthF   = 0.2
     resxy@pmLegendHeightF  = 0.15
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = 0.38   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.4    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = 0.3    ; move ref vector along X-axis
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -195,37 +218,34 @@ copy_VarMeta(map_var(0,:,:,:),diff)
     res@gsnLeftStringFontHeightF  = subtitle_font
     ;res@gsnCenterStringFontHeightF= subtitle_font
 
-do ne = 0,2,1
-    do nc = 0,2,1
-        res@gsnLeftString    = left_title(nc)
-        if(nc.eq.2) then
-        res@gsnRightString   = "" 
-        plot(nc) = gsn_csm_contour_map_ce(wks,diff(ne,:,:),res)
-        print(max(diff(ne,{lats:latn},{lonl:lonr})))
-        print(min(diff(ne,{lats:latn},{lonl:lonr})))
-        else
-        res@gsnRightString   = center_title(nc,ne)+"  "+right_title(nc,ne)+"%" 
-        plot(nc) = gsn_csm_contour_map_ce(wks,map_var(nc,ne,:,:),res)
-        print(max(map_var(nc,ne,{lats:latn},{lonl:lonr})))
-        print(min(map_var(nc,ne,{lats:latn},{lonl:lonr})))
-        end if
-    end do
-    
-    resxy@gsnCenterString  = ""
-    resxy@gsnLeftString    = ""
-    resxy@gsnRightString   = "" 
-    ;resxy@gsnYRefLine      = (/ave(nv,0,ns,nl),ave(nv,1,ns,nl)/)
-    plot(3) = gsn_csm_xy(wks,ts_var&year,(/ts_var(:,ne,:)/),resxy)
-
     resp  = True    
     resp@gsnMaximize   = True
-    ineval=ne+1
-    resp@txString      = "EOF" + ineval + " " + fig_title 
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
     resp@gsnPanelRowSpec  = True
-    ;resp@gsnPanelBottom   = 0.2
     resp@gsnPaperOrientation = "landscape"
+
+do ne = 0,neval-2,1
+    do nc = 0,ncase-1,1
+        res@gsnLeftString    = case(nc)
+        if(nc.eq.2) then
+            res@gsnRightString   = "" 
+        else
+            res@gsnRightStringFontColor   = subtitle_color(nc,ne)
+            res@gsnRightString   = eval(nc,ne)+"  "+pcvar(nc,ne)+"%" 
+        end if
+        plot(nc) = gsn_csm_contour_map_ce(wks,map_var(nc,ne,:,:),res)
+        print(max(map_var(nc,ne,{lats:latn},{lonl:lonr})))
+        print(min(map_var(nc,ne,{lats:latn},{lonl:lonr})))
+    end do
+    
+    resxy@gsnRightString   = "CTRL:" + ts_mean(0,ne) + " NUDG6h:" + ts_mean(1,ne)
+    resxy@gsnYRefLine      = dim_avg_n_Wrap(ts_var(:,ne,:),1) 
+    plot(3) = gsn_csm_xy(wks,ts_var&year,(/ts_var(:,ne,:)/),resxy)
+    ;plot(3) = gsn_csm_xy(wks,time,(/ts_var(:,ne,:)/),resxy)
+
+    ineval=ne+1
+    resp@txString      = "EOF" + ineval + " " + fig_title 
     gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 end

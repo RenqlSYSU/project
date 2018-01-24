@@ -8,16 +8,17 @@
 ;                                           2017/12/18
 ;*********************************************************************************
 begin
-path       = "/users/yangsong3/renql/project/TP_NUDG"
-filename   = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-JJApreci_EOFn3.nc"
-;fig_name   = path + "/analysis/fig/3p2X3_JJApreci_daily_EOF-6h"
-fig_name   = path + "/analysis/fig/3p2X3_JJApreci_EOF-6h"
+path       = "/home/ys17-19/renql/project/TP_NUDG"
+;path       = "/users/yangsong3/renql/project/TP_NUDG"
+filename   = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-JJApreci_EOFn3.nc"
+fig_name   = path + "/analysis/fig/3p2X3_JJApreci_daily_EOF-3c-6h"
+;fig_name   = path + "/analysis/fig/3p2X3_JJApreci_EOF-3c-6h"
 fig_title  = "of Asia JJA preci(mm/day)"  ;"EOF" + neval + fig_title
-      case = (/"CTRL","NUDG6h","CTRL - NUDG6h"/)
+      case = (/"CTRL","NUDG24h","NUDG6h"/)
 fig_out    = "pdf" ;"eps";"x11"
 unit       = "mm/day"
-;var_name   = (/"eof27d","eof27d_ts"/)
-var_name   = (/"eof27","eof27_ts"/)
+var_name   = (/"eof27d","eof27d_ts"/)
+;var_name   = (/"eof27","eof27_ts"/)
 
 ;plot area 
 lats = 10
@@ -28,16 +29,16 @@ lonr = 140
 f = addfile(filename(0),"r")
 ncase  = dimsizes(case)
 neval  = getfilevardimsizes(f,"neval")
-ntime  = getfilevardimsizes(f,"year")
-;ntime  = getfilevardimsizes(f,"day")
+;ntime  = getfilevardimsizes(f,"year")
+ntime  = getfilevardimsizes(f,"day")
 nlat   = getfilevardimsizes(f,"lat")
 nlon   = getfilevardimsizes(f,"lon")
-map_var  = new((/ncase  ,neval,nlat,nlon/),float)
-ts_var   = new((/ncase-1,neval,ntime/),float)
-pcvar    = new((/ncase-1,neval/),float)
-eval     = new((/ncase-1,neval/),float)
-ts_mean  = new((/ncase-1,neval/),float)
-sig      = new((/ncase-1,neval/),logical)
+map_var  = new((/ncase,neval,nlat,nlon/),float)
+ts_var   = new((/ncase,neval,ntime/),float)
+pcvar    = new((/ncase,neval/),float)
+eval     = new((/ncase,neval/),float)
+ts_mean  = new((/ncase,neval/),float)
+sig      = new((/ncase,neval/),logical)
 plot     = new((/4/),graphic)
 
 ;define the thickness and height of the title,tick and label
@@ -54,7 +55,7 @@ plot     = new((/4/),graphic)
 ;================================================================
 ;read data
 ;====================================================================
-do nf = 0,ncase-2,1
+do nf = 0,ncase-1,1
     f = addfile(filename(nf),"r")
     map_var(nf,:,:,:) = f->$var_name(0)$       ;(ncase,neval,nlat,nlon)
     ts_var (nf,:,:)   = f->$var_name(1)$       ;(ncase,neval,nyear) 
@@ -63,14 +64,14 @@ do nf = 0,ncase-2,1
     ts_mean(nf,:) = ts_var@ts_mean
     sig(nf,:) = eofunc_north(pcvar(nf,:),ntime,True)
 end do
-map_var(2,:,:,:)  = map_var(0,:,:,:) - map_var(1,:,:,:)
+;map_var(2,:,:,:)  = map_var(0,:,:,:) - map_var(1,:,:,:)
 subtitle_color = where(sig,"red","black") 
 printVarSummary(map_var)
 printVarSummary(ts_var)
 
-;timed     = cd_calendar(f->day,0)
-;total_day = dimsizes(timed(:,0).eq.1979) 
-;time      = fspan(1979,2006-1/total_day,ntime)
+timed     = cd_calendar(f->day,0)
+total_day = dimsizes(timed(:,0).eq.1979) 
+time      = fspan(1979,2006-1/total_day,ntime)
 
 ;==============================================================
 ;draw figure 
@@ -149,9 +150,9 @@ printVarSummary(ts_var)
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
     
-    resxy@xyDashPatterns     = (/0,0/)
-    resxy@xyLineThicknesses = (/2.0, 2.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"blue","red"/) ; change line color
+    resxy@xyDashPatterns     = (/0 , 0  , 0  /)
+    resxy@xyLineThicknesses = (/2.0, 2.0, 2.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"blue","red","forestgreen"/) ; change line color
     resxy@tiXAxisOn = False
     resxy@tiYAxisOn = False
     ;resxy@trYMinF = -4.0
@@ -182,9 +183,9 @@ printVarSummary(ts_var)
     resxy@tmXMajorGridThicknessF         = 2.0
                        
     ;resxy@gsnYRefLine             = 0
-    resxy@gsnYRefLineDashPatterns = (/12,12/)   
-    resxy@gsnYRefLineThicknesses  = (/3.0,3.0/)
-    resxy@gsnYRefLineColors       = (/"blue","red"/)
+    resxy@gsnYRefLineDashPatterns = (/12 ,12 ,12 /)   
+    resxy@gsnYRefLineThicknesses  = (/3.0,3.0,3.9/)
+    resxy@gsnYRefLineColors       = (/"blue","red","forestgreen"/)
                              
     resxy@gsnCenterStringFontHeightF = subtitle_font-0.005
     resxy@gsnRightStringFontHeightF  = subtitle_font + 0.01
@@ -198,12 +199,12 @@ printVarSummary(ts_var)
     resxy@lgPerimOn           = False
     resxy@lgPerimFill         = "SolidFill"
     resxy@lgPerimFillColor    = "white"
-    resxy@xyExplicitLegendLabels = case(0:1)
+    resxy@xyExplicitLegendLabels = case
     resxy@lgLabelFontColor       = "black"
     resxy@lgLabelFontThicknessF  = label_thick + 0.01
     resxy@lgLabelFontHeightF     = label_font + 0.01
     resxy@pmLegendWidthF   = 0.2
-    resxy@pmLegendHeightF  = 0.15
+    resxy@pmLegendHeightF  = 0.2
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = 0.38   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = 0.3    ; move ref vector along X-axis
@@ -228,21 +229,21 @@ printVarSummary(ts_var)
 do ne = 0,neval-2,1
     do nc = 0,ncase-1,1
         res@gsnLeftString    = case(nc)
-        if(nc.eq.2) then
+        if(nc.eq.4) then
             res@gsnRightString   = "" 
         else
             res@gsnRightStringFontColor   = subtitle_color(nc,ne)
-            res@gsnRightString   = eval(nc,ne)+"  "+pcvar(nc,ne)+"%" 
+            res@gsnRightString            = eval(nc,ne)+"  "+pcvar(nc,ne)+"%" 
         end if
         plot(nc) = gsn_csm_contour_map_ce(wks,map_var(nc,ne,:,:),res)
         print(max(map_var(nc,ne,{lats:latn},{lonl:lonr})))
         print(min(map_var(nc,ne,{lats:latn},{lonl:lonr})))
     end do
     
-    resxy@gsnRightString   = "CTRL:" + ts_mean(0,ne) + " NUDG6h:" + ts_mean(1,ne)
+    resxy@gsnRightString   = "CTRL:" + ts_mean(0,ne) + " NUDG24h:" + ts_mean(1,ne) + " NUDG6h:" + ts_mean(2,ne)
     resxy@gsnYRefLine      = dim_avg_n_Wrap(ts_var(:,ne,:),1) 
-    plot(3) = gsn_csm_xy(wks,ts_var&year,(/ts_var(:,ne,:)/),resxy)
-    ;plot(3) = gsn_csm_xy(wks,time,(/ts_var(:,ne,:)/),resxy)
+    ;plot(3) = gsn_csm_xy(wks,ts_var&year,(/ts_var(:,ne,:)/),resxy)
+    plot(3) = gsn_csm_xy(wks,time,(/ts_var(:,ne,:)/),resxy)
 
     ineval=ne+1
     resp@txString      = "EOF" + ineval + " " + fig_title 

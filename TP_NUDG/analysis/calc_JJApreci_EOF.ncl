@@ -12,16 +12,16 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-JJApreci_EOFn3.nc"
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Aisa-JJApreci_EOFn3.nc"
 years    = ispan(1979,2005,1)   ;the calculate time
 case     = (/"CTRL","NUDG24h","NUDG6h"/)
 var_name = (/"PRECC","PRECL"/)
 
 ;-----area of east asia 
-lats = 10
-latn = 50
-lonl = 110
-lonr = 140
+lats = -15
+latn = 55
+lonl = 30
+lonr = 150
 neval = 4
 
 ;------find the time index of the JJA and define the dimension of the varreas_telec_preci_JJA_corr.nc

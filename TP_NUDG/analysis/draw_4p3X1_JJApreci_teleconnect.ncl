@@ -1,28 +1,50 @@
 ;*********************************************************************
-;Draw the Asia teleconnection by the JJA precipitation index in four areas
-;And there are there case,1AMIP-CTRL,2TP-NUDG,3 is the difference between the above two
-;The data(3cases,4areas) are all save in one file,and are all named "var" in the script.
+;filename:      draw_4p3X1_JJApreci_teleconnect.ncl
+;input_data:    -Areas_JJApreci_telec.nc
+;Draw the Asia teleconnection with the JJA precipitation index in four areas
+;And there are there case,1AMIP-CTRL,2TP-NUDG24h,3 TP-NUDG6h
+;                                            by Ql_Ren
+;                                           2018/01/24
 ;*********************************************************************************
 begin
-;the path of the file
-filename   = "/users/yangsong3/Model_Team/F/clm-month/Areas_telec_preci_JJA_corr.nc"
-fig_name   = "/users/yangsong3/Model_Team/F/clm-month/fig/4panel_3X1_Asia_JJA_preci_corr"
+path       = "/users/yangsong3/renql/project/TP_NUDG"
+filename   = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Areas_JJApreci_telec.nc"
+fig_name   = path + "/analysis/fig/" + "4p3X1_JJApreci_telec"
 fig_title  = "Teleconnection in JJA"
-left_title = (/"AMIP_CTRL","TP_NUDG","AMIP_CTRL - TP_NUDG"/)
+    case   = (/"CTRL","NUDG24h","NUDG6h"/)
 fig_out    = "pdf";"x11"
 unit       = ""
-area      = (/"India","Tibet","Philippines","Maritime_continent"/) ;here used as the right title
-ncase = 3 
-narea = dimsizes(area)
-var_name = "corr"
+area       = (/"India","Tibet","Philippines","Maritime_continent"/) ;here used as the right title
+var_name   = "corr"
+
 ;plot area 
 lats = -15
 latn = 55
 lonl = 30
 lonr = 150
+siglvl = 0.05
+
 ;define the dimension of the data
-    nlat  = 85
-    nlon  = 113
+f     = addfile(filename(0),"r")
+vars  = f->$var_name$(0,{lats:latn},{lonl:lonr})
+nlat  = dimsizes(vars&lat)
+nlon  = dimsizes(vars&lon)
+ncase = dimsizes(case) 
+narea = dimsizes(area)
+plot  = new((/ncase/),graphic)
+plot2 = new((/ncase/),graphic)
+line  = new((/ncase/),graphic)
+line2 = new((/ncase/),graphic)
+var   = new((/ncase,narea,nlat,nlon/), float) ;the variable of teleconnection data
+prob  = new((/ncase,narea,nlat,nlon/), float) ;the variable of teleconnection data
+
+minlat = (/25 ,20 ,25  ,5   ,-10 /)
+maxlat = (/40 ,35 ,35  ,20  ,7.5 /)
+minlon = (/70 ,60 ,90  ,120 ,85  /)
+maxlon = (/105,80 ,103 ,140 ,120 /)
+lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
+latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
+
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
    subtitle_font  = 0.02
@@ -32,16 +54,17 @@ lonr = 150
    title_thick    = 5.0
    mp_thick       = 5.0
 
-;the number of the panel plot
-    plot   = new((/3/),graphic)
-    var    = new((/ncase,narea,nlat,nlon/), float) ;the variable of teleconnection data
-
 ;================================================================
 ;read data
 ;====================================================================
-f = addfile(filename,"r")
-var = f->$var_name$
-print(var(1,1,20,50))
+do nf = 0, ncase-1, 1
+    f             = addfile(filename(nf),"r")
+    var(nf,:,:,:) = f->$var_name$(:,{lats:latn},{lonl:lonr})
+end do
+prob = rtest(var,27,0)
+prob = mask(prob,prob.lt.siglvl,True)
+printVarSummary(var)
+printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -116,6 +139,42 @@ print(var(1,1,20,50))
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
 
+;----------Set res sig-----------
+    res_sig                  = True
+    res_sig@gsnDraw          = False
+    res_sig@gsnFrame         = False
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnInfoLabelOn    = False
+    ;res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 1.
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/0.01/)
+    ;res_sig@cnFillPattern        = "GMT_gray"
+    ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
+    
+    res_sig@gsnCenterString      = ""
+    res_sig@gsnRightStringFontHeightF = subtitle_font
+    res_sig@gsnLeftStringFontHeightF  = subtitle_font
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
+
+;--------set the attribute of polygon--------------
+    lnres                      = True
+    lnres@gsLineColor          = "black"
+    lnres@gsLineDashPattern    = 0
+    lnres@gsLineThicknessF     = 4.0
+    ;lnres@gsLineLabelString    = "TP"
+
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -126,20 +185,31 @@ print(var(1,1,20,50))
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
 
+    resp  = True    
+    resp@gsnMaximize   = True
+    resp@gsnPaperOrientation = "portrait"
+    ;resp@gsnPanelLabelBar = True
+    ;resp@pmLabelBarWidthF  = 0.5
+    ;resp@pmLabelBarHeightF = 0.05
+    ;resp@lbLabelFontHeightF = tick_font
+    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@txFontHeightF = title_font 
+    resp@txFontThicknessF = title_thick
+
 do na = 0,narea-1,1
     res@gsnRightString       = area(na) 
     do nc = 0, ncase-1,1
-        res@gsnLeftString    = left_title(nc)
-        plot(nc) = gsn_csm_contour_map_ce(wks,var(nc,na,:,:),res)
+        res@gsnLeftString    = case(nc)
+        plot(nc)   = gsn_csm_contour_map_ce(wks,var(nc,na,:,:),res)
+        plot2(nc)  = gsn_csm_contour(wks,prob(nc,na,:,:),res_sig)
+        overlay(plot(nc),plot2(nc))
+        line(nc)  = gsn_add_polyline( wks, plot(nc), lonx(:,0), latx(:,0), lnres )
+        line2(nc) = gsn_add_polyline( wks, plot(nc), lonx(:,na+1), latx(:,na+1), lnres )
         print(max(var(nc,na,{lats:latn},{lonl:lonr})))
         print(min(var(nc,na,{lats:latn},{lonl:lonr})))
     end do
     
-    resp  = True    
-    resp@gsnMaximize   = True
     resp@txString      = fig_title 
-    resp@txFontHeightF = title_font 
-    resp@txFontThicknessF = title_thick
     gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 end

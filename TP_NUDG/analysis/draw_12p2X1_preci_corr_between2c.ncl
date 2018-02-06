@@ -22,11 +22,12 @@ var_name = (/"month_corr","season_corr"/) ;this is the var_name in data file
 mon_season = 0 ;0 is to draw monthly data,1 is to draw seasonal data
 if (mon_season.eq.0) then
     months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-    nsample  = (/31,28,31,30,31,30,31,31,30,31,30,31/)*27
+;    nsample  = (/31,28,31,30,31,30,31,31,30,31,30,31/)*27
 else
     months   = (/"DJF","MAM","JJA","SON"/)
-    nsample  = (/90,92,92,91/)*27
+;    nsample  = (/90,92,92,91/)*27
 end if
+nsample = 27
 print(nsample)
 
 ;area: east Asia
@@ -74,12 +75,12 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
     var(nf,:,:,:)  = f->$var_name(mon_season)$ ;get an array (ncase,nmonth,nlat,nlon)
-    ;vari(nf,:,:,:) = f->$var_name(1)$ ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
 do nf = 0 ,ncase-1,1
 do nm = 0 ,nmonth-1,1
-prob(nf,nm,:,:) = rtest(var(nf,nm,:,:),nsample(nm),0)
+prob(nf,nm,:,:) = rtest(var(nf,nm,:,:),nsample,0)
+;prob(nf,nm,:,:) = rtest(var(nf,nm,:,:),nsample(nm),0)
 end do
 end do
 

@@ -5,8 +5,6 @@
 ;and then calculate the correlation between these two cases to get (nmonth,nlat,nlon).
 ;                                            by Ql_Ren
 ;                                           2018/01/18
-;modification
-;2018/02/06 calculate monthly average rainfall first then calculate the correlation
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
@@ -34,22 +32,19 @@ nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var1        = new((/nyear,365,nlat,nlon/),float)
-var         = new((/nyear,365,nlat,nlon/),float)
-month_var1  = new((/nyear,12 ,nlat,nlon/),float)  ;store the monthly average rainfall
-season_var1 = new((/nyear, 4 ,nlat,nlon/),float)  ;store the seasonal average rainfall
-month_var   = new((/nyear,12 ,nlat,nlon/),float)  ;store the monthly average rainfall
-season_var  = new((/nyear, 4 ,nlat,nlon/),float)  ;store the seasonal average rainfall
+var1        = new((/nyear*365,nlat,nlon/),float)
+var         = new((/nyear*365,nlat,nlon/),float)
 month_corr  = new((/      12 ,nlat,nlon/),float)
 season_corr = new((/       4 ,nlat,nlon/),float)
 
 var1 = 0 
-do nt = 0,nyear-1,1
-    do nv = 0,nvar-1,1 
-        f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        var1(nt,:,:,:) = var1(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    end do  ;the loop of PRECC and PRECL
-end do      ;the loop of 27 years
+do nv = 0, nvar-1, 1
+    system_order = "ls " + filein(0) + "*" + var_name(nv) + ".nc"
+    files = systemfunc(system_order)
+    f    := addfiles(files,"r")
+    ListSetType(f,"cat")
+    var1  = var1 + f[:]->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
+end do
 var1 = var1*1000*3600*24 ;convert the unit "m/s" to "mm/day"
 
 do nf = 1 , ncase-1,1
@@ -57,20 +52,20 @@ do nf = 1 , ncase-1,1
 ;read the data
 ;--------------------------------------------------------------
 var = 0
-do nt = 0,nyear-1,1
-    do nv = 0,nvar-1,1 
-        f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    end do  ;the loop of PRECC and PRECL
-end do      ;the loop of 27 years
+do nv = 0, nvar-1, 1
+    system_order = "ls " + filein(nf) + "*" + var_name(nv) + ".nc"
+    files = systemfunc(system_order)
+    f     = addfiles(files,"r")
+    ListSetType(f,"cat")
+    var  = var + f[:]->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
+end do
 var  = var*1000*3600*24
 
-time  = cd_calendar(f->time,0)
+time  = cd_calendar(f[:]->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
-    month_var1(:,nm,:,:) = dim_avg_n_Wrap(var1(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-     month_var(:,nm,:,:) =  dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-    month_corr(nm,:,:)   = escorc_n(month_var1(:,nm,:,:),month_var(:,nm,:,:),0,0) ;get (nmonth,nlat,nlon)
+    print(dimsizes(select_time))
+    month_corr(nm,:,:) = escorc_n(var1(select_time,:,:),var(select_time,:,:),0,0) ;get (nmonth,nlat,nlon)
 end do
 
 do ns = 0,3,1
@@ -80,9 +75,8 @@ do ns = 0,3,1
     else
         select_time := ind(time(:,1).ge.nm-1.and.time(:,1).le.nm+1)
     end if
-    season_var1(:,ns,:,:) = dim_avg_n_Wrap(var1(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-    season_var(:,ns,:,:)  = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-    season_corr(ns,:,:)   = escorc_n(season_var1(:,ns,:,:),season_var(:,ns,:,:),0,0) ;get (nseason,nlat,nlon)
+    print(dimsizes(select_time))
+    season_corr(ns,:,:) = escorc_n(var1(select_time,:,:),var(select_time,:,:),0,0) ;get (nseason,nlat,nlon)
 end do
 
 printVarSummary(month_corr)

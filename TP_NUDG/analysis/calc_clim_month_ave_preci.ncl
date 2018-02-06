@@ -50,8 +50,8 @@ do nt = 0,nyear-1,1
     do nv = 0,nvar-1,1 
         f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
         var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    end do  ;the loop of the 27 years
-end do   ;the loop of the 3 variables
+    end do  ;the loop of PRECC and PRECL
+end do   ;the loop of 27 years 
 
 var  = var*1000*3600*24
 time = cd_calendar(f->time,0)

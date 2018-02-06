@@ -7,15 +7,17 @@
 ;                                           2018/01/24
 ;*********************************************************************************
 begin
-path       = "/users/yangsong3/renql/project/TP_NUDG"
-filename   = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Areas_JJApreci_telec.nc"
-fig_name   = path + "/analysis/fig/" + "4p3X1_JJApreci_telec"
+;path       = "/users/yangsong3/renql/project/TP_NUDG"
+path       = "/home/ys17-19/renql/project/TP_NUDG" 
+filename   = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Areas_JJApreci_daily_telec.nc"
+fig_name   = path + "/analysis/fig/" + "4p3X1_JJApreci_daily_telec"
 fig_title  = "Teleconnection in JJA"
     case   = (/"CTRL","NUDG24h","NUDG6h"/)
 fig_out    = "pdf";"x11"
 unit       = ""
 area       = (/"India","Tibet","Philippines","Maritime_continent"/) ;here used as the right title
 var_name   = "corr"
+nsample    = 27*92
 
 ;plot area 
 lats = -15
@@ -61,7 +63,7 @@ do nf = 0, ncase-1, 1
     f             = addfile(filename(nf),"r")
     var(nf,:,:,:) = f->$var_name$(:,{lats:latn},{lonl:lonr})
 end do
-prob = rtest(var,27,0)
+prob = rtest(var,nsample,0)
 prob = mask(prob,prob.lt.siglvl,True)
 printVarSummary(var)
 printVarSummary(prob)

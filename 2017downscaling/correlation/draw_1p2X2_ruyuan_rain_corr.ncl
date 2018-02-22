@@ -25,7 +25,8 @@ latn = 60
 lonl = 70
 lonr = 150
 lev  = (/850,700,500,300/)
-siglvl = 0.05
+siglvl  = 0.05
+siglvl2 = 0.01
 
 mlat = 25
 mlon = 113
@@ -34,6 +35,7 @@ mlon = 113
 nlev  = dimsizes(lev)
 plot  = new((/nlev/),graphic)
 plot2 = new((/nlev/),graphic)
+plot3 = new((/nlev/),graphic)
 mark  = new((/nlev/),graphic)
 
 ;define the thickness and height of the title,tick and label
@@ -49,9 +51,14 @@ mark  = new((/nlev/),graphic)
 ;read data
 ;====================================================================
 f     = addfile(filename,"r")
-var   = f->$var_name(0)$
+corr  = f->$var_name(0)$
+var   = corr*100
+copy_VarMeta(corr,var)
 prob  = f->$var_name(1)$
-prob  = mask(prob,prob.lt.siglvl,True)
+prob1  = mask(prob,prob.lt.siglvl,True)
+prob2  = mask(prob,prob.lt.siglvl2,True)
+copy_VarMeta(prob,prob1)
+copy_VarMeta(prob,prob2)
 printVarSummary(var)
 printVarSummary(prob)
 
@@ -115,9 +122,9 @@ printVarSummary(prob)
     ;res@cnLevels             = ispan(0,60,10)
     ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -0.9          ; set min contour level
-    res@cnMaxLevelValF        = 0.9        ; set max contour level
-    res@cnLevelSpacingF       = 0.1        ; set contour interval
+    res@cnMinLevelValF        = -45          ; set min contour level
+    res@cnMaxLevelValF        = 45        ; set max contour level
+    res@cnLevelSpacingF       = 5       ; set contour interval
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 11                ; start at color 17
@@ -157,6 +164,9 @@ printVarSummary(prob)
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
 
+    res_sig2 = res_sig
+    res_sig2@cnFillPattern   = 12
+    
 ;--------set the attribute of polygon--------------
     lnres                      = True
     lnres@gsMarkerIndex     = 16          ; polymarker style
@@ -169,9 +179,10 @@ printVarSummary(prob)
    ; res@tiMainString         = fig_title + "in" + months(m)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
-    res@gsnCenterString      = ""
+    res@gsnCenterString      = siglvl2
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
+    res@gsnLeftString    = lefttitle
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -183,13 +194,14 @@ printVarSummary(prob)
     ;resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    res@gsnLeftString    = lefttitle
 
 do nl = 0,nlev-1,1
     res@gsnRightString   = lev(nl) + "hPa" 
     plot(nl)   = gsn_csm_contour_map_ce(wks,var(nl,:,:),res)
-    plot2(nl)  = gsn_csm_contour(wks,prob(nl,:,:),res_sig)
-    overlay(plot(nl),plot2(nl))
+    ;plot2(nl)  = gsn_csm_contour(wks,prob1(nl,:,:),res_sig)
+    plot3(nl)  = gsn_csm_contour(wks,prob2(nl,:,:),res_sig2)
+    ;overlay(plot(nl),plot2(nl))
+    overlay(plot(nl),plot3(nl))
     mark(nl)   = gsn_add_polymarker( wks, plot(nl), mlon, mlat, lnres )
     print(max(var(nl,{lats:latn},{lonl:lonr})))
     print(min(var(nl,{lats:latn},{lonl:lonr})))

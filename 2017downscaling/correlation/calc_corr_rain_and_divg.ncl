@@ -1,6 +1,6 @@
 ;******************************************************************************
 ;filename:      calc_corr_rain_and_divg.ncl 
-;output_file:   Corr_rain_and_divg.nc
+;output_file:   Corr_winter_rain_and_divg_vort.nc
 ;read ruyuan 1970-2016 rainfall and East Asia divg in winter then 
 ;calculation the correlation between them.
 ;                                            by Ql_Ren
@@ -50,6 +50,8 @@ end if
 
 ;var2 = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the divergence
 ;var3 = uv2vr_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the relative vorticity 
+var3 = var_u
+var2 = var_v
 uv2vrdvf(var_u, var_v, var3, var2) ;Computes vorticity and divergence via spherical harmonics
 
 nlat = dimsizes(var2&lat)

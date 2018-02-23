@@ -10,13 +10,14 @@
 begin
 ;path       = "/users/yangsong3/renql/project/TP_NUDG"
 path       = "/home/ys17-19/renql/project/2017downscaling" 
-filename   = path + "/correlation/mdata/" + "Corr_rain_and_omega.nc"
-fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_omega"
-fig_title  = "Ruyuan Rainfall Correlation with Omega"
+filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_divg_vort.nc"
+fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_vort" ;divg"
+fig_title  = "Ruyuan Rainfall Correlation with vorticity"
 fig_out    = "pdf";"x11"
-lefttitle  = "Omega"
+lefttitle  = "divergence"
 unit       = ""
-var_name   = (/"corr","prob"/)
+;var_name   = (/"corr_divg","prob_divg"/)
+var_name   = (/"corr_vort","prob_vort"/)
 nsample    = 8519
 
 ;plot area 
@@ -51,10 +52,10 @@ mark  = new((/nlev/),graphic)
 ;read data
 ;====================================================================
 f     = addfile(filename,"r")
-corr  = f->$var_name(0)$
+corr  = f->$var_name(0)$(:,{lats:latn},{lonl:lonr})
 var   = corr*100
 copy_VarMeta(corr,var)
-prob  = f->$var_name(1)$
+prob  = f->$var_name(1)$(:,{lats:latn},{lonl:lonr})
 prob1  = mask(prob,prob.lt.siglvl,True)
 prob2  = mask(prob,prob.lt.siglvl2,True)
 copy_VarMeta(prob,prob1)
@@ -179,7 +180,7 @@ printVarSummary(prob)
    ; res@tiMainString         = fig_title + "in" + months(m)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
-    res@gsnCenterString      = siglvl2
+    res@gsnCenterString      = "siglvl: " + siglvl2
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
     res@gsnLeftString    = lefttitle

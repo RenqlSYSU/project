@@ -11,7 +11,8 @@ path     = "/home/ys17-19/renql/project/2017downscaling"
 var_name = (/"rain","omega"/)
 filein1  = path + "/data/rain7016.nc"
 filein2  = path + "/data/NECP_NCAR-daily/" + var_name(1) + "/" + var_name(1) + "*"
-fileout  = path + "/correlation/mdata/" + "Corr_rain_and_omega.nc" 
+;fileout  = path + "/correlation/mdata/" + "corr_winter_rain_and_omega.nc" 
+fileout  = path + "/correlation/mdata/" + "corr_summer_rain_and_omega.nc" 
 years    = ispan(1970,2016,1)   ;the calculate time
 
 ;area of field 
@@ -28,7 +29,8 @@ files       = systemfunc("ls " + filein2)
 f2          = addfiles(files(22:68),"r")
 ListSetType(f2,"cat")
 time        = cd_calendar(f2[:]->time,0)
-select_time = ind(time(:,1).ge.9.or.time(:,1).le.2)
+;select_time = ind(time(:,1).ge.9.or.time(:,1).le.2)    ;winter
+select_time = ind(time(:,1).ge.3.and.time(:,1).le.8)    ;summer
 ntime       = dimsizes(select_time)
 var2       := f2[:]->$var_name(1)$(select_time,{lev},:,:)
 nlat = dimsizes(var2&lat)
@@ -43,8 +45,10 @@ var1    = f1->$var_name(0)$(select_time)  ;get var1(time)
 ;================================================================
 corr      = escorc_n(var1,var2,0,0) ;get (lev,lat,lon)
 corr1day  = escorc_n(var1(1:ntime-1),var2(0:ntime-2,:,:,:),0,0) ;get (lev,lat,lon)
+corr2day  = escorc_n(var1(2:ntime-1),var2(0:ntime-3,:,:,:),0,0) ;get (lev,lat,lon)
 prob      = rtest(corr,ntime,0)
 prob1day  = rtest(corr1day,ntime-1,0)
+prob2day  = rtest(corr2day,ntime-2,0)
 printVarSummary(corr)
 printVarSummary(prob)
 print(ntime)
@@ -61,7 +65,8 @@ setfileoption(ncdf,"DefineMode",True)
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
 fileAtt@discription   = "the correlation between ruyuan daily rainfall(mm) and east asia omega(pa/s)" + \ 
-                        " in winter(9,10,11,12,1,2) from 1970 to 2016"
+                        " in summer (3,4,5,6,7,8) from 1970 to 2016"
+                        ;" in winter(9,10,11,12,1,2) from 1970 to 2016"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
@@ -76,8 +81,10 @@ filevardef(ncdf,"lat",typeof(var2&lat),getvardims(var2&lat))
 filevardef(ncdf,"lon",typeof(var2&lon),getvardims(var2&lon))
 filevardef(ncdf,"corr",typeof(corr),(/"lev","lat","lon"/))
 filevardef(ncdf,"corr1day",typeof(corr1day),(/"lev","lat","lon"/))
+filevardef(ncdf,"corr2day",typeof(corr2day),(/"lev","lat","lon"/))
 filevardef(ncdf,"prob",typeof(prob),(/"lev","lat","lon"/))
 filevardef(ncdf,"prob1day",typeof(prob1day),(/"lev","lat","lon"/))
+filevardef(ncdf,"prob2day",typeof(prob2day),(/"lev","lat","lon"/))
 
 ;Define var Attribute
 filevarattdef(ncdf,"lev",var2&level)
@@ -89,14 +96,20 @@ filevarattdef(ncdf,"corr",corr)
 corr1day@long_name = "the one day delay correlation" 
 corr1day@units     = ""
 filevarattdef(ncdf,"corr1day",corr1day)
+corr2day@long_name = "the two day delay correlation" 
+corr2day@units     = ""
+filevarattdef(ncdf,"corr2day",corr2day)
 filevarattdef(ncdf,"prob",prob)
 filevarattdef(ncdf,"prob1day",prob1day)
+filevarattdef(ncdf,"prob2day",prob2day)
 
 ncdf->lev = (/var2&level/) 
 ncdf->lat = (/var2&lat/)
 ncdf->lon = (/var2&lon/)
 ncdf->corr      = (/corr/)
 ncdf->corr1day  = (/corr1day/)
+ncdf->corr2day  = (/corr2day/)
 ncdf->prob      = (/prob/)
 ncdf->prob1day  = (/prob1day/)
+ncdf->prob2day  = (/prob2day/)
 end

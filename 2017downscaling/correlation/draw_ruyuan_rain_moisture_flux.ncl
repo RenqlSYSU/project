@@ -10,19 +10,14 @@
 begin
 ;path       = "/users/yangsong3/renql/project/TP_NUDG"
 path       = "/home/ys17-19/renql/project/2017downscaling" 
-;filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_omega.nc" ;divg_vort.nc"
-filename   = path + "/correlation/mdata/" + "corr_summer_rain_and_omega.nc" ;divg_vort.nc"
-fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_omega-summer-2delay" ;vort" ;divg"
-;fig_title  = "Correlation with Omega in Winter" ;summer"
-fig_title  = "2 Delay Correlation with Omega in Summer"
+filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_vertical-shum.nc"
+fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_divg_flux" ;divg"
+fig_title  = "Ruyuan Rainfall Correlation with moisture flux divg"
 fig_out    = "pdf";"x11"
-lefttitle  = "omega(Pa/s)"   ;"divergence"
+lefttitle  = "moisture flux divg"
 unit       = ""
-;var_name   = (/"corr_divg","prob_divg"/)
-;var_name   = (/"corr_vort","prob_vort"/)
-;var_name   = (/"corr","prob"/)
-;var_name   = (/"corr1day","prob1day"/)
-var_name   = (/"corr2day","prob2day"/)
+;var_name   = (/"corr_flux","prob_flux"/)
+var_name   = (/"corr_divg_flux","prob_divg_flux"/)
 nsample    = 8519
 
 ;plot area 
@@ -30,7 +25,6 @@ lats = 5
 latn = 60
 lonl = 70
 lonr = 150
-lev  = (/850,700,500,300/)
 siglvl  = 0.05
 siglvl2 = 0.01
 
@@ -38,7 +32,7 @@ mlat = 25
 mlon = 113
 
 ;define the dimension of the data
-nlev  = dimsizes(lev)
+nlev  = 1
 plot  = new((/nlev/),graphic)
 plot2 = new((/nlev/),graphic)
 plot3 = new((/nlev/),graphic)
@@ -57,10 +51,10 @@ mark  = new((/nlev/),graphic)
 ;read data
 ;====================================================================
 f     = addfile(filename,"r")
-corr  = f->$var_name(0)$(:,{lats:latn},{lonl:lonr})
+corr  = f->$var_name(0)$({lats:latn},{lonl:lonr})
 var   = corr*100
 copy_VarMeta(corr,var)
-prob  = f->$var_name(1)$(:,{lats:latn},{lonl:lonr})
+prob  = f->$var_name(1)$({lats:latn},{lonl:lonr})
 prob1  = mask(prob,prob.lt.siglvl,True)
 prob2  = mask(prob,prob.lt.siglvl2,True)
 copy_VarMeta(prob,prob1)
@@ -189,6 +183,7 @@ printVarSummary(prob)
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
     res@gsnLeftString    = lefttitle
+    res@gsnRightString   = "" 
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -202,18 +197,17 @@ printVarSummary(prob)
     resp@txFontThicknessF = title_thick
 
 do nl = 0,nlev-1,1
-    res@gsnRightString   = lev(nl) + "hPa" 
-    plot(nl)   = gsn_csm_contour_map_ce(wks,var(nl,:,:),res)
-    ;plot2(nl)  = gsn_csm_contour(wks,prob1(nl,:,:),res_sig)
-    plot3(nl)  = gsn_csm_contour(wks,prob2(nl,:,:),res_sig2)
+    plot(nl)   = gsn_csm_contour_map_ce(wks,var(:,:),res)
+    ;plot2(nl)  = gsn_csm_contour(wks,prob1(:,:),res_sig)
+    plot3(nl)  = gsn_csm_contour(wks,prob2(:,:),res_sig2)
     ;overlay(plot(nl),plot2(nl))
     overlay(plot(nl),plot3(nl))
     mark(nl)   = gsn_add_polymarker( wks, plot(nl), mlon, mlat, lnres )
-    print(max(var(nl,{lats:latn},{lonl:lonr})))
-    print(min(var(nl,{lats:latn},{lonl:lonr})))
+    print(max(var({lats:latn},{lonl:lonr})))
+    print(min(var({lats:latn},{lonl:lonr})))
 end do 
     
     resp@txString      = fig_title 
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 end
 

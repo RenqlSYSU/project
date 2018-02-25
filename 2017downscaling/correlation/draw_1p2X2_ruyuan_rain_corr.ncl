@@ -10,19 +10,23 @@
 begin
 ;path       = "/users/yangsong3/renql/project/TP_NUDG"
 path       = "/home/ys17-19/renql/project/2017downscaling" 
-;filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_omega.nc" ;divg_vort.nc"
+;filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_divg_vort-cfd.nc"
 filename   = path + "/correlation/mdata/" + "corr_summer_rain_and_omega.nc" ;divg_vort.nc"
-fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_omega-summer-2delay" ;vort" ;divg"
-;fig_title  = "Correlation with Omega in Winter" ;summer"
-fig_title  = "2 Delay Correlation with Omega in Summer"
+fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_omega-winter" ;vort" ;divg"
+;fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_divg-winter-cfd" ;divg"
+;fig_title  = "Correlation with Vorticity in Winter" ;summer"
+;fig_title  = "Correlation with Divergence in Winter" ;summer"
+fig_title  = "Correlation with Omega in Summer"
 fig_out    = "pdf";"x11"
+;lefttitle  = "vorticity(/s)"  ;"omega(Pa/s)"   ;"divergence"
 lefttitle  = "omega(Pa/s)"   ;"divergence"
+;lefttitle  = "divergence(/s)"
 unit       = ""
 ;var_name   = (/"corr_divg","prob_divg"/)
 ;var_name   = (/"corr_vort","prob_vort"/)
-;var_name   = (/"corr","prob"/)
+var_name   = (/"corr","prob"/)
 ;var_name   = (/"corr1day","prob1day"/)
-var_name   = (/"corr2day","prob2day"/)
+;var_name   = (/"corr2day","prob2day"/)
 nsample    = 8519
 
 ;plot area 

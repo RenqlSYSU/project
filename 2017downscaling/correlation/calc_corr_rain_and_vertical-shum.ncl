@@ -73,8 +73,8 @@ end if
 
 var_u    = var_u*var_shum/g
 var_v    = var_v*var_shum/g
-;var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the divergence
-var_divg = uv2dvF_Wrap( var_u, var_v )
+var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the divergence
+;var_divg = uv2dvF_Wrap( var_u, var_v )
 
 var_divg_flux    = wgt_vert_avg_beta ( var_shum&level, var_divg, pres_sfc, 0, 0 )  
 ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum

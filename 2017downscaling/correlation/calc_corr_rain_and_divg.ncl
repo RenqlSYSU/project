@@ -11,7 +11,7 @@ path     = "/home/ys17-19/renql/project/2017downscaling"
 var_name = (/"rain","uwnd","vwnd"/)
 filein1  = path + "/data/rain7016.nc"
 filein2  = path + "/data/NECP_NCAR-daily/" + var_name(1:2) + "/" + var_name(1:2) + "*"
-fileout  = path + "/correlation/mdata/" + "corr_winter_rain_and_divg_vort.nc" 
+fileout  = path + "/correlation/mdata/" + "corr_winter_rain_and_divg_vort-cfd.nc" 
 years    = ispan(1970,2016,1)   ;the calculate time
 
 ;area of field 
@@ -48,13 +48,13 @@ else
     print("vwnd don't have missing values, so can use spherical harmonics")
 end if
 
-;var2 = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the divergence
-;var3 = uv2vr_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the relative vorticity 
-;copy_VarMeta(var_u,var2)
-;copy_VarMeta(var_u,var3)
-var3 = var_u
-var2 = var_v
-uv2vrdvf(var_u, var_v, var3, var2) ;Computes vorticity and divergence via spherical harmonics
+var2 = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the divergence
+var3 = uv2vr_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the relative vorticity 
+copy_VarMeta(var_u,var2)
+copy_VarMeta(var_u,var3)
+;var3 = var_u
+;var2 = var_v
+;uv2vrdvf(var_u, var_v, var3, var2) ;Computes vorticity and divergence via spherical harmonics
 
 nlat = dimsizes(var2&lat)
 nlon = dimsizes(var2&lon)
@@ -70,6 +70,11 @@ corr_divg      = escorc_n(var1,var2,0,0) ;get (lev,lat,lon)
 prob_divg      = rtest(corr_divg,ntime,0)
 corr_vort      = escorc_n(var1,var3,0,0) ;get (lev,lat,lon)
 prob_vort      = rtest(corr_vort,ntime,0)
+
+corr_divg1day      = escorc_n(var1(1:ntime-1),var2(0:ntime-2,:,:,:),0,0) ;get (lev,lat,lon)
+prob_divg1day      = rtest(corr_divg1day,ntime-1,0)
+corr_vort1day      = escorc_n(var1(1:ntime-1),var3(0:ntime-2,:,:,:),0,0) ;get (lev,lat,lon)
+prob_vort1day      = rtest(corr_vort1day,ntime-1,0)
 printVarSummary(var2)
 printVarSummary(var3)
 printVarSummary(corr_divg)
@@ -106,6 +111,11 @@ filevardef(ncdf,"corr_vort",typeof(corr_vort),(/"lev","lat","lon"/))
 filevardef(ncdf,"prob_divg",typeof(prob_divg),(/"lev","lat","lon"/))
 filevardef(ncdf,"prob_vort",typeof(prob_vort),(/"lev","lat","lon"/))
 
+filevardef(ncdf,"corr_divg1day",typeof(corr_divg1day),(/"lev","lat","lon"/))
+filevardef(ncdf,"corr_vort1day",typeof(corr_vort1day),(/"lev","lat","lon"/))
+filevardef(ncdf,"prob_divg1day",typeof(prob_divg1day),(/"lev","lat","lon"/))
+filevardef(ncdf,"prob_vort1day",typeof(prob_vort1day),(/"lev","lat","lon"/))
+
 ;Define var Attribute
 filevarattdef(ncdf,"lev",var2&level)
 filevarattdef(ncdf,"lat",var2&lat)
@@ -119,9 +129,19 @@ filevarattdef(ncdf,"corr_vort",corr_vort)
 filevarattdef(ncdf,"prob_divg",prob_divg)
 filevarattdef(ncdf,"prob_vort",prob_vort)
 
+filevarattdef(ncdf,"corr_divg1day",corr_divg1day)
+filevarattdef(ncdf,"corr_vort1day",corr_vort1day)
+filevarattdef(ncdf,"prob_divg1day",prob_divg1day)
+filevarattdef(ncdf,"prob_vort1day",prob_vort1day)
+
 ncdf->lev = (/var2&level/) 
 ncdf->lat = (/var2&lat/)
 ncdf->lon = (/var2&lon/)
+ncdf->corr_divg1day      = (/corr_divg1day/)
+ncdf->corr_vort1day      = (/corr_vort1day/)
+ncdf->prob_divg1day      = (/prob_divg1day/)
+ncdf->prob_vort1day      = (/prob_vort1day/)
+
 ncdf->corr_divg      = (/corr_divg/)
 ncdf->corr_vort      = (/corr_vort/)
 ncdf->prob_divg      = (/prob_divg/)

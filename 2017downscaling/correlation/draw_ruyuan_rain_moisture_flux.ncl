@@ -10,14 +10,17 @@
 begin
 ;path       = "/users/yangsong3/renql/project/TP_NUDG"
 path       = "/home/ys17-19/renql/project/2017downscaling" 
-filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_vertical-shum.nc"
-fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_divg_flux" ;divg"
-fig_title  = "Ruyuan Rainfall Correlation with moisture flux divg"
+filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_vertical-shum-cfd.nc"
+fig_name   = path + "/correlation/fig/" + "1p_ruyuan_rain_corr_with_flux-winter"   ;-delay" 
+;fig_title  = "Delay Correlation with Moisture Flux in Winter"
+fig_title  = "Correlation with Moisture Flux in Winter"
 fig_out    = "pdf";"x11"
-lefttitle  = "moisture flux divg"
-unit       = ""
-;var_name   = (/"corr_flux","prob_flux"/)
-var_name   = (/"corr_divg_flux","prob_divg_flux"/)
+lefttitle  = "moisture flux"
+;unit       = "g/(s*m*m)"
+unit       = "g/(m*m)"
+var_name   = (/"corr_flux","prob_flux"/)
+;var_name   = (/"corr_flux1day","prob_flux1day"/)
+;var_name   = (/"corr_divg_flux1day","prob_divg_flux1day"/)
 nsample    = 8519
 
 ;plot area 
@@ -183,7 +186,7 @@ printVarSummary(prob)
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
     res@gsnLeftString    = lefttitle
-    res@gsnRightString   = "" 
+    res@gsnRightString   = unit 
 
     resp  = True    
     resp@gsnMaximize   = True

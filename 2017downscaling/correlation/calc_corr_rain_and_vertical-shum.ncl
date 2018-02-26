@@ -11,7 +11,7 @@ path     = "/home/ys17-19/renql/project/2017downscaling"
 var_name = (/"rain","uwnd","vwnd","shum","pres.sfc"/)
 filein1  = path + "/data/rain7016.nc"
 filein2  = path + "/data/NECP_NCAR-daily/" + var_name(1:4) + "/" + var_name(1:4) + "*"
-fileout  = path + "/correlation/mdata/" + "Corr_winter_rain_and_vertical-shum.nc" 
+fileout  = path + "/correlation/mdata/" + "corr_winter_rain_and_vertical-shum-cfd.nc" 
 years    = ispan(1970,2016,1)   ;the calculate time
 g        = 9.8 ;m/(s*s)
 
@@ -96,6 +96,12 @@ prob_flux      = rtest(corr_flux,ntime,0)
 corr_divg_flux      = escorc_n(var1,var_divg_flux,0,0) ;get (lev,lat,lon)
 prob_divg_flux      = rtest(corr_divg_flux,ntime,0)
 
+
+corr_flux1day      = escorc_n(var1(1:ntime-1),var_flux(0:ntime-2,:,:),0,0) ;get (lev,lat,lon)
+prob_flux1day      = rtest(corr_flux1day,ntime-1,0)
+corr_divg_flux1day      = escorc_n(var1(1:ntime-1),var_divg_flux(0:ntime-2,:,:),0,0) ;get (lev,lat,lon)
+prob_divg_flux1day      = rtest(corr_divg_flux1day,ntime-1,0)
+
 corr_flux@units      = "g/(m*m)"
 corr_flux@long_name  = "the correlation between ruyuan rain and The layer of water vapor from 1000mb to 300mb"
 corr_divg_flux@units      = "g/(s*m*m)"
@@ -128,18 +134,30 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 ;Define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"lat",typeof(var&lat),getvardims(var&lat))
 filevardef(ncdf,"lon",typeof(var&lon),getvardims(var&lon))
+
 filevardef(ncdf,"corr_flux",typeof(corr_flux),(/"lat","lon"/))
 filevardef(ncdf,"corr_divg_flux",typeof(corr_divg_flux),(/"lat","lon"/))
 filevardef(ncdf,"prob_flux",typeof(prob_flux),(/"lat","lon"/))
 filevardef(ncdf,"prob_divg_flux",typeof(prob_divg_flux),(/"lat","lon"/))
 
+filevardef(ncdf,"corr_flux1day",typeof(corr_flux1day),(/"lat","lon"/))
+filevardef(ncdf,"corr_divg_flux1day",typeof(corr_divg_flux1day),(/"lat","lon"/))
+filevardef(ncdf,"prob_flux1day",typeof(prob_flux1day),(/"lat","lon"/))
+filevardef(ncdf,"prob_divg_flux1day",typeof(prob_divg_flux1day),(/"lat","lon"/))
+
 ;Define var Attribute
 filevarattdef(ncdf,"lat",var&lat)
 filevarattdef(ncdf,"lon",var&lon)
+
 filevarattdef(ncdf,"corr_flux",corr_flux)
 filevarattdef(ncdf,"corr_divg_flux",corr_divg_flux)
 filevarattdef(ncdf,"prob_flux",prob_flux)
 filevarattdef(ncdf,"prob_divg_flux",prob_divg_flux)
+
+filevarattdef(ncdf,"corr_flux1day",corr_flux1day)
+filevarattdef(ncdf,"corr_divg_flux1day",corr_divg_flux1day)
+filevarattdef(ncdf,"prob_flux1day",prob_flux1day)
+filevarattdef(ncdf,"prob_divg_flux1day",prob_divg_flux1day)
 
 ncdf->lat = (/var&lat/)
 ncdf->lon = (/var&lon/)
@@ -147,4 +165,9 @@ ncdf->corr_flux      = (/corr_flux/)
 ncdf->corr_divg_flux      = (/corr_divg_flux/)
 ncdf->prob_flux      = (/prob_flux/)
 ncdf->prob_divg_flux      = (/prob_divg_flux/)
+
+ncdf->corr_flux1day      = (/corr_flux1day/)
+ncdf->corr_divg_flux1day      = (/corr_divg_flux1day/)
+ncdf->prob_flux1day      = (/prob_flux1day/)
+ncdf->prob_divg_flux1day      = (/prob_divg_flux1day/)
 end

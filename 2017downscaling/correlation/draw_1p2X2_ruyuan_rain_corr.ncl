@@ -10,21 +10,21 @@
 begin
 ;path       = "/users/yangsong3/renql/project/TP_NUDG"
 path       = "/home/ys17-19/renql/project/2017downscaling" 
-filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_divg_vort-cfd.nc"
-;filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_omega.nc" ;divg_vort.nc"
-;fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_omega-winter" ;vort" ;divg"
-fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_vort-winter-cfd-delay" ;divg"
-fig_title  = "Delay Correlation with Vorticity in Winter" ;summer"
+;filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_divg_vort-cfd.nc"
+filename   = path + "/correlation/mdata/" + "corr_winter_rain_and_omega.nc" ;divg_vort.nc"
+fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_omega-winter" ;vort" ;divg"
+;fig_name   = path + "/correlation/fig/" + "1p2X2_ruyuan_rain_corr_with_vort-winter-cfd-delay" ;divg"
+;fig_title  = "Delay Correlation with Vorticity in Winter" ;summer"
 ;fig_title  = "Delay Correlation with Divergence in Winter" ;summer"
-;fig_title  = "Correlation with Omega in Winter"
+fig_title  = "Correlation with Omega in Winter"
 fig_out    = "pdf";"x11"
-lefttitle  = "vorticity(/s)" 
-;lefttitle  = "omega(Pa/s)" 
+;lefttitle  = "vorticity(/s)" 
+lefttitle  = "omega(Pa/s)" 
 ;lefttitle  = "divergence(/s)"
 unit       = ""
 ;var_name   = (/"corr_divg1day","prob_divg1day"/)
-var_name   = (/"corr_vort1day","prob_vort1day"/)
-;var_name   = (/"corr","prob"/)
+;var_name   = (/"corr_vort1day","prob_vort1day"/)
+var_name   = (/"corr","prob"/)
 ;var_name   = (/"corr1day","prob1day"/)
 ;var_name   = (/"corr2day","prob2day"/)
 nsample    = 8519
@@ -41,11 +41,19 @@ siglvl2 = 0.01
 mlat = 25
 mlon = 113
 
+maxlon = 110
+minlon = 118
+maxlat = 22
+minlat = 27
+lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
+latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
+
 ;define the dimension of the data
 nlev  = dimsizes(lev)
 plot  = new((/nlev/),graphic)
 plot2 = new((/nlev/),graphic)
 plot3 = new((/nlev/),graphic)
+line  = new((/nlev/),graphic)
 mark  = new((/nlev/),graphic)
 
 ;define the thickness and height of the title,tick and label
@@ -177,11 +185,18 @@ printVarSummary(prob)
     res_sig2 = res_sig
     res_sig2@cnFillPattern   = 12
     
+;--------set the attribute of mark--------------
+    markres                      = True
+    markres@gsMarkerIndex     = 16          ; polymarker style
+    markres@gsMarkerSizeF     = 5.          ; polymarker size
+    markres@gsMarkerColor     = "green"
+
 ;--------set the attribute of polygon--------------
     lnres                      = True
-    lnres@gsMarkerIndex     = 16          ; polymarker style
-    lnres@gsMarkerSizeF     = 5.          ; polymarker size
-    lnres@gsMarkerColor     = "green"
+    lnres@gsLineColor          = "black"
+    lnres@gsLineDashPattern    = 0
+    lnres@gsLineThicknessF     = 4.0
+    ;lnres@gsLineLabelString    = "TP"
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -212,7 +227,8 @@ do nl = 0,nlev-1,1
     plot3(nl)  = gsn_csm_contour(wks,prob2(nl,:,:),res_sig2)
     ;overlay(plot(nl),plot2(nl))
     overlay(plot(nl),plot3(nl))
-    mark(nl)   = gsn_add_polymarker( wks, plot(nl), mlon, mlat, lnres )
+    mark(nl)   = gsn_add_polymarker( wks, plot(nl), mlon, mlat, markres )
+    line(nl)     = gsn_add_polyline( wks, plot(nl), lonx, latx, lnres )
     print(max(var(nl,{lats:latn},{lonl:lonr})))
     print(min(var(nl,{lats:latn},{lonl:lonr})))
 end do 

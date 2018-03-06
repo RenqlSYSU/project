@@ -72,7 +72,7 @@ var1    = f1->$var_name(0)$(select_time)  ;get var1(time)
 
 rc    = regCoef_n(var2(0:ntime-2),var1(1:ntime-1),0,0)
 var1r = rc*var2(0:ntime-2)+rc@yintercept
-prob  = student_t(rc@tval,rc@nptxy-2)
+prob  = student_t(rc@tval,rc@nptxy-2)  ;do the significance testing to used as center title
 print(rc)
 
 ;====================================================================

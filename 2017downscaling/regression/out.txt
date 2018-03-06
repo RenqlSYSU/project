@@ -1,0 +1,340 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+
+Variable: ntime
+Type: integer
+Total Size: 4 bytes
+            1 values
+Number of Dimensions: 1
+Dimensions and sizes:	[1]
+Coordinates: 
+(0)	8519
+
+Variable: select_time
+Type: integer
+Total Size: 34076 bytes
+            8519 values
+Number of Dimensions: 1
+Dimensions and sizes:	[8519]
+Coordinates: 
+(0)	read rain
+(0)	read 700omega,nv = 1 lev = 700
+
+Variable: var
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 2] x [lon | 3]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [22.5..25]
+            lon: [110..115]
+Number Of Attributes: 16
+  level :	700
+  long_name :	mean Daily Omega
+  units :	Pascal/s
+  precision :	3
+  least_significant_digit :	3
+  GRIB_id :	39
+  GRIB_name :	VVEL
+  var_desc :	Omega (dp/dt)
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -0.9570026, 0.9299984 )
+  valid_range :	( -3,  7 )
+  _FillValue :	-9.96921e+36
+(0)	read 850divg,nv = 2 lev = 850
+
+Variable: var_u
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 2] x [lon | 3]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [22.5..25]
+            lon: [110..115]
+Number Of Attributes: 16
+  level :	850
+  long_name :	mean Daily U-wind
+  units :	m/s
+  precision :	2
+  least_significant_digit :	1
+  GRIB_id :	33
+  GRIB_name :	UGRD
+  var_desc :	u-wind
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -82.53998, 131.88 )
+  valid_range :	( -125, 160 )
+  _FillValue :	-9.96921e+36
+
+Variable: var_v
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 2] x [lon | 3]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [22.5..25]
+            lon: [110..115]
+Number Of Attributes: 16
+  level :	850
+  long_name :	mean Daily V wind
+  units :	m/s
+  precision :	2
+  least_significant_digit :	1
+  GRIB_id :	34
+  GRIB_name :	VGRD
+  var_desc :	v-wind
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -69.84998, 78.05 )
+  valid_range :	( -125, 160 )
+  _FillValue :	-9.96921e+36
+(0)	read 300divg,nv = 3 lev = 300
+
+Variable: var_u
+Type: float
+Total Size: 272608 bytes
+            68152 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 2] x [lon | 4]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [25..27.5]
+            lon: [112.5..120]
+Number Of Attributes: 16
+  level :	300
+  long_name :	mean Daily U-wind
+  units :	m/s
+  precision :	2
+  least_significant_digit :	1
+  GRIB_id :	33
+  GRIB_name :	UGRD
+  var_desc :	u-wind
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -82.53998, 131.88 )
+  valid_range :	( -125, 160 )
+  _FillValue :	-9.96921e+36
+
+Variable: var_v
+Type: float
+Total Size: 272608 bytes
+            68152 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 2] x [lon | 4]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [25..27.5]
+            lon: [112.5..120]
+Number Of Attributes: 16
+  level :	300
+  long_name :	mean Daily V wind
+  units :	m/s
+  precision :	2
+  least_significant_digit :	1
+  GRIB_id :	34
+  GRIB_name :	VGRD
+  var_desc :	v-wind
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -69.84998, 78.05 )
+  valid_range :	( -125, 160 )
+  _FillValue :	-9.96921e+36
+(0)	read 850vort,nv = 4 lev = 850
+
+Variable: var_u
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 3] x [lon | 2]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [20..25]
+            lon: [107.5..110]
+Number Of Attributes: 16
+  level :	850
+  long_name :	mean Daily U-wind
+  units :	m/s
+  precision :	2
+  least_significant_digit :	1
+  GRIB_id :	33
+  GRIB_name :	UGRD
+  var_desc :	u-wind
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -82.53998, 131.88 )
+  valid_range :	( -125, 160 )
+  _FillValue :	-9.96921e+36
+
+Variable: var_v
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 3] x [lon | 2]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [20..25]
+            lon: [107.5..110]
+Number Of Attributes: 16
+  level :	850
+  long_name :	mean Daily V wind
+  units :	m/s
+  precision :	2
+  least_significant_digit :	1
+  GRIB_id :	34
+  GRIB_name :	VGRD
+  var_desc :	v-wind
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( -69.84998, 78.05 )
+  valid_range :	( -125, 160 )
+  _FillValue :	-9.96921e+36
+(0)	read flux,nv = 5
+
+Variable: var_shum
+Type: float
+Total Size: 1635648 bytes
+            408912 values
+Number of Dimensions: 4
+Dimensions and sizes:	[time | 8519] x [level | 8] x [lat | 2] x [lon | 3]
+Coordinates: 
+            time: [1490184..1902168]
+            level: [1000..300]
+            lat: [22.5..25]
+            lon: [110..115]
+Number Of Attributes: 15
+  long_name :	mean Daily specific humidity
+  units :	kg/kg
+  precision :	6
+  least_significant_digit :	5
+  GRIB_id :	51
+  GRIB_name :	SPFH
+  var_desc :	Specific humidity
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	(  0, 0.047505 )
+  valid_range :	( -0.0001, 0.06543 )
+  _FillValue :	-9.96921e+36
+
+Variable: var_pres
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 2] x [lon | 3]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [22.5..25]
+            lon: [110..115]
+Number Of Attributes: 15
+  long_name :	mean Daily Pressure at surface
+  units :	Pascals
+  precision :	-1
+  least_significant_digit :	-1
+  GRIB_id :	1
+  GRIB_name :	PRES
+  var_desc :	Pressure
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Surface
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( 49270, 109350 )
+  valid_range :	( 40000, 115000 )
+  _FillValue :	-9.96921e+36
+(0)	read flux-divg,nv = 6
+
+Variable: var_shum
+Type: float
+Total Size: 1635648 bytes
+            408912 values
+Number of Dimensions: 4
+Dimensions and sizes:	[time | 8519] x [level | 8] x [lat | 3] x [lon | 2]
+Coordinates: 
+            time: [1490184..1902168]
+            level: [1000..300]
+            lat: [20..25]
+            lon: [110..112.5]
+Number Of Attributes: 15
+  long_name :	mean Daily specific humidity
+  units :	kg/kg
+  precision :	6
+  least_significant_digit :	5
+  GRIB_id :	51
+  GRIB_name :	SPFH
+  var_desc :	Specific humidity
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Multiple levels
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	(  0, 0.047505 )
+  valid_range :	( -0.0001, 0.06543 )
+  _FillValue :	-9.96921e+36
+
+Variable: var_pres
+Type: float
+Total Size: 204456 bytes
+            51114 values
+Number of Dimensions: 3
+Dimensions and sizes:	[time | 8519] x [lat | 3] x [lon | 2]
+Coordinates: 
+            time: [1490184..1902168]
+            lat: [20..25]
+            lon: [110..112.5]
+Number Of Attributes: 15
+  long_name :	mean Daily Pressure at surface
+  units :	Pascals
+  precision :	-1
+  least_significant_digit :	-1
+  GRIB_id :	1
+  GRIB_name :	PRES
+  var_desc :	Pressure
+  dataset :	NCEP Reanalysis Daily Averages
+  level_desc :	Surface
+  statistic :	Mean
+  parent_stat :	Individual Obs
+  missing_value :	-9.96921e+36
+  actual_range :	( 49270, 109350 )
+  valid_range :	( 40000, 115000 )
+  _FillValue :	-9.96921e+36
+fatal:Number of dimensions in parameter (2) of (write_table) is (2), (1) dimensions were expected 
+fatal:["Execute.c":8640]:Execute: Error occurred at or near line 181 in file calc_area_avrg_ts.ncl
+
+

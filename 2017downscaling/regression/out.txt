@@ -334,7 +334,3 @@ Number Of Attributes: 15
   actual_range :	( 49270, 109350 )
   valid_range :	( 40000, 115000 )
   _FillValue :	-9.96921e+36
-fatal:Number of dimensions in parameter (2) of (write_table) is (2), (1) dimensions were expected 
-fatal:["Execute.c":8640]:Execute: Error occurred at or near line 181 in file calc_area_avrg_ts.ncl
-
-

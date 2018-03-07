@@ -177,8 +177,8 @@ fbindirwrite(fileout2,ts)
 
 ;write_table(fileout3,"w",ts_var,"%s%s%s%s%s%s%s")
 time_YYYYMMDD = cd_calendar(time(select_time),-2)
-alist = (/time_YYYYMMDD,ts(0,:),ts(1,:),ts(2,:),ts(3,:),ts(4,:),ts(5,:),ts(6,:)/)
-write_table(fileout3,"w",ts,"%8d%12.7f%12.7f%12.7f%12.7f%12.7f%12.7f%12.7f")
+alist = [/time_YYYYMMDD,ts(0,:),ts(1,:),ts(2,:),ts(3,:),ts(4,:),ts(5,:),ts(6,:)/]
+write_table(fileout3,"w",alist,"%8d%12.7f%12.7f%12.7f%12.7f%12.7f%12.7f%12.7f")
 
 system("rm -f " + fileout)
 ncdf = addfile(fileout,"c")

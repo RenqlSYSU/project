@@ -1,5 +1,5 @@
 ;**********************************************************************
-;draw the monthly climate 500hpa height in the  AMIP-CTRL and TP-NUDG
+;draw the monthly climate U,V and OMEGA in the  AMIP-CTRL and TP-NUDG
 ;**********************************************************************
 
 begin
@@ -9,11 +9,11 @@ begin
 ;define the dimension of the data
     ntime = 12
     lev   = (/850,500,200/)  ;the hpa of the level
-    ;nlev  = dimsizes(lev)
+    nlev  = dimsizes(lev)
     nlat  = 192
     nlon  = 288
-    ;nvar  = 3  ;u,v,omega
-    ;ncase = 3  ;CTRL,NUDG,CTRL-NUDG
+    nvar  = 3  ;u,v,omega
+    ncase = 3  ;CTRL,NUDG,CTRL-NUDG
 ;area: east Asia
     lats = -20
     latn = 60
@@ -51,32 +51,34 @@ begin
     path       = "/users/yangsong3/Model_Team/F/clm-month/"
     pre_name   =(/"AMIP_C5PM.cam.h1.ESM.clim.month.",\
                  "AMIP_C5PM_TP_NUDG.cam.h1.ESM.clim.month."/)
-    var_name   = "Z3"
+    var_name   = (/"U","V","OMEGA"/)
     
-    fig_name   = path + "fig/" + "east_asia_12panel_3X1_clim_month_height_diff"
-    fig_title  = "Climate Month Height"
+    fig_name   = path + "fig/" + "east_asia_12panel_3X1_clim_month_wind_diff"
+    fig_title  = "Climate Month Wind"
     left_title = (/"AMIP_CTRL","TP_NUDG","AMIP_CTRL - TP_NUDG"/)
-    right_title = "m"
+    right_title = "Omega(Pa/s)"
     fig_out    = "pdf";"x11"
 
 ;the number of the panel plot
     plot   = new((/3/),graphic)
-    var    = new((/ncase,ntime,nlat,nlon/), float)
+    var    = new((/ncase,nvar,ntime,nlat,nlon/), float)
     months = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nev","Dec"/)
 
-h = 1
-;do h = 0,dimsizes(lev)-1,1   ; the loop of the height
+;h = 0
+do h = 0,dimsizes(lev)-1,1   ; the loop of the height
 ;================================================================
 ;read data
 ;====================================================================
    ; f = addfile(filein,"r")
 do i = 0,1,1
-    filein = path + pre_name(i) + var_name + ".nc"
-    f = addfile(filein,"r")
-    var(i,:,:,:) = f->$var_name$(:,{lev(h)},:,:)
+    do j = 0,2,1
+        filein = path + pre_name(i) + var_name(j) + ".nc"
+        f = addfile(filein,"r")
+        var(i,j,:,:,:) = f->$var_name(j)$(:,{lev(h)},:,:)
+    end do
 end do
-var(2,:,:,:) = var(0,:,:,:) - var(1,:,:,:)    ;the difference of the ctrl and nudg
-print(var(1,11,20,50))
+var(2,:,:,:,:) = var(0,:,:,:,:) - var(1,:,:,:,:)    ;the difference of the ctrl and nudg
+print(var(1,1,11,20,50))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -133,15 +135,15 @@ do m = 0,11,1
 ;set the attribute of the contour
 ;--------------------------------------------------------------------------
     res@gsnScalarContour = True
-    res@cnFillOn         = False 
-    res@cnLinesOn        = True
-    res@cnLineLabelsOn   = True
+    res@cnFillOn         = True
+    res@cnLinesOn        = False
+    res@cnLineLabelsOn   = False  ; True
    
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
     ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     ;res@cnMinLevelValF        = minlevel(h)          ; set min contour level
     ;res@cnMaxLevelValF        = maxlevel(h)          ; set max contour level
     ;res@cnLevelSpacingF       = levelspacing(h)          ; set contour interval

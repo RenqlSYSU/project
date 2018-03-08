@@ -12,24 +12,24 @@
 ;         minlevel, max level and level spacing.
 ;*********************************************************************************
 begin
-draw_var = (/"T","OMEGA","Q","Z3"/)  ;this is the variable used to draw, can used as center string
-;unit     = (/"~S~o~N~C","Pa/s","g/kg","km"/) ;"K"   ;this can be used as right string 
-unit     = (/"K~S~2~N~","Pa~S~2~N~/s~S~2~N~","kg~S~2~N~/kg~S~2~N~","m~S~2~N~"/)   ;this can be used as right string 
-var_name = (/"season_vari"/) ;this is the var_name in data file
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+draw_var = (/"U","V","wind"/)  ;this is the variable used to draw, can used as center string
+unit     = "m/s" ;"K"   ;this can be used as right string 
+;unit     = "m~S~2~N~/s~S~2~N~"   ;this can be used as right string 
+;var_name = (/"season_vari"/) ;this is the var_name in data file
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
 nl = 2;1;1;1
-nv = 3
+nv = 2
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
-fig_title  = "Seasonly " + draw_var(nv) + " Variance in " ;+season
-;fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
+;fig_title  = "Seasonly " + draw_var(nv) + " Variance in " ;+season
+fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
     case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
 fig_out    ="pdf";"x11"
 
@@ -40,19 +40,19 @@ lonl = 30  ;20
 lonr = 150 ;220
 siglvl = 0.05
 
-f = addfile(filename(0),"r")
+f = addfile(filename(0)+ draw_var(0) + ".nc","r")
 ncase  = dimsizes(case)
 nmonth = dimsizes(months)
 nlat   = getfilevardimsizes(f,"lat")
 nlon   = getfilevardimsizes(f,"lon")
 nlev   = getfilevardimsizes(f,"lev")
-var  = new((/ncase  ,nmonth,nlat,nlon/),float)
-vari = new((/ncase  ,nmonth,nlat,nlon/),float)
+var_u  = new((/ncase  ,nmonth,nlat,nlon/),float)
+var_v  = new((/ncase  ,nmonth,nlat,nlon/),float)
+vari   = new((/ncase  ,nmonth,nlat,nlon/),float)
 prob = new((/ncase-1,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/3/),graphic)
-    plot2    = new((/2/),graphic)
     line     = new((/3/),graphic)
 
 ;set the area of the box
@@ -67,36 +67,46 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_font      = 0.02
    subtitle_font  = 0.02
    title_font     = 0.03
+   vcref_font     = 0.01
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    mp_thick       = 5.0
+   vc_thick       = 1.5
 
 ;================================================================
 ;read data
 ;====================================================================
+nv = 0
 do nf = 0 ,ncase-1, 1
-    f = addfile(filename(nf),"r")
-    var(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
-    ;vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
+    f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
+    var_u(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
+end do
+
+nv = 1
+do nf = 0 ,ncase-1, 1
+    f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
+    var_v(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
 ;var      = var/1000      ;convert unit from m to km
 ;var      = var*1000      ;convert unit from kg/kg to g/kg
 ;var      = var - 273.15 ;convert unit from K to c
 ;copy_VarMeta(vari,var)
-var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
+var_u_temp = where(var_u(0,:,:,:).eq.0,var_u@_FillValue,var_u(0,:,:,:))
+var_v_temp = where(var_v(0,:,:,:).eq.0,var_v@_FillValue,var_v(0,:,:,:))
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
-;prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
+;prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
+prob(nf,:,:,:) = ttest(var_u(0,:,:,:),vari(0,:,:,:),27,var_u(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+var_u(nf+1,:,:,:)= (var_u(0,:,:,:) - var_u(nf+1,:,:,:))/abs(var_u_temp)*100 ;get the difference between CTRL and NUDG
+var_v(nf+1,:,:,:)= (var_v(0,:,:,:) - var_v(nf+1,:,:,:))/abs(var_v_temp)*100 ;get the difference between CTRL and NUDG
 end do
 
 prob = mask(prob,prob.lt.siglvl,True)
-copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
-printVarSummary(var)
+copy_VarMeta(var_u(0,0,:,:),prob(0,0,:,:))
+printVarSummary(var_u)
 printVarSummary(prob)
-print(var(1,1,3,6))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -147,32 +157,34 @@ print(var(1,1,3,6))
     ;  res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
+    res@gsnScalarContour = True
     res@cnFillOn         = True
     res@cnLinesOn        = False ;True
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
-    ;res@cnLineThicknessF = 0
-    ;res@gsnContourZeroLineThicknessF = 4.0
-    ;res@cnLineColor      = "blue"
+    res@cnMonoFillPattern= True;False
+    res@cnFillPattern    = 0
+    res@cnMonoFillColor  = True
+    res@cnFillColor      = "darkslategray"
+    res@lbLabelBarOn     = False;True   ; turn off the label bar
    
-    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
-    ;res@cnLevels             = ispan(0,60,10)
-    ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = 1          ; set min contour level
-    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    ;res@cnLevelSpacingF       = 1        ; set contour interval
-
-    res@gsnSpreadColors      = False  ;True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 11                ; start at color 17
-    res@gsnSpreadColorEnd    = 2                ; end at color 200
-    
-    res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "vertical"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 1
+;----------set the attribute of the vector-------------------
+     res@vcGlyphStyle               = "CurlyVector"
+     res@vcVectorDrawOrder          = "PostDraw"
+     res@vcLineArrowThicknessF      = vc_thick
+     res@vcMinDistanceF             = 0.015
+     ;res@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+     res@vcRefLengthF               = 0.05           ; define length of vec ref
+     res@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+     ;res@vcRefAnnoSide              = "Bottom"          
+     ;res@vcRefAnnoJust              = "TopRight"
+     res@vcRefAnnoOrthogonalPosF    = 0.5           ; move ref vector along Y-axis
+     res@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
+     res@vcRefAnnoPerimOn           = False         ;close the border
+     res@vcRefAnnoFontHeightF       = vcref_font
+     res@vcRefAnnoString1On         = False
+     res@vcRefAnnoString2On         = True
+     ;res@vcRefAnnoString2           = "30m/s"
 
 ;----------Set res sig-----------
     res_sig                  = True
@@ -231,37 +243,26 @@ print(var(1,1,3,6))
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+    vcref         = (/(/15,30,30/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/30,30,30/), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/50,30,30/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
         if(nc.gt.0) then
-            res@gsnSpreadColors       = False              ; turn of the full color map
-            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-            ;res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
-            res@cnLevelSpacingF       = 10        ; set contour interval
-            res@cnMaxLevelValF        = 90 ;32    ; set max contour level
-            res@cnMinLevelValF        = -90       ; set min contour level
+            res@vcRefMagnitudeF       = 30             ; define vector ref mag
+            res@vcRefAnnoString2      = "30%"
             res@gsnRightString  = "siglvl: " + siglvl
-            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-            overlay(plot(nc),plot2(nc-1))
+            plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob(nc-1,nm,:,:),res)
         else
-            ;res@gsnSpreadColors       = True              ; turn of the full color map
-            ;res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-            ;res@cnLevels              = (/0,0.5,1,1.8,3,4,5,6,7/)
-            ;min_var = floor(min(var(nc,nm,:,:))/10)*10
-            ;max_var = floor(min(var(nc,nm,:,:))/10)*10
-            res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
-            ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-            ;res@cnMinLevelValF        = 0  ; set min contour level
-            ;res@cnMaxLevelValF        = 1.8  ; set max contour level
-            ;res@cnLevelSpacingF       = 0.1        ; set contour interval
-            res@gsnRightString   = unit(nv) + " " + lev(nl) + "hPa" ;draw_var(nv) 
-            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+            res@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
+            res@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+            res@gsnRightString   = unit + " " + lev(nl) + "hPa" ;draw_var(nv) 
+            plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob@_FillValue,res)
         end if
         line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
-        print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
+        print(max(var_u(nc,nm,{lats:latn},{lonl:lonr})))
+        print(min(var_u(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
 
     resp@txString      = fig_title + months(nm) 

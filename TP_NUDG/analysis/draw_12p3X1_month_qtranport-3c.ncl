@@ -12,8 +12,8 @@
 ;         minlevel, max level and level spacing.
 ;*********************************************************************************
 begin
-draw_var = (/"U","V","wind"/)  ;this is the variable used to draw, can used as center string
-unit     = "m/s" ;"K"   ;this can be used as right string 
+draw_var = (/"Q","U","V","Moisture Transpot","qtranport"/)  ;this is the variable used to draw, can used as center string
+unit     = "g/(s*hPa*m)" ;"K"   ;this can be used as right string 
 ;unit     = "m~S~2~N~/s~S~2~N~"   ;this can be used as right string 
 ;var_name = (/"season_vari"/) ;this is the var_name in data file
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file

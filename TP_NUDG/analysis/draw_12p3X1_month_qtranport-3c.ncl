@@ -12,7 +12,7 @@
 ;         minlevel, max level and level spacing.
 ;*********************************************************************************
 begin
-draw_var = (/"Q","U","V","Moisture Transpot","qtranport"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"U","V","Q","Moisture Transpot","qtranport"/)  ;this is the variable used to draw, can used as center string
 unit     = "g/(s*hPa*m)" ;"K"   ;this can be used as right string 
 ;unit     = "m~S~2~N~/s~S~2~N~"   ;this can be used as right string 
 ;var_name = (/"season_vari"/) ;this is the var_name in data file
@@ -21,15 +21,16 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 0;1;1
-nv = 2
+g  = 9.8 ;m/(s*s)
+nl = 1;1;1
+nv = 4
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
 ;fig_title  = "Seasonly " + draw_var(nv) + " Variance in " ;+season
-fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
+fig_title  = "Climate Seasonal " + draw_var(nv-1) + " in " ;+season
     ;case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
     case   = (/"AMIP_CTRL","CTRL-NUDG24h","CTRL-NUDG6h"/)
 fig_out    ="pdf";"x11"
@@ -47,10 +48,11 @@ nmonth = dimsizes(months)
 nlat   = getfilevardimsizes(f,"lat")
 nlon   = getfilevardimsizes(f,"lon")
 nlev   = getfilevardimsizes(f,"lev")
+var_q  = new((/ncase  ,nmonth,nlat,nlon/),float)
 var_u  = new((/ncase  ,nmonth,nlat,nlon/),float)
 var_v  = new((/ncase  ,nmonth,nlat,nlon/),float)
-vari   = new((/ncase  ,nmonth,nlat,nlon/),float)
-prob = new((/ncase-1,nmonth,nlat,nlon/),float)
+;vari   = new((/ncase  ,nmonth,nlat,nlon/),float)
+;prob = new((/ncase-1  ,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/3/),graphic)
@@ -82,7 +84,7 @@ nv = 0
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
     var_u(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
+;    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
 end do
 
 nv = 1
@@ -91,23 +93,30 @@ do nf = 0 ,ncase-1, 1
     var_v(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
-;var      = var/1000      ;convert unit from m to km
-;var      = var*1000      ;convert unit from kg/kg to g/kg
-;var      = var - 273.15 ;convert unit from K to c
-;copy_VarMeta(vari,var)
+nv = 2
+do nf = 0 ,ncase-1, 1
+    f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
+    var_q(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
+end do
+var_q = var_q*1000      ;convert unit from kg/kg to g/kg
+;copy_VarMeta(var_u,var_q)
+var_u = var_u*var_q/g
+var_v = var_v*var_q/g
+
 ;var_u_temp = where(var_u(0,:,:,:).eq.0,var_u@_FillValue,var_u(0,:,:,:))
 ;var_v_temp = where(var_v(0,:,:,:).eq.0,var_v@_FillValue,var_v(0,:,:,:))
 do nf = 0 ,ncase-2,1
 ;prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
-prob(nf,:,:,:) = ttest(var_u(0,:,:,:),vari(0,:,:,:),27,var_u(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+;prob(nf,:,:,:) = ttest(var_u(0,:,:,:),vari(0,:,:,:),27,var_u(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
 var_u(nf+1,:,:,:)= (var_u(0,:,:,:) - var_u(nf+1,:,:,:));/abs(var_u_temp)*100 ;get the difference between CTRL and NUDG
 var_v(nf+1,:,:,:)= (var_v(0,:,:,:) - var_v(nf+1,:,:,:));/abs(var_v_temp)*100 ;get the difference between CTRL and NUDG
 end do
 
-prob = mask(prob,prob.lt.siglvl,True)
-copy_VarMeta(var_u(0,0,:,:),prob(0,0,:,:))
+;prob = mask(prob,prob.lt.siglvl,True)
+;copy_VarMeta(var_u(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var_u)
-printVarSummary(prob)
+printVarSummary(var_q)
+;printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -158,22 +167,22 @@ printVarSummary(prob)
     ;  res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
-    res@gsnScalarContour = True
-    res@cnFillOn         = True
-    res@cnLinesOn        = False ;True
-    res@cnLineLabelsOn   = False
-    res@cnInfoLabelOn    = False
-    res@cnMonoFillPattern= True;False
-    res@cnFillPattern    = 0
-    res@cnMonoFillColor  = True
-    res@cnFillColor      = "darkslategray"
-    res@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res@gsnScalarContour = True
+    ;res@cnFillOn         = True
+    ;res@cnLinesOn        = False ;True
+    ;res@cnLineLabelsOn   = False
+    ;res@cnInfoLabelOn    = False
+    ;res@cnMonoFillPattern= True;False
+    ;res@cnFillPattern    = 0
+    ;res@cnMonoFillColor  = True
+    ;res@cnFillColor      = "darkslategray"
+    ;res@lbLabelBarOn     = False;True   ; turn off the label bar
    
 ;----------set the attribute of the vector-------------------
      res@vcGlyphStyle               = "CurlyVector"
      res@vcVectorDrawOrder          = "PostDraw"
      res@vcLineArrowThicknessF      = vc_thick
-     res@vcMinDistanceF             = 0.015
+     res@vcMinDistanceF             = 0.02
      ;res@vcRefMagnitudeF            = 30.0             ; define vector ref mag
      res@vcRefLengthF               = 0.05           ; define length of vec ref
      res@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -244,22 +253,23 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/15,5,5/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/30,5,5/), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/50,5,5/)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/10,3 ,3 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/3 ,2 ,2 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/50,50,5 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
         if(nc.gt.0) then
-            res@gsnScalarContour = True
+            ;res@gsnScalarContour =False
             res@vcRefMagnitudeF       = vcref(nl,nc)                ; define vector ref mag
-            res@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+            res@vcRefAnnoString2      = vcref(nl,nc)+"g/(s*Pa*m)"
             res@gsnRightString  = "siglvl: " + siglvl
-            plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob(nc-1,nm,:,:),res)
+            ;plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob(nc-1,nm,:,:),res)
+            plot(nc)     = gsn_csm_vector_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),res)
         else
-            res@gsnScalarContour = False
+            ;res@gsnScalarContour = False
             res@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
-            res@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+            res@vcRefAnnoString2      = vcref(nl,nc)+"g/(s*Pa*m)"
             res@gsnRightString   = unit + " " + lev(nl) + "hPa" ;draw_var(nv) 
             plot(nc)     = gsn_csm_vector_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),res)
         end if

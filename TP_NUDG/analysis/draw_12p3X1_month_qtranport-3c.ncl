@@ -12,7 +12,7 @@
 ;         minlevel, max level and level spacing.
 ;*********************************************************************************
 begin
-draw_var = (/"U","V","Q","Moisture Transpot","qtranport"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Q","U","V","Moisture Transpot","qtranport"/)  ;this is the variable used to draw, can used as center string
 unit     = "g/(s*hPa*m)" ;"K"   ;this can be used as right string 
 ;unit     = "m~S~2~N~/s~S~2~N~"   ;this can be used as right string 
 ;var_name = (/"season_vari"/) ;this is the var_name in data file
@@ -21,8 +21,7 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-g  = 9.8 ;m/(s*s)
-nl = 1;1;1
+nl = 0;1;1
 nv = 4
 
 ;the path of the file
@@ -51,8 +50,8 @@ nlev   = getfilevardimsizes(f,"lev")
 var_q  = new((/ncase  ,nmonth,nlat,nlon/),float)
 var_u  = new((/ncase  ,nmonth,nlat,nlon/),float)
 var_v  = new((/ncase  ,nmonth,nlat,nlon/),float)
-;vari   = new((/ncase  ,nmonth,nlat,nlon/),float)
-;prob = new((/ncase-1  ,nmonth,nlat,nlon/),float)
+vari   = new((/ncase  ,nmonth,nlat,nlon/),float)
+prob = new((/ncase-1,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/3/),graphic)
@@ -84,10 +83,13 @@ nv = 0
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
     var_u(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
-;    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
 end do
 
 nv = 1
+do nf = 0 ,ncase-1, 1
+    f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
+    f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
     var_v(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
@@ -259,17 +261,6 @@ printVarSummary(var_q)
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
-        if(nc.gt.0) then
-            ;res@gsnScalarContour =False
-            res@vcRefMagnitudeF       = vcref(nl,nc)                ; define vector ref mag
-            res@vcRefAnnoString2      = vcref(nl,nc)+"g/(s*Pa*m)"
-            res@gsnRightString  = "siglvl: " + siglvl
-            ;plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob(nc-1,nm,:,:),res)
-            plot(nc)     = gsn_csm_vector_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),res)
-        else
-            ;res@gsnScalarContour = False
-            res@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
-            res@vcRefAnnoString2      = vcref(nl,nc)+"g/(s*Pa*m)"
             res@gsnRightString   = unit + " " + lev(nl) + "hPa" ;draw_var(nv) 
             plot(nc)     = gsn_csm_vector_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),res)
         end if

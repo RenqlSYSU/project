@@ -21,7 +21,7 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 0;1;1
+nl = 2;1;1
 nv = 2
 
 ;the path of the file
@@ -166,7 +166,7 @@ printVarSummary(prob)
     res@cnMonoFillPattern= True;False
     res@cnFillPattern    = 0
     res@cnMonoFillColor  = True
-    res@cnFillColor      = "darkslategray"
+    res@cnFillColor      = "gray"
     res@lbLabelBarOn     = False;True   ; turn off the label bar
    
 ;----------set the attribute of the vector-------------------
@@ -244,9 +244,9 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/15,5,5/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/30,5,5/), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/50,5,5/)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/15,3,3/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/30,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/50,3,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)

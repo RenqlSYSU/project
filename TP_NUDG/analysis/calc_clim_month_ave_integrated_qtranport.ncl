@@ -80,9 +80,9 @@ var_ps = var_ps/100 ;convert unit from Pa to hPa
 
 var_u = var_u*var_q/g
 var_v = var_v*var_q/g
-var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 3) ;calculate the divergence
+var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 2) ;calculate the divergence
 
-do nvc = 0, dimsizes(calc_name),1
+do nvc = 2, dimsizes(calc_name)-1,1
 if (nvc.eq.0) then
     var = wgt_vert_avg_beta ( var_u&level, var_u, var_ps, 0, 0 )
     ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum

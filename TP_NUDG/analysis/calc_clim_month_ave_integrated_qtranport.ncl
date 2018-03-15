@@ -80,7 +80,7 @@ var_ps = var_ps/100 ;convert unit from Pa to hPa
 
 var_u = var_u*var_q/g
 var_v = var_v*var_q/g
-var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 2) ;calculate the divergence
+var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 0) ;calculate the divergence
 
 do nvc = 2, dimsizes(calc_name)-1,1
 if (nvc.eq.0) then

@@ -11,20 +11,20 @@ begin
 ;path       = "/users/yangsong3/renql/project/TP_NUDG"
 path       = "/home/ys17-19/renql/project/2017downscaling" 
 filename   = path + "/correlation/mdata/" + "corr_summer_rain_and_vertical-shum-cfd.nc"
-fig_name   = path + "/correlation/fig/" + "1p_ruyuan_rain_corr_with_divg_flux-cfd-summer" ;-delay" 
+fig_name   = path + "/correlation/fig/" + "1p_ruyuan_rain_corr_with_divg_flux-cfd-summer-delay" 
 ;fig_name   = path + "/correlation/fig/" + "1p_ruyuan_rain_corr_with_flux-summer-delay" 
-;fig_title  = "Delay Correlation with Moisture Flux Divg in Summer"
+fig_title  = "Delay Correlation with Moisture Flux Divg in Summer"
 ;fig_title  = "Delay Correlation with Moisture Flux in Summer"
-fig_title  = "Correlation with Moisture Flux Divg in Summer"
+;fig_title  = "Correlation with Moisture Flux Divg in Summer"
 ;fig_title  = "Correlation with Moisture Flux in Summer"
 fig_out    = "pdf";"x11"
 lefttitle  = "moisture flux divg"
 ;lefttitle  = "moisture flux"
-unit       = "g/(s*m*m)"
-;unit       = "g/(m*m)"
+;unit       = "g/(s*m*m)"
+unit       = "g/(m*m)"
 ;var_name   = (/"corr_flux","prob_flux"/)
-;var_name   = (/"corr_flux1day","prob_flux1day"/)
-var_name   = (/"corr_divg_flux","prob_divg_flux"/)
+var_name   = (/"corr_flux1day","prob_flux1day"/)
+;var_name   = (/"corr_divg_flux","prob_divg_flux"/)
 ;var_name   = (/"corr_divg_flux1day","prob_divg_flux1day"/)
 nsample    = 8519
 
@@ -99,6 +99,9 @@ printVarSummary(prob)
     ;res@mpFillDrawOrder = "PreDraw"
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
+
+;----------------------------------------------------------------------
+;set the form of the coordinate
 
 ;----------------------------------------------------------------------
 ;set the form of the coordinate
@@ -183,9 +186,6 @@ printVarSummary(prob)
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
-;-----------------------------------------------------------------------
-   ; res@tiMainString         = fig_title + "in" + months(m)
-    ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = "siglvl: " + siglvl2
     res@gsnRightStringFontHeightF = subtitle_font

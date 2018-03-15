@@ -12,21 +12,21 @@
 ;         minlevel, max level and level spacing.
 ;*********************************************************************************
 begin
-draw_var = (/"T","OMEGA","Q","Z3"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"~S~o~N~C","Pa/s","g/kg","km"/) ;"K"   ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+draw_var = (/"U","V","T","OMEGA","Q","Z3"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"m~S~2~N~/s~S~2~N~","m~S~2~N~/s~S~2~N~","K~S~2~N~","Pa~S~2~N~/s~S~2~N~","kg~S~2~N~/kg~S~2~N~","m~S~2~N~"/)   ;this can be used as right string 
+var_name = (/"season_vari"/) ;this is the var_name in data file
+;var_name = (/"month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
 nl = 0;1
-nv = 1
+nv = 3;0
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
-fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
+fig_title  = "Seasonal " + draw_var(nv) + " Variance in " ;+season
     case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
 fig_out    ="pdf";"x11"
 
@@ -75,43 +75,13 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
     var(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
 end do
 
-if(nv.eq.0) then
-    var      = var - 273.15 ;convert unit from K to c
-    var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
-    do nf = 0 ,ncase-2,1
-        prob(nf,:,:,:) = ttest(var(0,:,:,:)+273.15,vari(0,:,:,:),27,var(nf+1,:,:,:)+273.15,vari(nf+1,:,:,:),27,True,False)
-        var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
-    end do
-end if
-
-if(nv.eq.1) then
-    var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
-    do nf = 0 ,ncase-2,1
-        prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-        var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
-    end do
-end if
-
-if(nv.eq.2) then
-    var      = var*1000      ;convert unit from kg/kg to g/kg
-    var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
-    do nf = 0 ,ncase-2,1
-        prob(nf,:,:,:) = ttest(var(0,:,:,:)/1000,vari(0,:,:,:),27,var(nf+1,:,:,:)/1000,vari(nf+1,:,:,:),27,True,False)
-        var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
-    end do
-end if
-
-if(nv.eq.3) then
-    var      = var/1000      ;convert unit from m to km
-    var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
-    do nf = 0 ,ncase-2,1
-        prob(nf,:,:,:) = ttest(var(0,:,:,:)*1000,vari(0,:,:,:),27,var(nf+1,:,:,:)*1000,vari(nf+1,:,:,:),27,True,False)
-        var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
-    end do
-end if
+var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
+do nf = 0 ,ncase-2,1
+    prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
+    var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
+end do
 
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
@@ -253,34 +223,28 @@ print(var(1,1,3,6))
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then
-    minlvl = (/(/10  ,-9  ,-9  /),(/-18 ,-9  ,-9  /),(/ -64,-4.5,-4.5/)/)  ;850,500,200hpa
-    maxlvl = (/(/28  , 9  , 9  /),(/  0 , 9  , 9  /),(/ -48, 4.5, 4.5/)/)
-    spacig = (/(/ 1  , 1  , 1  /),(/  1 , 1  , 1  /),(/   1, 0.5, 0.5/)/) 
+    minlvl = (/(/ 0  ,-90 ,-90 /),(/ 0   ,-90 ,-90 /),(/  0 ,-90 ,-90 /)/)  ;850,500,200hpa
+    maxlvl = (/(/14.4, 90 , 90 /),(/12.6 , 90 , 90 /),(/ 36 , 90 , 90 /)/)
+    spacig = (/(/ 0.8, 10 , 10 /),(/ 0.7 , 10 , 10 /),(/  2 , 10 , 10 /)/) 
 end if
 
 if(nv.eq.1) then
-    minlvl = (/(/-0.09,-90 ,-90 /),(/-0.09,-90 ,-90 /),(/-0.09,-90 ,-90 /)/)  ;850,500,200hpa
-    maxlvl = (/(/ 0.09, 90 , 90 /),(/ 0.09, 90 , 90 /),(/ 0.09, 90 , 90 /)/)
-    spacig = (/(/ 0.01, 10 , 10 /),(/ 0.01, 10 , 10 /),(/ 0.01, 10 , 10 /)/) 
-end if
-
-if(nv.eq.2) then
-    minlvl = (/(/ 0  ,-18 ,-18 /),(/ 0  ,-18 ,-18 /),(/ 0  ,-18 ,-18 /)/)  ;850,500,200hpa
-    maxlvl = (/(/18  ,18  , 18 /),(/4.5 ,18  , 18 /),(/0.18,18  , 18 /)/)
-    spacig = (/(/ 1  , 2  ,  2 /),(/0.5 , 2  ,  2 /),(/0.01, 2  , 2  /)/) 
+    minlvl = (/(/ 0  ,-90 ,-90 /),(/ 0   ,-90 ,-90 /),(/  0 ,-90 ,-90 /)/)  ;850,500,200hpa
+    maxlvl = (/(/ 4.5, 90 , 90 /),(/ 7.2 , 90 , 90 /),(/ 18 , 90 , 90 /)/)
+    spacig = (/(/0.25, 10 , 10 /),(/ 0.4 , 10 , 10 /),(/  1 , 10 , 10 /)/) 
 end if
 
 if(nv.eq.3) then
-    minlvl = (/(/1.25  ,-0.9 ,-0.9 /),(/5.0  ,-0.36,-0.36/),(/10.8,-0.36,-0.36/)/)  ;850,500,200hpa
-    maxlvl = (/(/1.70  , 0.9 , 0.9 /),(/5.9  ,0.36 ,0.36 /),(/12.6,0.36 ,0.36 /)/)
-    spacig = (/(/0.025 , 0.1 , 0.1 /),(/0.05 ,0.04 ,0.04 /),(/0.1 ,0.04 ,0.04 /)/) 
+    minlvl = (/(/ 0  ,-90 ,-90 /),(/ 0   ,-90 ,-90 /),(/  0 ,-90 ,-90 /)/)  ;850,500,200hpa
+    maxlvl = (/(/ 4.5, 90 , 90 /),(/ 7.2 , 90 , 90 /),(/ 18 , 90 , 90 /)/)
+    spacig = (/(/0.25, 10 , 10 /),(/ 0.4 , 10 , 10 /),(/  1 , 10 , 10 /)/) 
 end if
 
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
         res@gsnSpreadColors       = False              ; turn of the full color map
-        if(nv.eq.5) then
+        if(nv.eq.6) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
         else
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

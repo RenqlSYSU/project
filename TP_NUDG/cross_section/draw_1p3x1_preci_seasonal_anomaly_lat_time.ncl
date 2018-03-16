@@ -13,7 +13,7 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly(ctrl)_lat_time"
+fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly_lat_time107-122"
 fig_title  = "Anomalous rainfall in JJA"
     case   = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
 fig_out    ="pdf";"x11"

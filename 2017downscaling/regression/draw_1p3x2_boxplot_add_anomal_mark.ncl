@@ -13,12 +13,11 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path      = "/home/ys17-19/renql/project/2017downscaling"
 filename  = path + "/regression/mdata/" + "area_avrg_ts_winter.nc"
-fig_name  = path + "/regression/fig/" + "1p3x2_boxplot_winter_delay_flux_divg"
+fig_name  = path + "/regression/fig/" + "1p3x2_boxplot_winter_addmark"
 fig_title  = "Relationship between rainfall and meteorological elements"
 fig_out    = "pdf";"x11"
 var_name   = "ts"
 draw_var   = (/"700omega","850divg","300divg","850vort","flux"   ,"delay flux-divg"/) ;the first one of ts is rain
-;draw_var   = (/"700omega","850divg","300divg","850vort","flux"   ,"flux-divg"/) ;the first one of ts is rain
 magn       = (/    100   ,1000000  ,1000000  ,1000000  ,   1     , 10000     /)
 MAG    = "10~S~" + (/"-2","-6"     ,"-6"     ,"-6"     ,"0"      ,"-4"       /) + "~N~"
 unit       = (/  "Pa/s"  ,  "/s"   ,  "/s"   ,  "/s"   ,"g/(m*m)","g/(s*m*m)"/) ;the unit of rain is mm
@@ -59,15 +58,15 @@ do nr = 0, nrain-1, 1
         select_time = select_time -1
         select_time = where(select_time.lt.0,0,select_time)
         end if
-        
+
         var := ts(nv+1,select_time)
         qsort(var)
 
         y(nv,nr,1) = (var(x25)-var(x25-1))*xx25+var(x25-1)
         y(nv,nr,2) = dim_median(var)
         y(nv,nr,3) = (var(x75)-var(x75-1))*xx75+var(x75-1)
-        y(nv,nr,0) = min(var)
-        y(nv,nr,4) = max(var)
+        y(nv,nr,0) = y(nv,nr,3)-1.5*(y(nv,nr,3)-y(nv,nr,1))
+        y(nv,nr,4) = y(nv,nr,1)+1.5*(y(nv,nr,3)-y(nv,nr,1))
     end do
 
 end do
@@ -100,6 +99,16 @@ printVarSummary(y)
     res@tiXAxisFontColor    = "black"
     res@tmXBLabels  = lvl_name
 
+;--------set the attribute of box plot--------------
+;    boxres              = True
+;    boxres@boxWidth     = 
+
+;--------set the attribute of box plot--------------
+     mres               = True                     ; marker mods desired
+     mres@gsMarkerIndex = 3                        ; polymarker style
+     mres@gsMarkerSizeF = 5.                      ; polymarker size
+     mres@gsMarkerColor = "red"                    ; polymarker color
+
 ;---------set the attribute of the panel------------
     resp  = True    
     resp@gsnMaximize   = True
@@ -111,6 +120,18 @@ printVarSummary(y)
 do nv = 0, nvar-1, 1
     res@tiMainString     = draw_var(nv) + " ( " + MAG(nv) + " " + unit(nv) + " )"
     plot(nv) = boxplot(wks,x,y(nv,:,:),False,res,False)
+
+    do nr = 0, nrain-1, 1
+        select_time := ind(ts(0,:).gt.rain_lvl(nr).and.ts(0,:).le.rain_lvl(nr+1))
+        ntime    = dimsizes(select_time)
+        var     := ts(nv+1,select_time)
+        anomal  := ind(var.gt.y(nv,nr,4).or.var.lt.y(nv,nr,0))
+        nanomal  = dimsizes(anomal)
+        print(draw_var(nv) + "  " + lvl_name(nr) + ntime + "   " +  nanomal)
+        xanomal := new((/nanomal/),integer)
+        xanomal  = nr+1
+        mark(nv,nr) = gsn_add_polymarker(wks,plot(nv),xanomal,var(anomal),mres)
+    end do
 end do
     gsn_panel(wks,plot,(/2,3/),resp)
 end

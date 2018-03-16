@@ -13,7 +13,7 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly(ctrl)_lat_time"
+fig_name   = path + "/cross_section/fig/1p3X1_preci_daily_anomaly_lat_time"
 fig_title  = "Anomalous rainfall in JJA"
     case   = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
 fig_out    ="pdf";"x11"
@@ -24,7 +24,7 @@ draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center s
 lats = 20 ;-20
 latn = 45  ;60
 lonl = 107  ;20
-lonr = 122;130 ;220
+lonr = 130 ;220
 ;lev  = (/850,500,200/)
 
 ;define the thickness and height of the title,tick and label
@@ -39,16 +39,21 @@ lonr = 122;130 ;220
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
-vars:= f->$var_name(0)$(:,{lats:latn},{lonl:lonr})
-time        = cd_calendar(f->time,0)
+files1     = systemfunc("ls " + filein(0) + "*" + var_name(0) + ".nc")
+f          = addfiles(files1,"r")
+ListSetType(f,"cat")
+time        = cd_calendar(f[:]->time,0)
 select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
+ntime       = dimsizes(select_time)
+print(ntime)
+
+vars  := f[:]->$var_name(0)$(0,{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var   = new((/ncase,nlat,nyear/),float)
+var   = new((/ncase,nlat,ntime/),float)
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
@@ -56,24 +61,24 @@ plot  = new((/ncase/),graphic)
 ;--------------------------------------------------------------
 var = 0
 do nc = 0 , ncase-1,1
-do nt = 0,nyear-1,1
     do nv = 0,nvar-1,1 
-        f     = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        temp := f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
+        files1     = systemfunc("ls " + filein(nc) + "*" + var_name(nv) + ".nc")
+        f          = addfiles(files1,"r")
+        ListSetType(f,"cat")
+        temp := f[:]->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
         temp := dim_avg_n_Wrap(temp,2)
-        var(nc,:,nt) = var(nc,:,nt) + dim_avg_n_Wrap(temp,0)
+        var(nc,:,:) = var(nc,:,:) + temp({lat|:},{time|:})
     end do  ;the loop of PRECC and PRECL
-end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
 var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 
-ave = dim_avg_n_Wrap(var(0,:,:),1)
-do nc = 0 , ncase-1,1
-    do nt = 0, nyear-1, 1
-        var(nc,:,nt)  = var(nc,:,nt) - ave
-    end do
-end do   ;the loop of 3 cases 
-;var  = dim_rmvmean_n_Wrap(var,2)
+;ave = dim_avg_n_Wrap(var(0,:,:),1)
+;do nc = 0 , ncase-1,1
+;    do nt = 0, ntime-1, 1
+;        var(nc,:,nt)  = var(nc,:,nt) - ave
+;    end do
+;end do   ;the loop of 3 cases 
+var  = dim_rmvmean_n_Wrap(var,2)
 
 copy_VarMeta(temp(0,:),var(0,:,0))
 printVarSummary(var)
@@ -93,16 +98,16 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    ;res@vpHeightF        = 0.25
-    ;res@vpWidthF         = 0.8
+    res@vpHeightF        = 0.25
+    res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
     res@tiXAxisString   = "Year"
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,26,3)
-    res@tmXBLabels      = ispan(1979,2005,3)
+    res@tmXBValues      = ispan(0,ntime-1,92)
+    res@tmXBLabels      = ispan(1979,2005,1)
 
     res@tmYLMode        = "Manual"
     res@tmYLTickStartF  = 20
@@ -161,7 +166,7 @@ printVarSummary(var)
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape";"portrait"
+    resp@gsnPaperOrientation = "portrait";"landscape";"portrait"
     resp@gsnPanelLabelBar = True
     resp@lbOrientation    = "Horizontal"
     resp@lbLabelStride    = 2
@@ -179,8 +184,8 @@ printVarSummary(var)
         print(min(var(nc,:,:)))
     end do 
 
-    resp@txString      = fig_title + " (" + lonr + " - " + lonr + "E)"
-    gsn_panel(wks,plot,(/1,3/),resp)
+    resp@txString      = fig_title  
+    gsn_panel(wks,plot,(/3,1/),resp)
 end
 
 

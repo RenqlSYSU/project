@@ -12,6 +12,8 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fileout1 = path + "/cross_section/mdata/EastChina_JJApreci_standard_ts.nc"
+fileout2 = path + "/cross_section/mdata/EastChina_JJApreci_standard_ts.dat"
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
   case   = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
@@ -61,6 +63,47 @@ do nc = 0, ncase-1,1
         print(case(nc) + " " +area(na) + " positive years: " + years(posi))
     end do
 end do
-end
+;====================================================================
+;save the data
+;=======================================================================
+system("rm -f " + fileout2)
+do nc = 0, ncase-1,1
+    do na = 0, narea-1,1
+        fbindirwrite(fileout2,var(nc,na,:))
+    end do
+end do
 
+system("rm -f " + fileout1)
+ncdf = addfile(fileout1,"c")
+setfileoption(ncdf,"DefineMode",True)
+
+;Set All field attribution
+fileAtt =  True
+fileAtt@creation_date = systemfunc("date")
+fileAtt@discription   = "The JJA average daily rainfall standard time series over North China,Central East China,South China"
+fileattdef(ncdf,fileAtt)  
+
+;Define all Coordinate
+dimNames = (/"case","area","year"/)
+dimSizes = (/ncase ,narea , nyear/)
+dimUnlim = (/False , False, False/)
+filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
+
+;Define var_names, type(string) and dims_names(string)
+filevardef(ncdf,"case","integer",(/"case"/))
+filevardef(ncdf,"area","integer",(/"area"/))
+filevardef(ncdf,"year","integer",(/"year"/))
+filevardef(ncdf,"standard_ts",typeof(var),(/"case","area","year"/))
+
+;Define the attribute of the variables
+var@long_name = "the 27 years normalized time series of three areas JJA preci"
+var@units     = "mm/day"
+filevarattdef(ncdf,"standard_ts",var)
+
+ncdf->case   = (/1,2,3/)  ;the two cases are (/"CTRL","NUDG"/)
+ncdf->area   = (/1,2,3/)  ;the two cases are (/"CTRL","NUDG"/)
+ncdf->year   = (/years/)
+ncdf->standard_ts = (/var/)
+end do
+end
 

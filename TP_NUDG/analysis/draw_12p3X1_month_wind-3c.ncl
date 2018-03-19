@@ -21,7 +21,7 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 2;1;1
+nl = 1;1
 nv = 2
 
 ;the path of the file
@@ -91,12 +91,6 @@ do nf = 0 ,ncase-1, 1
     var_v(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
-;var      = var/1000      ;convert unit from m to km
-;var      = var*1000      ;convert unit from kg/kg to g/kg
-;var      = var - 273.15 ;convert unit from K to c
-;copy_VarMeta(vari,var)
-;var_u_temp = where(var_u(0,:,:,:).eq.0,var_u@_FillValue,var_u(0,:,:,:))
-;var_v_temp = where(var_v(0,:,:,:).eq.0,var_v@_FillValue,var_v(0,:,:,:))
 do nf = 0 ,ncase-2,1
 ;prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
 prob(nf,:,:,:) = ttest(var_u(0,:,:,:),vari(0,:,:,:),27,var_u(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
@@ -173,7 +167,7 @@ printVarSummary(prob)
      res@vcGlyphStyle               = "CurlyVector"
      res@vcVectorDrawOrder          = "PostDraw"
      res@vcLineArrowThicknessF      = vc_thick
-     res@vcMinDistanceF             = 0.015
+     res@vcMinDistanceF             = 0.02
      ;res@vcRefMagnitudeF            = 30.0             ; define vector ref mag
      res@vcRefLengthF               = 0.05           ; define length of vec ref
      res@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -244,9 +238,9 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/15,3,3/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/30,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/50,3,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/10,1,1/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/10,2,2/), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/25,3,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)

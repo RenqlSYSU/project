@@ -19,8 +19,8 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 0;1
-nv = 1
+nl = 2;0;1
+nv = 3
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -105,7 +105,7 @@ if(nv.eq.2) then
 end if
 
 if(nv.eq.3) then
-    var      = var/1000      ;convert unit from m to km
+;    var      = var/1000      ;convert unit from m to km
     var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
     do nf = 0 ,ncase-2,1
         prob(nf,:,:,:) = ttest(var(0,:,:,:)*1000,vari(0,:,:,:),27,var(nf+1,:,:,:)*1000,vari(nf+1,:,:,:),27,True,False)

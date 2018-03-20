@@ -13,7 +13,7 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly-ctrl_lat_time"
+fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly-ctrl3_lat_time"
 fig_title  = "Anomalous(CTRL) rainfall in JJA"
     case   = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
 fig_out    ="pdf";"x11"
@@ -68,12 +68,15 @@ end do   ;the loop of 3 cases
 var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 
 ave = dim_avg_n_Wrap(var(0,:,:),1)
-do nc = 0 , ncase-1,1
-    do nt = 0, nyear-1, 1
-        var(nc,:,nt)  = var(nc,:,nt) - ave
+do nt = 0, nyear-1, 1
+    do nc = 1 , ncase-1,1
+        var(nc,:,nt)  = var(0,:,nt) - var(nc,:,nt)
+    end do
+    var(0,:,nt) = var(0,:,nt) - ave
+    do nc = 1 , ncase-1,1
+        var(nc,:,nt)  = var(0,:,nt) - var(nc,:,nt)
     end do
 end do   ;the loop of 3 cases 
-;var  = dim_rmvmean_n_Wrap(var,2)
 
 copy_VarMeta(temp(0,:),var(0,:,0))
 printVarSummary(var)

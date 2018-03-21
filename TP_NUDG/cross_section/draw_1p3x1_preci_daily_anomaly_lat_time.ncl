@@ -53,7 +53,8 @@ nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var   = new((/ncase,nlat,ntime/),float)
+var_d = new((/ncase,nlat,ntime/),float)
+var   = new((/ncase,nlat,18*27/),float)   ;define five days is a week,and the last week is seven days
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
@@ -67,11 +68,20 @@ do nc = 0 , ncase-1,1
         ListSetType(f,"cat")
         temp := f[:]->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
         temp := dim_avg_n_Wrap(temp,2)
-        var(nc,:,:) = var(nc,:,:) + temp({lat|:},{time|:})
+        var_d(nc,:,:) = var_d(nc,:,:) + temp({lat|:},{time|:})
     end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 3 cases 
-var  = var*1000*3600*24  ;convert unit from m/s to mm/day
+var_d  = var_d*1000*3600*24  ;convert unit from m/s to mm/day
 
+do nw = 0, 485,1
+    nd_s = 5*nw
+    if((nw+1)/18) then
+        nd_e = 5*nw + 6
+    else
+        nd_e = 5*nw + 4
+    end if
+    var = dim_avg_n_Wrap(var_d(:,:,nd_s:nd_e),2)
+end do
 ;ave = dim_avg_n_Wrap(var(0,:,:),1)
 ;do nc = 0 , ncase-1,1
 ;    do nt = 0, ntime-1, 1

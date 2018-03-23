@@ -1,0 +1,2375 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	AMIP_C5PM_TP_NUDG.cam.h0.1995-01
+path:	AMIP_C5PM_TP_NUDG.cam.h0.1995-01.nc
+Number of Attributes:10
+    Conventions	: 	CF-1.0
+    source	: 	CAM
+    case	: 	AMIP_C5PM_TP_NUDG
+    title	: 	UNSET
+    logname	: 	yangsong3
+    host	: 	login-0-0.local
+    Version	: 	$Name$
+    revision_Id	: 	$Id$
+    initial_file	: 	b40_20th_1d_b08c5cn_139jp.cam.i.1979-01-01-00000.nc
+    topography_file	: 	/users/yangsong3/CESM/input/atm/cam/topo/USGS-gtopo30_0.9x1.25_remap_c051027.nc
+
+dimensions:
+    lat	= 192
+    lon	= 288
+    slat	= 191
+    slon	= 288
+    time	= 1 // unlimited
+    nbnd	= 2
+    chars	= 8
+    lev	= 30
+    ilev	= 31
+    ncl_scalar	= 1
+
+chunk dimensions:
+    lat	= 192
+    lon	= 288
+    slat	= 191
+    slon	= 288
+    time	= 1
+    nbnd	= 2
+    chars	= 8
+    lev	= 15
+
+variables:
+    Variable: lev
+    Type: double
+    Total Size: 30 values
+                240 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 30 <lev> ]
+    Chunking Info:	[ 30 <lev> ]
+    Coordinates:
+                lev: [3.643466..992.5561]
+        Number of Attributes:        5
+            long_name	: 	hybrid level at midpoints (1000*(A+B))
+            units	: 	level
+            positive	: 	down
+            standard_name	: 	atmosphere_hybrid_sigma_pressure_coordinate
+            formula_terms	: 	a: hyam b: hybm p0: P0 ps: PS
+
+    Variable: hyam
+    Type: double
+    Total Size: 30 values
+                240 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 30 <lev> ]
+    Chunking Info:	[ 30 <lev> ]
+    Coordinates:
+                lev: [3.643466..992.5561]
+        Number of Attributes:        1
+            long_name	: 	hybrid A coefficient at layer midpoints
+
+    Variable: hybm
+    Type: double
+    Total Size: 30 values
+                240 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 30 <lev> ]
+    Chunking Info:	[ 30 <lev> ]
+    Coordinates:
+                lev: [3.643466..992.5561]
+        Number of Attributes:        1
+            long_name	: 	hybrid B coefficient at layer midpoints
+
+    Variable: ilev
+    Type: double
+    Total Size: 31 values
+                248 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 31 <ilev> ]
+    Chunking Info:	[ 31 <ilev> ]
+    Coordinates:
+                ilev: [2.255239..1000]
+        Number of Attributes:        5
+            long_name	: 	hybrid level at interfaces (1000*(A+B))
+            units	: 	level
+            positive	: 	down
+            standard_name	: 	atmosphere_hybrid_sigma_pressure_coordinate
+            formula_terms	: 	a: hyai b: hybi p0: P0 ps: PS
+
+    Variable: hyai
+    Type: double
+    Total Size: 31 values
+                248 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 31 <ilev> ]
+    Chunking Info:	[ 31 <ilev> ]
+    Coordinates:
+                ilev: [2.255239..1000]
+        Number of Attributes:        1
+            long_name	: 	hybrid A coefficient at layer interfaces
+
+    Variable: hybi
+    Type: double
+    Total Size: 31 values
+                248 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 31 <ilev> ]
+    Chunking Info:	[ 31 <ilev> ]
+    Coordinates:
+                ilev: [2.255239..1000]
+        Number of Attributes:        1
+            long_name	: 	hybrid B coefficient at layer interfaces
+
+    Variable: P0
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        2
+            long_name	: 	reference pressure
+            units	: 	Pa
+
+    Variable: time
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        4
+            long_name	: 	time
+            units	: 	days since 1979-01-01 00:00:00
+            calendar	: 	noleap
+            bounds	: 	time_bnds
+
+    Variable: date
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 1048576 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	current date (YYYYMMDD)
+
+    Variable: datesec
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 1048576 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	current seconds of current date
+
+    Variable: lat
+    Type: double
+    Total Size: 192 values
+                1536 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 192 <lat> ]
+    Chunking Info:	[ 192 <lat> ]
+    Coordinates:
+                lat: [-90..90]
+        Number of Attributes:        2
+            long_name	: 	latitude
+            units	: 	degrees_north
+
+    Variable: lon
+    Type: double
+    Total Size: 288 values
+                2304 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 288 <lon> ]
+    Chunking Info:	[ 288 <lon> ]
+    Coordinates:
+                lon: [ 0..358.75]
+        Number of Attributes:        2
+            long_name	: 	longitude
+            units	: 	degrees_east
+
+    Variable: slat
+    Type: double
+    Total Size: 191 values
+                1528 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 191 <slat> ]
+    Chunking Info:	[ 191 <slat> ]
+    Coordinates:
+                slat: [-89.52879..89.52879]
+        Number of Attributes:        2
+            long_name	: 	staggered latitude
+            units	: 	degrees_north
+
+    Variable: slon
+    Type: double
+    Total Size: 288 values
+                2304 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 288 <slon> ]
+    Chunking Info:	[ 288 <slon> ]
+    Coordinates:
+                slon: [-0.625..358.125]
+        Number of Attributes:        2
+            long_name	: 	staggered longitude
+            units	: 	degrees_east
+
+    Variable: w_stag
+    Type: double
+    Total Size: 191 values
+                1528 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 191 <slat> ]
+    Chunking Info:	[ 191 <slat> ]
+    Coordinates:
+                slat: [-89.52879..89.52879]
+        Number of Attributes:        1
+            long_name	: 	staggered latitude weights
+
+    Variable: time_bnds
+    Type: double
+    Total Size: 2 values
+                16 bytes
+    Number of Dimensions: 2
+    Dimensions and sizes:	[ 1 <time | unlimited> x 2 <nbnd> ]
+    Chunking Info:	[ 1 <time> x 2 <nbnd> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	time interval endpoints
+
+    Variable: date_written
+    Type: character
+    Total Size: 8 values
+                8 bytes
+    Number of Dimensions: 2
+    Dimensions and sizes:	[ 1 <time | unlimited> x 8 <chars> ]
+    Chunking Info:	[ 1 <time> x 8 <chars> ]
+    Coordinates:
+                time: [5871..5871]
+
+    Variable: time_written
+    Type: character
+    Total Size: 8 values
+                8 bytes
+    Number of Dimensions: 2
+    Dimensions and sizes:	[ 1 <time | unlimited> x 8 <chars> ]
+    Chunking Info:	[ 1 <time> x 8 <chars> ]
+    Coordinates:
+                time: [5871..5871]
+
+    Variable: ntrm
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	spectral truncation parameter M
+
+    Variable: ntrn
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	spectral truncation parameter N
+
+    Variable: ntrk
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	spectral truncation parameter K
+
+    Variable: ndbase
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	base day
+
+    Variable: nsbase
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	seconds of base day
+
+    Variable: nbdate
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	base date (YYYYMMDD)
+
+    Variable: nbsec
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        1
+            long_name	: 	seconds of base date
+
+    Variable: mdt
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <ncl_scalar> ]
+    Coordinates:
+        Number of Attributes:        2
+            long_name	: 	timestep
+            units	: 	s
+
+    Variable: nlon
+    Type: integer
+    Total Size: 192 values
+                768 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 192 <lat> ]
+    Chunking Info:	[ 192 <lat> ]
+    Coordinates:
+                lat: [-90..90]
+        Number of Attributes:        1
+            long_name	: 	number of longitudes
+
+    Variable: wnummax
+    Type: integer
+    Total Size: 192 values
+                768 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 192 <lat> ]
+    Chunking Info:	[ 192 <lat> ]
+    Coordinates:
+                lat: [-90..90]
+        Number of Attributes:        1
+            long_name	: 	cutoff Fourier wavenumber
+
+    Variable: gw
+    Type: double
+    Total Size: 192 values
+                1536 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 192 <lat> ]
+    Chunking Info:	[ 192 <lat> ]
+    Coordinates:
+                lat: [-90..90]
+        Number of Attributes:        1
+            long_name	: 	gauss weights
+
+    Variable: ndcur
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 1048576 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	current day (from base day)
+
+    Variable: nscur
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 1048576 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	current seconds of current day
+
+    Variable: co2vmr
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	co2 volume mixing ratio
+
+    Variable: ch4vmr
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	ch4 volume mixing ratio
+
+    Variable: n2ovmr
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	n2o volume mixing ratio
+
+    Variable: f11vmr
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	f11 volume mixing ratio
+
+    Variable: f12vmr
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	f12 volume mixing ratio
+
+    Variable: sol_tsi
+    Type: double
+    Total Size: 1 values
+                8 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 524288 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        2
+            long_name	: 	total solar irradiance
+            units	: 	W/m2
+
+    Variable: nsteph
+    Type: integer
+    Total Size: 1 values
+                4 bytes
+    Number of Dimensions: 1
+    Dimensions and sizes:	[ 1 <time | unlimited> ]
+    Chunking Info:	[ 1048576 <time> ]
+    Coordinates:
+                time: [5871..5871]
+        Number of Attributes:        1
+            long_name	: 	current timestep
+
+    Variable: AEROD_v
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	1
+            long_name	: 	Total Aerosol Optical Depth in visible band
+            cell_methods	: 	time: mean
+
+    Variable: ANRAIN
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m-3
+            long_name	: 	Average rain number conc
+            cell_methods	: 	time: mean
+
+    Variable: ANSNOW
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m-3
+            long_name	: 	Average snow number conc
+            cell_methods	: 	time: mean
+
+    Variable: AODDUST1
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	
+            long_name	: 	Aerosol optical depth 550 nm model 1 from dust
+            cell_methods	: 	time: mean
+
+    Variable: AODDUST3
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	
+            long_name	: 	Aerosol optical depth 550 nm model 3 from dust
+            cell_methods	: 	time: mean
+
+    Variable: AODVIS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	
+            long_name	: 	Aerosol optical depth 550 nm
+            cell_methods	: 	time: mean
+
+    Variable: AQRAIN
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Average rain mixing ratio
+            cell_methods	: 	time: mean
+
+    Variable: AQSNOW
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Average snow mixing ratio
+            cell_methods	: 	time: mean
+
+    Variable: AREI
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	Micron
+            long_name	: 	Average ice effective radius
+            cell_methods	: 	time: mean
+
+    Variable: AREL
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	Micron
+            long_name	: 	Average droplet effective radius
+            cell_methods	: 	time: mean
+
+    Variable: AWNC
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m-3
+            long_name	: 	Average cloud water number conc
+            cell_methods	: 	time: mean
+
+    Variable: AWNI
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m-3
+            long_name	: 	Average cloud ice number conc
+            cell_methods	: 	time: mean
+
+    Variable: BURDEN1
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Aerosol burden mode 1
+            cell_methods	: 	time: mean
+
+    Variable: BURDEN2
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Aerosol burden mode 2
+            cell_methods	: 	time: mean
+
+    Variable: BURDEN3
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Aerosol burden mode 3
+            cell_methods	: 	time: mean
+
+    Variable: BURDENBC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Black carbon aerosol burden
+            cell_methods	: 	time: mean
+
+    Variable: BURDENDUST
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Dust aerosol burden
+            cell_methods	: 	time: mean
+
+    Variable: BURDENPOM
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	POM aerosol burden
+            cell_methods	: 	time: mean
+
+    Variable: BURDENSEASALT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Seasalt aerosol burden
+            cell_methods	: 	time: mean
+
+    Variable: BURDENSO4
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	Sulfate aerosol burden
+            cell_methods	: 	time: mean
+
+    Variable: BURDENSOA
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            _FillValue	: 	1e+36
+            missing_value	: 	1e+36
+            units	: 	kg/m2
+            long_name	: 	SOA aerosol burden
+            cell_methods	: 	time: mean
+
+    Variable: CCN3
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	#/cm3
+            long_name	: 	CCN concentration at S=0.1%
+            cell_methods	: 	time: mean
+
+    Variable: CDNUMC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	1/m2
+            long_name	: 	Vertically-integrated droplet concentration
+            cell_methods	: 	time: mean
+
+    Variable: CLDHGH
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Vertically-integrated high cloud
+            cell_methods	: 	time: mean
+
+    Variable: CLDICE
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Grid box averaged cloud ice amount
+            cell_methods	: 	time: mean
+
+    Variable: CLDLIQ
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Grid box averaged cloud liquid amount
+            cell_methods	: 	time: mean
+
+    Variable: CLDLOW
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Vertically-integrated low cloud
+            cell_methods	: 	time: mean
+
+    Variable: CLDMED
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Vertically-integrated mid-level cloud
+            cell_methods	: 	time: mean
+
+    Variable: CLDTOT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Vertically-integrated total cloud
+            cell_methods	: 	time: mean
+
+    Variable: CLOUD
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	fraction
+            long_name	: 	Cloud fraction
+            cell_methods	: 	time: mean
+
+    Variable: DCQ
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg/s
+            long_name	: 	Q tendency due to moist processes
+            cell_methods	: 	time: mean
+
+    Variable: DTCOND
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	K/s
+            long_name	: 	T tendency - moist processes
+            cell_methods	: 	time: mean
+
+    Variable: DTV
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	K/s
+            long_name	: 	T vertical diffusion
+            cell_methods	: 	time: mean
+
+    Variable: EMISCLD
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	1
+            long_name	: 	cloud emissivity
+            cell_methods	: 	time: mean
+
+    Variable: FICE
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	fraction
+            long_name	: 	Fractional ice content within cloud
+            cell_methods	: 	time: mean
+
+    Variable: FLDS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Downwelling longwave flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FLNS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Net longwave flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FLNSC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky net longwave flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FLNT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Net longwave flux at top of model
+            cell_methods	: 	time: mean
+
+    Variable: FLNTC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky net longwave flux at top of model
+            cell_methods	: 	time: mean
+
+    Variable: FLUT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Upwelling longwave flux at top of model
+            cell_methods	: 	time: mean
+
+    Variable: FLUTC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky upwelling longwave flux at top of model
+            cell_methods	: 	time: mean
+
+    Variable: FREQI
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	fraction
+            long_name	: 	Fractional occurrence of ice
+            cell_methods	: 	time: mean
+
+    Variable: FREQL
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	fraction
+            long_name	: 	Fractional occurrence of liquid
+            cell_methods	: 	time: mean
+
+    Variable: FREQR
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	fraction
+            long_name	: 	Fractional occurrence of rain
+            cell_methods	: 	time: mean
+
+    Variable: FREQS
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	fraction
+            long_name	: 	Fractional occurrence of snow
+            cell_methods	: 	time: mean
+
+    Variable: FSDS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Downwelling solar flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FSDSC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky downwelling solar flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FSNS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Net solar flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FSNSC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky net solar flux at surface
+            cell_methods	: 	time: mean
+
+    Variable: FSNT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Net solar flux at top of model
+            cell_methods	: 	time: mean
+
+    Variable: FSNTC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky net solar flux at top of model
+            cell_methods	: 	time: mean
+
+    Variable: FSNTOA
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Net solar flux at top of atmosphere
+            cell_methods	: 	time: mean
+
+    Variable: FSNTOAC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Clearsky net solar flux at top of atmosphere
+            cell_methods	: 	time: mean
+
+    Variable: FSUTOA
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Upwelling solar flux at top of atmosphere
+            cell_methods	: 	time: mean
+
+    Variable: ICEFRAC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Fraction of sfc area covered by sea-ice
+            cell_methods	: 	time: mean
+
+    Variable: ICIMR
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Prognostic in-cloud ice mixing ratio
+            cell_methods	: 	time: mean
+
+    Variable: ICWMR
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Prognostic in-cloud water mixing ratio
+            cell_methods	: 	time: mean
+
+    Variable: IWC
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/m3
+            long_name	: 	Grid box average ice water content
+            cell_methods	: 	time: mean
+
+    Variable: LANDFRAC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Fraction of sfc area covered by land
+            cell_methods	: 	time: mean
+
+    Variable: LHFLX
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	W/m2
+            long_name	: 	Surface latent heat flux
+            cell_methods	: 	time: mean
+
+    Variable: LWCF
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Longwave cloud forcing
+            cell_methods	: 	time: mean
+
+    Variable: NUMICE
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	1/kg
+            long_name	: 	Grid box averaged cloud ice number
+            cell_methods	: 	time: mean
+
+    Variable: NUMLIQ
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	1/kg
+            long_name	: 	Grid box averaged cloud liquid number
+            cell_methods	: 	time: mean
+
+    Variable: OCNFRAC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	fraction
+            long_name	: 	Fraction of sfc area covered by ocean
+            cell_methods	: 	time: mean
+
+    Variable: OMEGA
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	Pa/s
+            long_name	: 	Vertical velocity (pressure)
+            cell_methods	: 	time: mean
+
+    Variable: OMEGAT
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	K Pa/s
+            long_name	: 	Vertical heat flux
+            cell_methods	: 	time: mean
+
+    Variable: PBLH
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m
+            long_name	: 	PBL height
+            cell_methods	: 	time: mean
+
+    Variable: PHIS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m2/s2
+            long_name	: 	Surface geopotential
+            cell_methods	: 	time: mean
+
+    Variable: PRECC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m/s
+            long_name	: 	Convective precipitation rate (liq + ice)
+            cell_methods	: 	time: mean
+
+    Variable: PRECL
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m/s
+            long_name	: 	Large-scale (stable) precipitation rate (liq + ice)
+            cell_methods	: 	time: mean
+
+    Variable: PRECSC
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m/s
+            long_name	: 	Convective snow rate (water equivalent)
+            cell_methods	: 	time: mean
+
+    Variable: PRECSL
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m/s
+            long_name	: 	Large-scale (stable) snow rate (water equivalent)
+            cell_methods	: 	time: mean
+
+    Variable: PS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	Pa
+            long_name	: 	Surface pressure
+            cell_methods	: 	time: mean
+
+    Variable: PSL
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	Pa
+            long_name	: 	Sea level pressure
+            cell_methods	: 	time: mean
+
+    Variable: Q
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg
+            long_name	: 	Specific humidity
+            cell_methods	: 	time: mean
+
+    Variable: QFLX
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	kg/m2/s
+            long_name	: 	Surface water flux
+            cell_methods	: 	time: mean
+
+    Variable: QREFHT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	kg/kg
+            long_name	: 	Reference height humidity
+            cell_methods	: 	time: mean
+
+    Variable: QRL
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            mdims	: 	1
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	K/s
+            long_name	: 	Longwave heating rate
+            cell_methods	: 	time: mean
+
+    Variable: QRS
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        5
+            mdims	: 	1
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	K/s
+            long_name	: 	Solar heating rate
+            cell_methods	: 	time: mean
+
+    Variable: RELHUM
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	percent
+            long_name	: 	Relative humidity
+            cell_methods	: 	time: mean
+
+    Variable: SHFLX
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	W/m2
+            long_name	: 	Surface sensible heat flux
+            cell_methods	: 	time: mean
+
+    Variable: SNOWHICE
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m
+            long_name	: 	Snow depth over ice
+            cell_methods	: 	time: mean
+
+    Variable: SNOWHLND
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m
+            long_name	: 	Water equivalent snow depth
+            cell_methods	: 	time: mean
+
+    Variable: SOLIN
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Solar insolation
+            cell_methods	: 	time: mean
+
+    Variable: SWCF
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            Sampling_Sequence	: 	rad_lwsw
+            units	: 	W/m2
+            long_name	: 	Shortwave cloud forcing
+            cell_methods	: 	time: mean
+
+    Variable: T
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	K
+            long_name	: 	Temperature
+            cell_methods	: 	time: mean
+
+    Variable: TAUX
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	N/m2
+            long_name	: 	Zonal surface stress
+            cell_methods	: 	time: mean
+
+    Variable: TAUY
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	N/m2
+            long_name	: 	Meridional surface stress
+            cell_methods	: 	time: mean
+
+    Variable: TGCLDCWP
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	kg/m2
+            long_name	: 	Total grid-box cloud water path (liquid and ice)
+            cell_methods	: 	time: mean
+
+    Variable: TGCLDIWP
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	kg/m2
+            long_name	: 	Total grid-box cloud ice water path
+            cell_methods	: 	time: mean
+
+    Variable: TGCLDLWP
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	kg/m2
+            long_name	: 	Total grid-box cloud liquid water path
+            cell_methods	: 	time: mean
+
+    Variable: TMQ
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	kg/m2
+            long_name	: 	Total (vertically integrated) precipitable water
+            cell_methods	: 	time: mean
+
+    Variable: TREFHT
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	K
+            long_name	: 	Reference height temperature
+            cell_methods	: 	time: mean
+
+    Variable: TS
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	K
+            long_name	: 	Surface temperature (radiative)
+            cell_methods	: 	time: mean
+
+    Variable: TSMN
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	K
+            long_name	: 	Minimum surface temperature over output period
+            cell_methods	: 	time: mean
+
+    Variable: TSMX
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	K
+            long_name	: 	Maximum surface temperature over output period
+            cell_methods	: 	time: mean
+
+    Variable: U
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m/s
+            long_name	: 	Zonal wind
+            cell_methods	: 	time: mean
+
+    Variable: U10
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m/s
+            long_name	: 	10m wind speed
+            cell_methods	: 	time: mean
+
+    Variable: UU
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m2/s2
+            long_name	: 	Zonal velocity squared
+            cell_methods	: 	time: mean
+
+    Variable: V
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m/s
+            long_name	: 	Meridional wind
+            cell_methods	: 	time: mean
+
+    Variable: VD01
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	kg/kg/s
+            long_name	: 	Vertical diffusion of Q
+            cell_methods	: 	time: mean
+
+    Variable: VQ
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m/skg/kg
+            long_name	: 	Meridional water transport
+            cell_methods	: 	time: mean
+
+    Variable: VT
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	K m/s
+            long_name	: 	Meridional heat transport
+            cell_methods	: 	time: mean
+
+    Variable: VU
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m2/s2
+            long_name	: 	Meridional flux of zonal momentum
+            cell_methods	: 	time: mean
+
+    Variable: VV
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m2/s2
+            long_name	: 	Meridional velocity squared
+            cell_methods	: 	time: mean
+
+    Variable: WGUSTD
+    Type: float
+    Total Size: 55296 values
+                221184 bytes
+    Number of Dimensions: 3
+    Dimensions and sizes:	[ 1 <time | unlimited> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 192 <lat> x 288 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        3
+            units	: 	m/s
+            long_name	: 	wind gusts from turbulence
+            cell_methods	: 	time: mean
+
+    Variable: WSUB
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m/s
+            long_name	: 	Diagnostic sub-grid vertical velocity
+            cell_methods	: 	time: mean
+
+    Variable: Z3
+    Type: float
+    Total Size: 1658880 values
+                6635520 bytes
+    Number of Dimensions: 4
+    Dimensions and sizes:	[ 1 <time | unlimited> x 30 <lev> x 192 <lat> x 288 <lon> ]
+    Chunking Info:	[ 1 <time> x 15 <lev> x 96 <lat> x 144 <lon> ]
+    Coordinates:
+                time: [5871..5871]
+                lev: [3.643466..992.5561]
+                lat: [-90..90]
+                lon: [ 0..358.75]
+        Number of Attributes:        4
+            mdims	: 	1
+            units	: 	m
+            long_name	: 	Geopotential Height (above sea level)
+            cell_methods	: 	time: mean
+
+ 

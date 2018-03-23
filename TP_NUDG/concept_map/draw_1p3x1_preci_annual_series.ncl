@@ -7,13 +7,18 @@
 ;                                           2017/03/19
 ;******************************************************************************
 begin
+draw_var = (/"preci","SHFLX","LHFLX"/)
+unit     = (/"mm/day","W/m~S~2~N~","W/m~S~2~N~"/)   ;this can be used as right string 
+var_name = (/"series","ave"/)
+nv = 0;1
+
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_annual_series.nc"
-case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
-var_name = (/"series","ave"/)
-draw_var = (/"preci"/)
-unit     = (/"mm/day"/)   ;this can be used as right string 
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" + draw_var(nv) + "_TP_annual_series.nc" 
+fig_name   = path + "/concept_map/fig/1p3X1_annual_cycle-" + draw_var(nv)
+fig_title  = "Annual Cycle of " ; + lev(nl) + "hPa " + draw_var(nv) 
+fig_out    ="pdf";"x11"
+case     = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area of TP 
@@ -21,10 +26,6 @@ lats = 25
 latn = 40
 lonl = 70
 lonr = 105
-
-fig_name   = path + "/concept_map/fig/1p3X1_annual_cycle" + draw_var(0)
-fig_title  = "Annual Cycle of " ; + lev(nl) + "hPa " + draw_var(nv) 
-fig_out    ="pdf";"x11"
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -47,6 +48,7 @@ var         = new((/ncase,nyear,365/),float)
 ave         = new((/ncase,      365/),float)
 plot        = new((/ncase/),graphic)
 plot2       = new((/ncase/),graphic)
+plot3       = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
@@ -101,7 +103,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmXBMode           = "Manual"
     resxy@tmXBTickSpacingF   = 30
     resxy@tmXBTickStartF     = 0
-    resxy@tmXBTickEndF       = 330
+    resxy@tmXBTickEndF       = 360
     ;resxy@tmXBMode            = "Explicit"
     ;resxy@tmXBValues          = ispan(0,360,30)
     ;resxy@tmXBLabels          = ispan(0,360,30)
@@ -122,19 +124,24 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy2@xyLineThicknessF = 6.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     resxy2@xyLineColor      = "black"
 
+    resxy3 = resxy2
+    resxy3@xyLineThicknessF = 10.0;(/2.0, 2.0,2.0/)   ; make second line thicker
+
 do nc = 0, ncase-1,1
     resxy@gsnLeftString    = case(nc)
-    resxy@gsnRightString   = unit
+    resxy@gsnRightString   = unit(nv)
     resxy@trYMinF = floor(min(var(:,:,:)))
     resxy@trYMaxF =  ceil(max(var(:,:,:)))
     plot(nc)  = gsn_csm_xy(wks,var&day(0:359),(/var(nc,:,0:359)/),resxy)
     plot2(nc) = gsn_csm_xy(wks,var&day(0:359),(/ave(0   ,0:359)/),resxy2)
+    plot3(nc) = gsn_csm_xy(wks,var&day(0:359),(/ave(nc   ,0:359)/),resxy3)
     overlay(plot(nc),plot2(nc))
+    overlay(plot(nc),plot3(nc))
 end do
     
     resp  = True    
     resp@gsnMaximize   = True
-    resp@txString      = fig_title + draw_var
+    resp@txString      = fig_title + draw_var(nv)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
    gsn_panel(wks,plot,(/3,1/),resp)

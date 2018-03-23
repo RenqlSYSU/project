@@ -9,17 +9,17 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE \" IN STRING!
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
+#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
+#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
+PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
 
 # Path of the post processed data
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
+#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
+#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
+PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
 
 # Case name
-CASENAME=\"AMIP_C5PM_TP_NUDG\"
+#CASENAME=\"AMIP_C5PM_TP_NUDG\"
 CASENAME=\"AMIP_C5PM\"
 
 
@@ -27,7 +27,8 @@ CASENAME=\"AMIP_C5PM\"
 #FDNAME2D="(/\"PRECL\",\"PRECC\",\"LHFLX\",\"PS\",\"PSL\",\"QFLX\",\"TS\",\"TMQ\"/)" #often use
 #FDNAME2D="(/\"TS\",\"TSMX\"/)" #often use
 #FDNAME2D="(/\"PRECT\",\"U850\",\"V850\"/)" #often use
-FDNAME2D="(/\"PRECC\",\"PRECL\"/)" #often use
+#FDNAME2D="(/\"PRECC\",\"PRECL\"/)" #often use
+FDNAME2D="(/\"LHFLX\",\"SHFLX\"/)" #often use
 
 # Names of 3D fields
 FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
@@ -54,7 +55,7 @@ PLEV="(/1000,925,850,700,500,200/)"
 
 # Process flag
 FLAG_2D=1
-FLAG_3D=1
+FLAG_3D=0  #1
 FLAG_3D_HY=0
 
 #-----------------------------------------------------------

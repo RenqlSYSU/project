@@ -7,14 +7,19 @@
 ;                                           2017/03/19
 ;******************************************************************************
 begin
+case     = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
+years    = ispan(1979,2005,1)   ;the calculate time
+draw_var = (/"U","V","T","OMEGA"/)
+unit     = (/"m/s","m/s","~S~o~N~C","10~S~-2~N~ Pa/s"/)   ;this can be used as right string 
+var_name = (/"series","ave"/)
+nv = 3;1
+
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-UVT_TP_annual_series.nc"
-case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
-var_name = (/"series","ave"/)
-draw_var = (/"U","V","T"/)
-unit     = (/"m/s","m/s","~S~o~N~C"/)   ;this can be used as right string 
-years    = ispan(1979,2005,1)   ;the calculate time
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" + draw_var(nv) + "_TP_annual_series.nc"
+fig_name   = path + "/concept_map/fig/3p3X1_annual_cycle" + draw_var(nv)
+fig_title  = "Annual Cycle of " ; + lev(nl) + "hPa " + draw_var(nv) 
+fig_out    ="pdf";"x11"
 
 ;area of TP 
 lats = 25 
@@ -22,12 +27,6 @@ latn = 40
 lonl = 70
 lonr = 105
 lev  = (/850,500,200/)
-nl = 2
-nv = 1
-
-fig_name   = path + "/concept_map/fig/1p3X1_annual_cycle"; + lev(nl) + draw_var(nv)
-fig_title  = "Annual Cycle of " ; + lev(nl) + "hPa " + draw_var(nv) 
-fig_out    ="pdf";"x11"
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -47,22 +46,31 @@ nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(draw_var)
 nlev  = dimsizes(lev)
-var         = new((/ncase,nvar,nyear,365,nlev/),float)
-ave         = new((/ncase,nvar,      365,nlev/),float)
+var         = new((/ncase,nyear,365,nlev/),float)
+ave         = new((/ncase,      365,nlev/),float)
 plot        = new((/ncase/),graphic)
 plot2       = new((/ncase/),graphic)
+plot3       = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
 ;--------------------------------------------------------------
 do nc = 0,ncase-1,1
     f    = addfile(filename(nc),"r")
-    var(nc,:,:,:,:)  = f->$var_name(0)$     ;(nv,:,:,nl)
-    ave(nc,:,:,:)    = f->$var_name(1)$     ;(nv,:,nl)
+    var(nc,:,:,:)  = f->$var_name(0)$     ;(nv,:,:,nl)
+    ave(nc,:,:)    = f->$var_name(1)$     ;(nv,:,nl)
 end do   ;the loop of the three cases
 
-var(:,2,:,:,:) = var(:,2,:,:,:) - 273.15   ;convert unit from k to c
-ave(:,2,:,:)   = ave(:,2,:,:)   - 273.15
+if (nv.eq.2) then
+    var = var - 273.15   ;convert unit from k to c
+    ave = ave - 273.15
+end if
+
+if (nv.eq.3) then
+    var = var*100   ;convert unit from k to c
+    ave = ave*100
+end if
+
 printVarSummary(var)
 printVarSummary(ave)
 
@@ -128,16 +136,20 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy2@xyLineThicknessF = 6.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     resxy2@xyLineColor      = "black"
 
-do nv = 0,nvar-1,1
+    resxy3 = resxy2
+    resxy2@xyLineThicknessF = 10.0;(/2.0, 2.0,2.0/)   ; make second line thicker
+
 do nl = 0,nlev-1,1
 do nc = 0, ncase-1,1
     resxy@gsnLeftString    = case(nc)
     resxy@gsnRightString   = unit(nv)
-    resxy@trYMinF = floor(min(var(:,nv,:,:,nl)))
-    resxy@trYMaxF =  ceil(max(var(:,nv,:,:,nl)))
-    plot(nc)  = gsn_csm_xy(wks,var&day,(/var(nc,nv,:,:,nl)/),resxy)
-    plot2(nc) = gsn_csm_xy(wks,var&day,(/ave(0,nv,:,nl)/),resxy2)
+    resxy@trYMinF = floor(min(var(:,:,:,nl)))
+    resxy@trYMaxF =  ceil(max(var(:,:,:,nl)))
+    plot(nc)  = gsn_csm_xy(wks,var&day,(/var(nc,:,:,nl)/),resxy)
+    plot2(nc) = gsn_csm_xy(wks,var&day,(/ave(0 ,  :,nl)/),resxy2)
+    plot3(nc) = gsn_csm_xy(wks,var&day,(/ave(nc,  :,nl)/),resxy3)
     overlay(plot(nc),plot2(nc))
+    overlay(plot(nc),plot3(nc))
 end do
     
     resp  = True    
@@ -146,7 +158,6 @@ end do
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
    gsn_panel(wks,plot,(/3,1/),resp)
-end do
 end do
 end
 

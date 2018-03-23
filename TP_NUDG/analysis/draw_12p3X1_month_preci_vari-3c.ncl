@@ -8,22 +8,21 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci","qdivg","SHFLX","LHFLX"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~"/)    ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+draw_var = (/"preci","qdivg"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm~S~2~N~/day~S~2~N~","g~S~2~N~/(s*m*m)~S~2~N~"/)    ;this can be used as right string 
+var_name = (/"season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
-nv = 3;2;1
+nv = 0
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-;path     = "/home/ys17-19/renql/project/TP_NUDG"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
-fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
-    case   = (/"(a) AMIP_CTRL","(b) NUDG24h-CTRL","(c) NUDG6h-CTRL"/)
+fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
+    case   = (/"(a) AMIP_CTRL","(b) (NUDG24h-CTRL)/CTRL%","(c) (NUDG6h-CTRL)/CTRL%"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -70,16 +69,16 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
     var(nf,:,:,:)  = f->$var_name(0)$ ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,:,:,:)  = f->$var_name(1)$ ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
+var_temp = where(var(0,:,:,:).eq.0,var@_FillValue,var(0,:,:,:))
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
+prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
+var(nf+1,:,:,:)= (var(nf+1,:,:,:) - var(0,:,:,:))/var_temp*100 ;get the difference between CTRL and NUDG
 end do
 
-;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
-prob = mask(prob,prob.lt.siglvl,True)
+var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
+;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(prob)
@@ -217,42 +216,27 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(nv.eq.0) then
-    minlvl = (/ 0  ,-4.5 ,-4.5 /)
-    maxlvl = (/18  ,4.5  , 4.5 /)
-    spacig = (/ 1  ,0.5  , 0.5 /)
-end if
-
-if(nv.eq.2) then
-    minlvl = (/ -10,-27 ,-27 /)
-    maxlvl = (/ 134,27  , 27 /)
-    spacig = (/ 8  , 3  , 3  /)
-end if
-
-if(nv.eq.3) then
-    minlvl = (/   0,-27 ,-27 /)
-    maxlvl = (/ 270,27  , 27 /)
-    spacig = (/ 15 , 3  , 3  /)
-end if
-
 do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
-        res@gsnSpreadColors       = False              ; turn of the full color map
-        if(nv.eq.-1) then
-        res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
-        else
-        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
-        end if
         if(nc.gt.0) then
+            ;res@gsnSpreadColors       = False              ; turn of the full color map
+            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+            res@cnMinLevelValF        := -90 ;-2.7          ; set min contour level
+            res@cnMaxLevelValF        := 90  ;2.7 ;32        ; set max contour level
+            res@cnLevelSpacingF       := 10        ; set contour interval
             res@gsnRightString  = "siglvl: " + siglvl
             plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-            overlay(plot(nc),plot2(nc-1))
+            ;plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            ;overlay(plot(nc),plot2(nc-1))
         else
+            ;res@gsnSpreadColors       = True              ; turn of the full color map
+            ;res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+            ;res@cnLevels              = (/0,0.5,1,1.8,3,4,5,6,7/)
+            res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+            res@cnMinLevelValF        := 0  ; set min contour level
+            res@cnMaxLevelValF        := 18 ; set max contour level
+            res@cnLevelSpacingF       := 1        ; set contour interval
             res@gsnRightString   = unit(nv) ;draw_var(nv) 
             plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         end if

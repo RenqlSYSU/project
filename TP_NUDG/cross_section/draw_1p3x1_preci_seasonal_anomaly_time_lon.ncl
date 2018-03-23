@@ -12,20 +12,22 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
+nctrl = 1;0
 
-fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly-ctrl3_lat_time"
-fig_title  = "Anomalous(CTRL) rainfall in JJA"
-    case   = (/"AMIP_CTRL","NUDG24h","NUDG6h"/);this can be used as left string
+fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly" + (/"_time_lon","-ctrl_time_lon"/)
+fig_title  = "Anomalous rainfall in JJA"
+    case   = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
 fig_out    ="pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
-;area: east Asia
-lats = 20 ;-20
-latn = 45  ;60
-lonl = 107  ;20
-lonr = 122;130 ;220
-;lev  = (/850,500,200/)
+;area:   TP , east Asia
+lats = (/25 , 20/) ;-20
+latn = (/40 , 45/)  ;60
+lonl = (/70 ,107/)  ;20
+lonr = (/105,122/);130 ;220
+lon_spacing = 5
+na = 0
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -40,7 +42,7 @@ lonr = 122;130 ;220
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
-vars:= f->$var_name(0)$(:,{lats:latn},{lonl:lonr})
+vars:= f->$var_name(0)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
 nlat  = dimsizes(vars&lat)
@@ -48,7 +50,7 @@ nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var   = new((/ncase,nlat,nyear/),float)
+var   = new((/ncase,nyear,nlon/),float)
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
@@ -59,32 +61,32 @@ do nc = 0 , ncase-1,1
 do nt = 0,nyear-1,1
     do nv = 0,nvar-1,1 
         f     = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        temp := f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
-        temp := dim_avg_n_Wrap(temp,2)
-        var(nc,:,nt) = var(nc,:,nt) + dim_avg_n_Wrap(temp,0)
+        temp := f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+        temp := dim_avg_n_Wrap(temp,1)
+        var(nc,nt,:) = var(nc,nt,:) + dim_avg_n_Wrap(temp,0)
     end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
 var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 
-ave = dim_avg_n_Wrap(var(0,:,:),1)
-do nt = 0, nyear-1, 1
-    do nc = 1 , ncase-1,1
-        var(nc,:,nt)  = var(0,:,nt) - var(nc,:,nt)
-    end do
-    var(0,:,nt) = var(0,:,nt) - ave
-    do nc = 1 , ncase-1,1
-        var(nc,:,nt)  = var(0,:,nt) - var(nc,:,nt)
-    end do
-end do   ;the loop of 3 cases 
+if (nctrl.eq.1) then
+    ave = dim_avg_n_Wrap(var(0,:,:),0)
+    do nc = 0 , ncase-1,1
+        do nt = 0, nyear-1, 1
+            var(nc,nt,:)  = var(nc,nt,:) - ave
+        end do
+    end do   ;the loop of 3 cases 
+else
+    var  = dim_rmvmean_n_Wrap(var,1)
+end if
 
-copy_VarMeta(temp(0,:),var(0,:,0))
+copy_VarMeta(temp(0,:),var(0,0,:))
 printVarSummary(var)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name+lonl+"-"+lonr)
+    wks = gsn_open_wks(fig_out,fig_name(nctrl) + lonl(na)+"-"+lonr(na))
     gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
@@ -100,17 +102,17 @@ printVarSummary(var)
     ;res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
-    res@tiXAxisString   = "Year"
-    res@tiYAxisString   = "Latitude(N)"
+    res@tiXAxisString   = "Longitude(E)"
+    res@tiYAxisString   = "Year"
 
-    res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,26,3)
-    res@tmXBLabels      = ispan(1979,2005,3)
+    res@tmYLMode        = "Explicit"
+    res@tmYLValues      = ispan(0,26,3)
+    res@tmYLLabels      = ispan(1979,2005,3)
 
-    res@tmYLMode        = "Manual"
-    res@tmYLTickStartF  = 20
-    res@tmYLTickEndF    = 45
-    res@tmYLTickSpacingF= 5
+    res@tmXBMode        = "Manual"
+    res@tmXBTickStartF  = lonl(na)
+    res@tmXBTickEndF    = lonr(na)
+    res@tmXBTickSpacingF= lon_spacing
 
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
@@ -177,12 +179,12 @@ printVarSummary(var)
 
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
-        plot(nc)     = gsn_csm_lat_time(wks,var(nc,:,:),res)
+        plot(nc)     = gsn_csm_hov(wks,var(nc,:,:),res)
         print(max(var(nc,:,:)))
         print(min(var(nc,:,:)))
     end do 
 
-    resp@txString      = fig_title + " (" + lonl + " - " + lonr + "E)"
+    resp@txString      = fig_title + " (" + lats(na) + " - " + latn(na) + "N)"
     gsn_panel(wks,plot,(/1,3/),resp)
 end
 

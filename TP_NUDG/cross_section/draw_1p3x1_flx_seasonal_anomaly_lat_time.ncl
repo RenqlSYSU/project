@@ -10,16 +10,20 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-var_name = (/"PRECC","PRECL"/)
+var_name = (/"SHFLX","LHFLX"/)
+unit     = (/"W/m~S~2~N~","W/m~S~2~N~"/)   ;this can be used as right string 
 years    = ispan(1979,2005,1)   ;the calculate time
-nctrl = 0
+nctrl = 1
+nv = 1
+    
+minlvl = (/-18  ,-18  /)
+maxlvl = (/ 18  , 18  /)
+spacig = (/  1  ,  1  /)
 
-fig_name   = path + "/cross_section/fig/1p3X1_preci_seasonal_anomaly" + (/"_","-ctrl_"/) + "lat_time"
-fig_title  = "Anomalous rainfall in JJA"
+fig_name   = path + "/cross_section/fig/1p3X1_" + var_name(nv) + "_seasonal_anomaly" + (/"_","-ctrl_"/) + "lat_time"
+fig_title  = "Anomalous " + var_name(nv) + " in JJA"
     case   = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
 fig_out    ="pdf";"x11"
-unit       = "mm/day"   ;this can be used as right string 
-draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
 ;area:   TP , east Asia
 lats = (/25 , 20/) ;-20
@@ -56,18 +60,14 @@ plot  = new((/ncase/),graphic)
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-var = 0
 do nc = 0 , ncase-1,1
 do nt = 0,nyear-1,1
-    do nv = 0,nvar-1,1 
-        f     = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        temp := f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
-        temp := dim_avg_n_Wrap(temp,2)
-        var(nc,:,nt) = var(nc,:,nt) + dim_avg_n_Wrap(temp,0)
-    end do  ;the loop of PRECC and PRECL
+    f     = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    temp := f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    temp := dim_avg_n_Wrap(temp,2)
+    var(nc,:,nt) = dim_avg_n_Wrap(temp,0)
 end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
-var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 
 if (nctrl.eq.1) then 
     ave = dim_avg_n_Wrap(var(0,:,:),1)
@@ -140,9 +140,9 @@ printVarSummary(var)
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -4.5          ; set min contour level
-    res@cnMaxLevelValF        =  4.5 ;32        ; set max contour level
-    res@cnLevelSpacingF       =  0.5        ; set contour interval
+    res@cnLevelSpacingF       = spacig(nv)        ; set contour interval
+    res@cnMaxLevelValF        = maxlvl(nv) ;32    ; set max contour level
+    res@cnMinLevelValF        = minlvl(nv)       ; set min contour level
 
     res@gsnSpreadColors      = True              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -162,7 +162,7 @@ printVarSummary(var)
     res@gsnCenterString      = ""
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
-    res@gsnRightString  = unit   ;"siglvl: " + siglvl
+    res@gsnRightString  = unit(nv)   ;"siglvl: " + siglvl
 
     resp  = True    
     resp@gsnMaximize   = True

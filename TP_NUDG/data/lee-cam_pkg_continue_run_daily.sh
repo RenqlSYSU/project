@@ -25,10 +25,10 @@ CASENAME=\"AMIP_C5PM\"
 
 # Names of 2D fields
 #FDNAME2D="(/\"PRECL\",\"PRECC\",\"LHFLX\",\"PS\",\"PSL\",\"QFLX\",\"TS\",\"TMQ\"/)" #often use
-#FDNAME2D="(/\"TS\",\"TSMX\"/)" #often use
+FDNAME2D="(/\"TS\"/)" #often use
 #FDNAME2D="(/\"PRECT\",\"U850\",\"V850\"/)" #often use
 #FDNAME2D="(/\"PRECC\",\"PRECL\"/)" #often use
-FDNAME2D="(/\"LHFLX\",\"SHFLX\"/)" #often use
+#FDNAME2D="(/\"LHFLX\",\"SHFLX\"/)" #often use
 
 # Names of 3D fields
 FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use

@@ -9,10 +9,10 @@
 begin
 case     = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
 years    = ispan(1979,2005,1)   ;the calculate time
-draw_var = (/"U","V","T","OMEGA"/)
-unit     = (/"m/s","m/s","~S~o~N~C","10~S~-2~N~ Pa/s"/)   ;this can be used as right string 
+draw_var = (/"U","V","T","OMEGA","Z3"/)
+unit     = (/"m/s","m/s","~S~o~N~C","10~S~-2~N~ Pa/s","gpm"/)   ;this can be used as right string 
 var_name = (/"series","ave"/)
-nv = 3;1
+nv = 4;3;1
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"

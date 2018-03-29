@@ -25,7 +25,7 @@ gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/phy_panel-20180328/fig/1p2x3_preci_sh_lh_" + months(nm) + var_name(0) 
     case   = (/" AMIP_CTRL"," NUDG6h-CTRL"/)
 pre_case   = (/"(a","(b"/)
-fig_out    = "eps" ;"pdf";"x11"
+fig_out    = "pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -63,10 +63,11 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_font      = 0.02
    subtitle_font  = 0.02
    title_font     = 0.03
-   tick_thick     = 5.0
-   subtitle_thick = 5.0  ;not have this attribute
+   tick_thick     = 8.0
+   subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
    mp_thick       = 5.0
+   font_index     = 22
 
 ;================================================================
 ;read data
@@ -123,6 +124,8 @@ printVarSummary(prob)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
+    res@tmXBLabelFont   = font_index
+    res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
     res@tmXBLabelFontThicknessF  = tick_thick
@@ -164,7 +167,12 @@ printVarSummary(prob)
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
+
+    res@pmLabelBarZone               = 0
+    res@pmLabelBarOrthogonalPosF     = 0.15
+    res@pmLabelBarParallelPosF       = 0.5
 
 ;----------Set res sig-----------
     res_sig                  = True
@@ -179,10 +187,10 @@ printVarSummary(prob)
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 1.
+    res_sig@cnFillScaleF     = 0.5
     res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "darkslategray"
-    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@cnFillColor      = "grey0"
+    res_sig@cnFillDotSizeF   = 0.5
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
     ;res_sig@cnLevels             = (/0.01/)
@@ -197,7 +205,7 @@ printVarSummary(prob)
     lnres                      = True
     lnres@gsLineColor          = "black"
     lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = 5.0
+    lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
 
 ;--------set the attribute of gtop--------------
@@ -223,8 +231,8 @@ printVarSummary(prob)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
-    res@gsnRightStringFontHeightF = subtitle_font
-    res@gsnLeftStringFontHeightF  = subtitle_font
+    res@gsnStringFont         = font_index
+    res@gsnStringFontHeightF  = subtitle_font
 
     resp  = True    
     resp@gsnMaximize   = True

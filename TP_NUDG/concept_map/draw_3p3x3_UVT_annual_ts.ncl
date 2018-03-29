@@ -1,31 +1,29 @@
 ;***************************************************************************
-;filename:      draw_1p3x1_annual_series_T.ncl
-;plot the every year's annual cycle(365day) of TP average UVT(27 curves) 
+;filename:      draw_3p3x2_UVT_JJA_annual_ts.ncl
+;plot the JJA times of every year's annual cycle(id=151~242) of TP average UVT(27 curves) 
 ;then overlaying the climate annual cycle(black bold curve)
-;and one panel has three plots.
+;and one panel has six plots.
 ;                                            by Ql_Ren
-;                                           2017/03/19
+;                                           2017/03/29
 ;******************************************************************************
 begin
-draw_var = (/"preci","SHFLX","LHFLX","TMQ"/)
-unit     = (/"mm/day","W/m~S~2~N~","W/m~S~2~N~","kg/m~S~2~N~"/)   ;this can be used as right string 
+draw_var = (/"U","V","T"/)
+unit     = (/"m/s","m/s","~S~o~N~C"/)   ;this can be used as right string 
 var_name = (/"series","ave"/)
-nv = 3
+years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" + draw_var(nv) + "_TP_annual_series.nc" 
-fig_name   = path + "/concept_map/fig/1p3X1_annual_cycle-" + draw_var(nv)
-fig_title  = "Annual Cycle of " ; + lev(nl) + "hPa " + draw_var(nv) 
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" ;+ draw_var(nv) + "_TP_annual_series.nc"
+fig_name   = path + "/concept_map/fig/3p3X3_UVT_annual_cycle"
 fig_out    ="pdf";"x11"
-case     = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
-years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area of TP 
 lats = 25 
 latn = 40
 lonl = 70
 lonr = 105
+lev  = (/850,500,200/)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -44,8 +42,9 @@ lonr = 105
 nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(draw_var)
-var         = new((/ncase,nyear,365/),float)
-ave         = new((/ncase,      365/),float)
+nlev  = dimsizes(lev)
+var         = new((/ncase,nyear,365,nlev/),float)
+ave         = new((/ncase,      365,nlev/),float)
 plot        = new((/ncase/),graphic)
 plot2       = new((/ncase/),graphic)
 plot3       = new((/ncase/),graphic)
@@ -55,9 +54,19 @@ plot3       = new((/ncase/),graphic)
 ;--------------------------------------------------------------
 do nc = 0,ncase-1,1
     f    = addfile(filename(nc),"r")
-    var(nc,:,:)  = f->$var_name(0)$     ;(nv,:,:,nl)
-    ave(nc,:)    = f->$var_name(1)$     ;(nv,:,nl)
+    var(nc,:,:,:)  = f->$var_name(0)$     ;(nv,:,:,nl)
+    ave(nc,:,:)    = f->$var_name(1)$     ;(nv,:,nl)
 end do   ;the loop of the three cases
+
+if (nv.eq.2) then
+    var = var - 273.15   ;convert unit from k to c
+    ave = ave - 273.15
+end if
+
+if (nv.eq.3) then
+    var = var*100   ;convert unit from k to c
+    ave = ave*100
+end if
 
 printVarSummary(var)
 printVarSummary(ave)
@@ -100,13 +109,13 @@ wks = gsn_open_wks(fig_out,fig_name)
     
     ;resxy@tmXBMajorLengthF = 0.01
     ;resxy@tmYRMajorLengthF = 0.01
-    resxy@tmXBMode           = "Manual"
-    resxy@tmXBTickSpacingF   = 30
-    resxy@tmXBTickStartF     = 0
-    resxy@tmXBTickEndF       = 360
-    ;resxy@tmXBMode            = "Explicit"
-    ;resxy@tmXBValues          = ispan(0,360,30)
-    ;resxy@tmXBLabels          = ispan(0,360,30)
+    ;resxy@tmXBMode           = "Manual"
+    ;resxy@tmXBTickSpacingF   = 30
+    ;resxy@tmXBTickStartF     = 0
+    ;resxy@tmXBTickEndF       = 365
+    resxy@tmXBMode            = "Explicit"
+    resxy@tmXBValues          = ispan(0,360,30)
+    resxy@tmXBLabels          = ispan(0,360,30)
     
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2
@@ -125,25 +134,27 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy2@xyLineColor      = "black"
 
     resxy3 = resxy2
-    resxy3@xyLineThicknessF = 10.0;(/2.0, 2.0,2.0/)   ; make second line thicker
+    resxy2@xyLineThicknessF = 10.0;(/2.0, 2.0,2.0/)   ; make second line thicker
 
+do nl = 0,nlev-1,1
 do nc = 0, ncase-1,1
     resxy@gsnLeftString    = case(nc)
     resxy@gsnRightString   = unit(nv)
-    resxy@trYMinF = floor(min(var(:,:,:)))
-    resxy@trYMaxF =  ceil(max(var(:,:,:)))
-    plot(nc)  = gsn_csm_xy(wks,var&day(0:359),(/var(nc,:,0:359)/),resxy)
-    plot2(nc) = gsn_csm_xy(wks,var&day(0:359),(/ave(0   ,0:359)/),resxy2)
-    plot3(nc) = gsn_csm_xy(wks,var&day(0:359),(/ave(nc   ,0:359)/),resxy3)
+    resxy@trYMinF = floor(min(var(:,:,:,nl)))
+    resxy@trYMaxF =  ceil(max(var(:,:,:,nl)))
+    plot(nc)  = gsn_csm_xy(wks,var&day,(/var(nc,:,:,nl)/),resxy)
+    plot2(nc) = gsn_csm_xy(wks,var&day,(/ave(0 ,  :,nl)/),resxy2)
+    plot3(nc) = gsn_csm_xy(wks,var&day,(/ave(nc,  :,nl)/),resxy3)
     overlay(plot(nc),plot2(nc))
     overlay(plot(nc),plot3(nc))
 end do
     
     resp  = True    
     resp@gsnMaximize   = True
-    resp@txString      = fig_title + draw_var(nv)
+    resp@txString      = fig_title + lev(nl) + "hPa " + draw_var(nv)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
    gsn_panel(wks,plot,(/3,1/),resp)
+end do
 end
 

@@ -10,7 +10,7 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/)
-var_name = (/"SHFLX","LHFLX"/)
+var_name = (/"SHFLX","LHFLX","TMQ"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area of TP 
@@ -27,7 +27,7 @@ ncase = dimsizes(case)
 nvar  = dimsizes(var_name)
 var         = new((/nyear,365/),float)
 
-do nv = 0,nvar-1,1
+do nv = 2,nvar-1,1
 fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" + var_name(nv) + "_TP_annual_series.nc"
 do nc = 0,ncase-1,1
 ;---------------------------------------------------------------

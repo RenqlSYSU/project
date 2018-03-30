@@ -23,7 +23,7 @@ path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/phy_panel-20180328/fig/1p2x3_preci_sh_lh_" + months(nm) + var_name(0) 
-    case   = (/" AMIP_CTRL"," NUDG6h-CTRL"/)
+    case   = (/" CTRL"," NG6h - CTRL"/)
 pre_case   = (/"(a","(b"/)
 fig_out    = "pdf";"x11"
 

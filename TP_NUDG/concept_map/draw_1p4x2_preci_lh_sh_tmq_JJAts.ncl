@@ -7,17 +7,17 @@
 ;                                           2017/03/29
 ;******************************************************************************
 begin
-draw_var = (/"U","V","T"/)
-unit     = (/"m/s","m/s","~S~o~N~C"/)   ;this can be used as right string 
+draw_var = (/"preci" ,"TMQ"        ,"SHFLX"     ,"LHFLX"     /)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","kg/m~S~2~N~","W/m~S~2~N~","W/m~S~2~N~"/)    ;this can be used as right string 
 var_name = (/"series","ave"/)
-case     = (/" CTRL"," NG24h"," NG6h"/);this can be used as left string
-pre_case = (/"(a","(b","(c"/)
+case     = (/" CTRL"," NG6h"/);this can be used as left string
+pre_case = (/"(a","(b"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" ;+ draw_var(nv) + "_TP_annual_series.nc"
-fig_name   = path + "/concept_map/fig/3p3X3_UVT_annual_cycle"
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG6h"/) + "-" ;+ draw_var(nv) + "_TP_annual_series.nc"
+fig_name   = path + "/concept_map/fig/1p4X2_preci_sh_lh_tmq_JJAts"
 fig_out    ="pdf";"x11"
 
 ;area of TP 
@@ -46,9 +46,11 @@ nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(draw_var)
 nlev  = dimsizes(lev)
-nday  = 350
-var   = new((/ncase,nvar,nyear,nday,nlev/),float)
-ave   = new((/ncase,nvar,      nday,nlev/),float)
+nday  = 92
+nday_s=151
+nday_e=242
+var   = new((/ncase,nvar,nyear,nday/),float)
+ave   = new((/ncase,nvar,      nday/),float)
 plot  = new((/ncase*nvar/),graphic)
 plot2 = new((/ncase*nvar/),graphic)
 plot3 = new((/ncase*nvar/),graphic)
@@ -59,13 +61,10 @@ plot3 = new((/ncase*nvar/),graphic)
 do nc = 0,ncase-1,1
 do nv = 0,nvar-1,1
     f    = addfile(filename(nc)+draw_var(nv)+"_TP_annual_series.nc","r")
-    var(nc,nv,:,:,:)  = f->$var_name(0)$(:,0:349,:)
-    ave(nc,nv,:,:)    = f->$var_name(1)$(0:349,:)
+    var(nc,nv,:,:)  = f->$var_name(0)$(:,nday_s:nday_e)
+    ave(nc,nv,:)    = f->$var_name(1)$(nday_s:nday_e )
 end do   ;the loop of the three variables 
 end do   ;the loop of the three cases
-
-var(:,2,:,:,:) = var(:,2,:,:,:) - 273.15   ;convert unit from k to c
-ave(:,2,:,:)   = ave(:,2,:,:)   - 273.15
 
 printVarSummary(var)
 printVarSummary(ave)
@@ -79,8 +78,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;has 64 colors blue green yellow,red
 
     resxy     = True
-    resxy@vpWidthF  = 0.3
-    resxy@vpHeightF = 0.1
+    resxy@vpWidthF  = 0.45
+    resxy@vpHeightF = 0.15
     resxy@gsnFrame      = False
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
@@ -89,6 +88,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@xyDashPatterns    = 0 ;(/0,0,0/)
     resxy@xyLineThicknesses = 2.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     resxy@xyLineColors      = ispan(4,56,2)
+    resxy@tmYLAutoPrecision = False
+    resxy@tmYLPrecision     = 2 
     resxy@tiXAxisOn = False
     resxy@tiYAxisOn = False
     ;resxy@trYMinF = floor(min(var))
@@ -111,12 +112,13 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@tmXBMajorLengthF = 0.01
     ;resxy@tmYRMajorLengthF = 0.01
     ;resxy@tmXBMode           = "Manual"
-    ;resxy@tmXBTickSpacingF   = 30
+    ;resxy@tmXBTickSpacingF   = 5
     ;resxy@tmXBTickStartF     = 0
-    ;resxy@tmXBTickEndF       = 360
+    ;resxy@tmXBTickEndF       = 90
     resxy@tmXBMode            = "Explicit"
-    resxy@tmXBValues          = ispan(0,360,30)
-    resxy@tmXBLabels          = ispan(0,360,30)
+    resxy@tmXBValues          = ispan(0,95,5)
+    resxy@tmXBLabels          = ispan(0,95,5)
+    ;resxy@tmXBMode            = "Automatic"
     
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2
@@ -138,30 +140,28 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy2@xyLineColor      = "black"
 
     resxy3 = resxy2
-    resxy2@xyLineThicknessF = 6.0;(/2.0, 2.0,2.0/)   ; make second line thicker
+    resxy3@xyLineThicknessF = 6.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
 
-do nl = 0,nlev-1,1
-do nc = 0, ncase-1,1
 do nv =0, nvar-1,1
+do nc = 0, ncase-1,1
     nn = nv +1
-    np = nvar*nc + nv
+    np = ncase*nv + nc
     resxy@gsnLeftString   = pre_case(nc) + nn + case(nc)
-    resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
-    resxy@trYMinF = floor(min(var(:,nv,:,:,nl)))
-    resxy@trYMaxF =  ceil(max(var(:,nv,:,:,nl)))
-    plot(np)  = gsn_csm_xy(wks,var&day,(/var(nc,nv,:,:,nl)/),resxy)
-    plot2(np) = gsn_csm_xy(wks,var&day,(/ave(0 ,nv,  :,nl)/),resxy2)
-    ;plot3(np) = gsn_csm_xy(wks,var&day,(/ave(nc,nv,  :,nl)/),resxy3)
+    resxy@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"  
+    resxy@trYMinF = floor(min(var(:,nv,:,:)))
+    resxy@trYMaxF =  ceil(max(var(:,nv,:,:)))
+    plot(np)  = gsn_csm_xy(wks,ispan(0,91,1),(/var(nc,nv,:,:)/),resxy)
+    plot2(np) = gsn_csm_xy(wks,ispan(0,91,1),(/ave(0 ,nv,  :)/),resxy2)
+    plot3(np) = gsn_csm_xy(wks,ispan(0,91,1),(/ave(nc,nv,  :)/),resxy3)
     overlay(plot(np),plot2(np))
-    ;overlay(plot(np),plot3(np))
+    overlay(plot(np),plot3(np))
 end do
 end do
     
-   gsn_panel(wks,plot,(/ncase,nvar/),resp)
-end do
+   gsn_panel(wks,plot,(/nvar,ncase/),resp)
 end
 

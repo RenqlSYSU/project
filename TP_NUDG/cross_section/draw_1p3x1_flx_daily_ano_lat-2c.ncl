@@ -1,25 +1,26 @@
 ;***************************************************************************
-;filename:      draw_1p3x1_preci_daily_anomaly_lat_time.ncl
+;filename:      draw_1p2x3_preci_seas_ano_cross-2c.ncl
 ;read the 27 years PRECC and PRECL of three cases at East Asia(20N£­45N£¬107-130E)
 ;then calculate the anomalous rainfall var(ncase,nlat,ntime)
 ;                                            by Ql_Ren
-;                                           2018/03/16
+;                                           2018/03/30
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-var_name = (/"PRECC","PRECL"/)
+var_name = (/"LHFLX","SHFLX","TMQ"/)
+unit     = (/"W/m~S~2~N~","W/m~S~2~N~","kg/m~S~2~N~"/)   ;this can be used as right string 
 years    = ispan(1979,2005,1)   ;the calculate time
-nctrl = 1;0
+nv = 2;0;1
 
-fig_name   = path + "/cross_section/fig/1p3X1_preci_daily_anomaly" + (/"_","-ctrl_"/) + "lat_time"
-fig_title  = "Anomalous rainfall in JJA"
-    case   = (/"(a) AMIP_CTRL","(b) NUDG24h","(c) NUDG6h"/);this can be used as left string
+fig_name   = path + "/cross_section/fig/1p3x1_TP_JJA_" + var_name(nv) + "_daily_ano_lat_time-2c" 
+    case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
 fig_out    ="pdf";"x11"
-unit       = "mm/day"   ;this can be used as right string 
-draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
+
+minlvl = (/-45  ,-45 ,-9  /)
+maxlvl = (/ 45  , 45 , 9  /)
+spacig = (/  5  ,  5 , 1  /)
 
 ;area:   TP , east Asia
 lats = (/25 , 20/) ;-20
@@ -30,8 +31,8 @@ lat_spacing = 5
 na = 0
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.02
+   tick_font      = 0.01
+   subtitle_font  = 0.01
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -46,7 +47,7 @@ files1     = systemfunc("ls " + filein(0) + "*" + var_name(0) + ".nc")
 f          = addfiles(files1,"r")
 ListSetType(f,"cat")
 time        = cd_calendar(f[:]->time,0)
-select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
+select_time = ind(time(:,1).ge.6.and.time(:,1).le.8.and.time(:,2).le.30)
 ntime       = dimsizes(select_time)
 print(ntime)
 
@@ -55,10 +56,12 @@ nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
-ncase = dimsizes(filein)
+nfile = dimsizes(filein)
+ncase = dimsizes(case)
 intval= 10
-nday  = 9*nyear
-var_d = new((/ncase,nlat,ntime/),float)
+nweek = 9
+nday  = nweek*nyear
+var_d = new((/nfile,nlat,ntime/),float)
 var   = new((/ncase,nlat,nday /),float)   ;define five days is a week,and the last week is seven days
 plot  = new((/ncase/),graphic)
 
@@ -66,39 +69,30 @@ plot  = new((/ncase/),graphic)
 ;read the data
 ;--------------------------------------------------------------
 var_d = 0
-do nc = 0 , ncase-1,1
-    do nv = 0,nvar-1,1 
-        files1     = systemfunc("ls " + filein(nc) + "*" + var_name(nv) + ".nc")
-        f          = addfiles(files1,"r")
-        ListSetType(f,"cat")
-        temp := f[:]->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
-        temp := dim_avg_n_Wrap(temp,2)
-        var_d(nc,:,:) = var_d(nc,:,:) + temp({lat|:},{time|:})
-    end do  ;the loop of PRECC and PRECL
+do nc = 0 , nfile-1,1
+    files1     = systemfunc("ls " + filein(nc) + "*" + var_name(nv) + ".nc")
+    f          = addfiles(files1,"r")
+    ListSetType(f,"cat")
+    temp := f[:]->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    temp := dim_avg_n_Wrap(temp,2)
+    var_d(nc,:,:) = temp({lat|:},{time|:})
 end do   ;the loop of 3 cases 
-var_d  = var_d*1000*3600*24  ;convert unit from m/s to mm/day
 print(var_d(1,1,1))
 
 do nw = 0, nday-1,1
     nd_s = intval*nw
-    if(((nw+1)/9*9).eq.(nw+1)) then
-        nd_e = intval*nw + intval + 1
-    else
-        nd_e = intval*nw + intval - 1
-    end if
-    var(:,:,nw) = dim_avg_n_Wrap(var_d(:,:,nd_s:nd_e),2)
+    nd_e = intval*nw + intval-1
+    print(nd_s)
+    print(nd_e)
+    var(0:1,:,nw) = dim_avg_n_Wrap(var_d(:,:,nd_s:nd_e),2)
 end do
 
-if (nctrl.eq.1) then 
-    ave = dim_avg_n_Wrap(var(0,:,:),1)
-    do nc = 0 , ncase-1,1
-        do nt = 0, nday-1, 1
-            var(nc,:,nt)  = var(nc,:,nt) - ave
-        end do
-    end do   ;the loop of 3 cases 
-else
-    var  = dim_rmvmean_n_Wrap(var,2)
-end if
+ave = dim_avg_n_Wrap(var(0:1,:,:),2)
+do nt = 0,nday-1,1
+var(0,:,nt) = var(0,:,nt) - ave(0,:)
+var(2,:,nt) = var(1,:,nt) - ave(0,:)
+var(1,:,nt) = var(1,:,nt) - ave(1,:)
+end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))
 printVarSummary(var)
@@ -106,7 +100,7 @@ printVarSummary(var)
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name(nctrl) +lonl(na)+"-"+lonr(na))
+    wks = gsn_open_wks(fig_out,fig_name)
     gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
@@ -118,7 +112,7 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.15
+    res@vpHeightF        = 0.1
     res@vpWidthF         = 0.9
 
 ;--------set the form of the coordinate-----------------
@@ -130,6 +124,7 @@ printVarSummary(var)
     res@tmXBMode        = "Explicit"
     res@tmXBValues      = ispan(0,nday-1,18)
     res@tmXBLabels      = ispan(1979,2005,2)
+    res@tmXBMinorValues = ispan(0,nday-1,9)
 
     res@tmYLMode        = "Manual"
     res@tmYLTickStartF  = lats(na)
@@ -145,17 +140,23 @@ printVarSummary(var)
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
+    res@tmXMinorGrid                   = True
+    res@tmXMinorGridLineDashPattern    = 2
+    res@tmXMinorGridLineColor          = "grey0"
+    res@tmXMinorGridThicknessF         = 2.0
+    
     res@tmXMajorGrid                   = True
     res@tmXMajorGridLineDashPattern    = 2
     res@tmXMajorGridLineColor          = "grey0"
     res@tmXMajorGridThicknessF         = 2.0
-    ;  res@tmXBMajorOutwardLengthF = -0.
-    ;  res@tmYLMajorOutwardLengthF = -0.
-    ;  res@tmYRMajorOutwardLengthF = -0.
-      
-    ;  res@tmXBMinorOutwardLengthF = -0.
-    ;  res@tmYLMinorOutwardLengthF = -0.
-    ;  res@tmYRMinorOutwardLengthF = -0.
+    
+    res@tmXBMajorOutwardLengthF = -0.
+    res@tmYLMajorOutwardLengthF = -0.
+    res@tmYRMajorOutwardLengthF = -0.
+    
+    res@tmXBMinorOutwardLengthF = -0.
+    res@tmYLMinorOutwardLengthF = -0.
+    res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
@@ -168,9 +169,9 @@ printVarSummary(var)
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -9          ; set min contour level
-    res@cnMaxLevelValF        =  9 ;32        ; set max contour level
-    res@cnLevelSpacingF       =  1        ; set contour interval
+    res@cnLevelSpacingF       = spacig(nv)        ; set contour interval
+    res@cnMaxLevelValF        = maxlvl(nv) ;32    ; set max contour level
+    res@cnMinLevelValF        = minlvl(nv)       ; set min contour level
 
     res@gsnSpreadColors      = True              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -180,7 +181,7 @@ printVarSummary(var)
     res@lbOrientation        = "vertical"
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 2
+    res@lbLabelStride        = 1
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -192,7 +193,7 @@ printVarSummary(var)
     res@gsnStringFont        = font_index
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
-    res@gsnRightString  = draw_var + " " + unit + lonl(na)+" - "+lonr(na)+"E"   
+    res@gsnRightString  = var_name(nv) + " (" + unit(nv) +") "+ lonl(na)+" - "+lonr(na)+"E"   
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -200,7 +201,8 @@ printVarSummary(var)
     resp@gsnPanelLabelBar = True
     resp@lbOrientation    = "Horizontal"
     resp@lbLabelStride    = 1
-    resp@lbLabelFont       = font_index              ; make labels smaller
+    resp@lbLabelFont      = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF = tick_font              ; make labels smaller
     ;resp@pmLabelBarWidthF  = 0.5
     ;resp@pmLabelBarHeightF = 0.05
     ;resp@lbLabelFontHeightF = tick_font

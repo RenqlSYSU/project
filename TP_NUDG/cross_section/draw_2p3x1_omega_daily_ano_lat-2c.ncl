@@ -7,26 +7,23 @@
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-;                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-var_name = (/"PRECC","PRECL"/)
+                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+var_name = (/"OMEGA","T","U","V"/)
+unit     = (/"10~S~-2~N~ Pa/s","~S~o~N~C","m/s","m/s"/)   ;this can be used as right string 
 years    = ispan(1979,2005,1)   ;the calculate time
+nv = 3;2;1;0;1
 
-;fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c" 
-fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c-24h" 
-    ;case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
-    case   = (/"(a) CTRL-climCTRL","(b) NG24h-climND6h","(c) NG24h-climCTRL"/);this can be used as left string
+fig_name   = path + "/cross_section/fig/1p3x1_TP_JJA_" + var_name(nv) + "_daily_ano_lat_time-2c" 
+    case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
 fig_out    ="pdf";"x11"
-unit       = "mm/day"   ;this can be used as right string 
-draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
 ;area:   TP , east Asia
 lats = (/25 , 20/) ;-20
 latn = (/40 , 45/)  ;60
 lonl = (/70 ,107/)  ;20
 lonr = (/105,122/);130 ;220
+lev  = (/500,200/)
 lat_spacing = 5
 na = 0
 
@@ -43,7 +40,7 @@ na = 0
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-files1     = systemfunc("ls " + filein(0) + "*" + var_name(0) + ".nc")
+files1     = systemfunc("ls " + filein(0) + "*.daily." + var_name(0) + ".nc")
 f          = addfiles(files1,"r")
 ListSetType(f,"cat")
 time        = cd_calendar(f[:]->time,0)
@@ -51,18 +48,19 @@ select_time = ind(time(:,1).ge.6.and.time(:,1).le.8.and.time(:,2).le.30)
 ntime       = dimsizes(select_time)
 print(ntime)
 
-vars  := f[:]->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+vars  := f[:]->$var_name(0)$(0,{lev(0)},{lats(na):latn(na)},{lonl(na):lonr(na)})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
+nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
 nfile = dimsizes(filein)
 ncase = dimsizes(case)
 intval= 10
 nweek = 9
 nday  = nweek*nyear
-var_d = new((/nfile,nlat,ntime/),float)
-var   = new((/ncase,nlat,nday /),float)   ;define five days is a week,and the last week is seven days
+var_d = new((/nfile,nlev,nlat,ntime/),float)
+var   = new((/ncase,nlev,nlat,nday /),float)   ;define five days is a week,and the last week is seven days
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
@@ -70,34 +68,39 @@ plot  = new((/ncase/),graphic)
 ;--------------------------------------------------------------
 var_d = 0
 do nc = 0 , nfile-1,1
-    do nv = 0,nvar-1,1 
-        files1     = systemfunc("ls " + filein(nc) + "*" + var_name(nv) + ".nc")
-        f          = addfiles(files1,"r")
-        ListSetType(f,"cat")
-        temp := f[:]->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
-        temp := dim_avg_n_Wrap(temp,2)
-        var_d(nc,:,:) = var_d(nc,:,:) + temp({lat|:},{time|:})
-    end do  ;the loop of PRECC and PRECL
+    files1     = systemfunc("ls " + filein(nc) + "*.daily." + var_name(nv) + ".nc")
+    f          = addfiles(files1,"r")
+    ListSetType(f,"cat")
+    temp := f[:]->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    temp := dim_avg_n_Wrap(temp,3)
+    var_d(nc,:,:,:) = temp({level|:},{lat|:},{time|:})
 end do   ;the loop of 3 cases 
-var_d  = var_d*1000*3600*24  ;convert unit from m/s to mm/day
-print(var_d(1,1,1))
+print(var_d(1,1,1,1))
 
 do nw = 0, nday-1,1
     nd_s = intval*nw
     nd_e = intval*nw + intval-1
     print(nd_s)
     print(nd_e)
-    var(0:1,:,nw) = dim_avg_n_Wrap(var_d(:,:,nd_s:nd_e),2)
+    var(0:1,:,:,nw) = dim_avg_n_Wrap(var_d(:,:,:,nd_s:nd_e),3)
 end do
 
-ave = dim_avg_n_Wrap(var(0:1,:,:),2)
+if(nv.eq.0) then
+    var = var*100
+end if 
+
+if(nv.eq.1) then
+    var = var - 273.15 ;convert unit from k to c
+end if 
+
+ave = dim_avg_n_Wrap(var(0:1,:,:,:),3)
 do nt = 0,nday-1,1
-var(0,:,nt) = var(0,:,nt) - ave(0,:)
-var(2,:,nt) = var(1,:,nt) - ave(0,:)
-var(1,:,nt) = var(1,:,nt) - ave(1,:)
+var(0,:,:,nt) = var(0,:,:,nt) - ave(0,:,:)
+var(2,:,:,nt) = var(1,:,:,nt) - ave(0,:,:)
+var(1,:,:,nt) = var(1,:,:,nt) - ave(1,:,:)
 end do
 
-copy_VarMeta(temp(0,:),var(0,:,0))
+copy_VarMeta(temp(0,:,:),var(0,:,:,0))
 printVarSummary(var)
 
 ;==============================================================
@@ -172,9 +175,6 @@ printVarSummary(var)
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -9          ; set min contour level
-    res@cnMaxLevelValF        =  9 ;32        ; set max contour level
-    res@cnLevelSpacingF       =  1        ; set contour interval
 
     res@gsnSpreadColors      = True              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -184,7 +184,7 @@ printVarSummary(var)
     res@lbOrientation        = "vertical"
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 2
+    res@lbLabelStride        = 1
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -196,7 +196,6 @@ printVarSummary(var)
     res@gsnStringFont        = font_index
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
-    res@gsnRightString  = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -213,14 +212,23 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+minlvl = (/(/ -9 , -9 /), (/ -2.7, -2.7 /), (/ -2.7, -9 /), (/ -1.8, -4.5 /)/)
+maxlvl = (/(/  9 ,  9 /), (/  2.7,  2.7 /), (/  2.7,  9 /), (/  1.8,  4.5 /)/)
+spacig = (/(/  1 ,  1 /), (/  0.3,  0.3 /), (/  0.3,  1 /), (/  0.2,  0.5 /)/)
+
+do nl = 0,nlev-1,1
+    res@cnLevelSpacingF       = spacig(nv,nl)        ; set contour interval
+    res@cnMaxLevelValF        = maxlvl(nv,nl) ;32    ; set max contour level
+    res@cnMinLevelValF        = minlvl(nv,nl)       ; set min contour level
+    
     do nc = 0, ncase-1,1
+        res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) + " (" + unit(nv) +") "+ lonl(na)+" - "+lonr(na)+"E"   
         res@gsnLeftString   = case(nc)
-        plot(nc)     = gsn_csm_lat_time(wks,var(nc,:,:),res)
-        print(max(var(nc,:,:)))
-        print(min(var(nc,:,:)))
+        plot(nc)     = gsn_csm_lat_time(wks,var(nc,nl,:,:),res)
+        print(max(var(nc,nl,:,:)))
+        print(min(var(nc,nl,:,:)))
     end do 
-
     gsn_panel(wks,plot,(/3,1/),resp)
+end do 
 end
-
 

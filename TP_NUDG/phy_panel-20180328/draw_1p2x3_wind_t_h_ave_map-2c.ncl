@@ -9,7 +9,7 @@
 ;                                                    2018/03/28
 ;*********************************************************************************
 begin
-draw_var = (/"Wind(m/s)&T(~S~o~N~C)","OMEGA(10~S~-2~N~ Pa/s)","Height(gpm)"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Wind&T(~S~o~N~C)","OMEGA(10~S~-2~N~ Pa/s)","Height(gpm)"/)  ;this is the variable used to draw, can used as center string
 draw_varname = (/"T","OMEGA","Z3","U","V"/)
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -17,7 +17,7 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
 lev      = (/850,500,200/)
 nm = 2
-nl = 2
+nl = 2;1;0
 
 ;the path of the file
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
@@ -25,9 +25,9 @@ path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/phy_panel-20180328/fig/1p2x3_wind_t_h_" + months(nm) + lev(nl) + var_name(0) 
-    case   = (/" AMIP_CTRL"," NUDG6h-CTRL"/)
+    case   = (/" CTRL"," NG6h-CTRL"/)
 pre_case   = (/"(a","(b"/)
-fig_out    = "pdf";"x11"
+fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -77,7 +77,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 2.0
+   vc_thick       = 3.0
    mp_thick       = 5.0
    font_index     = 22
 
@@ -158,6 +158,7 @@ printVarSummary(u_test)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
+    res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
     res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
@@ -165,10 +166,14 @@ printVarSummary(u_test)
     res@tmYLLabelFontHeightF     = tick_font
     ; res@tmYLLabelFontAspectF   = 1.3
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     ;  res@tmXBMajorOutwardLengthF = -0.
     ;  res@tmYLMajorOutwardLengthF = -0.
     ;  res@tmYRMajorOutwardLengthF = -0.
-      
+    
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
@@ -201,6 +206,7 @@ printVarSummary(u_test)
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-2
 
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.15
@@ -234,36 +240,40 @@ printVarSummary(u_test)
     res_sig@gsnRightString   = " "
 
 ;--------set the attribute of vector--------------
-    resxy                  = True
-    resxy@gsnDraw          = False
-    resxy@gsnFrame         = False
-    resxy@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
-    resxy@vcVectorDrawOrder          = "PostDraw"
-    resxy@vcLineArrowThicknessF      = vc_thick
-    resxy@vcMonoLineArrowColor       = True
-    resxy@vcLineArrowColor           = "black"
-    resxy@vcMinDistanceF             = 0.03
-    ;resxy@vcRefMagnitudeF            = 30.0             ; define vector ref mag
-    resxy@vcRefLengthF               = 0.05           ; define length of vec ref
-    resxy@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
-    ;resxy@vcRefAnnoSide              = "Bottom"          
-    ;resxy@vcRefAnnoJust              = "TopRight"
-    resxy@vcRefAnnoOrthogonalPosF    = -0.67           ; move ref vector along Y-axis
-    resxy@vcRefAnnoParallelPosF      = -0.05            ; move ref vector along X-axis
-    resxy@vcRefAnnoPerimOn           = False         ;close the border
-    resxy@vcRefAnnoFont              = font_index
-    resxy@vcRefAnnoFontHeightF       = vcref_font
-    resxy@vcRefAnnoString1On         = False
-    resxy@vcRefAnnoString2On         = True
-    ;resxy@vcRefAnnoString2           = "30m/s"
-    resxy@gsnCenterString      = ""
-    resxy@gsnLeftString    = " "
-    resxy@gsnRightString   = " "
+    resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMonoLineArrowColor       = True
+    resvc@vcLineArrowColor           = "black"
+    resvc@vcMinDistanceF             = 0.03
+    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = -0.67           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    ;resvc@vcRefAnnoString2           = "30m/s"
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
+    resvc@vcLineArrowHeadMinSizeF   = 0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015
 
-    resxy2          = resxy
-    resxy2@vcLineArrowColor           = "green"
-    resxy2@vcLineArrowThicknessF      = vc_thick + 1
-    resxy2@vcRefAnnoOn                = False
+    resvc2          = resvc
+    resvc2@vcLineArrowColor           = "green"
+    resvc2@vcLineArrowThicknessF      = vc_thick
+    resvc2@vcRefAnnoOn                = False
+    resvc2@vcLineArrowHeadMinSizeF   = 0.02
+    resvc2@vcLineArrowHeadMaxSizeF   = 0.02
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -313,9 +323,9 @@ printVarSummary(u_test)
                       (/10,2/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/20,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
 if(nl.eq.0) then
-    minlvl = (/(/ 10,-9  ,1400/),(/-2.7, -4.5, -9 /)/)
-    maxlvl = (/(/ 28, 9  ,1580/),(/ 2.7,  4.5,  9 /)/)
-    spacig = (/(/ 1 , 1  ,  10/),(/ 0.3,  0.5,  1 /)/)
+    minlvl = (/(/ 10,-9  ,1400/),(/-0.9, -4.5, -9 /)/)
+    maxlvl = (/(/ 28, 9  ,1580/),(/ 0.9,  4.5,  9 /)/)
+    spacig = (/(/ 1 , 1  ,  10/),(/ 0.1,  0.5,  1 /)/)
 end if
 
 if(nl.eq.1) then
@@ -347,16 +357,16 @@ do nc = 0, ncase-1,1
         end if
         
         if(nv.eq.0) then
-            resxy@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
-            resxy@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
-            plot_uv(nc)  = gsn_csm_vector(wks,var_u(nc,:,:),var_v(nc,:,:),resxy)
+            resvc@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
+            resvc@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+            plot_uv(nc)  = gsn_csm_vector(wks,var_u(nc,:,:),var_v(nc,:,:),resvc)
             overlay(plot(np),plot_uv(nc))
         end if
 
         if(nv.eq.0.and.nc.gt.0) then
-            resxy2@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
-            resxy2@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
-            plot_uv2 = gsn_csm_vector(wks,u_test,v_test,resxy2)
+            resvc2@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
+            resvc2@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+            plot_uv2 = gsn_csm_vector(wks,u_test,v_test,resvc2)
             overlay(plot(np),plot_uv2)
         end if
 

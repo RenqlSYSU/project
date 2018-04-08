@@ -1,0 +1,8 @@
+fpftdyn = /users/yangsong3/CESM/input/lnd/clm2/surfdata/surfdata.pftdyn_0.9x1.25_simyr1850-2005_c091008.nc
+fpftcon = /users/yangsong3/CESM/input/lnd/clm2/pftdata/pft-physiology.clm40.c130424.nc
+fsnowaging = /users/yangsong3/CESM/input/lnd/clm2/snicardata/snicar_drdt_bst_fit_60_c070416.nc
+fatmlndfrc = /users/yangsong3/CESM/input/share/domains/domain.lnd.fv0.9x1.25_gx1v6.090309.nc
+fsnowoptics = /users/yangsong3/CESM/input/lnd/clm2/snicardata/snicar_optics_5bnd_c090915.nc
+fsurdat = /users/yangsong3/CESM/input/lnd/clm2/surfdata/surfdata_0.9x1.25_simyr1850_c110921.nc
+finidat = b40_20th_1d_b08c5cn_139jp.clm2.r.1979-01-01-00000.nc
+megan_factors_file = /users/yangsong3/CESM/input/atm/cam/chem/trop_mozart/emis/megan21_emis_factors_c20120313.nc

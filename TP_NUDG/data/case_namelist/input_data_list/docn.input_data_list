@@ -1,0 +1,3 @@
+domain1 = /users/yangsong3/CESM/input/atm/cam/ocnfrac/domain.camocn.0.9x1.25_gx1v6_090403.nc
+file1 = /users/yangsong3/CESM/input/atm/cam/sst/sst_HadOIBl_bc_0.9x1.25_1850_2012_c130411.nc
+domainfile = /users/yangsong3/CESM/input/share/domains/domain.ocn.0.9x1.25_gx1v6_090403.nc

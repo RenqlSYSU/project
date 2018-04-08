@@ -1,0 +1,3 @@
+lnd2rof_fmapname = /users/yangsong3/CESM/input/lnd/clm2/mappingdata/maps/0.9x1.25/map_0.9x1.25_nomask_to_0.5x0.5_nomask_aave_da_c120522.nc
+rof2lnd_fmapname = /users/yangsong3/CESM/input/lnd/clm2/mappingdata/maps/0.9x1.25/map_0.5x0.5_nomask_to_0.9x1.25_nomask_aave_da_c121019.nc
+rof2lnd_smapname = /users/yangsong3/CESM/input/lnd/clm2/mappingdata/maps/0.9x1.25/map_0.5x0.5_nomask_to_0.9x1.25_nomask_aave_da_c121019.nc

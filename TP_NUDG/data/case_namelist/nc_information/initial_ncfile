@@ -1,0 +1,1626 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	b40_20th_1d_b08c5cn_139jp.clm2.r.1979-01-01-00000
+path:	/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/b40_20th_1d_b08c5cn_139jp.clm2.r.1979-01-01-00000.nc
+   file global attributes:
+      conventions : CF-1.0
+      history : created on 03/27/11 15:47:42
+      username : hannay
+      host : jaguarpf
+      version : cesm1_0_beta08
+      source : Community Land Model CLM4.0
+      revision_id : $Id: restFileMod.F90 21588 2010-03-10 00:58:41Z erik $
+      case_title : UNSET
+      case_id : b40_20th_1d_b08c5cn_139jp
+      surface_dataset : /tmp/proj/ccsm/inputdata/lnd/clm2/surfdata/surfdata_0.9x1.25_simyr1850_c091006.nc
+   dimensions:
+      ncl_scalar = 1
+      gridcell = 20975
+      landunit = 28110
+      column = 45689
+      pft = 277769
+      levgrnd = 15
+      levlak = 10
+      levsno = 5
+      levsno1 = 6
+      levtot = 20
+      numrad = 2
+      rtmlon = 720
+      rtmlat = 360
+      string_length = 64
+   variables:
+      integer timemgr_rst_nstep_rad_prev ( ncl_scalar )
+         long_name :	previous_radiation_nstep
+         units :	
+
+      integer timemgr_rst_type ( ncl_scalar )
+         long_name :	calendar type
+         units :	
+
+      integer timemgr_rst_step_sec ( ncl_scalar )
+         long_name :	seconds component of timestep size
+         units :	
+
+      integer timemgr_rst_start_ymd ( ncl_scalar )
+         long_name :	start date
+         units :	
+
+      integer timemgr_rst_start_tod ( ncl_scalar )
+         long_name :	start time of day
+         units :	
+
+      integer timemgr_rst_ref_ymd ( ncl_scalar )
+         long_name :	reference date
+         units :	
+
+      integer timemgr_rst_ref_tod ( ncl_scalar )
+         long_name :	reference time of day
+         units :	
+
+      integer timemgr_rst_curr_ymd ( ncl_scalar )
+         long_name :	current date
+         units :	
+
+      integer timemgr_rst_curr_tod ( ncl_scalar )
+         long_name :	current time of day
+         units :	
+
+      integer mcdate ( ncl_scalar )
+         long_name :	current date as 8 digit integer (YYYYMMDD)
+
+      integer mcsec ( ncl_scalar )
+         long_name :	current seconds of current date
+         units :	s
+
+      double grid1d_lon ( gridcell )
+         long_name :	gridcell longitude
+         units :	degrees_east
+
+      double grid1d_lat ( gridcell )
+         long_name :	gridcell latitude
+         units :	degrees_north
+
+      integer grid1d_ixy ( gridcell )
+         long_name :	2d longitude index of corresponding gridcell
+
+      integer grid1d_jxy ( gridcell )
+         long_name :	2d latitude index of corresponding gridcell
+
+      double land1d_lon ( landunit )
+         long_name :	landunit longitude
+         units :	degrees_east
+
+      double land1d_lat ( landunit )
+         long_name :	landunit latitude
+         units :	degrees_north
+
+      integer land1d_ixy ( landunit )
+         long_name :	2d longitude index of corresponding landunit
+
+      integer land1d_jxy ( landunit )
+         long_name :	2d latitude index of corresponding landunit
+
+      integer land1d_gi ( landunit )
+         long_name :	1d grid index of corresponding landunit
+
+      double land1d_wtxy ( landunit )
+         long_name :	landunit weight relative to corresponding gridcell
+
+      integer land1d_ityplun ( landunit )
+         long_name :	landunit type (vegetated,urban,lake,wetland or glacier)
+
+      double cols1d_lon ( column )
+         long_name :	column longitude
+         units :	degrees_east
+
+      double cols1d_lat ( column )
+         long_name :	column latitude
+         units :	degrees_north
+
+      integer cols1d_ixy ( column )
+         long_name :	2d longitude index of corresponding column
+
+      integer cols1d_jxy ( column )
+         long_name :	2d latitude index of corresponding column
+
+      integer cols1d_gi ( column )
+         long_name :	1d grid index of corresponding column
+
+      integer cols1d_li ( column )
+         long_name :	1d landunit index of corresponding column
+
+      double cols1d_wtxy ( column )
+         long_name :	column weight relative to corresponding gridcell
+
+      double cols1d_wtlnd ( column )
+         long_name :	column weight relative to corresponding landunit
+
+      integer cols1d_ityplun ( column )
+         long_name :	column landunit type (vegetated,urban,lake,wetland or glacier)
+
+      integer cols1d_ityp ( column )
+         long_name :	column type (61-roof,62-sunwall,63-shadewall,64-impervious road,65-pervious road,1-all other columns)
+
+      double pfts1d_lon ( pft )
+         long_name :	pft longitude
+         units :	degrees_east
+
+      double pfts1d_lat ( pft )
+         long_name :	pft latitude
+         units :	degrees_north
+
+      integer pfts1d_ixy ( pft )
+         long_name :	2d longitude index of corresponding pft
+
+      integer pfts1d_jxy ( pft )
+         long_name :	2d latitude index of corresponding pft
+
+      integer pfts1d_gi ( pft )
+         long_name :	1d grid index of corresponding pft
+
+      integer pfts1d_li ( pft )
+         long_name :	1d landunit index of corresponding pft
+
+      integer pfts1d_ci ( pft )
+         long_name :	1d column index of corresponding pft
+
+      double pfts1d_wtxy ( pft )
+         long_name :	pft weight relative to corresponding gridcell
+
+      double pfts1d_wtlnd ( pft )
+         long_name :	pft weight relative to corresponding landunit
+
+      double pfts1d_wtcol ( pft )
+         long_name :	pft weight relative to corresponding column
+
+      integer pfts1d_itypveg ( pft )
+         long_name :	pft vegetation type
+
+      integer pfts1d_ityplun ( pft )
+         long_name :	pft landunit type (vegetated,urban,lake,wetland or glacier)
+
+      double PFT_WTGCELL ( pft )
+         long_name :	pft weight relative to corresponding gridcell
+         units :	
+
+      double PFT_WTLUNIT ( pft )
+         long_name :	pft weight relative to corresponding landunit
+         units :	
+
+      double PFT_WTCOL ( pft )
+         long_name :	pft weight relative to corresponding column
+         units :	
+
+      double EFLX_LWRAD_OUT ( pft )
+         long_name :	emitted infrared (longwave) radiation
+         units :	watt/m^2
+
+      integer SNLSNO ( column )
+         long_name :	number of snow layers
+         units :	unitless
+
+      double SNOWDP ( column )
+         long_name :	snow depth
+         units :	m
+
+      double WA ( column )
+         long_name :	water in the unconfined aquifer
+         units :	mm
+
+      double WT ( column )
+         long_name :	total water storage
+         units :	mm
+
+      double ZWT ( column )
+         long_name :	water table depth
+         units :	m
+
+      double frac_sno ( column )
+         long_name :	fraction of ground covered by snow (0 to 1)
+         units :	
+
+      double DZSNO ( column, levsno )
+         long_name :	snow layer thickness
+         units :	m
+
+      double ZSNO ( column, levsno )
+         long_name :	snow layer depth
+         units :	m
+
+      double ZISNO ( column, levsno )
+         long_name :	snow interface depth
+         units :	m
+
+      double coszen ( column )
+         long_name :	cosine of solar zenith angle
+         units :	
+
+      double gdir ( pft )
+         long_name :	leaf projection in solar direction (0 to 1)
+         units :	
+
+      double omega ( pft, numrad )
+         long_name :	fraction of intercepted radiation that is scattered (0 to 1)
+         units :	
+
+      double sabs_roof_dir ( landunit, numrad )
+         long_name :	direct solar absorbed by roof per unit ground area per unit incident flux
+         units :	
+
+      double sabs_roof_dif ( landunit, numrad )
+         long_name :	diffuse solar absorbed by roof per unit ground area per unit incident flux
+         units :	
+
+      double sabs_sunwall_dir ( landunit, numrad )
+         long_name :	direct solar absorbed by sunwall per unit wall area per unit incident flux
+         units :	
+
+      double sabs_sunwall_dif ( landunit, numrad )
+         long_name :	diffuse solar absorbed by sunwall per unit wall area per unit incident flux
+         units :	
+
+      double sabs_shadewall_dir ( landunit, numrad )
+         long_name :	direct solar absorbed by shadewall per unit wall area per unit incident flux
+         units :	
+
+      double sabs_shadewall_dif ( landunit, numrad )
+         long_name :	diffuse solar absorbed by shadewall per unit wall area per unit incident flux
+         units :	
+
+      double sabs_improad_dir ( landunit, numrad )
+         long_name :	direct solar absorbed by impervious road per unit ground area per unit incident flux
+         units :	
+
+      double sabs_improad_dif ( landunit, numrad )
+         long_name :	diffuse solar absorbed by impervious road per unit ground area per unit incident flux
+         units :	
+
+      double sabs_perroad_dir ( landunit, numrad )
+         long_name :	direct solar absorbed by pervious road per unit ground area per unit incident flux
+         units :	
+
+      double sabs_perroad_dif ( landunit, numrad )
+         long_name :	diffuse solar absorbed by pervious road per unit ground area per unit incident flux
+         units :	
+
+      double vf_sr ( landunit )
+         long_name :	view factor of sky for road
+         units :	
+
+      double vf_wr ( landunit )
+         long_name :	view factor of one wall for road
+         units :	
+
+      double vf_sw ( landunit )
+         long_name :	view factor of sky for one wall
+         units :	
+
+      double vf_rw ( landunit )
+         long_name :	view factor of road for one wall
+         units :	
+
+      double vf_ww ( landunit )
+         long_name :	view factor of opposing wall for one wall
+         units :	
+
+      double taf ( landunit )
+         long_name :	urban canopy air temperature
+         units :	K
+
+      double qaf ( landunit )
+         long_name :	urban canopy specific humidity
+         units :	kg/kg
+
+      double albd ( pft, numrad )
+         long_name :	surface albedo (direct) (0 to 1)
+         units :	
+
+      double albi ( pft, numrad )
+         long_name :	surface albedo (diffuse) (0 to 1)
+         units :	
+
+      double albgrd ( column, numrad )
+         long_name :	ground albedo (direct) (0 to 1)
+         units :	
+
+      double albgri ( column, numrad )
+         long_name :	ground albedo (indirect) (0 to 1)
+         units :	
+
+      double H2OSNO ( column )
+         long_name :	snow water
+         units :	kg/m2
+
+      double H2OSOI_LIQ ( column, levtot )
+         long_name :	liquid water
+         units :	kg/m2
+
+      double H2OSOI_ICE ( column, levtot )
+         long_name :	ice lens
+         units :	kg/m2
+
+      double T_GRND ( column )
+         long_name :	ground temperature
+         units :	K
+
+      double URBAN_AC ( column )
+         long_name :	urban air conditioning flux
+         units :	watt/m^2
+
+      double URBAN_HEAT ( column )
+         long_name :	urban heating flux
+         units :	watt/m^2
+
+      double T_REF2M_MIN ( pft )
+         long_name :	daily minimum of average 2 m height surface air temperature (K)
+         units :	K
+
+      double T_REF2M_MAX ( pft )
+         long_name :	daily maximum of average 2 m height surface air temperature (K)
+         units :	K
+
+      double T_REF2M_MIN_INST ( pft )
+         long_name :	instantaneous daily min of average 2 m height surface air temp (K)
+         units :	K
+
+      double T_REF2M_MAX_INST ( pft )
+         long_name :	instantaneous daily max of average 2 m height surface air temp (K)
+         units :	K
+
+      double T_REF2M_U ( pft )
+         long_name :	Urban 2m height surface air temperature
+         units :	K
+
+      double T_GRND_U ( column )
+         long_name :	urban ground temperature
+         units :	K
+
+      double T_REF2M_MIN_U ( pft )
+         long_name :	urban daily minimum of average 2 m height surface air temperature (K)
+         units :	K
+
+      double T_REF2M_MAX_U ( pft )
+         long_name :	urban daily maximum of average 2 m height surface air temperature (K)
+         units :	K
+
+      double T_REF2M_MIN_INST_U ( pft )
+         long_name :	urban instantaneous daily min of average 2 m height surface air temp (K)
+         units :	K
+
+      double T_REF2M_MAX_INST_U ( pft )
+         long_name :	urban instantaneous daily max of average 2 m height surface air temp (K)
+         units :	K
+
+      double T_REF2M_R ( pft )
+         long_name :	Rural 2m height surface air temperature
+         units :	K
+
+      double T_GRND_R ( column )
+         long_name :	rural ground temperature
+         units :	K
+
+      double T_REF2M_MIN_R ( pft )
+         long_name :	rural daily minimum of average 2 m height surface air temperature (K)
+         units :	K
+
+      double T_REF2M_MAX_R ( pft )
+         long_name :	rural daily maximum of average 2 m height surface air temperature (K)
+         units :	K
+
+      double T_REF2M_MIN_INST_R ( pft )
+         long_name :	rural instantaneous daily min of average 2 m height surface air temp (K)
+         units :	K
+
+      double T_REF2M_MAX_INST_R ( pft )
+         long_name :	rural instantaneous daily max of average 2 m height surface air temp (K)
+         units :	K
+
+      double T_SOISNO ( column, levtot )
+         long_name :	soil-snow temperature
+         units :	K
+
+      double T_LAKE ( column, levlak )
+         long_name :	lake temperature
+         units :	K
+
+      integer FRAC_VEG_NOSNO_ALB ( pft )
+         long_name :	fraction of vegetation not covered by snow (0 or 1)
+         units :	
+
+      double FWET ( pft )
+         long_name :	fraction of canopy that is wet (0 to 1)
+         units :	
+
+      double tlai ( pft )
+         long_name :	one-sided leaf area index, no burying by snow
+         units :	
+
+      double tsai ( pft )
+         long_name :	one-sided stem area index, no burying by snow
+         units :	
+
+      double mlaidiff ( pft )
+         long_name :	difference between lai month one and month two
+         units :	
+
+      double elai ( pft )
+         long_name :	one-sided leaf area index, with burying by snow
+         units :	
+
+      double esai ( pft )
+         long_name :	one-sided stem area index, with burying by snow
+         units :	
+
+      double fsun ( pft )
+         long_name :	sunlit fraction of canopy
+         units :	
+
+      double htop ( pft )
+         long_name :	canopy top
+         units :	m
+
+      double hbot ( pft )
+         long_name :	canopy botton
+         units :	m
+
+      double fabd ( pft, numrad )
+         long_name :	flux absorbed by veg per unit direct flux
+         units :	
+
+      double fabi ( pft, numrad )
+         long_name :	flux absorbed by veg per unit diffuse flux
+         units :	
+
+      double ftdd ( pft, numrad )
+         long_name :	down direct flux below veg per unit direct flux
+         units :	
+
+      double ftid ( pft, numrad )
+         long_name :	down diffuse flux below veg per unit direct flux
+         units :	
+
+      double ftii ( pft, numrad )
+         long_name :	down diffuse flux below veg per unit diffuse flux
+         units :	
+
+      double T_VEG ( pft )
+         long_name :	vegetation temperature
+         units :	K
+
+      double T_REF2M ( pft )
+         long_name :	2m height surface air temperature
+         units :	K
+
+      double H2OCAN ( pft )
+         long_name :	canopy water
+         units :	kg/m2
+
+      double snw_rds ( column, levsno )
+         long_name :	snow layer effective radius
+         units :	um
+
+      double mss_bcpho ( column, levsno )
+         long_name :	snow layer hydrophobic black carbon mass
+         units :	kg m-2
+
+      double mss_bcphi ( column, levsno )
+         long_name :	snow layer hydrophilic black carbon mass
+         units :	kg m-2
+
+      double mss_ocpho ( column, levsno )
+         long_name :	snow layer hydrophobic organic carbon mass
+         units :	kg m-2
+
+      double mss_ocphi ( column, levsno )
+         long_name :	snow layer hydrophilic organic carbon mass
+         units :	kg m-2
+
+      double mss_dst1 ( column, levsno )
+         long_name :	snow layer dust species 1 mass
+         units :	kg m-2
+
+      double mss_dst2 ( column, levsno )
+         long_name :	snow layer dust species 2 mass
+         units :	kg m-2
+
+      double mss_dst3 ( column, levsno )
+         long_name :	snow layer dust species 3 mass
+         units :	kg m-2
+
+      double mss_dst4 ( column, levsno )
+         long_name :	snow layer dust species 4 mass
+         units :	kg m-2
+
+      double flx_absdv ( column, levsno1 )
+         long_name :	snow layer flux absorption factors (direct, VIS)
+         units :	fraction
+
+      double flx_absdn ( column, levsno1 )
+         long_name :	snow layer flux absorption factors (direct, NIR)
+         units :	fraction
+
+      double flx_absiv ( column, levsno1 )
+         long_name :	snow layer flux absorption factors (diffuse, VIS)
+         units :	fraction
+
+      double flx_absin ( column, levsno1 )
+         long_name :	snow layer flux absorption factors (diffuse, NIR)
+         units :	fraction
+
+      double albsnd_hst ( column, numrad )
+         long_name :	snow albedo (direct) (0 to 1)
+         units :	proportion
+
+      double albsni_hst ( column, numrad )
+         long_name :	snow albedo (diffuse) (0 to 1)
+         units :	proportion
+
+      double qflx_snofrz_lyr ( column, levsno )
+         long_name :	snow layer ice freezing rate
+         units :	kg m-2 s-1
+
+      double dormant_flag ( pft )
+         long_name :	
+         units :	
+
+      double days_active ( pft )
+         long_name :	
+         units :	
+
+      double onset_flag ( pft )
+         long_name :	
+         units :	
+
+      double onset_counter ( pft )
+         long_name :	
+         units :	
+
+      double onset_gddflag ( pft )
+         long_name :	
+         units :	
+
+      double onset_fdd ( pft )
+         long_name :	
+         units :	
+
+      double onset_gdd ( pft )
+         long_name :	
+         units :	
+
+      double onset_swi ( pft )
+         long_name :	
+         units :	
+
+      double offset_flag ( pft )
+         long_name :	
+         units :	
+
+      double offset_counter ( pft )
+         long_name :	
+         units :	
+
+      double offset_fdd ( pft )
+         long_name :	
+         units :	
+
+      double offset_swi ( pft )
+         long_name :	
+         units :	
+
+      double lgsf ( pft )
+         long_name :	
+         units :	
+
+      double bglfr ( pft )
+         long_name :	
+         units :	
+
+      double bgtr ( pft )
+         long_name :	
+         units :	
+
+      double dayl ( pft )
+         long_name :	
+         units :	
+
+      double prev_dayl ( pft )
+         long_name :	
+         units :	
+
+      double annavg_t2m ( pft )
+         long_name :	
+         units :	
+
+      double tempavg_t2m ( pft )
+         long_name :	
+         units :	
+
+      double gpp_pepv ( pft )
+         long_name :	
+         units :	
+
+      double availc ( pft )
+         long_name :	
+         units :	
+
+      double xsmrpool_recover ( pft )
+         long_name :	
+         units :	
+
+      double alloc_pnow ( pft )
+         long_name :	
+         units :	
+
+      double c_allometry ( pft )
+         long_name :	
+         units :	
+
+      double n_allometry ( pft )
+         long_name :	
+         units :	
+
+      double plant_ndemand ( pft )
+         long_name :	
+         units :	
+
+      double tempsum_potential_gpp ( pft )
+         long_name :	
+         units :	
+
+      double annsum_potential_gpp ( pft )
+         long_name :	
+         units :	
+
+      double tempmax_retransn ( pft )
+         long_name :	
+         units :	
+
+      double annmax_retransn ( pft )
+         long_name :	
+         units :	
+
+      double avail_retransn ( pft )
+         long_name :	
+         units :	
+
+      double plant_nalloc ( pft )
+         long_name :	
+         units :	
+
+      double plant_calloc ( pft )
+         long_name :	
+         units :	
+
+      double excess_cflux ( pft )
+         long_name :	
+         units :	
+
+      double downreg ( pft )
+         long_name :	
+         units :	
+
+      double prev_leafc_to_litter ( pft )
+         long_name :	
+         units :	
+
+      double prev_frootc_to_litter ( pft )
+         long_name :	
+         units :	
+
+      double tempsum_npp ( pft )
+         long_name :	
+         units :	
+
+      double annsum_npp ( pft )
+         long_name :	
+         units :	
+
+      double leafc ( pft )
+         long_name :	
+         units :	
+
+      double leafc_storage ( pft )
+         long_name :	
+         units :	
+
+      double leafc_xfer ( pft )
+         long_name :	
+         units :	
+
+      double frootc ( pft )
+         long_name :	
+         units :	
+
+      double frootc_storage ( pft )
+         long_name :	
+         units :	
+
+      double frootc_xfer ( pft )
+         long_name :	
+         units :	
+
+      double livestemc ( pft )
+         long_name :	
+         units :	
+
+      double livestemc_storage ( pft )
+         long_name :	
+         units :	
+
+      double livestemc_xfer ( pft )
+         long_name :	
+         units :	
+
+      double deadstemc ( pft )
+         long_name :	
+         units :	
+
+      double deadstemc_storage ( pft )
+         long_name :	
+         units :	
+
+      double deadstemc_xfer ( pft )
+         long_name :	
+         units :	
+
+      double livecrootc ( pft )
+         long_name :	
+         units :	
+
+      double livecrootc_storage ( pft )
+         long_name :	
+         units :	
+
+      double livecrootc_xfer ( pft )
+         long_name :	
+         units :	
+
+      double deadcrootc ( pft )
+         long_name :	
+         units :	
+
+      double deadcrootc_storage ( pft )
+         long_name :	
+         units :	
+
+      double deadcrootc_xfer ( pft )
+         long_name :	
+         units :	
+
+      double gresp_storage ( pft )
+         long_name :	
+         units :	
+
+      double gresp_xfer ( pft )
+         long_name :	
+         units :	
+
+      double cpool ( pft )
+         long_name :	
+         units :	
+
+      double xsmrpool ( pft )
+         long_name :	
+         units :	
+
+      double pft_ctrunc ( pft )
+         long_name :	
+         units :	
+
+      double totvegc ( pft )
+         long_name :	
+         units :	
+
+      double leafn ( pft )
+         long_name :	
+         units :	
+
+      double leafn_storage ( pft )
+         long_name :	
+         units :	
+
+      double leafn_xfer ( pft )
+         long_name :	
+         units :	
+
+      double frootn ( pft )
+         long_name :	
+         units :	
+
+      double frootn_storage ( pft )
+         long_name :	
+         units :	
+
+      double frootn_xfer ( pft )
+         long_name :	
+         units :	
+
+      double livestemn ( pft )
+         long_name :	
+         units :	
+
+      double livestemn_storage ( pft )
+         long_name :	
+         units :	
+
+      double livestemn_xfer ( pft )
+         long_name :	
+         units :	
+
+      double deadstemn ( pft )
+         long_name :	
+         units :	
+
+      double deadstemn_storage ( pft )
+         long_name :	
+         units :	
+
+      double deadstemn_xfer ( pft )
+         long_name :	
+         units :	
+
+      double livecrootn ( pft )
+         long_name :	
+         units :	
+
+      double livecrootn_storage ( pft )
+         long_name :	
+         units :	
+
+      double livecrootn_xfer ( pft )
+         long_name :	
+         units :	
+
+      double deadcrootn ( pft )
+         long_name :	
+         units :	
+
+      double deadcrootn_storage ( pft )
+         long_name :	
+         units :	
+
+      double deadcrootn_xfer ( pft )
+         long_name :	
+         units :	
+
+      double retransn ( pft )
+         long_name :	
+         units :	
+
+      double npool ( pft )
+         long_name :	
+         units :	
+
+      double pft_ntrunc ( pft )
+         long_name :	
+         units :	
+
+      double decl ( column )
+         long_name :	
+         units :	
+
+      double fpi ( column )
+         long_name :	
+         units :	
+
+      double fpg ( column )
+         long_name :	
+         units :	
+
+      double annsum_counter ( column )
+         long_name :	
+         units :	
+
+      double cannsum_npp ( column )
+         long_name :	
+         units :	
+
+      double cannavg_t2m ( column )
+         long_name :	
+         units :	
+
+      double wf ( column )
+         long_name :	
+         units :	
+
+      double me ( column )
+         long_name :	
+         units :	
+
+      double fire_prob ( column )
+         long_name :	
+         units :	
+
+      double mean_fire_prob ( column )
+         long_name :	
+         units :	
+
+      double fireseasonl ( column )
+         long_name :	
+         units :	
+
+      double farea_burned ( column )
+         long_name :	
+         units :	
+
+      double ann_farea_burned ( column )
+         long_name :	
+         units :	
+
+      double cwdc ( column )
+         long_name :	
+         units :	
+
+      double litr1c ( column )
+         long_name :	
+         units :	
+
+      double litr2c ( column )
+         long_name :	
+         units :	
+
+      double litr3c ( column )
+         long_name :	
+         units :	
+
+      double soil1c ( column )
+         long_name :	
+         units :	
+
+      double soil2c ( column )
+         long_name :	
+         units :	
+
+      double soil3c ( column )
+         long_name :	
+         units :	
+
+      double soil4c ( column )
+         long_name :	
+         units :	
+
+      double seedc ( column )
+         long_name :	
+         units :	
+
+      double col_ctrunc ( column )
+         long_name :	
+         units :	
+
+      double totlitc ( column )
+         long_name :	
+         units :	
+
+      double totcolc ( column )
+         long_name :	
+         units :	
+
+      double prod10c ( column )
+         long_name :	
+         units :	
+
+      double prod100c ( column )
+         long_name :	
+         units :	
+
+      double cwdn ( column )
+         long_name :	
+         units :	
+
+      double litr1n ( column )
+         long_name :	
+         units :	
+
+      double litr2n ( column )
+         long_name :	
+         units :	
+
+      double litr3n ( column )
+         long_name :	
+         units :	
+
+      double soil1n ( column )
+         long_name :	
+         units :	
+
+      double soil2n ( column )
+         long_name :	
+         units :	
+
+      double soil3n ( column )
+         long_name :	
+         units :	
+
+      double soil4n ( column )
+         long_name :	
+         units :	
+
+      double sminn ( column )
+         long_name :	
+         units :	
+
+      double col_ntrunc ( column )
+         long_name :	
+         units :	
+
+      double totcoln ( column )
+         long_name :	
+         units :	
+
+      double seedn ( column )
+         long_name :	
+         units :	
+
+      double prod10n ( column )
+         long_name :	
+         units :	
+
+      double prod100n ( column )
+         long_name :	
+         units :	
+
+      double RTM_VOLR_LIQ ( rtmlat, rtmlon )
+         long_name :	water volume in cell (volr)
+         units :	m3
+
+      double RTM_VOLR_ICE ( rtmlat, rtmlon )
+         long_name :	water volume in cell (volr)
+         units :	m3
+
+      double RTM_FLUXOUT_LIQ ( rtmlat, rtmlon )
+         long_name :	water fluxout in cell (fluxout)
+         units :	m3/s
+
+      double RTM_FLUXOUT_ICE ( rtmlat, rtmlon )
+         long_name :	water fluxout in cell (fluxout)
+         units :	m3/s
+
+      double RTM_RUNOFF_LIQ ( rtmlat, rtmlon )
+         long_name :	runoff (runoff)
+         units :	m3/s
+
+      double RTM_RUNOFF_ICE ( rtmlat, rtmlon )
+         long_name :	runoff (runoff)
+         units :	m3/s
+
+      double RTM_DVOLRDT_LIQ ( rtmlat, rtmlon )
+         long_name :	water volume change in cell (dvolrdt)
+         units :	mm/s
+
+      double RTM_DVOLRDT_ICE ( rtmlat, rtmlon )
+         long_name :	water volume change in cell (dvolrdt)
+         units :	mm/s
+
+      double RTM_INPUT_LIQ ( gridcell )
+         long_name :	average input on clm grid (rtmin_acc)
+         units :	mm/s
+
+      double RTM_INPUT_ICE ( gridcell )
+         long_name :	average input on clm grid (rtmin_acc)
+         units :	mm/s
+
+      integer RTM_NCOUNT ( ncl_scalar )
+         long_name :	counter for RTM averaged input on CLM grid
+         units :	
+
+      double TREFAV_VALUE ( pft )
+         long_name :	average over an hour of 2-m temperature
+         units :	K
+
+      integer TREFAV_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double TREFAV_U_VALUE ( pft )
+         long_name :	average over an hour of urban 2-m temperature
+         units :	K
+
+      integer TREFAV_U_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double TREFAV_R_VALUE ( pft )
+         long_name :	average over an hour of rural 2-m temperature
+         units :	K
+
+      integer TREFAV_R_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double T_VEG24_VALUE ( pft )
+         long_name :	24hr average of vegetation temperature
+         units :	K
+
+      integer T_VEG24_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double T_VEG240_VALUE ( pft )
+         long_name :	240hr average of vegetation temperature
+         units :	K
+
+      integer T_VEG240_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double FSD24_VALUE ( pft )
+         long_name :	24hr average of direct solar radiation
+         units :	W/m2
+
+      integer FSD24_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double FSD240_VALUE ( pft )
+         long_name :	240hr average of direct solar radiation
+         units :	W/m2
+
+      integer FSD240_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double FSI24_VALUE ( pft )
+         long_name :	24hr average of diffuse solar radiation
+         units :	W/m2
+
+      integer FSI24_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double FSI240_VALUE ( pft )
+         long_name :	240hr average of diffuse solar radiation
+         units :	W/m2
+
+      integer FSI240_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double FSUN24_VALUE ( pft )
+         long_name :	24hr average of diffuse solar radiation
+         units :	fraction
+
+      integer FSUN24_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double FSUN240_VALUE ( pft )
+         long_name :	240hr average of diffuse solar radiation
+         units :	fraction
+
+      integer FSUN240_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+      double LAIP_VALUE ( pft )
+         long_name :	leaf area index average over timestep
+         units :	m2/m2
+
+      integer LAIP_PERIOD ( ncl_scalar )
+         long_name :	
+         units :	time steps
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	b40_20th_1d_b08c5cn_139jp.cice.r.1979-01-01-00000
+path:	/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/b40_20th_1d_b08c5cn_139jp.cice.r.1979-01-01-00000.nc
+   file global attributes:
+      istep1 : 17520
+      time : 62409744000
+      time_forc : 3942000000
+   dimensions:
+      ni = 320
+      nj = 384
+      ncat = 5
+      ntilyr = 20
+      ntslyr = 5
+   variables:
+      double aicen ( ncat, nj, ni )
+
+      double vicen ( ncat, nj, ni )
+
+      double vsnon ( ncat, nj, ni )
+
+      double Tsfcn ( ncat, nj, ni )
+
+      double aerosnossl1 ( ncat, nj, ni )
+
+      double aerosnoint1 ( ncat, nj, ni )
+
+      double aeroicessl1 ( ncat, nj, ni )
+
+      double aeroiceint1 ( ncat, nj, ni )
+
+      double aerosnossl2 ( ncat, nj, ni )
+
+      double aerosnoint2 ( ncat, nj, ni )
+
+      double aeroicessl2 ( ncat, nj, ni )
+
+      double aeroiceint2 ( ncat, nj, ni )
+
+      double aerosnossl3 ( ncat, nj, ni )
+
+      double aerosnoint3 ( ncat, nj, ni )
+
+      double aeroicessl3 ( ncat, nj, ni )
+
+      double aeroiceint3 ( ncat, nj, ni )
+
+      double iage ( ncat, nj, ni )
+
+      double FY ( ncat, nj, ni )
+
+      double volpn ( ncat, nj, ni )
+
+      double apondn ( ncat, nj, ni )
+
+      double hpondn ( ncat, nj, ni )
+
+      double eicen ( ntilyr, nj, ni )
+
+      double esnon ( ntslyr, nj, ni )
+
+      double uvel ( nj, ni )
+
+      double vvel ( nj, ni )
+
+      double coszen ( nj, ni )
+
+      double scale_factor ( nj, ni )
+
+      double swvdr ( nj, ni )
+
+      double swvdf ( nj, ni )
+
+      double swidr ( nj, ni )
+
+      double swidf ( nj, ni )
+
+      double strocnxT ( nj, ni )
+
+      double strocnyT ( nj, ni )
+
+      double stressp_1 ( nj, ni )
+
+      double stressp_2 ( nj, ni )
+
+      double stressp_3 ( nj, ni )
+
+      double stressp_4 ( nj, ni )
+
+      double stressm_1 ( nj, ni )
+
+      double stressm_2 ( nj, ni )
+
+      double stressm_3 ( nj, ni )
+
+      double stressm_4 ( nj, ni )
+
+      double stress12_1 ( nj, ni )
+
+      double stress12_2 ( nj, ni )
+
+      double stress12_3 ( nj, ni )
+
+      double stress12_4 ( nj, ni )
+
+      double iceumask ( nj, ni )
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	b40_20th_1d_b08c5cn_139jp.cam.i.1979-01-01-00000
+path:	/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/b40_20th_1d_b08c5cn_139jp.cam.i.1979-01-01-00000.nc
+   file global attributes:
+      Conventions : CF-1.0
+      source : CAM
+      case : b40_20th_1d_b08c5cn_139jp
+      title : UNSET
+      logname : hannay
+      host : jaguarpf-batch8
+      Version : $Name$
+      revision_Id : $Id$
+      initial_file : b40_1850_1d_b08c5cn_138j.cam2.i.0232-01-01-00000.nc
+      topography_file : /tmp/proj/ccsm/inputdata/atm/cam/topo/USGS-gtopo30_0.9x1.25_remap_c051027.nc
+   dimensions:
+      ncl_scalar = 1
+      lat = 192
+      lon = 288
+      slat = 191
+      slon = 288
+      lev = 30
+      ilev = 31
+      isccp_prs = 7
+      isccp_tau = 7
+      isccp_prstau = 49
+      time = 1  // unlimited
+      tbnd = 2
+      chars = 8
+   variables:
+      double P0 ( ncl_scalar )
+         long_name :	reference pressure
+         units :	Pa
+
+      double lat ( lat )
+         long_name :	latitude
+         units :	degrees_north
+
+      double lon ( lon )
+         long_name :	longitude
+         units :	degrees_east
+
+      double slat ( slat )
+         long_name :	staggered latitude
+         units :	degrees_north
+
+      double slon ( slon )
+         long_name :	staggered longitude
+         units :	degrees_east
+
+      double w_stag ( slat )
+         long_name :	staggered latitude weights
+
+      double lev ( lev )
+         long_name :	hybrid level at midpoints (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyam b: hybm p0: P0 ps: PS
+
+      double ilev ( ilev )
+         long_name :	hybrid level at interfaces (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyai b: hybi p0: P0 ps: PS
+
+      double isccp_prs ( isccp_prs )
+         long_name :	Mean ISCCP pressure
+         units :	mb
+         isccp_prs_bnds :	(    0,  180,  310,  440,  560,  680,  800, 1000 )
+
+      double isccp_tau ( isccp_tau )
+         long_name :	Mean ISCCP optical depth
+         units :	unitless
+         isccp_tau_bnds :	(    0,  0.3,  1.3,  3.6,  9.4,   23,   60,  379 )
+
+      double isccp_prstau ( isccp_prstau )
+         long_name :	Mean pressure (mb).mean optical depth (unitless)/1000
+         units :	mixed
+
+      double time ( time )
+         long_name :	time
+         units :	days since 1850-01-01 00:00:00
+         calendar :	noleap
+         bounds :	time_bnds
+
+      double time_bnds ( time, tbnd )
+         long_name :	time interval endpoints
+
+      character date_written ( time, chars )
+
+      character time_written ( time, chars )
+
+      integer ntrm ( ncl_scalar )
+         long_name :	spectral truncation parameter M
+
+      integer ntrn ( ncl_scalar )
+         long_name :	spectral truncation parameter N
+
+      integer ntrk ( ncl_scalar )
+         long_name :	spectral truncation parameter K
+
+      integer ndbase ( ncl_scalar )
+         long_name :	base day
+
+      integer nsbase ( ncl_scalar )
+         long_name :	seconds of base day
+
+      integer nbdate ( ncl_scalar )
+         long_name :	base date (YYYYMMDD)
+
+      integer nbsec ( ncl_scalar )
+         long_name :	seconds of base date
+
+      integer mdt ( ncl_scalar )
+         long_name :	timestep
+         units :	s
+
+      double hyai ( ilev )
+         long_name :	hybrid A coefficient at layer interfaces
+
+      double hybi ( ilev )
+         long_name :	hybrid B coefficient at layer interfaces
+
+      double hyam ( lev )
+         long_name :	hybrid A coefficient at layer midpoints
+
+      double hybm ( lev )
+         long_name :	hybrid B coefficient at layer midpoints
+
+      double gw ( lat )
+         long_name :	gauss weights
+
+      integer ndcur ( time )
+         long_name :	current day (from base day)
+
+      integer nscur ( time )
+         long_name :	current seconds of current day
+
+      integer date ( time )
+         long_name :	current date (YYYYMMDD)
+
+      integer datesec ( time )
+         long_name :	current seconds of current date
+
+      integer nsteph ( time )
+         long_name :	current timestep
+
+      double CLDICE ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	Grid box averaged cloud ice amount
+
+      double CLDLIQ ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	Grid box averaged cloud liquid amount
+
+      double DMS ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	DMS
+
+      double H2O2 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	H2O2
+
+      double H2SO4 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	H2SO4
+
+      double ICEFRAC ( time, lat, lon )
+         units :	fraction
+         long_name :	Fraction of sfc area covered by sea-ice
+
+      double NUMICE ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	Grid box averaged cloud ice number
+
+      double NUMLIQ ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	Grid box averaged cloud liquid number
+
+      double PS ( time, lat, lon )
+         units :	Pa
+         long_name :	Surface pressure
+
+      double Q ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	Specific humidity
+
+      double SICTHK ( time, lat, lon )
+         units :	m
+         long_name :	Sea ice thickness
+
+      double SNOWHICE ( time, lat, lon )
+         units :	m
+         long_name :	Water equivalent snow depth
+
+      double SO2 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	SO2
+
+      double SOAG ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	SOAG
+
+      double T ( time, lev, lat, lon )
+         units :	K
+         long_name :	Temperature
+
+      double TS1 ( time, lat, lon )
+         units :	K
+         long_name :	TS1      subsoil temperature
+
+      double TS2 ( time, lat, lon )
+         units :	K
+         long_name :	TS2      subsoil temperature
+
+      double TS3 ( time, lat, lon )
+         units :	K
+         long_name :	TS3      subsoil temperature
+
+      double TS4 ( time, lat, lon )
+         units :	K
+         long_name :	TS4      subsoil temperature
+
+      double TSICE ( time, lat, lon )
+         units :	K
+         long_name :	Ice temperature
+
+      double US ( time, lev, slat, lon )
+         units :	m/s
+         long_name :	Zonal wind, staggered
+
+      double VS ( time, lev, lat, slon )
+         units :	m/s
+         long_name :	Meridional wind, staggered
+
+      double bc_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	bc_a1
+
+      double dst_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	dst_a1
+
+      double dst_a3 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	dst_a3
+
+      double ncl_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	ncl_a1
+
+      double ncl_a2 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	ncl_a2
+
+      double ncl_a3 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	ncl_a3
+
+      double num_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	num_a1
+
+      double num_a2 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	num_a2
+
+      double num_a3 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	num_a3
+
+      double pom_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	pom_a1
+
+      double so4_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	so4_a1
+
+      double so4_a2 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	so4_a2
+
+      double so4_a3 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	so4_a3
+
+      double soa_a1 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	soa_a1
+
+      double soa_a2 ( time, lev, lat, lon )
+         units :	kg/kg
+         long_name :	soa_a2
+
+ 

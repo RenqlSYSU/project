@@ -1,0 +1,1256 @@
+Variable: f
+Type: file
+filename:	sst_HadOIBl_bc_0.9x1.25_1850_2012_c130411
+path:	/users/yangsong3/CESM/input/atm/cam/sst/sst_HadOIBl_bc_0.9x1.25_1850_2012_c130411.nc
+   file global attributes:
+      history : 2013-04-10 14:23:11 regrid -i MODEL.ICE.HAD185001-198110.OI198111-201303.nc -s MODEL.SST.HAD185001-198110.OI198111-201303.nc -g /glade/p/cesm/amwg/jcaron/coords/fv_0.9x1.25.nc -o sstice0.9x1.25.nc
+2013-04-10 15:35:25 bcgen -i sstice0.9x1.25.nc -c clim.nc -t sst_HadOIBl_bc_0.9x1.25_1850_2012_c130411.nc
+   dimensions:
+      lon = 288
+      lat = 192
+      time = 1956  // unlimited
+   variables:
+      integer date ( time )
+         long_name :	current date (YYYYMMDD)
+
+      integer datesec ( time )
+         long_name :	current seconds of current date
+
+      double lon ( lon )
+         long_name :	longitude
+         units :	degrees_east
+
+      double lat ( lat )
+         long_name :	latitude
+         units :	degrees_north
+
+      double time ( time )
+         units :	days since 1850-01-01 00:00:00
+         calendar :	365_day
+
+      float ice_cov ( time, lat, lon )
+         long_name :	BCS Pseudo Sea-ice concentration
+         units :	fraction
+
+      float ice_cov_prediddle ( time, lat, lon )
+         long_name :	Sea-ice concentration before time diddling
+         units :	fraction
+
+      float SST_cpl ( time, lat, lon )
+         long_name :	BCS Pseudo SST
+         units :	deg_C
+
+      float SST_cpl_prediddle ( time, lat, lon )
+         long_name :	SST before time diddling
+         units :	deg_C
+
+ 
+Variable: f
+Type: file
+filename:	pft-physiology.clm40.c130424
+path:	/users/yangsong3/CESM/input/lnd/clm2/pftdata/pft-physiology.clm40.c130424.nc
+   file global attributes:
+      history : Wed Apr 24 12:12:21 MDT 2013: Convert min_planting_temp and planting_temp from Celcius to Kelvin (add 273.15d00)Mon Apr 25 13:15:54 2011: ncks --exclude -v vcmx25,dw_fcel,dw_flig pft-physiology.c110331.nc pft-physiology.c110425.nc
+Thu Mar 31 17:44:06 MDT 201: Change some meta-data on crop planting dates, change wheat pftname for temperate cereal\nTue Mar 29 15:29:41 MDT 2011: Add planting temperatures and dates, temperatures are from EPIC model parameterizations, dates are in line with typical planting dates for the US\nMon Mar  7 15:17:52 MST 2011: Add valid_range, flags, change a few names\nWed Mar  2 22:17:36 MST 2011: Add grpnow and pftdyn variables on file\nThu Feb 17 09:50 2011: Add crop variables onto file\n Fri Feb 25 12:53:22 MST 2011: Add grperc on file, fix declfact long_name
+      Conventions : CF-1.0
+      title : Vegetation (Plant Function Type or PFT) constants
+   dimensions:
+      pft = 21
+      string_length = 40
+   variables:
+      double aleaff ( pft )
+         long_name :	Leaf Allocation coefficient parameter used in CNAllocationn
+         units :	unitless
+         coordinates :	pftname
+
+      double allconsl ( pft )
+         long_name :	Leaf Allocation coefficient parameter power used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double allconss ( pft )
+         long_name :	Stem Allocation coefficient parameter power used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double arootf ( pft )
+         long_name :	Root Allocation coefficient parameter used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double arooti ( pft )
+         long_name :	Root Allocation coefficient parameter used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double astemf ( pft )
+         long_name :	Stem Allocation coefficient parameter used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double baset ( pft )
+         long_name :	Base Temperature, parameter used in accFlds
+         units :	C
+         coordinates :	pftname
+
+      double bfact ( pft )
+         long_name :	Exponential factor used in CNAllocation for fraction allocated to leaf
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double c3psn ( pft )
+         long_name :	Photosynthetic pathway
+         units :	flag
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         flag_meanings :	C4 C3
+         flag_values :	(    0,    1 )
+
+      double croot_stem ( pft )
+         long_name :	Allocation parameter: new coarse root C per new stem C
+         units :	gC/gC
+         coordinates :	pftname
+
+      double crop ( pft )
+         long_name :	Binary crop PFT flag:
+         units :	logical flag
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         flag_values :	(    0,    1 )
+         flag_meanings :	NOT_crop crop_PFT
+
+      double deadwdcn ( pft )
+         long_name :	Dead wood (xylem and heartwood) C:N
+         units :	gC/gN
+         coordinates :	pftname
+
+      double declfact ( pft )
+         long_name :	Decline factor for gddmaturity used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double displar ( pft )
+         long_name :	Ratio of displacement height to canopy top height
+         units :	unitless
+         coordinates :	pftname
+
+      double dleaf ( pft )
+         long_name :	Characteristic leaf dimension
+         units :	m
+         coordinates :	pftname
+
+      double dsladlai ( pft )
+         long_name :	Through canopy, projected area basis: dSLA/dLAI
+         units :	m^2/gC
+         coordinates :	pftname
+
+      double evergreen ( pft )
+         long_name :	Binary flag for evergreen leaf habit
+         units :	logical flag
+         coordinates :	pftname
+         flag_meanings :	NON-evergreen evergreen
+         flag_values :	(    0,    1 )
+
+      double fcur ( pft )
+         long_name :	Allocation parameter: fraction of allocation that goes to currently displayed growth, remainder to storage
+         units :	fraction
+         coordinates :	pftname
+
+      double fcurdv ( pft )
+         long_name :	Alternate fcur for use with CNDV
+         units :	fraction
+         coordinates :	pftname
+
+      double fleafi ( pft )
+         long_name :	Leaf Allocation coefficient parameter fraction used in CNAllocation
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double flivewd ( pft )
+         long_name :	Allocation parameter: fraction of new wood that is live (phloem and ray parenchyma)
+         units :	fraction
+         coordinates :	pftname
+
+      double flnr ( pft )
+         long_name :	Fraction of leaf N in Rubisco enzyme
+         units :	fraction
+         coordinates :	pftname
+
+      double fnitr ( pft )
+         long_name :	Foliage nitrogen limitation factor
+         units :	unitless
+         coordinates :	pftname
+
+      double fr_fcel ( pft )
+         long_name :	Fine root litter cellulose fraction
+         units :	fraction
+         coordinates :	pftname
+
+      double fr_flab ( pft )
+         long_name :	Fine root litter labile fraction
+         units :	fraction
+         coordinates :	pftname
+
+      double fr_flig ( pft )
+         long_name :	Fine root litter lignin fraction
+         units :	fraction
+         coordinates :	pftname
+
+      double froot_leaf ( pft )
+         long_name :	Allocation parameter: new fine root C per new leaf C
+         units :	gC/gC
+         coordinates :	pftname
+
+      double frootcn ( pft )
+         long_name :	Fine root C:N
+         units :	gC/gN
+         coordinates :	pftname
+
+      double gddmin ( pft )
+         long_name :	Minimim growing degree days used in CNPhenology
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double graincn ( pft )
+         long_name :	Grain C:N
+         units :	gC/gN
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double grnfill ( pft )
+         long_name :	Grain fill parameter used in CNPhenology
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double grperc ( pft )
+         long_name :	Growth respiration factor
+         units :	unitless
+         coordinates :	pftname
+
+      double grpnow ( pft )
+         long_name :	Growth respiration factor
+         units :	unitless
+         coordinates :	pftname
+
+      double hybgdd ( pft )
+         long_name :	Growing Degree Days for maturity used in CNPhenology
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double irrigated ( pft )
+         long_name :	Binary Irrigated PFT flag
+         units :	logical flag
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         flag_meanings :	NOT_irrigated irrigated
+         flag_values :	(    0,    1 )
+
+      double laimx ( pft )
+         long_name :	Maximum Leaf Area Index used in CNVegStructUpdate
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double leaf_long ( pft )
+         long_name :	Leaf longevity
+         units :	years
+         coordinates :	pftname
+
+      double leafcn ( pft )
+         long_name :	Leaf C:N
+         units :	gC/gN
+         coordinates :	pftname
+
+      double lf_fcel ( pft )
+         long_name :	Leaf litter cellulose fraction
+         units :	fraction
+         coordinates :	pftname
+
+      double lf_flab ( pft )
+         long_name :	Leaf litter labile fraction
+         units :	fraction
+         coordinates :	pftname
+
+      double lf_flig ( pft )
+         long_name :	Leaf litter lignin fraction
+         units :	fraction
+         coordinates :	pftname
+
+      double lfemerg ( pft )
+         long_name :	Leaf emergence parameter used in CNPhenology
+         units :	unitless
+         _FillValue :	   0
+         coordinates :	pftname
+
+      double lflitcn ( pft )
+         long_name :	Leaf litter C:N
+         units :	gC/gN
+         coordinates :	pftname
+
+      double livewdcn ( pft )
+         long_name :	Live wood (phloem and ray parenchyma) C:N
+         units :	gC/gN
+         coordinates :	pftname
+
+      integer max_NH_planting_date ( pft )
+         _FillValue :	0
+         long_name :	Maximum planting date for the Northern Hemipsphere
+         units :	YYYYMMDD
+         coordinates :	pftname
+         comment :	Typical U.S. latest planting dates according to AgroIBIS: Maize May 10th; soybean Jun 20th; spring wheat mid-May; winter wheat early Nov.
+
+      integer max_SH_planting_date ( pft )
+         _FillValue :	0
+         long_name :	Maximum planting date for the Southern Hemipsphere
+         units :	YYYYMMDD
+         coordinates :	pftname
+         comment :	Same as max_NH_planting_date, but offset by six months
+
+      integer min_NH_planting_date ( pft )
+         _FillValue :	0
+         long_name :	Minimum planting date for the Northern Hemipsphere
+         units :	YYYYMMDD
+         coordinates :	pftname
+         comment :	Typical U.S. earliest planting dates according to AgroIBIS: Maize Apr 10th; soybean May 15th; spring wheat early Apr; winter wheat Sep 1st
+
+      integer min_SH_planting_date ( pft )
+         _FillValue :	0
+         long_name :	Minimum planting date for the Southern Hemipsphere
+         units :	YYYYMMDD
+         coordinates :	pftname
+         comment :	Same as min_NH_planting_date, but offset by six months
+
+      double min_planting_temp ( pft )
+         long_name :	Average 5 day daily minimum temperature needed for planting
+         units :	K
+         coordinates :	pftname
+         _FillValue :	1000
+         comment :	From AGROIBIS derived from EPIC model parameterizations
+
+      double mp ( pft )
+         long_name :	Slope of conductance-to-photosynthesis relationship
+         units :	unitless
+         coordinates :	pftname
+
+      integer mxmat ( pft )
+         _FillValue :	0
+         long_name :	Maximum number of days to maturity parameter in CNPhenology
+         units :	days
+         coordinates :	pftname
+
+      double mxtmp ( pft )
+         long_name :	Max Temperature, parameter used in accFlds
+         units :	C
+         _FillValue :	   0
+
+      double pconv ( pft )
+         long_name :	Deadstem proportions to send to conversion flux
+         units :	fraction
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         comment :	pconv+pprod10+pprod100 must sum to 1.0
+
+      character pftname ( pft, string_length )
+         long_name :	Description of plant type
+         units :	unitless
+
+      short pftnum ( pft )
+         long_name :	Plant Functional Type number
+         units :	unitless
+         coordinates :	pftname
+
+      double pftpar20 ( pft )
+         long_name :	Tree maximum crown area
+         units :	m2
+         _FillValue :	9999.9
+         coordinates :	pftname
+
+      double pftpar28 ( pft )
+         long_name :	Minimum coldest monthly mean temperature
+         units :	degrees_Celsius
+         _FillValue :	9999.9
+         coordinates :	pftname
+
+      double pftpar29 ( pft )
+         long_name :	Maximum coldest monthly mean temperature
+         units :	degrees_Celsius
+         _FillValue :	1000
+         coordinates :	pftname
+
+      double pftpar30 ( pft )
+         long_name :	Minimum growing degree days (>= 5 degree Celsius)
+         units :	degree_C_days
+         coordinates :	pftname
+
+      double pftpar31 ( pft )
+         long_name :	Upper limit of temperature of the warmest month (twmax)
+         units :	degrees_Celsius
+         _FillValue :	1000
+         coordinates :	pftname
+
+      double planting_temp ( pft )
+         long_name :	Average 10 day temperature needed for planting
+         units :	K
+         coordinates :	pftname
+         _FillValue :	1000
+         comment :	From AGROIBIS derived from EPIC model parameterizations
+
+      double pprod10 ( pft )
+         long_name :	Deadstem proportions to send to 10 year product pool
+         units :	fraction
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         comment :	pconv+pprod10+pprod100 must sum to 1.0
+
+      double pprod100 ( pft )
+         long_name :	Deadstem proportions to send to 100 year product pool
+         units :	fraction
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         comment :	pconv+pprod10+pprod100 must sum to 1.0
+
+      double pprodharv10 ( pft )
+         long_name :	Deadstem proportions to send to 10 year harvest pool
+         units :	fraction
+         coordinates :	pftname
+         _FillValue :	   0
+         valid_range :	(    0,    1 )
+         comment :	100 year harvest is one minus this value
+
+      double qe25 ( pft )
+         long_name :	Quantum efficiency at 25 degrees Celsius
+         units :	umol CO2 / umol photon
+         coordinates :	pftname
+
+      double resist ( pft )
+         long_name :	Fire resistance index
+         units :	unitless
+         coordinates :	pftname
+
+      double rholnir ( pft )
+         long_name :	Leaf reflectance: near-IR
+         units :	fraction
+         coordinates :	pftname
+
+      double rholvis ( pft )
+         long_name :	Leaf reflectance: visible
+         units :	fraction
+         coordinates :	pftname
+
+      double rhosnir ( pft )
+         long_name :	Stem reflectance: near-IR
+         units :	fraction
+         coordinates :	pftname
+
+      double rhosvis ( pft )
+         long_name :	Stem reflectance: visible
+         units :	fraction
+         coordinates :	pftname
+
+      double roota_par ( pft )
+         long_name :	CLM rooting distribution parameter
+         units :	1/m
+         coordinates :	pftname
+
+      double rootb_par ( pft )
+         long_name :	CLM rooting distribution parameter
+         units :	1/m
+         coordinates :	pftname
+
+      double season_decid ( pft )
+         long_name :	Binary flag for seasonal-deciduous leaf habit
+         units :	logical flag
+         coordinates :	pftname
+         flag_meanings :	NOT seasonal-deciduous
+         flag_values :	(    0,    1 )
+
+      double slatop ( pft )
+         long_name :	Specific Leaf Area (SLA) at top of canopy, projected area basis
+         units :	m^2/gC
+         coordinates :	pftname
+
+      double smpsc ( pft )
+         long_name :	Soil water potential at full stomatal closure
+         units :	mm
+         coordinates :	pftname
+
+      double smpso ( pft )
+         long_name :	Soil water potential at full stomatal opening
+         units :	mm
+         coordinates :	pftname
+
+      double stem_leaf ( pft )
+         long_name :	Allocation parameter: new stem C per new leaf C (-1 means use dynamic stem allocation)
+         units :	gC/gC
+         coordinates :	pftname
+
+      double stress_decid ( pft )
+         long_name :	Binary flag for stress-deciduous leaf habit
+         units :	logical flag
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         flag_values :	(    0,    1 )
+         flag_meanings :	NOT stress_decidious
+
+      double taulnir ( pft )
+         long_name :	Leaf transmittance: near-IR
+         units :	fraction
+         coordinates :	pftname
+
+      double taulvis ( pft )
+         long_name :	Leaf transmittance: visible
+         units :	fraction
+         coordinates :	pftname
+
+      double tausnir ( pft )
+         long_name :	Stem transmittance: near-IR
+         units :	fraction
+         coordinates :	pftname
+
+      double tausvis ( pft )
+         long_name :	Stem transmittance: visible
+         units :	fraction
+         coordinates :	pftname
+
+      double woody ( pft )
+         long_name :	Binary woody lifeform flag
+         units :	logical flag
+         coordinates :	pftname
+         valid_range :	(    0,    1 )
+         flag_values :	(    0,    1 )
+         flag_meanings :	NON_woody woody
+
+      double xl ( pft )
+         long_name :	Leaf/stem orientation index
+         units :	unitless
+         coordinates :	pftname
+         valid_range :	(   -1,    1 )
+
+      double z0mr ( pft )
+         long_name :	Ratio of momentum roughness length to canopy top height
+         units :	unitless
+         coordinates :	pftname
+
+      double ztopmx ( pft )
+         long_name :	Canopy top coefficient used in CNVegStructUpdate
+         units :	m
+         _FillValue :	   0
+         coordinates :	pftname
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	surfdata.pftdyn_0.9x1.25_simyr1850-2005_c091008
+path:	/users/yangsong3/CESM/input/lnd/clm2/surfdata/surfdata.pftdyn_0.9x1.25_simyr1850-2005_c091008.nc
+   file global attributes:
+      Conventions : NCAR-CSM
+      History_Log : created on: 10-07-09 20:44:11
+      Logname : erik
+      Host : be1005en.ucar.edu
+      Source : Community Land Model: CLM3
+      Version : $HeadURL: https://svn-ccsm-models.cgd.ucar.edu/clm2/branch_tags/vocemis-drydep_clm3_6_14_tags/vocemis-drydep12_clm3_6_52/models/lnd/clm/tools/mksurfdata/mkfileMod.F90 $
+      Revision_Id : $Id: mkfileMod.F90 18237 2009-09-09 23:17:04Z erik $
+      Input_grid_dataset : /fs/cgd/csm/inputdata/lnd/clm2/griddata/griddata_0.9x1.25_c070928.nc
+      Input_gridtype : global
+      Vegetation_type_raw_data_filename : mksrf_landuse_rc1850_c090630.nc
+      Organic_matter_raw_data_file_name : mksrf_organic.10level.0.5deg.081112.nc
+      Inland_water_raw_data_file_name : mksrf_lanwat.050425.nc
+      Glacier_raw_data_file_name : mksrf_glacier.060929.nc
+      Topography_raw_data_file_name : mksrf_topo.10min.c080912.nc
+      Fracdata_raw_data_file_name : fracdata_10min_USGS_071205.nc
+      Fmax_raw_data_file_name : mksrf_fmax.070406.nc
+      Urban_raw_data_file_name : mksrf_urban_3den_0.5x0.5_simyr2000.c090223_v1.nc
+      Irrig_raw_data_file_name : 
+   dimensions:
+      ncl_scalar = 1
+      lsmlon = 288
+      lsmlat = 192
+      nlevurb = 15
+      numsolar = 2
+      numrad = 2
+      lsmpft = 17
+      time = 156  // unlimited
+      nchar = 128
+   variables:
+      double EDGEN ( ncl_scalar )
+         long_name :	northern edge of surface grid
+         units :	degrees north
+
+      double EDGEE ( ncl_scalar )
+         long_name :	eastern edge of surface grid
+         units :	degrees east
+
+      double EDGES ( ncl_scalar )
+         long_name :	southern edge of surface grid
+         units :	degrees north
+
+      double EDGEW ( ncl_scalar )
+         long_name :	western edge of surface grid
+         units :	degrees east
+
+      double LATN ( lsmlat, lsmlon )
+         long_name :	latitude of north edge
+         units :	degrees north
+
+      double LONE ( lsmlat, lsmlon )
+         long_name :	longitude of east edge
+         units :	degrees east
+
+      double LATS ( lsmlat, lsmlon )
+         long_name :	latitude of south edge
+         units :	degrees north
+
+      double LONW ( lsmlat, lsmlon )
+         long_name :	longitude of west edge
+         units :	degrees east
+
+      double AREA ( lsmlat, lsmlon )
+         long_name :	area
+         units :	km^2
+
+      integer NUMLON ( lsmlat )
+         long_name :	number of longitudes for each latitude
+         units :	unitless
+
+      double LONGXY ( lsmlat, lsmlon )
+         long_name :	longitude
+         units :	degrees east
+
+      double LATIXY ( lsmlat, lsmlon )
+         long_name :	latitude
+         units :	degrees north
+
+      double LANDFRAC_PFT ( lsmlat, lsmlon )
+         long_name :	land fraction from pft dataset
+         units :	unitless
+
+      integer PFTDATA_MASK ( lsmlat, lsmlon )
+         long_name :	land mask from pft dataset, indicative of real/fake points
+         units :	unitless
+
+      double PCT_WETLAND ( lsmlat, lsmlon )
+         long_name :	percent wetland
+         units :	unitless
+
+      double PCT_LAKE ( lsmlat, lsmlon )
+         long_name :	percent lake
+         units :	unitless
+
+      double PCT_GLACIER ( lsmlat, lsmlon )
+         long_name :	percent glacier
+         units :	unitless
+
+      double PCT_URBAN ( lsmlat, lsmlon )
+         long_name :	percent urban
+         units :	unitless
+
+      double PCT_PFT ( time, lsmpft, lsmlat, lsmlon )
+         long_name :	percent plant functional type of gridcell
+         units :	unitless
+
+      double HARVEST_VH1 ( time, lsmlat, lsmlon )
+         long_name :	harvest from primary forest
+         units :	unitless
+
+      double HARVEST_VH2 ( time, lsmlat, lsmlon )
+         long_name :	harvest from primary non-forest
+         units :	unitless
+
+      double HARVEST_SH1 ( time, lsmlat, lsmlon )
+         long_name :	harvest from secondary mature-forest
+         units :	unitless
+
+      double HARVEST_SH2 ( time, lsmlat, lsmlon )
+         long_name :	harvest from secondary young-forest
+         units :	unitless
+
+      double HARVEST_SH3 ( time, lsmlat, lsmlon )
+         long_name :	harvest from secondary non-forest
+         units :	unitless
+
+      double GRAZING ( time, lsmlat, lsmlon )
+         long_name :	grazing of herbacous pfts
+         units :	unitless
+
+      integer YEAR ( time )
+         long_name :	Year of PFT data
+         units :	unitless
+
+      integer time ( time )
+         long_name :	year
+         units :	unitless
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	snicar_drdt_bst_fit_60_c070416
+path:	/users/yangsong3/CESM/input/lnd/clm2/snicardata/snicar_drdt_bst_fit_60_c070416.nc
+   file global attributes:
+      description : Snow effective radius growth parameters for temperature, temperature gradient, and snow density. r_e0= 54.5 um
+      author : Mark Flanner
+      date : 16-Apr-2007
+   dimensions:
+      T = 11
+      dTdz = 31
+      sno_dns = 8
+   variables:
+      double T ( T )
+         units :	Kelvin
+
+      double dTdz ( dTdz )
+         units :	Kelvin meter-1
+
+      double sno_dns ( sno_dns )
+         units :	kg meter-3
+
+      double tau ( T, dTdz, sno_dns )
+         units :	hours
+
+      double kappa ( T, dTdz, sno_dns )
+         units :	unitless
+
+      double drdsdt0 ( T, dTdz, sno_dns )
+         units :	m2 kg-1 hr-1
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	snicar_optics_5bnd_c090915
+path:	/users/yangsong3/CESM/input/lnd/clm2/snicardata/snicar_optics_5bnd_c090915.nc
+   file global attributes:
+      description : Mie optical parameters for CLM snowpack treatment. Includes ice (effective radii from 30-1500um), black carbon, organic carbon, and dust
+      author : Mark Flanner
+      date : 15-Sep-2009
+      history : Tue Sep 15 17:20:53 2009: ncks -A -v ext_cff_mss_ocphil,ss_alb_ocphil,asm_prm_ocphil /data/mflanner/mie/clm/mie_clm_drc/foo1.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncatted -a date,global,o,c,15-Sep-2009 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncatted -a description,global,o,c,Mie optical parameters for CLM snowpack treatment. Includes ice (effective radii from 30-1500um), black carbon, organic carbon, and dust /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncatted -a author,global,o,c,Mark Flanner /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_ice_dfs /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_ice_dfs /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_ice_dfs /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_dfs/mie_ice_5bnd_dfs_30_1500.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_ice_drc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_ice_drc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_ice_drc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/mie_ice_5bnd_drc_30_1500.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_dust04 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_dust04 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_dust04 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/aer_dst_bln_20060904_04.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_dust03 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_dust03 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_dust03 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/aer_dst_bln_20060904_03.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_dust02 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_dust02 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_dust02 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/aer_dst_bln_20060904_02.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_dust01 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_dust01 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_dust01 /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/aer_dst_bln_20060904_01.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_ocphil /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_ocphil /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_ocphil /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/mie_waso99.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_ocphob /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_ocphob /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_ocphob /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/mie_wsoc00_HKS98.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ss_alb,ss_alb_bcphil /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v ext_cff_mss,ext_cff_mss_bcphil /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncrename -O -v asm_prm,asm_prm_bcphil /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Tue Sep 15 17:20:53 2009: ncks -A -v asm_prm,ext_cff_mss,ss_alb /data/mflanner/mie/clm/mie_clm_drc/miecot_slfsot_ChC90_dns_1317.nc /data/mflanner/mie/clm/mie_clm_drc/snicar_optics_5bnd_c090915.nc
+Fri Aug  4 15:20:40 2006: ncks -A -v ext_cff_mss_cor foo.nc miecot_slfsot_ChC90_dns_1317.nc
+Fri Aug  4 15:20:11 2006: ncrename -v ext_cff_mss,ext_cff_mss_cor foo.nc
+      nco_openmp_thread_number : 1
+   dimensions:
+      wvl = 5
+      radius_um = 1471
+   variables:
+      double asm_prm_bcphob ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_bcphob ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_bcphob ( wvl )
+         units :	Fraction
+
+      double wvl ( wvl )
+         units :	meter
+
+      double asm_prm_bcphil ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_bcphil ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_bcphil ( wvl )
+         units :	Fraction
+
+      double asm_prm_ocphob ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_ocphob ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_ocphob ( wvl )
+         units :	fraction
+
+      double asm_prm_ocphil ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_ocphil ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_ocphil ( wvl )
+         units :	fraction
+
+      double asm_prm_dust01 ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_dust01 ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_dust01 ( wvl )
+         units :	fraction
+
+      double asm_prm_dust02 ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_dust02 ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_dust02 ( wvl )
+         units :	fraction
+
+      double asm_prm_dust03 ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_dust03 ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_dust03 ( wvl )
+         units :	fraction
+
+      double asm_prm_dust04 ( wvl )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_dust04 ( wvl )
+         units :	meter2 kilogram-1
+
+      double ss_alb_dust04 ( wvl )
+         units :	fraction
+
+      double asm_prm_ice_drc ( wvl, radius_um )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_ice_drc ( wvl, radius_um )
+         units :	meter2 kilogram-1
+
+      double radius_um ( radius_um )
+         units :	meter*10-6
+
+      double ss_alb_ice_drc ( wvl, radius_um )
+         units :	Fraction
+
+      double asm_prm_ice_dfs ( wvl, radius_um )
+         units :	unitless (cos theta)
+
+      double ext_cff_mss_ice_dfs ( wvl, radius_um )
+         units :	meter2 kilogram-1
+
+      double ss_alb_ice_dfs ( wvl, radius_um )
+         units :	Fraction
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	surfdata_0.9x1.25_simyr1850_c110921
+path:	/users/yangsong3/CESM/input/lnd/clm2/surfdata/surfdata_0.9x1.25_simyr1850_c110921.nc
+   file global attributes:
+      Conventions : NCAR-CSM
+      History_Log : created on: 10-06-09 12:38:50
+      Logname : erik
+      Host : be1005en.ucar.edu
+      Source : Community Land Model: CLM3
+      Version : $HeadURL: https://svn-ccsm-models.cgd.ucar.edu/clm2/branch_tags/vocemis-drydep_clm3_6_14_tags/vocemis-drydep12_clm3_6_52/models/lnd/clm/tools/mksurfdata/mkfileMod.F90 $
+      Revision_Id : $Id: mkfileMod.F90 18237 2009-09-09 23:17:04Z erik $
+      Input_grid_dataset : /fs/cgd/csm/inputdata/lnd/clm2/griddata/griddata_0.9x1.25_c070928.nc
+      Input_gridtype : global
+      Vegetation_type_raw_data_filename : mksrf_landuse_rc1850_c090630.nc
+      Soil_texture_raw_data_file_name : mksrf_soitex.10level.c010119.nc
+      Soil_color_raw_data_file_name : mksrf_soilcol_global_c090324.nc
+      VOC_EF_raw_data_file_name : mksrf_vocef.c060502.nc
+      Organic_matter_raw_data_file_name : mksrf_organic.10level.0.5deg.081112.nc
+      Inland_water_raw_data_file_name : mksrf_lanwat.050425.nc
+      Glacier_raw_data_file_name : mksrf_glacier.060929.nc
+      Topography_raw_data_file_name : mksrf_topo.10min.c080912.nc
+      Fracdata_raw_data_file_name : fracdata_10min_USGS_071205.nc
+      Fmax_raw_data_file_name : mksrf_fmax.070406.nc
+      Urban_raw_data_file_name : mksrf_urban_3den_0.5x0.5_simyr2000.c090223_v1.nc
+      Irrig_raw_data_file_name : 
+      Lai_raw_data_file_name : mksrf_lai_global_c090506.nc
+      history : Wed Sep 21 17:01:03 2011: ncks -A -v LATIXY,LONGXY,AREA,LONW,LONE,LATN,LATS /fs/cgd/csm/inputdata/lnd/clm2/griddata/griddata_0.9x1.25_070212.nc /fs/cgd/csm/inputdata/lnd/clm2/surfdata/surfdata_0.9x1.25_simyr1850_c110921.nc
+      NCO : 20110921
+   dimensions:
+      ncl_scalar = 1
+      lsmlon = 288
+      lsmlat = 192
+      nlevsoi = 10
+      nglcec = 10
+      nlevurb = 15
+      numsolar = 2
+      numrad = 2
+      lsmpft = 17
+      time = 12  // unlimited
+      nchar = 128
+   variables:
+      double EDGEN ( ncl_scalar )
+         long_name :	northern edge of surface grid
+         units :	degrees north
+
+      double EDGEE ( ncl_scalar )
+         long_name :	eastern edge of surface grid
+         units :	degrees east
+
+      double EDGES ( ncl_scalar )
+         long_name :	southern edge of surface grid
+         units :	degrees north
+
+      double EDGEW ( ncl_scalar )
+         long_name :	western edge of surface grid
+         units :	degrees east
+
+      double LATN ( lsmlat, lsmlon )
+         long_name :	latitude of north edge
+         units :	degrees north
+
+      double LONE ( lsmlat, lsmlon )
+         long_name :	longitude of east edge
+         units :	degrees east
+
+      double LATS ( lsmlat, lsmlon )
+         long_name :	latitude of south edge
+         units :	degrees north
+
+      double LONW ( lsmlat, lsmlon )
+         long_name :	longitude of west edge
+         units :	degrees east
+
+      double AREA ( lsmlat, lsmlon )
+         long_name :	area
+         units :	km^2
+
+      integer NUMLON ( lsmlat )
+         long_name :	number of longitudes for each latitude
+         units :	unitless
+
+      double LONGXY ( lsmlat, lsmlon )
+         long_name :	longitude
+         units :	degrees east
+
+      double LATIXY ( lsmlat, lsmlon )
+         long_name :	latitude
+         units :	degrees north
+
+      double LANDFRAC_PFT ( lsmlat, lsmlon )
+         long_name :	land fraction from pft dataset
+         units :	unitless
+
+      integer PFTDATA_MASK ( lsmlat, lsmlon )
+         long_name :	land mask from pft dataset, indicative of real/fake points
+         units :	unitless
+
+      integer mxsoil_color ( ncl_scalar )
+         long_name :	maximum numbers of soil colors
+         units :	unitless
+
+      integer SOIL_COLOR ( lsmlat, lsmlon )
+         long_name :	soil color
+         units :	unitless
+
+      double PCT_SAND ( nlevsoi, lsmlat, lsmlon )
+         long_name :	percent sand
+         units :	unitless
+
+      double PCT_CLAY ( nlevsoi, lsmlat, lsmlon )
+         long_name :	percent clay
+         units :	unitless
+
+      double EF1_BTR ( lsmlat, lsmlon )
+         long_name :	EF btr (isoprene)
+         units :	unitless
+
+      double EF1_FET ( lsmlat, lsmlon )
+         long_name :	EF fet (isoprene)
+         units :	unitless
+
+      double EF1_FDT ( lsmlat, lsmlon )
+         long_name :	EF fdt (isoprene)
+         units :	unitless
+
+      double EF1_SHR ( lsmlat, lsmlon )
+         long_name :	EF shr (isoprene)
+         units :	unitless
+
+      double EF1_GRS ( lsmlat, lsmlon )
+         long_name :	EF grs (isoprene)
+         units :	unitless
+
+      double EF1_CRP ( lsmlat, lsmlon )
+         long_name :	EF crp (isoprene)
+         units :	unitless
+
+      double ORGANIC ( nlevsoi, lsmlat, lsmlon )
+         long_name :	organic matter density at soil levels
+         units :	kg/m3 (assumed carbon content 0.58 gC per gOM)
+
+      double CANYON_HWR ( lsmlat, lsmlon )
+         long_name :	canyon height to width ratio
+         units :	unitless
+
+      double EM_IMPROAD ( lsmlat, lsmlon )
+         long_name :	emissivity of impervious road
+         units :	unitless
+
+      double EM_PERROAD ( lsmlat, lsmlon )
+         long_name :	emissivity of pervious road
+         units :	unitless
+
+      double EM_ROOF ( lsmlat, lsmlon )
+         long_name :	emissivity of roof
+         units :	unitless
+
+      double EM_WALL ( lsmlat, lsmlon )
+         long_name :	emissivity of wall
+         units :	unitless
+
+      double HT_ROOF ( lsmlat, lsmlon )
+         long_name :	height of roof
+         units :	meters
+
+      double THICK_ROOF ( lsmlat, lsmlon )
+         long_name :	thickness of roof
+         units :	meters
+
+      double THICK_WALL ( lsmlat, lsmlon )
+         long_name :	thickness of wall
+         units :	meters
+
+      double T_BUILDING_MAX ( lsmlat, lsmlon )
+         long_name :	maximum interior building temperature
+         units :	K
+
+      double T_BUILDING_MIN ( lsmlat, lsmlon )
+         long_name :	minimum interior building temperature
+         units :	K
+
+      double WIND_HGT_CANYON ( lsmlat, lsmlon )
+         long_name :	height of wind in canyon
+         units :	meters
+
+      double WTLUNIT_ROOF ( lsmlat, lsmlon )
+         long_name :	fraction of roof
+         units :	unitless
+
+      double WTROAD_PERV ( lsmlat, lsmlon )
+         long_name :	fraction of pervious road
+         units :	unitless
+
+      double ALB_IMPROAD ( numsolar, numrad, lsmlat, lsmlon )
+         long_name :	albedo of impervious road
+         units :	unitless
+
+      double ALB_PERROAD ( numsolar, numrad, lsmlat, lsmlon )
+         long_name :	albedo of pervious road
+         units :	unitless
+
+      double ALB_ROOF ( numsolar, numrad, lsmlat, lsmlon )
+         long_name :	albedo of roof
+         units :	unitless
+
+      double ALB_WALL ( numsolar, numrad, lsmlat, lsmlon )
+         long_name :	albedo of wall
+         units :	unitless
+
+      double TK_ROOF ( nlevurb, lsmlat, lsmlon )
+         long_name :	thermal conductivity of roof
+         units :	W/m*K
+
+      double TK_WALL ( nlevurb, lsmlat, lsmlon )
+         long_name :	thermal conductivity of wall
+         units :	W/m*K
+
+      double TK_IMPROAD ( nlevurb, lsmlat, lsmlon )
+         long_name :	thermal conductivity of impervious road
+         units :	W/m*K
+
+      double CV_ROOF ( nlevurb, lsmlat, lsmlon )
+         long_name :	volumetric heat capacity of roof
+         units :	J/m^3*K
+
+      double CV_WALL ( nlevurb, lsmlat, lsmlon )
+         long_name :	volumetric heat capacity of wall
+         units :	J/m^3*K
+
+      double CV_IMPROAD ( nlevurb, lsmlat, lsmlon )
+         long_name :	volumetric heat capacity of impervious road
+         units :	J/m^3*K
+
+      integer NLEV_IMPROAD ( lsmlat, lsmlon )
+         long_name :	number of impervious road layers
+         units :	unitless
+
+      double PCT_WETLAND ( lsmlat, lsmlon )
+         long_name :	percent wetland
+         units :	unitless
+
+      double PCT_LAKE ( lsmlat, lsmlon )
+         long_name :	percent lake
+         units :	unitless
+
+      double PCT_GLACIER ( lsmlat, lsmlon )
+         long_name :	percent glacier
+         units :	unitless
+
+      double PCT_GLC_MEC ( nglcec, lsmlat, lsmlon )
+         long_name :	percent for each glacier elevation class
+         units :	unitless
+
+      double TOPO_GLC_MEC ( nglcec, lsmlat, lsmlon )
+         long_name :	mean elevation on glacier elevation classes
+         units :	m
+
+      double THCK_GLC_MEC ( nglcec, lsmlat, lsmlon )
+         long_name :	mean ice sheet thickness on glacier elevation classes
+         units :	m
+
+      double FMAX ( lsmlat, lsmlon )
+         long_name :	maximum fractional saturated area
+         units :	unitless
+
+      double PCT_URBAN ( lsmlat, lsmlon )
+         long_name :	percent urban
+         units :	unitless
+
+      double PCT_PFT ( lsmpft, lsmlat, lsmlon )
+         long_name :	percent plant functional type of gridcell
+         units :	unitless
+
+      double MONTHLY_LAI ( time, lsmpft, lsmlat, lsmlon )
+         long_name :	monthly leaf area index
+         units :	unitless
+
+      double MONTHLY_SAI ( time, lsmpft, lsmlat, lsmlon )
+         long_name :	monthly stem area index
+         units :	unitless
+
+      double MONTHLY_HEIGHT_TOP ( time, lsmpft, lsmlat, lsmlon )
+         long_name :	monthly height top
+         units :	meters
+
+      double MONTHLY_HEIGHT_BOT ( time, lsmpft, lsmlat, lsmlon )
+         long_name :	monthly height bottom
+         units :	meters
+
+      integer time ( time )
+         long_name :	Calendar month
+         units :	month
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	rdirc_0.5x0.5_simyr2000_slpmxvl_c120717
+path:	/users/yangsong3/CESM/input/lnd/clm2/rtmdata/rdirc_0.5x0.5_simyr2000_slpmxvl_c120717.nc
+   file global attributes:
+      title : River Transport Model (RTM) flow directions
+      conventions : CF-1.0
+      history : Tue Jul 17 11:16:22 2012: ncks -v MAX_VOLR,MIN_VOLR rdirc_0.5x0.5_simyr2000_slpmxvl_c120524.nc rdirc_0.5x0.5_simyr2000_slpmxvl_c120717.nc
+created by SCS 2010-11-01
+      source : rdirc.slope.05.100309.txt
+      comment : slope, maximum volr added
+      NCO : 20120717
+      SVD_ID : none
+      SVN_URL : none
+   dimensions:
+      nj = 360
+      ni = 720
+   variables:
+      float RTM_FLOW_DIRECTION ( nj, ni )
+         long_name :	RTM flow direction
+         units :	unitless
+         mode :	time-invariant
+         comment :	N,NE,E,SE,S,SW,W,NW = 1,2,3,4,5,6,7,8
+
+      float xc ( nj, ni )
+         long_name :	longitude of grid cell center
+         units :	degrees_east
+         mode :	time-invariant
+
+      float yc ( nj, ni )
+         long_name :	latitude of grid cell center
+         units :	degrees_north
+         mode :	time-invariant
+
+      float MAX_VOLR ( nj, ni )
+         long_name :	Climatological maximum channel storage
+         units :	m^3
+         mode :	time-invariant
+         comment :	computed from long control run
+
+      float SLOPE ( nj, ni )
+         long_name :	RTM channel slopoe
+         units :	unitless
+         mode :	time-invariant
+         comment :	slope of river channel from HYDRO1K dataset
+
+      float MIN_VOLR ( nj, ni )
+         long_name :	Climatological minimum channel storage
+         units :	m^3
+         mode :	time-invariant
+         comment :	computed from long control run
+
+ 

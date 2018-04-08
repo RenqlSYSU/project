@@ -1,0 +1,1388 @@
+Variable: f
+Type: file
+filename:	ghg_hist_1765-2005_c091218
+path:	/users/yangsong3/CESM/input/atm/cam/ggas/ghg_hist_1765-2005_c091218.nc
+   file global attributes:
+      comment : 18 December 2009: Prepared by B. Eaton using data provided by Jean-Francois Lamarque
+All variables except f11 are directly from PRE2005_MIDYR_CONC.DAT                   
+The f11 gaseous constituent used by CAM is CFC-11 adjusted to account for a         
+collection of radiatively active species.  The following list gives the name        
+of each specie along with its column in the file PRE2005_MIDYR_CONC.DAT, and        
+the radiative efficiency factors used to compute the cfc-11 equivalent concentration
+which is summed over the collection to get the F11 adjusted value.                  
+
+Col Name        Radiative efficiency 
+  8 CF4            0.1               
+  9 C2F6           0.26              
+ 10 C6F14          0.49              
+ 11 HFC23          0.19              
+ 12 HFC32          0.11              
+ 13 HFC43_10       0.4               
+ 14 HFC125         0.23              
+ 15 HFC134a        0.16              
+ 16 HFC143a        0.13              
+ 17 HFC227ea       0.26              
+ 18 HFC245fa       0.28              
+ 19 SF6            0.52              
+ 20 CFC_11         0.25              
+ 22 CFC_113        0.3               
+ 23 CFC_114        0.31              
+ 24 CFC_115        0.18              
+ 25 CARB_TET       0.13              
+ 26 MCF            0.06              
+ 27 HCFC_22        0.2               
+ 28 HCFC_141B      0.14              
+ 29 HCFC_142B      0.2               
+ 30 HALON1211      0.3               
+ 32 HALON1301      0.32              
+ 33 HALON2402      0.33              
+ 34 CH3BR          0.01              
+ 35 CH3CL          0.01              
+
+The cfc-11 equivalent of species X is computed as follows:                         
+cfc-11 equiv of X(ppt) = X(ppt) * (rad efficiency of X)/(rad efficiency of CFC_11) 
+
+The data are annual mean values.  The date assigned to each value is July 01 of    
+the year.  There are also two extension points added to allow the model to run     
+through the end of 2005.  The data for 2006 and 2007 are duplicates of the data for 2005.
+   dimensions:
+      time = 243  // unlimited
+   variables:
+      double time ( time )
+         units :	days since 1765-01-01
+         long_name :	Time
+         calendar :	noleap
+
+      integer date ( time )
+         long_name :	current date as yyyymmdd
+
+      float CO2 ( time )
+         long_name :	CO2
+         units :	1e-6 mol/mol
+
+      float CH4 ( time )
+         long_name :	CH4
+         units :	1e-9 mol/mol
+
+      float N2O ( time )
+         long_name :	N2O
+         units :	1e-9 mol/mol
+
+      float f11 ( time )
+         long_name :	CFC-11 (adjusted)
+         units :	1e-12 mol/mol
+
+      float f12 ( time )
+         long_name :	CFC-12
+         units :	1e-12 mol/mol
+
+      float adj ( time )
+         long_name :	adj factor for f11
+
+ 
+Variable: f
+Type: file
+filename:	oxid_1.9x2.5_L26_1850-2005_c091123
+path:	/users/yangsong3/CESM/input/atm/cam/chem/trop_mozart_aero/oxid/oxid_1.9x2.5_L26_1850-2005_c091123.nc
+   file global attributes:
+      Conventions : CF-1.0
+      source : CAM
+      case : ar5_cam_1850-2000_03
+      title : 
+      logname : lamar
+      host : be0207en.ucar.ed
+      Version : $Name$
+      revision_Id : $Id$
+      initial_file : /ptmp/lamar/cam-inputs/ar5_cam_1850_06.cam2.i.1860-01-01-00000.nc
+      topography_file : /fs/cgd/csm/inputdata/atm/cam/topo/USGS-gtopo30_1.9x2.5_remap_c050602.nc
+      history : Mon Nov 23 15:14:25 2009: ncks --append -v date,time date_time_1849-2006_c091112.nc oxid_1.9x2.5_L26_1850-2005_c091123.nc
+Mon Nov 23 14:56:39 2009: ncrcat oxid_1.9x2.5_L26_1850-1859.r4.nc oxid_1.9x2.5_L26_1850-1859.r4.nc oxid_1.9x2.5_L26_1860-1869.r4.nc oxid_1.9x2.5_L26_1870-1879.r4.nc oxid_1.9x2.5_L26_1880-1889.r4.nc oxid_1.9x2.5_L26_1890-1899.r4.nc oxid_1.9x2.5_L26_1900-1909.r4.nc oxid_1.9x2.5_L26_1910-1919.r4.nc oxid_1.9x2.5_L26_1920-1929.r4.nc oxid_1.9x2.5_L26_1930-1939.r4.nc oxid_1.9x2.5_L26_1940-1949.r4.nc oxid_1.9x2.5_L26_1950-1959.r4.nc oxid_1.9x2.5_L26_1960-1969.r4.nc oxid_1.9x2.5_L26_1970-1979.r4.nc oxid_1.9x2.5_L26_1980-1989.r4.nc oxid_1.9x2.5_L26_1990-1999.r4.nc oxid_1.9x2.5_L26_2000-2009.r4.nc oxid_1.9x2.5_L26_2000-2009.r4.nc oxid_1.9x2.5_L26_1850-2005_c091123.nc.2040280
+
+11/23/09 14:54:25 eaton:be1105en.ucar.ed:interpic -e T -p 4 -t /fis/cgd/cseg/csm/inputdata/atm/cam/inic/fv/camchemi_0012-01-01_1.9x2.5_L26_c081104.nc /ptmp/lamar/IPCC_AR5/Climatologies_20091118/oxid_1.9x2.5_L26_1850-1859.nc oxid_1.9x2.5_L26_1850-1859.r4.nc
+      nco_openmp_thread_number : 1
+   dimensions:
+      ncl_scalar = 1
+      lev = 26
+      lat = 96
+      lon = 144
+      ilev = 27
+      slat = 95
+      slon = 144
+      time = 216  // unlimited
+   variables:
+      double gw ( lat )
+         long_name :	gauss weights
+
+      double hyai ( ilev )
+         long_name :	hybrid A coefficient at layer interfaces
+
+      double hyam ( lev )
+         long_name :	hybrid A coefficient at layer midpoints
+
+      double hybi ( ilev )
+         long_name :	hybrid B coefficient at layer interfaces
+
+      double hybm ( lev )
+         long_name :	hybrid B coefficient at layer midpoints
+
+      double ilev ( ilev )
+         long_name :	hybrid level at interfaces (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyai b: hybi p0: P0 ps: PS
+
+      double lat ( lat )
+         long_name :	latitude
+         units :	degrees_north
+
+      double lev ( lev )
+         long_name :	hybrid level at midpoints (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyam b: hybm p0: P0 ps: PS
+
+      double lon ( lon )
+         long_name :	longitude
+         units :	degrees_east
+
+      double slat ( slat )
+         long_name :	staggered latitude
+         units :	degrees_north
+
+      double slon ( slon )
+         long_name :	staggered longitude
+         units :	degrees_east
+
+      double P0 ( ncl_scalar )
+         long_name :	reference pressure
+         units :	Pa
+
+      double time ( time )
+         long_name :	time
+         units :	days since 1849-01-01 00:00
+         calendar :	noleap
+         bounds :	time_bnds
+
+      integer date ( time )
+         long_name :	date
+         format :	YYYYMMDD
+
+      integer datesec ( time )
+         long_name :	current seconds of current date
+
+      float H2O2 ( time, lev, lat, lon )
+         units :	mol/mol
+         long_name :	H2O2 concentration
+         cell_method :	time: mean
+
+      float HO2 ( time, lev, lat, lon )
+         units :	mol/mol
+         long_name :	HO2 concentration
+         cell_method :	time: mean
+
+      float NO3 ( time, lev, lat, lon )
+         units :	mol/mol
+         long_name :	NO3 concentration
+         cell_method :	time: mean
+
+      float O3 ( time, lev, lat, lon )
+         units :	mol/mol
+         long_name :	O3 concentration
+         cell_method :	time: mean
+
+      float OH ( time, lev, lat, lon )
+         units :	mol/mol
+         long_name :	OH concentration
+         cell_method :	time: mean
+
+      float PS ( time, lat, lon )
+         units :	Pa
+         long_name :	Surface pressure
+         cell_method :	time: mean
+
+ 
+Variable: f
+Type: file
+filename:	mam3_1.9x2.5_L30_2000clim_c130319
+path:	/users/yangsong3/CESM/input/atm/cam/chem/trop_mam/aero/mam3_1.9x2.5_L30_2000clim_c130319.nc
+   file global attributes:
+      Conventions : CF-1.0
+      source : CAM
+      case : cesm1_1_prescribe_cntl_e001
+      title : casename: cesm1_1_prescribe_cntl_e001, cam tag: cesm1_1_prescribe, resolution: -nlev 30 -dyn fv -res 1.9x2.5, chem: -chem trop_mam3
+      logname : jhyoon
+      host : nid04749
+      Version : $Name$
+      revision_Id : $Id$
+      initial_file : /project/projectdirs/PNNL-PJR/csm/inputdata/atm/cam/inic/fv/cami-mam3_0000-01-01_1.9x2.5_L30_c090306.nc
+      topography_file : /project/projectdirs/PNNL-PJR/csm/inputdata/atm/cam/topo/USGS-gtopo30_1.9x2.5_remap_c050602.nc
+      history : Fri Jan  4 13:21:58 2013: ncrcat /lustre/yoon753/project/PrescAERO/tmp//climo_01.nc /lustre/yoon753/project/PrescAERO/tmp//climo_02.nc /lustre/yoon753/project/PrescAERO/tmp//climo_03.nc /lustre/yoon753/project/PrescAERO/tmp//climo_04.nc /lustre/yoon753/project/PrescAERO/tmp//climo_05.nc /lustre/yoon753/project/PrescAERO/tmp//climo_06.nc /lustre/yoon753/project/PrescAERO/tmp//climo_07.nc /lustre/yoon753/project/PrescAERO/tmp//climo_08.nc /lustre/yoon753/project/PrescAERO/tmp//climo_09.nc /lustre/yoon753/project/PrescAERO/tmp//climo_10.nc /lustre/yoon753/project/PrescAERO/tmp//climo_11.nc /lustre/yoon753/project/PrescAERO/tmp//climo_12.nc /lustre/yoon753/csm/special_input_pmam02//cesm1_1_prescribe_cntl_e001.prescribed_aerosols_0001_y0001-0010.nc
+Fri Jan  4 13:17:37 2013: ncea /lustre/yoon753/project/PrescAERO/tmp//tmp_0001.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0002.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0003.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0004.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0005.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0006.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0007.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0008.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0009.nc /lustre/yoon753/project/PrescAERO/tmp//tmp_0010.nc /lustre/yoon753/project/PrescAERO/tmp//climo_01.nc
+Fri Jan  4 13:15:19 2013: ncks -C -v P0,slat,slon,w_stag,ilev,time_bnds,nlon,hyai,hybi,hyam,hybm,gw,lat,lon,lev,time,date,PS,bc_a1_logm,bc_a1_logv,so4_a1_logm,so4_a1_logv,soa_a1_logm,soa_a1_logv,pom_a1_logm,pom_a1_logv,dst_a1_logm,dst_a1_logv,ncl_a1_logm,ncl_a1_logv,num_a1_logm,num_a1_logv,so4_a2_logm,so4_a2_logv,soa_a2_logm,soa_a2_logv,ncl_a2_logm,ncl_a2_logv,num_a2_logm,num_a2_logv,so4_a3_logm,so4_a3_logv,dst_a3_logm,dst_a3_logv,ncl_a3_logm,ncl_a3_logv,num_a3_logm,num_a3_logv,so4_a1,pom_a1,soa_a1,bc_a1,dst_a1,ncl_a1,num_a1,so4_a2,soa_a2,ncl_a2,num_a2,dst_a3,ncl_a3,so4_a3,num_a3,wat_a1,wat_a2,wat_a3,so4_a1DDF,pom_a1DDF,soa_a1DDF,bc_a1DDF,dst_a1DDF,ncl_a1DDF,num_a1DDF,so4_a2DDF,soa_a2DDF,ncl_a2DDF,num_a2DDF,dst_a3DDF,ncl_a3DDF,so4_a3DDF,num_a3DDF,so4_a1SFWET,pom_a1SFWET,soa_a1SFWET,bc_a1SFWET,dst_a1SFWET,ncl_a1SFWET,num_a1SFWET,so4_a2SFWET,soa_a2SFWET,ncl_a2SFWET,num_a2SFWET,dst_a3SFWET,ncl_a3SFWET,so4_a3SFWET,num_a3SFWET,so4_c1,pom_c1,soa_c1,bc_c1,dst_c1,ncl_c1,num_c1,so4_c2,soa_c2,ncl_c2,num_c2,dst_c3,ncl_c3,so4_c3,num_c3,so4_c1DDF,pom_c1DDF,soa_c1DDF,bc_c1DDF,dst_c1DDF,ncl_c1DDF,num_c1DDF,so4_c2DDF,soa_c2DDF,ncl_c2DDF,num_c2DDF,dst_c3DDF,ncl_c3DDF,so4_c3DDF,num_c3DDF,so4_c1SFWET,pom_c1SFWET,soa_c1SFWET,bc_c1SFWET,dst_c1SFWET,ncl_c1SFWET,num_c1SFWET,so4_c2SFWET,soa_c2SFWET,ncl_c2SFWET,num_c2SFWET,dst_c3SFWET,ncl_c3SFWET,so4_c3SFWET,num_c3SFWET /lustre/yoon753/project/PrescAERO/tmp//inmod.nc /lustre/yoon753/project/PrescAERO/tmp//tmp.nc
+      NCO : 4.0.8
+      nco_openmp_thread_number : 1
+   dimensions:
+      ncl_scalar = 1
+      time = 12  // unlimited
+      lat = 96
+      lon = 144
+      lev = 30
+      ilev = 31
+      slat = 95
+      slon = 144
+      nbnd = 2
+   variables:
+      double P0 ( ncl_scalar )
+         long_name :	reference pressure
+         units :	Pa
+
+      float PS ( time, lat, lon )
+         units :	Pa
+         long_name :	Surface pressure
+         cell_methods :	time: mean
+
+      float bc_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	bc_a1 concentration
+         cell_methods :	time: mean
+
+      float bc_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	bc_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float bc_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float bc_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	bc_a1 log concentration
+         cell_methods :	time: mean
+
+      float bc_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	 bc_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float bc_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	bc_c1 in cloud water
+         cell_methods :	time: mean
+
+      float bc_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	bc_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float bc_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	bc_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      integer date ( time )
+         long_name :	current date (YYYYMMDD)
+
+      float dst_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_a1 concentration
+         cell_methods :	time: mean
+
+      float dst_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	dst_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float dst_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float dst_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_a1 log concentration
+         cell_methods :	time: mean
+
+      float dst_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float dst_a3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_a3 concentration
+         cell_methods :	time: mean
+
+      float dst_a3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	dst_a3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float dst_a3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float dst_a3_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_a3 log concentration
+         cell_methods :	time: mean
+
+      float dst_a3_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_a3 log^2 concentration
+         cell_methods :	time: mean
+
+      float dst_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_c1 in cloud water
+         cell_methods :	time: mean
+
+      float dst_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	dst_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float dst_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	dst_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float dst_c3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	dst_c3 in cloud water
+         cell_methods :	time: mean
+
+      float dst_c3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	dst_c3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float dst_c3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	dst_c3 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      double gw ( lat )
+         long_name :	gauss weights
+
+      double hyai ( ilev )
+         long_name :	hybrid A coefficient at layer interfaces
+
+      double hyam ( lev )
+         long_name :	hybrid A coefficient at layer midpoints
+
+      double hybi ( ilev )
+         long_name :	hybrid B coefficient at layer interfaces
+
+      double hybm ( lev )
+         long_name :	hybrid B coefficient at layer midpoints
+
+      double ilev ( ilev )
+         long_name :	hybrid level at interfaces (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyai b: hybi p0: P0 ps: PS
+
+      double lat ( lat )
+         long_name :	latitude
+         units :	degrees_north
+
+      double lev ( lev )
+         long_name :	hybrid level at midpoints (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyam b: hybm p0: P0 ps: PS
+
+      double lon ( lon )
+         long_name :	longitude
+         units :	degrees_east
+
+      float ncl_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a1 concentration
+         cell_methods :	time: mean
+
+      float ncl_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float ncl_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float ncl_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a1 log concentration
+         cell_methods :	time: mean
+
+      float ncl_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float ncl_a2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a2 concentration
+         cell_methods :	time: mean
+
+      float ncl_a2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_a2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float ncl_a2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float ncl_a2_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a2 log concentration
+         cell_methods :	time: mean
+
+      float ncl_a2_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a2 log^2 concentration
+         cell_methods :	time: mean
+
+      float ncl_a3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a3 concentration
+         cell_methods :	time: mean
+
+      float ncl_a3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_a3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float ncl_a3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float ncl_a3_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a3 log concentration
+         cell_methods :	time: mean
+
+      float ncl_a3_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_a3 log^2 concentration
+         cell_methods :	time: mean
+
+      float ncl_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_c1 in cloud water
+         cell_methods :	time: mean
+
+      float ncl_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float ncl_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float ncl_c2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_c2 in cloud water
+         cell_methods :	time: mean
+
+      float ncl_c2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_c2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float ncl_c2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_c2 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float ncl_c3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	ncl_c3 in cloud water
+         cell_methods :	time: mean
+
+      float ncl_c3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_c3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float ncl_c3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	ncl_c3 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      integer nlon ( lat )
+         long_name :	number of longitudes
+
+      float num_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a1 concentration
+         cell_methods :	time: mean
+
+      float num_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float num_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float num_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a1 log concentration
+         cell_methods :	time: mean
+
+      float num_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float num_a2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a2 concentration
+         cell_methods :	time: mean
+
+      float num_a2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_a2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float num_a2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float num_a2_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a2 log concentration
+         cell_methods :	time: mean
+
+      float num_a2_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a2 log^2 concentration
+         cell_methods :	time: mean
+
+      float num_a3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a3 concentration
+         cell_methods :	time: mean
+
+      float num_a3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_a3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float num_a3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float num_a3_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a3 log concentration
+         cell_methods :	time: mean
+
+      float num_a3_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_a3 log^2 concentration
+         cell_methods :	time: mean
+
+      float num_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_c1 in cloud water
+         cell_methods :	time: mean
+
+      float num_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float num_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float num_c2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_c2 in cloud water
+         cell_methods :	time: mean
+
+      float num_c2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_c2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float num_c2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_c2 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float num_c3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	num_c3 in cloud water
+         cell_methods :	time: mean
+
+      float num_c3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_c3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float num_c3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	num_c3 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float pom_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	pom_a1 concentration
+         cell_methods :	time: mean
+
+      float pom_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	pom_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float pom_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float pom_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	pom_a1 log concentration
+         cell_methods :	time: mean
+
+      float pom_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	pom_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float pom_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	pom_c1 in cloud water
+         cell_methods :	time: mean
+
+      float pom_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	pom_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float pom_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	pom_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      double slat ( slat )
+         long_name :	staggered latitude
+         units :	degrees_north
+
+      double slon ( slon )
+         long_name :	staggered longitude
+         units :	degrees_east
+
+      float so4_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a1 concentration
+         cell_methods :	time: mean
+
+      float so4_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float so4_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float so4_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a1 log concentration
+         cell_methods :	time: mean
+
+      float so4_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float so4_a2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a2 concentration
+         cell_methods :	time: mean
+
+      float so4_a2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_a2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float so4_a2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float so4_a2_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a2 log concentration
+         cell_methods :	time: mean
+
+      float so4_a2_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a2 log^2 concentration
+         cell_methods :	time: mean
+
+      float so4_a3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a3 concentration
+         cell_methods :	time: mean
+
+      float so4_a3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_a3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float so4_a3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float so4_a3_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a3 log concentration
+         cell_methods :	time: mean
+
+      float so4_a3_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_a3 log^2 concentration
+         cell_methods :	time: mean
+
+      float so4_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_c1 in cloud water
+         cell_methods :	time: mean
+
+      float so4_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float so4_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float so4_c2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_c2 in cloud water
+         cell_methods :	time: mean
+
+      float so4_c2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_c2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float so4_c2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_c2 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float so4_c3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	so4_c3 in cloud water
+         cell_methods :	time: mean
+
+      float so4_c3DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_c3 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float so4_c3SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	so4_c3 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float soa_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_a1 concentration
+         cell_methods :	time: mean
+
+      float soa_a1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	soa_a1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float soa_a1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float soa_a1_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_a1 log concentration
+         cell_methods :	time: mean
+
+      float soa_a1_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_a1 log^2 concentration
+         cell_methods :	time: mean
+
+      float soa_a2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_a2 concentration
+         cell_methods :	time: mean
+
+      float soa_a2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	soa_a2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float soa_a2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	Wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float soa_a2_logm ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_a2 log concentration
+         cell_methods :	time: mean
+
+      float soa_a2_logv ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_a2 log^2 concentration
+         cell_methods :	time: mean
+
+      float soa_c1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_c1 in cloud water
+         cell_methods :	time: mean
+
+      float soa_c1DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	soa_c1 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float soa_c1SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	soa_c1 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      float soa_c2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	kg/kg
+         long_name :	soa_c2 in cloud water
+         cell_methods :	time: mean
+
+      float soa_c2DDF ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	soa_c2 dry deposition flux at bottom (grav + turb)
+         cell_methods :	time: mean
+
+      float soa_c2SFWET ( time, lat, lon )
+         units :	kg/m2/s
+         long_name :	soa_c2 wet deposition flux at surface
+         cell_methods :	time: mean
+
+      double time ( time )
+         long_name :	time
+         units :	days since 0000-01-01 00:00:00
+         calendar :	noleap
+         bounds :	time_bnds
+
+      double time_bnds ( time, nbnd )
+         long_name :	time interval endpoints
+
+      double w_stag ( slat )
+         long_name :	staggered latitude weights
+
+      float wat_a1 ( time, lev, lat, lon )
+         mdims :	1
+         units :	m
+         long_name :	aerosol water, interstitial, mode 01
+         cell_methods :	time: mean
+
+      float wat_a2 ( time, lev, lat, lon )
+         mdims :	1
+         units :	m
+         long_name :	aerosol water, interstitial, mode 02
+         cell_methods :	time: mean
+
+      float wat_a3 ( time, lev, lat, lon )
+         mdims :	1
+         units :	m
+         long_name :	aerosol water, interstitial, mode 03
+         cell_methods :	time: mean
+
+ 
+Variable: f
+Type: file
+filename:	ozone_1.9x2.5_L26_1850-2005_c090803
+path:	/users/yangsong3/CESM/input/atm/cam/ozone/ozone_1.9x2.5_L26_1850-2005_c090803.nc
+   file global attributes:
+      Conventions : CF-1.0
+      source : CAM
+      case : ar5_cam_1850_06
+      title : 
+      logname : 
+      host : 
+      Version : $Name$
+      revision_Id : $Id$
+      initial_file : /ptmp/lamar/cam-inputs/ar5_cam_1850_04.cam2.i.1862-01-01-00000.nc
+      topography_file : /fs/cgd/csm/inputdata/atm/cam/topo/USGS-gtopo30_1.9x2.5_remap_c050602.nc
+      history : Mon Aug  3 15:35:12 2009: ncks --append -v date,time date_time_1849-2006_c090803.nc ozone_1.9x2.5_L26_1850-2005_c090803.nc
+Mon Aug  3 15:34:31 2009: ncrcat ozone_1.9x2.5_L26_1850clim_c090420.nc ozone_1.9x2.5_L26_1850clim_c090420.nc ozone_1.9x2.5_L26_1850-2005_c090803.nc.2138940 ozone_1.9x2.5_L26_1850-2005_c090803.nc
+Mon Apr 20 13:43:22 2009: ncks -v date,time date_time_1850clim.nc ozone_1850_p4.nc
+Sun Apr 19 07:05:36 2009: ncrcat -O avg_01.nc avg_02.nc avg_03.nc avg_04.nc avg_05.nc avg_06.nc avg_07.nc avg_08.nc avg_09.nc avg_10.nc avg_11.nc avg_12.nc /data4/lamar/AR5/Climatologies/New/ozone_1.9x2.5_L26_1850clim_c090419.nc
+Sun Apr 19 07:05:08 2009: ncra -O wk_1.nc wk_2.nc wk_3.nc wk_4.nc wk_5.nc avg_01.nc
+Sun Apr 19 07:05:08 2009: ncks -O -v lat,lon,lev,O3 ar5_cam_1850_06.cam2.h0.1855-01.nc wk_1.nc
+      nco_openmp_thread_number : 1
+   dimensions:
+      lat = 96
+      lon = 144
+      slat = 95
+      slon = 144
+      lev = 26
+      time = 228  // unlimited
+   variables:
+      double gw ( lat )
+         long_name :	gauss weights
+
+      double lat ( lat )
+         long_name :	latitude
+         units :	degrees_north
+
+      double lon ( lon )
+         long_name :	longitude
+         units :	degrees_east
+
+      double slat ( slat )
+         long_name :	staggered latitude
+         units :	degrees_north
+
+      double slon ( slon )
+         long_name :	staggered longitude
+         units :	degrees_east
+
+      double w_stag ( slat )
+         long_name :	staggered latitude weights
+
+      double lev ( lev )
+         long_name :	hybrid level at midpoints (1000*(A+B))
+         units :	level
+         positive :	down
+         standard_name :	atmosphere_hybrid_sigma_pressure_coordinate
+         formula_terms :	a: hyam b: hybm p0: P0 ps: PS
+
+      float O3 ( time, lev, lat, lon )
+         units :	mol/mol
+         long_name :	O3 concentration
+         cell_method :	time: mean
+
+      double time ( time )
+         long_name :	time
+         units :	days since 1849-01-01 00:00
+         calendar :	noleap
+         bounds :	time_bnds
+
+      integer date ( time )
+         long_name :	date
+         format :	YYYYMMDD
+
+ 
+Variable: f
+Type: file
+filename:	SOLAR_SPECTRAL_Lean_1610-2008_annual_c090324
+path:	/users/yangsong3/CESM/input/atm/cam/solar/SOLAR_SPECTRAL_Lean_1610-2008_annual_c090324.nc
+   file global attributes:
+      comment : Fixed Lyman-Alpha and below
+      user : Caspar Ammann
+      creation_date : Tue Mar 24 16:00:16 MDT 2009
+      title : Lean spectral solar irradiance 1610-2008
+   dimensions:
+      time = 399  // unlimited
+      wvl = 3780
+   variables:
+      double time ( time )
+         _FillValue :	-9999
+         units :	days since 0000-01-01 00:00:00
+         time_origin :	01-JAN-0000
+         axis :	T
+         calendar :	noleap
+
+      float wvl ( wvl )
+         _FillValue :	-999
+         long_name :	Wavelength of the midpoint of band
+         units :	nm
+
+      double ssi ( time, wvl )
+         _FillValue :	-9999
+         reference :	TIM adjusted, based on Wang et al, ApJ 2005
+         level :	PMOD adjusted to SORCE-TIM using 0.9965 conversion factor
+         long_name :	spectral irradiance in Milli-Watts per m^2 and per nm
+         units :	mW/m^2/nm
+
+      integer date ( time )
+
+      float band_width ( wvl )
+         long_name :	window width of band centered on wvl_midpoint
+         units :	nm
+         _FillValue :	-999
+
+ 
+
+Variable: f
+Type: file
+filename:	USGS-gtopo30_0.9x1.25_remap_c051027
+path:	/users/yangsong3/CESM/input/atm/cam/topo/USGS-gtopo30_0.9x1.25_remap_c051027.nc
+   file global attributes:
+      history : Written on date: 20051027
+definesurf -remap -t /fs/cgd/csm/inputdata/atm/cam/topo/USGS-gtopo30_10min_c050419.nc -g /fs/cgd/csm/inputdata/atm/cam/coords/fv_0.9x1.25.nc -l /fs/cgd/csm/inputdata/atm/cam2/hrtopo/landm_coslat.nc /fs/cgd/csm/inputdata/atm/cam/to
+      make_ross : true
+      topofile : /fs/cgd/csm/inputdata/atm/cam/topo/USGS-gtopo30_10min_c050419.nc
+      gridfile : /fs/cgd/csm/inputdata/atm/cam/coords/fv_0.9x1.25.nc
+      landmask : /fs/cgd/csm/inputdata/atm/cam2/hrtopo/landm_coslat.nc
+   dimensions:
+      lon = 288
+      lat = 192
+   variables:
+      double lat ( lat )
+         long_name :	latitude
+         units :	degrees_north
+
+      double lon ( lon )
+         long_name :	longitude
+         units :	degrees_east
+
+      double PHIS ( lat, lon )
+         _FillValue :	1e+36
+         missing_value :	1e+36
+         long_name :	surface geopotential
+         units :	m2/s2
+         from_hires :	true
+         filter :	remap
+
+      double SGH ( lat, lon )
+         _FillValue :	1e+36
+         missing_value :	1e+36
+         long_name :	standard deviation of 10-min elevations
+         units :	m
+         from_hires :	true
+         filter :	none (2x[1-2-1])
+
+      double SGH30 ( lat, lon )
+         _FillValue :	1e+36
+         missing_value :	1e+36
+         long_name :	standard deviation of elevation from 30s to 10m
+         units :	m
+         from_hires :	true
+         filter :	none (2x[1-2-1])
+
+      double LANDFRAC ( lat, lon )
+         _FillValue :	1e+36
+         missing_value :	1e+36
+         long_name :	gridbox land fraction
+         from_hires :	true
+
+      double LANDM_COSLAT ( lat, lon )
+         _FillValue :	1e+36
+         missing_value :	1e+36
+         long_name :	land ocean transition mask: ocean (0), continent (1), transition (0-1)
+         from_hires :	true
+
+ 
+Variable: f
+Type: file
+filename:	water_refindex_rrtmg_c080910
+path:	/users/yangsong3/CESM/input/atm/cam/physprops/water_refindex_rrtmg_c080910.nc
+   file global attributes:
+      source : OPAC + miev0
+      history : Mon May 10 14:04:54 2010: ncks -v refindex_real_water_sw,refindex_im_water_sw,refindex_real_water_lw,refindex_im_water_lw bcpho_rrtmg_c100508.nc water_rrtmg_c080910.nc
+Mon May 10 11:00:25 2010: ncks -A bcpho_density_3mode.nc bcpho_rrtmg_c100508.nc
+Tue Mar 10 15:30:27 2009: ncks -v abs_lw,scat_lw,asym_lw,asm_sw,ext_sw,abs_sw,ssa_sw,ext_nir,abs_nir,ssa_nir,asym_nir bcpho_rrtmg.nc bcpho_rrtmg_c090310.nc
+Tue Mar 10 15:25:14 2009: ncrename -v asym_sw,asm_sw bcpho_rrtmg.nc
+Water uptake from Kohler theory
+   dimensions:
+      lw_band = 16
+      sw_band = 14
+   variables:
+      double refindex_im_water_lw ( lw_band )
+         long_name :	imaginary refractive index of water - longwave  
+
+      double refindex_im_water_sw ( sw_band )
+         long_name :	imaginary refractive index of water - shortwave 
+
+      double refindex_real_water_lw ( lw_band )
+         long_name :	real refractive index of water - longwave  
+
+      double refindex_real_water_sw ( sw_band )
+         long_name :	real refractive index of water - shortwave 
+
+ 
+Variable: f
+Type: file
+filename:	iceoptics_c080917
+path:	/users/yangsong3/CESM/input/atm/cam/physprops/iceoptics_c080917.nc
+   file global attributes:
+      source : Produced by David Mitchell, DRI, on 17 September 2008, MADA code
+      microphysical_assumption : Crystal shape recipe based on Lawson et al., 2006, J. Atmos. Sci., for T = -45 C
+      band_averaging : based on simple average across band
+      SW_band_sequence_based_on_shortest_wavelength : 3.08, 2.50, 2.15, 1.94, 1.63, 1.30, 1.24, 0.78, 0.62, 0.44, 0.34, 0.26, 0.20, 3.85
+      LW_band_sequence_based_on_shortest_wavelength : 28.6, 20.0, 15.9, 14.3, 12.2, 10.2, 9.26, 8.47, 7.19, 6.76, 5.56, 4.81, 4.44, 4.18, 3.85, 3.08
+      reference_1 : Mitchell, D.L., A. Macke and Y. Liu, 1996: Modeling cirrus clouds. Part II: Treatment of radiative properties. J. Atmos. Sci., 53, 2967-2988
+      reference_2 : Mitchell, D.L., 2000: Parameterization of the Mie extinction and absorption coefficients for water clouds. J. Atmos. Sci., 57, 1311-1326
+      reference_3 : Mitchell, D.L., 2002: Effective diameter in radiation transfer: General definition, applications, and limitations. J. Atmos. Sci., 59, 2330-2346
+      reference_4 : Mitchell et al. 2006: Testing and comparing the modified anomalous diffraction approximation. J. Atmos. Sci., 63, 2948-2962
+   dimensions:
+      lw_band = 16
+      sw_band = 14
+      d_eff = 300
+   variables:
+      float d_eff ( d_eff )
+         long_name :	effective diameter
+         units :	microns
+
+      float lw_abs ( lw_band, d_eff )
+         long_name :	Longwave mass specific absorption for in-cloud ice water path
+         units :	meter^2 kilogram^-1
+
+      float sw_ext ( sw_band, d_eff )
+         long_name :	Shortwave extinction
+         units :	meter^2 kilogram^-1
+
+      float sw_ssa ( sw_band, d_eff )
+         long_name :	Shortwave single scattering albedo
+         units :	fraction
+
+      float sw_asm ( sw_band, d_eff )
+         long_name :	Shortwave asymmetry parameter
+         units :	fraction
+ 
+
+Variable: f
+Type: file
+filename:	F_nwvl200_mu20_lam50_res64_t298_c080428
+path:	/users/yangsong3/CESM/input/atm/cam/physprops/F_nwvl200_mu20_lam50_res64_t298_c080428.nc
+   file global attributes:
+   dimensions:
+      lw_band = 16
+      sw_band = 14
+      mu = 20
+      lambda_scale = 50
+   variables:
+      double mid_wvl_sw_band ( sw_band )
+         units :	meters
+
+      double wvl_sw_min ( sw_band )
+         units :	meters
+
+      double wvl_sw_max ( sw_band )
+         units :	meters
+
+      double mid_wvl_lw_band ( lw_band )
+         units :	meters
+
+      double wvl_min_lw ( lw_band )
+         units :	meters
+
+      double wvl_max_lw ( lw_band )
+         units :	meters
+
+      double k_ext_sw ( sw_band, lambda_scale, mu )
+         units :	meters^2/kg
+
+      double k_sca_sw ( sw_band, lambda_scale, mu )
+         units :	meters^2/kg
+
+      double k_abs_sw ( sw_band, lambda_scale, mu )
+         units :	meters^2/kg
+
+      double ssa_sw ( sw_band, lambda_scale, mu )
+         units :	0 to 1 unitless
+
+      double asm_sw ( sw_band, lambda_scale, mu )
+         units :	-1 to 1 unitless
+
+      double k_ext_lw ( lw_band, lambda_scale, mu )
+         units :	meters^2/kg
+
+      double k_sca_lw ( lw_band, lambda_scale, mu )
+         units :	meters^2/kg
+
+      double k_abs_lw ( lw_band, lambda_scale, mu )
+         units :	meters^2/kg
+
+      double q_ext_eff_lw ( lw_band, lambda_scale, mu )
+         units :	none
+
+      double q_sca_eff_lw ( lw_band, lambda_scale, mu )
+         units :	none
+
+      double q_abs_eff_lw ( lw_band, lambda_scale, mu )
+         units :	none
+
+      double q_ext_eff_sw ( sw_band, lambda_scale, mu )
+         units :	none
+
+      double q_sca_eff_sw ( sw_band, lambda_scale, mu )
+         units :	none
+
+      double q_abs_eff_sw ( sw_band, lambda_scale, mu )
+         units :	none
+
+      double ssa_lw ( lw_band, lambda_scale, mu )
+         units :	0 to 1 unitless
+
+      double asm_lw ( lw_band, lambda_scale, mu )
+         units :	-1 to 1 unitless
+
+      double lambda ( lambda_scale, mu )
+         units :	meter^-1
+
+      double mu ( mu )
+         units :	unitless
+
+ 
+Variable: f
+Type: file
+filename:	CCSM4_volcanic_1850-2008_prototype1
+path:	/users/yangsong3/CESM/input/atm/cam/volc/CCSM4_volcanic_1850-2008_prototype1.nc
+   file global attributes:
+      title : Volcanic Aerosol Mass Mixing Ratio Prototype Dec 1849 to Jan 2009 for NCAR-CCSM4
+      creation_date : Wed Apr  1 09:13:55 MDT 2009
+      created_by : Caspar Ammann
+      reference : ...
+      aerosol_dates : Covered Period : Monthly averages Dec 1849 - Jan 2009.
+      aerosol_base : Derived from CCSM3_volcanic forcing
+      aerosol_distribution : Single aerosol distribution: sulfuric acid with reff 0.4264, med 0.375, sigma 1.25
+   dimensions:
+      time = 1910  // unlimited
+      date = 1910
+      lev = 8
+      lat = 64
+   variables:
+      float time ( time )
+
+      double date ( time )
+         _FillValue :	-9999
+         long_name :	Date
+         units :	yyyymmdd
+
+      float lev ( lev )
+         bounds :	ilev
+         long_name :	Pressure downwards
+         units :	hPa
+         standard_name :	pure pressure levels
+         formula_terms :	none
+
+      double lat ( lat )
+
+      double MMRVOLC ( time, lev, lat )
+         _FillValue :	-9999
+         units :	kg kg-1
+         long_name :	layer volcanic aerosol mass mixing ratio
+
+      float colmass ( time, lat )
+         _FillValue :	-999
+
+      integer datesec ( time )
+         _FillValue :	-999
+
+ 
+Variable: f
+Type: file
+filename:	clim_p_trop
+path:	/users/yangsong3/CESM/input/atm/cam/chem/trop_mozart/ub/clim_p_trop.nc
+   file global attributes:
+   dimensions:
+      lon = 144
+      lat = 73
+      time = 12  // unlimited
+   variables:
+      float lat ( lat )
+         long_name :	 
+         units :	 
+
+      float lon ( lon )
+         long_name :	 
+         units :	 
+
+      float trop_p ( time, lat, lon )
+         long_name :	tropopause pressure
+         units :	Pa
+
+      integer month ( time )
+         long_name :	 
+         units :	 
+
+ 

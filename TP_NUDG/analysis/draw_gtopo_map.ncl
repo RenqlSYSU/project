@@ -8,10 +8,11 @@
 ;*********************************************************************************
 begin
 ;the path of the file
-fig_name   = "/users/yangsong3/renql/project/TP_NUDG/analysis/fig/topography_nudg_zone"
-filename   = "/users/yangsong3/renql/project/TP_NUDG/analysis/mdata/gtopo30_0.9x1.25.nc"
+path = "/users/yangsong3/renql/project/TP_NUDG"
+fig_name   = path + "/analysis/fig/topography_nudg_zone"
+filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
 fig_title  = "Topography" ; + var_name + " in " + lev + " hPa"
-fig_out    = "pdf";"x11"
+fig_out    = "eps";"pdf";"x11"
 var_name   = "PHIS"
 unit       = "x100 gpm"
 
@@ -45,6 +46,7 @@ plonr = 150
    subtitle_thick = 6.0  ;not have this attribute
    title_thick    = 5.0
    mp_thick       = 5.0
+   font_index     = 22
 
 ;the number of the panel plot
     narea = dimsizes(area)
@@ -88,6 +90,9 @@ copy_VarMeta(var1,var)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;-------set the form of the coordinate--------------
+    res@tmBorderThicknessF  = mp_thick
+    res@tmXBLabelFont   = font_index
+    res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
     res@tmXBLabelFontThicknessF  = tick_thick
@@ -95,10 +100,14 @@ copy_VarMeta(var1,var)
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     ;  res@tmXBMajorOutwardLengthF = -0.
     ;  res@tmYLMajorOutwardLengthF = -0.
     ;  res@tmYRMajorOutwardLengthF = -0.
       
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
@@ -128,15 +137,17 @@ copy_VarMeta(var1,var)
 
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
+    res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-2
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
     lnres@gsEdgesOn            = True
     lnres@gsEdgeColor          = "black"
     lnres@gsEdgeDashPattern    = 0
-    lnres@gsEdgeThicknessF     = 4.0
+    lnres@gsEdgeThicknessF     = mp_thick + 1
     ;fillcolor = (/"yellow","red","red","red","red","blue","blue","blue"/)
     ;opacity   = (/  1,  0.7,  0.7,  0.7,  0.7,  0.7,  0.7,  0.7 /)
     lnres@gsFillOpacityF       = 0 
@@ -150,11 +161,11 @@ copy_VarMeta(var1,var)
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-    res@tiMainString         = fig_title 
-    res@tiMainFontHeightF    = title_font
-    res@tiMainFontColor      = "black"
-    res@gsnRightStringFontHeightF = subtitle_font
-    res@gsnLeftStringFontHeightF  = subtitle_font
+    ;res@tiMainString         = fig_title 
+    ;res@tiMainFontHeightF    = title_font
+    ;res@tiMainFontColor      = "black"
+    res@gsnStringFont        = font_index
+    res@gsnStringFontHeightF = subtitle_font
     res@gsnRightString      = unit 
     res@gsnLeftString       = var_name ;""
     

@@ -47,7 +47,7 @@ printVarSummary(select_time)
 
 do nv = 0,nvar-1,1
 nvv = nv + 2
-var(nv,:)  = f->$var_name(nv)$(select_time)     ;(nv,:,:,nl)
+var(nv,:)  = f->$var_name(nvv)$(select_time)     ;(nv,:,:,nl)
 end do
 printVarSummary(var)
 
@@ -64,22 +64,27 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@vpHeightF = 0.25
     ;resxy@gsnFrame      = False
     ;resxy@gsnDraw       = False
-    resxy@gsnMaximize   = True
-    resxy@gsnPaperOrientation = "portrait"
+    ;resxy@gsnMaximize   = True
+    resxy@gsnPaperOrientation = "landscape";"portrait"
     
     resxy@xyDashPatterns    = (/0  ,0  ,0  ,0  ,0  /)
-    resxy@xyLineThicknesses = (/2.0,2.0,2.0,2.0,2.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/2.0,2.0,2.0,2.0,2.0/)
+    resxy@xyLineThicknesses = (/5.0,5.0,5.0,5.0,5.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/2  , 17, 33, 49, 57/)
     resxy@tiXAxisOn = False
+    resxy@tiXAxisFont   = font_index
+    resxy@tiXAxisString = "Year"
     resxy@tiYAxisOn = False
     ;resxy@trYMinF = floor(min(var))
     ;resxy@trYMaxF = ceil(max(var))
-    
+
+    resxy@tmBorderThicknessF        = mp_thick  
+    resxy@tmXBLabelFont             = font_index
+    resxy@tmYLLabelFont             = font_index
     ;resxy@tmXBLabelFontHeightF     = tick_font-0.01
     ;resxy@tmXBLabelFontThicknessF  = tick_thick-1.0 
     ;resxy@tmYRLabelFontHeightF     = tick_font
     ;resxy@tmYRLabelFontThicknessF  = tick_thick
-
+    
     resxy@tmXBMinorOn          = False ; Turn off x-axis (bottom) minor ticks
     resxy@tmXTMinorOn          = False ; Turn off x-axis (tottom)minor ticks
     resxy@tmXTOn               = False ; Turn off x-axis (top) major ticks
@@ -89,28 +94,44 @@ wks = gsn_open_wks(fig_out,fig_name)
     
     ;resxy@tmXBMajorLengthF = 0.01
     ;resxy@tmYRMajorLengthF = 0.01
-    ;resxy@tmXBMode           = "Manual"
-    ;resxy@tmXBTickSpacingF   = 30
-    ;resxy@tmXBTickStartF     = 0
-    ;resxy@tmXBTickEndF       = 365
+    resxy@tmXBMode           = "Manual"
+    resxy@tmXBTickSpacingF   = 3
+    resxy@tmXBTickStartF     = 1979
+    resxy@tmXBTickEndF       = 2005
     ;resxy@tmXBMode            = "Explicit"
-    ;resxy@tmXBValues          = ispan(0,360,30)
-    ;resxy@tmXBLabels          = ispan(0,360,30)
+    ;resxy@tmXBValues          = ispan(1979,2005,3)
+    ;resxy@tmXBLabels          = ispan(1979,2005,3)
     
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2
     resxy@tmXMajorGridLineColor          = "gray"
     resxy@tmXMajorGridThicknessF         = 2.0
     
+    ;legend
+    resxy@pmLegendDisplayMode = "Always"
+    resxy@lgOrientation       = "Vertical"
+    resxy@lgPerimOn           = False
+    resxy@lgPerimFill         = "SolidFill"
+    resxy@lgPerimFillColor    = "white"
+    resxy@xyExplicitLegendLabels = draw_var + " " + unit
+    resxy@lgLabelFont            = font_index 
+    resxy@lgLabelFontColor       = "black"
+    resxy@lgLabelFontThicknessF  = label_thick
+    resxy@lgLabelFontHeightF     = label_font
+    resxy@pmLegendWidthF   = 0.07
+    resxy@pmLegendHeightF  = 0.15
+    resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
+    resxy@pmLegendOrthogonalPosF  = -0.05   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = -0.05    ; move ref vector along X-axis
+
     resxy@gsnStringFont              = font_index
     resxy@gsnStringFontHeightF       = subtitle_font 
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
-
     resxy@gsnLeftString    = ""
     resxy@gsnRightString   = ""
     ;resxy@trYMinF = floor(min(var(:,:,:,nl)))
     ;resxy@trYMaxF =  ceil(max(var(:,:,:,nl)))
-    plot(nc)  = gsn_csm_xy(wks,date(select_time),var,resxy)
+    plot  = gsn_csm_xy(wks,date(select_time),var,resxy)
     
     ;resp  = True    
     ;resp@gsnMaximize   = True

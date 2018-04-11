@@ -1,23 +1,22 @@
 ;***************************************************************************
-;filename:      draw_3p3x2_UVT_JJA_annual_ts.ncl
-;plot the JJA times of every year's annual cycle(id=151~242) of TP average UVT(27 curves) 
-;then overlaying the climate annual cycle(black bold curve)
-;and one panel has six plots.
+;filename:      draw_1p1x2_intro_sketch_ts.ncl
+;use the daily annual cycle of TP area average T in 850hPa 0f CTRL and NG6h 
+;these two case to explain the mean of nudging in the intro of the paper.
 ;                                            by Ql_Ren
-;                                           2017/03/29
+;                                           2018/04/11
 ;******************************************************************************
 begin
-draw_var = (/"U","V","T"/)
-unit     = (/"m/s","m/s","~S~o~N~C"/)   ;this can be used as right string 
-var_name = (/"series","ave"/)
-case     = (/" CTRL"," NG24h"," NG6h"/);this can be used as left string
-pre_case = (/"(a","(b","(c"/)
+case     = (/"(a) CTRL","(b) NUDG"/);this can be used as left string
 years    = ispan(1979,2005,1)   ;the calculate time
+draw_var = (/"U","V","T","OMEGA","Z3"/)
+unit     = (/"m/s","m/s","~S~o~N~C","10~S~-2~N~ Pa/s","gpm"/)   ;this can be used as right string 
+var_name = (/"series","ave"/)
+nv = 2;3;1
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" ;+ draw_var(nv) + "_TP_annual_series.nc"
-fig_name   = path + "/concept_map/fig/3p3X3_UVT_annual_cycle"
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG6h"/) + "-" + draw_var(nv) + "_TP_annual_series.nc"
+fig_name   = path + "/concept_map/fig/1p1x2_intro_sketch_ts" + draw_var(nv)
 fig_out    ="eps";"pdf";"x11"
 
 ;area of TP 
@@ -26,10 +25,11 @@ latn = 40
 lonl = 70
 lonr = 105
 lev  = (/850,500,200/)
+nl   = 0
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.01
+   tick_font      = 0.015
+   subtitle_font  = 0.015
    title_font     = 0.03
    label_font     = 0.015
    tick_thick     = 5.0
@@ -45,27 +45,29 @@ lev  = (/850,500,200/)
 nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(draw_var)
-nlev  = dimsizes(lev)
-nday  = 350
-var   = new((/ncase,nvar,nyear,nday,nlev/),float)
-ave   = new((/ncase,nvar,      nday,nlev/),float)
-plot  = new((/ncase*nvar/),graphic)
-plot2 = new((/ncase*nvar/),graphic)
-plot3 = new((/ncase*nvar/),graphic)
+var         = new((/ncase,nyear,350/),float)
+ave         = new((/ncase,      350/),float)
+plot        = new((/ncase/),graphic)
+plot2       = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
 ;--------------------------------------------------------------
 do nc = 0,ncase-1,1
-do nv = 0,nvar-1,1
-    f    = addfile(filename(nc)+draw_var(nv)+"_TP_annual_series.nc","r")
-    var(nc,nv,:,:,:)  = f->$var_name(0)$(:,0:349,:)
-    ave(nc,nv,:,:)    = f->$var_name(1)$(0:349,:)
-end do   ;the loop of the three variables 
+    f    = addfile(filename(nc),"r")
+    var(nc,:,:)  = f->$var_name(0)$(:,0:349,nl)
+    ave(nc,:)    = f->$var_name(1)$(0:349,nl)
 end do   ;the loop of the three cases
 
-var(:,2,:,:,:) = var(:,2,:,:,:) - 273.15   ;convert unit from k to c
-ave(:,2,:,:)   = ave(:,2,:,:)   - 273.15
+if (nv.eq.2) then
+    var = var - 273.15   ;convert unit from k to c
+    ave = ave - 273.15
+end if
+
+if (nv.eq.3) then
+    var = var*100   ;convert unit from k to c
+    ave = ave*100
+end if
 
 printVarSummary(var)
 printVarSummary(ave)
@@ -79,8 +81,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;has 64 colors blue green yellow,red
 
     resxy     = True
-    resxy@vpWidthF  = 0.3
-    resxy@vpHeightF = 0.1
+    resxy@vpWidthF  = 0.45
+    resxy@vpHeightF = 0.25
     resxy@gsnFrame      = False
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
@@ -95,10 +97,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@trYMaxF = ceil(max(var))
     
     resxy@tmBorderThicknessF  = mp_thick
-    resxy@tmXBLabelFont         = font_index
-    resxy@tmYLLabelFont         = font_index
-    ;resxy@tmXBLabelFontHeightF     = tick_font-0.01
-    ;resxy@tmYRLabelFontHeightF     = tick_font
+    resxy@tmXBLabelFont   = font_index
+    resxy@tmYLLabelFont   = font_index
+    ;resxyxy@tmXBLabelFontHeightF     = tick_font
+    ;resxyxy@tmYRLabelFontHeightF     = tick_font
 
     resxy@tmXBMajorThicknessF     = mp_thick
     resxy@tmYLMajorThicknessF     = mp_thick
@@ -124,7 +126,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@tmXBMode           = "Manual"
     ;resxy@tmXBTickSpacingF   = 30
     ;resxy@tmXBTickStartF     = 0
-    ;resxy@tmXBTickEndF       = 360
+    ;resxy@tmXBTickEndF       = 365
     resxy@tmXBMode            = "Explicit"
     resxy@tmXBValues          = ispan(0,360,30)
     resxy@tmXBLabels          = ispan(0,360,30)
@@ -135,7 +137,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmXMajorGridThicknessF         = 2.0
                              
     resxy@gsnStringFont         = font_index
-    resxy@gsnStringFontHeightF  = subtitle_font
+    resxy@gsnStringFontHeightF  = subtitle_font 
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
     resxy@gsnLeftString    = ""
     resxy@gsnRightString   = ""
@@ -143,34 +145,25 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy2 = resxy
     resxy2@xyMonoLineColor  = True
     resxy2@xyMonoLineThickness = True
-    resxy2@xyLineThicknessF = 4.0;(/2.0, 2.0,2.0/)   ; make second line thicker
+    resxy2@xyLineThicknessF = 6.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     resxy2@xyLineColor      = "black"
 
-    ;resxy@tiXAxisOn = True
-    ;resxy@tiXAxisFont        = font_index
-    ;resxy@tiXAxisFontHeightF = tick_font
-    ;resxy@tiXAxisString      = "day"
+    resxy@tiXAxisOn = True
+    resxy@tiXAxisFont        = font_index
+    resxy@tiXAxisFontHeightF = tick_font
+    resxy@tiXAxisString      = "day"
+
+do nc = 0, ncase-1,1
+    resxy@gsnLeftString    = case(nc)
+    resxy@trYMinF = floor(min(var(:,:,:)))
+    resxy@trYMaxF =  ceil(max(var(:,:,:)))
+    plot(nc)  = gsn_csm_xy(wks,var&day,(/var(nc,:,:)/),resxy)
+    plot2(nc) = gsn_csm_xy(wks,var&day,(/ave(0 ,  :)/),resxy2)
+    overlay(plot(nc),plot2(nc))
+end do
     
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape"
-
-do nl = 0,nlev-1,1
-do nc = 0, ncase-1,1
-do nv =0, nvar-1,1
-    nn = nv +1
-    np = nvar*nc + nv
-    resxy@gsnLeftString   = pre_case(nc) + nn + case(nc)
-    resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
-    resxy@trYMinF = floor(min(var(:,nv,:,:,nl)))
-    resxy@trYMaxF =  ceil(max(var(:,nv,:,:,nl)))
-    plot(np)  = gsn_csm_xy(wks,var&day,(/var(nc,nv,:,:,nl)/),resxy)
-    plot2(np) = gsn_csm_xy(wks,var&day,(/ave(0 ,nv,  :,nl)/),resxy2)
-    overlay(plot(np),plot2(np))
-end do
-end do
-    
-   gsn_panel(wks,plot,(/ncase,nvar/),resp)
-end do
+   gsn_panel(wks,plot,(/1,ncase/),resp)
 end
 

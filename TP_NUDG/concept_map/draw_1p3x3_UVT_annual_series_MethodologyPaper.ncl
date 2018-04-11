@@ -1,24 +1,25 @@
 ;***************************************************************************
-;filename:      draw_3p3x2_UVT_JJA_annual_ts.ncl
-;plot the JJA times of every year's annual cycle(id=151~242) of TP average UVT(27 curves) 
+;filename:      draw_1p3x3_UVT_annual_series_MethodologyPaper.ncl
+;plot the every year's annual cycle(356) of TP average UVT(27 curves) 
 ;then overlaying the climate annual cycle(black bold curve)
-;and one panel has six plots.
+;and one panel has nine plots
+;this fig is used to the paper.
 ;                                            by Ql_Ren
-;                                           2017/03/29
+;                                           2017/04/11
 ;******************************************************************************
 begin
 draw_var = (/"U","V","T"/)
 unit     = (/"m/s","m/s","~S~o~N~C"/)   ;this can be used as right string 
 var_name = (/"series","ave"/)
 case     = (/" CTRL"," NG24h"," NG6h"/);this can be used as left string
-pre_case = (/"(a","(b","(c"/)
+pre_case = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" ;+ draw_var(nv) + "_TP_annual_series.nc"
 fig_name   = path + "/concept_map/fig/3p3X3_UVT_annual_cycle"
-fig_out    ="eps";"pdf";"x11"
+fig_out    ="pdf";"x11"
 
 ;area of TP 
 lats = 25 
@@ -94,23 +95,12 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@trYMinF = floor(min(var))
     ;resxy@trYMaxF = ceil(max(var))
     
-    resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
     resxy@tmYLLabelFont         = font_index
     ;resxy@tmXBLabelFontHeightF     = tick_font-0.01
+    ;resxy@tmXBLabelFontThicknessF  = tick_thick-1.0 
     ;resxy@tmYRLabelFontHeightF     = tick_font
-
-    resxy@tmXBMajorThicknessF     = mp_thick
-    resxy@tmYLMajorThicknessF     = mp_thick
-    ;  resxy@tmXBMajorOutwardLengthF = -0.
-    ;  resxy@tmYLMajorOutwardLengthF = -0.
-    ;  resxy@tmYRMajorOutwardLengthF = -0.
-    
-    resxy@tmXBMinorThicknessF     = mp_thick
-    resxy@tmYLMinorThicknessF     = mp_thick
-    ;  resxy@tmXBMinorOutwardLengthF = -0.
-    ;  resxy@tmYLMinorOutwardLengthF = -0.
-    ;  resxy@tmYRMinorOutwardLengthF = -0.
+    ;resxy@tmYRLabelFontThicknessF  = tick_thick
 
     resxy@tmXBMinorOn          = False ; Turn off x-axis (bottom) minor ticks
     resxy@tmXTMinorOn          = False ; Turn off x-axis (tottom)minor ticks
@@ -135,7 +125,9 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmXMajorGridThicknessF         = 2.0
                              
     resxy@gsnStringFont         = font_index
-    resxy@gsnStringFontHeightF  = subtitle_font
+    resxy@gsnCenterStringFontHeightF = subtitle_font-0.005
+    resxy@gsnRightStringFontHeightF  = subtitle_font
+    resxy@gsnLeftStringFontHeightF   = subtitle_font
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
     resxy@gsnLeftString    = ""
     resxy@gsnRightString   = ""
@@ -146,10 +138,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy2@xyLineThicknessF = 4.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     resxy2@xyLineColor      = "black"
 
-    ;resxy@tiXAxisOn = True
-    ;resxy@tiXAxisFont        = font_index
-    ;resxy@tiXAxisFontHeightF = tick_font
-    ;resxy@tiXAxisString      = "day"
+    resxy3 = resxy2
+    resxy2@xyLineThicknessF = 6.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     
     resp  = True    
     resp@gsnMaximize   = True
@@ -166,7 +156,9 @@ do nv =0, nvar-1,1
     resxy@trYMaxF =  ceil(max(var(:,nv,:,:,nl)))
     plot(np)  = gsn_csm_xy(wks,var&day,(/var(nc,nv,:,:,nl)/),resxy)
     plot2(np) = gsn_csm_xy(wks,var&day,(/ave(0 ,nv,  :,nl)/),resxy2)
+    ;plot3(np) = gsn_csm_xy(wks,var&day,(/ave(nc,nv,  :,nl)/),resxy3)
     overlay(plot(np),plot2(np))
+    ;overlay(plot(np),plot3(np))
 end do
 end do
     

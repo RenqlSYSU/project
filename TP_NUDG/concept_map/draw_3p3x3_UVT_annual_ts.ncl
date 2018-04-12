@@ -17,7 +17,7 @@ years    = ispan(1979,2005,1)   ;the calculate time
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" ;+ draw_var(nv) + "_TP_annual_series.nc"
-fig_name   = path + "/concept_map/fig/3p3X3_UVT_annual_cycle"
+fig_name   = path + "/concept_map/fig/3p3X3_annual_cycle-"
 fig_out    ="eps";"pdf";"x11"
 
 ;area of TP 
@@ -28,7 +28,7 @@ lonr = 105
 lev  = (/850,500,200/)
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
+   tick_font      = 0.01
    subtitle_font  = 0.01
    title_font     = 0.03
    label_font     = 0.015
@@ -36,7 +36,7 @@ lev  = (/850,500,200/)
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    label_thick    = 1.5
-   mp_thick       = 5.0
+   mp_thick       = 4.0
    font_index     = 22
 
 ;==========================================================
@@ -73,13 +73,10 @@ printVarSummary(ave)
 ;===============================================
 ;draw the figure
 ;=============================================
-wks = gsn_open_wks(fig_out,fig_name)
 
-    gsn_define_colormap(wks,"matlab_jet") 
-    ;has 64 colors blue green yellow,red
 
     resxy     = True
-    resxy@vpWidthF  = 0.3
+    resxy@vpWidthF  = 0.29
     resxy@vpHeightF = 0.1
     resxy@gsnFrame      = False
     resxy@gsnDraw       = False
@@ -97,7 +94,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
     resxy@tmYLLabelFont         = font_index
-    ;resxy@tmXBLabelFontHeightF     = tick_font-0.01
+    ;resxy@tmXBLabelFontHeightF     = tick_font
     ;resxy@tmYRLabelFontHeightF     = tick_font
 
     resxy@tmXBMajorThicknessF     = mp_thick
@@ -155,11 +152,16 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
 
-do nl = 0,nlev-1,1
+do nv = 0, nvar-1,1
+wks = gsn_open_wks(fig_out,fig_name+draw_var(nv))
+
+gsn_define_colormap(wks,"matlab_jet") 
+;has 64 colors blue green yellow,red
+
 do nc = 0, ncase-1,1
-do nv =0, nvar-1,1
-    nn = nv +1
-    np = nvar*nc + nv
+do nl =0, nlev-1,1
+    nn = nl +1
+    np = nlev*nc + nl
     resxy@gsnLeftString   = pre_case(nc) + nn + case(nc)
     resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
     resxy@trYMinF = floor(min(var(:,nv,:,:,nl)))

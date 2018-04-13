@@ -10,15 +10,14 @@
 ;                                                    2018/03/28
 ;*********************************************************************************
 begin
-draw_var  = (/"U","V","OMEGA","T","Z3"/)
-right_str = (/"U","V","omega","T","height"/)
-unit      = (/"m~S~2~N~/s~S~2~N~","m~S~2~N~/s~S~2~N~","10~S~-3~N~ Pa~S~2~N~/s~S~2~N~","~S~o~N~C~S~2~N~","gpm~S~2~N~"/) ;can used as right string 
+draw_var  = (/"TMQ","preci"/)
+right_str = (/"TMQ","preci"/)
+unit      = (/"kg~S~2~N~/m~S~4~N~","mm~S~2~N~/day~S~2~N~"/) ;can used as right string 
 var_name  = (/"season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 nm = 2
-nv = 1;0
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -26,18 +25,17 @@ path     = "/users/yangsong3/renql/project/TP_NUDG"
 filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x3_year_day_vari_" + months(nm) + draw_var(nv) 
+fig_name = path + "/phy_panel-20180328/fig/1p2x2_year_day_vari_tmq_preci"
     case   = (/" daily"," year"/)
 pre_case   = (/"(a","(b"/)
-;fig_out    = "pdf";"x11"
-fig_out    = "eps";"x11"
+fig_out    = "pdf";"x11"
+;fig_out    = "eps";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
 latn = 55  ;60
 lonl = 30  ;20
 lonr = 150 ;220
-lev  = (/850,500,200/)
 siglvl = 0.05
 
 f = addfile(gtopfile,"r")
@@ -46,19 +44,18 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case)
 nmonth = dimsizes(months)
 nvar   = dimsizes(draw_var)
-nlev   = dimsizes(lev)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
-var  = new((/ncase,nlev,nlat,nlon/),float)
-vari = new((/ncase,nlev,nlat,nlon/),float)
-prob = new((/ncase,nlev,nlat,nlon/),float)
+var  = new((/ncase,nvar,nlat,nlon/),float)
+vari = new((/ncase,nvar,nlat,nlon/),float)
+prob = new((/ncase,nvar,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/ncase*nlev/),graphic)
-    line     = new((/ncase*nlev/),graphic)
-    gtop     = new((/ncase*nlev/),graphic)
-    plot_p   = new((/ncase*nlev/),graphic)
-    plot_n   = new((/ncase*nlev/),graphic)
+    plot     = new((/ncase*nvar/),graphic)
+    line     = new((/ncase*nvar/),graphic)
+    gtop     = new((/ncase*nvar/),graphic)
+    plot_p   = new((/ncase*nvar/),graphic)
+    plot_n   = new((/ncase*nvar/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -82,20 +79,18 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;read data
 ;====================================================================
 do nf = 0 ,ncase-1, 1
+do nv = 0 ,nvar-1,1
     f = addfile(filectrl(nf)+draw_var(nv)+".nc","r")
-    var(nf,:,:,:)  = f->$var_name$(nm,:,:,:) ;get an ctrl (ncase,nlev,nlat,nlon)
+    var(nf,nv,:,:)  = f->$var_name$(nm,:,:) ;get an ctrl (ncase,nlev,nlat,nlon)
     f = addfile(filenudg(nf)+draw_var(nv)+".nc","r")
-    vari(nf,:,:,:) = f->$var_name$(nm,:,:,:) ;get an nudg (ncase,nlev,nlat,nlon)
+    vari(nf,nv,:,:) = f->$var_name$(nm,:,:) ;get an nudg (ncase,nlev,nlat,nlon)
+end do
 end do
 
 var_temp = where(var.eq.0,var@_FillValue,var)
 prob(0,:,:,:)  = ftest(var(0,:,:,:),92,vari(0,:,:,:),92,0)
 prob(1,:,:,:)  = ftest(var(1,:,:,:),27,vari(1,:,:,:),27,0)
 vari  = (vari - var)/var_temp*100 ;get (nudg-ctrl)/ctrl
-
-if(nv.eq.2) then
-var = var*1000
-end if
 
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 vari = mask(vari,prob.lt.siglvl,True)
@@ -209,7 +204,7 @@ printVarSummary(prob)
     res_sigp@cnMonoFillPattern= True;False
     res_sigp@cnFillPattern    = 14
     res_sigp@cnMonoFillScale  = True
-    res_sigp@cnFillScaleF     = 0.6
+    res_sigp@cnFillScaleF     = 0.7
     res_sigp@cnMonoFillColor  = True
     res_sigp@cnFillColor      = "grey0"
     ;res_sigp@cnLinesOn        = True      ; turn off contour lines
@@ -274,73 +269,47 @@ printVarSummary(prob)
     ;resp@txFontHeightF = title_font 
     ;resp@txFontThicknessF = title_thick
 
-if(nv.eq.0) then   ;U
-    minlvl = (/(/ 0 ,  5 ,  30/),(/  0 ,  0 ,  0 /)/)
-    maxlvl = (/(/ 45, 59 , 264/),(/  9 ,  9 ,  9 /)/)
-    spacig = (/(/2.5,  3 ,  13/),(/ 0.5, 0.5, 0.5 /)/)
-end if
-
-if(nv.eq.1) then  ;V
-    minlvl = (/(/ 0 ,  2 ,  10/),(/  0 ,  0 ,  0  /)/)
-    maxlvl = (/(/ 36, 56 , 190/),(/ 2.7, 2.7,  9  /)/)
-    spacig = (/(/ 2 ,  3 ,  10/),(/0.15,0.15, 0.5 /)/)
-end if
-
-if(nv.eq.2) then    ;omega`
-    minlvl = (/(/ 0 ,  0 ,  0/),(/  0 ,  0 ,  0  /)/)
-    maxlvl = (/(/18 , 18 , 18/),(/ 0.9, 0.9, 0.9 /)/)
-    spacig = (/(/ 1 ,  1 ,  1/),(/0.05,0.05,0.05 /)/)
-end if
-
-if(nv.eq.3) then    ;T
-    minlvl = (/(/ 0 ,  0 ,  0/),(/  0 ,  0 ,  0  /)/)
-    maxlvl = (/(/ 27, 18 , 27/),(/ 3.6, 0.9, 0.9 /)/)
-    spacig = (/(/1.5,  1 ,1.5/),(/0.2 ,0.05,0.05 /)/)
-end if
-
-if(nv.eq.4) then    ;z3
-    minlvl = (/(/ 0  , 50 , 250 /),(/  0 ,  30,200  /)/)
-    maxlvl = (/(/3240,8150,32290/),(/ 288,750 ,2360 /)/)
-    spacig = (/(/180 , 450, 1780/),(/ 16 ,40  ,120  /)/)
-end if
+    minlvl = (/(/ 10,  10/),(/  0 ,  0 /)/)
+    maxlvl = (/(/190, 190/),(/  18,  18/)/)
+    spacig = (/(/10 ,  10/),(/  1 ,   1/)/)
 
 do nc = 0, ncase-1,1
-    do nl = 0, nlev-1,1
-        nn = nl +1
-        np = nlev*nc + nl
+    do nv = 0, nvar-1,1
+        nn = nv +1
+        np = nvar*nc + nv
         res@gsnLeftString   = pre_case(nc) + nn + case(nc)
-        res@gsnRightString  = lev(nl) + "hPa " + right_str(nv) + " (" + unit(nv) + ")"  
+        res@gsnRightString  = right_str(nv) + " (" + unit(nv) + ")"  
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF       := spacig(nc,nl)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc,nl) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc,nl)        ; set min contour level
-        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
+        res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(nc,nv)        ; set min contour level
+        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
         
-        if(all(ismissing(vari_p(nc,nl,:,:)))) then
+        if(all(ismissing(vari_p(nc,nv,:,:)))) then
             print("vari_p is all missing. Cannot create plot.")
         else 
             print("pertentage of (NUDG-CTRL)/CTRL*100")
-            print(min(vari_p(nc,nl,{lats:latn},{lonl:lonr})))
-            plot_p(np)  = gsn_csm_contour(wks,vari_p(nc,nl,:,:),res_sigp)
+            print(min(vari_p(nc,nv,{lats:latn},{lonl:lonr})))
+            plot_p(np)  = gsn_csm_contour(wks,vari_p(nc,nv,:,:),res_sigp)
             overlay(plot(np),plot_p(np))
         end if
         
-        if(all(ismissing(vari_n(nc,nl,:,:)))) then
+        if(all(ismissing(vari_n(nc,nv,:,:)))) then
             print("vari_n is all missing. Cannot create plot.")
         else 
             print("pertentage of (NUDG-CTRL)/CTRL*100")
-            print(max(vari_n(nc,nl,{lats:latn},{lonl:lonr})))
-            plot_n(np)  = gsn_csm_contour(wks,vari_n(nc,nl,:,:),res_sign)
+            print(max(vari_n(nc,nv,{lats:latn},{lonl:lonr})))
+            plot_n(np)  = gsn_csm_contour(wks,vari_n(nc,nv,:,:),res_sign)
             overlay(plot(np),plot_n(np))
         end if
         
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        print(max(var(nc,nl,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,nl,{lats:latn},{lonl:lonr})))
+        print(max(var(nc,nv,{lats:latn},{lonl:lonr})))
+        print(min(var(nc,nv,{lats:latn},{lonl:lonr})))
     end do 
 end do
-    gsn_panel(wks,plot,(/ncase,nlev/),resp)
+    gsn_panel(wks,plot,(/ncase,nvar/),resp)
 end
 

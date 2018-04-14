@@ -11,13 +11,13 @@ lats = (/25 , 20/) ;-20
 latn = (/40 , 45/)  ;60
 lonl = (/70 ,107/)  ;20
 lonr = (/105,122/);130 ;220
-na = 1
+na = 0;1
 
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-preci_TP_JJAdaily_wavelet.nc"
+fileout = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
 case     = (/"CTRL","NUDG6h","NUDG24h"/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
@@ -89,7 +89,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "the wavelet analysis of JJA daily rainfall in TP area"
+fileAtt@discription   = "the wavelet analysis of JJA daily rainfall in " + area(na)
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
@@ -101,7 +101,7 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 ;Define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"part","integer"   ,(/"part"/))
 filevardef(ncdf,"jtot","integer"   ,(/"jtot"/))
-filevardef(ncdf,"time",typeof(time),(/"time"/))
+filevardef(ncdf,"time","integer"   ,(/"time"/))
 filevardef(ncdf,"wave",typeof(var) ,(/"part","jtot","time"/))
 
 ;Define var Attribute
@@ -115,7 +115,7 @@ filevarattdef(ncdf,"wave",var)
 
 ncdf->part   = (/0,1/)  
 ncdf->jtot   = ispan(1,jtot,1) 
-ncdf->time   = (/time(select_time)/)
+ncdf->time   = ispan(1,N,1)
 ncdf->wave   = (/var/)
 end do
 end

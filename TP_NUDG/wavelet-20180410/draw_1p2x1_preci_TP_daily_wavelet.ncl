@@ -17,25 +17,25 @@ begin
    mp_thick       = 5.0
    font_index     = 22
 
+area =(/"TP","eastAsia"/)
+lats = (/25 , 20/) ;-20
+latn = (/40 , 45/)  ;60
+lonl = (/70 ,107/)  ;20
+lonr = (/105,122/);130 ;220
+na = 0;1
+
 ;path       = "/home/ys17-19/renql/project/TP_NUDG"
 path       = "/users/yangsong3/renql/project/TP_NUDG"
 ;filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_JJAdaily_wavelet.nc"
 ;fig_name   = path + "/wavelet-20180410/fig/1p3x1_preci_TP_daily_wavelet_nobias"
       ;case = (/"(a) CTRL","(b) NG24h","(c) NG6h"/)
-filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_TP_JJAdaily_wavelet.nc"
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_TP_daily_wavelet_nobias"
-      case = (/"(a) CTRL","(b) NG6h"/)
+filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
+fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_daily_wavelet_nobias"
+      case = (/"(a) CTRL","(b) NG6h"/) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" 
 fig_out    = "pdf" ;"eps";"x11"
 draw_var   = "preci"
 unit       = "mm~S~2~N~/day~S~2~N~"
 var_name   = (/"wave"/)
-
-;area:   TP , east Asia
-lats = (/25 , 20/) ;-20
-latn = (/40 , 45/)  ;60
-lonl = (/70 ,107/)  ;20
-lonr = (/105,122/);130 ;220
-na = 0
 
 f = addfile(filename(0),"r")
 ncase  = dimsizes(case)
@@ -57,6 +57,7 @@ do nf = 0,ncase-1,1
       sig(nf,:,:) = power(nf,:,:)/conform(power(nf,:,:),var@signif,0) ;compute significance ( >= 1 is significant)
     power(nf,:,:) = power(nf,:,:)/conform(power(nf,:,:),var@scale ,0)   ;no bias, referenced by Liu et.al(2007)
 end do
+
 power!1         = "period"
 power&period    = var@period
 power!2         = "time"
@@ -65,10 +66,12 @@ copy_VarMeta(power,sig)
 sig = mask(sig,sig.ge.1.0,True)
 printVarSummary(power)
 printVarSummary(sig)
+printVarSummary(var)
 
 exponent = ispan(2,11,2)
 ylabel   = exp( exponent*log(2.0) )
 print(ylabel)
+
 ;==============================================================
 ;draw figure 
 ;==================================================================
@@ -141,7 +144,6 @@ print(ylabel)
     res@cnLevels             = (/0.01,0.03,0.06,0.1 ,0.15, \
                                  0.2 ,0.3 ,0.4 ,0.6 ,0.8 , \
                                  1   ,1.2 ,1.5 ,2   ,2.5 , 3 , 4/)
-    ;res@cnLevels             = ispan(0,60,10)
     colors       = new((/18/),integer)
     colors(0:8)  = ispan(2,10,1)
     colors(9:17) = ispan(13,21,1)
@@ -178,22 +180,29 @@ print(ylabel)
     res_sig@tmYLLabels          = ylabel
     res_sig@tmLabelAutoStride   = True
 
-    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnFillOn         = True;False       ; Fill contours
     res_sig@cnLinesOn        = False;True      ; turn off contour lines
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
     res_sig@cnInfoLabelOn    = False
+;    res_sig@cnLineThicknessF = mp_thick
+;    res_sig@cnLineColors     = "black"
+;    res_sig@cnLevelSelectionMode = "ExplicitLevels"
+;    res_sig@cnLevels         = 
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
     res_sig@cnFillScaleF     = 0.5
     res_sig@cnMonoFillColor  = True
     res_sig@cnFillColor      = "grey0"
-    res_sig@cnFillDotSizeF   = 0.1
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     
     res_sig@gsnCenterString      = ""
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
+
+;------------set the attribute of the cone of influence---------------------
+    rescoi              = True
+    rescoi@gsFillIndex  = 1 
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -215,6 +224,7 @@ do nc = 0,ncase-1,1
     plot(nc)  = gsn_csm_contour(wks,power(nc,:,:),res)
     plot2(nc) = gsn_csm_contour(wks,sig(nc,:,:)  ,res_sig)
     overlay(plot(nc),plot2(nc))
+    plot(nc) = ShadeCOI(wks, plot(nc), var, var&time, False)
     print(max(power(nc,:,:)))
     print(min(power(nc,:,:)))
 end do

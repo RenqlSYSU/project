@@ -6,18 +6,21 @@
 ;                                           2018/03/30
 ;******************************************************************************
 begin
-area =(/"TP","eastAsia"/)
-lats = (/25 , 20/) ;-20
-latn = (/40 , 45/)  ;60
-lonl = (/70 ,107/)  ;20
-lonr = (/105,122/);130 ;220
-na = 0;1
+area =(/"STP","CTP","NTP","TP","SEA","NEA","EA"/)  ;S mean south,N mean North,EA mean East Asia
+lats = (/25  ,30   ,35   ,25  , 22  , 30  , 20 /) ;-20
+latn = (/30  ,35   ,40   ,40  , 30  , 45  , 45 /)  ;60
+lonl = (/70  ,70   ,70   ,70  ,107  ,107  ,107 /)  ;20
+lonr = (/105 ,105  ,105  ,105 ,130  ,130  ,122 /);130 ;220
+;na = 0;1
 
+narea = dimsizes(area)
+;do na = 0,narea-1,1
+do na = 0,0,1
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
+fileout = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet-stand.nc"
 case     = (/"CTRL","NUDG6h","NUDG24h"/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
@@ -54,6 +57,7 @@ var_d = 0
         var_d = var_d + temp
     end do  ;the loop of PRECC and PRECL
 var_d  = var_d*1000*3600*24  ;convert unit from m/s to mm/day
+var_d  = dim_standardize_Wrap(var_d,1)
 
 ;************************************
 ; compute wavelet
@@ -117,6 +121,7 @@ ncdf->part   = (/0,1/)
 ncdf->jtot   = ispan(1,jtot,1) 
 ncdf->time   = ispan(1,N,1)
 ncdf->wave   = (/var/)
+end do
 end do
 end
 

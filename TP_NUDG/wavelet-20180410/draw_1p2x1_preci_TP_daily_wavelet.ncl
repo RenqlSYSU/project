@@ -17,21 +17,22 @@ begin
    mp_thick       = 5.0
    font_index     = 22
 
-area =(/"TP","eastAsia"/)
-lats = (/25 , 20/) ;-20
-latn = (/40 , 45/)  ;60
-lonl = (/70 ,107/)  ;20
-lonr = (/105,122/);130 ;220
-na = 0;1
+
+area =(/"STP","CTP","NTP","TP","SEA","NEA","EA"/)  ;S mean south,N mean North,EA mean East Asia
+lats = (/25  ,30   ,35   ,25  , 22  , 30  , 20 /) ;-20
+latn = (/30  ,35   ,40   ,40  , 30  , 45  , 45 /)  ;60
+lonl = (/70  ,70   ,70   ,70  ,107  ,107  ,107 /)  ;20
+lonr = (/105 ,105  ,105  ,105 ,130  ,130  ,122 /);130 ;220
+na = 0;5;4;3;2;1
 
 ;path       = "/home/ys17-19/renql/project/TP_NUDG"
 path       = "/users/yangsong3/renql/project/TP_NUDG"
 ;filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_JJAdaily_wavelet.nc"
 ;fig_name   = path + "/wavelet-20180410/fig/1p3x1_preci_TP_daily_wavelet_nobias"
       ;case = (/"(a) CTRL","(b) NG24h","(c) NG6h"/)
-filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
+filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet-stand.nc"
 fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_daily_wavelet_nobias"
-      case = (/"(a) CTRL","(b) NG6h"/) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" 
+      case = (/"(a) CTRL","(b) NG6h"/)  
 fig_out    = "pdf" ;"eps";"x11"
 draw_var   = "preci"
 unit       = "mm~S~2~N~/day~S~2~N~"
@@ -210,6 +211,7 @@ print(ylabel)
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
     res@gsnRightString   = draw_var + " (" + unit +")"
+    res@gsnCenterString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" 
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -225,6 +227,7 @@ do nc = 0,ncase-1,1
     plot2(nc) = gsn_csm_contour(wks,sig(nc,:,:)  ,res_sig)
     overlay(plot(nc),plot2(nc))
     plot(nc) = ShadeCOI(wks, plot(nc), var, var&time, False)
+    print(area(na))
     print(max(power(nc,:,:)))
     print(min(power(nc,:,:)))
 end do

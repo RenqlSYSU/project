@@ -17,12 +17,11 @@ begin
    mp_thick       = 5.0
    font_index     = 22
 
-
-area =(/"STP","CTP","NTP","TP","SEA","NEA","EA"/)  ;S mean south,N mean North,EA mean East Asia
-lats = (/25  ,30   ,35   ,25  , 22  , 30  , 20 /) ;-20
-latn = (/30  ,35   ,40   ,40  , 30  , 45  , 45 /)  ;60
-lonl = (/70  ,70   ,70   ,70  ,107  ,107  ,107 /)  ;20
-lonr = (/105 ,105  ,105  ,105 ,130  ,130  ,122 /);130 ;220
+area =(/"STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
+lats = (/25  ,30   ,35   , 22  , 30  /) ;-20
+latn = (/30  ,35   ,40   , 30  , 45  /)  ;60
+lonl = (/70  ,70   ,70   ,107  ,107  /)  ;20
+lonr = (/105 ,105  ,105  ,130  ,130  /);130 ;220
 na = 0;5;4;3;2;1
 isnormal = 1 ;1 mean normalized
 narea = dimsizes(area)
@@ -37,19 +36,15 @@ cnlevels  = (/0.01,0.03,0.06,0.1 ,0.15, \
               1   ,1.2 ,1.5 ,2   ,2.5 , 3 , 4/)
 end if
 
-do na = 0,narea-1,1 
-;path       = "/home/ys17-19/renql/project/TP_NUDG"
 path       = "/users/yangsong3/renql/project/TP_NUDG"
-;filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_JJAdaily_wavelet.nc"
-;fig_name   = path + "/wavelet-20180410/fig/1p3x1_preci_TP_daily_wavelet_nobias"
-      ;case = (/"(a) CTRL","(b) NG24h","(c) NG6h"/)
 filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
 if(isnormal.eq.1) then
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_daily_wavelet_nobias-stand"
+fig_name   = path + "/wavelet-20180410/fig/1p5x2_preci_daily_wavelet_nobias-stand"
 else
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_daily_wavelet_nobias"
+fig_name   = path + "/wavelet-20180410/fig/1p5x2_preci_daily_wavelet_nobias"
 end if
-      case = (/"(a) CTRL","(b) NG6h"/)  
+  pre_case = (/"(a","(b"/)  
+      case = (/"CTRL","NG6h"/)  
 fig_out    = "pdf" ;"eps";"x11"
 draw_var   = "preci"
 unit       = "mm~S~2~N~/day~S~2~N~"
@@ -60,28 +55,31 @@ ncase  = dimsizes(case)
 npart  = getfilevardimsizes(f,"part")
 njtot  = getfilevardimsizes(f,"jtot")
 ntime  = getfilevardimsizes(f,"time")
-power  = new((/ncase,njtot,ntime/),float)
-sig    = new((/ncase,njtot,ntime/),float)
-plot   = new((/ncase/),graphic)
-plot2  = new((/ncase/),graphic)
+power  = new((/narea,ncase,njtot,ntime/),float)
+sig    = new((/narea,ncase,njtot,ntime/),float)
+plot   = new((/narea*ncase/),graphic)
+plot2  = new((/narea*ncase/),graphic)
 
 ;================================================================
 ;read data
 ;====================================================================
+do na = 0,narea-1,1 
+filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
 do nf = 0,ncase-1,1
     f   = addfile(filename(nf),"r")
     var = f->$var_name$       ;(ncase,neval,nlat,nlon)
-    power(nf,:,:) = onedtond(var@power,(/njtot,ntime/))   
-      sig(nf,:,:) = power(nf,:,:)/conform(power(nf,:,:),var@signif,0) ;compute significance ( >= 1 is significant)
-    power(nf,:,:) = power(nf,:,:)/conform(power(nf,:,:),var@scale ,0)   ;no bias, referenced by Liu et.al(2007)
+    power(na,nf,:,:) = onedtond(var@power,(/njtot,ntime/))   
+      sig(na,nf,:,:) = power(na,nf,:,:)/conform(power(na,nf,:,:),var@signif,0) ;compute significance ( >= 1 is significant)
+    power(na,nf,:,:) = power(na,nf,:,:)/conform(power(na,nf,:,:),var@scale ,0)   ;no bias, referenced by Liu et.al(2007)
     if(isnormal.eq.1) then
-        power(nf,:,:) = power(nf,:,:)/var@stdev/var@stdev
+        power(na,nf,:,:) = power(na,nf,:,:)/var@stdev/var@stdev
     end if
 end do
+end do
 
-power!1         = "period"
+power!2         = "period"
 power&period    = var@period
-power!2         = "time"
+power!3         = "time"
 power&time      = var&time
 copy_VarMeta(power,sig)
 sig = mask(sig,sig.ge.1.0,True)
@@ -104,8 +102,8 @@ print(ylabel)
     res@gsnFrame         = False
     res@gsnDraw          = False
     res@gsnMaximize      = True
-    res@vpHeightF        = 0.2                   ; height and width of plot
-    res@vpWidthF         = 0.9
+    res@vpHeightF        = 0.15                   ; height and width of plot
+    res@vpWidthF         = 0.45
 
 ;------------set the form of the coordinate-----------------------
     res@tmBorderThicknessF  = mp_thick
@@ -136,7 +134,7 @@ print(ylabel)
     res@tiXAxisOn       = False
     res@tiXAxisString   = "Year"
     
-    res@tiYAxisOn       = True
+    res@tiYAxisOn       = False
     res@tiYAxisFont     = font_index
     res@tiYAxisFontHeightF = subtitle_font 
     res@tiYAxisString   = "period(days)"
@@ -163,6 +161,7 @@ print(ylabel)
     ;res@cnFillMode          = "RasterFill"          ; turn on raster mode
     ;res@cnRasterSmoothingOn = True                  ; turn on raster smoothing
     res@cnLineLabelsOn   = False  ; True
+    res@cnInfoLabelOn    = False
     res@cnFillMode          = "RasterFill"          ; turn on raster mode
     res@cnRasterSmoothingOn = True                  ; turn on raster smoothing
 
@@ -181,7 +180,7 @@ print(ylabel)
 ;    res@gsnSpreadColorStart  = 2                ; start at color 17
 ;    res@gsnSpreadColorEnd    = 21                ; end at color 200
 
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False  ; the label bar
     res@lbOrientation        = "Horizontal"   ;"Vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
@@ -233,29 +232,38 @@ print(ylabel)
 ;-----------------------------------------------------------------------
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
-    res@gsnRightString   = draw_var + " (" + unit +")"
-    res@gsnCenterString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" 
+    res@gsnCenterString   = "" ;draw_var + " (" + unit +")"
 
     resp  = True    
     resp@gsnMaximize   = True
+    resp@gsnPanelLabelBar = True
+    resp@lbOrientation    = "Horizontal" ;"Vertical" ;"Horizontal"
+    resp@lbLabelStride    = 1
+    resp@lbLabelFont      = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    resp@lbBoxLineThicknessF  = mp_thick-2
 ;    resp@txFont        = font_index
 ;    resp@txFontHeightF = title_font 
 ;    resp@txFontThicknessF = title_thick
 ;    resp@txString      =  fig_title 
-    resp@gsnPaperOrientation = "landscape"
+    resp@gsnPaperOrientation = "portrait"  ;"landscape"
 
+do na = 0,narea-1,1
+    res@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" 
 do nc = 0,ncase-1,1
-    res@gsnLeftString    = case(nc)
-    plot(nc)  = gsn_csm_contour(wks,power(nc,{1:1024},:),res)
-    plot2(nc) = gsn_csm_contour(wks,sig(nc,{1:1024},:)  ,res_sig)
-    overlay(plot(nc),plot2(nc))
-    plot(nc) = ShadeCOI(wks, plot(nc), var, var&time, False)
+    nn = nc + 1
+    np = ncase*na + nc
+    res@gsnLeftString    = pre_case(nc) + nn + ") " + case(nc)
+    plot(np)  = gsn_csm_contour(wks,power(na,nc,{1:1024},:),res)
+    plot2(np) = gsn_csm_contour(wks,  sig(na,nc,{1:1024},:),res_sig)
+    overlay(plot(np),plot2(np))
+    plot(np) = ShadeCOI(wks, plot(np), var, var&time, False)
     print(area(na))
-    print(max(power(nc,:,:)))
-    print(min(power(nc,:,:)))
+    print(max(power(na,nc,:,:)))
+    print(min(power(na,nc,:,:)))
+end do
 end do
 
-gsn_panel(wks,plot,(/ncase,1/),resp)
-end do
+gsn_panel(wks,plot,(/narea,ncase/),resp)
 end
 

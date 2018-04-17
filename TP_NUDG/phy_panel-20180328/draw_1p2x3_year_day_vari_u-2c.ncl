@@ -111,8 +111,10 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"GMT_polar") 
+    ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
+    gsn_define_colormap(wks,"WhiteBlueGreenYellowRed") 
+    ;has 254 colors,can use(/2,17,33,49,65, 81,97,113,129,145, 161,177,193,209,225, 241/)
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 

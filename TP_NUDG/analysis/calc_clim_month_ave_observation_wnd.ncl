@@ -1,8 +1,8 @@
 ;***************************************************************************
 ;filename:      calc_clim_month_ave_observation_wnd.ncl
 ;output_file:   Observ-Clim_month_ave_wnd.nc 
-;use cpc global precip daily 1x1 data to calculate the observation climate rainfall
-;which used to state the CTRL's result is right
+;use NCEP2 reanalysis data (2.5x2.5) to calculate the observation climate 
+;wind and Geopotential Heights, which used to state the CTRL's result is right
 ;                                            by Ql_Ren
 ;                                           2018/04/18
 ;******************************************************************************
@@ -10,7 +10,7 @@ begin
 ;path    = "/users/yangsong3/renql/project/TP_NUDG"
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 filein  = path + "/data/observation/NCEP2_daily/"  ;+year(i) + ".nc"
-fileout = path + "/analysis/mdata/Observ-Clim_month_ave"
+fileout = path + "/analysis/mdata/Observ-Clim_month_ave_"
 var_name = (/"uwnd","vwnd","hgt"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 

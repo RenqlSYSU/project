@@ -18,15 +18,16 @@ var_name  = (/"season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 nm = 2
-nv = 1;0
+;nv = 3;2;1;0
 
+do nv=0,3,1
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
-filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
-filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
+filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
+filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x3_year_day_vari_" + months(nm) + draw_var(nv) 
+fig_name = path + "/phy_panel-20180328/fig/1p2x3_year_day_vari_rmvmean" + months(nm) + draw_var(nv) 
     case   = (/" daily"," year"/)
 pre_case   = (/"(a","(b"/)
 ;fig_out    = "pdf";"x11"
@@ -111,9 +112,11 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
+    gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    gsn_define_colormap(wks,"WhiteBlueGreenYellowRed") 
+    ;gsn_define_colormap(wks,"WhiteBlueGreenYellowRed") 
     ;has 254 colors,can use(/2,17,33,49,65, 81,97,113,129,145, 161,177,193,209,225, 241/)
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
@@ -277,47 +280,50 @@ printVarSummary(prob)
     ;resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then   ;U
-    minlvl = (/(/ 0 ,  5 ,  30/),(/  0 ,  0 ,  0 /)/)
-    maxlvl = (/(/ 45, 59 , 264/),(/  9 ,  9 ,  9 /)/)
-    spacig = (/(/2.5,  3 ,  13/),(/ 0.5, 0.5, 0.5 /)/)
+    minlvl := (/(/ 0 , 5  ,  15/),(/  0 ,  0 ,  0  /)/)
+    maxlvl := (/(/ 45, 50 , 210/),(/ 15 ,  15,  15 /)/)
+    spacig := (/(/ 3 ,  3 ,  13/),(/  1 ,  1 ,   1 /)/)
 end if
 
 if(nv.eq.1) then  ;V
-    minlvl = (/(/ 0 ,  2 ,  10/),(/  0 ,  0 ,  0  /)/)
-    maxlvl = (/(/ 36, 56 , 190/),(/ 2.7, 2.7,  9  /)/)
-    spacig = (/(/ 2 ,  3 ,  10/),(/0.15,0.15, 0.5 /)/)
+    minlvl := (/(/ 0 ,  2 ,  10/),(/  0 ,  0 ,  0  /)/)
+    maxlvl := (/(/ 30, 47 , 160/),(/  3 ,  3 ,  7.5/)/)
+    spacig := (/(/ 2 ,  3 ,  10/),(/0.2 ,0.2 , 0.5 /)/)
 end if
 
 if(nv.eq.2) then    ;omega`
-    minlvl = (/(/ 0 ,  0 ,  0/),(/  0 ,  0 ,  0  /)/)
-    maxlvl = (/(/18 , 18 , 18/),(/ 0.9, 0.9, 0.9 /)/)
-    spacig = (/(/ 1 ,  1 ,  1/),(/0.05,0.05,0.05 /)/)
+    minlvl := (/(/ 0 ,  0 ,  0/),(/  0 ,  0 ,  0  /)/)
+    maxlvl := (/(/15 , 15 , 15/),(/0.75,0.75,0.75 /)/)
+    spacig := (/(/ 1 ,  1 ,  1/),(/0.05,0.05,0.05 /)/)
 end if
 
 if(nv.eq.3) then    ;T
-    minlvl = (/(/ 0 ,  0 ,  0/),(/  0 ,  0 ,  0  /)/)
-    maxlvl = (/(/ 27, 18 , 27/),(/ 3.6, 0.9, 0.9 /)/)
-    spacig = (/(/1.5,  1 ,1.5/),(/0.2 ,0.05,0.05 /)/)
+    minlvl := (/(/  0,  0 ,  0/),(/  0 ,  0 ,  0  /)/)
+    maxlvl := (/(/ 15, 7.5,7.5/),(/ 3  ,0.75,0.75 /)/)
+    spacig := (/(/  1, 0.5,0.5/),(/0.2 ,0.05,0.05 /)/)
 end if
 
 if(nv.eq.4) then    ;z3
-    minlvl = (/(/ 0  , 50 , 250 /),(/  0 ,  30,200  /)/)
-    maxlvl = (/(/3240,8150,32290/),(/ 288,750 ,2360 /)/)
-    spacig = (/(/180 , 450, 1780/),(/ 16 ,40  ,120  /)/)
+    minlvl := (/(/ 0  , 50 , 250 /),(/  0 ,  30,200  /)/)
+    maxlvl := (/(/3240,8150,32290/),(/ 288,750 ,2360 /)/)
+    spacig := (/(/180 , 450, 1780/),(/ 16 ,40  ,120  /)/)
 end if
 
 do nc = 0, ncase-1,1
     do nl = 0, nlev-1,1
         nn = nl +1
         np = nlev*nc + nl
-        res@gsnLeftString   = pre_case(nc) + nn + case(nc)
+        res@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
         res@gsnRightString  = lev(nl) + "hPa " + right_str(nv) + " (" + unit(nv) + ")"  
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc,nl)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc,nl) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc,nl)        ; set min contour level
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
-        
+    
+    if(nc.eq.0.and.nv.eq.3.and.nl.eq.0) then
+        print("scalar field is constant; no contour lines will appear; use cnConstFEnableFill to enable fill")
+    else
         if(all(ismissing(vari_p(nc,nl,:,:)))) then
             print("vari_p is all missing. Cannot create plot.")
         else 
@@ -326,7 +332,8 @@ do nc = 0, ncase-1,1
             plot_p(np)  = gsn_csm_contour(wks,vari_p(nc,nl,:,:),res_sigp)
             overlay(plot(np),plot_p(np))
         end if
-        
+    end if
+
         if(all(ismissing(vari_n(nc,nl,:,:)))) then
             print("vari_n is all missing. Cannot create plot.")
         else 
@@ -344,5 +351,6 @@ do nc = 0, ncase-1,1
     end do 
 end do
     gsn_panel(wks,plot,(/ncase,nlev/),resp)
+end do
 end
 

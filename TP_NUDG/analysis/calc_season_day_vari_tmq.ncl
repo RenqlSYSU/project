@@ -14,7 +14,7 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Season_day_vari_"
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Season_day_vari_rmvmean_"
 var_name = (/"TMQ","LHFLX","SHFLX"/)
 case     = (/"AMIP_CTRL","TP_NUDG24h","TP_NUDG6h"/)
 years    = ispan(1979,2005,1)   ;the calculate time
@@ -42,7 +42,8 @@ var       = new((/nyear,nday,nlat,nlon/),float)
 vari_temp = new((/nyear,nsea,nlat,nlon/),float)
 vari      = new((/      nsea,nlat,nlon/),float)
 
-do nv = 0 ,nvar-1,1 
+;do nv = 0 ,nvar-1,1 
+do nv = 0 ,0,1 
 do nc = 0,ncase-1,1
 ;---------------------------------------------------------------
 ;read the data
@@ -51,6 +52,7 @@ do nt = 0,nyear-1,1
     f  = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:) = f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
 end do  ;the loop of the 27 years
+var = dim_rmvmean_n_Wrap(var,0)
 
 ;-------calc the daily variance in 12 month-------------
 time = cd_calendar(f->time,0)

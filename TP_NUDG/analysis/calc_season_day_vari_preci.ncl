@@ -14,7 +14,7 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Season_day_vari_preci.nc"
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Season_day_vari_rmvmean_preci.nc"
 var_name = (/"PRECC","PRECL"/)   ;(/"U","V","T"/)
 case     = (/"AMIP_CTRL","TP_NUDG24h","TP_NUDG6h"/)
 years    = ispan(1979,2005,1)   ;the calculate time
@@ -54,6 +54,7 @@ do nv = 0,nvar-1,1
 end do  ;the loop of the PRECC and PRECL
 end do   ;the loop of 27 year
 var = var*1000*3600*24
+var = dim_rmvmean_n_Wrap(var,0)
 
 ;-------calc the daily variance in 12 month-------------
 time = cd_calendar(f->time,0)

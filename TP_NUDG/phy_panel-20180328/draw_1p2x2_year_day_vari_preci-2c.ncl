@@ -22,14 +22,14 @@ nm = 2
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
-filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
-filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
+filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
+filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x2_year_day_vari_tmq_preci"
+fig_name = path + "/phy_panel-20180328/fig/1p2x2_year_day_vari_rmvmean_tmq_preci"
     case   = (/" daily"," year"/)
 pre_case   = (/"(a","(b"/)
-fig_out    = "pdf";"x11"
-;fig_out    = "eps";"x11"
+;fig_out    = "pdf";"x11"
+fig_out    = "eps";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -106,7 +106,9 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"GMT_polar") 
+    gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
@@ -270,14 +272,14 @@ printVarSummary(prob)
     ;resp@txFontThicknessF = title_thick
 
     minlvl = (/(/ 10,  10/),(/  0 ,  0 /)/)
-    maxlvl = (/(/190, 190/),(/  18,  18/)/)
+    maxlvl = (/(/160, 160/),(/  15,  15/)/)
     spacig = (/(/10 ,  10/),(/  1 ,   1/)/)
 
 do nc = 0, ncase-1,1
     do nv = 0, nvar-1,1
         nn = nv +1
         np = nvar*nc + nv
-        res@gsnLeftString   = pre_case(nc) + nn + case(nc)
+        res@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
         res@gsnRightString  = right_str(nv) + " (" + unit(nv) + ")"  
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval

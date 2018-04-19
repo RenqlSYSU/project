@@ -11,7 +11,7 @@ begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 filein  = path + "/data/observation/NCEP2_daily/"  ;+year(i) + ".nc"
 fileout = path + "/analysis/mdata/Observ-Clim_month_ave"
-var_name = (/"uwnd","vwnd"/)
+var_name = (/"uwnd","vwnd","hgt"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area: east Asia
@@ -33,7 +33,7 @@ nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 JJAw  = new((/nyear,nlev,nlat,nlon/),float)
 
-do nv = 0 ,nvar-1,1 
+do nv = 2 ,nvar-1,1 
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------

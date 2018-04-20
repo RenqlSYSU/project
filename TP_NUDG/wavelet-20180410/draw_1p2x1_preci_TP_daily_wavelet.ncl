@@ -30,24 +30,24 @@ narea = dimsizes(area)
 if (isnormal.eq.1) then
 cnlevels =  (/0.002,0.005 ,0.009,0.015,0.02 , \
               0.03 ,0.05  ,0.08 ,0.12 ,0.18 , \
-              0.25 ,0.35  , 0.5 , 0.7 ,1    , 1.3,1.6/)
+              0.25 ,0.35  , 0.5 , 0.7 ,1    /)
 else
 cnlevels  = (/0.01,0.03,0.06,0.1 ,0.15, \
               0.2 ,0.3 ,0.4 ,0.6 ,0.8 , \
               1   ,1.2 ,1.5 ,2   ,2.5 , 3 , 4/)
 end if
 
-do na = 0,narea-1,1 
+;do na = 0,narea-1,1 
 ;path       = "/home/ys17-19/renql/project/TP_NUDG"
 path       = "/users/yangsong3/renql/project/TP_NUDG"
 ;filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_JJAdaily_wavelet.nc"
 ;fig_name   = path + "/wavelet-20180410/fig/1p3x1_preci_TP_daily_wavelet_nobias"
       ;case = (/"(a) CTRL","(b) NG24h","(c) NG6h"/)
-filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
+filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_daily_wavelet-stand.nc"
 if(isnormal.eq.1) then
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_daily_wavelet_nobias-stand"
+fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_365daily_wavelet_nobias-stand"
 else
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_daily_wavelet_nobias"
+fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_365daily_wavelet_nobias"
 end if
       case = (/"(a) CTRL","(b) NG6h"/)  
 fig_out    = "pdf" ;"eps";"x11"
@@ -89,7 +89,7 @@ printVarSummary(power)
 printVarSummary(sig)
 printVarSummary(var)
 
-exponent = ispan(2,9,2)
+exponent = ispan(2,13,2)
 ylabel   = exp( exponent*log(2.0) )
 print(ylabel)
 
@@ -97,7 +97,9 @@ print(ylabel)
 ;draw figure 
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"GMT_polar") 
+    gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     
     res                  = True
@@ -142,7 +144,7 @@ print(ylabel)
     res@tiYAxisString   = "period(days)"
     
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(1,ntime,92)
+    res@tmXBValues      = ispan(1,ntime,365)
     res@tmXBLabels      = ispan(1979,2005,1)
     
     res@trYReverse          = True   ; reverse y-axis
@@ -168,10 +170,10 @@ print(ylabel)
 
     res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     res@cnLevels             = cnlevels
-    colors       = new((/18/),integer)
-    colors(0:8)  = ispan(2,10,1)
-    colors(9:17) = ispan(13,21,1)
-    res@cnFillColors         = colors 
+    ;colors       = new((/18/),integer)
+    ;colors(0:8)  = ispan(2,10,1)
+    ;colors(9:17) = ispan(13,21,1)
+    ;res@cnFillColors         = colors 
     ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     ;res@cnMinLevelValF        = -0.09       ; set min contour level
     ;res@cnMaxLevelValF        = 0.09       ; set max contour level
@@ -196,7 +198,7 @@ print(ylabel)
     res_sig@tiXAxisOn       = False
     res_sig@tiYAxisOn       = False
     res_sig@tmXBMode        = "Explicit"
-    res_sig@tmXBValues      = ispan(1,ntime,92)
+    res_sig@tmXBValues      = ispan(1,ntime,365)
     res_sig@tmXBLabels      = ispan(1979,2005,1)
     res_sig@trYReverse          = True   ; reverse y-axis
     res_sig@tmYLMode            = "Explicit"
@@ -246,8 +248,8 @@ print(ylabel)
 
 do nc = 0,ncase-1,1
     res@gsnLeftString    = case(nc)
-    plot(nc)  = gsn_csm_contour(wks,power(nc,{1:1024},:),res)
-    plot2(nc) = gsn_csm_contour(wks,sig(nc,{1:1024},:)  ,res_sig)
+    plot(nc)  = gsn_csm_contour(wks,power(nc,:,:),res)
+    plot2(nc) = gsn_csm_contour(wks,sig(nc,:,:)  ,res_sig)
     overlay(plot(nc),plot2(nc))
     plot(nc) = ShadeCOI(wks, plot(nc), var, var&time, False)
     print(area(na))
@@ -256,6 +258,6 @@ do nc = 0,ncase-1,1
 end do
 
 gsn_panel(wks,plot,(/ncase,1/),resp)
-end do
+;end do
 end
 

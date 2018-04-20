@@ -22,14 +22,14 @@ lats = (/25  ,30   ,35   , 22  , 30  /) ;-20
 latn = (/30  ,35   ,40   , 30  , 45  /)  ;60
 lonl = (/70  ,70   ,70   ,107  ,107  /)  ;20
 lonr = (/105 ,105  ,105  ,130  ,130  /);130 ;220
-na = 0;5;4;3;2;1
+na = 0
 isnormal = 1 ;1 mean normalized
 narea = dimsizes(area)
 
 if (isnormal.eq.1) then
 cnlevels =  (/0.002,0.005 ,0.009,0.015,0.02 , \
               0.03 ,0.05  ,0.08 ,0.12 ,0.18 , \
-              0.25 ,0.35  , 0.5 , 0.7 ,1    , 1.3,1.6/)
+              0.25 ,0.35  , 0.5 , 0.7 ,1    /)
 else
 cnlevels  = (/0.01,0.03,0.06,0.1 ,0.15, \
               0.2 ,0.3 ,0.4 ,0.6 ,0.8 , \
@@ -37,9 +37,9 @@ cnlevels  = (/0.01,0.03,0.06,0.1 ,0.15, \
 end if
 
 path       = "/users/yangsong3/renql/project/TP_NUDG"
-filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
+filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_daily_wavelet-stand.nc"
 if(isnormal.eq.1) then
-fig_name   = path + "/wavelet-20180410/fig/1p5x2_preci_daily_wavelet_nobias-stand"
+fig_name   = path + "/wavelet-20180410/fig/1p5x2_preci_365daily_wavelet_nobias-stand"
 else
 fig_name   = path + "/wavelet-20180410/fig/1p5x2_preci_daily_wavelet_nobias"
 end if
@@ -64,7 +64,7 @@ plot2  = new((/narea*ncase/),graphic)
 ;read data
 ;====================================================================
 do na = 0,narea-1,1 
-filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_JJAdaily_wavelet.nc"
+filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_daily_wavelet-stand.nc"
 do nf = 0,ncase-1,1
     f   = addfile(filename(nf),"r")
     var = f->$var_name$       ;(ncase,neval,nlat,nlon)
@@ -95,7 +95,9 @@ print(ylabel)
 ;draw figure 
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"GMT_polar") 
+    gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     
     res                  = True
@@ -140,7 +142,7 @@ print(ylabel)
     res@tiYAxisString   = "period(days)"
     
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(1,ntime,92)
+    res@tmXBValues      = ispan(1,ntime,365)
     res@tmXBLabels      = ispan(1979,2005,1)
     
     res@trYReverse          = True   ; reverse y-axis
@@ -167,10 +169,6 @@ print(ylabel)
 
     res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     res@cnLevels             = cnlevels
-    colors       = new((/18/),integer)
-    colors(0:8)  = ispan(2,10,1)
-    colors(9:17) = ispan(13,21,1)
-    res@cnFillColors         = colors 
     ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     ;res@cnMinLevelValF        = -0.09       ; set min contour level
     ;res@cnMaxLevelValF        = 0.09       ; set max contour level
@@ -195,7 +193,7 @@ print(ylabel)
     res_sig@tiXAxisOn       = False
     res_sig@tiYAxisOn       = False
     res_sig@tmXBMode        = "Explicit"
-    res_sig@tmXBValues      = ispan(1,ntime,92)
+    res_sig@tmXBValues      = ispan(1,ntime,365)
     res_sig@tmXBLabels      = ispan(1979,2005,1)
     res_sig@trYReverse          = True   ; reverse y-axis
     res_sig@tmYLMode            = "Explicit"
@@ -254,8 +252,8 @@ do nc = 0,ncase-1,1
     nn = nc + 1
     np = ncase*na + nc
     res@gsnLeftString    = pre_case(nc) + nn + ") " + case(nc)
-    plot(np)  = gsn_csm_contour(wks,power(na,nc,{1:1024},:),res)
-    plot2(np) = gsn_csm_contour(wks,  sig(na,nc,{1:1024},:),res_sig)
+    plot(np)  = gsn_csm_contour(wks,power(na,nc,{1:1024},1824:8029),res)
+    plot2(np) = gsn_csm_contour(wks,  sig(na,nc,{1:1024},1824:8029),res_sig)
     overlay(plot(np),plot2(np))
     plot(np) = ShadeCOI(wks, plot(np), var, var&time, False)
     print(area(na))

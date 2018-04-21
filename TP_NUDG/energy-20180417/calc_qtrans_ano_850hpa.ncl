@@ -1,20 +1,21 @@
 ;***************************************************************************
-;filename:      calc_clim_month_ave_wind.ncl
-;output_file:   Clim_month_ave_wind.nc 
-;read the 27 years variable(TLLL) of one case at East AsiaI(15S£­55N£¬30-150E) 
-;and then calculate the month average to get an array of (nmonth,nlat,nlon),
-;then calculate the season average (nseason,nlat,nlon).
+;filename:      calc_qtrans_ano_850hpa.ncl
+;output_file:   CTRL-JJA_ano_850hpa_qu.nc 
+;read the 850hPa 27 years JJA daily variable(TLL) of one case at East AsiaI(15S£­55N£¬30-150E) 
+;and then calculate the climate average(LL) and the anomaly(TLL)
 ;                                            by Ql_Ren
-;                                           2018/01/18
+;                                           2018/04/21
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-qtrans_ano_850hpa.nc"
-var_name  = (/"U","V","Q"/)
-calc_name = (/"qu","qv"/)
+fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-JJA_ano_850hpa_"
+var_name  = (/"U","Q"/)
+calc_name = (/"ave_qu","aveq_aveu","aveq_u","q_aveu","qu"/)
+;var_name  = (/"V","Q"/)
+;calc_name = (/"ave_qv","aveq_avev","aveq_v","q_avev","qv"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 
@@ -23,31 +24,23 @@ lats = -15 ;-20
 latn = 55  ;60
 lonl = 30  ;20
 lonr = 150 ;220
-lev  = (/1000,925,850,700,500/)
-nl   = 2
+lev  = (/850/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
+time        = cd_calendar(f->time,0)
+select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
+ntime       = dimsizes(select_time)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
-nlev  = dimsizes(vars&level)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var_u      = new((/nyear,365,nlev,nlat,nlon/),float)
-var_v      = new((/nyear,365,nlev,nlat,nlon/),float)
-var_q      = new((/nyear,365,nlev,nlat,nlon/),float)
-var_ps     = new((/nyear,365,nlat,nlon/),float)
-var        = new((/nyear,365,nlat,nlon/),float)
-var_month  = new((/nyear,12 ,nlat,nlon/),float)
-var_season = new((/nyear,4  ,nlat,nlon/),float)
-month_ave  = new((/      12 ,nlat,nlon/),float)
-month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
-season_ave = new((/       4 ,nlat,nlon/),float)
-season_vari= new((/       4 ,nlat,nlon/),float)
+var_u      = new((/nyear,ntime,nlat,nlon/),float)
+var_q      = new((/nyear,ntime,nlat,nlon/),float)
 
 do nf = 0 , ncase-1,1
 ;---------------------------------------------------------------
@@ -56,125 +49,73 @@ do nf = 0 , ncase-1,1
 nv = 0
 do nt = 0,nyear-1,1
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_u(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    var_u(nt,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do   ;the loop of 27 years
+printVarSummary(var_u)
 
 nv = 1
 do nt = 0,nyear-1,1
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_v(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
-
-nv = 2
-do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_q(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    var_q(nt,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do   ;the loop of 27 years
 var_q = var_q*1000  ;convert unit from kg/kg to g/kg
+printVarSummary(var_q)
 
-nv =3
-do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_ps(nt,:,:,:) = f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
-var_ps = var_ps/100 ;convert unit from Pa to hPa
+var = var_u*var_q/g  ;get var(nyear,ntime,nlat,nlon)
+ave_qu = dim_avg_n_Wrap(var,(/0,1/)) ;get var(nlat,nlon)
+ave_qu@long_name = "the average of 27 years and 92 days of 850hpa qu"
+ave_qu@units     = "g/(s*pa*m)"
 
-var_u = var_u*var_q/g
-var_v = var_v*var_q/g
-var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 0) ;calculate the divergence
+aveq = dim_avg_n_Wrap(var_q,0) ;get (ntime,nalt,nlon)
+aveu = dim_avg_n_Wrap(var_u,0) ;get (ntime,nlat,nlon)
+q    = dim_rmvmean_n_Wrap(var_q,0) ;get (nyear,ntime,nlat,nlon)
+u    = dim_rmvmean_n_Wrap(var_u,0) ;get (nyear,ntime,nlat,nlon)
 
-do nvc = 2, dimsizes(calc_name)-1,1
-if (nvc.eq.0) then
-    var = wgt_vert_avg_beta ( var_u&level, var_u, var_ps, 0, 0 )
-    ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum
-    var@long_name = "Total (vertically integrated) zonal water vapor transmission"
-    var@units     = "g/(s*m)"
-else if (nvc.eq.1) then
-    var = wgt_vert_avg_beta ( var_v&level, var_v, var_ps, 0, 0 )
-    ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum
-    var@long_name = "Total (vertically integrated) meridional water vapor transmission"
-    var@units     = "g/(s*m)"
-else
-    var = wgt_vert_avg_beta ( var_u&level, var_divg, var_ps, 0, 0 )
-    ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum
-    var@long_name = "Total (vertically integrated) divergence of moisture flux"
-    var@units     = "g/(s*m*m)"
-end if
-end if
-
-;----------calculate the month and season average-----------------------
-time = cd_calendar(f->time,0)
-do nm = 0,11,1
-    select_time := ind(time(:,1).eq.nm+1)
-    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-end do
-
-mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
-do ns = 0,3,1
-    nm = ns*3 ;nm = 0,3,6,9
-    if(nm.eq.0) then
-    var_season(:,ns,:,:) = ( var_month(:,11  ,:,:)*mdays(11)   + \
-                               var_month(:,nm  ,:,:)*mdays(nm)   + \
-                               var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
-    else
-    var_season(:,ns,:,:) = ( var_month(:,nm-1,:,:)*mdays(nm-1) + \
-                               var_month(:,nm  ,:,:)*mdays(nm)   + \
-                               var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
-    end if
-end do
-month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-printVarSummary(month_ave)
-printVarSummary(season_ave)
+aveq_aveu = dim_avg_n_Wrap(aveq*aveu/g,0) ;get (nlat,nlon) 
+aveq_u    = dim_avg_n_Wrap(conform(u,aveq,(/1,2,3/))*u/g,(/0,1/)) ;get (nlat,nlon)
+q_aveu    = dim_avg_n_Wrap(conform(q,aveu,(/1,2,3/))*q/g,(/0,1/)) ;get (nlat,nlon)
+qu        = dim_avg_n_Wrap(q*u,(/0,1/)) ;get (nlat,nlon)
 
 ;====================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf)+calc_name(nvc)+".nc")
-ncdf = addfile(fileout(nf)+calc_name(nvc)+".nc","c")
+system("rm -f " + fileout(nf)+calc_name(4)+".nc")
+ncdf = addfile(fileout(nf)+calc_name(4)+".nc","c")
 setfileoption(ncdf,"DefineMode",True)
 
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "the monthly and seasonal average"
+fileAtt@discription   = "the climatology and JJA seasonal 850 hPa moisture transport analysis "
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
-dimNames = (/"month","season","lat","lon"/)
-dimSizes = (/  12   ,  4     ,nlat ,nlon/)
-dimUnlim = (/False  ,False   ,False,False/)
+dimNames = (/"lat","lon"/)
+dimSizes = (/nlat ,nlon/)
+dimUnlim = (/False,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;Define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"month" ,"integer",(/"month" /))
-filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
-filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
-filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
-filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
+filevardef(ncdf,"ave_qu"   ,typeof(ave_qu   ) ,(/"lat","lon"/))
+filevardef(ncdf,"aveq_aveu",typeof(aveq_aveu) ,(/"lat","lon"/))
+filevardef(ncdf,"aveq_u"   ,typeof(aveq_u   ) ,(/"lat","lon"/))
+filevardef(ncdf,"q_aveu"   ,typeof(q_aveu   ) ,(/"lat","lon"/))
+filevardef(ncdf,"qu"       ,typeof(qu       ) ,(/"lat","lon"/))
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"month_ave",var)
-filevarattdef(ncdf,"season_ave",var)
-filevarattdef(ncdf,"month_vari",var)
-filevarattdef(ncdf,"season_vari",var)
+filevarattdef(ncdf,"ave_qu",ave_qu)
 
-ncdf->month  = ispan(1,12,1)
-ncdf->season  = (/1212,345,678,91011/)
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)
-ncdf->month_ave   = (/month_ave/)
-ncdf->season_ave  = (/season_ave/)
-ncdf->month_vari  = (/month_vari/)
-ncdf->season_vari = (/season_vari/)
-end do
+ncdf->ave_qu    = (/ave_qu   /)
+ncdf->aveq_aveu = (/aveq_aveu/)
+ncdf->aveq_u    = (/aveq_u   /)
+ncdf->q_aveu    = (/q_aveu   /)
+ncdf->qu        = (/qu       /)
 end do
 end
 

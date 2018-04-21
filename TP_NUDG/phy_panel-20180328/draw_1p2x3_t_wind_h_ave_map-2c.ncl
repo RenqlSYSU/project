@@ -1,5 +1,5 @@
 ;*********************************************************************
-;filename:      draw_1p2x4_preci_qdivg_sh_lh_ave_map-2c.ncl
+;filename:      draw_1p2x3_wind_t_h_ave_map-2c.ncl
 ;input_data:    CTRL-Clim_month_ave_*.nc 
 ;
 ;1 read JJA data from four files season_ave(2,:,:) and season_vari(2,:,:)
@@ -9,24 +9,26 @@
 ;                                                    2018/03/28
 ;*********************************************************************************
 begin
-draw_var = (/"preci","TMQ","SHFLX","LHFLX"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","kg/m~S~2~N~","W/m~S~2~N~","W/m~S~2~N~"/)    ;this can be used as right string 
+draw_var = (/"T(~S~o~N~C)","Z(gpm)","Wind"/)  ;this is the variable used to draw, can used as center string
+draw_varname = (/"T","Z3","U","V"/)
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
+lev      = (/850,500,200/)
 nm = 2
+nl = 2;0
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
+path     = "/users/yangsong3/renql/project/TP_NUDG"
+filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x4_preci_TMQ_sh_lh_" + months(nm) + var_name(0) 
+fig_name = path + "/phy_panel-20180328/fig/1p2x3_t_wind_h_" + months(nm) + lev(nl) + var_name(0) 
     case   = (/" CTRL"," NG6h-CTRL"/)
 pre_case   = (/"(a","(b"/)
-;fig_out    = "pdf";"x11"
-fig_out    = "eps";"x11"
+;fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -43,15 +45,18 @@ nmonth = dimsizes(months)
 nvar   = dimsizes(draw_var)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
-var  = new((/ncase  ,nvar,nlat,nlon/),float)
-vari = new((/ncase  ,nvar,nlat,nlon/),float)
-prob = new((/ncase-1,nvar,nlat,nlon/),float)
+var    = new((/ncase  ,nvar,nlat,nlon/),float)
+var_v  = new((/ncase       ,nlat,nlon/),float)
+vari   = new((/ncase  ,nvar,nlat,nlon/),float)
+vari_v = new((/ncase       ,nlat,nlon/),float)
+prob   = new((/ncase-1,nvar,nlat,nlon/),float)
+prob_v = new((/ncase-1     ,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/ncase*nvar/),graphic)
     line     = new((/ncase*nvar/),graphic)
     gtop     = new((/ncase*nvar/),graphic)
-    plot2    = new((/(ncase-1)*nvar/),graphic)
+    plot2    = new((/(ncase-1)*(nvar-1)/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -65,9 +70,11 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_font      = 0.03
    subtitle_font  = 0.03
    title_font     = 0.03
-   tick_thick     = 8.0
-   subtitle_thick = 8.0  ;not have this attribute
+   vcref_font     = 0.02
+   tick_thick     = 5.0
+   subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
+   vc_thick       = 3.0
    mp_thick       = 4.0
    font_index     = 22
 
@@ -76,19 +83,27 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 do nf = 0 ,ncase-1, 1
 do nv = 0 ,nvar-1,1
-    f = addfile(filename(nf)+draw_var(nv)+".nc","r")
-    var(nf,nv,:,:)  = f->$var_name(0)$(nm,:,:) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,nv,:,:)  = f->$var_name(1)$(nm,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+    f = addfile(filename(nf)+draw_varname(nv)+".nc","r")
+     var(nf,nv,:,:)  = f->$var_name(0)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,nv,:,:)  = f->$var_name(1)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
+f = addfile(filename(nf)+draw_varname(3)+".nc","r")
+ var_v(nf,:,:)  = f->$var_name(0)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+vari_v(nf,:,:)  = f->$var_name(1)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+prob_v(nf,:,:) = ttest(var_v(0,:,:),vari_v(0,:,:),27,var_v(nf+1,:,:),vari_v(nf+1,:,:),27,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
+var_v(nf+1,:,:)= var_v(nf+1,:,:) - var_v(0,:,:) ;get the difference between CTRL and NUDG
 end do
 
-;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
-prob = mask(prob,prob.lt.siglvl,True)
+var(0,0,:,:) = var(0,0,:,:)-273.15      ;convert unit from K to C
+
+var(1,2,:,:) = mask(var(1,2,:,:),((prob(0,2,:,:).lt.siglvl).or.(prob_v(0,:,:).lt.siglvl)),True)
+prob   = mask(prob,prob.lt.siglvl,True)
+var_v(1,:,:) = mask(var_v(1,:,:),((prob(0,2,:,:).lt.siglvl).or.(prob_v(0,:,:).lt.siglvl)),True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(prob)
@@ -132,23 +147,26 @@ printVarSummary(prob)
     res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
-    res@tmXBLabelFontThicknessF  = tick_thick
     res@tmYLLabelFontHeightF     = tick_font
     ; res@tmYLLabelFontAspectF   = 1.3
-    res@tmYLLabelFontThicknessF  = tick_thick
     
     res@tmXBMajorThicknessF     = mp_thick
     res@tmYLMajorThicknessF     = mp_thick
     ;  res@tmXBMajorOutwardLengthF = -0.
     ;  res@tmYLMajorOutwardLengthF = -0.
     ;  res@tmYRMajorOutwardLengthF = -0.
-      
+    
     res@tmXBMinorThicknessF     = mp_thick
     res@tmYLMinorThicknessF     = mp_thick
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
-
+    
+    res@gsnCenterString      = ""
+    res@gsnStringFont         = font_index
+    res@gsnStringFontHeightF  = subtitle_font
+    
+    resvc = res
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
     res@cnLinesOn        = False ;True
@@ -177,7 +195,7 @@ printVarSummary(prob)
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
+    res@lbBoxLineThicknessF  = mp_thick-2
 
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.15
@@ -199,11 +217,38 @@ printVarSummary(prob)
     res_sig@cnFillScaleF     = 0.5
     res_sig@cnMonoFillColor  = True
     res_sig@cnFillColor      = "grey0"
-    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    res_sig@cnFillDotSizeF   = 0.1
     
     res_sig@gsnCenterString      = ""
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
+
+;--------set the attribute of vector--------------
+
+    ;resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMonoLineArrowColor       = True
+    resvc@vcLineArrowColor           = "black"
+    resvc@vcMinDistanceF             = 0.03
+    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = 0.68           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    ;resvc@vcRefAnnoString2           = "30m/s"
+    resvc@vcLineArrowHeadMinSizeF   = 0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -234,9 +279,6 @@ printVarSummary(prob)
    ; res@tiMainString         = fig_title + "in" + months(m)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
-    res@gsnCenterString      = ""
-    res@gsnStringFont         = font_index
-    res@gsnStringFontHeightF  = subtitle_font
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -249,9 +291,26 @@ printVarSummary(prob)
     ;resp@txFontHeightF = title_font 
     ;resp@txFontThicknessF = title_thick
 
-    minlvl = (/(/ 1 ,5 ,0 ,  0 /),(/-4.0,-4.0, -24, -24/)/)
-    maxlvl = (/(/ 16,50,75, 225/),(/ 4.0, 4.0,  24,  24/)/)
-    spacig = (/(/ 1 ,3 , 5,  15/),(/ 0.5, 0.5,  3 ,  3 /)/)
+    vcref         = (/(/10,1/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/10,2/), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/20,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
+if(nl.eq.0) then
+    minlvl = (/(/ 12,1410/),(/-0.8, -8 /)/)
+    maxlvl = (/(/ 27,1560/),(/ 0.8,  8 /)/)
+    spacig = (/(/ 1 ,  10/),(/ 0.1,  1 /)/)
+end if
+
+if(nl.eq.1) then
+    minlvl = (/(/-7.5,5730/),(/-0.8, -16/)/)
+    maxlvl = (/(/ 0  ,5880/),(/ 0.8,  16/)/)
+    spacig = (/(/0.5 ,  10/),(/ 0.1,  2 /)/)
+end if
+
+if(nl.eq.2) then
+    minlvl = (/(/-55.5,12063/),(/-0.8, -24/)/)
+    maxlvl = (/(/-48  ,12558/),(/ 0.8,  24/)/)
+    spacig = (/(/0.5  ,  33 /),(/ 0.1,  3 /)/)
+end if
 
 do nc = 0, ncase-1,1
 if(nc.eq.0) then
@@ -263,20 +322,28 @@ else
 end if 
     do nv = 0, nvar-1,1
         nn = nv +1
-        np = 4*nc + nv
+        np = nvar*nc + nv
         res@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
-        res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"  
+        res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv)   
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc,nv)       ; set min contour level
-        if(nc.gt.0) then
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
-            plot2(nv)  = gsn_csm_contour(wks,prob(nc-1,nv,:,:),res_sig)
-            overlay(plot(np),plot2(nv))
+        if(nv.eq.2) then
+            resvc@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
+            resvc@gsnRightString  = lev(nl) + "hPa " + draw_var(nv)   
+            resvc@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
+            resvc@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+            plot(np)  = gsn_csm_vector_map_ce(wks,var(nc,nv,:,:),var_v(nc,:,:),resvc)
         else
+            res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
+            res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
+            res@cnMinLevelValF        := minlvl(nc,nv)       ; set min contour level
             plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
         end if
+        
+        if(nc.gt.0.and.nv.lt.2) then
+            plot2(nv)  = gsn_csm_contour(wks,prob(nc-1,nv,:,:),res_sig)
+            overlay(plot(np),plot2(nv))
+        end if
+
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
@@ -284,7 +351,6 @@ end if
         print(min(var(nc,nv,{lats:latn},{lonl:lonr})))
     end do 
 end do
-    ;resp@txString      = fig_title + months(nm) 
-    gsn_panel(wks,plot,(/2,4/),resp)
+    gsn_panel(wks,plot,(/ncase,nvar/),resp)
 end
 

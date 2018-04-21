@@ -1,5 +1,5 @@
 ;*********************************************************************
-;filename:      draw_1p2x4_preci_qdivg_sh_lh_ave_map-2c.ncl
+;filename:      draw_1p2x2_preci_qdivg_sh_lh_ave_map-2c.ncl
 ;input_data:    CTRL-Clim_month_ave_*.nc 
 ;
 ;1 read JJA data from four files season_ave(2,:,:) and season_vari(2,:,:)
@@ -22,11 +22,10 @@ path     = "/users/yangsong3/renql/project/TP_NUDG"
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x4_preci_TMQ_sh_lh_" + months(nm) + var_name(0) 
-    case   = (/" CTRL"," NG6h-CTRL"/)
-pre_case   = (/"(a","(b"/)
-;fig_out    = "pdf";"x11"
-fig_out    = "eps";"x11"
+fig_name = path + "/phy_panel-20180328/fig/1p2x2_preci_TMQ_sh_lh_ave_shad" + months(nm) + var_name(0) 
+case     = (/"CTRL","NG6h"/)
+pre_case   = (/"(a)","(b)","(c)","(d)"/)
+fig_out    = "pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -45,13 +44,14 @@ nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 var  = new((/ncase  ,nvar,nlat,nlon/),float)
 vari = new((/ncase  ,nvar,nlat,nlon/),float)
-prob = new((/ncase-1,nvar,nlat,nlon/),float)
+prob = new((/        nvar,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/ncase*nvar/),graphic)
-    line     = new((/ncase*nvar/),graphic)
-    gtop     = new((/ncase*nvar/),graphic)
-    plot2    = new((/(ncase-1)*nvar/),graphic)
+    plot     = new((/nvar/),graphic)
+    line     = new((/nvar/),graphic)
+    gtop     = new((/nvar/),graphic)
+    plot2    = new((/nvar/),graphic)
+    plot3    = new((/nvar/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -82,14 +82,15 @@ do nv = 0 ,nvar-1,1
 end do
 end do
 
-do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+nf = 0 
+prob = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
-end do
 
-;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
-prob = mask(prob,prob.lt.siglvl,True)
-copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
+var(1,:,:,:) = mask(var(1,:,:,:),prob.lt.siglvl,True)
+var_p = var(1,:,:,:)
+var_n = var(1,:,:,:)
+var_p = mask(var(1,:,:,:),var(1,:,:,:).le.0,False)
+var_n = mask(var(1,:,:,:),var(1,:,:,:).lt.0,True)
 printVarSummary(var)
 printVarSummary(prob)
 
@@ -97,6 +98,10 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
+    gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
@@ -187,23 +192,32 @@ printVarSummary(prob)
     res_sig                  = True
     res_sig@gsnDraw          = False
     res_sig@gsnFrame         = False
-    res_sig@cnFillOn         = True       ; Fill contours
-    res_sig@cnLinesOn        = False;True      ; turn off contour lines
-    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnFillOn         = False;True       ; Fill contours
+    res_sig@cnLinesOn        = True      ; turn off contour lines
+    res_sig@cnLineLabelsOn   = True;False      ; turn off contour line labels
     res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
-    res_sig@cnMonoFillPattern= True;False
-    res_sig@cnFillPattern    = 11
-    res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 0.5
-    res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "grey0"
-    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    res_sig@cnLineThicknessF = mp_thick 
+    res_sig@cnLineColor      = "black"
+    res_sig@cnLineDashPattern= 0
+    res_sig@cnLevelSelectionMode  = "Manuallevels"
+    res_sig@cnMinLevelValF        = 0          ; set min contour level
+    res_sig@cnMaxLevelValF        = 500 ;32        ; set max contour level
+    res_sig@cnLevelSpacingF       = 10        ; set contour interval
+
+    ;res_sig@cnMonoFillPattern= True;False
+    ;res_sig@cnFillPattern    = 11
+    ;res_sig@cnMonoFillScale  = True
+    ;res_sig@cnFillScaleF     = 0.7
+    ;res_sig@cnMonoFillColor  = True
+    ;res_sig@cnFillColor      = "darkslategray"
+    ;res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     
     res_sig@gsnCenterString      = ""
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
+
+    res_sign    = res_sig
+    res_sign@cnLineDashPattern = 2
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -253,38 +267,27 @@ printVarSummary(prob)
     maxlvl = (/(/ 16,50,75, 225/),(/ 4.0, 4.0,  24,  24/)/)
     spacig = (/(/ 1 ,3 , 5,  15/),(/ 0.5, 0.5,  3 ,  3 /)/)
 
-do nc = 0, ncase-1,1
-if(nc.eq.0) then
-    res@cnFillPalette = "precip3_16lev"
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-else
-    res@cnFillPalette = "BlueDarkRed18"
-    ;blue and red, has 18 colors,2-10 is blue
-end if 
-    do nv = 0, nvar-1,1
-        nn = nv +1
-        np = 4*nc + nv
-        res@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
-        res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"  
-        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc,nv)       ; set min contour level
-        if(nc.gt.0) then
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
-            plot2(nv)  = gsn_csm_contour(wks,prob(nc-1,nv,:,:),res_sig)
-            overlay(plot(np),plot2(nv))
-        else
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
-        end if
-        gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
-        overlay(plot(np),gtop(np))
-        line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        print(max(var(nc,nv,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,nv,{lats:latn},{lonl:lonr})))
-    end do 
-end do
-    ;resp@txString      = fig_title + months(nm) 
-    gsn_panel(wks,plot,(/2,4/),resp)
+do nv = 0, nvar-1,1
+    nc = 0
+    res@gsnLeftString   = pre_case(nv) + draw_var(nv)
+    res@gsnRightString  = "(" + unit(nv) + ")"  
+    res@cnLevelSelectionMode  = "manuallevels" ; set manual contour levels
+    res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(nc,nv)       ; set min contour level
+    plot(nv)   = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
+    res_sig@cnLevelSpacingF := spacig(1,nv)
+    res_sign@cnLevelSpacingF := spacig(1,nv)
+    plot2(nv)  = gsn_csm_contour(wks,var_p(nv,:,:),res_sig)
+    plot3(nv)  = gsn_csm_contour(wks,var_n(nv,:,:),res_sign)
+    overlay(plot(nv),plot2(nv))
+    overlay(plot(nv),plot3(nv))
+    gtop(nv) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(nv),gtop(nv))
+    line(nv) = gsn_add_polyline( wks, plot(nv), lonx, latx, lnres )
+    print(max(var(nc,nv,{lats:latn},{lonl:lonr})))
+    print(min(var(nc,nv,{lats:latn},{lonl:lonr})))
+end do 
+gsn_panel(wks,plot,(/2,2/),resp)
 end
 

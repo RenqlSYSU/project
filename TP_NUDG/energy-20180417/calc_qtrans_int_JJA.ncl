@@ -1,106 +1,172 @@
 ;***************************************************************************
 ;filename:      calc_qtran_int_JJA.ncl
-;use the initial data to calculate the integrated qu and qv then write data file (a year is a file)
-;The ncl functions have been used are: dpres_hybrid_ccm,dim_sum_n_Wrap,dim_avg_n_Wrap
+;use the post-processing data to calculate the integrated climatology qu, steady qu and 
+;transient eddy qu, according to the Jiang Xinwen's paper 
+;The ncl functions have been used are: dpres_plevel_Wrap,dim_sum_n_Wrap,dim_avg_n_Wrap
+;dim_rmvmean_n_Wrap
 ;                                            by Ql_Ren
 ;                                           2018/04/17
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = (/"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/AMIP_C5PM.cam.h1.",\
-            "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/AMIP_C5PM_TP_NUDG.cam.h1.",\
-            "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/AMIP_C5PM_TP_NUDG.cam.h1."/)
-fileout = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-case    = (/"CTRL","NUDG24h","NUDG6h"/)
+fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_JJAave_qtran_int.nc"
+var_name= (/"U","V","Q","PS"/)
+case    = (/"CTRL","NUDG6h"/)
+ncase   = dimsizes(case)
 years   = ispan(1979,2005,1)   ;the calculate time
-ncase = dimsizes(case)
-nyear = dimsizes(year)
+g  = 9.8 ;m/(s*s)
 
-files1 = systemfunc("ls " + filein(0) + years(0) + "*" + ".nc")
-f1     = addfile(files1(0),"r")
-hyai   = f1->hyai  ;hyai(ilev),ilev = lev+1,hybrid A coefficient at layer interfaces
-hybi   = f1->hybi
-hyam   = f1->hyam  ;hybm(lev), hybrid A coefficient at layer midpoints
-hybm   = f1->hybm
-p0     = 100000   ;a scalar ,double,reference pressure,unit is Pa
-printVarSummary(hyai)
-printVarSummary(hyam)
+;area: east Asia
+lats = -20
+latn = 60
+lonl = 20
+lonr = 220
+lev  = (/1000,925,850,700,600,500,400,300/)
+;lev  = (/600,500,400,300/)        ; high lev, according to Jiang Xinwen's paper
+;lev  = (/1000,925,850,700,600/)   ;low lev
 
 do nf = 0,ncase-1,1 
-do nt = 0,nyear-1,1
 ;==========================================================
 ;read the data
 ;============================================================
-files  = systemfunc("ls " + filein(nf) + years(nt) + "*" + ".nc")
+nv = 0
+files  = systemfunc("ls " + filein(nf) + "*.daily." + var_name(nv) + ".nc")
 f      = addfiles(files,"r")
 ListSetType(f,"cat")
-u   = f[:]->U    ;(:,:,{lats:latn},{lonl:lonr})
-v   = f[:]->V    ;(:,:,{lats:latn},{lonl:lonr})
-q   = f[:]->Q    ;(:,:,{lats:latn},{lonl:lonr})
-ps  = f[:]->PS   ;(:,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+time        = cd_calendar(f[:]->time,0)
+select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
+ntime       = dimsizes(select_time)
+print(ntime)
+u   = f[:]->U(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 1
+files  = systemfunc("ls " + filein(nf) + "*.daily." + var_name(nv) + ".nc")
+f      = addfiles(files,"r")
+ListSetType(f,"cat")
+v  = f[:]->V(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 2
+files  = systemfunc("ls " + filein(nf) + "*.daily." + var_name(nv) + ".nc")
+f      = addfiles(files,"r")
+ListSetType(f,"cat")
+q   = f[:]->Q(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 3
+files  = systemfunc("ls " + filein(nf) + "*.daily." + var_name(nv) + ".nc")
+f      = addfiles(files,"r")
+ListSetType(f,"cat")
+ps     = f[:]->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+
+nlat  = dimsizes(v&lat)
+nlon  = dimsizes(v&lon)
 printVarSummary(ps)
 printVarSummary(u)
 printVarSummary(q)
-q = q*1000 ;convert unit from kg/kg to g/kg
+
+;print("convert unit from kg/kg to g/kg")
+;q = q*1000 
 
 ;calculates the pressure differences of a hybrid coordinate system.
-dpi  = dpres_hybrid_ccm(ps,p0,hyai,hybi)  ;get dpi (time,lev,lat,lon)
-printVarSummary(dpi)
+dp  = dpres_plevel_Wrap(lev*100,ps,50000,0)  ;unit is Pa, get dp (time,lev,lat,lon)
+printVarSummary(dp)
 
-qu = q*u
-qv = q*v
-qdivg = uv2dv_cfd ( qv, qu, u&lat, u&lon, 3)
+qu := dim_sum_n(q*u*dp,1)/g ;get integrated qu(time,lat,lon)
+qv := dim_sum_n(q*v*dp,1)/g ;get integrated qu(time,lat,lon)
+qu_vari = dim_variance_n(qu,0) 
+qv_vari = dim_variance_n(qv,0) 
+qu := dim_avg_n(qu,0)  ;get integrated qu(lat,lon)
+qv := dim_avg_n(qv,0)  ;get integrated qu(lat,lon)
 
-qu := dim_avg_n_Wrap(qu*dpi,1)/9.8 ;get qu(time,lat,lon)
-qv := dim_avg_n_Wrap(qv*dpi,1)/9.8 ;get qv(time,lat,lon)
-copy_VarMeta(q(0,0,:,:),qu(0,:,:))
-copy_VarMeta(q(0,0,:,:),qv(0,:,:))
+q_vari = dim_variance_n(dim_sum_n(q*dp,1),0)
+u_vari = dim_variance_n(dim_sum_n(u*dp,1),0)
+v_vari = dim_variance_n(dim_sum_n(v*dp,1),0)
+q_ave = dim_avg_n(dim_sum_n(q*dp,1),0)
+u_ave = dim_avg_n(dim_sum_n(u*dp,1),0)
+v_ave = dim_avg_n(dim_sum_n(v*dp,1),0)
+ste_qu = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(u,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qu(lat,lon)
+ste_qv = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(v,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qv(lat,lon)
+
+edd_qu := dim_sum_n(dim_rmvmean_n(q,0)*dim_rmvmean_n(u,0)*dp,1)/g ;get transient eddy integrated qu(lat,lon)
+edd_qv := dim_sum_n(dim_rmvmean_n(q,0)*dim_rmvmean_n(v,0)*dp,1)/g
+edd_qu_vari = dim_variance_n(edd_qu,0) ;get transient eddy integrated qu(lat,lon)
+edd_qv_vari = dim_variance_n(edd_qv,0)
+edd_qu := dim_avg_n(edd_qu,0) ;get transient eddy integrated qu(lat,lon)
+edd_qv := dim_avg_n(edd_qv,0)
+
 qu@long_name = "Integrated zonal moisture transport"
 qv@long_name = "Integrated meridional moisture transport"
-qdivg@long_name = "Integrated divergence of moisture flux" 
-qu@units     = "g/(s*m)" 
-qv@units     = "g/(s*m)" 
-qdivg@units     = "g/(s*m*m)" 
+ste_qu@long_name = "steady Integrated meridional moisture transport"
+edd_qu@long_name = "transient eddy Integrated meridional moisture transport"
+qu@units     = "kg/(s*m)" 
+qv@units     = "kg/(s*m)" 
 
 ;========================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf)+years(nt) + ".daily." + "qtran.nc")
-ncdf = addfile(fileout(nf)+years(nt) + ".daily." + "qtran.nc","c")
+system("rm -f " + fileout(nf))
+ncdf = addfile(fileout(nf),"c")
 setfileoption(ncdf,"definemode",True)
 
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "the integration is based on 30 hybrid levels "
+fileatt@discription   = "the integration is based on 1000,925,850,700,500 hPa "
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"time","lat" ,"lon"/)
-dimSizes = (/ntime ,nlat  ,nlon /)
-dimUnlim = (/True  ,False ,False/)
+dimNames = (/"lat" ,"lon"/)
+dimSizes = (/nlat  ,nlon /)
+dimUnlim = (/False ,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"time",typeof(uwnd&time),(/"time"/))
-filevardef(ncdf,"lat" ,typeof(uwnd&lat),getvardims(uwnd&lat))
-filevardef(ncdf,"lon" ,typeof(uwnd&lon),getvardims(uwnd&lon))
-filevardef(ncdf,"kpkm",typeof(kpkm),(/"time","lat","lon"/))
+filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
+filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
+filevardef(ncdf,"qu",typeof(qu),(/"lat","lon"/))
+filevardef(ncdf,"qv",typeof(qv),(/"lat","lon"/))
+filevardef(ncdf,"qu_vari",typeof(qu_vari),(/"lat","lon"/))
+filevardef(ncdf,"qv_vari",typeof(qv_vari),(/"lat","lon"/))
+filevardef(ncdf,"ste_qu",typeof(ste_qu),(/"lat","lon"/))
+filevardef(ncdf,"ste_qv",typeof(ste_qv),(/"lat","lon"/))
+filevardef(ncdf,"edd_qu",typeof(edd_qu),(/"lat","lon"/))
+filevardef(ncdf,"edd_qv",typeof(edd_qv),(/"lat","lon"/))
+filevardef(ncdf,"edd_qu_vari",typeof(edd_qu_vari),(/"lat","lon"/))
+filevardef(ncdf,"edd_qv_vari",typeof(edd_qv_vari),(/"lat","lon"/))
+filevardef(ncdf,"q_vari",typeof(q_vari),(/"lat","lon"/))
+filevardef(ncdf,"u_vari",typeof(u_vari),(/"lat","lon"/))
+filevardef(ncdf,"v_vari",typeof(v_vari),(/"lat","lon"/))
+filevardef(ncdf,"q_ave",typeof(q_ave),(/"lat","lon"/))
+filevardef(ncdf,"u_ave",typeof(u_ave),(/"lat","lon"/))
+filevardef(ncdf,"v_ave",typeof(v_ave),(/"lat","lon"/))
 
 ;define var attribute
-filevarattdef(ncdf,"time",uwnd&lat)
-filevarattdef(ncdf,"lat" ,uwnd&lat)
-filevarattdef(ncdf,"lon" ,uwnd&lon)
-kpkm@long_name = "vertical integrated and ten grids average, >0 mean Kp convert to Km"
-kpkm@units     = "J"
-filevarattdef(ncdf,"kpkm",kpkm)
+filevarattdef(ncdf,"lat",u&lat)
+filevarattdef(ncdf,"lon",u&lon)
+filevarattdef(ncdf,"qu",qu)
+filevarattdef(ncdf,"qv",qv)
+filevarattdef(ncdf,"edd_qu",edd_qu)
+filevarattdef(ncdf,"edd_qv",edd_qv)
 
-ncdf->time = (/uwnd&time/)
-ncdf->lat  = (/uwnd&lat/)
-ncdf->lon  = (/uwnd&lon/)
-ncdf->kpkm = (/kpkm/)
+ncdf->lat  = (/u&lat/)
+ncdf->lon  = (/u&lon/)
+ncdf->qu   = (/qu/)
+ncdf->qv   = (/qv/)
+ncdf->ste_qu = (/ste_qu/)
+ncdf->ste_qv = (/ste_qv/)
+ncdf->edd_qu = (/edd_qu/)
+ncdf->edd_qv = (/edd_qv/)
+ncdf->qu_vari   = (/qu_vari/)
+ncdf->qv_vari   = (/qv_vari/)
+ncdf->edd_qu_vari = (/edd_qu_vari/)
+ncdf->edd_qv_vari = (/edd_qv_vari/)
+ncdf->q_vari = (/q_vari/)
+ncdf->u_vari = (/u_vari/)
+ncdf->v_vari = (/v_vari/)
+ncdf->q_ave = (/q_ave/)
+ncdf->u_ave = (/u_ave/)
+ncdf->v_ave = (/v_ave/)
 end do
 end
 

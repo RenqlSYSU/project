@@ -10,17 +10,17 @@
 # Path of the original data
 # Caution: DO NOT DELETE \" IN STRING!
 #PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
-#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
+PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
+#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
 
 # Path of the post processed data
 #PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
-#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
+PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
+#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
 
 # Case name
-#CASENAME=\"AMIP_C5PM_TP_NUDG\"
-CASENAME=\"AMIP_C5PM\"
+CASENAME=\"AMIP_C5PM_TP_NUDG\"
+#CASENAME=\"AMIP_C5PM\"
 
 
 # Names of 2D fields
@@ -31,7 +31,8 @@ FDNAME2D="(/\"TS\"/)" #often use
 #FDNAME2D="(/\"LHFLX\",\"SHFLX\"/)" #often use
 
 # Names of 3D fields
-FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
+FDNAME3D="(/\"U\",\"V\",\"Q\"/)" # hybrid coordinate
+#FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
 #FDNAME3D="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"RELHUM\",\"Z3\",\"DTCOND\"/)" # hybrid coordinate
@@ -50,12 +51,13 @@ LAYERS=30
 # Output specific pressure layers
 # CAUTION: Do not leave species between element!
 #PLEV="(/925,850,700,600,500,400,300,200,100,50/)"
-PLEV="(/1000,925,850,700,500,200/)"
+#PLEV="(/1000,925,850,700,500,200/)"
+PLEV="(/1000,925,850,700,600,500,400,300,200/)"
 
 
 # Process flag
-FLAG_2D=1
-FLAG_3D=0  #1
+FLAG_2D=0
+FLAG_3D=1
 FLAG_3D_HY=0
 
 #-----------------------------------------------------------

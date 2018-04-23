@@ -9,6 +9,18 @@
 ;                                                    2018/03/28
 ;*********************************************************************************
 begin
+;define the thickness and height of the title,tick and label
+   tick_font      = 0.03
+   subtitle_font  = 0.03
+   title_font     = 0.03
+   vcref_font     = 0.02
+   tick_thick     = 5.0
+   subtitle_thick = 5.0  ;not have this attribute
+   title_thick    = 5.0
+   vc_thick       = 3.0
+   mp_thick       = 5.0
+   font_index     = 22
+
 draw_var = (/"T(~S~o~N~C)","Z(gpm)","Wind"/)  ;this is the variable used to draw, can used as center string
 draw_varname = (/"T","Z3","U","V"/)
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
@@ -65,18 +77,6 @@ maxlat = 40
 minlat = 25
 lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
 latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
-
-;define the thickness and height of the title,tick and label
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
-   vcref_font     = 0.02
-   tick_thick     = 5.0
-   subtitle_thick = 5.0  ;not have this attribute
-   title_thick    = 5.0
-   vc_thick       = 3.0
-   mp_thick       = 4.0
-   font_index     = 22
 
 ;================================================================
 ;read data
@@ -218,6 +218,7 @@ printVarSummary(prob)
     res_sig@cnMonoFillColor  = True
     res_sig@cnFillColor      = "grey0"
     res_sig@cnFillDotSizeF   = 0.1
+    res_sig@lbLabelBarOn     = False   ; the label bar
     
     res_sig@gsnCenterString      = ""
     res_sig@gsnLeftString    = " "

@@ -169,7 +169,6 @@ printVarSummary(var)
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
     
-    resvc = res
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
     res@cnLinesOn        = False ;True
@@ -196,27 +195,36 @@ printVarSummary(var)
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-2
+    res@pmLabelBarOrthogonalPosF = 0.2
+    res@pmLabelBarParallelPosF   = 0.5
 
 ;----------set the attribute of the vector-------------------
-     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
-     resvc@vcVectorDrawOrder          = "PostDraw"
-     resvc@vcLineArrowThicknessF      = vc_thick
-     resvc@vcMinDistanceF             = 0.035
-     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
-     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
-     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
-     ;resvc@vcRefAnnoSide              = "Bottom"          
-     ;resvc@vcRefAnnoJust              = "TopRight"
-     resvc@vcRefAnnoOrthogonalPosF    = -0.75           ; move ref vector along Y-axis
-     resvc@vcRefAnnoParallelPosF      = 0.2            ; move ref vector along X-axis
-     resvc@vcRefAnnoPerimOn           = False         ;close the border
-     resvc@vcRefAnnoFont              = font_index
-     resvc@vcRefAnnoFontHeightF       = vcref_font
-     resvc@vcRefAnnoString1On         = False
-     resvc@vcRefAnnoString2On         = True
-     ;resvc@vcRefAnnoString2           = "30m/s"
-     resvc@vcLineArrowHeadMinSizeF   = 0.01
-     resvc@vcLineArrowHeadMaxSizeF   = 0.01
+    resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMinDistanceF             = 0.035
+    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = -0.78           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.25            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    ;resvc@vcRefAnnoString2           = "30m/s"
+    resvc@vcLineArrowHeadMinSizeF   = 0.01
+    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -256,11 +264,11 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref  = (/(/300,300,30/),(/60,60,10/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/200,200,20/),(/40,40,5/)/)  ;the level of 850hpa    ctrl,nudg,diff
 
-    minlvl = (/(/15 ,0 , 0/),(/-80,-80,-16/)/)
-    maxlvl = (/(/615,90,15/),(/ 80, 80, 16/)/)
-    spacig = (/(/40 ,6 , 1/),(/ 10, 10,  2/)/)
+    minlvl = (/(/15 ,55 , 0/),(/-80,-16,-16/)/)
+    maxlvl = (/(/615,130,30/),(/ 80, 16, 16/)/)
+    spacig = (/(/40 ,5  , 2/),(/ 10, 2 ,  2/)/)
 
 do nc = 0, ncase-1,1
 if(nc.eq.0) then

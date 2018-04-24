@@ -1,5 +1,5 @@
 ;***************************************************************************
-;filename:      calc_qtran_int_JJA.ncl
+;filename:      calc_qtran_int_JJA_rmvannual.ncl
 ;use the initial data to calculate the integrated qu and qv then write data file (a year is a file)
 ;The ncl functions have been used are: dpres_hybrid_ccm,dim_sum_n_Wrap,dim_avg_n_Wrap
 ;                                            by Ql_Ren
@@ -10,7 +10,7 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_qtran"
+fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_JJAave_qtran"
 var_name= (/"U","V","Q","PS"/)
 case    = (/"CTRL","NUDG24h","NUDG6h"/)
 years   = ispan(1979,2005,1)   ;the calculate time
@@ -74,7 +74,6 @@ q = q*1000
 ;calculates the pressure differences of a hybrid coordinate system.
 dp  = dpres_plevel_Wrap(lev*100,ps,50000,0)  ;unit is Pa, get dp (time,lev,lat,lon)
 printVarSummary(dp)
-
 
 
 qu = q*u

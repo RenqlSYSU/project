@@ -13,41 +13,43 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_annual_series.nc"
-case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/)
+fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_6TP_annual_series.nc"
+case     = (/"CTRL","NG24h","NG6h"/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-;area of TP 
-lats = 25 
-latn = 40
-lonl = 70
-lonr = 105
+area =(/"TP","STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
+lats = (/25 ,25  ,30   ,35   , 22  , 30  /) ;-20
+latn = (/40 ,30  ,35   ,40   , 30  , 45  /)  ;60
+lonl = (/70 ,70  ,70   ,70   ,107  ,107  /)  ;20
+lonr = (/105,105 ,105  ,105  ,130  ,130  /);130 ;220
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
-vars:= f->$var_name(0)$(0,{lats:latn},{lonl:lonr})
 nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(var_name)
-var         = new((/nyear,365/),float)
+narea = dimsizes(area)
+var   = new((/narea,nyear,365/),float)
 
 do nc = 0,ncase-1,1
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
 ;--------------------------------------------------------------
 var = 0
+do na = 0,narea-1,1
 do nt = 0,nyear-1,1
 do nv = 0,nvar-1,1
     f    = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    temp = f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    var(nt,:) = var(nt,:) + wgt_areaave_Wrap(temp,1.0,1.0,0)
+    temp := f->$var_name(nv)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var(na,nt,:) = var(na,nt,:) + wgt_areaave_Wrap(temp,1.0,1.0,0)
 end do  ;the loop of the 27 years
 end do  ;the loop of the 3 variables
+end do  
 var = var*1000*24*3600
-ave = dim_avg_n_Wrap(var,0) ;get the climate (ndays
+var@units = "mm/day"
+ave = dim_avg_n_Wrap(var,1) ;get the climate (narea,ndays)
 printVarSummary(var)
 printVarSummary(ave)
 
@@ -61,25 +63,28 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "The annual cycle of TP average's preci,unit is mm/day" 
+fileAtt@discription   = "The annual cycle of area average's preci,unit is mm/day" + \
+        "the area is TP,STP,CTP,NTP,SEA,NEA"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
-dimNames = (/"year","day"/)
-dimSizes = (/ nyear,365  /)
-dimUnlim = (/ False,False/)
+dimNames = (/"area","year","day"/)
+dimSizes = (/ narea,nyear,365  /)
+dimUnlim = (/ False,False,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;Define var_names, type(string) and dims_names(string)
+filevardef(ncdf,"area","integer",(/"area"/))
 filevardef(ncdf,"year","integer",(/"year"/))
 filevardef(ncdf,"day" ,"integer",(/"day"/))
-filevardef(ncdf,"series",typeof(var),(/"year","day"/))
-filevardef(ncdf,"ave"   ,typeof(ave),(/"day"/))
+filevardef(ncdf,"series",typeof(var),(/"area","year","day"/))
+filevardef(ncdf,"ave"   ,typeof(ave),(/"area","day"/))
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"series",var)
 filevarattdef(ncdf,"ave",ave)
 
+ncdf->area   = ispan(1,narea,1)
 ncdf->year   = (/years/)
 ncdf->day    = ispan(1,365,1)
 ncdf->series = (/var/)

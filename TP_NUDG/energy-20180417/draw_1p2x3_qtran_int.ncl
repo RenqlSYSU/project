@@ -217,7 +217,7 @@ printVarSummary(var_u)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref  = (/(/300,300,30/),(/60,60,10/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/200,200,20/),(/40,40,5/)/)  ;the level of 850hpa    ctrl,nudg,diff
 
 do nc = 0, ncase-1,1
     do nv = 0 ,nvar-1,1

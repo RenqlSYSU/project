@@ -10,14 +10,14 @@ begin
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day"/)    ;this can be used as right string 
 var_name = (/"series","ave"/)
-case     = (/" CTRL"," NG6h"/);this can be used as left string
-pre_case = (/"(a","(b"/)
+case     = (/" CTRL"," NG24h"," NG6h"/);this can be used as left string
+pre_case = (/"(a","(b","(c"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_4TP_annual_series.nc"
-fig_name = path + "/concept_map/fig/1p5x2_preci_5area_JJAts"
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_4TP_annual_series.nc"
+fig_name = path + "/concept_map/fig/1p5x3_preci_5area_JJAts"
 fig_out  ="pdf";"x11"
 
 area = (/"STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
@@ -33,8 +33,8 @@ lonr = (/105  ,105  ,105  ,130  ,130  /);130 ;220
 ;lonr = (/105 ,105  ,105  ,105  ,130  ,130  /);130 ;220
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.01
+   tick_font      = 0.015
+   subtitle_font  = 0.015
    title_font     = 0.03
    label_font     = 0.015
    tick_thick     = 5.0
@@ -50,9 +50,9 @@ lonr = (/105  ,105  ,105  ,130  ,130  /);130 ;220
 nyear = dimsizes(years)
 ncase = dimsizes(case)
 narea = dimsizes(area)
-nday  = 92
-nday_s=151
-nday_e=242
+nday  = 90
+nday_s=152
+nday_e=241
 var   = new((/ncase,narea,nyear,nday/),float)
 ave   = new((/ncase,narea,      nday/),float)
 plot  = new((/ncase*narea/),graphic)
@@ -97,12 +97,13 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@trYMinF = floor(min(var))
     ;resxy@trYMaxF = ceil(max(var))
     
+    resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
     resxy@tmYLLabelFont         = font_index
-    ;resxy@tmXBLabelFontHeightF     = tick_font-0.01
-    ;resxy@tmXBLabelFontThicknessF  = tick_thick-1.0 
-    ;resxy@tmYRLabelFontHeightF     = tick_font
-    ;resxy@tmYRLabelFontThicknessF  = tick_thick
+    resxy@tmXBLabelFontHeightF     = tick_font 
+    resxy@tmXBLabelFontThicknessF  = tick_thick
+    resxy@tmYLLabelFontHeightF     = tick_font
+    resxy@tmYLLabelFontThicknessF  = tick_thick
 
     resxy@tmXBMinorOn          = False ; Turn off x-axis (bottom) minor ticks
     resxy@tmXTMinorOn          = False ; Turn off x-axis (tottom)minor ticks
@@ -111,6 +112,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmYLMinorOn          = False ; Turn off y-axis (left) minor ticks
     resxy@tmYROn               = False ; Turn off y-axis (right) major ticks
     
+    resxy@tmXBMajorThicknessF     = mp_thick
+    resxy@tmYLMajorThicknessF     = mp_thick
+    resxy@tmXBMinorThicknessF     = mp_thick
+    resxy@tmYLMinorThicknessF     = mp_thick
     ;resxy@tmXBMajorLengthF = 0.01
     ;resxy@tmYRMajorLengthF = 0.01
     ;resxy@tmXBMode           = "Manual"
@@ -118,8 +123,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@tmXBTickStartF     = 0
     ;resxy@tmXBTickEndF       = 90
     resxy@tmXBMode            = "Explicit"
-    resxy@tmXBValues          = ispan(0,95,5)
-    resxy@tmXBLabels          = ispan(0,95,5)
+    resxy@tmXBValues          = ispan(153,243,10)
+    resxy@tmXBLabels          = ispan(0,90,10)
+    resxy@trXMaxF      = 242
+    resxy@trXMinF      = 153
     ;resxy@tmXBMode            = "Automatic"
     
     resxy@tmXMajorGrid                   = True
@@ -128,9 +135,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmXMajorGridThicknessF         = 2.0
                              
     resxy@gsnStringFont         = font_index
-    resxy@gsnCenterStringFontHeightF = subtitle_font-0.005
-    resxy@gsnRightStringFontHeightF  = subtitle_font
-    resxy@gsnLeftStringFontHeightF   = subtitle_font
+    resxy@gsnStringFontHeightF = subtitle_font
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
     resxy@gsnLeftString    = ""
     resxy@gsnRightString   = ""
@@ -152,13 +157,13 @@ do na =0, narea-1,1
 do nc = 0, ncase-1,1
     nn = na +1
     np = ncase*na + nc
-    resxy@gsnLeftString   = pre_case(nc) + nn + case(nc)
-    resxy@gsnRightString  = area(na) + " (" + unit + ")"  
+    resxy@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
+    resxy@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" + " (" + unit + ")"  
     resxy@trYMinF = floor(min(var(:,na,:,:)))
     resxy@trYMaxF =  ceil(max(var(:,na,:,:)))
-    plot(np)  = gsn_csm_xy(wks,ispan(0,91,1),(/var(nc,na,:,:)/),resxy)
-    plot2(np) = gsn_csm_xy(wks,ispan(0,91,1),(/ave(0 ,na,  :)/),resxy2)
-    plot3(np) = gsn_csm_xy(wks,ispan(0,91,1),(/ave(nc,na,  :)/),resxy3)
+    plot(np)  = gsn_csm_xy(wks,var&day,(/var(nc,na,:,:)/),resxy)
+    plot2(np) = gsn_csm_xy(wks,var&day,(/ave(0 ,na,  :)/),resxy2)
+    plot3(np) = gsn_csm_xy(wks,var&day,(/ave(nc,na,  :)/),resxy3)
     overlay(plot(np),plot2(np))
     overlay(plot(np),plot3(np))
 end do

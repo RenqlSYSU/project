@@ -7,18 +7,19 @@
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-;                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+;                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-;fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c" 
-fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c-24h" 
-    ;case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
-    case   = (/"(a) CTRL-climCTRL","(b) NG24h-climND6h","(c) NG24h-climCTRL"/);this can be used as left string
-fig_out    ="pdf";"x11"
+fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c" 
+    case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
+;fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c-24h" 
+    ;case   = (/"(a) CTRL-climCTRL","(b) NG24h-climND6h","(c) NG24h-climCTRL"/);this can be used as left string
+fig_out    = "eps";"pdf";"x11"
+;fig_out    = "pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
@@ -31,13 +32,13 @@ lat_spacing = 5
 na = 0
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.01
-   subtitle_font  = 0.01
+   tick_font      = 0.015
+   subtitle_font  = 0.015
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 5.0
+   mp_thick       = 4.0
    font_index     = 22
 
 ;==========================================================
@@ -134,6 +135,7 @@ printVarSummary(var)
     res@tmYLTickEndF    = latn(na)
     res@tmYLTickSpacingF= lat_spacing
 
+    res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
     res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
@@ -153,10 +155,14 @@ printVarSummary(var)
     res@tmXMajorGridLineColor          = "grey0"
     res@tmXMajorGridThicknessF         = 2.0
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     res@tmXBMajorOutwardLengthF = -0.
     res@tmYLMajorOutwardLengthF = -0.
     res@tmYRMajorOutwardLengthF = -0.
     
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     res@tmXBMinorOutwardLengthF = -0.
     res@tmYLMinorOutwardLengthF = -0.
     res@tmYRMinorOutwardLengthF = -0.
@@ -185,6 +191,7 @@ printVarSummary(var)
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 2
+    res@lbBoxLineThicknessF  = mp_thick-1
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -194,8 +201,7 @@ printVarSummary(var)
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
-    res@gsnRightStringFontHeightF = subtitle_font
-    res@gsnLeftStringFontHeightF  = subtitle_font
+    res@gsnStringFontHeightF = subtitle_font
     res@gsnRightString  = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
 
     resp  = True    
@@ -206,10 +212,9 @@ printVarSummary(var)
     resp@lbLabelStride    = 1
     resp@lbLabelFont      = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = tick_font              ; make labels smaller
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@lbBoxLineThicknessF  = mp_thick-1
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -220,7 +225,7 @@ printVarSummary(var)
         print(min(var(nc,:,:)))
     end do 
 
-    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/ncase,1/),resp)
 end
 
 

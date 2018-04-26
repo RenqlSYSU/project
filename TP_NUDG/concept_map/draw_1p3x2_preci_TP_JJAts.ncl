@@ -17,14 +17,15 @@ years    = ispan(1979,2005,1)   ;the calculate time
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_4TP_annual_series.nc"
-fig_name = path + "/concept_map/fig/1p5x3_preci_5area_JJAts"
-fig_out  ="pdf";"x11"
+fig_name = path + "/concept_map/fig/1p3x2_preci_SCNTP_JJAts"
+fig_out  = "eps";"pdf";"x11"
+;fig_out  = "pdf";"x11"
 
-area = (/"STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
-lats = (/25   ,30   ,35   , 22  , 30  /) ;-20
-latn = (/30   ,35   ,40   , 30  , 45  /)  ;60
-lonl = (/70   ,70   ,70   ,107  ,107  /)  ;20
-lonr = (/105  ,105  ,105  ,130  ,130  /);130 ;220
+area = (/"STP","CTP","NTP"/)  ;S mean south,N mean North,EA mean East Asia
+lats = (/25   ,30   ,35   /) ;-20
+latn = (/30   ,35   ,40   /)  ;60
+lonl = (/70   ,70   ,70   /)  ;20
+lonr = (/105  ,105  ,105  /);130 ;220
 
 ;area = (/"TP","STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
 ;lats = (/25  ,25   ,30   ,35   , 22  , 30  /) ;-20
@@ -41,7 +42,7 @@ lonr = (/105  ,105  ,105  ,130  ,130  /);130 ;220
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    label_thick    = 1.5
-   mp_thick       = 5.0
+   mp_thick       = 4.0
    font_index     = 22
 
 ;==========================================================
@@ -64,8 +65,8 @@ plot3 = new((/ncase*narea/),graphic)
 ;--------------------------------------------------------------
 do nc = 0,ncase-1,1
     f    = addfile(filename(nc),"r")
-    var(nc,:,:,:)  = f->$var_name(0)$(1:5,:,nday_s:nday_e)
-    ave(nc,:,:)    = f->$var_name(1)$(1:5,nday_s:nday_e )
+    var(nc,:,:,:)  = f->$var_name(0)$(1:narea,:,nday_s:nday_e)
+    ave(nc,:,:)    = f->$var_name(1)$(1:narea,nday_s:nday_e )
 end do   ;the loop of the three cases
 
 printVarSummary(var)
@@ -162,9 +163,9 @@ do nc = 0, ncase-1,1
     resxy@trYMinF = floor(min(var(:,na,:,:)))
     resxy@trYMaxF =  ceil(max(var(:,na,:,:)))
     plot(np)  = gsn_csm_xy(wks,var&day,(/var(nc,na,:,:)/),resxy)
-    plot2(np) = gsn_csm_xy(wks,var&day,(/ave(0 ,na,  :)/),resxy2)
+    ;plot2(np) = gsn_csm_xy(wks,var&day,(/ave(0 ,na,  :)/),resxy2)
     plot3(np) = gsn_csm_xy(wks,var&day,(/ave(nc,na,  :)/),resxy3)
-    overlay(plot(np),plot2(np))
+    ;overlay(plot(np),plot2(np))
     overlay(plot(np),plot3(np))
 end do
 end do

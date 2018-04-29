@@ -16,16 +16,16 @@ years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_4TP_annual_series.nc"
-fig_name = path + "/concept_map/fig/1p3x2_preci_SCNTP_JJAts"
-fig_out  = "eps";"pdf";"x11"
-;fig_out  = "pdf";"x11"
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_3TP_annual_series.nc"
+fig_name = path + "/concept_map/fig/1p3x3_preci_ESCNTP_JJAts"
+;fig_out  = "eps";"pdf";"x11"
+fig_out  = "pdf";"x11"
 
-area = (/"STP","CTP","NTP"/)  ;S mean south,N mean North,EA mean East Asia
-lats = (/25   ,30   ,35   /) ;-20
-latn = (/30   ,35   ,40   /)  ;60
-lonl = (/70   ,70   ,70   /)  ;20
-lonr = (/105  ,105  ,105  /);130 ;220
+area = (/"ESTP","ECTP","NTP"/);,"STP","CTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
+lats = (/25    ,30    ,35   /);,25   ,30   ,35   , 22  , 30  /) 25  , ;-20
+latn = (/30    ,35    ,40   /);,30   ,35   ,40   , 30  , 45  /) 40  , ;60
+lonl = (/100   ,90    ,70   /);,70   ,70   ,70   ,107  ,107  /) 70  , ;20
+lonr = (/105   ,105   ,105  /);,105  ,105  ,105  ,130  ,130  /) 105 , ;130 ;220
 
 ;area = (/"TP","STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
 ;lats = (/25  ,25   ,30   ,35   , 22  , 30  /) ;-20
@@ -35,7 +35,7 @@ lonr = (/105  ,105  ,105  /);130 ;220
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.015
-   subtitle_font  = 0.015
+   subtitle_font  = 0.02
    title_font     = 0.03
    label_font     = 0.015
    tick_thick     = 5.0
@@ -65,8 +65,8 @@ plot3 = new((/ncase*narea/),graphic)
 ;--------------------------------------------------------------
 do nc = 0,ncase-1,1
     f    = addfile(filename(nc),"r")
-    var(nc,:,:,:)  = f->$var_name(0)$(1:narea,:,nday_s:nday_e)
-    ave(nc,:,:)    = f->$var_name(1)$(1:narea,nday_s:nday_e )
+    var(nc,:,:,:)  = f->$var_name(0)$(0:narea-1,:,nday_s:nday_e)
+    ave(nc,:,:)    = f->$var_name(1)$(0:narea-1,nday_s:nday_e )
 end do   ;the loop of the three cases
 
 printVarSummary(var)
@@ -159,7 +159,7 @@ do nc = 0, ncase-1,1
     nn = na +1
     np = ncase*na + nc
     resxy@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
-    resxy@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" + " (" + unit + ")"  
+    resxy@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
     resxy@trYMinF = floor(min(var(:,na,:,:)))
     resxy@trYMaxF =  ceil(max(var(:,na,:,:)))
     plot(np)  = gsn_csm_xy(wks,var&day,(/var(nc,na,:,:)/),resxy)

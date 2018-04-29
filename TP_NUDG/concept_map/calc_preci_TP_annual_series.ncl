@@ -13,16 +13,16 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_6TP_annual_series.nc"
+fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_3TP_annual_series.nc"
 case     = (/"CTRL","NG24h","NG6h"/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-area =(/"TP","STP","CTP","NTP","SEA","NEA"/)  ;S mean south,N mean North,EA mean East Asia
-lats = (/25 ,25  ,30   ,35   , 22  , 30  /) ;-20
-latn = (/40 ,30  ,35   ,40   , 30  , 45  /)  ;60
-lonl = (/70 ,70  ,70   ,70   ,107  ,107  /)  ;20
-lonr = (/105,105 ,105  ,105  ,130  ,130  /);130 ;220
+area = (/"ESTP","ECTP","NTP"/);,"STP","CTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
+lats = (/25    ,30    ,35   /);,25   ,30   ,35   , 22  , 30  /) 25  , ;-20
+latn = (/30    ,35    ,40   /);,30   ,35   ,40   , 30  , 45  /) 40  , ;60
+lonl = (/100   ,90    ,70   /);,70   ,70   ,70   ,107  ,107  /) 70  , ;20
+lonr = (/105   ,105   ,105  /);,105  ,105  ,105  ,130  ,130  /) 105 , ;130 ;220
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data

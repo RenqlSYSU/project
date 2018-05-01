@@ -15,10 +15,9 @@ unit     = "kg/(s*m)" ;"K"   ;this can be used as right string
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_JJAave_qtran_int.nc"
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x2_boundary_moisture_budget"
     case   = (/"CTRL","NG6h"/)
-plot_right = (/"upside","bottom","left","right"/)
+plot_right = (/"qu (25N,70-105E)","qu (40N,70-105E)","qv (25-40N,70E)","qv (25-40N,105E)"/)
 pre_case   = (/"(a)","(b)","(c)","(d)"/)
 fig_out    ="pdf";"x11"
 
@@ -44,10 +43,10 @@ right  = new((/ncase,nlat/),float)
     plot     = new((/nplot/),graphic)
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.025
+   tick_font      = 0.03
    subtitle_font  = 0.03
    title_font     = 0.03
-   label_font     = 0.025
+   label_font     = 0.03
    vcref_font     = 0.01
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -67,6 +66,20 @@ do nf = 0,ncase-1, 1
      right(nf,:) = f->$var_name_u$({lats:latn},{lonr})
 end do
 
+do nf = 0,ncase-1,1
+if(any(ismissing(bottom(nf,:)))) then
+  print(case(nf) + " bottom contains some missing values. Beware.")
+end if
+if(any(ismissing(upside(nf,:)))) then
+  print(case(nf) + " upside contains some missing values. Beware.")
+end if
+if(any(ismissing(right(nf,:)))) then
+  print(case(nf) + " right contains some missing values. Beware.")
+end if
+if(any(ismissing(left(nf,:)))) then
+  print(case(nf) + " left contains some missing values. Beware.")
+end if
+end do
 ;===============================================
 ;draw the figure
 ;=============================================
@@ -79,6 +92,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
    
+    ;resxy@xyMarkLineMode    = "MarkLines"
+    ;resxy@xyMarkers         = (/16,16/)
+    ;resxy@xyMarkerColor     = (/"red","blue"/)
+    ;resxy@xyMarkerSizeF     = (/0.02,0.02/)
     resxy@xyDashPatterns    = (/0 ,0 /)
     resxy@xyLineThicknesses = (/5.0, 5.0/)   ; make second line thicker
     resxy@xyLineColors      = (/"red","blue"/)
@@ -86,6 +103,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tiYAxisOn = False
     ;resxy@trYMinF = floor(min(var))
     ;resxy@trYMaxF = ceil(max(var))
+    resxy@gsnYRefLine             = 0.0 
+    resxy@gsnYRefLineDashPatterns = 12 
+    resxy@gsnYRefLineThicknesses  = 5.0
+    resxy@gsnYRefLineColors       = "black"
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -137,11 +158,11 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@lgLabelFontThicknessF  = label_thick
     resxy@lgLabelFontHeightF     = label_font
     resxy@lgLabelFont            = font_index
-    resxy@pmLegendWidthF   = 0.07
-    resxy@pmLegendHeightF  = 0.08
+    resxy@pmLegendWidthF   = 0.1
+    resxy@pmLegendHeightF  = 0.1
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-    resxy@pmLegendOrthogonalPosF  = -0.4   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.4   ; move ref vector along X-axis
+    resxy@pmLegendOrthogonalPosF  = -0.35   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.35   ; move ref vector along X-axis
 
 do np = 0, nplot-1,1
     resxy@gsnLeftString    = pre_case(np) +" " + plot_right(np)
@@ -149,9 +170,9 @@ do np = 0, nplot-1,1
     if(np.le.1) then
     resxy@tmXBTickSpacingF   = 5
     if(np.eq.0) then
-        plot(np)  = gsn_csm_xy(wks,upside&lon,(/upside/),resxy)
+        plot(np)  = gsn_csm_xy(wks,upside&lon,(/bottom/),resxy)
     else
-        plot(np)  = gsn_csm_xy(wks,bottom&lon,(/bottom/),resxy)
+        plot(np)  = gsn_csm_xy(wks,bottom&lon,(/upside/),resxy)
     end if
     else
     resxy@tmXBTickSpacingF   = 3

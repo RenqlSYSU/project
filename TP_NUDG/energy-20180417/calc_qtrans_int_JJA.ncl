@@ -66,9 +66,6 @@ printVarSummary(ps)
 printVarSummary(u)
 printVarSummary(q)
 
-;print("convert unit from kg/kg to g/kg")
-;q = q*1000 
-
 ;calculates the pressure differences of a hybrid coordinate system.
 dp  = dpres_plevel_Wrap(lev*100,ps,30000,0)  ;unit is Pa, get dp (time,lev,lat,lon)
 printVarSummary(dp)

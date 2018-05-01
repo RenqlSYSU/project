@@ -13,7 +13,6 @@ unit     = "kg/(s*m)" ;"K"   ;this can be used as right string
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_JJAave_qtran_int.nc"
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x1_boundary_moisture_budget"
 txt_name = path + "/energy-20180417/TP_boundary_moisture_budget.txt"
     case   = (/"CTRL","NG6h"/)

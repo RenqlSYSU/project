@@ -7,19 +7,19 @@
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 ;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-;                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+;                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c" 
-    case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
-;fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c-24h" 
-    ;case   = (/"(a) CTRL-climCTRL","(b) NG24h-climND6h","(c) NG24h-climCTRL"/);this can be used as left string
-fig_out    = "eps";"pdf";"x11"
-;fig_out    = "pdf";"x11"
+;fig_name   = path + "/cross_section/fig/1p3x1_EA_JJApreci_daily_ano_lat_time-2c" 
+;    case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
+fig_name   = path + "/cross_section/fig/1p3x1_EA_JJApreci_daily_ano_lat_time-2c-24h" 
+    case   = (/"(a) CTRL-climCTRL","(b) NG24h-climND6h","(c) NG24h-climCTRL"/);this can be used as left string
+;fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
@@ -27,9 +27,9 @@ draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center s
 lats = (/25 , 20/) ;-20
 latn = (/40 , 45/)  ;60
 lonl = (/70 ,107/)  ;20
-lonr = (/105,122/);130 ;220
+lonr = (/105,130/);130 ;220
 lat_spacing = 5
-na = 0
+na = 1
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.015
@@ -116,7 +116,7 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.1
+    res@vpHeightF        = 0.15
     res@vpWidthF         = 0.9
 
 ;--------set the form of the coordinate-----------------

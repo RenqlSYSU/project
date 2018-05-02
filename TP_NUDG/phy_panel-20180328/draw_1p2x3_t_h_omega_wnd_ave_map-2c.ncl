@@ -21,22 +21,22 @@ begin
    mp_thick       = 4.0
    font_index     = 22
 
-draw_var = (/"T(~S~o~N~C)","Z(gpm)","Wind"/)  ;this is the variable used to draw, can used as center string
-draw_varname = (/"T","Z3","U","V"/)
+draw_var = (/"T(~S~o~N~C)","Z(gpm)","omega(10~S~-2~N~ Pa/s)"/)  ;this is the variable used to draw, can used as center string
+draw_varname = (/"T","Z3","OMEGA","U","V"/)
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev      = (/850,500,200/)
 nm = 2
-nl = 1;2;0
+nl = 0
 
 ;the path of the file
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x3_t_wind_h_" + months(nm) + lev(nl) + var_name(0) 
+fig_name = path + "/phy_panel-20180328/fig/1p2x3_t_h_omega_wnd_" + months(nm) + lev(nl) + var_name(0) 
     case   = (/" CTRL"," NG6h-CTRL"/)
 pre_case   = (/"(a","(b"/)
 fig_out    = "eps";"pdf";"x11"
@@ -58,10 +58,13 @@ nvar   = dimsizes(draw_var)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 var    = new((/ncase  ,nvar,nlat,nlon/),float)
+var_u  = new((/ncase       ,nlat,nlon/),float)
 var_v  = new((/ncase       ,nlat,nlon/),float)
 vari   = new((/ncase  ,nvar,nlat,nlon/),float)
+vari_u = new((/ncase       ,nlat,nlon/),float)
 vari_v = new((/ncase       ,nlat,nlon/),float)
 prob   = new((/ncase-1,nvar,nlat,nlon/),float)
+prob_u = new((/ncase-1     ,nlat,nlon/),float)
 prob_v = new((/ncase-1     ,nlat,nlon/),float)
 
 ;the number of the panel plot
@@ -69,6 +72,7 @@ prob_v = new((/ncase-1     ,nlat,nlon/),float)
     line     = new((/ncase*nvar/),graphic)
     gtop     = new((/ncase*nvar/),graphic)
     plot2    = new((/(ncase-1)*(nvar-1)/),graphic)
+    plot_vc  = new((/2/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -88,22 +92,29 @@ do nv = 0 ,nvar-1,1
     vari(nf,nv,:,:)  = f->$var_name(1)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 f = addfile(filename(nf)+draw_varname(3)+".nc","r")
+ var_u(nf,:,:)  = f->$var_name(0)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+vari_u(nf,:,:)  = f->$var_name(1)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+f = addfile(filename(nf)+draw_varname(4)+".nc","r")
  var_v(nf,:,:)  = f->$var_name(0)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
 vari_v(nf,:,:)  = f->$var_name(1)$(nm,nl,:,:) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+prob_u(nf,:,:) = ttest(var_u(0,:,:),vari_u(0,:,:),27,var_u(nf+1,:,:),vari_u(nf+1,:,:),27,True,False)
 prob_v(nf,:,:) = ttest(var_v(0,:,:),vari_v(0,:,:),27,var_v(nf+1,:,:),vari_v(nf+1,:,:),27,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
+var_u(nf+1,:,:)= var_u(nf+1,:,:) - var_u(0,:,:) ;get the difference between CTRL and NUDG
 var_v(nf+1,:,:)= var_v(nf+1,:,:) - var_v(0,:,:) ;get the difference between CTRL and NUDG
 end do
 
 var(0,0,:,:) = var(0,0,:,:)-273.15      ;convert unit from K to C
+var(:,2,:,:) = var(:,2,:,:)*100     ;convert unit from Pa/s to 10^-2 Pa/s
 
-var(1,2,:,:) = mask(var(1,2,:,:),((prob(0,2,:,:).lt.siglvl).or.(prob_v(0,:,:).lt.siglvl)),True)
 prob   = mask(prob,prob.lt.siglvl,True)
-var_v(1,:,:) = mask(var_v(1,:,:),((prob(0,2,:,:).lt.siglvl).or.(prob_v(0,:,:).lt.siglvl)),True)
+var(1,2,:,:) = mask(var(1,2,:,:),prob(0,2,:,:).lt.siglvl,True)
+var_u(1,:,:) = mask(var_u(1,:,:),((prob_u(0,:,:).lt.siglvl).or.(prob_v(0,:,:).lt.siglvl)),True)
+var_v(1,:,:) = mask(var_v(1,:,:),((prob_u(0,:,:).lt.siglvl).or.(prob_v(0,:,:).lt.siglvl)),True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(prob)
@@ -168,7 +179,6 @@ printVarSummary(prob)
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
     
-    resvc = res
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
     res@cnLinesOn        = False ;True
@@ -227,7 +237,7 @@ printVarSummary(prob)
 
 ;--------set the attribute of vector--------------
 
-    ;resvc                  = True
+    resvc                  = True
     resvc@gsnDraw          = False
     resvc@gsnFrame         = False
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
@@ -241,8 +251,8 @@ printVarSummary(prob)
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.55           ; move ref vector along Y-axis
-    resvc@vcRefAnnoParallelPosF      = 0.1            ; move ref vector along X-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.2           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
@@ -251,6 +261,9 @@ printVarSummary(prob)
     ;resvc@vcRefAnnoString2           = "30m/s"
     resvc@vcLineArrowHeadMinSizeF   = 0.012
     resvc@vcLineArrowHeadMaxSizeF   = 0.012
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -297,48 +310,49 @@ printVarSummary(prob)
                       (/5 ,2/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
 if(nl.eq.0) then
-    minlvl = (/(/ 12,1410/),(/-0.8, -8 /)/)
-    maxlvl = (/(/ 27,1560/),(/ 0.8,  8 /)/)
-    spacig = (/(/ 1 ,  10/),(/ 0.1,  1 /)/)
+    minlvl = (/(/ 12,1410,-8  /),(/-0.8, -8 , -4.0/)/)
+    maxlvl = (/(/ 27,1560, 8  /),(/ 0.8,  8 ,  4.0/)/)
+    spacig = (/(/ 1 ,  10, 1  /),(/ 0.1,  1 ,  0.5/)/)
 end if
 
 if(nl.eq.1) then
-    minlvl = (/(/-7.5,5730/),(/-0.8, -16/)/)
-    maxlvl = (/(/ 0  ,5880/),(/ 0.8,  16/)/)
-    spacig = (/(/0.5 ,  10/),(/ 0.1,  2 /)/)
+    minlvl = (/(/-7.5,5730,-8  /),(/-0.8, -16, -4.0/)/)
+    maxlvl = (/(/ 0  ,5880, 8  /),(/ 0.8,  16,  4.0/)/)
+    spacig = (/(/0.5 ,  10, 1  /),(/ 0.1,  2 ,  0.5/)/)
 end if
 
 if(nl.eq.2) then
-    minlvl = (/(/-55.5,12063/),(/-0.8, -24/)/)
-    maxlvl = (/(/-48  ,12558/),(/ 0.8,  24/)/)
-    spacig = (/(/0.5  ,  33 /),(/ 0.1,  3 /)/)
+    minlvl = (/(/-55.5,12063,-8  /),(/-0.8, -24, -4.0/)/)
+    maxlvl = (/(/-48  ,12558, 8  /),(/ 0.8,  24,  4.0/)/)
+    spacig = (/(/0.5  ,  33 , 1  /),(/ 0.1,  3 ,  0.5/)/)
 end if
 
 do nc = 0, ncase-1,1
-if(nc.eq.0) then
+    do nv = 0, nvar-1,1
+if(nc.eq.0.and.nv.lt.2) then
     res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
-else
+else 
     res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
 end if 
-    do nv = 0, nvar-1,1
         nn = nv +1
         np = nvar*nc + nv
         res@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
-        res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv)   
+        res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv)  
+    if(nc.eq.1.and.nv.eq.2) then
+        res@gsnRightString  = draw_var(nv)   
+    end if
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(nc,nv)       ; set min contour level
+        plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
         if(nv.eq.2) then
-            resvc@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
-            resvc@gsnRightString  = lev(nl) + "hPa " + draw_var(nv)   
             resvc@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
             resvc@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
-            plot(np)  = gsn_csm_vector_map_ce(wks,var(nc,nv,:,:),var_v(nc,:,:),resvc)
-        else
-            res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
-            res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
-            res@cnMinLevelValF        := minlvl(nc,nv)       ; set min contour level
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
+            plot_vc(nc)  = gsn_csm_vector(wks,var_u(nc,:,:),var_v(nc,:,:),resvc)
+            overlay(plot(np),plot_vc(nc))
         end if
         
         if(nc.gt.0.and.nv.lt.2) then

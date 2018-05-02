@@ -263,13 +263,6 @@ printVarSummary(prob)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
-    ;resp@txFontHeightF = title_font 
-    ;resp@txFontThicknessF = title_thick
 
     minlvl = (/(/ 10,  10/),(/  0 ,  0 /)/)
     maxlvl = (/(/160, 160/),(/  15,  15/)/)

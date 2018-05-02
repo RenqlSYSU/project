@@ -31,7 +31,8 @@ gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_shaded_ratio"
     case   = (/" CTRL"," NG6h-CTRL"/)
 pre_case   = (/"(a","(b"/)
-fig_out    ="pdf";"x11"
+;fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
 
 ;area: east Asia
 lats = -15 ;-20

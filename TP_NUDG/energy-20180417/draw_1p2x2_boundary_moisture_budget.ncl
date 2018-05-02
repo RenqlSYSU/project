@@ -19,7 +19,8 @@ fig_name = path + "/energy-20180417/fig/1p2x2_boundary_moisture_budget"
     case   = (/"CTRL","NG6h"/)
 plot_right = (/"qu (25N,70-105E)","qu (40N,70-105E)","qv (25-40N,70E)","qv (25-40N,105E)"/)
 pre_case   = (/"(a)","(b)","(c)","(d)"/)
-fig_out    ="pdf";"x11"
+;fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
 
 ;area: east Asia
 lats = 25  ;-15 ;-20

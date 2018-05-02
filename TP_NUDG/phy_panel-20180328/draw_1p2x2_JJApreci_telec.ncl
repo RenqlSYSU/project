@@ -1,5 +1,5 @@
 ;*********************************************************************
-;filename:      draw_4p3X1_JJApreci_teleconnect.ncl
+;filename:      draw_1p3X1_JJApreci_teleconnect.ncl
 ;input_data:    -Areas_JJApreci_telec.nc
 ;Draw the Asia teleconnection with the JJA precipitation index in four areas
 ;And there are there case,1AMIP-CTRL,2TP-NUDG24h,3 TP-NUDG6h
@@ -7,16 +7,20 @@
 ;                                           2018/01/24
 ;*********************************************************************************
 begin
-path       = "/users/yangsong3/renql/project/TP_NUDG"
-;path       = "/home/ys17-19/renql/project/TP_NUDG" 
-filename   = path + "/analysis/mdata/" + (/"CTRL","NG6h"/) + "-Areas_JJApreci_daily_telec.nc"
-fig_name   = path + "/phy_panel-20180328/fig/" + "p2x2_JJApreci_telec"
-    case   = (/"CTRL","NG6h"/)
-fig_out    = "pdf";"x11"
-unit       = ""
-area       = (/"India","Tibet","Philippines","Maritime_continent"/) ;here used as the right title
-var_name   = "corr"
-nsample    = 27*92
+path     = "/users/yangsong3/renql/project/TP_NUDG"
+;path     = "/home/ys17-19/renql/project/TP_NUDG" 
+filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Areas_JJApreci_telec.nc"
+gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+fig_name = path + "/phy_panel-20180328/fig/" + "1p2x2_JJApreci_telec"
+    case = (/"CTRL","NG6h"/)
+pre_case = (/"(a","(b"/)
+;fig_out  = "pdf";"x11"
+fig_out  = "eps";"x11"
+unit     = ""
+area     = (/"PS","WMC"/) ;here used as the right title
+;the data in file is corr(area,lat,lon),the area is India,Tibet,Philippines,Maritime_continent
+var_name = "corr"
+nsample  = 27
 
 ;plot area 
 lats = -15
@@ -26,44 +30,49 @@ lonr = 150
 siglvl = 0.05
 
 ;define the dimension of the data
-f     = addfile(filename(0),"r")
-vars  = f->$var_name$(0,{lats:latn},{lonl:lonr})
-nlat  = dimsizes(vars&lat)
-nlon  = dimsizes(vars&lon)
+f = addfile(gtopfile,"r")
+phis  = f->PHIS({lats:latn},{lonl:lonr})
+phis  = phis/9.8   ;convert unit from m2/s2 to gpm
+nlat  = dimsizes(phis&lat)
+nlon  = dimsizes(phis&lon)
 ncase = dimsizes(case) 
 narea = dimsizes(area)
-plot  = new((/ncase/),graphic)
-plot2 = new((/ncase/),graphic)
-line  = new((/ncase/),graphic)
-line2 = new((/ncase/),graphic)
+plot  = new((/ncase*narea/),graphic)
+plot2 = new((/ncase*narea/),graphic)
+line  = new((/ncase*narea/),graphic)
+line2 = new((/ncase*narea/),graphic)
+gtop  = new((/ncase*narea/),graphic)
 var   = new((/ncase,narea,nlat,nlon/), float) ;the variable of teleconnection data
 prob  = new((/ncase,narea,nlat,nlon/), float) ;the variable of teleconnection data
 
-minlat = (/25 ,20 ,25  ,5   ,-10 /)
-maxlat = (/40 ,35 ,35  ,20  ,7.5 /)
-minlon = (/70 ,60 ,90  ,120 ,85  /)
-maxlon = (/105,80 ,103 ,140 ,120 /)
+;area of TP ,PS and WMC
+minlat = (/25 ,5   ,-10 /)
+maxlat = (/40 ,20  ,7.5 /)
+minlon = (/70 ,120 ,85  /)
+maxlon = (/105,140 ,120 /)
 lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
 latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.02
+   tick_font      = 0.03
+   subtitle_font  = 0.03
    title_font     = 0.03
-   tick_thick     = 5.0
+   tick_thick     = 8.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    mp_thick       = 5.0
+   font_index     = 22
 
 ;================================================================
 ;read data
 ;====================================================================
 do nf = 0, ncase-1, 1
     f             = addfile(filename(nf),"r")
-    var(nf,:,:,:) = f->$var_name$(:,{lats:latn},{lonl:lonr})
+    var(nf,:,:,:) = f->$var_name$(2:3,{lats:latn},{lonl:lonr})
 end do
 prob = rtest(var,nsample,0)
 prob = mask(prob,prob.lt.siglvl,True)
+copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(prob)
 
@@ -89,7 +98,8 @@ printVarSummary(prob)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 10
+    res@gsnMajorLatSpacing = 15
+    res@gsnMinorLatSpacing = 15
     res@gsnMajorLonSpacing = 30
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
@@ -100,6 +110,9 @@ printVarSummary(prob)
 ;----------------------------------------------------------------------
 ;set the form of the coordinate
 ;------------------------------------------------------------------------
+    res@tmBorderThicknessF  = mp_thick
+    res@tmXBLabelFont   = font_index
+    res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
     res@tmXBLabelFontThicknessF  = tick_thick
@@ -107,10 +120,14 @@ printVarSummary(prob)
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     ;  res@tmXBMajorOutwardLengthF = -0.
     ;  res@tmYLMajorOutwardLengthF = -0.
     ;  res@tmYRMajorOutwardLengthF = -0.
       
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
@@ -135,11 +152,10 @@ printVarSummary(prob)
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
 
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
-
 ;----------Set res sig-----------
     res_sig                  = True
     res_sig@gsnDraw          = False
@@ -148,24 +164,16 @@ printVarSummary(prob)
     res_sig@cnLinesOn        = False;True      ; turn off contour lines
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
     res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
+    
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 1.
+    res_sig@cnFillScaleF     = 0.7
     res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "darkslategray"
-    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@cnFillColor      = "grey0"
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
-    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
-    ;res_sig@cnLevels             = (/0.01/)
-    ;res_sig@cnFillPattern        = "GMT_gray"
-    ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
     
-    res_sig@gsnCenterString      = ""
-    res_sig@gsnRightStringFontHeightF = subtitle_font
-    res_sig@gsnLeftStringFontHeightF  = subtitle_font
+    res_sig@gsnCenterString  = ""
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
 
@@ -174,7 +182,24 @@ printVarSummary(prob)
     lnres@gsLineColor          = "black"
     lnres@gsLineDashPattern    = 0
     lnres@gsLineThicknessF     = 4.0
-    ;lnres@gsLineLabelString    = "TP"
+    
+    lnres2  = lnres
+    lnres2@gsLineDashPattern    = 16
+;--------set the attribute of gtop--------------
+    res_gtop                  = True
+    res_gtop@gsnDraw          = False
+    res_gtop@gsnFrame         = False
+    res_gtop@cnFillOn         = False
+    res_gtop@cnLinesOn        = True      ; turn off contour lines
+    res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_gtop@cnInfoLabelOn    = False
+    res_gtop@cnLineThicknessF = 4.0
+    res_gtop@cnLineColor      = "black"
+    res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_gtop@cnLevels         = (/1500/)
+    res_gtop@gsnCenterString  = ""
+    res_gtop@gsnLeftString    = ""
+    res_gtop@gsnRightString   = ""
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -183,35 +208,40 @@ printVarSummary(prob)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
-    res@gsnRightStringFontHeightF = subtitle_font
-    res@gsnLeftStringFontHeightF  = subtitle_font
+    res@gsnStringFont         = font_index
+    res@gsnStringFontHeightF  = subtitle_font
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
-    resp@txFontHeightF = title_font 
-    resp@txFontThicknessF = title_thick
+    resp@gsnPaperOrientation = "landscape"
+    resp@gsnPanelLabelBar = True
+    resp@lbOrientation    = "Horizontal";"Vertical" 
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.08
+    resp@pmLabelBarOrthogonalPosF     = -0.005
+    resp@pmLabelBarParallelPosF       = 0
+    resp@lbLabelStride    = 1
+    resp@lbLabelFont      = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF = tick_font-0.01
+    resp@lbLabelFontThicknessF = tick_thick
 
+do nc = 0,ncase-1,1
 do na = 0,narea-1,1
-    res@gsnRightString       = area(na) 
-    do nc = 0, ncase-1,1
-        res@gsnLeftString    = case(nc)
-        plot(nc)   = gsn_csm_contour_map_ce(wks,var(nc,na,:,:),res)
-        plot2(nc)  = gsn_csm_contour(wks,prob(nc,na,:,:),res_sig)
-        overlay(plot(nc),plot2(nc))
-        line(nc)  = gsn_add_polyline( wks, plot(nc), lonx(:,0), latx(:,0), lnres )
-        line2(nc) = gsn_add_polyline( wks, plot(nc), lonx(:,na+1), latx(:,na+1), lnres )
-        print(max(var(nc,na,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,na,{lats:latn},{lonl:lonr})))
-    end do
-    
-    resp@txString      = fig_title 
-    gsn_panel(wks,plot,(/3,1/),resp)
+    nn = na +1
+    np = narea*nc + na
+    res@gsnRightString   = area(na) 
+    res@gsnLeftString    = pre_case(nc) + nn + ") " + case(nc)
+    plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,na,:,:),res)
+    plot2(np)  = gsn_csm_contour(wks,prob(nc,na,:,:),res_sig)
+    overlay(plot(np),plot2(np))
+    gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(np),gtop(np))
+    line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
+    line2(np) = gsn_add_polyline( wks, plot(np), lonx(:,na+1), latx(:,na+1), lnres2 )
+    print(max(var(nc,na,{lats:latn},{lonl:lonr})))
+    print(min(var(nc,na,{lats:latn},{lonl:lonr})))
+end do
 end do 
+    gsn_panel(wks,plot,(/ncase,narea/),resp)
 end
 

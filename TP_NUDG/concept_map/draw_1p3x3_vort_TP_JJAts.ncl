@@ -24,7 +24,7 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fig_name = path + "/concept_map/fig/1p3x3_vort_SCNTP_JJAts"
+fig_name = path + "/concept_map/fig/1p5x3_vort_SCNTP_SNEA_JJAts"
 ;fig_out  = "eps";"pdf";"x11"
 fig_out  = "pdf";"x11"
 
@@ -35,11 +35,11 @@ unit     = (/"10~S~-6~N~ s~S~-1~N~"/)   ;this can be used as right string
 pre_case = (/"(a","(b","(c"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-area = (/"STP","CTP","NTP"/);,"STP","CTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
-lats = (/25   ,30   ,35   /);,25   ,30   ,35   , 22  , 30  /) 25  , ;-20
-latn = (/30   ,35   ,40   /);,30   ,35   ,40   , 30  , 45  /) 40  , ;60
-lonl = (/70   ,80   ,70   /);,70   ,70   ,70   ,107  ,107  /) 70  , ;20
-lonr = (/105  ,100  ,105  /);,105  ,105  ,105  ,130  ,130  /) 105 , ;130 ;220
+area = (/"STP","CTP","NTP","SEA","NEA"/);"STP","CTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
+lats = (/25   ,30   ,35   , 25  , 35  /);25   ,30   ,35   , 22  , 30  /) 25  , ;-20
+latn = (/30   ,35   ,40   , 35  , 45  /);30   ,35   ,40   , 30  , 45  /) 40  , ;60
+lonl = (/70   ,80   ,70   ,107  ,107  /);70   ,70   ,70   ,107  ,107  /) 70  , ;20
+lonr = (/105  ,100  ,105  ,120  ,130  /);105  ,105  ,105  ,130  ,130  /) 105 , ;130 ;220
 lev = (/500/)
 
 ;==========================================================

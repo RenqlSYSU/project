@@ -25,14 +25,14 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fig_name = path + "/concept_map/fig/1p5x3_vort_SCNTP_SNEA_JJAts"
-;fig_out  = "eps";"pdf";"x11"
-fig_out  = "pdf";"x11"
+fig_out  = "eps";"pdf";"x11"
+;fig_out  = "pdf";"x11"
 
 case    = (/"CTRL","NG24h","NG6h"/)
 var_name  = (/"U","V"/)
 calc_name = (/"vort"/)
 unit     = (/"10~S~-6~N~ s~S~-1~N~"/)   ;this can be used as right string 
-pre_case = (/"(a","(b","(c"/)
+pre_case = (/"(a","(b","(c","(d","(e"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 area = (/"STP","CTP","NTP","SEA","NEA"/);"STP","CTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
@@ -167,9 +167,9 @@ wks = gsn_open_wks(fig_out,fig_name)
 
 do na =0, narea-1,1
 do nc = 0, ncase-1,1
-    nn = na +1
+    nn = nc +1
     np = ncase*na + nc
-    resxy@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
+    resxy@gsnLeftString   = pre_case(na) + nn + ")" + case(nc)
     resxy@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
     resxy@trYMinF = floor(min(var(:,na,:,:)))
     resxy@trYMaxF =  ceil(max(var(:,na,:,:)))

@@ -8,7 +8,7 @@
 begin
 draw_var = (/"500hPa Wind & Preci(mm/day)"/)  ;this is the variable used to draw, can used as center string
 ;draw_varname = (/"preci","uwnd","vwnd","preci","U","V"/)
-draw_varname = (/"hgt","uwnd","vwnd","Z3","U","V"/)
+draw_varname = (/"preci","uwnd","vwnd","preci","U","V"/)
 var_name = (/"season_ave"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
 lev      = (/850,500,200/)
@@ -16,14 +16,13 @@ nm = 2
 nl = 1;0
 
 ;the path of the file
-;path     = "/home/ys17-19/renql/project/TP_NUDG"
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"Observ","CTRL"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p2x1_hgt_wind_obs_ctrl_" + months(nm) + lev(nl)
+fig_name = path + "/analysis/fig/1p2x1_preci_wind_obs_ctrl_" + months(nm) + lev(nl)
     case   = (/" Obs"," CTRL"/)
 pre_case   = (/"(a)","(b)"/)
-fig_out    = "pdf";"eps";"pdf";"x11"
+fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -33,6 +32,7 @@ lonr = 150 ;220
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = phis/9.8
 land   = f->LANDM_COSLAT({lats:latn},{lonl:lonr})
 ncase  = dimsizes(case)
 
@@ -67,8 +67,8 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 nf = 0
 f = addfile(filename(nf)+draw_varname(0)+".nc","r")
- ;var0  = f->$draw_varname(0)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
- var0  = f->$draw_varname(0)$(nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+ var0  = f->$draw_varname(0)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+ ;var0  = f->$draw_varname(0)$(nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 f = addfile(filename(nf)+draw_varname(1)+".nc","r")
  var0_u  = f->$draw_varname(1)$(nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 f = addfile(filename(nf)+draw_varname(2)+".nc","r")
@@ -76,8 +76,8 @@ f = addfile(filename(nf)+draw_varname(2)+".nc","r")
 
 nf = 1
 f = addfile(filename(nf)+draw_varname(3)+".nc","r")
- ;var1  = f->$var_name$(nm,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
- var1  = f->$var_name$(nm,nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+ var1  = f->$var_name$(nm,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+ ;var1  = f->$var_name$(nm,nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 f = addfile(filename(nf)+draw_varname(4)+".nc","r")
  var1_u  = f->$var_name$(nm,nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 f = addfile(filename(nf)+draw_varname(5)+".nc","r")
@@ -155,9 +155,9 @@ printVarSummary(var0_v)
     ;res@cnLevels             = ispan(0,60,10)
     ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 5730  ;0          ; set min contour level
-    res@cnMaxLevelValF        = 5880  ;15         ; set max contour level
-    res@cnLevelSpacingF       = 10    ;1          ; set contour interval
+    res@cnMinLevelValF        = 0          ; set min contour level
+    res@cnMaxLevelValF        = 15         ; set max contour level
+    res@cnLevelSpacingF       = 1          ; set contour interval
 
     res@gsnSpreadColors      = False  ;True              ; turn of the full color map
     res@gsnSpreadColorStart  = 11                ; start at color 17
@@ -221,7 +221,7 @@ printVarSummary(var0_v)
     res_gtop@cnLineThicknessF = 4.0
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_gtop@cnLevels         = (/15000/)
+    res_gtop@cnLevels         = (/1500/)
     res_gtop@gsnCenterString      = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "

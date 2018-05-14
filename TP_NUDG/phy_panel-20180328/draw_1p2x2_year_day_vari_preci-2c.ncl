@@ -25,7 +25,7 @@ path     = "/users/yangsong3/renql/project/TP_NUDG"
 filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x2_year_day_vari_rmvmean_tmq_preci"
+fig_name = path + "/phy_panel-20180328/fig/1p2x2_NG24h_year_day_vari_rmvmean_tmq_preci"
     case   = (/" daily"," year"/)
 pre_case   = (/"(a","(b"/)
 ;fig_out    = "pdf";"x11"
@@ -87,6 +87,7 @@ do nv = 0 ,nvar-1,1
 end do
 end do
 
+var_draw = vari
 var_temp = where(var.eq.0,var@_FillValue,var)
 prob(0,:,:,:)  = ftest(var(0,:,:,:),92,vari(0,:,:,:),92,0)
 prob(1,:,:,:)  = ftest(var(1,:,:,:),27,vari(1,:,:,:),27,0)
@@ -278,7 +279,7 @@ do nc = 0, ncase-1,1
         res@cnLevelSpacingF       := spacig(nc,nv)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc,nv) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc,nv)        ; set min contour level
-        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res)
+        plot(np)    = gsn_csm_contour_map_ce(wks,var_draw(nc,nv,:,:),res)
         
         if(all(ismissing(vari_p(nc,nv,:,:)))) then
             print("vari_p is all missing. Cannot create plot.")

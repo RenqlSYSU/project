@@ -25,9 +25,9 @@ do nv=0,3,1
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"
 filectrl  = path + "/analysis/mdata/CTRL"   + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
-filenudg  = path + "/analysis/mdata/NUDG6h" + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
+filenudg  = path + "/analysis/mdata/NUDG24h" + (/"-Season_day_vari_rmvmean_","-Clim_month_ave_"/);+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p2x3_year_day_vari_rmvmean" + months(nm) + draw_var(nv) 
+fig_name = path + "/phy_panel-20180328/fig/1p2x3_NG24h_year_day_vari_rmvmean" + months(nm) + draw_var(nv) 
     case   = (/" daily"," year"/)
 pre_case   = (/"(a","(b"/)
 ;fig_out    = "pdf";"x11"
@@ -89,13 +89,14 @@ do nf = 0 ,ncase-1, 1
     vari(nf,:,:,:) = f->$var_name$(nm,:,:,:) ;get an nudg (ncase,nlev,nlat,nlon)
 end do
 
+var_draw = vari
 var_temp = where(var.eq.0,var@_FillValue,var)
 prob(0,:,:,:)  = ftest(var(0,:,:,:),92,vari(0,:,:,:),92,0)
 prob(1,:,:,:)  = ftest(var(1,:,:,:),27,vari(1,:,:,:),27,0)
 vari  = (vari - var)/var_temp*100 ;get (nudg-ctrl)/ctrl
 
 if(nv.eq.2) then
-var = var*1000
+var_draw = var_draw*1000
 end if
 
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
@@ -319,10 +320,10 @@ do nc = 0, ncase-1,1
         res@cnLevelSpacingF       := spacig(nc,nl)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc,nl) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc,nl)        ; set min contour level
-        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
+        plot(np)    = gsn_csm_contour_map_ce(wks,var_draw(nc,nl,:,:),res)
     
-    if(nc.eq.0.and.nv.eq.3.and.nl.eq.0) then
-        print("scalar field is constant; no contour lines will appear; use cnConstFEnableFill to enable fill")
+    if((nc.eq.0.and.nv.lt.3.and.nl.eq.0).or.(nv.eq.3.and.nl.eq.0)) then
+        ;print("scalar field is constant; no contour lines will appear; use cnConstFEnableFill to enable fill")
     else
         if(all(ismissing(vari_p(nc,nl,:,:)))) then
             print("vari_p is all missing. Cannot create plot.")

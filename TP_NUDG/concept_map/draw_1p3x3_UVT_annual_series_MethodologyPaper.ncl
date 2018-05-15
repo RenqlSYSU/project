@@ -14,7 +14,7 @@ var_name = (/"series","ave"/)
 case     = (/"CTRL","NG24h","NG6h"/);this can be used as left string
 pre_case = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i"/)
 years    = ispan(1979,2005,1)   ;the calculate time
-nv = 0
+nv = 2;1;0
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -153,7 +153,7 @@ do nc = 0, ncase-1,1
 do nl = 0,nlev-1,1
     nn = nl +1
     np = nlev*nc + nl
-    resxy@gsnLeftString   = pre_case(nl) + nn + ") " + case(nc)
+    resxy@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
     resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
     resxy@trYMinF = floor(min(var(:,:,:,nl)))
     resxy@trYMaxF =  ceil(max(var(:,:,:,nl)))

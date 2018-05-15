@@ -29,7 +29,7 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
 lev      = (/850,500,200/)
 nm = 2
-nl = 0
+nl = 2;1;0
 
 ;the path of the file
 ;path     = "/home/ys17-19/renql/project/TP_NUDG"

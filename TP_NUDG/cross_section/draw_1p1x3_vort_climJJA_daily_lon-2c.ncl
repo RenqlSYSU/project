@@ -6,6 +6,8 @@
 ;                                            by Ql_Ren
 ;                                           2018/05/03
 ;******************************************************************************
+load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
+
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -13,9 +15,10 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
 var_name = (/"U","V"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-fig_name   = path + "/cross_section/fig/1p1x3_JJAvort_daily_lon" 
+fig_name   = path + "/cross_section/fig/1p1x3_climJJAvort_daily_lon" 
     case   = (/"(a) CTRL","(b) NG6h","(c) NG6h-CTRL"/);this can be used as left string
-fig_out    ="pdf";"x11"
+;fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
 unit       = "10~S~-6~N~ s~S~-1~N~"   ;this can be used as right string 
 draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
 
@@ -35,74 +38,49 @@ nl = 1
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 5.0
+   mp_thick       = 4.0
    font_index     = 22
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-files1     = systemfunc("ls " + filein(0) + "*" + var_name(0) + ".nc")
-f          = addfiles(files1,"r")
-ListSetType(f,"cat")
-time        = cd_calendar(f[:]->time,0)
-select_time = ind(time(:,1).ge.6.and.time(:,1).le.8.and.time(:,2).le.30)
+f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+time        = cd_calendar(f->time,0)
+select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
 ntime       = dimsizes(select_time)
 print(ntime)
 
-vars  := f[:]->$var_name(0)$(0,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+vars  := f->$var_name(0)$(0,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 nfile = dimsizes(filein)
 ncase = dimsizes(case)
-intval= 10
-nweek = 9
-nday  = nweek*nyear
-var_d = new((/nfile,ntime,nlon/),float)
-var   = new((/ncase,nday ,nlon/),float)   ;define five days is a week,and the last week is seven days
+var   = new((/ncase,nyear,ntime,nlon/),float)   ;define five days is a week,and the last week is seven days
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-var_d = 0
 do nc = 0 , nfile-1,1
+do nt = 0,nyear-1,1
     nv = 0
-    files1     = systemfunc("ls " + filein(nc) + "*" + var_name(nv) + ".nc")
-    f          = addfiles(files1,"r")
-    ListSetType(f,"cat")
-    u   = f[:]->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    u = f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
 
     nv = 1
-    files1     = systemfunc("ls " + filein(nc) + "*" + var_name(nv) + ".nc")
-    f          = addfiles(files1,"r")
-    ListSetType(f,"cat")
-    v   = f[:]->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    v = f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     
-    vort  = uv2vr_cfd(u, v, v&lat, v&lon, 0) ;calculate the divergence
-    var_d(nc,:,:) = dim_avg_n_Wrap(vort,1)
-end do   ;the loop of 3 cases 
-var_d  = var_d*1000000  ;convert unit from m/s to mm/day
-printVarSummary(var_d)
-
-do nw = 0, nday-1,1
-    nd_s = intval*nw
-    nd_e = intval*nw + intval-1
-    print(nd_s)
-    print(nd_e)
-    var(0:1,nw,:) = dim_avg_n_Wrap(var_d(:,nd_s:nd_e,:),1)
+    vort  = uv2vr_cfd(u, v, v&lat, v&lon, 2) ;calculate the divergence
+    var(nc,nt,:,:) = dim_avg_n_Wrap(vort,1)
+end do   ;the loop of 3 cases
 end do
-
-;ave = dim_avg_n_Wrap(var(0:1,:,:),1)
-;do nt = 0,nday-1,1
-;var(0,nt,:) = var(0,nt,:) - ave(0,:)
-;var(2,nt,:) = var(1,nt,:) - ave(0,:)
-;var(1,nt,:) = var(1,nt,:) - ave(1,:)
-;end do
-
-var(2,:,:) = var(1,:,:)-var(0,:,:)
-copy_VarMeta(v(0,0,:),var(0,0,:))
+var(2,:,:,:) = var(1,:,:,:) - var(0,:,:,:)
+var := dim_avg_n_Wrap(var,1) ;get var(ncase,ntime,nlon)
+var  = var*1000000  ;convert unit from m/s to mm/day
+copy_VarMeta(v(:,0,:),var(0,:,:))
 printVarSummary(var)
 
 ;==============================================================
@@ -122,7 +100,7 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.9
+    res@vpHeightF        = 0.5
     res@vpWidthF         = 0.3
 
 ;--------set the form of the coordinate-----------------
@@ -131,15 +109,22 @@ printVarSummary(var)
     res@tiXAxisString   = "Year"
     res@tiYAxisString   = "Latitude(N)"
 
-    res@tmYLMode        = "Explicit"
-    res@tmYLValues      = ispan(0,nday-1,9)
-    res@tmYLLabels      = ispan(1979,2005,1)
+    ;res@tmYLMode        = "Explicit"
+    ;res@tmYLValues      = ispan(0,90,10)
+    ;res@tmYLLabels      = ispan(0,90,10)
+
+; Set special resources for the time axis
+    resTick                = True
+    resTick@ttmFormat      = "%d %c"
+    resTick@ttmAxis        = "YL"
+    resTick@ttmMajorStride = 15
 
     res@tmXBMode        = "Manual"
     res@tmXBTickStartF  = lonl(na)
     res@tmXBTickEndF    = lonr(na)
     res@tmXBTickSpacingF= 15
-
+    
+    res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
     res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
@@ -149,15 +134,19 @@ printVarSummary(var)
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
-    res@tmYMajorGrid                   = True
-    res@tmYMajorGridLineDashPattern    = 2
-    res@tmYMajorGridLineColor          = "grey0"
-    res@tmYMajorGridThicknessF         = 2.0
+    ;res@tmYMajorGrid                   = True
+    ;res@tmYMajorGridLineDashPattern    = 2
+    ;res@tmYMajorGridLineColor          = "grey0"
+    ;res@tmYMajorGridThicknessF         = 2.0
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     res@tmXBMajorOutwardLengthF = -0.
     res@tmYLMajorOutwardLengthF = -0.
     res@tmYRMajorOutwardLengthF = -0.
     
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     res@tmXBMinorOutwardLengthF = -0.
     res@tmYLMinorOutwardLengthF = -0.
     res@tmYRMinorOutwardLengthF = -0.
@@ -197,16 +186,17 @@ printVarSummary(var)
     res@gsnStringFont        = font_index
     res@gsnRightStringFontHeightF = subtitle_font
     res@gsnLeftStringFontHeightF  = subtitle_font
-    res@gsnRightString  = draw_var + " (" + unit +") " 
+    res@gsnRightString  = draw_var + "(" + unit +") " 
 
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
     resp@lbOrientation    = "Vertical" ;"Horizontal"
-    resp@lbLabelStride    = 1
+    resp@lbLabelStride    = 2
     resp@lbLabelFont      = font_index              ; make labels smaller
-    resp@lbLabelFontHeightF = tick_font-0.005              ; make labels smaller
+    resp@lbLabelFontHeightF = tick_font              ; make labels smaller
+    resp@lbBoxLineThicknessF  = mp_thick-1
     ;resp@pmLabelBarWidthF  = 0.5
     ;resp@pmLabelBarHeightF = 0.05
     ;resp@lbLabelFontHeightF = tick_font
@@ -216,6 +206,7 @@ printVarSummary(var)
 
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
+        time_axis_labels( u&time,res,resTick )
         plot(nc)     = gsn_csm_hov(wks,var(nc,:,:),res)
         print(max(var(nc,:,:)))
         print(min(var(nc,:,:)))

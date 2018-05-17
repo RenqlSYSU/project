@@ -26,7 +26,7 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fig_name = path + "/concept_map/fig/1p5x3_vort_SCNTP_SNEA_JJAts"
 fig_out  = "eps";"pdf";"x11"
-;fig_out  = "pdf";"x11"
+;fig_out  = "x11"
 
 case    = (/"CTRL","NG24h","NG6h"/)
 var_name  = (/"U","V"/)
@@ -135,8 +135,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@tmXBTickStartF     = 0
     ;resxy@tmXBTickEndF       = 90
     resxy@tmXBMode            = "Explicit"
-    resxy@tmXBValues          = ispan(0,90,10)
-    resxy@tmXBLabels          = ispan(0,90,10)
+    resxy@tmXBValues          = ispan(0,90,20)
+    resxy@tmXBLabels          = (/"1Jun","21Jun","11Jul","31Jul","20Aug"/)
     resxy@trXMaxF      = 90
     resxy@trXMinF      = 0
     ;resxy@tmXBMode            = "Automatic"

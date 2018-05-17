@@ -119,10 +119,10 @@ printVarSummary(var)
     resTick@ttmAxis        = "YL"
     resTick@ttmMajorStride = 15
 
-    res@tmXBMode        = "Manual"
-    res@tmXBTickStartF  = lonl(na)
-    res@tmXBTickEndF    = lonr(na)
-    res@tmXBTickSpacingF= 15
+    ;res@tmXBMode        = "Manual"
+    ;res@tmXBTickStartF  = lonl(na)
+    ;res@tmXBTickEndF    = lonr(na)
+    ;res@tmXBTickSpacingF= 15
     
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index

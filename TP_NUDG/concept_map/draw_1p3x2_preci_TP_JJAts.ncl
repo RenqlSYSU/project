@@ -6,20 +6,22 @@
 ;                                            by Ql_Ren
 ;                                           2017/03/29
 ;******************************************************************************
+load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
+
 begin
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day"/)    ;this can be used as right string 
 var_name = (/"series","ave"/)
-case     = (/" CTRL"," NG24h"," NG6h"/);this can be used as left string
+case     = (/" CTRL"," NG6h"/);" NG24h",this can be used as left string
 pre_case = (/"(a","(b","(c"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_4TP_annual_series.nc"
-fig_name = path + "/concept_map/fig/1p3x3_preci_SCNTP_JJAts"
-fig_out  = "eps";"pdf";"x11"
-;fig_out  = "pdf";"x11"
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_4TP_annual_series.nc"
+fig_name = path + "/concept_map/fig/1p3x2_preci_SCNTP_JJAts"
+;fig_out  = "eps";"pdf";"x11"
+fig_out  = "pdf";"x11"
 
 area = (/"STP","CTP","NTP"/);,"STP","CTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
 lats = (/25   ,30   ,35   /);,25   ,30   ,35   , 22  , 30  /) 25  , ;-20
@@ -71,6 +73,7 @@ end do   ;the loop of the three cases
 
 printVarSummary(var)
 printVarSummary(ave)
+printVarSummary(var&day)
 
 ;===============================================
 ;draw the figure
@@ -124,8 +127,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;resxy@tmXBTickStartF     = 0
     ;resxy@tmXBTickEndF       = 90
     resxy@tmXBMode            = "Explicit"
-    resxy@tmXBValues          = ispan(153,243,10)
-    resxy@tmXBLabels          = ispan(0,90,10)
+    resxy@tmXBValues          = ispan(153,243,20)
+    resxy@tmXBLabels          = (/"1Jun","21Jun","11Jul","31Jul","20 Aug"/)
     resxy@trXMaxF      = 242
     resxy@trXMinF      = 153
     ;resxy@tmXBMode            = "Automatic"

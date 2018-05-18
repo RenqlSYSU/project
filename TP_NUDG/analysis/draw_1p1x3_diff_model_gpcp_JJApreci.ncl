@@ -6,41 +6,30 @@
 ;                                                    2018/0418
 ;*********************************************************************************
 begin
+draw_var = (/"Preci(mm/day)"/)  ;this is the variable used to draw, can used as center string
 ;draw_varname = (/"preci","uwnd","vwnd","preci","U","V"/)
-draw_varname = (/"preci","uwnd","vwnd","preci","U","V"/)
+draw_varname = (/"preci"/)
 var_name = (/"season_ave"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
 lev      = (/850,500,200/)
 nm = 2
 nl = 1;0
-draw_var = (/lev(nl) + "hPa Wind & Preci(mm/day)"/)  ;this is the variable used to draw, can used as center string
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"Observ","CTRL","GPCP"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
+filename = path + "/analysis/mdata/" + (/"GPCP","CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p2x1_gpcp_wind_obs_ctrl_" + months(nm) + lev(nl)
-    case   = (/" Obs"," CTRL"/)
-pre_case   = (/"(c)","(d)"/)
-fig_out    = "eps";"pdf";"x11"
+fig_name = path + "/analysis/fig/1p1x3_diff_model_gpcp_" + months(nm)
+    case   = (/"CTRL-GPCP","NG24h-GPCP","NG6h-GPCP"/)
+pre_case   = (/"(a)","(b)","(c)"/)
+fig_out    = "pdf";"x11"
+;fig_out    = "x11"
 
 ;area: east Asia
 lats = -15 ;-20
 latn = 55  ;60
 lonl = 30  ;20
 lonr = 150 ;220
-
-f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats:latn},{lonl:lonr})
-phis   = phis/9.8
-land   = f->LANDM_COSLAT({lats:latn},{lonl:lonr})
-ncase  = dimsizes(case)
-
-;the number of the panel plot
-    plot     = new((/ncase/),graphic)
-    line     = new((/ncase/),graphic)
-    gtop     = new((/ncase/),graphic)
-    plot_uv   = new((/ncase/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -62,37 +51,46 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    mp_thick       = 5.0
    font_index     = 22
 
+f = addfile(gtopfile,"r")
+phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = phis/9.8
+ncase  = dimsizes(case)
+nlat   = dimsizes(phis&lat)
+nlon   = dimsizes(phis&lon)
+var    = new((/ncase,nlat,nlon/),float)
+
+;the number of the panel plot
+    plot     = new((/ncase/),graphic)
+    line     = new((/ncase/),graphic)
+    gtop     = new((/ncase/),graphic)
+    plot_uv   = new((/ncase/),graphic)
+
 ;================================================================
 ;read data
 ;====================================================================
-nf = 0
-f = addfile(filename(nf)+draw_varname(0)+".nc","r")
- var0  = f->$draw_varname(0)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
- ;var0  = f->$draw_varname(0)$(nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-f = addfile(filename(nf)+draw_varname(1)+".nc","r")
- var0_u  = f->$draw_varname(1)$(nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-f = addfile(filename(nf)+draw_varname(2)+".nc","r")
- var0_v  = f->$draw_varname(2)$(nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+f     = addfile(filename(0)+draw_varname+".nc","r")
+var0  = f->$draw_varname(0)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 
-nf = 1
-f = addfile(filename(nf)+draw_varname(3)+".nc","r")
- var1  = f->$var_name$(nm,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
- ;var1  = f->$var_name$(nm,nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-f = addfile(filename(nf)+draw_varname(4)+".nc","r")
- var1_u  = f->$var_name$(nm,nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-f = addfile(filename(nf)+draw_varname(5)+".nc","r")
- var1_v  = f->$var_name$(nm,nl,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+do nf = 1,ncase,1
+    nc = nf-1
+    f     = addfile(filename(nf)+draw_varname+".nc","r")
+    var(nc,:,:)  = f->$var_name(0)$(nm,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+end do
+var0 := linint2_Wrap(var0&lon,var0&lat,var0,False,var&lon,var&lat,0)
 
-;var1 = mask(var1,land.lt.1,False)
+do nc = 0,ncase-1,1
+    var(nc,:,:) = var(nc,:,:) - var0
+end do
 printVarSummary(var0)
-printVarSummary(var0_u)
-printVarSummary(var0_v)
+printVarSummary(var)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"precip3_16lev") 
+    gsn_define_colormap(wks,"BlueDarkRed18") 
+    ;blue and red, has 18 colors,2-10 is blue
+    ;gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -155,9 +153,9 @@ printVarSummary(var0_v)
     ;res@cnLevels             = ispan(0,60,10)
     ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 0          ; set min contour level
-    res@cnMaxLevelValF        = 15         ; set max contour level
-    res@cnLevelSpacingF       = 1          ; set contour interval
+    res@cnMinLevelValF        = -8          ; set min contour level
+    res@cnMaxLevelValF        = 8         ; set max contour level
+    res@cnLevelSpacingF       = 1         ; set contour interval
 
     res@gsnSpreadColors      = False  ;True              ; turn of the full color map
     res@gsnSpreadColorStart  = 11                ; start at color 17
@@ -173,36 +171,6 @@ printVarSummary(var0_v)
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.15
     res@pmLabelBarParallelPosF       = 0.5
-
-;--------set the attribute of vector--------------
-    resvc                  = True
-    resvc@gsnDraw          = False
-    resvc@gsnFrame         = False
-    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
-    resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMonoLineArrowColor       = True
-    resvc@vcLineArrowColor           = "black"
-    resvc@vcMinDistanceF             = 0.03
-    resvc@vcRefMagnitudeF            = 8.0             ; define vector ref mag
-    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
-    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
-    ;resvc@vcRefAnnoSide              = "Bottom"          
-    ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = -0.67           ; move ref vector along Y-axis
-    resvc@vcRefAnnoParallelPosF      = -0.1            ; move ref vector along X-axis
-    resvc@vcRefAnnoPerimOn           = False         ;close the border
-    resvc@vcRefAnnoFont              = font_index
-    resvc@vcRefAnnoFontHeightF       = vcref_font
-    resvc@vcRefAnnoString1On         = False
-    resvc@vcRefAnnoString2On         = True
-    resvc@vcRefAnnoString2           = "8m/s"
-    
-    resvc@gsnCenterString      = ""
-    resvc@gsnLeftString    = " "
-    resvc@gsnRightString   = " "
-    resvc@vcLineArrowHeadMinSizeF   = 0.01
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -229,9 +197,6 @@ printVarSummary(var0_v)
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-   ; res@tiMainString         = fig_title + "in" + months(m)
-    ;res@tiMainFontHeightF    = 0.04
-   ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
@@ -249,28 +214,15 @@ printVarSummary(var0_v)
     resp@lbLabelStride         = 1
     resp@lbBoxLineThicknessF   = mp_thick-2
 
-nc = 0
-res@gsnLeftString   = pre_case(nc) + case(nc)
-plot(nc)     = gsn_csm_contour_map_ce(wks,var0,res)
-plot_uv(nc)  = gsn_csm_vector(wks,var0_u,var0_v,resvc)
-overlay(plot(nc),plot_uv(nc))
-gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
-overlay(plot(nc),gtop(nc))
-line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
-print(max(var0))
-print(min(var0))
-
-nc = 1
-res@gsnLeftString   = pre_case(nc) + case(nc)
-plot(nc)     = gsn_csm_contour_map_ce(wks,var1,res)
-plot_uv(nc)  = gsn_csm_vector(wks,var1_u,var1_v,resvc)
-overlay(plot(nc),plot_uv(nc))
-gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
-overlay(plot(nc),gtop(nc))
-line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
-print(max(var1))
-print(min(var1))
-
+do nc = 0,ncase-1,1
+    res@gsnLeftString   = pre_case(nc) + case(nc)
+    plot(nc) = gsn_csm_contour_map_ce(wks,var(nc,:,:),res)
+    gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(nc),gtop(nc))
+    line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
+    print(max(var(nc,:,:)))
+    print(min(var(nc,:,:)))
+end do
 gsn_panel(wks,plot,(/1,ncase/),resp)
 end
 

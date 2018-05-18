@@ -9,10 +9,11 @@
 begin
 ;the path of the file
 path = "/users/yangsong3/renql/project/TP_NUDG"
-fig_name   = path + "/analysis/fig/topography_nudg_zone"
+fig_name   = path + "/analysis/fig/topography_nudg_zone_gray"
 filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
 fig_title  = "Topography" ; + var_name + " in " + lev + " hPa"
-fig_out    = "eps";"pdf";"x11"
+fig_out    = "x11"
+;fig_out    = "eps";"pdf";"x11"
 var_name   = "PHIS"
 unit       = "x100 gpm"
 
@@ -40,7 +41,7 @@ plonr = 150
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.04
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 6.0  ;not have this attribute
@@ -52,7 +53,7 @@ plonr = 150
     narea = dimsizes(area)
     plot   = new((/1/),graphic)
     line   = new((/narea/),graphic)
-    ;text   = new((/narea/),graphic)
+    text   = new((/2/),graphic)
 
 f     = addfile(filename,"r")
 var1  = f->$var_name$  ;({plats:platn},{plonl:plonr})$ ;get an array (nlat,nlon)
@@ -65,7 +66,7 @@ copy_VarMeta(var1,var)
     wks = gsn_open_wks(fig_out,fig_name)
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    gsn_define_colormap(wks,"matlab_jet") 
+    gsn_define_colormap(wks,"GMT_gray") 
     ;has 64 colors blue green yellow,red
 
     res                  = True
@@ -83,11 +84,11 @@ copy_VarMeta(var1,var)
     res@mpMinLonF        = plonl
     res@gsnMajorLatSpacing = 10
     res@gsnMajorLonSpacing = 30
-    res@mpFillOn         = False ;True
-    ;res@mpLandFillColor  = "gray"
-    ;res@mpFillDrawOrder  = "PreDraw"
-    res@mpGeophysicalLineThicknessF = mp_thick
-    res@mpGeophysicalLineColor      = "black";"white"
+    res@mpFillOn         = False;True
+    res@mpLandFillColor  = "gray"
+    res@mpFillDrawOrder  = "PreDraw"
+    ;res@mpGeophysicalLineThicknessF = mp_thick
+    ;res@mpGeophysicalLineColor      = "black";"white"
 
 ;-------set the form of the coordinate--------------
     res@tmBorderThicknessF  = mp_thick
@@ -120,21 +121,16 @@ copy_VarMeta(var1,var)
     ;res@cnLineThicknessF = 0
     ;res@gsnContourZeroLineThicknessF = 4.0
     ;res@cnLineColor      = "blue"
-   
-    res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
-    ;res@cnLevels             = ispan(0,60,10)
-    ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = 1          ; set min contour level
-    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    ;res@cnLevelSpacingF       = 1        ; set contour interval
+    
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnMinLevelValF        = 1          ; set min contour level
+    res@cnMaxLevelValF        = 13 ;32        ; set max contour level
+    res@cnLevelSpacingF       = 1        ; set contour interval
 
     res@gsnSpreadColors      = True              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
     res@gsnSpreadColorEnd    = 65                ; end at color 200
-
+    
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -157,6 +153,7 @@ copy_VarMeta(var1,var)
     txres@txFontHeightF        = subtitle_font
     txres@txFontThicknessF     = subtitle_thick
     txres@txFontColor          = "black"
+    txres@txFont          = font_index 
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -166,16 +163,17 @@ copy_VarMeta(var1,var)
     ;res@tiMainFontColor      = "black"
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString      = unit 
-    res@gsnLeftString       = var_name ;""
+    res@gsnRightString      = "";unit 
+    res@gsnLeftString       = "";var_name ;""
     
-    plot = gsn_csm_contour_map_ce(wks,var,res)
+    ;plot = gsn_csm_contour_map_ce(wks,var,res)
+    plot = gsn_csm_map_ce(wks,res)
 do na = 0,narea-1,1
     ;lnres@gsFillColor    = fillcolor(na)
     ;lnres@gsFillOpacityF = opacity(na)
     line(na) = gsn_add_polygon( wks, plot, lonx(:,na), latx(:,na), lnres )
-    ;text(na) = gsn_add_text( wks, plot, area(na), lonm(na), latm(na),txres)
 end do 
+    text = gsn_add_text( wks, plot, "NUDG", lonm(0), latm(0),txres)
 
 draw(plot)
 frame(wks)

@@ -9,8 +9,8 @@
 begin
 ;path    = "/users/yangsong3/renql/project/TP_NUDG"
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-filein  = path + "/data/observation/cpc_daily_preci/precip."  ;+year(i) + ".nc"
-fileout = path + "/analysis/mdata/Observ-Clim_month_ave_preci.nc"
+filein  = path + "/data/observation/gpcp_monthly_preci/precip.mon.mean.nc" ;time from 197901 to 201711, monthly data 
+fileout = path + "/analysis/mdata/GPCP-Clim_month_ave_preci.nc"
 var_name = (/"precip"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
@@ -23,25 +23,14 @@ lonr = 150 ;220
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein+years(0)+".nc","r")
-vars:= f->$var_name(0)$(0,{lats:latn},{lonl:lonr})
-nlat  = dimsizes(vars&lat)
-nlon  = dimsizes(vars&lon)
-nyear = dimsizes(years)
-JJApreci  = new((/nyear,nlat,nlon/),float)
-
-;---------------------------------------------------------------
-;read the data
-;--------------------------------------------------------------
-do nt = 0,nyear-1,1
-    f    = addfile(filein+years(nt)+".nc","r")
-    time        := cd_calendar(f->time,0)
-    select_time := ind(time(:,1).ge.6.and.time(:,1).le.8)
-    var := f->$var_name$(select_time,{lats:latn},{lonl:lonr})
-    JJApreci(nt,:,:) = dim_avg_n_Wrap(var,0)
-end do   ;the loop of 27 years
-JJApreci := dim_avg_n_Wrap(JJApreci,0) ;get a var(nlat,nlon)
-printVarSummary(JJApreci)
+f    = addfile(filein,"r")
+time = cd_calendar( f->time,0)
+select_time = ind(time(:,0).ge.1979.and.time(:,0).le.2005.and.time(:,1).ge.6.and.time(:,1).le.8)
+var  = f->$var_name$(select_time,{lats:latn},{lonl:lonr})
+var := dim_avg_n_Wrap(var,0) ;get (lat,lon)
+nlon = dimsizes(var&lon)
+nlat = dimsizes(var&lat)
+printVarSummary(var)
 
 ;====================================================================
 ;save the data
@@ -53,7 +42,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "Climate JJA average precipation"
+fileAtt@discription   = "Climate JJA average precipation from 1979 to 2005"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
@@ -63,17 +52,17 @@ dimUnlim = (/False,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;Define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
-filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"preci",typeof(JJApreci),(/"lat","lon"/))
+filevardef(ncdf,"lat",typeof(var&lat),getvardims(var&lat))
+filevardef(ncdf,"lon",typeof(var&lon),getvardims(var&lon))
+filevardef(ncdf,"preci",typeof(var),(/"lat","lon"/))
 
 ;Define the attribute of the variables
-filevarattdef(ncdf,"lat",vars&lat)
-filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"preci",JJApreci)
+filevarattdef(ncdf,"lat",var&lat)
+filevarattdef(ncdf,"lon",var&lon)
+filevarattdef(ncdf,"preci", var)
 
-ncdf->lat = (/vars&lat/)
-ncdf->lon = (/vars&lon/)
-ncdf->preci   = (/JJApreci/)
+ncdf->lat = (/var&lat/)
+ncdf->lon = (/var&lon/)
+ncdf->preci   = (/var/)
 end
 

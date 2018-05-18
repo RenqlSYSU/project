@@ -17,9 +17,9 @@ nl = 1;0
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"Observ","CTRL"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
+filename = path + "/analysis/mdata/" + (/"GPCP","CTRL"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p2x1_preci_wind_obs_ctrl_" + months(nm) + lev(nl)
+fig_name = path + "/analysis/fig/1p2x1_gpcp_wind_obs_ctrl_" + months(nm) + lev(nl)
     case   = (/" Obs"," CTRL"/)
 pre_case   = (/"(a)","(b)"/)
 fig_out    = "eps";"pdf";"x11"

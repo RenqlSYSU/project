@@ -12,7 +12,7 @@ path = "/users/yangsong3/renql/project/TP_NUDG"
 fig_name   = path + "/analysis/fig/topography_nudg_zone_gray"
 filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
 fig_title  = "Topography" ; + var_name + " in " + lev + " hPa"
-fig_out    = "x11"
+fig_out    = "eps";"x11"
 ;fig_out    = "eps";"pdf";"x11"
 var_name   = "PHIS"
 unit       = "x100 gpm"
@@ -41,7 +41,7 @@ plonr = 150
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
-   subtitle_font  = 0.04
+   subtitle_font  = 0.02
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 6.0  ;not have this attribute
@@ -67,7 +67,7 @@ copy_VarMeta(var1,var)
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     gsn_define_colormap(wks,"GMT_gray") 
-    ;has 64 colors blue green yellow,red
+    ;has 11 color,0 is white, 1 is black, 2-11
 
     res                  = True
     res@gsnFrame         = False
@@ -123,13 +123,13 @@ copy_VarMeta(var1,var)
     ;res@cnLineColor      = "blue"
     
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 1          ; set min contour level
-    res@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    res@cnLevelSpacingF       = 1        ; set contour interval
-
+    res@cnMinLevelValF        = 10         ; set min contour level
+    res@cnMaxLevelValF        = 50 ;32        ; set max contour level
+    res@cnLevelSpacingF       = 5        ; set contour interval
+;    res@cnFillColors          =  
     res@gsnSpreadColors      = True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 2                ; start at color 17
-    res@gsnSpreadColorEnd    = 65                ; end at color 200
+    res@gsnSpreadColorStart  = 11                ; start at color 17
+    res@gsnSpreadColorEnd    = 2                ; end at color 200
     
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
@@ -163,17 +163,17 @@ copy_VarMeta(var1,var)
     ;res@tiMainFontColor      = "black"
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString      = "";unit 
-    res@gsnLeftString       = "";var_name ;""
+    res@gsnRightString      = unit 
+    res@gsnLeftString       = var_name ;""
     
-    ;plot = gsn_csm_contour_map_ce(wks,var,res)
-    plot = gsn_csm_map_ce(wks,res)
+    plot = gsn_csm_contour_map_ce(wks,var,res)
+    ;plot = gsn_csm_map_ce(wks,res)
 do na = 0,narea-1,1
     ;lnres@gsFillColor    = fillcolor(na)
     ;lnres@gsFillOpacityF = opacity(na)
     line(na) = gsn_add_polygon( wks, plot, lonx(:,na), latx(:,na), lnres )
 end do 
-    text = gsn_add_text( wks, plot, "NUDG", lonm(0), latm(0),txres)
+    ;text = gsn_add_text( wks, plot, "NUDG", lonm(0), latm(0),txres)
 
 draw(plot)
 frame(wks)

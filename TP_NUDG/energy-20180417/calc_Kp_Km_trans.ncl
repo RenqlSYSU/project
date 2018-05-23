@@ -15,6 +15,7 @@ fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-K
 case    = (/"CTRL","NUDG24h","NUDG6h"/)
 years   = ispan(1979,2005,1)   ;the calculate time
 ncase = dimsizes(case)
+nyear = dimsizes(years)
 
 ;area of field variables,larger then the plan
 lats = -20
@@ -33,11 +34,13 @@ printVarSummary(hyai)
 printVarSummary(hyam)
 
 do nf = 0,ncase-1,1 
+do nt = 0,nyear-1,1 
 ;==========================================================
 ;read the data
 ;============================================================
-files  = systemfunc("ls " + filein(nf) + years(0) + "*" + ".nc")
-f      = addfiles(files(0:2),"r")
+files  = systemfunc("ls " + filein(nf) + years(nt) + "*" + ".nc")
+setfileoption("nc","SuppressClose",False) ; close too many files
+f      = addfiles(files,"r")
 ListSetType(f,"cat")
 uwnd   = f[:]->U(:,:,{lats:latn},{lonl:lonr})
 vwnd   = f[:]->V(:,:,{lats:latn},{lonl:lonr})
@@ -87,12 +90,16 @@ do nlo = 5, nlon-6, 1
                        *center_finite_diff_n(zm_v, zm_plev, False, 0, 1) ;center_finite_diff_n (data, coordinates, rcyclic, opt, dim)
 end do
 kpkm =dim_sum_n_Wrap(( var1+var2+var3+var4)*dpi,1) ;Vertical integration,get(ntime,nlat,nlon)
+var11 =dim_sum_n_Wrap( var1*dpi,1) ;Vertical integration,get(ntime,nlat,nlon)
+var22 =dim_sum_n_Wrap( var2*dpi,1) ;Vertical integration,get(ntime,nlat,nlon)
+var33 =dim_sum_n_Wrap( var3*dpi,1) ;Vertical integration,get(ntime,nlat,nlon)
+var44 =dim_sum_n_Wrap( var4*dpi,1) ;Vertical integration,get(ntime,nlat,nlon)
 
 ;========================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf)+years(0) + ".nc")
-ncdf = addfile(fileout(nf)+years(0) + ".nc","c")
+system("rm -f " + fileout(nf)+years(nt) + ".nc")
+ncdf = addfile(fileout(nf)+years(nt) + ".nc","c")
 setfileoption(ncdf,"definemode",True)
 
 ;set all field attribute
@@ -111,10 +118,14 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"time",typeof(uwnd&time),(/"time"/))
 filevardef(ncdf,"lat" ,typeof(uwnd&lat),getvardims(uwnd&lat))
 filevardef(ncdf,"lon" ,typeof(uwnd&lon),getvardims(uwnd&lon))
+filevardef(ncdf,"var11",typeof(var11),(/"time","lat","lon"/))
+filevardef(ncdf,"var22",typeof(var22),(/"time","lat","lon"/))
+filevardef(ncdf,"var33",typeof(var33),(/"time","lat","lon"/))
+filevardef(ncdf,"var44",typeof(var44),(/"time","lat","lon"/))
 filevardef(ncdf,"kpkm",typeof(kpkm),(/"time","lat","lon"/))
 
 ;define var attribute
-filevarattdef(ncdf,"time",uwnd&lat)
+filevarattdef(ncdf,"time",uwnd&time)
 filevarattdef(ncdf,"lat" ,uwnd&lat)
 filevarattdef(ncdf,"lon" ,uwnd&lon)
 kpkm@long_name = "vertical integrated and ten grids average, >0 mean Kp convert to Km"
@@ -124,7 +135,12 @@ filevarattdef(ncdf,"kpkm",kpkm)
 ncdf->time = (/uwnd&time/)
 ncdf->lat  = (/uwnd&lat/)
 ncdf->lon  = (/uwnd&lon/)
+ncdf->var11 = (/var11/)
+ncdf->var22 = (/var22/)
+ncdf->var33 = (/var33/)
+ncdf->var44 = (/var44/)
 ncdf->kpkm = (/kpkm/)
+end do
 end do
 end
 

@@ -24,12 +24,12 @@ path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Kp_Km_trans_10avg_vert_int1979.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/kpkm"
-    case = (/"CTRL","NG6h","CTRL - NG6h"/)
-fig_out  ="pdf";"x11"
+    case = (/"CTRL","NG6h","NG6h - CTRL" /)
+fig_out  = "pdf";"x11"
 unit     = "J"
 ncase = dimsizes(case) 
 draw_var = (/"KpKm"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"kpkm"/)  ;this is the variable used to draw, can used as center string
+var_name = (/"kpkm"/)  ;this is the variable in file 
 
 ;area: east Asia
 lats = -20     
@@ -42,13 +42,12 @@ f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case)
-nmonth = dimsizes(months)
 nvar   = dimsizes(draw_var)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
-var  = new((/ncase,nvar,nlat,nlon/),float)
-vari = new((/ncase,nvar,nlat,nlon/),float)
-prob = new((/ncase,nvar,nlat,nlon/),float)
+var  = new((/ncase,nlat,nlon/),double)
+vari = new((/ncase,nlat,nlon/),float)
+prob = new((/ncase,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot   = new((/ncase/),graphic)
@@ -66,18 +65,17 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;================================================================
 ;read data
 ;====================================================================
-do nf = 0 ,ncase-1, 1
+do nf = 0 ,ncase-2, 1
     f = addfile(filename(nf),"r")
-    var(nf,:,:)  = f->$var_name$(0,:,:) ;get an ctrl (ncase,nlev,nlat,nlon)
+    var(nf,:,:)  = f->$var_name$(0,{lats:latn},{lonl:lonr}) ;get an ctrl (ncase,nlev,nlat,nlon)
 end do
+var(2,:,:) = var(1,:,:) - var(0,:,:)
 printVarSummary(var)
-printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name+lev(nl)+draw_var(nv))
-do nm = 0,11,1
+    wks = gsn_open_wks(fig_out,fig_name)
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     gsn_define_colormap(wks,"matlab_jet") 
@@ -105,6 +103,9 @@ do nm = 0,11,1
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
+    res@tmBorderThicknessF  = mp_thick
+    res@tmXBLabelFont   = font_index
+    res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
     res@tmXBLabelFontThicknessF  = tick_thick
@@ -112,10 +113,14 @@ do nm = 0,11,1
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     ;  res@tmXBMajorOutwardLengthF = -0.
     ;  res@tmYLMajorOutwardLengthF = -0.
     ;  res@tmYRMajorOutwardLengthF = -0.
       
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
@@ -142,6 +147,8 @@ do nm = 0,11,1
     res@lbOrientation        = "vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbBoxLineThicknessF  = mp_thick-1
 
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
@@ -173,6 +180,22 @@ do nm = 0,11,1
     lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
 
+;--------set the attribute of gtop--------------
+    res_gtop                  = True
+    res_gtop@gsnDraw          = False
+    res_gtop@gsnFrame         = False
+    res_gtop@cnFillOn         = False
+    res_gtop@cnLinesOn        = True      ; turn off contour lines
+    res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_gtop@cnInfoLabelOn    = False
+    res_gtop@cnLineThicknessF = 4.0
+    res_gtop@cnLineColor      = "black"
+    res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_gtop@cnLevels         = (/1500/)
+    res_gtop@gsnCenterString      = ""
+    res_gtop@gsnLeftString    = " "
+    res_gtop@gsnRightString   = " "
+
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -180,34 +203,37 @@ do nm = 0,11,1
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
-    res@gsnRightStringFontHeightF = subtitle_font
-    res@gsnLeftStringFontHeightF  = subtitle_font
-    res@gsnRightString   = draw_var(nv) + lev(nl) + "hPa" 
-
-    do nc = 0, ncase-1,1
-        res@gsnLeftString = case(nc)
-        if(nc.eq.2) then
-            res@gsnRightString  = "siglvl: " + siglvl
-            ;res@cnMinLevelValF        = -5 ;-20         ; set min contour level
-            ;res@cnMaxLevelValF        = 5  ;20          ; set max contour level
-            ;res@cnLevelSpacingF       = 1          ; set contour interval
-        end if
-        plot(nc) = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
-        print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
-    end do 
-    plot_sig = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
-    overlay(plot(2),plot_sig)
+    res@gsnStringFont         = font_index
+    res@gsnStringFontHeightF = subtitle_font
+    res@gsnRightString   = draw_var
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@txString      = fig_title + months(nm) 
-    resp@txFontHeightF = title_font 
-    resp@txFontThicknessF = title_thick
+    resp@gsnPaperOrientation = "portrait"
+    ;resp@gsnPanelLabelBar = True
+    ;resp@pmLabelBarWidthF  = 0.5
+    ;resp@pmLabelBarHeightF = 0.05
+    ;resp@lbLabelFontHeightF = tick_font
+    ;resp@lbLabelFontThicknessF = tick_thick
+    ;resp@txFontHeightF = title_font 
+    ;resp@txFontThicknessF = title_thick
+
+    do nc = 0, ncase-1,1
+        res@gsnLeftString = case(nc)
+        ;if(nc.eq.2) then
+        ;    res@gsnRightString  = "siglvl: " + siglvl
+            ;res@cnMinLevelValF        = -5 ;-20         ; set min contour level
+            ;res@cnMaxLevelValF        = 5  ;20          ; set max contour level
+            ;res@cnLevelSpacingF       = 1          ; set contour interval
+        ;end if
+        plot(nc) = gsn_csm_contour_map_ce(wks,var(nc,:,:),res)
+        line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
+        print(max(var(nc,{lats:latn},{lonl:lonr})))
+        print(min(var(nc,{lats:latn},{lonl:lonr})))
+        gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
+        overlay(plot(nc),gtop(nc))
+    end do 
+
     gsn_panel(wks,plot,(/3,1/),resp)
-end do 
-end do ;for level
-end do ;for varables
 end
 

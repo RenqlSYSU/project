@@ -9,8 +9,8 @@
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Kp_Km_trans_10avg_vert_int"
-fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_kpkm.nc"
+filein  = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Kp_Km_trans_10avg_vert_int" ;
+fileout = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_kpkm.nc"     ;
 var_name = (/"kpkm"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
@@ -38,7 +38,7 @@ month_vari = new((/      12 ,nlat,nlon/),double)
 season_ave = new((/       4 ,nlat,nlon/),double)
 season_vari= new((/       4 ,nlat,nlon/),double)
 
-do nf = 0 , ncase-1,1
+do nf = 2 , ncase-1,1
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------

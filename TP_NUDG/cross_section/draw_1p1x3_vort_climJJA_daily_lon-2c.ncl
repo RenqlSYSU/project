@@ -15,10 +15,10 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
 var_name = (/"U","V"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-fig_name   = path + "/cross_section/fig/1p1x3_climJJAvort_daily_lon" 
+fig_name   = path + "/cross_section/fig/1p1x3_JJAvort_daily_lon" 
     case   = (/"(a) CTRL","(b) NG6h","(c) NG6h-CTRL"/);this can be used as left string
-;fig_out    ="pdf";"x11"
-fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
 unit       = "10~S~-6~N~ s~S~-1~N~"   ;this can be used as right string 
 draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
 
@@ -78,9 +78,9 @@ do nt = 0,nyear-1,1
 end do   ;the loop of 3 cases
 end do
 var(2,:,:,:) = var(1,:,:,:) - var(0,:,:,:)
-var := dim_avg_n_Wrap(var,1) ;get var(ncase,ntime,nlon)
+;var := dim_avg_n_Wrap(var,1) ;get var(ncase,ntime,nlon)
 var  = var*1000000  ;convert unit from m/s to mm/day
-copy_VarMeta(v(:,0,:),var(0,:,:))
+copy_VarMeta(v(:,0,:),var(0,0,:,:))
 printVarSummary(var)
 
 ;==============================================================
@@ -201,18 +201,21 @@ printVarSummary(var)
     ;resp@pmLabelBarHeightF = 0.05
     ;resp@lbLabelFontHeightF = tick_font
     ;resp@lbLabelFontThicknessF = tick_thick
+    resp@txFont = font_index 
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+do nt = 0, nyear-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
         time_axis_labels( u&time,res,resTick )
-        plot(nc)     = gsn_csm_hov(wks,var(nc,:,:),res)
-        print(max(var(nc,:,:)))
-        print(min(var(nc,:,:)))
+        plot(nc)     = gsn_csm_hov(wks,var(nc,nt,:,:),res)
+        print(max(var(nc,nt,:,:)))
+        print(min(var(nc,nt,:,:)))
     end do 
 
+    resp@txString      = years(nt)
     gsn_panel(wks,plot,(/1,3/),resp)
+end do
 end
-
 

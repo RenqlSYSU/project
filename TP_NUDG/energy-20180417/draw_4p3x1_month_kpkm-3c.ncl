@@ -1,14 +1,64 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_month_preci-2c_shad.ncl
-;input_data:    Month_ave_year_varience-6h.nc 
-;Draw the contour map of monthly variance of 27 years 
-;And there are three cases,1AMIP-CTRL,2TP-NUDG,3 is the difference between the above two
-;the third case will do the significance testing, the dot mean the difference is significance
-;The data(3variables,3cases,12month,3levs) are all save in one file
+;filename:      draw_12p3X1_month_preci-3c_shad.ncl
+;input_data:    CTRL-Clim_month_ave_preci.nc 
+;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
+;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
+;then do the significance testing, the dot mean the difference is significance
 ;                                                     by Ql Ren
-;                                                    2018/01/08
+;                                                    2018/01/18
 ;*********************************************************************************
 begin
+draw_var = (/"preci","qdivg","SHFLX","LHFLX","kpkm"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","10~S~6~N~ J"/)    ;this can be used as right string 
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"DJF","MAM","JJA","SON"/)
+nv = 4;3;2;1
+
+;the path of the file
+path     = "/users/yangsong3/renql/project/TP_NUDG"
+filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+fig_name = path + "/energy-20180417/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
+fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
+    case   = (/"(a) CTRL","(b) NG24h-CTRL","(c) NG6h-CTRL"/) ;
+fig_out    ="pdf";"x11"
+
+;area: east Asia
+lats = -15 ;-20
+latn = 55  ;60
+lonl = 30  ;20
+lonr = 150 ;220
+siglvl = 0.05
+
+f = addfile(gtopfile,"r")
+phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = phis/9.8   ;convert unit from m2/s2 to gpm
+ncase  = dimsizes(case)
+nmonth = dimsizes(months)
+nvar   = dimsizes(draw_var)
+nlat   = dimsizes(phis&lat)
+nlon   = dimsizes(phis&lon)
+var  = new((/ncase  ,nmonth,nlat,nlon/),double)
+vari = new((/ncase  ,nmonth,nlat,nlon/),double)
+prob = new((/ncase-1,nmonth,nlat,nlon/),double)
+
+;the number of the panel plot
+    plot     = new((/ncase/),graphic)
+    line     = new((/ncase/),graphic)
+    gtop     = new((/ncase/),graphic)
+    plot2    = new((/ncase/),graphic)
+
+;set the area of the box
+maxlon = 105
+minlon = 70
+maxlat = 40
+minlat = 25
+lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
+latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
+
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
    subtitle_font  = 0.02
@@ -19,67 +69,29 @@ begin
    mp_thick       = 5.0
    font_index     = 22
 
-;the path of the file
-years    = ispan(1979,2005,1)   ;the calculate time
-nt = 19
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Kp_Km_trans_10avg_vert_int" + years(nt) + ".nc"
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/kpkmi-" + years(nt)
-    case = (/"CTRL","NG6h","NG6h - CTRL" /)
-fig_out  = "pdf";"x11"
-unit     = "10~S~6~N~ J"
-ncase = dimsizes(case) 
-draw_var = (/"KpKm"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"kpkm"/)  ;this is the variable in file 
-
-;area: east Asia
-lats = -20     
-latn = 60      
-lonl = 30  
-lonr = 150
-siglvl = 0.05
-
-f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats:latn},{lonl:lonr})
-phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-
-f = addfile(filename(0),"r")
-time        = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
-ntime       = dimsizes(select_time)
-
-ncase  = dimsizes(case)
-nvar   = dimsizes(draw_var)
-nlat   = dimsizes(phis&lat)
-nlon   = dimsizes(phis&lon)
-var  = new((/ncase,ntime,nlat,nlon/),double)
-vari = new((/ncase,ntime,nlat,nlon/),float)
-prob = new((/ncase,ntime,nlat,nlon/),float)
-
-;the number of the panel plot
-    plot   = new((/ncase/),graphic)
-    line   = new((/ncase/),graphic)
-    gtop   = new((/ncase/),graphic)
-
-;set the area of the box
-maxlon = 105
-minlon = 70
-maxlat = 40
-minlat = 25
-lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
-latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
-
 ;================================================================
 ;read data
 ;====================================================================
-do nf = 0 ,ncase-2, 1
+do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
-    var(nf,:,:,:)  = f->$var_name$(select_time,{lats:latn},{lonl:lonr}) ;get an ctrl (ncase,nlev,nlat,nlon)
+    var(nf,:,:,:)  = f->$var_name(0)$ ;get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,:,:,:)  = f->$var_name(1)$ ;get an array (ncase,nmonth,nlat,nlon)
 end do
-var(2,:,:,:) = var(1,:,:,:) - var(0,:,:,:)
-var = var/1000000
+
+do nf = 0 ,ncase-2,1
+prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
+end do
+
+if(nv.eq.4)
+    var = var/1000000
+end if
+
+;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
+prob = mask(prob,prob.lt.siglvl,True)
+copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
+printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -98,6 +110,8 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
+    ;res@vpHeightF        = 0.25
+    ;res@vpWidthF         = 0.8
 
 ;-------set the attribute of the map-------------------
     res@mpCenterLonF     = 180.
@@ -138,39 +152,44 @@ printVarSummary(var)
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
-    res@cnLinesOn        = False
-    res@cnLineLabelsOn   = False  ; True
+    res@cnLinesOn        = False ;True
+    res@cnLineLabelsOn   = False
+    res@cnInfoLabelOn    = False
+    ;res@cnLineThicknessF = 0
+    ;res@gsnContourZeroLineThicknessF = 4.0
+    ;res@cnLineColor      = "blue"
    
+    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
     ;res@cnLevels             = ispan(0,60,10)
     ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -8          ; set min contour level
-    res@cnMaxLevelValF        = 8 ;32        ; set max contour level
-    res@cnLevelSpacingF       = 1        ; set contour interval
+    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res@cnMinLevelValF        = 1          ; set min contour level
+    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
+    ;res@cnLevelSpacingF       = 1        ; set contour interval
 
-    res@gsnSpreadColors      = False              ; turn of the full color map
-    res@gsnSpreadColorStart  = 2                ; start at color 17
-    res@gsnSpreadColorEnd    = 65                ; end at color 200
+    res@gsnSpreadColors      = False  ;True              ; turn of the full color map
+    res@gsnSpreadColorStart  = 11                ; start at color 17
+    res@gsnSpreadColorEnd    = 2                ; end at color 200
     
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 1
     res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
 
 ;----------Set res sig-----------
-    res_sig                  = True       ; use plot options
+    res_sig                  = True
+    res_sig@gsnDraw          = False
+    res_sig@gsnFrame         = False
     res_sig@cnFillOn         = True       ; Fill contours
     res_sig@cnLinesOn        = False;True      ; turn off contour lines
-    res_sig@gsnFrame         = False
-    res_sig@gsnDraw          = False
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
     res_sig@cnInfoLabelOn    = False
+    ;res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
@@ -180,7 +199,11 @@ printVarSummary(var)
     res_sig@cnFillDotSizeF   = 0.1
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
-    ;res_sig@cnLevels             = (/3000,1000/)
+    ;res_sig@cnLevels             = (/0.01/)
+    ;res_sig@cnFillPattern        = "GMT_gray"
+    ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
+    
+    res_sig@gsnCenterString      = ""
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
 
@@ -216,7 +239,6 @@ printVarSummary(var)
     res@gsnCenterString      = ""
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString   = draw_var + "(" + unit + ")"
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -226,29 +248,63 @@ printVarSummary(var)
     ;resp@pmLabelBarHeightF = 0.05
     ;resp@lbLabelFontHeightF = tick_font
     ;resp@lbLabelFontThicknessF = tick_thick
-    resp@txFont = font_index
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-do nm = 0,ntime-1,1
+if(nv.eq.0) then
+    minlvl = (/ 0  ,-4.5 ,-4.5 /)
+    maxlvl = (/18  ,4.5  , 4.5 /)
+    spacig = (/ 1  ,0.5  , 0.5 /)
+end if
+
+if(nv.eq.2) then
+    minlvl = (/ -10,-27 ,-27 /)
+    maxlvl = (/ 134,27  , 27 /)
+    spacig = (/ 8  , 3  , 3  /)
+end if
+
+if(nv.eq.3) then
+    minlvl = (/   0,-27 ,-27 /)
+    maxlvl = (/ 270,27  , 27 /)
+    spacig = (/ 15 , 3  , 3  /)
+end if
+
+if(nv.eq.4) then
+    minlvl = (/(/  -8,-0.8,-0.8/),(/-3.2,-0.8,-0.8/),(/-0.8,-0.8,-0.8/),(/-3.2,-0.8,-0.8/)/)
+    maxlvl = (/(/   8, 0.8, 0.8/),(/ 3.2, 0.8, 0.8/),(/ 0.8, 0.8, 0.8/),(/ 3.2, 0.8, 0.8/)/)
+    spacig = (/(/   1, 0.1, 0.1/),(/ 0.4, 0.1, 0.1/),(/ 0.1, 0.1, 0.1/),(/ 0.4, 0.1, 0.1/)/)
+end if
+
+do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
-        res@gsnLeftString = case(nc)
-        ;if(nc.eq.2) then
-        ;    res@gsnRightString  = "siglvl: " + siglvl
-            ;res@cnMinLevelValF        = -5 ;-20         ; set min contour level
-            ;res@cnMaxLevelValF        = 5  ;20          ; set max contour level
-            ;res@cnLevelSpacingF       = 1          ; set contour interval
-        ;end if
-        plot(nc) = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+        res@gsnLeftString   = case(nc)
+        res@gsnSpreadColors       = False              ; turn of the full color map
+        if(nv.eq.-1) then
+        res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
+        else
+        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        res@cnLevelSpacingF       := spacig(nm,nc)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(nm,nc) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(nm,nc)       ; set min contour level
+        end if
+        if(nc.gt.0) then
+            res@gsnRightString  = "siglvl: " + siglvl
+            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+            plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            overlay(plot(nc),plot2(nc-1))
+        else
+            res@gsnRightString   = unit(nv) ;draw_var(nv) 
+            plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+        end if
+        gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
+        overlay(plot(nc),gtop(nc))
         line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
-        gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
-        overlay(plot(nc),gtop(nc))
     end do 
 
-    resp@txString      = years(nt) + "/" + time(select_time(nm),1) + "/" + time(select_time(nm),2) 
+    resp@txString      = fig_title + months(nm) 
     gsn_panel(wks,plot,(/ncase,1/),resp)
-end do
+end do ;for the month 
 end
 

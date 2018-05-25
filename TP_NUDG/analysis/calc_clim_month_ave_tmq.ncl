@@ -50,6 +50,11 @@ do nt = 0,nyear-1,1
     var(nt,:,:,:) = f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
 end do   ;the loop of 27 years
 
+if(nv.eq.3.or.nv.eq.4) then
+    var@units   = "mm/day"
+    var = var*1000*3600*24
+end if
+
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)

@@ -9,12 +9,10 @@
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
-var_name  = (/"U","V","Q","PS"/)
-calc_name = (/"qu","qv","qdivg"/)
+filein  = (/"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/AMIP_C5PM.cam.h0.",\
+            "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/AMIP_C5PM_TP_NUDG.cam.h0."/)
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_"
+var_name  = (/"DCQ","DTCOND"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 
@@ -23,25 +21,23 @@ lats = -15 ;-20
 latn = 55  ;60
 lonl = 30  ;20
 lonr = 150 ;220
-lev  = (/1000,925,850,700,500/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
-vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
+f1    = addfile(filein(0)+"1995-01.nc","r")
+vars:= f1->$var_name(0)$(:,:,{lats:latn},{lonl:lonr})
+hyai = f1->hyai  ;hyai(ilev),ilev = lev+1,hybrid A coefficient at layer interfaces
+hybi = f1->hybi
+p0   = 100000   ;a scalar ,double,reference pressure,unit is Pa
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
-nlev  = dimsizes(vars&level)
+nlev  = dimsizes(vars&lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var_u      = new((/nyear,365,nlev,nlat,nlon/),float)
-var_v      = new((/nyear,365,nlev,nlat,nlon/),float)
-var_q      = new((/nyear,365,nlev,nlat,nlon/),float)
-var_ps     = new((/nyear,365,nlat,nlon/),float)
-var        = new((/nyear,365,nlat,nlon/),float)
-var_month  = new((/nyear,12 ,nlat,nlon/),float)
+var_temp   = new((/nyear*12 ,nlev,nlat,nlon/),float)
+var        = new((/nyear*12 ,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlat,nlon/),float)
 month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
@@ -49,80 +45,38 @@ season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
 do nf = 0 , ncase-1,1
+    files  = systemfunc("ls " + filein(nf) + "*" + ".nc")
+    setfileoption("nc","SuppressClose",False) ; close too many files
+    f      = addfiles(files(0:(nyear*12-1)),"r")
+    ListSetType(f,"cat")
+    ps   = f[:]->PS(:,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+    dpi  = dpres_hybrid_ccm(ps,p0,hyai,hybi)  ;get dpi (time,lev,lat,lon)
+    time = cd_calendar(f[:]->time,0)
+
+    do nv = 0, nvar-1,1
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-nv = 0
-do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_u(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
-
-nv = 1
-do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_v(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
-
-nv = 2
-do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_q(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
-var_q = var_q*1000  ;convert unit from kg/kg to g/kg
-
-nv =3
-do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var_ps(nt,:,:,:) = f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
-var_ps = var_ps/100 ;convert unit from Pa to hPa
-
-var_u = var_u*var_q/g
-var_v = var_v*var_q/g
-var_divg = uv2dv_cfd(var_u, var_v, var_v&lat, var_v&lon, 0) ;calculate the divergence
-
-do nvc = 2, dimsizes(calc_name)-1,1
-if (nvc.eq.0) then
-    var = wgt_vert_avg_beta ( var_u&level, var_u, var_ps, 0, 0 )
-    ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum
-    var@long_name = "Total (vertically integrated) zonal water vapor transmission"
-    var@units     = "g/(s*m)"
-else if (nvc.eq.1) then
-    var = wgt_vert_avg_beta ( var_v&level, var_v, var_ps, 0, 0 )
-    ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum
-    var@long_name = "Total (vertically integrated) meridional water vapor transmission"
-    var@units     = "g/(s*m)"
-else
-    var = wgt_vert_avg_beta ( var_u&level, var_divg, var_ps, 0, 0 )
-    ;the first 0 means the units of p and psfc are hPa, the second 0 means the pressure-thickness weighted vertical sum
-    var@long_name = "Total (vertically integrated) divergence of moisture flux"
-    var@units     = "g/(s*m*m)"
-end if
-end if
+    var_temp := f[:]->$var_name(nv)$(:,:,{lats:latn},{lonl:lonr})
+    var = dim_sum_n_Wrap(var_temp*dpi,1) ;vertically integrated 
 
 ;----------calculate the month and season average-----------------------
-time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
-    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+    month_ave(nm,:,:) = dim_avg_n_Wrap(var(select_time,:,:),0) ;get (nyear,nmonth,nlat,nlon)
+    month_vari(nm,:,:) = dim_variance_n_Wrap(var(select_time,:,:),0) ;get (nyear,nmonth,nlat,nlon)
 end do
 
-mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
+do nt = 0,nyear-1,1
 do ns = 0,3,1
-    nm = ns*3 ;nm = 0,3,6,9
-    if(nm.eq.0) then
-    var_season(:,ns,:,:) = ( var_month(:,11  ,:,:)*mdays(11)   + \
-                               var_month(:,nm  ,:,:)*mdays(nm)   + \
-                               var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
+    nm = (nt*4+ns)*3
+    if(ns.eq.0.and.nt.eq.0) then
+    var_season(nt,ns,:,:) = (var(0,:,:) + var(1,:,:) + var(nyear*12-1,:,:))/3
     else
-    var_season(:,ns,:,:) = ( var_month(:,nm-1,:,:)*mdays(nm-1) + \
-                               var_month(:,nm  ,:,:)*mdays(nm)   + \
-                               var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
+    var_season(nt,ns,:,:) = (var(nm-1,:,:) + var(nm,:,:) + var(nm+1,:,:))/3
     end if
 end do
-month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
+end do
 season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 printVarSummary(month_ave)
@@ -131,8 +85,8 @@ printVarSummary(season_ave)
 ;====================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf)+calc_name(nvc)+".nc")
-ncdf = addfile(fileout(nf)+calc_name(nvc)+".nc","c")
+system("rm -f " + fileout(nf)+var_name(nv)+".nc")
+ncdf = addfile(fileout(nf)+var_name(nv)+".nc","c")
 setfileoption(ncdf,"DefineMode",True)
 
 ;Set All field attribution
@@ -160,10 +114,10 @@ filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"month_ave",var)
-filevarattdef(ncdf,"season_ave",var)
-filevarattdef(ncdf,"month_vari",var)
-filevarattdef(ncdf,"season_vari",var)
+filevarattdef(ncdf,"month_ave",var_temp)
+filevarattdef(ncdf,"season_ave",var_temp)
+filevarattdef(ncdf,"month_vari",var_temp)
+filevarattdef(ncdf,"season_vari",var_temp)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season  = (/1212,345,678,91011/)

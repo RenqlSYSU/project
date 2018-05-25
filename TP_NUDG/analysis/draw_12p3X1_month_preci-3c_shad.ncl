@@ -8,13 +8,13 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci","qdivg","SHFLX","LHFLX"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~"/)    ;this can be used as right string 
+draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day"/)    ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
-nv = 3;2;1
+nv = 4;3;2;1
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -23,7 +23,7 @@ filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_mo
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
-    case   = (/"(a) AMIP_CTRL","(b) NUDG24h-CTRL","(c) NUDG6h-CTRL"/)
+    case   = (/"(a) CTRL","(b) NG24h-CTRL","(c) NG6h-CTRL"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -88,7 +88,9 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"GMT_polar") 
+    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+    ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
@@ -117,6 +119,9 @@ printVarSummary(prob)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
+    res@tmBorderThicknessF  = mp_thick
+    res@tmXBLabelFont   = font_index
+    res@tmYLLabelFont   = font_index
     res@tmXBLabelFontHeightF     = tick_font
     ; res@tmXBLabelFontAspectF   = 1.6
     res@tmXBLabelFontThicknessF  = tick_thick
@@ -124,10 +129,14 @@ printVarSummary(prob)
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
     ;  res@tmXBMajorOutwardLengthF = -0.
     ;  res@tmYLMajorOutwardLengthF = -0.
     ;  res@tmYRMajorOutwardLengthF = -0.
       
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
     ;  res@tmXBMinorOutwardLengthF = -0.
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
@@ -158,7 +167,9 @@ printVarSummary(prob)
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
 
 ;----------Set res sig-----------
     res_sig                  = True
@@ -184,8 +195,6 @@ printVarSummary(prob)
     ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
     
     res_sig@gsnCenterString      = ""
-    res_sig@gsnRightStringFontHeightF = subtitle_font
-    res_sig@gsnLeftStringFontHeightF  = subtitle_font
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
 
@@ -195,6 +204,22 @@ printVarSummary(prob)
     lnres@gsLineDashPattern    = 0
     lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
+
+;--------set the attribute of gtop--------------
+    res_gtop                  = True
+    res_gtop@gsnDraw          = False
+    res_gtop@gsnFrame         = False
+    res_gtop@cnFillOn         = False
+    res_gtop@cnLinesOn        = True      ; turn off contour lines
+    res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_gtop@cnInfoLabelOn    = False
+    res_gtop@cnLineThicknessF = 4.0
+    res_gtop@cnLineColor      = "black"
+    res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_gtop@cnLevels         = (/1500/)
+    res_gtop@gsnCenterString      = ""
+    res_gtop@gsnLeftString    = " "
+    res_gtop@gsnRightString   = " "
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles

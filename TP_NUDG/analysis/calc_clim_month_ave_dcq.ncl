@@ -11,7 +11,7 @@ begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = (/"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/AMIP_C5PM.cam.h0.",\
             "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/AMIP_C5PM_TP_NUDG.cam.h0."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_"
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
 var_name  = (/"DCQ","DTCOND"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
@@ -44,7 +44,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 0 , ncase-1,1
+do nf = 1 , ncase-2,1
     files  = systemfunc("ls " + filein(nf) + "*" + ".nc")
     setfileoption("nc","SuppressClose",False) ; close too many files
     f      = addfiles(files(0:(nyear*12-1)),"r")

@@ -8,18 +8,18 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day"/)    ;this can be used as right string 
+draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL","DCQ","DTCOND"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day","kg/kg/day","K/s"/)    ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
-nv = 4;3;2;1
+nv = 7;5;4;3;2;1
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-;path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
@@ -33,11 +33,13 @@ lonl = 30  ;20
 lonr = 150 ;220
 siglvl = 0.05
 
-f = addfile(filename(0),"r")
+f = addfile(gtopfile,"r")
+phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case)
 nmonth = dimsizes(months)
-nlat   = getfilevardimsizes(f,"lat")
-nlon   = getfilevardimsizes(f,"lon")
+nlat   = dimsizes(phis&lat)
+nlon   = dimsizes(phis&lon)
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
 vari = new((/ncase  ,nmonth,nlat,nlon/),float)
 prob = new((/ncase-1,nmonth,nlat,nlon/),float)
@@ -45,6 +47,7 @@ prob = new((/ncase-1,nmonth,nlat,nlon/),float)
 ;the number of the panel plot
     plot     = new((/3/),graphic)
     plot2    = new((/2/),graphic)
+    gtop     = new((/ncase/),graphic)
     line     = new((/3/),graphic)
 
 ;set the area of the box
@@ -63,6 +66,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    mp_thick       = 5.0
+   font_index     = 22
 
 ;================================================================
 ;read data
@@ -88,7 +92,7 @@ printVarSummary(prob)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -228,8 +232,8 @@ printVarSummary(prob)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
-    res@gsnRightStringFontHeightF = subtitle_font
-    res@gsnLeftStringFontHeightF  = subtitle_font
+    res@gsnStringFont         = font_index
+    res@gsnStringFontHeightF = subtitle_font
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -243,8 +247,8 @@ printVarSummary(prob)
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then
-    minlvl = (/ 0  ,-4.5 ,-4.5 /)
-    maxlvl = (/18  ,4.5  , 4.5 /)
+    minlvl = (/ 0  ,-4.0 ,-4.0 /)
+    maxlvl = (/15  ,4.0  , 4.0 /)
     spacig = (/ 1  ,0.5  , 0.5 /)
 end if
 
@@ -260,11 +264,36 @@ if(nv.eq.3) then
     spacig = (/ 15 , 3  , 3  /)
 end if
 
+if(nv.eq.4) then
+    minlvl = (/ 0  ,-4.0 ,-4.0 /)
+    maxlvl = (/ 15 ,4.0  , 4.0 /)
+    spacig = (/ 1  ,0.5  , 0.5 /)
+end if
+
+if(nv.eq.5) then
+    minlvl = (/ 0  ,-4.0 ,-4.0 /)
+    maxlvl = (/15  ,4.0  , 4.0 /)
+    spacig = (/ 1  ,0.5  , 0.5 /)
+end if
+
+if(nv.eq.7) then
+    minlvl = (/ 0  ,-1.8 ,-1.8 /)
+    maxlvl = (/ 6  ,1.8  , 1.8 /)
+    spacig = (/0.5 ,0.2  , 0.2 /)
+end if
+
 do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
+if((nv.gt.3.or.nv.eq.0).and.nc.eq.0) then
+    res@cnFillPalette = "precip3_16lev"
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+else
+    res@cnFillPalette = "BlueDarkRed18"
+    ;blue and red, has 18 colors,2-10 is blue
+end if 
         res@gsnLeftString   = case(nc)
         res@gsnSpreadColors       = False              ; turn of the full color map
-        if(nv.eq.-1) then
+        if(nv.gt.7) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
         else
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -281,13 +310,15 @@ do nm = 0,nmonth-1,1
             res@gsnRightString   = unit(nv) ;draw_var(nv) 
             plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         end if
+        gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
+        overlay(plot(nc),gtop(nc))
         line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
 
     resp@txString      = fig_title + months(nm) 
-    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/ncase,1/),resp)
 end do ;for the month 
 end
 

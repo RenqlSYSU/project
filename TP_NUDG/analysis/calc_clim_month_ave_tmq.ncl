@@ -13,7 +13,7 @@ filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
-var_name = (/"TMQ","LHFLX","SHFLX","PRECC","PRECL"/)
+var_name = (/"TMQ","LHFLX","SHFLX","PRECC","PRECL","TS"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area: east Asia
@@ -40,7 +40,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nv = 3 ,nvar-1,1 
+do nv = 5 ,nvar-1,1 
 do nf = 0 , ncase-1,1
 ;---------------------------------------------------------------
 ;read the data

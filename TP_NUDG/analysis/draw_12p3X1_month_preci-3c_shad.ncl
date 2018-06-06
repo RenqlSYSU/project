@@ -8,13 +8,13 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL","DCQ","DTCOND"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day","kg/kg/day","K/s"/)    ;this can be used as right string 
+draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL","DCQ","DTCOND","HFLX","TS"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day","kg/kg/day","K/s","W/m","C~S~o~N~"/)    ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
-nv = 7;5;4;3;2;1
+nv = 9;5;4;3;2;1
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -81,6 +81,10 @@ do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
 end do
+
+if(nv.eq.9) then
+var(0,:,:,:) = var(0,:,:,:) - 273.15  ;convert unit from K to C
+end if
 
 ;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
 prob = mask(prob,prob.lt.siglvl,True)
@@ -282,6 +286,18 @@ if(nv.eq.7) then
     spacig = (/0.5 ,0.2  , 0.2 /)
 end if
 
+if(nv.eq.8) then
+    minlvl = (/ 0  ,-24 ,-24 /)
+    maxlvl = (/150 , 24 , 24 /)
+    spacig = (/ 10 , 3  ,  3 /)
+end if
+
+if(nv.eq.9) then
+    minlvl = (/-30  ,-4.0 ,-4.0 /)
+    maxlvl = (/30 ,4.0  , 4.0 /)
+    spacig = (/ 5  ,0.5  , 0.5 /)
+end if
+
 do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
 if((nv.gt.3.or.nv.eq.0).and.nc.eq.0) then
@@ -293,7 +309,7 @@ else
 end if 
         res@gsnLeftString   = case(nc)
         res@gsnSpreadColors       = False              ; turn of the full color map
-        if(nv.gt.7) then
+        if(nv.gt.9) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
         else
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

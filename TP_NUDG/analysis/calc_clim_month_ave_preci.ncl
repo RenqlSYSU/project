@@ -12,8 +12,9 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_preci.nc"
-var_name = (/"PRECC","PRECL"/)
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_HFLX.nc"
+var_name = (/"SHFLX","LHFLX"/)
+;var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;area: east Asia
@@ -53,7 +54,7 @@ do nt = 0,nyear-1,1
     end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 27 years 
 
-var  = var*1000*3600*24
+;var  = var*1000*3600*24
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
@@ -91,7 +92,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "the monthly and seasonal average Asia precipitation climatology"
+fileAtt@discription   = "the monthly and seasonal average Asia Heat flux climatology"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
@@ -113,11 +114,11 @@ filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-month_ave@long_name = "precipitation rate"
-month_ave@units     = "mm/day"
+;month_ave@long_name = "precipitation rate"
+;month_ave@units     = "mm/day"
 filevarattdef(ncdf,"month_ave",month_ave)
-season_ave@long_name = "precipitation rate"
-season_ave@units     = "mm/day"
+;season_ave@long_name = "precipitation rate"
+;season_ave@units     = "mm/day"
 filevarattdef(ncdf,"season_ave",season_ave)
 
 ncdf->month  = ispan(1,12,1)

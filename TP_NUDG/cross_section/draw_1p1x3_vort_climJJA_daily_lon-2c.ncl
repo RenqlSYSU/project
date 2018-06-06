@@ -23,8 +23,8 @@ unit       = "10~S~-6~N~ s~S~-1~N~"   ;this can be used as right string
 draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
 
 ;area:   TP , east Asia
-lats = (/25 , 20, 35,30/) ;-20
-latn = (/40 , 45, 40,35/)  ;60
+lats = (/25 , 20, 35,25/) ;-20
+latn = (/40 , 45, 40,30/)  ;60
 lonl = (/70 ,107,100,80/)  ;20
 lonr = (/105,122,130,130/);130 ;220
 lev  = (/700,500/)

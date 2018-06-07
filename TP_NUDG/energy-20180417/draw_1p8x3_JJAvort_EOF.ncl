@@ -8,7 +8,7 @@
 ;                                           2017/12/18
 ;*********************************************************************************
 begin
-ne   = 1
+ne   = 2
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-JJAvort_daily_EEOF_avg.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"

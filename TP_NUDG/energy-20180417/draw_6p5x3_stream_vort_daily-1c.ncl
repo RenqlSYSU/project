@@ -14,19 +14,20 @@ years    = ispan(1979,2005,1)   ;the calculate time
 var_name = (/"U","V"/)
 lev      = (/850,500,200/)
 case     = (/"CTRL","NG24h","NG6h"/)
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 nt = 19
 nc = 0
 nl = 1
 nrow    = 5  ;used for layout of panel
-ncolumn = 3
-npanel  = 6
+ncolumn = 2
+npanel  = 9
 
 path    = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                    "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/6p5x3_stream_vort_daily-1c_" + years(nt)
+fig_name = path + "/energy-20180417/fig/6p5x3_stream_vort_daily-" + years(nt) + case(nc) + lev(nl)
 fig_out  = "pdf";"x11"
 unit     = "10~S~-6~N~ s~S~-1~N~"
 fig_title= years(nt) + " " + lev(nl) + "hPa vort(" + unit + ") in " + case(nc)
@@ -45,22 +46,23 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nv = 0
 f    = addfile(filename(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
 time        = cd_calendar(f->time,0)
+printVarSummary(time)
 select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
 ntime       = dimsizes(select_time)
-u = f->$var_name(nv)$(select_time,lev(nl),{lats:latn},{lonl:lonr})
+u = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr})
 
 nv = 1
 f = addfile(filename(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-v = f->$var_name(nv)$(select_time,lev(nl),{lats:latn},{lonl:lonr})
+v = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr})
 
 vort = uv2vr_cfd(u, v, v&lat, v&lon, 2)*1000000 ;calculate the vorticity
 copy_VarMeta(u,vort)
 
 ;the number of the panel plot
-    plot   = new((/nrow*ncolumn/),graphic)
-    stream = new((/nrow*ncolumn/),graphic)
-    line   = new((/nrow*ncolumn/),graphic)
-    gtop   = new((/nrow*ncolumn/),graphic)
+    plot   = new((/ncolumn*nrow/),graphic)
+    stream = new((/ncolumn*nrow/),graphic)
+    line   = new((/ncolumn*nrow/),graphic)
+    gtop   = new((/ncolumn*nrow/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -71,13 +73,13 @@ lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
 latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.02
-   title_font     = 0.03
+   tick_font      = 0.03
+   subtitle_font  = 0.03
+   title_font     = 0.02
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 3.0
+   mp_thick       = 4.0
    font_index     = 22
 
 ;==============================================================
@@ -170,7 +172,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     res_st@stArrowLengthF     = 0.008             ; arrow length
     res_st@stArrowStride      = 3
     res_st@stLineColor        = "black"
-    res_st@stLineThicknessF   = mp_thick + 1
+    res_st@stLineThicknessF   = mp_thick - 2
 
 
 ;--------set the attribute of polygon--------------
@@ -214,24 +216,30 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     resp@pmLabelBarWidthF  = 0.5
     resp@pmLabelBarHeightF = 0.05
     resp@lbOrientation      = "horizontal" ;"vertical"
-    resp@lbLabelFontHeightF = tick_font
+    resp@lbLabelFontHeightF = tick_font-0.02
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFont = font_index
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-do np = 0,5,1
-    do nc = 0,nrow*ncolumn-1,1
-        nd = np*nrow*ncolumn + nc
-        res@gsnLeftString =  
-        plot(nc) = gsn_csm_contour_map_ce(wks,var(nd,:,:),res)
+nday = (/(/0,1,2,3,4/),(/5,6,7,8,9/)/)
+
+do np = 0,npanel-1,1
+    nc = -1
+    do nco = 0,ncolumn-1,1
+    do nr  = 0,nrow-1,1
+        nc = nc + 1
+        nd = np*nrow*ncolumn + nday(nco,nr)
+        res@gsnLeftString = time(select_time(nd),2) + " " + months(floattoint(time(select_time(nd),1))-1) 
+        plot(nc) = gsn_csm_contour_map_ce(wks,vort(nd,:,:),res)
         stream(nc) = gsn_csm_streamline(wks,u(nd,:,:),v(nd,:,:),res_st)
         overlay(plot(nc),stream(nc))
         line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
-        print(max(var(nd,{lats:latn},{lonl:lonr})))
-        print(min(var(nd,{lats:latn},{lonl:lonr})))
+        print(max(vort(nd,{lats:latn},{lonl:lonr})))
+        print(min(vort(nd,{lats:latn},{lonl:lonr})))
         gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(nc),gtop(nc))
+    end do 
     end do 
 
     resp@txString      = fig_title

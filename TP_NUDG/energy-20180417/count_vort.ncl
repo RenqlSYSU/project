@@ -86,26 +86,26 @@ gradw  = new((/ntime,nlat,nlon/),float) ;west
     grade1d = ndtooned(grade)
     gradn1d = ndtooned(gradn)
     gradw1d = ndtooned(gradw)
-    indices = ind_resolve(ind(grads1d.lt.0.and.grade1d.gt.0.and.gradw1d.lt.0.and.gradn1d.gt.0),dimsizes(grads)) ;two dimensions
+    indices = ind_resolve(ind(grads1d.gt.0.and.grade1d.gt.0.and.gradw1d.gt.0.and.gradn1d.gt.0),dimsizes(grads)) ;two dimensions
     dim_id  = dimsizes(indices)
     number  = dim_id(0)
-    print(years(nt) + "YEAR " + number + " vortices generate")
+    print(years(nt) + "YEAR " + number + " vortices generate in " + case(nc) + lev(nl) )
     print("===============================================================")
 
-    numberTP= dimsizes(ind(lat(indices(:,1)).ge.25.and.lat(indices(:,1)).le.40.and.lon(indices(:,2)).ge.70.and.lon(indices(:,2)).le.105))
-    print(years(nt) + "YEAR " + numberTP + "Plateau vortices generate")
+    numberTP= dimsizes(ind(lat(indices(:,1)).gt.25.and.lat(indices(:,1)).lt.40.and.lon(indices(:,2)).gt.70.and.lon(indices(:,2)).lt.105))
+    print(years(nt) + "YEAR " + numberTP + "Plateau vortices generate" + case(nc) + lev(nl) )
     print("===============================================================")
 
     numberTP = 0
     do nn = 0,number-1,1
-    if(lat(indices(nn,1)).ge.25.and.lat(indices(nn,1)).le.40.and.lon(indices(nn,2)).ge.70.and.lon(indices(nn,2)).le.105) then
+    if(lat(indices(nn,1)).gt.25.and.lat(indices(nn,1)).lt.40.and.lon(indices(nn,2)).gt.70.and.lon(indices(nn,2)).lt.105) then
     numberTP = numberTP + 1
     print(years(nt) + "/" + time(select_time(indices(nn,0)),1) + "/" + time(select_time(indices(nn,0)),2) \
             + " " + hgt(indices(nn,0),indices(nn,1),indices(nn,2)) + "m " + lon(indices(nn,2)) + "E " + lat(indices(nn,1)) + "N")
     end if
     end do
     print("===============================================================")
-    print(years(nt) + "YEAR " + numberTP + " Plateau vortices generate")
+    print(years(nt) + "YEAR " + numberTP + " Plateau vortices generate" + case(nc) + lev(nl) )
 ;end do
 ;end do
 end

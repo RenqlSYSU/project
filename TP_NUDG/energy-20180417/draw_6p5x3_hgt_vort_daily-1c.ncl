@@ -27,7 +27,7 @@ filename = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                    "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/6p5x3_hgt_vort_daily-" + years(nt) + case(nc) + lev(nl)
+fig_name = path + "/energy-20180417/fig/6p5x3_2hgt_vort_daily-" + years(nt) + case(nc) + lev(nl)
 fig_out  = "pdf";"x11"
 unit     = "m"
 fig_title= years(nt) + " " + lev(nl) + "hPa hgt(" + unit + ") in " + case(nc)
@@ -58,14 +58,25 @@ v = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr})
 nv = 2
 f = addfile(filename(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
 hgt = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr})
+lat = f->lat({lats:latn})
+lon = f->lon({lonl:lonr})
 
 vort = uv2vr_cfd(u, v, v&lat, v&lon, 2)*1000000 ;calculate the vorticity
 copy_VarMeta(u,vort)
+
+;-----count the vortices------------------------
+nlat  = dimsizes(phis&lat)
+nlon  = dimsizes(phis&lon)
+grads  = new((/nlat,nlon/),float) ;south
+grade  = new((/nlat,nlon/),float) ;east
+gradn  = new((/nlat,nlon/),float) ;north
+gradw  = new((/nlat,nlon/),float) ;west
 
 ;the number of the panel plot
     plot   = new((/ncolumn*nrow/),graphic)
     stream = new((/ncolumn*nrow/),graphic)
     line   = new((/ncolumn*nrow/),graphic)
+    mark   = new((/ncolumn*nrow/),graphic)
     gtop   = new((/ncolumn*nrow/),graphic)
 
 ;set the area of the box
@@ -186,6 +197,11 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
 
+;--------set the attribute of polygon--------------
+    mkres                      = True
+    mkres@gsMarkerIndex        = 16 
+    mkres@gsMarkerColor        = "grey0"
+
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
     res_gtop@gsnDraw          = False
@@ -243,6 +259,52 @@ do np = 0,npanel-1,1
         print(min(vort(nd,{lats:latn},{lonl:lonr})))
         gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(nc),gtop(nc))
+
+;-----draw the vortices marker------------
+do nx = 1,nlon-2,1
+do ny = 1,nlat-2,1
+    grads(ny,nx) = (hgt(nd,ny,nx-1)-hgt(nd,ny,nx));/(cos(lat(ny)*3.14/180)*6371393*(lon(nx-1)-lon(nx))) ;<0
+    grade(ny,nx) = (hgt(nd,ny,nx+1)-hgt(nd,ny,nx));/(cos(lat(ny)*3.14/180)*6371393*(lon(nx+1)-lon(nx))) ;>0
+    gradn(ny,nx) = (hgt(nd,ny+1,nx)-hgt(nd,ny,nx));/(6371393*(lat(ny+1)-lat(ny))) ;>0
+    gradw(ny,nx) = (hgt(nd,ny-1,nx)-hgt(nd,ny,nx));/(6371393*(lat(ny-1)-lat(ny))) ;<0
+end do
+end do
+grads1d = ndtooned(grads)
+grade1d = ndtooned(grade)
+gradn1d = ndtooned(gradn)
+gradw1d = ndtooned(gradw)
+indices := ind_resolve(ind(grads1d.gt.0.and.grade1d.gt.0.and.gradw1d.gt.0.and.gradn1d.gt.0),dimsizes(grads)) ;two dimensions
+dim_id  = dimsizes(indices)
+number  = dim_id(0)
+
+num_vort = 0
+do nn = 0,number-1,1
+    ilat = indices(nn,0)
+    ilon = indices(nn,1)
+    ;if(vort(nd,ilat,ilon).gt.0) then
+    if(vort(nd,ilat,ilon).gt.0.and.vort(nd,ilat+1,ilon).gt.0.and.vort(nd,ilat-1,ilon).gt.0 \
+        .and.vort(nd,ilat,ilon-1).gt.0.and.vort(nd,ilat,ilon+1).gt.0) then
+    num_vort = num_vort + 1
+    end if
+end do
+print(num_vort)
+
+ind_lat := new((/num_vort/),integer)
+ind_lon := new((/num_vort/),integer)
+num_vort = -1
+do nn = 0,number-1,1
+    ilat = indices(nn,0)
+    ilon = indices(nn,1)
+    ;if(vort(nd,ilat,ilon).gt.0) then
+    if(vort(nd,ilat,ilon).gt.0.and.vort(nd,ilat+1,ilon).gt.0.and.vort(nd,ilat-1,ilon).gt.0 \
+        .and.vort(nd,ilat,ilon-1).gt.0.and.vort(nd,ilat,ilon+1).gt.0) then
+    num_vort = num_vort + 1
+    ind_lat(num_vort) = indices(nn,0)
+    ind_lon(num_vort) = indices(nn,1)
+    end if
+end do
+mark(nc) = gsn_add_polymarker(wks,plot(nc),lon(ind_lon),lat(ind_lat),mkres)
+    
     end do 
     end do 
 

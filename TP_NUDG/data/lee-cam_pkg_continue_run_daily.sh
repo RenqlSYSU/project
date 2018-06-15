@@ -9,13 +9,13 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE \" IN STRING!
-#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
+PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
+#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
 #PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
 
 # Path of the post processed data
-#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
+PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
+#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
 #PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
 
 # Case name
@@ -31,9 +31,9 @@ FDNAME2D="(/\"TS\"/)" #often use
 #FDNAME2D="(/\"LHFLX\",\"SHFLX\"/)" #often use
 
 # Names of 3D fields
-FDNAME3D="(/\"U\",\"V\",\"Q\"/)" # hybrid coordinate
+#FDNAME3D="(/\"U\",\"V\",\"Q\"/)" # hybrid coordinate
 #FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
-#FDNAME3D="(/\"RELHUM\"/)" #often use
+FDNAME3D="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"RELHUM\",\"Z3\",\"DTCOND\"/)" # hybrid coordinate
 #FDNAME3D_HY="(/\"U\",\"V\",\"T\"/)" # hybrid coordinate

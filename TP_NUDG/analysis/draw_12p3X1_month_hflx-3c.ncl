@@ -8,13 +8,13 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL","DCQ","DTCOND","HFLX","TS","DTHFLX","PS"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day","kg/kg/day","K/s","W/m","C~S~o~N~","k/S","Pa"/)    ;this can be used as right string 
+draw_var = (/"HFLX","PS","T change due to Heat Flux","TCHFLX"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"W/m","C~S~o~N~"/)    ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
-nv = 10;11;9;5;4;3;2;1
+nv = 3
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -298,12 +298,6 @@ if(nv.eq.9) then
     spacig = (/ 5  ,0.5  , 0.5 /)
 end if
 
-if(nv.eq.10) then
-    minlvl = (/0   ,-0.08,-0.08 /)
-    maxlvl = (/0.75, 0.08, 0.08 /)
-    spacig = (/0.05,0.01 , 0.01 /)
-end if
-
 do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
 if((nv.gt.3.or.nv.eq.0).and.nc.eq.0) then
@@ -315,7 +309,7 @@ else
 end if 
         res@gsnLeftString   = case(nc)
         res@gsnSpreadColors       = False              ; turn of the full color map
-        if(nv.gt.10) then
+        if(nv.gt.9) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
         else
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

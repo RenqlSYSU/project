@@ -12,10 +12,11 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_HFLX.nc"
+fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_DTHFLX.nc"
 var_name = (/"SHFLX","LHFLX"/)
 ;var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
+choice   = 1 ;1 means to calc T change due to Heat Flux ; 0 means to calc precipitation
 
 ;area: east Asia
 lats = -15 ;-20
@@ -35,6 +36,7 @@ nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 var        = new((/nyear,365,nlat,nlon/),float)
+ps         = new((/nyear,365,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlat,nlon/),float)
@@ -53,6 +55,17 @@ do nt = 0,nyear-1,1
         var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
     end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 27 years 
+
+if(choice.eq.1) then 
+;    do nt = 0,nyear-1,1
+;        f  = addfile(filein(nf)+years(nt)+".daily.PS.nc","r")
+;        ps(nt,:,:,:) = ps(nt,:,:,:) + f->PS(:,{lats:latn},{lonl:lonr})  ;surface pressure
+;    end do   ;the loop of 27 years 
+    cp = 1004.5 ;specific heat capacities of air, unit is J/(kg*K)
+    g  = 9.8 ;gravitational acceleration, N/kg, PS/g is th weight of air, kg
+    dst = 0.39 ;air density, unit is kg/m3
+    var = var/(cp*dst)
+end if
 
 ;var  = var*1000*3600*24
 time = cd_calendar(f->time,0)
@@ -92,7 +105,8 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "the monthly and seasonal average Asia Heat flux climatology"
+;fileAtt@discription   = "the monthly and seasonal average Asia Heat flux climatology"
+fileAtt@discription   = "the monthly and seasonal average Temperature change due to Heat flux"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

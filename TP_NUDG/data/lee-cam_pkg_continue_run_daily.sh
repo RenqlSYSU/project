@@ -9,18 +9,18 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE \" IN STRING!
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
+#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
 #PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
-#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
+PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
 
 # Path of the post processed data
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
+#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
 #PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
-#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
+PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
 
 # Case name
-CASENAME=\"AMIP_C5PM_TP_NUDG\"
-#CASENAME=\"AMIP_C5PM\"
+#CASENAME=\"AMIP_C5PM_TP_NUDG\"
+CASENAME=\"AMIP_C5PM\"
 
 
 # Names of 2D fields

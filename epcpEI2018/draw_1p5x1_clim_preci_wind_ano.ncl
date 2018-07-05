@@ -15,8 +15,8 @@ fig_name   = path + "/fig/" + (/"1p5x2_clim_preci_ano"/) + case(1)
 fig_out    ="pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"PRECC","PRECL"/) ;this is the var_name in data file
-season   = (/"JJA","SON","DJF","MAM","JJA"/)
+var_name = (/"PRECC","PRECL","U","V"/) ;this is the var_name in data file
+season   = (/"(a)JJA(0)","SON","DJF","MAM","JJA"/)
 
 ;area: east Asia
 lats = 0 ;-20

@@ -97,8 +97,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tiXAxisOn = True
     resxy@tiXAxisString = "Year"
     resxy@tiYAxisOn = False
-    resxy@trYMinF = floor(min(var1))
-    resxy@trYMaxF = ceil(max(var1))
+    resxy@trYMinF = 0.95 ;floor(min(var1))
+    resxy@trYMaxF = 1.05 ;ceil(max(var1))
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index

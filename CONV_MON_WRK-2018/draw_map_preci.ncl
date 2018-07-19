@@ -8,16 +8,16 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
-unit     = (/"~S~o~N~C","hPa"/)    ;this can be used as right string 
-var_name = (/"TS","PSL"/)
+draw_var = (/"preci"/)
+unit     = (/"mm/day"/)    ;this can be used as right string 
+var_name = (/"PRECC","PRECL"/)
 case     = (/"MX_AQUAP_SCYC","SF_AQUAP_SCYC","NO_TOPO_SCYC","REAL_WORLD_SCYC"/);" NG24H",THIS CAN BE USED AS LEFT STRING
 pre_case = (/"(a","(b","(c","(d"/)
-nv = 1
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
 filename = path + "/data/" + case + "/pro/B20f19-" + (/"pure-aqua","surf-aqua","topo","realworld"/) + ".cam.h0." ; ; + var_name + ".1-100.nc" 
-fig_name = path + "/fig/" + var_name(nv) + "_global_map"
+fig_name = path + "/fig/animation/" + draw_var + "_global_map"
 fig_out  = "pdf";"x11"
 
 f    = addfile(filename(0) + var_name(0) + ".1-100.nc","r")
@@ -27,6 +27,7 @@ nlon   = dimsizes(vars&lon)
 ncase  = dimsizes(case)
 nyear  = 100 
 nmonth = 12
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 var   = new((/ncase,100*12,nlat,nlon/),float)
 var1  = new((/ncase,nyear ,nlat,nlon/),float)
 plot  = new((/ncase/),graphic)
@@ -36,27 +37,30 @@ plot  = new((/ncase/),graphic)
 ;====================================================================
 var = 0
 do nc = 0,ncase-1,1
+    nv = 0
     print(filename(nc) + var_name(nv))
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
-    var(nc,:,:,:) = f->$var_name(nv)$
-end do
+    fsnt =  f->$var_name(nv)$ ;+ means downward to earth
+    
+    nv = 1
+    print(filename(nc) + var_name(nv))
+    f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
+    flnt =  f->$var_name(nv)$ ;+ means upward to space
 
-if(nv.eq.0) then
-var = var - 273.15 ;convert unit from K to C
-end if
-if(nv.eq.1) then
-var = var/100 ;convert unit from K to C
-end if
+    var(nc,:,:,:) = fsnt+flnt ;+ means downward to earth
+end do
+var = var*3600*24*1000 ;convert unit from m/s to mm/day
+copy_VarMeta(vars,var(0,0,:,:))
 printVarSummary(var)
 
-do ns = 0,nyear-1,1
-    nms = ns*nmonth
-    nme = ns*nmonth + 11 
-    var1(:,ns,:,:) = dim_avg_n(var(:,nms:nme,:,:),1) ;calc the annual mean
-end do
-var1 := dim_avg_n(var1(:,69:99,:,:),1)
-copy_VarMeta(vars,var1(0,:,:))
-printVarSummary(var1)
+;do ns = 0,nyear-1,1
+;    nms = ns*nmonth
+;    nme = ns*nmonth + 11 
+;    var1(:,ns,:,:) = dim_avg_n(var(:,nms:nme,:,:),1) ;calc the annual mean
+;end do
+;var1 := dim_avg_n(var1(:,69:99,:,:),1)
+;copy_VarMeta(vars,var1(0,:,:))
+;printVarSummary(var1)
 
 ;===============================================
 ;draw the figure
@@ -77,11 +81,11 @@ wks = gsn_open_wks(fig_out,fig_name)
 
     ;gsn_define_colormap(wks,"BlueDarkRed18") 
     ;;blue and red, has 18 colors,2-10 is blue
-    ;gsn_define_colormap(wks,"precip3_16lev") 
+    gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    gsn_define_colormap(wks,"matlab_jet") 
+    ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
     res                  = True
@@ -163,21 +167,32 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    minlvl = (/ 0,935 /)
-    maxlvl = (/30,1025/)
-    spacig = (/ 1,3   /)
+    minlvl = (/ 0/)
+    maxlvl = (/15/)
+    spacig = (/ 1/)
 
+do nt = 0,10*12-1,1 
+ny = floor((nt)/12)+1
+print(ny)
+nm = toint(nt-(ny-1)*12)
+print(nm)
 do nc = 0, ncase-1,1
+    nv = 0
     res@gsnLeftString   = pre_case(nc) + ")" + case(nc)
-    res@gsnRightString  = var_name(nv) + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +  
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ") " + months(nm) ;lev(nl) + "hPa " +  
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(nc)   = gsn_csm_contour_map(wks,var1(nc,:,:),res)
-    print(max(var1(nc,:,:)))
-    print(min(var1(nc,:,:)))
+    plot(nc)   = gsn_csm_contour_map(wks,var(nc,nt,:,:),res)
+    print(max(var(nc,nt,:,:)))
+    print(min(var(nc,nt,:,:)))
+    ;plot(nc)   = gsn_csm_contour_map(wks,var1(nc,:,:),res)
+    ;print(max(var1(nc,:,:)))
+    ;print(min(var1(nc,:,:)))
 end do
+    resp@txString      = "Year" + ny
     gsn_panel(wks,plot,(/ncase,1/),resp)
+end do
 end
 

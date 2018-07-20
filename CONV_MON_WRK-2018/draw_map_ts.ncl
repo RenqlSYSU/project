@@ -46,7 +46,7 @@ if(nv.eq.0) then
 var = var - 273.15 ;convert unit from K to C
 end if
 if(nv.eq.1) then
-var = var/100 ;convert unit from K to C
+var = var/100 ;convert unit from Pa to hPa
 end if
 printVarSummary(var)
 

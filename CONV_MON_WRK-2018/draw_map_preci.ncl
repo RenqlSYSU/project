@@ -1,12 +1,10 @@
 ;***************************************************************************
-;filename:      draw_fsnt_flnt_preci_global_ts.ncl
-;1 read data in (ncase,12nmonth*100years,nlat,nlon),FSNT+FLNT
-;2 calc global weighted annual mean，then draw the ts plot
+;filename:      draw_regin_map_preci.ncl
+;1 read data in (ncase,12nmonth*100years,nlat,nlon),PRECC + PRECL
+;2 calc last 30years monthly average, then draw the ts plot
 ;                                            by Ql_Ren
 ;                                           2018/07/19
 ;******************************************************************************
-load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
-
 begin
 draw_var = (/"preci"/)
 unit     = (/"mm/day"/)    ;this can be used as right string 
@@ -14,22 +12,32 @@ var_name = (/"PRECC","PRECL"/)
 case     = (/"MX_AQUAP_SCYC","SF_AQUAP_SCYC","NO_TOPO_SCYC","REAL_WORLD_SCYC"/);" NG24H",THIS CAN BE USED AS LEFT STRING
 pre_case = (/"(a","(b","(c","(d"/)
 
+;area: east Asia
+lats = -60 ;-20
+latn = 60  ;60
+lonl = 0  ;20
+lonr = 360 ;220
+lat_spacing = 20
+lon_spacing = 30
+
 ;the path of the file
 path     = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
 filename = path + "/data/" + case + "/pro/B20f19-" + (/"pure-aqua","surf-aqua","topo","realworld"/) + ".cam.h0." ; ; + var_name + ".1-100.nc" 
-fig_name = path + "/fig/animation/" + draw_var + "_global_map"
+fig_name = path + "/fig/animation/" + draw_var + "_map_" + lats + "-" + latn
 fig_out  = "pdf";"x11"
 
 f    = addfile(filename(0) + var_name(0) + ".1-100.nc","r")
-vars = f->$var_name(0)$(0,:,:)
+vars = f->$var_name(0)$(0,{lats:latn},{lonl:lonr})
 nlat   = dimsizes(vars&lat) 
 nlon   = dimsizes(vars&lon)
 ncase  = dimsizes(case)
-nyear  = 100 
+nyear  = 30 
 nmonth = 12
+nd_s = nmonth*100-nmonth*nyear
+nd_e = nmonth*100-1
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-var   = new((/ncase,100*12,nlat,nlon/),float)
-var1  = new((/ncase,nyear ,nlat,nlon/),float)
+var   = new((/ncase,nyear*nmonth,nlat,nlon/),float)
+var1  = new((/ncase,nmonth      ,nlat,nlon/),float)
 plot  = new((/ncase/),graphic)
 
 ;================================================================
@@ -40,18 +48,20 @@ do nc = 0,ncase-1,1
     nv = 0
     print(filename(nc) + var_name(nv))
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
-    fsnt =  f->$var_name(nv)$ ;+ means downward to earth
+    fsnt =  f->$var_name(nv)(nd_s:nd_e,{lats:latn},{lonl:lonr})$ ;+ means downward to earth
     
     nv = 1
     print(filename(nc) + var_name(nv))
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
-    flnt =  f->$var_name(nv)$ ;+ means upward to space
+    flnt =  f->$var_name(nv)(nd_s:nd_e,{lats:latn},{lonl:lonr})$ ;+ means upward to space
 
     var(nc,:,:,:) = fsnt+flnt ;+ means downward to earth
 end do
-var = var*3600*24*1000 ;convert unit from m/s to mm/day
+var  = var*3600*24*1000 ;convert unit from m/s to mm/day
 copy_VarMeta(vars,var(0,0,:,:))
 printVarSummary(var)
+
+var1 = dim_avg_n(var(0:(nyear*nmonth-1):12,:,:),0)
 
 ;do ns = 0,nyear-1,1
 ;    nms = ns*nmonth

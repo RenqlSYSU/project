@@ -23,7 +23,7 @@ lon_spacing = 30
 ;the path of the file
 path     = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
 filename = path + "/data/" + case + "/pro/B20f19-" + (/"pure-aqua","surf-aqua","topo","realworld"/) + ".cam.h0." ; ; + var_name + ".1-100.nc" 
-fig_name = path + "/fig/animation/" + draw_var + "_map_" + lats + "-" + latn
+fig_name = path + "/fig/" + draw_var + "_map_" + lats + "-" + latn
 fig_out  = "pdf";"x11"
 
 f    = addfile(filename(0) + var_name(0) + ".1-100.nc","r")
@@ -48,12 +48,12 @@ do nc = 0,ncase-1,1
     nv = 0
     print(filename(nc) + var_name(nv))
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
-    fsnt =  f->$var_name(nv)(nd_s:nd_e,{lats:latn},{lonl:lonr})$ ;+ means downward to earth
+    fsnt =  f->$var_name(nv)$(nd_s:nd_e,{lats:latn},{lonl:lonr}) ;+ means downward to earth
     
     nv = 1
     print(filename(nc) + var_name(nv))
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
-    flnt =  f->$var_name(nv)(nd_s:nd_e,{lats:latn},{lonl:lonr})$ ;+ means upward to space
+    flnt =  f->$var_name(nv)$(nd_s:nd_e,{lats:latn},{lonl:lonr}) ;+ means upward to space
 
     var(nc,:,:,:) = fsnt+flnt ;+ means downward to earth
 end do
@@ -61,7 +61,9 @@ var  = var*3600*24*1000 ;convert unit from m/s to mm/day
 copy_VarMeta(vars,var(0,0,:,:))
 printVarSummary(var)
 
-var1 = dim_avg_n(var(0:(nyear*nmonth-1):12,:,:),0)
+do nm = 0,11,1
+var1(:,nm,:,:) = dim_avg_n_Wrap(var(:,nm:(nyear*nmonth-1):12,:,:),1)
+end do
 
 ;do ns = 0,nyear-1,1
 ;    nms = ns*nmonth
@@ -108,23 +110,46 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;res@vpWidthF         = 0.8
 
 ;-------set the attribute of the map-------------------
-    res@mpProjection      = "Mollweide"       ; choose projection
-    res@mpGridAndLimbOn   = True              ; turn on lat/lon lines
-    res@mpPerimOn         = False             ; turn off box around plot
-    res@mpGridLatSpacingF = 30.               ; spacing for lat lines
-    res@mpGridLonSpacingF = 30.               ; spacing for lon lines
-    ;res@mpCenterLonF     = 180.
-    ;res@mpMaxLatF        = latn
-    ;res@mpMinLatF        = lats
-    ;res@mpMaxLonF        = lonr
-    ;res@mpMinLonF        = lonl
-    ;res@gsnMajorLatSpacing = 15
-    ;res@gsnMajorLonSpacing = 30
+   ; res@mpProjection      = "Mollweide"       ; choose projection
+   ; res@mpGridAndLimbOn   = True              ; turn on lat/lon lines
+   ; res@mpPerimOn         = False             ; turn off box around plot
+   ; res@mpGridLatSpacingF = 30.               ; spacing for lat lines
+   ; res@mpGridLonSpacingF = 30.               ; spacing for lon lines
+    res@mpCenterLonF     = 180.
+    res@mpMaxLatF        = latn
+    res@mpMinLatF        = lats
+    res@mpMaxLonF        = lonr
+    res@mpMinLonF        = lonl
+    res@gsnMajorLatSpacing = lat_spacing 
+    res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
+
+;--------set the form of the coordinate-----------------
+    res@tmBorderThicknessF  = mp_thick
+    res@tmXBLabelFont   = font_index
+    res@tmYLLabelFont   = font_index
+    res@tmXBLabelFontHeightF     = tick_font
+    ; res@tmXBLabelFontAspectF   = 1.6
+    res@tmXBLabelFontThicknessF  = tick_thick
+    res@tmYLLabelFontHeightF     = tick_font
+    ; res@tmYLLabelFontAspectF   = 1.3
+    res@tmYLLabelFontThicknessF  = tick_thick
+    
+    res@tmXBMajorThicknessF     = mp_thick
+    res@tmYLMajorThicknessF     = mp_thick
+    ;  res@tmXBMajorOutwardLengthF = -0.
+    ;  res@tmYLMajorOutwardLengthF = -0.
+    ;  res@tmYRMajorOutwardLengthF = -0.
+      
+    res@tmXBMinorThicknessF     = mp_thick
+    res@tmYLMinorThicknessF     = mp_thick
+    ;  res@tmXBMinorOutwardLengthF = -0.
+    ;  res@tmYLMinorOutwardLengthF = -0.
+    ;  res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
@@ -181,11 +206,11 @@ wks = gsn_open_wks(fig_out,fig_name)
     maxlvl = (/15/)
     spacig = (/ 1/)
 
-do nt = 0,10*12-1,1 
-ny = floor((nt)/12)+1
-print(ny)
-nm = toint(nt-(ny-1)*12)
-print(nm)
+do nm = 0,12-1,1 
+;ny = floor((nt)/12)+1
+;print(ny)
+;nm = toint(nt-(ny-1)*12)
+;print(nm)
 do nc = 0, ncase-1,1
     nv = 0
     res@gsnLeftString   = pre_case(nc) + ")" + case(nc)
@@ -194,14 +219,14 @@ do nc = 0, ncase-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(nc)   = gsn_csm_contour_map(wks,var(nc,nt,:,:),res)
-    print(max(var(nc,nt,:,:)))
-    print(min(var(nc,nt,:,:)))
+    plot(nc)   = gsn_csm_contour_map(wks,var1(nc,nm,:,:),res)
+    print(max(var(nc,nm,:,:)))
+    print(min(var(nc,nm,:,:)))
     ;plot(nc)   = gsn_csm_contour_map(wks,var1(nc,:,:),res)
     ;print(max(var1(nc,:,:)))
     ;print(min(var1(nc,:,:)))
 end do
-    resp@txString      = "Year" + ny
+;    resp@txString      = "Year" + ny
     gsn_panel(wks,plot,(/ncase,1/),resp)
 end do
 end

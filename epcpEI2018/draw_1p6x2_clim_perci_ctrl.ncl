@@ -18,53 +18,59 @@ siglvl = 0.05
 years  = ispan(1979,2004,1)
 
 ;the path of the file
-path    = "/users/yangsong3/renql/project"
-case    = (/"AMIP_CTRL"/)
-file_in  = path + "/TP_NUDG/data/AMIP-CTRL/AMIP_C5PM.cam.h1"
+path    = "/home/ys17-19/renql/project"
+case    = (/"GPCP"/)
+file_in  = "/home/ys17-19/data-observation/GPCP-precip/precip.mon.mean.nc" 
 fig_name = path + "/epcpEI2018/1p6x2_clim_preci_ctrl-" + lonl + "-" + lonr
 fig_out    ="pdf";"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"PRECC","PRECL"/) ;this is the var_name in data file
+;var_name = (/"PRECC","PRECL"/) ;this is the var_name in data file
+var_name = (/"precip"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 
-f    = addfile(file_in(0) + ".YEAR." + years(0) + ".daily." + var_name(0) + ".nc","r")
+f    = addfile(file_in,"r")
+;f    = addfile(file_in(0) + ".YEAR." + years(0) + ".daily." + var_name(0) + ".nc","r")
 ;f    = addfile(file_in(0) + ".YEAR." + years(0) + ".monthly." + var_name(0) + ".nc","r")
-vars = f->$var_name(0)$(0,{lats:latn},{lonl:lonr})
+vars = f->$var_name(0)$(0:311,{lats:latn},{lonl:lonr})
 ncase  = dimsizes(case)
-nsample = dimsizes(years) 
+nsample = dimsizes(years)*12 
 nmonth  = 12
 nday    = 365 
 nvar    = dimsizes(var_name)
 nlat    = dimsizes(vars&lat) 
 nlon    = dimsizes(vars&lon)
-var   = new((/ncase,nsample,nday,nlat,nlon/),float)
-var_ave   = new((/ncase,nmonth,nlat,nlon/),float)
+;var   = new((/ncase,nsample,nlat,nlon/),float)
+;var_ave   = new((/ncase,nmonth,nlat,nlon/),float)
+var_ave   = new((/nmonth,nlat,nlon/),float)
 
 ;================================================================
 ;read data
 ;====================================================================
-var = 0
-do nc = 0,ncase-1,1
-do nv = 0,nvar-1,1
-    files := systemfunc("ls " + file_in(nc) + "*" + var_name(nv) + ".nc")
-    do nt = 0,nsample-1,1
-        f     := addfile(files(nt),"r")
-        var(nc,nt,:,:,:) = var(nc,nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    end do
-end do
-end do
-var = var*3600*24*1000 ;convert unit from m/s to mm/day
+;var = 0
+;do nc = 0,ncase-1,1
+;do nv = 0,nvar-1,1
+;    files := systemfunc("ls " + file_in(nc) + "*" + var_name(nv) + ".nc")
+;    do nt = 0,nsample-1,1
+;        f     := addfile(files(nt),"r")
+;       var(nc,nt,:,:,:) = var(nc,nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
+;    end do
+;end do
+;end do
+;var = var*3600*24*1000 ;convert unit from m/s to mm/day
 
-var := dim_avg_n(var,1)        ;get(ncase,nseason,nlat,nlon)
+;var := dim_avg_n(var,1)        ;get(ncase,nseason,nlat,nlon)
 
-time = cd_calendar(f->time,0)
+;time = cd_calendar(f->time,0)
+;do nm = 0,11,1
+;    select_time := ind(time(:,1).eq.nm+1)
+;    var_ave(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+;end do
+
 do nm = 0,11,1
-    select_time := ind(time(:,1).eq.nm+1)
-    var_ave(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+var_ave(nm,:,:) = dim_avg_n_Wrap(var(nm:(26*12-1):12,:,:),0)   ;used for GPCP
 end do
-
-copy_VarMeta(vars,var_ave(0,0,:,:))
+copy_VarMeta(vars,var_ave(0,:,:))
 printVarSummary(var_ave)
 
 ;==============================================================
@@ -155,7 +161,7 @@ printVarSummary(var_ave)
     res@cnMaxLevelValF        = 16        ; set max contour level
     res@cnLevelSpacingF       = 1       ; set contour interval
 
-    res@gsnSpreadColors      = True              ; turn of the full color map
+    res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
     res@gsnSpreadColorEnd    = 21                ; end at color 200
     

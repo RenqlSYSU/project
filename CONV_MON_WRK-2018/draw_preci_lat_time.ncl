@@ -23,15 +23,15 @@ ny_e = (nd_e+1)/12
 ;area: east Asia
 lats = -60 ;-20
 latn = 60  ;60
-lonl = 0  ;20
-lonr = 360 ;220
+lonl = 100  ;20
+lonr = 120 ;220
 lat_spacing = 20
 lon_spacing = 30
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
 filename = path + "/data/" + case + "/pro/B20f19-" + (/"pure-aqua","surf-aqua","topo","realworld"/) + ".cam.h0." ; ; + var_name + ".1-100.nc" 
-fig_name = path + "/fig/" + draw_var + "_lat_time_annual"
+fig_name = path + "/fig/" + draw_var + "_lat_time_" + lonl + "-" + lonr
 fig_out  = "pdf";"x11"
 
 f    = addfile(filename(0) + var_name(0) + ".1-100.nc","r")
@@ -232,7 +232,7 @@ wks = gsn_open_wks(fig_out,fig_name)
 
 do nc = 0, ncase-1,1
     res@gsnLeftString   = pre_case(nc) + ")" + case(nc)
-    res@gsnRightString  = draw_var + " (" + unit + ")"
+    res@gsnRightString  = lonl + "-" + lonr + "E " + draw_var + " (" + unit + ")"
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level

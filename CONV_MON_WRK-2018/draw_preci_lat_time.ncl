@@ -40,14 +40,18 @@ nlat   = dimsizes(vars&lat)
 nlon   = dimsizes(vars&lon)
 ncase  = dimsizes(case)
 nmonth = 12
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;months = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months = (/"J","F","M","A","M","J","J","A","S","O","N","D"/)
 var   = new((/ncase,nys*12,nlat,nlon/),float)
 var1  = new((/ncase,12    ,nlat,nlon/),float)
 plot  = new((/ncase/),graphic)
+line  = new((/ncase/),graphic)
 
 ;================================================================
 ;read data
 ;====================================================================
+
+;---------read data and convert unit-----------------
 var = 0
 do nc = 0,ncase-1,1
     nv = 0
@@ -60,23 +64,37 @@ do nc = 0,ncase-1,1
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
     flnt =  f->$var_name(nv)$(nd_s:nd_e,{lats:latn},{lonl:lonr}) ;+ means upward to space
 
-    var(nc,:,:,:) = fsnt+flnt ;+ means downward to earth
-    ;var(nc,:,:,:) = fsnt-flnt ;+ means downward to earth
+    var(nc,:,:,:) = fsnt+flnt ;calculate the preci
+    ;var(nc,:,:,:) = fsnt-flnt ;calculate the net flux at the top of the model, + means downward to earth
 end do
 var = var*3600*24*1000 ;convert unit from m/s to mm/day
 copy_VarMeta(vars,var(0,0,:,:))
 printVarSummary(var)
 
+;-------in order to draw two cycle years--------------
+var12    = new((/ncase,24    ,nlat/),float)
+months2  = new((/24/),string)
+months2(0:11)  = months
+months2(12:23) = months
+
+;------calculate climate annual cycle-------------
 do nm = 0,11,1
 var1(:,nm,:,:) = dim_avg_n_Wrap(var(:,nm:(nys*12-1):12,:,:),1)
 end do
 var1 := dim_avg_n_Wrap(var1,3) ;get(ncase,ntime,nlat)
-var1!0    = "case"
-var1!1    = "time"
+var1  = dim_rmvmean_n_Wrap(var1,1) ;romve annual mean, get(ncase,ntime,nlat)
+var12(:,0:11,:)  = var1
+var12(:,12:23,:) = var1
+var12!0    = "case"
+var12!1    = "time"
 ;var1&time = ispan(1,1200,1)
-var1&time = ispan(1,12,1)
-printVarSummary(var1)
-var2 = var1(case|:,lat|:,time|:)
+var12&time = ispan(1,24,1)
+printVarSummary(var12)
+var2 = var12(case|:,lat|:,time|:)
+
+pai = 3.14
+sun_point = 23.433*sin(pai/6.0*var12&time-pai/2.0)
+printVarSummary(sun_point)
 
 ;do ns = 0,nyear-1,1
 ;    nms = ns*nmonth
@@ -91,22 +109,22 @@ var2 = var1(case|:,lat|:,time|:)
 ;draw the figure
 ;=============================================
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.015
-   subtitle_font  = 0.018
+   tick_font      = 0.02
+   subtitle_font  = 0.02
    title_font     = 0.03
-   label_font     = 0.015
+   label_font     = 0.02
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
-   label_thick    = 1.5
+   label_thick    = 3.0
    mp_thick       = 3.0
    font_index     = 22
 
 wks = gsn_open_wks(fig_out,fig_name)
 
-    ;gsn_define_colormap(wks,"BlueDarkRed18") 
+    gsn_define_colormap(wks,"BlueDarkRed18") 
     ;blue and red, has 18 colors,2-10 is blue
-    gsn_define_colormap(wks,"precip3_16lev") 
+    ;gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -130,8 +148,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@tmXBMode        = "Explicit"
     ;res@tmXBValues      = ispan(nd_s+1,nd_e+1,12)
     ;res@tmXBLabels      = ispan(ny_e-nys+1,ny_e,1)
-    res@tmXBValues      = ispan(1,12,1)
-    res@tmXBLabels      = months
+    res@tmXBValues      = ispan(1,24,1)
+    res@tmXBLabels      = months2
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)
@@ -205,6 +223,11 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@pmLabelBarOrthogonalPosF     = 0.15
     res@pmLabelBarParallelPosF       = 0.5
 
+;-----------set the attribute of the polyline---------------
+    lres                = True
+    lres@gsLineThicknessF = 7.0            ; line thickness   
+    lres@gsLineColor      = "black"         ; color of lines
+    
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -225,9 +248,12 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    minlvl = (/ 1 ,-120/)
-    maxlvl = (/10 , 120/)
-    spacig = (/0.6,  15/)
+    ;minlvl = (/ 1 ,-120/)
+    ;maxlvl = (/10 , 120/)
+    ;spacig = (/0.6,  15/)
+    minlvl = (/ -4,-120/)
+    maxlvl = (/ 4 , 120/)
+    spacig = (/0.5,  15/)
     nv = 0
 
 do nc = 0, ncase-1,1
@@ -239,6 +265,7 @@ do nc = 0, ncase-1,1
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     ;plot(nc)   = gsn_csm_lat_time(wks,var2(nc,:,nd_s:nd_e),res)
     plot(nc)   = gsn_csm_lat_time(wks,var2(nc,:,:),res)
+    line(nc)   = gsn_add_polyline(wks,plot(nc),var12&time,sun_point,lres)
     print(max(var1(nc,:,:)))
     print(min(var1(nc,:,:)))
 end do

@@ -31,15 +31,17 @@ begin
 
   preci     = new((/nmonth,nstation,nyear/),float)
   nino3     = new((/nyear ,nmonth/),float)
-  lat       = new((/nstation/),float)
-  lon       = new((/nstation/),float)
-  slid_corr = new((/ncorr,nstation/),float)
+  lat_st    = new((/nstation/),float)
+  lon_st    = new((/nstation/),float)
 
 ;----- Read JJA precipitation from ascii file which are all numeric--------------------
 ; Preci data is stored in a file with two dimensions (station160,year67),from 1951 to 2017
 do nm = 0,nmonth-1,1
   preci(nm,:,:) = tofloat(asciiread(preci_f(nm),(/nstation,nyear/),"integer"))
 end do
+  preci := dim_avg_n_Wrap(preci,0) ;JJA average, get(nstation, nyear)
+  preci!0 = "station"
+  preci!1 = "year"
 
 ;-----Read DJF Nino3 SST from ascii file which have character----------------------------
 ; Nino3 data is stored in 10 columns: year(1950-2017), month(12), Nino1+2, Anom, 
@@ -52,29 +54,48 @@ end do
 do nm = 0,nmonth-1,1
   nino3(:,nm) = tofloat(str_get_field(line((12+nm):815:12),5," ")) ;only read DJF
 end do
+  nino3 := dim_avg_n_Wrap(nino3,1) ;DJF average, get(nyear)
 
 ;-----Read the information of 160 stations from ascii file which have header lines-------
 ; Station information is stored in five columns: number,name,number,lat,lon
   line := asciiread(station_f, -1, "string")
   printVarSummary(line)
-  lat = tofloat(str_get_field(line(21:),1," "))  ; Attach as lat1d, lon1d
-  lon = tofloat(str_get_field(line(21:),2," "))  ; for plotting later
-  print(lat(1))
+  lat_st = tofloat(str_get_field(line(21:),1," "))  ; Attach as lat1d, lon1d
+  lon_st = tofloat(str_get_field(line(21:),2," "))  ; for plotting later
 ; if there are number, name, number in file, can not separate each field successfully
 ; so remove these three columns
 
+;-----interplote the station data to grid data---------------
+  lonl = 70
+  lonr = 140
+  lats = 15
+  latn = 55
+  nlat = ceil((latn - lats)/0.5) + 1
+  nlon = ceil((lonr - lonl)/0.5) + 1
+  lat_g = fspan(lats, latn, toint(nlat))
+  lon_g = fspan(lonl, lonr, toint(nlon))
+  
+  lat_g!0 = "lat"
+  lat_g@long_name = "latitude"
+  lat_g@units     = "degree_north"
+  lon_g!0 = "lon"
+  lon_g@long_name = "longitude"
+  lon_g@units     = "degree_east"
+
+  rscan = (/5, 2.5, 1/)
+  var   = obj_anal_ic_Wrap(lon_st, lat_st, preci(year|:,station|:), lon_g, lat_g,rscan, False)
+  printVarSummary(var)
+
 ;-----calculate the sliding correlation and standard deviation-------------
-  preci := dim_avg_n_Wrap(preci,0) ;JJA average, get(nstation, nyear)
-  nino3 := dim_avg_n_Wrap(nino3,1) ;DJF average, get(nyear)
+  slid_corr = new((/ncorr,toint(nlat),toint(nlon)/),float)
 do nn = 0,ncorr-1,1
-  slid_corr(nn,:) = escorc_n(preci(:,nn:(nn+10)), nino3(nn:(nn+10)), 1, 0)
+  slid_corr(nn,:,:) = escorc_n(var(nn:(nn+10),:,:), nino3(nn:(nn+10)), 0, 0)
 end do
   slid_corr!0 = "year"
   slid_corr&year = years(5:(nyear-6))
   printVarSummary(slid_corr)
-  std  = dim_stddev_n_Wrap(slid_corr({1956:2002},:),0) ;get (nstation)
-  std@lat1d = lat
-  std@lon1d = lon
+  std  = dim_stddev_n_Wrap(slid_corr({1956:2002},:,:),0) ;get (nstation)
+  copy_VarMeta(var(0,:,:),std)
   printVarSummary(std)
 
 ;==============================================================
@@ -93,8 +114,7 @@ end do
 ;draw the figure
     wks = gsn_open_wks(fig_out,fig_name)
 
-    cmap = read_colormap_file("GMT_gray") ; read color map
-    cmap = cmap(::-1,:)                   ; reverse the color map
+    gsn_define_colormap(wks,"GMT_gray") ; read color map
     ;gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -102,8 +122,8 @@ end do
     ;has 64 colors blue green yellow,red
 
     res                  = True
-    ;res@gsnFrame         = False
-    ;res@gsnDraw          = False
+    res@gsnFrame         = False
+    res@gsnDraw          = False
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "landscape"
@@ -111,17 +131,28 @@ end do
     ;res@vpWidthF         = 0.8
 
 ;-------set the attribute of the map-------------------
+    res@mpDataBaseVersion = "Ncarg4_1"  ;alias "MediumRes"
+    res@mpDataSetName     = "Earth..4"  
+    res@mpAreaMaskingOn      = True
+    res@mpMaskAreaSpecifiers = (/"China","Taiwan"/)
+    res@mpOutlineOn          = True  ;draw the national boundary line
+    res@mpOutlineSpecifiers  = (/"China","Taiwan"/)
+    res@mpFillOn         = True
+    res@mpLandFillColor        = 0
+    res@mpOceanFillColor       = 0
+    res@mpInlandWaterFillColor = 0
+    res@mpGeophysicalLineThicknessF = mp_thick      ; double the thickness of geophysical boundaries
+    res@mpNationalLineThicknessF    = mp_thick      ; double the thickness of national boundaries
+    
     res@mpCenterLonF     = 180.
-    res@mpMaxLatF        = 55
-    res@mpMinLatF        = 20
-    res@mpMaxLonF        = 140
-    res@mpMinLonF        = 70
+    res@mpMaxLatF        = latn
+    res@mpMinLatF        = lats
+    res@mpMaxLonF        = lonr
+    res@mpMinLonF        = lonl
     res@gsnMajorLatSpacing = 10
     res@gsnMajorLonSpacing = 20
-    res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
-    res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
@@ -145,29 +176,49 @@ end do
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
-    res@cnLinesOn        = True
-    res@cnLineLabelsOn   = True
+    res@cnLinesOn        = False
+    res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
-    res@cnLineThicknessF = 5.0
+    ;res@cnLineThicknessF = 5.0
     ;res@gsnContourZeroLineThicknessF = 4.0
-    res@cnLineColor      = "black"
-   
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 0         ; set min contour level
-    res@cnMaxLevelValF        = 0.8        ; set max contour level
-    res@cnLevelSpacingF       = 0.1       ; set contour interval
-    res@cnFillPalette         = cmap
+    ;res@cnLineColor      = "black"
 
-    res@gsnSpreadColors      = True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 2                ; start at color 17
-    res@gsnSpreadColorEnd    = 21                ; end at color 200
-    
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnMinLevelValF        = 0.3         ; set min contour level
+    res@cnMaxLevelValF        = 0.4        ; set max contour level
+    res@cnLevelSpacingF       = 0.1       ; set contour interval
+    res@cnFillColors = (/0,10,6/)
+
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
+
+;-------set the attribute of the contour line---------------
+    resl  = True
+    resl@gsnDraw  = False
+    resl@gsnFrame = False
+    resl@cnFillOn         = False
+    resl@cnLinesOn        = True
+    resl@cnLineThicknessF  = mp_thick + 1
+    resl@cnLineColor      = "black"
+    
+    resl@cnInfoLabelOn    = False
+    resl@cnLineLabelsOn   = True
+    resl@cnLineLabelInterval    = 1
+    resl@cnLineLabelFontHeightF = 0.01
+    resl@cnLineLabelFont        = font_index
+    
+    resl@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    resl@cnMinLevelValF        = 0.1         ; set min contour level
+    resl@cnMaxLevelValF        = 0.8        ; set max contour level
+    resl@cnLevelSpacingF       = 0.1       ; set contour interval
+    
+    resl@gsnRightString  = " " 
+    resl@gsnLeftString   = " "
+    resl@gsnCenterString = " "
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -179,8 +230,13 @@ end do
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
 
-    plot = gsn_csm_contour_map(wks,std,res)
+    plot  = gsn_csm_contour_map(wks,std,res)
+    plot1 = gsn_csm_contour(wks,std,resl)
+    overlay(plot,plot1)
     print(max(std))
     print(min(std))
+
+    draw(plot)
+    frame(wks)
 end
 

@@ -1,13 +1,14 @@
 ;******************************************************************************
-;filename:      draw_1p5x3_month_sst_EOF.ncl
+;filename:      draw_1p4x3_month_pc_wavelet.ncl
 ;input_file:    var_name(nv) + area + _EOFn3.nc
 ;----------------------------------------------------------------------
 ; Concepts illustrated:
-;   - read EOF pattern and time series data
-;   - Draw the first three EOF spatial patterns and principal components
+;   - read EOF time series data and eval
+;   - calc wavelet of EOF time series
+;   - Draw the
 ;   - each panel have four map figure and one time series figure(have four curves)
 ;                                            by Ql_Ren
-;                                           2018/09/17
+;                                           2018/09/29
 ;*********************************************************************************
 begin
 unit     = (/"~S~o~N~C","hPa","W/m2","W/m2"/)    ;this can be used as right string 
@@ -29,30 +30,67 @@ lon_spacing = 20
 ;----path of the file and output file-----------------------------
 path      = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
 filename  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF" + neval + ".nc"
-fig_name  = path + "/fig/"   + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF" + neval
+fig_name  = path + "/fig/"   + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF_wavelet" + neval
 fig_out   = "pdf";"x11"
 
 ;================================================================
 ;read data
 ;====================================================================
 f = addfile(filename,"r")
-map_var = f->eof       ;(ncase,neval,nlat,nlon)
 ts_var  = dim_standardize_n_Wrap(f->eof_ts,1,2)    ;(ncase,neval,nyear) 
 right_title   = f->pcvar
 center_title  = f->eval
-printVarSummary(map_var)
 printVarSummary(ts_var)
 printVarSummary(right_title)
 
 ncase = dimsizes(ts_var&case)
 ntime = dimsizes(ts_var&time)
-sig   = new((/ncase,neval/),logical) 
-plot  = new((/(ncase+1)*(neval-1)/),graphic)
+sig1  = new((/ncase,neval/),logical) 
+plot  = new((/ncase*neval/),graphic)
 
 do nc = 0,ncase-1,1
-sig(nc,:) = eofunc_north(right_title(nc,:),ntime,True)
+sig1(nc,:) = eofunc_north(right_title(nc,:),ntime,True)
 end do
-subtitle_color = where(sig,"red","black")
+subtitle_color = where(sig1,"red","black")
+
+;---- compute wavelet----------------------------------
+mother  = 0    ;0 = Morlet, 1 = Paull, 2 = DOG (derivative of Gaussian)
+param   = 6.0  ;The mother wavelet parameter. If param < 0, then the default is used,
+;Morlet k0 (wavenumber), default is 6. Paul m (order), default is 4. DOG m (m-th derivative), default is 2.
+
+N       = ntime
+dt      = 1    ;timesteps of time series, the unit here is month
+s0      = dt   ;The smallest scale of the wavelet, which is typically is equal to 2*dt. s0 = dt for Morlet; s0 = dt/4 for Paul
+dj      = 0.25 ;The spacing between discrete scales, which is typically equal to 0.25. A smaller value will give better scale resolution, but will be slower.
+jtot    = 1+floattointeger(((log10(N*dt/s0))/dj)/log10(2.))  
+;The integer number of scales. Scales range from s0 up to s0*2^[(jtot-1)*dj].
+
+npad    = N    ;The total number of points (including padding) to use for the wavelet transform
+nadof   = 0    ;Currently ignored (set to zero).
+
+noise   = 1    ;0 means use a white noise for significance test. 1 means use a red noise for significance test. (Most commonly, noise = 1.)
+siglvl  = .05  ;The significance level to use
+isigtest= 0    ; 0 means do a regular chi-square test, i.e. Eqn (18) from Torrence and Compo. 1 means do a "time-average" test on the global wavelet spectrum.
+
+power = new((/ncase, neval, jtot, npad/),float)
+sig2  = new((/ncase, neval, jtot, npad/),float)
+do nc = 0, ncase-1, 1
+do ne = 0, neval-1, 1
+    wave = wavelet(ts_var(nc,ne,:),mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
+    printVarSummary(wave)
+    power(nc,ne,:,:) = onedtond (wave@power,(/jtot,npad/) )
+    sig2(nc,ne,:,:)  = power(nc,ne,:,:)/conform(power(nc,ne,:,:),wave@signif,0) ;compute significance ( >= 1 is significant)
+end do
+end do
+
+power!2         = "period"
+power&period    = var@period
+power!3         = "time"
+power&time      = var&time
+copy_VarMeta(power,sig2)
+sig = mask(sig2,sig2.ge.1.0,True)
+printVarSummary(power)
+printVarSummary(sig2)
 
 ;==============================================================
 ;draw figure 

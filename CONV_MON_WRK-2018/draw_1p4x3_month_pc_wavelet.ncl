@@ -1,4 +1,4 @@
-;******************************************************************************
+******************************************************************************
 ;filename:      draw_1p4x3_month_pc_wavelet.ncl
 ;input_file:    var_name(nv) + area + _EOFn3.nc
 ;----------------------------------------------------------------------
@@ -6,9 +6,8 @@
 ;   - read EOF time series data and eval
 ;   - calc wavelet of EOF time series
 ;   - Draw the
-;   - each panel have four map figure and one time series figure(have four curves)
 ;                                            by Ql_Ren
-;                                           2018/09/29
+;                                           2018/10/07
 ;*********************************************************************************
 begin
 unit     = (/"~S~o~N~C","hPa","W/m2","W/m2"/)    ;this can be used as right string 
@@ -29,8 +28,8 @@ lon_spacing = 20
 
 ;----path of the file and output file-----------------------------
 path      = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
-filename  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF" + neval + ".nc"
-fig_name  = path + "/fig/"   + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF_wavelet" + neval
+filename  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_DJF_covEOF" + neval + ".nc"
+fig_name  = path + "/fig/"   + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_DJF_covEOF_wavelet" + neval
 fig_out   = "pdf";"x11"
 
 ;================================================================
@@ -38,15 +37,17 @@ fig_out   = "pdf";"x11"
 ;====================================================================
 f = addfile(filename,"r")
 ts_var  = dim_standardize_n_Wrap(f->eof_ts,1,2)    ;(ncase,neval,nyear) 
-right_title   = f->pcvar
-center_title  = f->eval
+right_title   = f->pcvar   ;the percent variance associated with each eigenvalue.
+center_title  = f->eval    ;eigenvalues
 printVarSummary(ts_var)
 printVarSummary(right_title)
 
 ncase = dimsizes(ts_var&case)
 ntime = dimsizes(ts_var&time)
+gap_time = toint(ntime/30)
 sig1  = new((/ncase,neval/),logical) 
-plot  = new((/ncase*neval/),graphic)
+plot  = new((/ncase*(neval-1)/),graphic)
+plot2 = new((/ncase*(neval-1)/),graphic)
 
 do nc = 0,ncase-1,1
 sig1(nc,:) = eofunc_north(right_title(nc,:),ntime,True)
@@ -84,20 +85,24 @@ end do
 end do
 
 power!2         = "period"
-power&period    = var@period
+power&period    = wave@period
 power!3         = "time"
-power&time      = var&time
+power&time      = ts_var&time
 copy_VarMeta(power,sig2)
-sig = mask(sig2,sig2.ge.1.0,True)
+sig2 = mask(sig2,sig2.ge.1.0,True)
 printVarSummary(power)
 printVarSummary(sig2)
+
+exponent = ispan(1,6,1)
+ylabel   = exp( exponent*log(2.0) )
+print(ylabel)
 
 ;==============================================================
 ;draw figure 
 ;==================================================================
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.015
-   subtitle_font  = 0.015
+   tick_font      = 0.01
+   subtitle_font  = 0.01
    title_font     = 0.02
    label_font     = 0.015
    tick_thick     = 5.0
@@ -108,29 +113,17 @@ printVarSummary(sig2)
    font_index     = 22
 
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"GMT_polar") 
+    gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
     res@gsnMaximize      = True
-    res@gsnAddCyclic     = False
-    res@gsnPaperOrientation = "portrait"
-
-;------------set the attribute of the map----------------
-    res@mpCenterLonF     = 180.
-    res@mpMaxLatF        = latn
-    res@mpMinLatF        = lats
-    res@mpMaxLonF        = lonr
-    res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = lat_spacing 
-    res@gsnMajorLonSpacing = lon_spacing
-    res@mpFillOn         = False
-    ;res@mpLandFillColor = "gray"
-    ;res@mpFillDrawOrder = "PreDraw"
-    res@mpGeophysicalLineThicknessF = mp_thick
-    res@mpGeophysicalLineColor      = "black";"white"
+    res@vpHeightF        = 0.15       ; height and width of plot
+    res@vpWidthF         = 0.45
 
 ;------------set the form of the coordinate-----------------------
     res@tmBorderThicknessF  = mp_thick
@@ -145,150 +138,137 @@ printVarSummary(sig2)
     
     res@tmXBMajorThicknessF     = mp_thick
     res@tmYLMajorThicknessF     = mp_thick
-    ;  res@tmXBMajorOutwardLengthF = -0.
-    ;  res@tmYLMajorOutwardLengthF = -0.
-    ;  res@tmYRMajorOutwardLengthF = -0.
+    res@tmXTMajorOutwardLengthF = 0.01
+    res@tmXBMajorOutwardLengthF = 0.01
+    res@tmYLMajorOutwardLengthF = 0.01
+    res@tmYRMajorOutwardLengthF = 0.01
       
     res@tmXBMinorThicknessF     = mp_thick
     res@tmYLMinorThicknessF     = mp_thick
-    ;  res@tmXBMinorOutwardLengthF = -0.
-    ;  res@tmYLMinorOutwardLengthF = -0.
-    ;  res@tmYRMinorOutwardLengthF = -0.
+    res@tmXTMinorOutwardLengthF = 0.01
+    res@tmXBMinorOutwardLengthF = 0.01
+    res@tmYLMinorOutwardLengthF = 0.01
+    res@tmYRMinorOutwardLengthF = 0.01
+
+;---------set the attribute of the x y axis------------
+    res@tiXAxisOn       = False ;True
+    res@tiXAxisString   = "Year"
+    
+    res@tiYAxisOn       = False
+    res@tiYAxisFont     = font_index
+    res@tiYAxisFontHeightF = subtitle_font 
+    res@tiYAxisString   = "period(months)"
+    
+    res@tmXBMode        = "Explicit"
+    res@tmXBValues      = ispan(1,ntime,gap_time)
+    res@tmXBLabels      = ispan(1,30,1)
+    
+    res@trYReverse          = True   ; reverse y-axis
+    res@tmYLMode            = "Explicit"
+    res@tmYLValues          = ylabel 
+    res@tmYLLabels          = ylabel
+    res@tmLabelAutoStride   = True
+
+    res@tmYMajorGrid                   = True
+    res@tmYMajorGridLineDashPattern    = 2
+    res@tmYMajorGridLineColor          = "black"
+    res@tmYMajorGridThicknessF         = 4.0
 
 ;------------set the attribute of the contour----------------------
     res@cnFillOn         = True
     res@cnLinesOn        = False
     res@cnLineLabelsOn   = False  ; True
-   
+    res@cnInfoLabelOn    = False
+    res@cnFillMode          = "RasterFill"          ; turn on raster mode
+    res@cnRasterSmoothingOn = True                  ; turn on raster smoothing
+
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
-    ;res@cnLevels             = ispan(0,60,10)
-    ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
+    ;res@cnLevels             = cnlevels
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -0.063       ; set min contour level
-    res@cnMaxLevelValF        = 0.063       ; set max contour level
-    res@cnLevelSpacingF       = 0.007        ; set contour interval
+    res@cnMinLevelValF        = 0.5       ; set min contour level
+    res@cnMaxLevelValF        = 7.5       ; set max contour level
+    res@cnLevelSpacingF       = 0.5        ; set contour interval
 
-    res@gsnSpreadColors      = False              ; turn of the full color map
-    res@gsnSpreadColorStart  = 11                ; start at color 17
-    res@gsnSpreadColorEnd    = 2                ; end at color 200
+;    res@gsnSpreadColors      = True              ; turn of the full color map
+;    res@gsnSpreadColorStart  = 2                ; start at color 17
+;    res@gsnSpreadColorEnd    = 21                ; end at color 200
 
-    res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "vertical"
+    res@lbLabelBarOn         = False  ; the label bar
+    res@lbOrientation        = "Horizontal"   ;"Vertical"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelStride        = 1
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbBoxLineThicknessF  = mp_thick-2
     
-;------------set the resxy for time series figure-----------
-    resxy     = True
-    ;resxy@vpXF      = 0.1
-    ;resxy@vpYF      = 0.4
-    resxy@vpWidthF  = 0.9
-    resxy@vpHeightF = 0.15
-    resxy@gsnFrame      = False
-    resxy@gsnDraw       = False
-    resxy@gsnMaximize   = True
+;----------Set res sig-----------
+    res_sig                  = True
+    res_sig@gsnDraw          = False
+    res_sig@gsnFrame         = False
     
-    resxy@xyDashPatterns     = (/0,0,0,0/)
-    resxy@xyLineThicknesses = (/2.0, 2.0, 2.0, 2.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"black", "red", "green", "blue"/) ; change line color
-    resxy@tiXAxisOn = False
-    resxy@tiYAxisOn = False
-    resxy@trYMinF = -3.0
-    resxy@trYMaxF = 3.0
-    
-    resxy@tmBorderThicknessF  = mp_thick
-    resxy@tmXBLabelFont         = font_index
-    resxy@tmYLLabelFont         = font_index
-    resxy@tmXBLabelFontHeightF     = label_font
-    resxy@tmXBLabelFontThicknessF  = label_thick 
-    resxy@tmYRLabelFontHeightF     = label_font
-    resxy@tmYRLabelFontThicknessF  = label_thick
+    res_sig@tiXAxisOn       = False
+    res_sig@tiYAxisOn       = False
+    res_sig@tmXBMode        = "Explicit"
+    res_sig@tmXBValues      = ispan(1,ntime,gap_time)
+    res_sig@tmXBLabels      = ispan(1,30,1)
+    res_sig@trYReverse          = True   ; reverse y-axis
+    res_sig@tmYLMode            = "Explicit"
+    res_sig@tmYLValues          = ylabel
+    res_sig@tmYLLabels          = ylabel
+    res_sig@tmLabelAutoStride   = True
 
-    resxy@tmXBMinorOn          = False ; Turn off x-axis (bottom) minor ticks
-    resxy@tmXTMinorOn          = False ; Turn off x-axis (tottom)minor ticks
-    resxy@tmXTOn               = False ; Turn off x-axis (top) major ticks
-    resxy@tmYRMinorOn          = False ; Turn off y-axis (right) minor ticks
-    resxy@tmYLMinorOn          = False ; Turn off y-axis (left) minor ticks
-    resxy@tmYROn               = False ; Turn off y-axis (right) major ticks
+    res_sig@cnFillOn         = True;False       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnInfoLabelOn    = False
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "grey0"
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     
-    resxy@tmXBMajorThicknessF     = mp_thick
-    resxy@tmYLMajorThicknessF     = mp_thick
-    resxy@tmXBMinorThicknessF     = mp_thick
-    resxy@tmYLMinorThicknessF     = mp_thick
-    ;resxy@tmXBMajorLengthF = 0.01
-    ;resxy@tmYRMajorLengthF = 0.01
-    resxy@tmXBMode           = "Manual"
-    resxy@tmYLMode           = "Manual"
-    resxy@tmXBTickSpacingF   = ntime/10
-    ;resxy@tmYLTickSpacingF   = 1.0
+    res_sig@gsnCenterString      = ""
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
 
-    resxy@tmXMajorGrid                   = True
-    resxy@tmXMajorGridLineDashPattern    = 2
-    resxy@tmXMajorGridLineColor          = "gray"
-    resxy@tmXMajorGridThicknessF         = 2.0
-                       
-    resxy@gsnYRefLine             = 0
-    resxy@gsnYRefLineDashPatterns = 0 ; (/12,12/)   
-    resxy@gsnYRefLineThicknesses  = 3.0 ;(/3.0,3.0/)
-    resxy@gsnYRefLineColors       = "black"  ;(/"blue","red"/)
-                             
-    resxy@gsnStringFont         = font_index
-    resxy@gsnStringFontHeightF = subtitle_font
-    resxy@gsnCenterString  = "";lev(nl) + " hPa" 
-    resxy@gsnLeftString    = ""
-    resxy@gsnRightString   = ""
-    
-    ;legend
-    resxy@pmLegendDisplayMode = "Always"
-    resxy@lgOrientation       = "Horizontal"
-    resxy@lgPerimOn           = False
-    resxy@lgPerimFill         = "SolidFill"
-    resxy@lgPerimFillColor    = "white"
-    resxy@xyExplicitLegendLabels = case 
-    resxy@lgLabelFontColor       = "black"
-    resxy@lgLabelFont            = font_index
-    resxy@lgLabelFontThicknessF  = label_thick
-    resxy@lgLabelFontHeightF     = label_font
-    resxy@pmLegendWidthF   = 0.8
-    resxy@pmLegendHeightF  = 0.03
-    resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-    resxy@pmLegendOrthogonalPosF  = -0.6   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0    ; move ref vector along X-axis
+;------------set the attribute of the cone of influence---------------------
+    rescoi              = True
+    rescoi@gsFillIndex  = 1 
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
-    
+    res@gsnCenterString   = "" ;draw_var + " (" + unit +")"
+
     resp  = True    
     resp@gsnMaximize   = True
-    resp@txFont = font_index
-    resp@txFontHeightF = title_font 
-    resp@txFontThicknessF = title_thick
-    ;resp@gsnPanelRowSpec  = True
-    ;resp@gsnPanelBottom   = 0.2
-    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    resp@gsnPanelLabelBar = True
+    resp@lbOrientation    = "Horizontal" ;"Vertical" ;"Horizontal"
+    resp@lbLabelStride    = 1
+    resp@lbLabelFont      = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    resp@lbBoxLineThicknessF  = mp_thick-2
+    resp@gsnPaperOrientation  = "landscape"
 
 do nc = 0,ncase-1,1
 do ne = 0,neval-2,1
     np = nc*(neval-1) + ne
     res@gsnLeftString    = case(nc)
-    res@gsnCenterString  = "EOF " + (ne+1)
+    res@gsnCenterString  = "PC " + (ne+1)
     res@gsnRightStringFontColor    = subtitle_color(nc,ne)
     res@gsnRightString   = center_title(nc,ne)+"  "+right_title(nc,ne)+"%" 
-    plot(np) = gsn_csm_contour_map_ce(wks,map_var(nc,ne,:,:),res)
-    print(max(map_var(nc,ne,{lats:latn},{lonl:lonr})))
-    print(min(map_var(nc,ne,{lats:latn},{lonl:lonr})))
+    plot(np)  = gsn_csm_contour(wks,power(nc,ne,{1:64},:),res)
+    plot2(np) = gsn_csm_contour(wks, sig2(nc,ne,{1:64},:),res_sig)
+    overlay(plot(np),plot2(np))
+    plot(np) = ShadeCOI(wks, plot(np), wave, ts_var&time, False)
+    print(max(power(nc,ne,:,:)))
+    print(min(power(nc,ne,:,:)))
 end do
-end do 
-    
-do ne = 0,neval-2,1
-    np = 12 + ne
-    plot(np) = gsn_csm_xy(wks,ts_var&time,(/ts_var(:,ne,:)/),resxy)
-end do 
+end do
 
-    resp@txString      = "EOF of " + var_name(nv)
-    gsn_panel(wks,plot,(/5,3/),resp)
+gsn_panel(wks,plot,(/ncase,(neval-1)/),resp)
 end
 

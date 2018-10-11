@@ -84,7 +84,11 @@ CONTAINS
        df(2,i)= -10*x(2,i)*exp(-5*x(2,i)**2)
 
        f(3,i) = 1-abs(x(3,i))
+    if(x(3,i).eq.0) then
+       df(3,i)= -1
+    else
        df(3,i)= -abs(x(3,i))/x(3,i)
+    endif
     ENDDO
   END SUBROUTINE INIT
 

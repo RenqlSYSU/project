@@ -20,7 +20,8 @@ begin
   y  = fbindirread(f,1,(/3,128/),"float")
   dy = fbindirread(f,2,(/3,128/),"float") ;real first derivative
   ft = fbindirread(f,3,(/3,128/),"float") ;first derivative by fourier transform
-  label  = (/"y=sin(pi*x)","y=exp(-5x~S~2~N~)","y=1-|x|"/)
+  name  = (/"y=sin(pi*x)","y=exp(-5x~S~2~N~)","y=1-|x|"/)
+  label = (/"y","y'","FT"/)
   
   print(x(1,10:20))
   print(y(1,10:20))
@@ -56,8 +57,8 @@ begin
 wks  = gsn_open_wks("png","fourier_transform_derivative")                 ; send graphics to PNG file
   
   res               = True                        ; plot mods desired
-  res@gsnFrame      = True
-  res@gsnDraw       = True
+  res@gsnFrame      = False ;True
+  res@gsnDraw       = False ;True
   res@gsnMaximize   = True
   res@tiXAxisString = "x"  ; xaxis
   res@tiYAxisAngleF = 0.0 ;let the yaxis horizontal
@@ -65,9 +66,9 @@ wks  = gsn_open_wks("png","fourier_transform_derivative")                 ; send
   res@trXMinF = -1.0
   res@trXMaxF = 1.0
   
-  res@xyDashPatterns    = (/0,1,2/)
+  res@xyDashPatterns    = (/0,0,0/)
   res@xyLineThicknesses = (/4.0,4.0,4.0/)   ; make second line thicker
-  res@xyLineColors      = (/"black","black","black"/)
+  res@xyLineColors      = (/"black","red","blue"/)
 
   res@tmBorderThicknessF  = mp_thick
   res@tmXBLabelFont         = font_index
@@ -92,7 +93,7 @@ wks  = gsn_open_wks("png","fourier_transform_derivative")                 ; send
   res@tmYMajorGridLineColor       = "gray"
   res@tmYMajorGridLineDashPattern = 2             ; select short dash lines
   
-  res@pmLegendDisplayMode = "NoCreate"
+  res@pmLegendDisplayMode = "Always"
   res@lgOrientation       = "Vertical"
   res@lgPerimOn           = False
   res@lgPerimFill         = "SolidFill"
@@ -105,29 +106,35 @@ wks  = gsn_open_wks("png","fourier_transform_derivative")                 ; send
   res@pmLegendWidthF   = 0.08
   res@pmLegendHeightF  = 0.1
   res@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-  res@pmLegendOrthogonalPosF  = 0.3   ; move ref vector along Y-axis
-  res@pmLegendParallelPosF    = 0.1    ; move ref vector along X-axis
+  res@pmLegendOrthogonalPosF  = 0.4   ; move ref vector along Y-axis
+  res@pmLegendParallelPosF    = -0.2    ; move ref vector along X-axis
 
   res@gsnStringFont         = font_index
   res@gsnStringFontHeightF = subtitle_font
 
-  res@tiMainString  = "Function Value"
-  res@tiYAxisString = "y"  ; xaxis
-  plot(0) = gsn_csm_xy(wks,x(0,:),y,res)   ; create plot  
+;  res@tiMainString  = "Function Value"
+;  res@tiYAxisString = "y"  ; xaxis
+;  plot(0) = gsn_csm_xy(wks,x(0,:),y,res)   ; create plot  
   
-  ;res@tiMainString  = "First Derivative"
-  ;res@tiYAxisString = "dy"  ; xaxis
-  plot(1) = gsn_csm_xy(wks,x(0,:),dy,res)   ; create plot  
+;  res@tiMainString  = "First Derivative"
+;  res@tiYAxisString = "dy"  ; xaxis
+;  plot(1) = gsn_csm_xy(wks,x(0,:),dy,res)   ; create plot  
 
-  res@pmLegendDisplayMode = "Always"
-  res@tiMainString  = "Fourier First Derivative"
-  res@tiYAxisString = "ft"  ; xaxis
-  plot(2) = gsn_csm_xy(wks,x(0,:),ft,res)   ; create plot  
-  
+;  res@pmLegendDisplayMode = "Always"
+;  res@tiMainString  = "Fourier First Derivative"
+;  res@tiYAxisString = "ft"  ; xaxis
+;  plot(2) = gsn_csm_xy(wks,x(0,:),ft,res)   ; create plot  
+ 
+do ni = 0,2,1
+   res@tiMainString  = name(ni) 
+   plot(ni) = gsn_csm_xy(wks,x(ni,:),(/y(ni,:),dy(ni,:),ft(ni,:)/),res)   ; create plot  
+end do
+
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
+    resp@gsnPanelRowSpec  = True
 
-gsn_panel(wks,plot,(/1,3/),resp)
+gsn_panel(wks,plot,(/1,2/),resp)
 end
 

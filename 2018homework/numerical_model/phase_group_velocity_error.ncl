@@ -11,7 +11,10 @@ begin
 ;************************************************
 ; generate variable
 ;************************************************
+  pi  = 3.14159265
   kx  = fspan(0.001,6,60)
+  ;ppw = fspan(1,12,60)
+  ;kx  = 2*pi/ppw
   nkx = dimsizes(kx)
   c   = new((/3,nkx/),float)
   cg  = new((/3,nkx/),float)
@@ -40,13 +43,13 @@ begin
    mp_thick       = 4.0
    font_index     = 22
 
-wks  = gsn_open_wks("png","phase_group_velocity_error")      ; send graphics to PNG file
+wks  = gsn_open_wks("png","phase_group_velocity_error2")      ; send graphics to PNG file
   
   res               = True                        ; plot mods desired
   res@gsnFrame      = False
   res@gsnDraw       = False
   res@gsnMaximize   = True
-  res@tiXAxisString = "k~F19~["  ; xaxis
+  ;res@tiXAxisString = "k~F19~["  ; xaxis
   res@tiYAxisAngleF = 0.0 ;let the yaxis horizontal
   
   res@xyDashPatterns    = (/0,1,2,0,1,2/)
@@ -100,6 +103,7 @@ wks  = gsn_open_wks("png","phase_group_velocity_error")      ; send graphics to 
   res@gsnStringFontHeightF = subtitle_font
 
   res@tiMainString  = "Velocity Error"     ; title
+  res@tiXAxisString = "k~F33~D"   ;"ppw = 2~F33~p/k~F33~D"  ; xaxis
   res@tiYAxisString = "1/c"; yaxis
   plot = gsn_csm_xy(wks,kx,(/c(0,:),c(1,:),c(2,:),cg(0,:),cg(1,:),cg(2,:)/),res)   ; create plot  
 

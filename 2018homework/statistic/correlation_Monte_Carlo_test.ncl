@@ -14,20 +14,23 @@ begin
     av = 0.0  ;representing mean of the normal distribution
     sd = 1.0  ;representing standard deviation of the normal distribution
     ntest   = 1000
-    nsample = 30
+    nsample = 10
     nintval = 21
     r_refer = fspan(0, 100, nintval) ;the x-axis
     frequency = new((/nintval/),float)
     cumu_freq = new((/nintval/),float)
+    yaxis_name = (/"Cumulative Frequency","Relative Frequency"/) + "(%)"
+    xaxis_name = "abs(r)*100"
+    title      = "Monte_carlo_corr_test(10)"
 
 ;Generates random numbers using a normal distribution.
     x1 = random_normal(av,sd,(/ntest, nsample/))
     x2 = random_normal(av,sd,(/ntest, nsample/))
     r =  esccr(x1, x2, 0)*100 ;calc cross-corr on the rightmost dimension, get (ntest)
-    r := ndtooned(r)
+    r := ndtooned(abs(r))
     printVarSummary(r)
-    print(x1(1,0:10))
-    print(x2(1,0:10))
+    print(x1(1,0:5))
+    print(x2(1,0:5))
     
 frequency(0) = dimsizes(ind(r.eq.0))
 cumu_freq(0) = frequency(0)
@@ -35,6 +38,15 @@ do ni = 1, nintval-1, 1
     frequency(ni) = dimsizes(ind((r.gt.r_refer(ni-1)).and.(r.le.r_refer(ni))))
     cumu_freq(ni) = cumu_freq(ni-1) + frequency(ni)
 end do
+frequency = frequency/ntest*100
+cumu_freq = cumu_freq/ntest*100
+print(max(r))
+print(min(r))
+print(sum(frequency))
+
+if(any(ismissing(r))) then
+   print("r contains some missing values. Beware.")
+end if
 
 ;************************************************
 ; plotting
@@ -51,69 +63,82 @@ end do
    mp_thick       = 4.0
    font_index     = 22
 
-wks  = gsn_open_wks("png","amplitude_error")                 ; send graphics to PNG file
+wks  = gsn_open_wks("png",title)                 ; send graphics to PNG file
   
-  res               = True                        ; plot mods desired
-  res@gsnFrame      = False
-  res@gsnDraw       = False
-  res@gsnMaximize   = True
-  res@tiMainString  = "Amplitude Error"     ; title
-  res@tiXAxisString = "k~F19~["  ; xaxis
-  res@tiYAxisString = "A~B~k'~N~/k"; yaxis
-  res@tiYAxisAngleF = 0.0 ;let the yaxis horizontal
-  
-  res@xyDashPatterns    = (/0,1,2/)
-  res@xyLineThicknesses = (/4.0,4.0,4.0/)   ; make second line thicker
-  res@xyLineColors      = (/"black","black","black"/)
+  resl               = True                        ; plot mods desired
+  resl@gsnFrame      = False
+  resl@gsnDraw       = False
+  resl@gsnMaximize   = True
+  resl@vpWidthF      = 0.9
+  resl@vpHeightF     = 0.3
 
-  res@tmBorderThicknessF  = mp_thick
-  res@tmXBLabelFont         = font_index
-  res@tmYLLabelFont         = font_index
-  res@tmXBLabelFontHeightF     = tick_font 
-  res@tmXBLabelFontThicknessF  = tick_thick
-  res@tmYLLabelFontHeightF     = tick_font
-  res@tmYLLabelFontThicknessF  = tick_thick
+  resl@tiMainString  = title
+  resl@tiXAxisString = xaxis_name  ; xaxis
+  resl@tiYAxisString = yaxis_name(0) 
+  resl@tiYAxisFontColor = "black"
   
-  res@tmXBMajorThicknessF     = mp_thick
-  res@tmYLMajorThicknessF     = mp_thick
-  res@tmXBMinorThicknessF     = mp_thick
-  res@tmYLMinorThicknessF     = mp_thick
-  
-  res@tmXMajorGrid                = True          ; implement x grid 
-  res@tmXMajorGridThicknessF      = 2.0           ; 2.0 is default
-  res@tmXMajorGridLineColor       = "gray"
-  res@tmXMajorGridLineDashPattern = 2             ; select short dash lines
-  
-  res@tmYMajorGrid                = True          ; implement y grid
-  res@tmYMajorGridThicknessF      = 2.0           ; 2.0 is default
-  res@tmYMajorGridLineColor       = "gray"
-  res@tmYMajorGridLineDashPattern = 2             ; select short dash lines
-  
-  res@pmLegendDisplayMode = "Always"
-  res@lgOrientation       = "Vertical"
-  res@lgPerimOn           = False
-  res@lgPerimFill         = "SolidFill"
-  res@lgPerimFillColor    = "white"
-  res@xyExplicitLegendLabels = label
-  res@lgLabelFontColor       = "black"
-  res@lgLabelFontThicknessF  = label_thick
-  res@lgLabelFontHeightF     = label_font
-  res@pmLegendWidthF   = 0.08
-  res@pmLegendHeightF  = 0.1
-  res@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-  res@pmLegendOrthogonalPosF  = 0.3   ; move ref vector along Y-axis
-  res@pmLegendParallelPosF    = -0.35    ; move ref vector along X-axis
+  resl@xyDashPatterns    = (/0/)
+  resl@xyLineThicknesses = (/4.0/)   ; make second line thicker
+  resl@xyLineColors      = (/"black"/)
+  resl@trYMaxF  = 100
+  resl@trYMinF  = 0
+  resl@trXMaxF  = 70
+  resl@trXMinF  = 0
 
-  res@gsnStringFont         = font_index
-  res@gsnStringFontHeightF = subtitle_font
+  resl@tmBorderThicknessF  = mp_thick
+  resl@tmXBLabelFont         = font_index
+  resl@tmYLLabelFont         = font_index
+  resl@tmXBLabelFontHeightF     = tick_font 
+  resl@tmXBLabelFontThicknessF  = tick_thick
+  resl@tmYLLabelFontHeightF     = tick_font
+  resl@tmYLLabelFontThicknessF  = tick_thick
+  
+  resl@tmXBMajorThicknessF     = mp_thick
+  resl@tmYLMajorThicknessF     = mp_thick
+  resl@tmXBMinorThicknessF     = mp_thick
+  resl@tmYLMinorThicknessF     = mp_thick
+  
+  resl@tmXMajorGrid                = True          ; implement x grid 
+  resl@tmXMajorGridThicknessF      = 2.0           ; 2.0 is default
+  resl@tmXMajorGridLineColor       = "gray"
+  resl@tmXMajorGridLineDashPattern = 2             ; select short dash lines
+  
+  resl@tmYMajorGrid                = True          ; implement y grid
+  resl@tmYMajorGridThicknessF      = 2.0           ; 2.0 is default
+  resl@tmYMajorGridLineColor       = "gray"
+  resl@tmYMajorGridLineDashPattern = 2             ; select short dash lines
+  
+  ;resl@pmLegendDisplayMode = "Always"
+  ;resl@lgOrientation       = "Vertical"
+  ;resl@lgPerimOn           = False
+  ;resl@lgPerimFill         = "SolidFill"
+  ;resl@lgPerimFillColor    = "white"
+  ;resl@xyExplicitLegendLabels = label
+  ;resl@lgLabelFontColor       = "black"
+  ;resl@lgLabelFontThicknessF  = label_thick
+  ;resl@lgLabelFontHeightF     = label_font
+  ;resl@pmLegendWidthF   = 0.08
+  ;resl@pmLegendHeightF  = 0.1
+  ;resl@pmLegendZone  = 0   ;set the positional origin in the center of the plot
+  ;resl@pmLegendOrthogonalPosF  = 0.3   ; move ref vector along Y-axis
+  ;resl@pmLegendParallelPosF    = -0.35    ; move ref vector along X-axis
 
-  plot = gsn_csm_xy(wks,kx,y,res)   ; create plot  
+  resl@gsnStringFont        = font_index
+  resl@gsnStringFontHeightF = subtitle_font
+
+  resr               = True
+  resr@tiYAxisString = yaxis_name(1)
+  resr@tiYAxisFontColor = "red"
+  resr@xyDashPatterns    = (/0/)
+  resr@xyLineThicknesses = (/4.0/)   ; make second line thicker
+  resr@xyLineColors      = (/"red"/)
+  plot = gsn_csm_xy2(wks,r_refer,cumu_freq,frequency,resl,resr)   ; create plot  
 
   gsres                   = True                        ; poly res
-  gsres@tfPolyDrawOrder   = "Predraw"                   ; draw this first
-  gsres@gsFillColor       = "grey"                 ; color chosen
-  xp = (/0.0,3.0,3.0,0.0,0.0/)
-  yp = (/0.9,0.9,1.0,1.0,0.9/)
+  gsres@tfPolyDrawOrder  = "Predraw"                   ; draw this first
+  gsres@gsFillColor      = "grey"                 ; color chosen
+  xp = (/0.0,100,100,0.0,0.0/)
+  yp = (/90 ,90 ,100,100,90 /)
   dummy = gsn_add_polygon (wks,plot,xp,yp,gsres)
 
   draw(plot)

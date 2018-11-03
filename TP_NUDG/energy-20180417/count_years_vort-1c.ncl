@@ -25,7 +25,6 @@ lonl = 70
 lonr = 125
 lev  = (/850,500,200/)
 nl = 1
-fileout = path + "/energy-20180417/JJAvort_number" + case(nc) + lev(nl) + ".txt"
 
 ;-----area of TP 
 maxlon = 105

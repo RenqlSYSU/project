@@ -13,17 +13,18 @@
 ;*********************************************************************************
 begin
 draw_var = (/"T","OMEGA","Q","Z3","DTCOND"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"~S~o~N~C","Pa/s","g/kg","km","K/s"/) ;"K"   ;this can be used as right string 
+unit     = (/"~S~o~N~C","Pa/s","g/kg","km","K/day"/) ;"K"   ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 1
+nl = 2
 nv = 4
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
 fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
@@ -115,8 +116,9 @@ if(nv.eq.3) then
 end if
 
 if(nv.eq.4) then
+    var = var*3600*24 ;convert unit from K/s to K/day
     do nf = 0 ,ncase-2,1
-        prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+        prob(nf,:,:,:) = ttest(var(0,:,:,:)/3600/24,vari(0,:,:,:),27,var(nf+1,:,:,:)/3600/24,vari(nf+1,:,:,:),27,True,False)
         var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)
     end do
 end if
@@ -285,9 +287,9 @@ if(nv.eq.3) then
 end if
 
 if(nv.eq.4) then
-    minlvl = (/(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-0.18 ,-0.18 /),(/ 0  ,-1.8 ,-1.8 /)/)
-    maxlvl = (/(/ 6  ,1.8  , 1.8 /),(/0.6 ,0.18  , 0.18 /),(/ 6  ,1.8  , 1.8 /)/)
-    spacig = (/(/0.5 ,0.2  , 0.2 /),(/0.05,0.02  , 0.02 /),(/0.5 ,0.2  , 0.2 /)/)
+    minlvl = (/(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /)/)
+    maxlvl = (/(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /)/)
+    spacig = (/(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /)/)
 end if
 
 do nm = 0 ,nmonth-1,1

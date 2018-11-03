@@ -19,13 +19,13 @@ var_name = (/"U","V","Z3"/)
 nc = 2
 
 ;-----area of east asia 
-lats = 20
-latn = 45
-lonl = 65
+lats = 25
+latn = 40
+lonl = 70
 lonr = 125
 lev  = (/850,500,200/)
 nl = 1
-fileout = path + "/energy-20180417/mdata/JJAvort_number" + case(nc) + lev(nl) + ".txt"
+fileout = path + "/energy-20180417/JJAvort_number" + case(nc) + lev(nl) + ".txt"
 
 ;-----area of TP 
 maxlon = 105
@@ -54,11 +54,11 @@ print(" ")
 print("=================================================================================")
 print(" the number of vortices generating in " + case(nc) + " " + lev(nl) + "hPa")
 print(" ")
-NUM_a = 0
+NUM_a = 0  ;satisfy the low pressure
 NUM_T = 0
-NUM_av1 = 0
-NUM_TV1 = 0
-NUM_av2 = 0
+NUM_av1 = 0  ;satisfy the low pressure and positive vorticity
+NUM_TV1 = 0                                                                                
+NUM_av2 = 0  ;satsify the low pressure and positive vorticity and around positive vorticity
 NUM_TV2 = 0
 do nt = 0,nyear-1,1
     nv = 0
@@ -72,13 +72,14 @@ do nt = 0,nyear-1,1
     hgt = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr})
     vort = uv2vr_cfd(u, v, v&lat, v&lon, 2)*1000000 ;calculate the vorticity
     copy_VarMeta(u,vort)
-    
+
+;calc the gradient of pressure in order to judge to the low pressure
     do nx = 1,nlon-2,1
     do ny = 1,nlat-2,1
-    grads(:,ny,nx) = (hgt(:,ny,nx-1)-hgt(:,ny,nx));/(cos(lat(ny)*3.14/180)*6371393*(lon(nx-1)-lon(nx))) ;<0
+    gradw(:,ny,nx) = (hgt(:,ny,nx-1)-hgt(:,ny,nx));/(cos(lat(ny)*3.14/180)*6371393*(lon(nx-1)-lon(nx))) ;<0
     grade(:,ny,nx) = (hgt(:,ny,nx+1)-hgt(:,ny,nx));/(cos(lat(ny)*3.14/180)*6371393*(lon(nx+1)-lon(nx))) ;>0
     gradn(:,ny,nx) = (hgt(:,ny+1,nx)-hgt(:,ny,nx));/(6371393*(lat(ny+1)-lat(ny))) ;>0
-    gradw(:,ny,nx) = (hgt(:,ny-1,nx)-hgt(:,ny,nx));/(6371393*(lat(ny-1)-lat(ny))) ;<0
+    grads(:,ny,nx) = (hgt(:,ny-1,nx)-hgt(:,ny,nx));/(6371393*(lat(ny-1)-lat(ny))) ;<0
     end do
     end do
     copy_VarMeta(hgt,grads)
@@ -92,12 +93,12 @@ do nt = 0,nyear-1,1
     gradw1d = ndtooned(gradw)
     indices := ind_resolve(ind(grads1d.gt.0.and.grade1d.gt.0.and.gradw1d.gt.0.and.gradn1d.gt.0),dimsizes(grads)) ;two dimensions
     dim_id  := dimsizes(indices)
-    number  := dim_id(0)
+    number  := dim_id(0) ;satisfy the low pressure
     numberTP:= dimsizes(ind(lat(indices(:,1)).gt.25.and.lat(indices(:,1)).lt.40.and.lon(indices(:,2)).gt.70.and.lon(indices(:,2)).lt.105))
     
-    num_vort1   = 0
-    num_vortTP1 = 0
-    num_vort2   = 0
+    num_vort1   = 0  ;satisfy the low pressure and positive vorticity
+    num_vortTP1 = 0 
+    num_vort2   = 0  ;satsify the low pressure and positive vorticity and around positive vorticity
     num_vortTP2 = 0
     do nn = 0,number-1,1
         itime= indices(nn,0)
@@ -118,7 +119,7 @@ do nt = 0,nyear-1,1
         end if
         end if
     end do
-    print(years(nt) + " " + number + " " + numberTP + " " + num_vort1 + " " + num_vortTP1 + " " + num_vort2 + " " + num_vortTP2)
+    print(years(nt) + "JJA " + number + " " + numberTP + " " + num_vort1 + " " + num_vortTP1 + " " + num_vort2 + " " + num_vortTP2)
     
     NUM_a = NUM_a + number
     NUM_T = NUM_T + numberTP
@@ -128,7 +129,8 @@ do nt = 0,nyear-1,1
     NUM_TV2 = NUM_TV2 + num_vortTP2
 end do
 print(" ")
-print("all year in east Asia: " + NUM_a + ",all year in TP: " + NUM_T + " " + NUM_av1 + " " + NUM_TV1 + " " + NUM_av2 + " " + NUM_TV2)
+print("all year JJA in east Asia: " + NUM_a + " " + NUM_av1 + " " + NUM_av2)
+print("all year JJA in TP: " + NUM_T + " " + NUM_TV1 + " " + NUM_TV2)
 print("=================================================================================")
 print(" ")
 end do

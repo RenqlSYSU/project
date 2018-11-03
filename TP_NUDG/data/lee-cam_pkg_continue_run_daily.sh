@@ -9,18 +9,19 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE \" IN STRING!
-#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
-#PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
-PRE_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
+PRE_DIR[1]=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/\"
+PRE_DIR[2]=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/\"
+PRE_DIR[3]=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/\"
 
 # Path of the post processed data
-#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
-#PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
-PRO_DIR=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
+PRO_DIR[1]=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_6h/\"
+PRO_DIR[2]=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/post_data_24h/\"
+PRO_DIR[3]=\"/users/yangsong3/L_Zealot/F/AMIP_C5PM/post_data/\"
 
 # Case name
-#CASENAME=\"AMIP_C5PM_TP_NUDG\"
-CASENAME=\"AMIP_C5PM\"
+CASENAME[1]=\"AMIP_C5PM_TP_NUDG\"
+CASENAME[2]=\"AMIP_C5PM_TP_NUDG\"
+CASENAME[3]=\"AMIP_C5PM\"
 
 
 # Names of 2D fields
@@ -33,7 +34,7 @@ FDNAME2D="(/\"TS\"/)" #often use
 # Names of 3D fields
 #FDNAME3D="(/\"U\",\"V\",\"Q\"/)" # hybrid coordinate
 #FDNAME3D="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"Z3\"/)" #often use
-FDNAME3D="(/\"RELHUM\"/)" #often use
+FDNAME3D="(/\"DTCOND\"/)" #often use
 #FDNAME3D_HY="(/\"RELHUM\"/)" #often use
 #FDNAME3D_HY="(/\"U\",\"V\",\"T\",\"OMEGA\",\"Q\",\"RELHUM\",\"Z3\",\"DTCOND\"/)" # hybrid coordinate
 #FDNAME3D_HY="(/\"U\",\"V\",\"T\"/)" # hybrid coordinate
@@ -54,7 +55,6 @@ LAYERS=30
 #PLEV="(/1000,925,850,700,500,200/)"
 PLEV="(/1000,925,850,700,600,500,400,300,200/)"
 
-
 # Process flag
 FLAG_2D=0
 FLAG_3D=1
@@ -62,16 +62,18 @@ FLAG_3D_HY=0
 
 #-----------------------------------------------------------
 
+for ni in {1..3}
+do
 #Output post processed 2D fields
 if [ $FLAG_2D == 1 ] ; then
     echo "-----package 2D field    (1)-----"
     ncl -nQ \
-        pre_dir=$PRE_DIR            \
-        pro_dir=$PRO_DIR            \
+        pre_dir=${PRE_DIR[ni]}            \
+        pro_dir=${PRO_DIR[ni]}            \
         fdname2d=$FDNAME2D          \
         frstyear=$FRSTYEAR          \
         lstyear=$LSTYEAR           \
-        case_name=$CASENAME         \
+        case_name=${CASENAME[ni]}         \
         ./package_2D_from_raw_data_daily-160402.ncl
 fi
 
@@ -80,14 +82,14 @@ fi
 if [ $FLAG_3D == 1 ] ; then
     echo "-----package 3D field    (1)-----"
     ncl -nQ \
-       pre_dir=$PRE_DIR            \
-       pro_dir=$PRO_DIR            \
+        pre_dir=${PRE_DIR[ni]}            \
+        pro_dir=${PRO_DIR[ni]}            \
        fdname3d=$FDNAME3D          \
        layers=$LAYERS              \
        plev=$PLEV                  \
        frstyear=$FRSTYEAR          \
        lstyear=$LSTYEAR           \
-       case_name=$CASENAME         \
+        case_name=${CASENAME[ni]}         \
        ./package_3D_from_raw_data_daily-160808.ncl
 fi
 
@@ -95,12 +97,13 @@ fi
 if [ $FLAG_3D_HY == 1 ] ; then
     echo "-----package 3D field    (1)-----"
     ncl -nQ \
-       pre_dir=$PRE_DIR            \
-       pro_dir=$PRO_DIR            \
+        pre_dir=${PRE_DIR[ni]}            \
+        pro_dir=${PRO_DIR[ni]}            \
        fdname3d=$FDNAME3D_HY          \
        frstyear=$FRSTYEAR          \
        lstyear=$LSTYEAR           \
        layers=$LAYERS              \
-       case_name=$CASENAME         \
+        case_name=${CASENAME[ni]}         \
        ./package_3DHY_from_raw_data_daily-171019.ncl
 fi
+done

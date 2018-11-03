@@ -12,22 +12,23 @@
 ;         minlevel, max level and level spacing.
 ;*********************************************************************************
 begin
-draw_var = (/"T","OMEGA","Q","Z3"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"~S~o~N~C","Pa/s","g/kg","km"/) ;"K"   ;this can be used as right string 
+draw_var = (/"T","OMEGA","Q","Z3","DTCOND"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"~S~o~N~C","Pa/s","g/kg","km","K/s"/) ;"K"   ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
 nl = 2;0;1
-nv = 3
+nv = 4
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
 fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
-    case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
+    ;case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
+    case   = (/"AMIP_CTRL","NUDG24h-CTRL","NUDG6h-CTRL"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -110,6 +111,13 @@ if(nv.eq.3) then
     do nf = 0 ,ncase-2,1
         prob(nf,:,:,:) = ttest(var(0,:,:,:)*1000,vari(0,:,:,:),27,var(nf+1,:,:,:)*1000,vari(nf+1,:,:,:),27,True,False)
         var(nf+1,:,:,:)= (var(0,:,:,:) - var(nf+1,:,:,:))/abs(var_temp)*100 ;get the difference between CTRL and NUDG
+    end do
+end if
+
+if(nv.eq.4) then
+    do nf = 0 ,ncase-2,1
+        prob(nf,:,:,:) = ttest(var(0,:,:,:)*1000,vari(0,:,:,:),27,var(nf+1,:,:,:)*1000,vari(nf+1,:,:,:),27,True,False)
+        var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)
     end do
 end if
 
@@ -274,6 +282,12 @@ if(nv.eq.3) then
     minlvl = (/(/1.25  ,-0.9 ,-0.9 /),(/5.0  ,-0.36,-0.36/),(/10.8,-0.36,-0.36/)/)  ;850,500,200hpa
     maxlvl = (/(/1.70  , 0.9 , 0.9 /),(/5.9  ,0.36 ,0.36 /),(/12.6,0.36 ,0.36 /)/)
     spacig = (/(/0.025 , 0.1 , 0.1 /),(/0.05 ,0.04 ,0.04 /),(/0.1 ,0.04 ,0.04 /)/) 
+end if
+
+if(nv.eq.4) then
+    minlvl = (/(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /)/)
+    maxlvl = (/(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /)/)
+    spacig = (/(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /)/)
 end if
 
 do nm = 0 ,nmonth-1,1

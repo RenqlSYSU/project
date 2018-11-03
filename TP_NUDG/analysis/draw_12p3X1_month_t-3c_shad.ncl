@@ -19,7 +19,7 @@ var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"DJF","MAM","JJA","SON"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 2;0;1
+nl = 1
 nv = 4
 
 ;the path of the file
@@ -116,7 +116,7 @@ end if
 
 if(nv.eq.4) then
     do nf = 0 ,ncase-2,1
-        prob(nf,:,:,:) = ttest(var(0,:,:,:)*1000,vari(0,:,:,:),27,var(nf+1,:,:,:)*1000,vari(nf+1,:,:,:),27,True,False)
+        prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
         var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)
     end do
 end if
@@ -285,9 +285,9 @@ if(nv.eq.3) then
 end if
 
 if(nv.eq.4) then
-    minlvl = (/(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /)/)
-    maxlvl = (/(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /)/)
-    spacig = (/(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /)/)
+    minlvl = (/(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-0.18 ,-0.18 /),(/ 0  ,-1.8 ,-1.8 /)/)
+    maxlvl = (/(/ 6  ,1.8  , 1.8 /),(/0.6 ,0.18  , 0.18 /),(/ 6  ,1.8  , 1.8 /)/)
+    spacig = (/(/0.5 ,0.2  , 0.2 /),(/0.05,0.02  , 0.02 /),(/0.5 ,0.2  , 0.2 /)/)
 end if
 
 do nm = 0 ,nmonth-1,1

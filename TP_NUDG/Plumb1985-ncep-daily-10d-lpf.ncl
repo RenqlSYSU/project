@@ -29,8 +29,8 @@
 ; x-component:  Plumb1985-Fx.daily.2000.nc
 ; y-component:  Plumb1985-Fy.daily.2000.nc
 ; z-component:  Plumb1985-Fz.daily.2000.nc
-
-
+; daily QG stream function anomaly: psidev.daily.2000.nc
+; Brunt Vaisala frequency: NN.daily.2000.nc
 
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
@@ -207,24 +207,19 @@ NN&lon = lon
 Fx@units = "m^2/s^2"
 Fx@units = "m^2/s^2"
 Fz@units = "m^2/s^2"
-
 psidev@units = "m^2/s"
-
 NN@units = "1/s^2"
 
 ncFx = addfile("Plumb1985-Fx.daily.2008.nc","c")
 ncFy = addfile("Plumb1985-Fy.daily.2008.nc","c")
 ncFz = addfile("Plumb1985-Fz.daily.2008.nc","c")
-
 ncpsidev = addfile("psidev.daily.2008.nc","c")
-
-ncNN = addfile("NN.daily.2008.nc","c")
+ncNN     = addfile("NN.daily.2008.nc","c")
 
 ncFx->Fx = Fx
 ncFy->Fy = Fy
 ncFz->Fz = Fz
 ncpsidev->psidev = psidev
-
 ncNN->NN = NN
 end
 

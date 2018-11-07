@@ -28,7 +28,6 @@
 ; Note that 
 ; (i) "p" (pressure) in Eq. (5.7) is dimensionless (pressure/1000mb)
 
-
 ; Output files are
 ; x-component:  TN2001-Fx.monthly.1990.nc
 ; y-component:  TN2001-Fy.monthly.1990.nc
@@ -329,9 +328,7 @@ NN&lon = lon
 Fx@units = "m^2/s^2"
 Fx@units = "m^2/s^2"
 Fz@units = "m^2/s^2"
-
 psidev@units = "m^2/s"
-
 NN@units = "1/s^2"
 
 ncFx =     addfile("TN2001-Fx.monthly.1990.nc","c")
@@ -344,6 +341,5 @@ ncFx->Fx = Fx
 ncFy->Fy = Fy
 ncFz->Fz = Fz
 ncpsidev->psidev = psidev
-
 ncNN->NN = NN
 end

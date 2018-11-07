@@ -79,7 +79,6 @@ bufile = addfile(filename,"r")
 filename = systemfunc("ls "+dirci+"vwnd.day.ltm.nc")
 bvfile = addfile(filename,"r")
 
-
 ; Test a variable's type prior to reading the variable
 if (getfilevartypes(zfile[0],"hgt").eq."short")then
 zvarorg = short2flt(zfile[:]->hgt)
@@ -301,3 +300,89 @@ ddpsidevdlatz = center_finite_diff_n(dpsidevdlat, -sclhgt*log(level/1000),False,
 
 xuterm = (dpsidevdlon*dpsidevdlon - psidev*ddpsidevdlonlon)
 xvterm = (dpsidevdlon*dpsidevdlat - psid
+;yuterm = xvterm
+yvterm = (dpsidevdlat*dpsidevdlat - psidev*ddpsidevdlatlat)
+
+zuterm = (dpsidevdlon*dpsidevdz - psidev*ddpsidevdlonz)
+zvterm = (dpsidevdlat*dpsidevdz - psidev*ddpsidevdlatz)
+
+; Mask out where westerlies is small or negative (less than 5 m/s).
+;  by using mask
+
+;x-component of (38)
+Fx = mask( leveltmp/1000./(2.*cumag*re*re)*( cuvar/coslattmp * xuterm + cvvar * xvterm), cuvar.lt.5,False)
+
+;y-component 
+Fy = mask(leveltmp/1000./(2.*cumag*re*re)*( cuvar*xvterm + coslattmp*cvvar*yvterm),  cuvar.lt.5,False)
+
+;z-component 
+Fz = mask(leveltmp/1000.*ftmp*ftmp/(2.*cumag*NN*re)*(cuvar*zuterm + coslattmp*cvvar*zvterm), cuvar.lt.5, False)
+
+; for output
+Fx!0 = "time"
+Fx&time = ctime
+Fx!1 = "level"
+Fx&level = level
+Fx!2 = "lat"
+Fx&lat = lat
+Fx!3 = "lon"
+Fx&lon = lon
+
+Fy!0 = "time"
+Fy&time = ctime
+Fy!1 = "level"
+Fy&level = level
+Fy!2 = "lat"
+Fy&lat = lat
+Fy!3 = "lon"
+Fy&lon = lon
+
+Fz!0 = "time"
+Fz&time = ctime
+Fz!1 = "level"
+Fz&level = level
+Fz!2 = "lat"
+Fz&lat = lat
+Fz!3 = "lon"
+Fz&lon = lon
+
+psidev!0 = "time"
+psidev&time = ctime
+psidev!1 = "level"
+psidev&level = level
+psidev!2 = "lat"
+psidev&lat = lat
+psidev!3 = "lon"
+psidev&lon = lon
+
+NN!0 = "time"
+NN&time = ctime
+NN!1 = "level"
+NN&level = level
+NN!2 = "lat"
+NN&lat = lat
+NN!3 = "lon"
+NN&lon = lon
+
+Fx@units = "m^2/s^2"
+Fx@units = "m^2/s^2"
+Fz@units = "m^2/s^2"
+
+psidev@units = "m^2/s"
+
+NN@units = "1/s^2"
+
+ncFx =     addfile("TN2001-Fx.daily.2000.nc","c")
+ncFy =     addfile("TN2001-Fy.daily.2000.nc","c")
+ncFz =     addfile("TN2001-Fz.daily.2000.nc","c")
+ncpsidev = addfile("psidev.daily.2000.nc","c")
+ncNN =     addfile("NN.daily.2000.nc","c")
+
+ncFx->Fx = Fx
+ncFy->Fy = Fy
+ncFz->Fz = Fz
+ncpsidev->psidev = psidev
+
+ncNN->NN = NN
+end
+

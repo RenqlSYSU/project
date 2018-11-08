@@ -9,7 +9,6 @@
 begin
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-;path     = "/home/ys17-19/renql/project/TP_NUDG"
 case = (/"CTRL","NUDG24h","NUDG6h"/)
 basic = 2
 filein  = path + "/analysis/mdata/" + case + "-Clim_month_ave_" 
@@ -23,7 +22,7 @@ lats = -90 ;-20
 latn = 90  ;60
 lonl = 0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600,500,400,300,200/)
+lev  = (/600,500,400,300,200/)
 
 zf = addfile(filein(0) + "Z3.nc","r")
 zvar = zf->$var_name$(:,{lev},{lats:latn},{lonl:lonr})
@@ -41,7 +40,7 @@ bvvar = bzf->$var_name$(:,{lev},{lats:latn},{lonl:lonr})
 nmonth = dimsizes(months)
 nlat   = getfilevardimsizes(zf,"lat")
 nlon   = getfilevardimsizes(zf,"lon")
-nlev    = getfilevardimsizes(zf,"lev")
+nlev   = dimsizes(lev) 
 lat   = zf->lat
 lon   = zf->lon
 

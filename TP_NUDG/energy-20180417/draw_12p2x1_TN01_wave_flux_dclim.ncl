@@ -13,16 +13,17 @@ months   = (/"DJF","MAM","JJA","SON"/)
 pre_case = (/"(a)","(b)","(c)","(d)"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 1;1
+nl = 2 
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG" 
 case = (/"CTRL","NUDG24h","NUDG6h"/)
 basic = 2
 filename = path + "/energy-20180417/mdata/CTRL_b" + case(basic) + "_TN01_wave_flux_dclim_seasonly.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/4p3X1_CTRL_b" + case(basic) + "TN01_wave_flux_dclim_seasonly_"+ lev(nl)
-fig_title  = "TN01 Wave Flux"
+fig_name = path + "/energy-20180417/fig/4p3X1_CTRL_b" + case(basic) + "TN01_wave_flux_dclim_seasonly_" + lev(nl)
+fig_title  = "TN01 Wave Flux in " + lev(nl) + "hPa"
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -40,6 +41,8 @@ f = addfile(filename(0),"r")
 var_u  = f->$draw_var(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
 var_v  = f->$draw_var(1)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
 var_w  = f->$draw_var(2)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
+printVarSummary(var_u)
+printVarSummary(var_w)
 
 ;the number of the panel plot
     plot     = new((/nmonth/),graphic)
@@ -92,8 +95,8 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 20
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLatSpacing = 30
+    res@gsnMajorLonSpacing = 40
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -163,8 +166,8 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     res@vcRefAnnoPerimOn           = False         ;close the border
     res@vcRefAnnoFont              = font_index
     res@vcRefAnnoFontHeightF       = vcref_font
-    res@vcRefAnnoString1On         = False
-    res@vcRefAnnoString2On         = True
+    res@vcRefAnnoString1On         = True
+    res@vcRefAnnoString2On         = False
     ;res@vcRefAnnoString2           = "30m/s"
 
 ;--------set the attribute of polygon--------------
@@ -199,7 +202,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "portrait"
+    resp@gsnPaperOrientation = "landscape" ;"portrait"
     ;resp@gsnPanelLabelBar = True
     ;resp@pmLabelBarWidthF  = 0.5
     ;resp@pmLabelBarHeightF = 0.05
@@ -208,13 +211,14 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/100,100,100,100/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/100,100,100,100/), \  ;the level of 500hpa    ctrl,nudg,diff
+    vcref         = (/(/10,10,10,10/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/200,50,30,100/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,15,15,15/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     res@gsnLeftString   = pre_case(nm) + months(nm)
-    res@vcRefMagnitudeF       = vcref(nl,nm)                ; define vector ref mag
-    res@vcRefAnnoString2      = vcref(nl,nm)+"m/s"
+    res@gsnRightString  = unit
+    ;res@vcRefMagnitudeF       = vcref(nl,nm)                ; define vector ref mag
+    ;res@vcRefAnnoString2      = vcref(nl,nm)+"m/s"
     plot(nm) = gsn_csm_vector_scalar_map_ce(wks,var_u(nm,:,:),var_v(nm,:,:),var_w(nm,:,:),res)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),gtop(nm))

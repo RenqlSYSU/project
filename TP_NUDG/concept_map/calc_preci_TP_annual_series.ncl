@@ -13,16 +13,16 @@ path    = "/users/yangsong3/renql/project/TP_NUDG"
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_4TP_annual_series.nc"
+fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_6TP_annual_series.nc"
 case     = (/"CTRL","NG24h","NG6h"/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-area = (/"TP","STP","CTP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP", ;S mean south,N mean North,EA mean East Asia
-lats = (/25  ,25   ,30   ,35   /);25    ,30    ,35   , 22  , 30  /) 25  , ;-20
-latn = (/40  ,30   ,35   ,40   /);30    ,35    ,40   , 30  , 45  /) 40  , ;60
-lonl = (/70  ,70   ,70   ,70   /);100   ,90    ,70   ,107  ,107  /) 70  , ;20
-lonr = (/105 ,105  ,105  ,105  /);105   ,105   ,105  ,130  ,130  /) 105 , ;130 ;220
+area = (/"SETP","SCTP","SWTP","CETP","CWTP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/25    ,30    ,30    ,30    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
+latn = (/30    ,35    ,35    ,35    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
+lonl = (/100   ,85    ,70    ,90    ,70    ,70   /);100   ,90    ,70   ,107  ,107  /) 70  ,70   ,70   , ;20
+lonr = (/105   ,100   ,85    ,105   ,90    ,105  /);105   ,105   ,105  ,130  ,130  /) 105 ,105  ,105  , ;130 ;220
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -65,7 +65,7 @@ setfileoption(ncdf,"DefineMode",True)
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
 fileAtt@discription   = "The annual cycle of area average's preci,unit is mm/day" + \
-        "the area is TP,STP,CTP,NTP"
+        "the area is SETP,SCTP,SWTP,CETP,CWTP,NTP"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

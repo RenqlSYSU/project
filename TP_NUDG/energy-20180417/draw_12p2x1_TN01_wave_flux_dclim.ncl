@@ -20,10 +20,13 @@ nl = 2
 path     = "/home/ys17-19/renql/project/TP_NUDG" 
 case = (/"CTRL","NUDG24h","NUDG6h"/)
 basic = 2
-filename = path + "/energy-20180417/mdata/CTRL_b" + case(basic) + "_TN01_wave_flux_dclim_seasonly.nc"
+;filename = path + "/energy-20180417/mdata/CTRL_b" + case(basic) + "_TN01_wave_flux_dclim_seasonly.nc"
+;fig_name = path + "/energy-20180417/fig/4p3X1_CTRL_b" + case(basic) + "TN01_wave_flux_dclim_seasonly_" + lev(nl)
+;fig_title  = "TN01 Wave Flux in " + lev(nl) + "hPa"
+filename = path + "/energy-20180417/mdata/" + case(basic) + "_Pl85_wave_flux_dzonal_seasonly.nc"
+fig_name = path + "/energy-20180417/fig/" + case(basic) + "Pl85_wave_flux_dzonal_seasonly_" + lev(nl)
+fig_title  = "Pb85 Wave Flux in " + lev(nl) + "hPa"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/4p3X1_CTRL_b" + case(basic) + "TN01_wave_flux_dclim_seasonly_" + lev(nl)
-fig_title  = "TN01 Wave Flux in " + lev(nl) + "hPa"
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -41,8 +44,15 @@ f = addfile(filename(0),"r")
 var_u  = f->$draw_var(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
 var_v  = f->$draw_var(1)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
 var_w  = f->$draw_var(2)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
+divg = uv2dv_cfd ( var_u, var_v, var_u&lat, var_u&lon, 3 )
+copy_VarMeta(var_u,divg)
+printVarSummary(divg)
 printVarSummary(var_u)
 printVarSummary(var_w)
+print(max(var_u(0,{lats:latn},{lonl:lonr})))
+print(min(var_u(0,{lats:latn},{lonl:lonr})))
+print(max(var_w(0,{lats:latn},{lonl:lonr})))
+print(min(var_w(0,{lats:latn},{lonl:lonr})))
 
 ;the number of the panel plot
     plot     = new((/nmonth/),graphic)
@@ -133,10 +143,10 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
    
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -8          ; set min contour level
-    res@cnMaxLevelValF        = 8 ;32        ; set max contour level
-    res@cnLevelSpacingF       = 1        ; set contour interval
+    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res@cnMinLevelValF        = -8          ; set min contour level
+    ;res@cnMaxLevelValF        = 8 ;32        ; set max contour level
+    ;res@cnLevelSpacingF       = 1        ; set contour interval
 
     res@gsnSpreadColors      = False  ;True              ; turn of the full color map
     res@gsnSpreadColorStart  = 11                ; start at color 17
@@ -211,15 +221,15 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/10,10,10,10/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/200,50,30,100/), \  ;the level of 500hpa    ctrl,nudg,diff
+    vcref         = (/(/30,10,10,10/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/30,50,50,30/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,15,15,15/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     res@gsnLeftString   = pre_case(nm) + months(nm)
     res@gsnRightString  = unit
-    ;res@vcRefMagnitudeF       = vcref(nl,nm)                ; define vector ref mag
-    ;res@vcRefAnnoString2      = vcref(nl,nm)+"m/s"
-    plot(nm) = gsn_csm_vector_scalar_map_ce(wks,var_u(nm,:,:),var_v(nm,:,:),var_w(nm,:,:),res)
+    res@vcRefMagnitudeF       = vcref(nl,nm)                ; define vector ref mag
+    res@vcRefAnnoString2      = vcref(nl,nm)+"m/s"
+    plot(nm) = gsn_csm_vector_scalar_map_ce(wks,var_u(nm,:,:),var_v(nm,:,:),divg(nm,:,:),res)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),gtop(nm))
     line(nm) = gsn_add_polyline( wks, plot(nm), lonx, latx, lnres )

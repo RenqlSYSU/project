@@ -18,7 +18,7 @@ fig_title  = "Variance of 27 years in "
 fig_out    ="pdf";"x11"
 unit       = ""
 ncase = 3 
-draw_var = (/"U","V","T"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"U","V","T","preci"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 

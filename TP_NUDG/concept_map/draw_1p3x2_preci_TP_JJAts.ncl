@@ -12,7 +12,7 @@ begin
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day"/)    ;this can be used as right string 
 var_name = (/"series","ave"/)
-case     = (/" CTRL"," NG6h"/);" NG24h",this can be used as left string
+case     = (/" CTRL"," NG24h"," NG6h"/);" NG24h",this can be used as left string
 pre_case = (/"(a","(b","(c"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
@@ -24,8 +24,8 @@ fig_name = path + "/concept_map/fig/1p6x3_preci_SECW-CEW-NTP_JJAts"
 fig_out  = "pdf";"x11"
 
 area = (/"SETP","SCTP","SWTP","CETP","CWTP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/25    ,30    ,30    ,30    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
-latn = (/30    ,35    ,35    ,35    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
+lats = (/25    ,25    ,25    ,30    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
+latn = (/30    ,30    ,30    ,35    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
 lonl = (/100   ,85    ,70    ,90    ,70    ,70   /);100   ,90    ,70   ,107  ,107  /) 70  ,70   ,70   , ;20
 lonr = (/105   ,100   ,85    ,105   ,90    ,105  /);105   ,105   ,105  ,130  ,130  /) 105 ,105  ,105  , ;130 ;220
 

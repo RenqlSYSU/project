@@ -7,13 +7,13 @@
 ;                                                    2018/11/08
 ;*********************************************************************************
 begin
-draw_var = (/"Fx","Fy","Fz"/)  ;this is the variable used to draw, can used as center string
-unit     = "m~S~2~N~/s~S~2~N~" ;this can be used as right string 
+draw_var = "season_ave_" + (/"Fx","Fy","psidev"/)  ;this is the variable used to draw, can used as center string
+unit     = "QG streamfunc " + "(m~S~2~N~/s)" ;this can be used as right string 
 months   = (/"DJF","MAM","JJA","SON"/)
 pre_case = (/"(a)","(b)","(c)","(d)"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev  = (/850,500,200/)  ;can used as right string
-nl = 2 
+nl = 1 
 
 ;the path of the file
 ;path     = "/users/yangsong3/renql/project/TP_NUDG"
@@ -23,14 +23,17 @@ basic = 2
 ;filename = path + "/energy-20180417/mdata/CTRL_b" + case(basic) + "_TN01_wave_flux_dclim_seasonly.nc"
 ;fig_name = path + "/energy-20180417/fig/4p3X1_CTRL_b" + case(basic) + "TN01_wave_flux_dclim_seasonly_" + lev(nl)
 ;fig_title  = "TN01 Wave Flux in " + lev(nl) + "hPa"
-filename = path + "/energy-20180417/mdata/" + case(basic) + "_Pl85_wave_flux_dzonal_seasonly.nc"
-fig_name = path + "/energy-20180417/fig/" + case(basic) + "Pl85_wave_flux_dzonal_seasonly_" + lev(nl)
-fig_title  = "Pb85 Wave Flux in " + lev(nl) + "hPa"
+;filename = path + "/energy-20180417/mdata/" + case(basic) + "_Pl85_wave_flux_dzonal_seasonly.nc"
+;fig_name = path + "/energy-20180417/fig/" + case(basic) + "Pl85_wave_flux_dzonal_seasonly_" + lev(nl)
+;fig_title  = "Pb85 Wave Flux in " + lev(nl) + "hPa"
+filename  = path + "/energy-20180417/mdata/" + case(basic) + "_TN01_wave_flux_dclim_seasonly.nc"
+fig_name  = path + "/energy-20180417/fig/" + case(basic) + "_TN01_daily_wave_flux_dclim_seasonly_" + lev(nl)
+fig_title  = "TN01 Wave Flux " + lev(nl) + "hPa"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -90 ;-20
+lats = 15 ;-90 ;-20
 latn = 90  ;60
 lonl = 0  ;20
 lonr = 360 ;220
@@ -43,16 +46,12 @@ phis = phis/9.8   ;convert unit from m2/s2 to gpm
 f = addfile(filename(0),"r")
 var_u  = f->$draw_var(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
 var_v  = f->$draw_var(1)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
-var_w  = f->$draw_var(2)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
+var    = f->$draw_var(2)$(:,{lev(nl)},{lats:latn},{lonl:lonr})
 divg = uv2dv_cfd ( var_u, var_v, var_u&lat, var_u&lon, 3 )
 copy_VarMeta(var_u,divg)
 printVarSummary(divg)
 printVarSummary(var_u)
-printVarSummary(var_w)
-print(max(var_u(0,{lats:latn},{lonl:lonr})))
-print(min(var_u(0,{lats:latn},{lonl:lonr})))
-print(max(var_w(0,{lats:latn},{lonl:lonr})))
-print(min(var_w(0,{lats:latn},{lonl:lonr})))
+printVarSummary(var)
 
 ;the number of the panel plot
     plot     = new((/nmonth/),graphic)
@@ -222,21 +221,21 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
     resp@txFontThicknessF = title_thick
 
     vcref         = (/(/30,10,10,10/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/30,50,50,30/), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/30,30,30,30/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,15,15,15/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     res@gsnLeftString   = pre_case(nm) + months(nm)
     res@gsnRightString  = unit
-    res@vcRefMagnitudeF       = vcref(nl,nm)                ; define vector ref mag
-    res@vcRefAnnoString2      = vcref(nl,nm)+"m/s"
-    plot(nm) = gsn_csm_vector_scalar_map_ce(wks,var_u(nm,:,:),var_v(nm,:,:),divg(nm,:,:),res)
+    res@vcRefMagnitudeF  = vcref(nl,nm)                ; define vector ref mag
+    res@vcRefAnnoString2 = vcref(nl,nm)+"m~S~2~N~/s~S~2~N~"
+    plot(nm) = gsn_csm_vector_scalar_map_ce(wks,var_u(nm,:,:),var_v(nm,:,:),var(nm,:,:),res)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),gtop(nm))
     line(nm) = gsn_add_polyline( wks, plot(nm), lonx, latx, lnres )
     print(max(var_u(nm,{lats:latn},{lonl:lonr})))
     print(min(var_u(nm,{lats:latn},{lonl:lonr})))
-    print(max(var_w(nm,{lats:latn},{lonl:lonr})))
-    print(min(var_w(nm,{lats:latn},{lonl:lonr})))
+    print(max(var(nm,{lats:latn},{lonl:lonr})))
+    print(min(var(nm,{lats:latn},{lonl:lonr})))
 end do 
 
     resp@txString      = fig_title

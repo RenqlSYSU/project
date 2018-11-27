@@ -14,7 +14,7 @@ begin
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
 case = (/"CTRL","NUDG24h","NUDG6h"/)
-basic = 2
+basic = 1
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
@@ -260,7 +260,7 @@ setfileoption(ncdf,"DefineMode",True)
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
 fileAtt@discription   = "3-D wave-activity flux derived by Takaya and Nakamura (1999, 2001)" + \
-                ", the basic state is NUDG seasonly climatology"
+               ", the basic state is itself daily climatology"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

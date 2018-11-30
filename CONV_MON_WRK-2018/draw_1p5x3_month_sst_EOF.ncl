@@ -19,17 +19,22 @@ nv = 0
 ;-----EOF area-------------- 
 lats = -30
 latn = 30
-lonl = 120
-lonr = 260
+lonl = 90
+lonr = 300
 ;lev  = 200
 neval = 4
 lat_spacing = 15
 lon_spacing = 20
 
+opt = True
+opt@jopt = 0 ;0 mean use the covariance matrix to compute EOFs (default), 1 mean use the correlation matrix
+eof_kind = (/"cov","corr"/)
+tname    = (/"_","_DJF_"/)
+
 ;----path of the file and output file-----------------------------
 path      = "/home/ys17-19/renql/project/CONV_MON_WRK-2018" 
-filename  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF" + neval + ".nc"
-fig_name  = path + "/fig/"   + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_covEOF" + neval
+filename  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E" + tname(0) + eof_kind(opt@jopt) + "EOF" + neval + ".nc"
+fig_name  = path + "/fig/"   + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E" + tname(0) + eof_kind(opt@jopt) + "EOF" + neval
 fig_out   = "pdf";"x11"
 
 ;================================================================
@@ -238,7 +243,12 @@ do ne = 0,neval-2,1
     res@gsnLeftString    = case(nc)
     res@gsnCenterString  = "EOF " + (ne+1)
     res@gsnRightStringFontColor    = subtitle_color(nc,ne)
-    res@gsnRightString   = center_title(nc,ne)+"  "+right_title(nc,ne)+"%" 
+    res@gsnRightString   = center_title(nc,ne)+"  "+right_title(nc,ne)+"%"
+    if(nc.le.1) then
+        res@mpGeophysicalLineThicknessF = 0
+    else
+        res@mpGeophysicalLineThicknessF = mp_thick
+    end if
     plot(np) = gsn_csm_contour_map_ce(wks,map_var(nc,ne,:,:),res)
     print(max(map_var(nc,ne,{lats:latn},{lonl:lonr})))
     print(min(map_var(nc,ne,{lats:latn},{lonl:lonr})))

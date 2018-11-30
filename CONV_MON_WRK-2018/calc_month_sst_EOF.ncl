@@ -27,12 +27,13 @@ neval = 4
 opt = True
 opt@jopt = 0 ;0 mean use the covariance matrix to compute EOFs (default), 1 mean use the correlation matrix
 eof_kind = (/"cov","corr"/)
+tname    = (/"_","_DJF_"/)
 
 ;----path of the file and output file-----------------------------
 path     = "/home/ys17-19/renql/project/CONV_MON_WRK-2018"
 gtopfile = path + "/data/USGS-gtopo30_1.9x2.5_remap_c050602.nc"
 filename = path + "/data/" + case + "/pro/B20f19-" + (/"pure-aqua","surf-aqua","topo","realworld"/) + ".cam.h0." ; ; + var_name + ".1-100.nc" 
-fileout  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E_" + eof_kind(opt@jopt) + "EOF" + neval + ".nc"
+fileout  = path + "/mdata/" + var_name(nv) + lats + "S-" + latn + "N_" + lonl + "E-" + lonr + "E" + tname(0) + eof_kind(opt@jopt) + "EOF" + neval + ".nc"
 
 ;----Defining array dimensions-----------------
 f    = addfile(filename(0) + var_name(nv) + ".1-100.nc","r")
@@ -52,10 +53,10 @@ eof_ts= new((/ncase,neval,ntime/),float)
 pcvar = new((/ncase,neval/),float)
 eval  = new((/ncase,neval/),float)
 
-f    = addfile(gtopfile."r")
+f    = addfile(gtopfile,"r")
 mlnd = f->LANDM_COSLAT({lats:latn},{lonl:lonr}) ;ocean (0), continent (1), transition (0-1)
 mlnd_tmp = conform(var(0,:,:,:),mlnd,(/1,2/))
-print(mlnd_tmp)
+printVarSummary(mlnd_tmp)
 
 ;-----read the data-----------------------------
 do nc = 0,ncase-1,1
@@ -66,8 +67,8 @@ if(ntime.eq.(nyear*nmonth)) then
 ;=======================dd=================================================================
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
     var(nc,:,:,:) = f->$var_name(nv)$(nd_s:nd_e,{lats:latn},{lonl:lonr})
-    if(nc.ge.2) then
-        var(nc,:,:,:) = mask(var(nc,:,:,:),mlnd_tmp.eq.0, True) ;remove land surface temperature
+    if(nc.ge.0) then
+        var(nc,:,:,:) = mask(var(nc,:,:,:),mlnd_tmp.eq.1, False) ;remove land surface temperature
     end if
     var(nc,:,:,:) = var(nc,:,:,:) - 273.15  ;convert unit from K to C
     printVarSummary(var)
@@ -80,7 +81,7 @@ else
     f    = addfile(filename(nc) + var_name(nv) + ".1-100.nc","r")
     var(nc,:,:,:) = f->$var_name(nv)$((nd_s-1):(nd_e-1),{lats:latn},{lonl:lonr})
     if(nc.ge.2) then
-        var(nc,:,:,:) = mask(var(nc,:,:,:),mlnd_tmp.eq.0, True) ;remove land surface temperature
+        var(nc,:,:,:) = mask(var(nc,:,:,:),mlnd_tmp.eq.1, False) ;remove land surface temperature
     end if
     var(nc,:,:,:) = var(nc,:,:,:) - 273.15  ;convert unit from K to C
     printVarSummary(var)

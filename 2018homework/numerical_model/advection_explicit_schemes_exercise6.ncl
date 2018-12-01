@@ -23,22 +23,23 @@ title = (/"FTCS","Lax","Lax-Wendroff"/) + "_scheme"
 opt   = 0 ;0 mean FTCS, 1 mean Lax, 2 mean Lax-Wendroff
 
 ;---Boundary and initial value--------------
-k     = 2*3.14/dx
-theta = 1
+sigma = 0.1
+k     = 3.14/sigma
 x0    = 0
 x = fspan(-(lx-dx)/2, (lx-dx)/2, nx)
 
 f  = new((/nstp,nx/),float)
 f!0 = "time"
 f&time = fspan(0, lx/c, nstp)
-f(0,:) = cos(k*(x-x0))*exp(-(x-x0)^2/(2*theta^2))
+f(0,:) = cos(k*(x-x0))*exp(-((x-x0)^2)/(2*(sigma^2)))
 
 f1 = new((/dimsizes(drawt),nx/),float)
 do nt = 0, dimsizes(drawt)-1, 1
-    f1(nt,:) = cos(k*(x-c*drawt(nt)-x0))*exp(-(x-c*drawt(nt)-x0)^2/(2*theta^2))
+    f1(nt,:) = cos(k*(x-c*drawt(nt)-x0))*exp(-((x-c*drawt(nt)-x0)^2)/(2*(sigma^2)))
 end do
 print(x(0:10)) 
 print(f(0,0:10))
+print(f1(1,0:10))
 
 ;---Explicit schemes for the advection equation---------
 if(opt.eq.0) then
@@ -84,6 +85,7 @@ else
     end do
 end if
 end if
+print(f(2,0:10))
 
 ;************************************************
 ; plotting
@@ -100,7 +102,7 @@ end if
    mp_thick       = 4.0
    font_index     = 22
 
-figname = title(opt) + "_k" + k + "_theta" + theta + "_dt" + dt
+figname = title(opt) + "_k" + k + "_sigma" + sigma + "_dt" + dt
 plot = new((/dimsizes(drawt)/),graphic)
 wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
   
@@ -116,7 +118,7 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
   
   res@xyDashPatterns    = (/0, 0/)
   res@xyLineThicknesses = (/4.0, 4.0/)   ; make second line thicker
-  res@xyLineColors      = (/"black","red"/)
+  res@xyLineColors      = (/"red","black"/)
 
 ;  res@gsnYRefLine             = 0.0
 ;  res@gsnYRefLineDashPatterns = 11   
@@ -155,11 +157,12 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
   res@lgLabelFontColor       = "black"
   res@lgLabelFontThicknessF  = label_thick
   res@lgLabelFontHeightF     = label_font
+  res@lgLabelFont            = font_index
   res@pmLegendWidthF   = 0.08
   res@pmLegendHeightF  = 0.07
   res@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-  res@pmLegendOrthogonalPosF  = 0.4   ; move ref vector along Y-axis
-  res@pmLegendParallelPosF    = 0.3    ; move ref vector along X-axis
+  res@pmLegendOrthogonalPosF  = -0.35   ; move ref vector along Y-axis
+  res@pmLegendParallelPosF    = -0.4    ; move ref vector along X-axis
 
   res@gsnStringFont        = font_index
   res@gsnStringFontHeightF = subtitle_font

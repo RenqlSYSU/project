@@ -9,19 +9,21 @@
 ;                                                    2018/03/28
 ;*********************************************************************************
 begin
-draw_var = (/"vort" /)  ;this is the variable used to draw, can used as center string
-unit     = (/"10~S~-6~N~ s~S~-1~N~"/)   ;this can be used as right string 
+draw_var = (/"vort","DTCOND"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"10~S~-6~N~ s~S~-1~N~","K/day"/)   ;this can be used as right string 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
 nm = 2
+nv = 1
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
+filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/phy_panel-20180328/fig/1p3x2_vort_" + months(nm) + var_name(0) 
-    case   = (/" CTRL"," NG24h-CTRL"," NG6h-CTRL"/)
-pre_case   = (/"(a","(b","(c"/)
+fig_name = path + "/phy_panel-20180328/fig/1p3x2_" + draw_var(nv) + "_" + months(nm) + var_name(0) 
+    case   = (/" CTRL"," NG6h-CTRL"/)
+pre_case   = (/"(a","(b"/)
 ;fig_out    = "eps" ;"pdf";"x11"
 fig_out    = "pdf";"x11"
 
@@ -50,7 +52,7 @@ prob = new((/ncase-1,nlev,nlat,nlon/),float)
     line     = new((/ncase*nlev/),graphic)
     gtop     = new((/ncase*nlev/),graphic)
     plot2    = new((/(ncase-1)*nlev/),graphic)
-
+printVarSummary(plot) 
 ;set the area of the box
 maxlon = 105
 minlon = 70
@@ -73,17 +75,27 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;read data
 ;====================================================================
 do nf = 0 ,ncase-1, 1
-    f = addfile(filename(nf)+draw_var+".nc","r")
+    f = addfile(filename(nf)+draw_var(nv)+".nc","r")
     var(nf,:,:,:)  = f->$var_name(0)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     vari(nf,:,:,:)  = f->$var_name(1)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
-do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
-end do
+if(nv.eq.0) then
+    do nf = 0 ,ncase-2,1
+    prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+    var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
+    end do
+    var = var*1000000
+end if
 
-var = var*1000000
+if(nv.eq.1) then
+    var = var*3600*24 ;convert unit from K/s to K/day
+    do nf = 0 ,ncase-2,1
+        prob(nf,:,:,:) = ttest(var(0,:,:,:)/3600/24,vari(0,:,:,:),27,var(nf+1,:,:,:)/3600/24,vari(nf+1,:,:,:),27,True,False)
+        var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)
+    end do
+end if
+
 ;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
@@ -255,26 +267,36 @@ printVarSummary(prob)
     ;resp@txFontHeightF = title_font 
     ;resp@txFontThicknessF = title_thick
 
+if(nv.eq.0) then
     minlvl = (/(/-24,-16,-24/),(/-8,-8,-8/),(/-8,-8,-8/)/)
     maxlvl = (/(/ 24, 16, 24/),(/ 8, 8, 8/),(/ 8, 8, 8/)/)
     spacig = (/(/ 3 ,  2,  3/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
+end if
+
+if(nv.eq.1) then
+    minlvl = (/(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /),(/ 0  ,-1.8 ,-1.8 /)/)
+    maxlvl = (/(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /),(/ 6  ,1.8  , 1.8 /)/)
+    spacig = (/(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /),(/0.5 ,0.2  , 0.2 /)/)
+end if
 
 do nc = 0, ncase-1,1
     do nl = 0, nlev-1,1
-        nn = nl +1
+        nn = nl + 1
         np = nlev*nc + nl
         res@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
-        res@gsnRightString  = lev(nl) + "hPa " + draw_var + " (" + unit + ")"  
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF       := spacig(nc,nl)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc,nl) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc,nl)       ; set min contour level
+        res@cnLevelSpacingF       := spacig(nl,nc)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(nl,nc) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(nl,nc)       ; set min contour level
+        print(np)
         if(nc.gt.0) then
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
+            res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"  
+            plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
             plot2(nl)  = gsn_csm_contour(wks,prob(nc-1,nl,:,:),res_sig)
             overlay(plot(np),plot2(nl))
-        else
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
+       else
+            res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
+            plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,nl,:,:),res)
         end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))

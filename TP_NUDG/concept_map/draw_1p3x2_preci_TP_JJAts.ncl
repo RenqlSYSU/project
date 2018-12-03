@@ -12,22 +12,28 @@ begin
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day"/)    ;this can be used as right string 
 var_name = (/"series","ave"/)
-case     = (/" CTRL"," NG24h"," NG6h"/);" NG24h",this can be used as left string
-pre_case = (/"(a","(b","(c"/)
+case     = (/" CTRL"," NG6h"/);" NG24h",this can be used as left string
+pre_case = (/"(a","(b"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_6TP_annual_series.nc"
-fig_name = path + "/concept_map/fig/1p6x3_preci_SECW-CEW-NTP_JJAts"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
+filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_6TP_annual_series.nc"
+fig_name = path + "/concept_map/fig/1p3x2_preci_SE-CE-NTP_JJAts"
 ;fig_out  = "eps";"pdf";"x11"
 fig_out  = "pdf";"x11"
 
-area = (/"SETP","SCTP","SWTP","CETP","CWTP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/25    ,25    ,25    ,30    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
-latn = (/30    ,30    ,30    ,35    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
-lonl = (/100   ,85    ,70    ,90    ,70    ,70   /);100   ,90    ,70   ,107  ,107  /) 70  ,70   ,70   , ;20
-lonr = (/105   ,100   ,85    ,105   ,90    ,105  /);105   ,105   ,105  ,130  ,130  /) 105 ,105  ,105  , ;130 ;220
+;area = (/"SETP","SCTP","SWTP","CETP","CWTP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+;lats = (/25    ,25    ,25    ,30    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
+;latn = (/30    ,30    ,30    ,35    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
+;lonl = (/100   ,85    ,70    ,90    ,70    ,70   /);100   ,90    ,70   ,107  ,107  /) 70  ,70   ,70   , ;20
+;lonr = (/105   ,100   ,85    ,105   ,90    ,105  /);105   ,105   ,105  ,130  ,130  /) 105 ,105  ,105  , ;130 ;220
+area = (/"SETP","CETP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/25    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
+latn = (/30    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
+lonl = (/100   ,90    ,70   /);100   ,90    ,70   ,107  ,107  /) 70  ,70   ,70   , ;20
+lonr = (/105   ,105   ,105  /);105   ,105   ,105  ,130  ,130  /) 105 ,105  ,105  , ;130 ;220
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.015
@@ -61,8 +67,8 @@ plot3 = new((/ncase*narea/),graphic)
 ;--------------------------------------------------------------
 do nc = 0,ncase-1,1
     f    = addfile(filename(nc),"r")
-    var(nc,:,:,:)  = f->$var_name(0)$(0:(narea-1),:,nday_s:nday_e)
-    ave(nc,:,:)    = f->$var_name(1)$(0:(narea-1),nday_s:nday_e )
+    var(nc,:,:,:)  = f->$var_name(0)$((/0,3,5/),:,nday_s:nday_e)
+    ave(nc,:,:)    = f->$var_name(1)$((/0,3,5/),nday_s:nday_e )
 end do   ;the loop of the three cases
 
 printVarSummary(var)

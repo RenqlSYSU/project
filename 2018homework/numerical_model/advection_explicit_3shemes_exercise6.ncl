@@ -18,9 +18,9 @@ dt = 0.002  ;time spacing
 lx = 1.0    ;the length of x
 nx = 50     ;the number of grids
 nstp = toint(lx/(c*dt)+1)    ;integration steps
-drawt = (/0, 0.1, 0.5, 1.0/)    ;the time used to draw
+drawt = (/0, 0.1, 0.6, 1.0/)    ;the time used to draw
 title = (/"FTCS","Lax","Lax-Wendroff"/) + "_scheme"
-opt   = 0
+nscheme = dimsizes(title)
 
 ;---Boundary and initial value--------------
 sigma = 0.1
@@ -28,64 +28,62 @@ k     = 3.14/sigma
 x0    = 0
 x = fspan(-(lx-dx)/2, (lx-dx)/2, nx)
 
-f  = new((/nstp,nx/),float)
-f!0 = "time"
-f&time = fspan(0, lx/c, nstp)
-f(0,:) = cos(k*(x-x0))*exp(-((x-x0)^2)/(2*(sigma^2)))
-
+f  = new((/nscheme,nstp,nx/),float)
 f1 = new((/dimsizes(drawt),nx/),float)
 do nt = 0, dimsizes(drawt)-1, 1
     f1(nt,:) = cos(k*(x-c*drawt(nt)-x0))*exp(-((x-c*drawt(nt)-x0)^2)/(2*(sigma^2)))
 end do
+f!1 = "time"
+f&time = fspan(0, lx/c, nstp)
+f(:,0,:) = conform(f(:,0,:),cos(k*(x-x0))*exp(-((x-x0)^2)/(2*(sigma^2))),1)
+
 print(x(0:10)) 
-print(f(0,0:10))
+print(f(0,0,0:10))
 print(f1(1,0:10))
 
 ;---Explicit schemes for the advection equation---------
-if(opt.eq.0) then
-    do istp = 1, nstp-1, 1
+opt = 0 ;FTCS
+do istp = 1, nstp-1, 1
     do ix = 0, nx-1, 1
         if(ix.eq.0) then
-            f(istp,ix) = f(istp-1,ix) - c*dt/2/dx*( f(istp-1,ix+1) - f(istp-1,nx-1))
+            f(opt,istp,ix) = f(opt,istp-1,ix) - c*dt/2/dx*( f(opt,istp-1,ix+1) - f(opt,istp-1,nx-1))
         else if(ix.eq.(nx-1)) then
-            f(istp,ix) = f(istp-1,ix) - c*dt/2/dx*( f(istp-1,0) - f(istp-1,ix-1))
+            f(opt,istp,ix) = f(opt,istp-1,ix) - c*dt/2/dx*( f(opt,istp-1,0) - f(opt,istp-1,ix-1))
         else
-            f(istp,ix) = f(istp-1,ix) - c*dt/2/dx*( f(istp-1,ix+1) - f(istp-1,ix-1))
+            f(opt,istp,ix) = f(opt,istp-1,ix) - c*dt/2/dx*( f(opt,istp-1,ix+1) - f(opt,istp-1,ix-1))
         end if
         end if
     end do
-    end do
+end do
 
-else if(opt.eq.1) then
-    do istp = 1, nstp-1, 1
+opt = 1 ;Lax
+do istp = 1, nstp-1, 1
     do ix = 0, nx-1, 1
         if(ix.eq.0) then
-            f(istp,ix) = (0.5 - c*dt/2/dx)*f(istp-1,ix+1) + (0.5 + c*dt/2/dx)*f(istp-1,nx-1)
+            f(opt,istp,ix) = (0.5 - c*dt/2/dx)*f(opt,istp-1,ix+1) + (0.5 + c*dt/2/dx)*f(opt,istp-1,nx-1)
         else if(ix.eq.(nx-1)) then
-            f(istp,ix) = (0.5 - c*dt/2/dx)*f(istp-1,0) + (0.5 + c*dt/2/dx)*f(istp-1,ix-1)
+            f(opt,istp,ix) = (0.5 - c*dt/2/dx)*f(opt,istp-1,0) + (0.5 + c*dt/2/dx)*f(opt,istp-1,ix-1)
         else
-            f(istp,ix) = (0.5 - c*dt/2/dx)*f(istp-1,ix+1) + (0.5 + c*dt/2/dx)*f(istp-1,ix-1)
+            f(opt,istp,ix) = (0.5 - c*dt/2/dx)*f(opt,istp-1,ix+1) + (0.5 + c*dt/2/dx)*f(opt,istp-1,ix-1)
         end if
         end if
     end do
-    end do
+end do
 
-else
-    do istp = 1, nstp-1, 1
+opt = 2 ;Lax-Wendroff
+do istp = 1, nstp-1, 1
     do ix = 0, nx-1, 1
         if(ix.eq.0) then
-            f(istp,ix) = (1-(c*dt/dx)^2)*f(istp-1,ix) + c*dt/2/dx*( (c*dt/dx-1)*f(istp-1,ix+1) + (c*dt/dx+1)*f(istp-1,nx-1))
+            f(opt,istp,ix) = (1-(c*dt/dx)^2)*f(opt,istp-1,ix) + c*dt/2/dx*( (c*dt/dx-1)*f(opt,istp-1,ix+1) + (c*dt/dx+1)*f(opt,istp-1,nx-1))
         else if(ix.eq.(nx-1)) then
-            f(istp,ix) = (1-(c*dt/dx)^2)*f(istp-1,ix) + c*dt/2/dx*( (c*dt/dx-1)*f(istp-1,0) + (c*dt/dx+1)*f(istp-1,ix-1))
+            f(opt,istp,ix) = (1-(c*dt/dx)^2)*f(opt,istp-1,ix) + c*dt/2/dx*( (c*dt/dx-1)*f(opt,istp-1,0) + (c*dt/dx+1)*f(opt,istp-1,ix-1))
         else
-            f(istp,ix) = (1-(c*dt/dx)^2)*f(istp-1,ix) + c*dt/2/dx*( (c*dt/dx-1)*f(istp-1,ix+1) + (c*dt/dx+1)*f(istp-1,ix-1))
+            f(opt,istp,ix) = (1-(c*dt/dx)^2)*f(opt,istp-1,ix) + c*dt/2/dx*( (c*dt/dx-1)*f(opt,istp-1,ix+1) + (c*dt/dx+1)*f(opt,istp-1,ix-1))
         end if
         end if
     end do
-    end do
-end if
-end if
-print(f(2,0:10))
+end do
+print(f(0,2,0:10))
 
 ;************************************************
 ; plotting
@@ -102,9 +100,10 @@ print(f(2,0:10))
    mp_thick       = 4.0
    font_index     = 22
 
-figname = title(opt) + "_k" + k + "_sigma" + sigma + "_dt" + dt
+figname = "advect_3schemes_k" + k + "_sigma" + sigma + "_dt" + dt
+fig_out = "png";"x11"
 plot = new((/dimsizes(drawt)/),graphic)
-wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
+wks  = gsn_open_wks(fig_out,figname)      ; send graphics to PNG file
   
   res               = True                        ; plot mods desired
   res@gsnFrame      = False
@@ -116,9 +115,9 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
   res@tiYAxisString = "f"  ; xaxis
   res@tiYAxisAngleF = 0.0 ;let the yaxis horizontal
   
-  res@xyDashPatterns    = (/0, 0/)
-  res@xyLineThicknesses = (/4.0, 4.0/)   ; make second line thicker
-  res@xyLineColors      = (/"red","black"/)
+  res@xyDashPatterns    = (/0, 0, 0, 0/)
+  res@xyLineThicknesses = (/4.0, 4.0, 4.0, 4.0/)   ; make second line thicker
+  res@xyLineColors      = (/"blue","red","green","black"/)
 
 ;  res@gsnYRefLine             = 0.0
 ;  res@gsnYRefLineDashPatterns = 11   
@@ -153,15 +152,15 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
   res@lgPerimOn           = False
   res@lgPerimFill         = "SolidFill"
   res@lgPerimFillColor    = "white"
-  res@xyExplicitLegendLabels = (/"True","Numerical"/)
+  res@xyExplicitLegendLabels = (/"FTCS","Lax","Wendroff","True"/)
   res@lgLabelFontColor       = "black"
   res@lgLabelFontThicknessF  = label_thick
   res@lgLabelFontHeightF     = label_font
   res@lgLabelFont            = font_index
   res@pmLegendWidthF   = 0.08
-  res@pmLegendHeightF  = 0.07
+  res@pmLegendHeightF  = 0.14
   res@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-  res@pmLegendOrthogonalPosF  = -0.35   ; move ref vector along Y-axis
+  res@pmLegendOrthogonalPosF  = -0.1    ; move ref vector along Y-axis
   res@pmLegendParallelPosF    = -0.4    ; move ref vector along X-axis
 
   res@gsnStringFont        = font_index
@@ -172,12 +171,16 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
   resp@gsnPaperOrientation = "portrait"
   resp@txFontHeightF = title_font 
   resp@txFontThicknessF = title_thick
-  resp@txString  = title(opt)
+  resp@txString  = "Advection Schemes"
 
   res@gsnLeftString  = "dt = " + dt + "s" 
 do nt = 0, dimsizes(drawt)-1, 1
+  int = toint(drawt(nt)/dt)
+  if(nt.gt.0) then
+    res@pmLegendDisplayMode = "NoCreate"
+  end if
   res@gsnRightString = "t = " + drawt(nt) + "s"
-  plot(nt) = gsn_csm_xy(wks,x,(/f1(nt,:),f(toint(drawt(nt)/dt),:)/),res)   ; create plot  
+  plot(nt) = gsn_csm_xy(wks,x,(/f(0,int,:),f(1,int,:),f(2,int,:),f1(nt,:)/),res)   ; create plot  
 end do
 
   gsn_panel(wks,plot,(/dimsizes(drawt),1/),resp)

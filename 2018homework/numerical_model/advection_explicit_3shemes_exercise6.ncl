@@ -14,27 +14,29 @@ begin
 ;---Define parameters------------------
 c  = 1.0    ;phase velocity
 dx = 0.02   ;grid spacing
-dt = 0.002  ;time spacing
-lx = 1.0    ;the length of x
-nx = 50     ;the number of grids
-nstp = toint(lx/(c*dt)+1)    ;integration steps
-drawt = (/0, 0.1, 0.6, 1.0/)    ;the time used to draw
+dt = 0.04  ;time spacing
+lx1 = 1.0    ;the length of spread
+lx2 = 2.0    ;the length of x
+nx = 100     ;the number of grids
+nstp = toint(lx1/(c*dt)+1)    ;integration steps
+;drawt = (/0, 0.01, 0.02, 0.03/)    ;the time used to draw
+drawt = (/0, 0.1, 0.6, 1 /)    ;the time used to draw
 title = (/"FTCS","Lax","Lax-Wendroff"/) + "_scheme"
 nscheme = dimsizes(title)
 
 ;---Boundary and initial value--------------
 sigma = 0.1
 k     = 3.14/sigma
-x0    = 0
-x = fspan(-(lx-dx)/2, (lx-dx)/2, nx)
+x0    = -0.39
+x = fspan(-(lx2-dx)/2, (lx2-dx)/2, nx)
 
-f  = new((/nscheme,nstp,nx/),float)
-f1 = new((/dimsizes(drawt),nx/),float)
+f  = new((/nscheme,nstp,nx/),float)     ;numerical results
+f1 = new((/dimsizes(drawt),nx/),float)  ;true results
 do nt = 0, dimsizes(drawt)-1, 1
     f1(nt,:) = cos(k*(x-c*drawt(nt)-x0))*exp(-((x-c*drawt(nt)-x0)^2)/(2*(sigma^2)))
 end do
 f!1 = "time"
-f&time = fspan(0, lx/c, nstp)
+f&time = fspan(0, lx1/c, nstp)
 f(:,0,:) = conform(f(:,0,:),cos(k*(x-x0))*exp(-((x-x0)^2)/(2*(sigma^2))),1)
 
 print(x(0:10)) 
@@ -89,10 +91,10 @@ print(f(0,2,0:10))
 ; plotting
 ;************************************************
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.015
-   subtitle_font  = 0.018
+   tick_font      = 0.018
+   subtitle_font  = 0.02
    title_font     = 0.03
-   label_font     = 0.015
+   label_font     = 0.02
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
@@ -114,6 +116,10 @@ wks  = gsn_open_wks(fig_out,figname)      ; send graphics to PNG file
   res@tiXAxisString = "x"  ; xaxis
   res@tiYAxisString = "f"  ; xaxis
   res@tiYAxisAngleF = 0.0 ;let the yaxis horizontal
+  res@trYMinF = -2.0
+  res@trYMaxF = 2.0
+  res@trXMaxF = 1.0
+  res@trXMinF = -1.0
   
   res@xyDashPatterns    = (/0, 0, 0, 0/)
   res@xyLineThicknesses = (/4.0, 4.0, 4.0, 4.0/)   ; make second line thicker
@@ -160,7 +166,7 @@ wks  = gsn_open_wks(fig_out,figname)      ; send graphics to PNG file
   res@pmLegendWidthF   = 0.08
   res@pmLegendHeightF  = 0.14
   res@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-  res@pmLegendOrthogonalPosF  = -0.1    ; move ref vector along Y-axis
+  res@pmLegendOrthogonalPosF  = -0.13    ; move ref vector along Y-axis
   res@pmLegendParallelPosF    = -0.4    ; move ref vector along X-axis
 
   res@gsnStringFont        = font_index
@@ -185,5 +191,4 @@ end do
 
   gsn_panel(wks,plot,(/dimsizes(drawt),1/),resp)
 end
-
 

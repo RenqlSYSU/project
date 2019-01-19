@@ -1,7 +1,7 @@
 ;***************************************************************************
 ;filename:      calc_qtran_int_JJA.ncl
 ;use the post-processing data to calculate the integrated climatology qu, steady qu and 
-;transient eddy qu, according to the Jiang Xinwen's paper 
+;transient eddy qu, and this transient eddy is calc based an annual cycle 
 ;The ncl functions have been used are: dpres_plevel_Wrap,dim_sum_n_Wrap,dim_avg_n_Wrap
 ;dim_rmvmean_n_Wrap
 ;                                            by Ql_Ren
@@ -35,10 +35,10 @@ f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.6.and.time(:,1).le.8)
-ntime = dimsizes(time)
+ntime = dimsizes(select_time)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
-nlev  = dimsizes(vars&level)
+nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
@@ -53,48 +53,49 @@ do nf = 0,ncase-1,1
 ;============================================================
 do nt = 0,nyear-1,1
 nv = 0
-f      = addfile(filein(nf) + year(nt) + ".daily" + var_name(nv) + ".nc","r")
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)   = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-f      = addfile(filein(nf) + year(nt) + ".daily" + var_name(nv) + ".nc","r")
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->V(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-f      = addfile(filein(nf) + year(nt) + ".daily" + var_name(nv) + ".nc","r")
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 q(nt,:,:,:,:)   = f->Q(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 3
-f      = addfile(filein(nf) + year(nt) + ".daily" + var_name(nv) + ".nc","r")
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 ps(nt,:,:,:)  = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+dp(nt,:,:,:,:)  = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),30000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
 
 printVarSummary(ps)
 printVarSummary(u)
 printVarSummary(q)
-
-;calculates the pressure differences of a hybrid coordinate system.
-dp  = dpres_plevel_Wrap(lev*100,ps,30000,0)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 printVarSummary(dp)
 
-qu := dim_sum_n(q*u*dp,1)/g ;get integrated qu(nyear,time,lat,lon)
-qv := dim_sum_n(q*v*dp,1)/g ;get integrated qu(nyear,time,lat,lon)
+qu := dim_sum_n(q*u*dp,2)/g ;get integrated qu(nyear,time,lat,lon)
+qv := dim_sum_n(q*v*dp,2)/g ;get integrated qu(nyear,time,lat,lon)
+qu := dim_avg_n(qu,1)  ;get qu(nyear,lat,lon)
+qv := dim_avg_n(qv,1)  ;get qu(nyear,lat,lon)
 qu_vari = dim_variance_n(qu,0) 
 qv_vari = dim_variance_n(qv,0) 
 qu := dim_avg_n(qu,0)  ;get integrated qu(lat,lon)
 qv := dim_avg_n(qv,0)  ;get integrated qu(lat,lon)
 
-q_vari = dim_variance_n(dim_sum_n(q*dp,1),0)
-u_vari = dim_variance_n(dim_sum_n(u*dp,1),0)
-v_vari = dim_variance_n(dim_sum_n(v*dp,1),0)
-q_ave = dim_avg_n(dim_sum_n(q*dp,1),0)
-u_ave = dim_avg_n(dim_sum_n(u*dp,1),0)
-v_ave = dim_avg_n(dim_sum_n(v*dp,1),0)
-ste_qu = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(u,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qu(lat,lon)
-ste_qv = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(v,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qv(lat,lon)
+ste_qu = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(u,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qu(ntime,lat,lon)
+ste_qv = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(v,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qv(ntime,lat,lon)
+ste_qu := dim_avg_n(ste_qu,0)
+ste_qv := dim_avg_n(ste_qv,0)
 
-edd_qu := dim_sum_n(dim_rmvmean_n(q,0)*dim_rmvmean_n(u,0)*dp,1)/g ;get transient eddy integrated qu(lat,lon)
-edd_qv := dim_sum_n(dim_rmvmean_n(q,0)*dim_rmvmean_n(v,0)*dp,1)/g
+edd_q = q - conform(q,dim_avg_n(q,0),(/1,2,3,4/))
+edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+edd_qu := dim_sum_n(edd_q*edd_u*dp,1)/g ;get transient eddy integrated qu(nyear,ntime,lat,lon)
+edd_qv := dim_sum_n(edd_q*edd_v*dp,1)/g
+edd_qu := dim_avg_n(edd_qu,1) ;get transient eddy integrated qu(nyear,lat,lon),suppose year is the sample number
+edd_qv := dim_avg_n(edd_qv,1)
 edd_qu_vari = dim_variance_n(edd_qu,0) ;get transient eddy integrated qu(lat,lon)
 edd_qv_vari = dim_variance_n(edd_qv,0)
 edd_qu := dim_avg_n(edd_qu,0) ;get transient eddy integrated qu(lat,lon)
@@ -139,12 +140,6 @@ filevardef(ncdf,"edd_qu",typeof(edd_qu),(/"lat","lon"/))
 filevardef(ncdf,"edd_qv",typeof(edd_qv),(/"lat","lon"/))
 filevardef(ncdf,"edd_qu_vari",typeof(edd_qu_vari),(/"lat","lon"/))
 filevardef(ncdf,"edd_qv_vari",typeof(edd_qv_vari),(/"lat","lon"/))
-filevardef(ncdf,"q_vari",typeof(q_vari),(/"lat","lon"/))
-filevardef(ncdf,"u_vari",typeof(u_vari),(/"lat","lon"/))
-filevardef(ncdf,"v_vari",typeof(v_vari),(/"lat","lon"/))
-filevardef(ncdf,"q_ave",typeof(q_ave),(/"lat","lon"/))
-filevardef(ncdf,"u_ave",typeof(u_ave),(/"lat","lon"/))
-filevardef(ncdf,"v_ave",typeof(v_ave),(/"lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"lat",u&lat)
@@ -166,12 +161,6 @@ ncdf->qu_vari   = (/qu_vari/)
 ncdf->qv_vari   = (/qv_vari/)
 ncdf->edd_qu_vari = (/edd_qu_vari/)
 ncdf->edd_qv_vari = (/edd_qv_vari/)
-ncdf->q_vari = (/q_vari/)
-ncdf->u_vari = (/u_vari/)
-ncdf->v_vari = (/v_vari/)
-ncdf->q_ave = (/q_ave/)
-ncdf->u_ave = (/u_ave/)
-ncdf->v_ave = (/v_ave/)
 end do
 end
 

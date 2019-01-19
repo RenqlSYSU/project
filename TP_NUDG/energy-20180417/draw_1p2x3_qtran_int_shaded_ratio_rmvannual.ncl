@@ -20,18 +20,19 @@ begin
 draw_var = (/"climate","steady","transient"/) 
 var_name_u = (/"qu","ste_qu","edd_qu"/)
 var_name_v = (/"qv","ste_qv","edd_qv"/)
-vari_name  = (/"qu","qv","q"    ,"u"    ,"v"    ,"edd_qu","edd_qv"/) + "_vari"
-ave_name   = (/"qu","qv","q_ave","u_ave","v_ave","edd_qu","edd_qv"/)
+vari_name  = (/"qu","qv","edd_qu","edd_qv"/) + "_vari"
+ave_name   = (/"qu","qv","edd_qu","edd_qv"/)
 unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
 
 ;the path of the file
 path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_JJAave_qtran_int.nc"
+filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_JJAave_qtran_int_rmvannual.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA"
+fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_shaded_ratio_rmvannual"
     case   = (/" CTRL"," NG6h-CTRL"/)
 pre_case   = (/"(a","(b"/)
 fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -87,15 +88,25 @@ do nv = 0,nvari-1,1
 end do
 end do
 
+var  = sqrt(var_u^2 + var_v^2)
+var(:,1,:,:) = var(:,1,:,:)/var(:,0,:,:)*100
+var(:,2,:,:) = var(:,2,:,:)/var(:,0,:,:)*100
+copy_VarMeta(var_u,var)
+
 prob = ttest(ave(0,:,:,:),vari(0,:,:,:),ntime,ave(1,:,:,:),vari(1,:,:,:),ntime,True,False)
 var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 var_v(1,:,:,:) = var_v(1,:,:,:) - var_v(0,:,:,:)
+  var(1,:,:,:) =   var(1,:,:,:)  -  var(0,:,:,:)
+
 var_v(1,(/0,2/),:,:) = mask(var_v(1,(/0,2/),:,:),((prob((/0,5/),:,:).lt.siglvl).or.(prob((/1,6/),:,:).lt.siglvl)),True)
 var_u(1,(/0,2/),:,:) = mask(var_u(1,(/0,2/),:,:),((prob((/0,5/),:,:).lt.siglvl).or.(prob((/1,6/),:,:).lt.siglvl)),True)
+  var(1,(/0,2/),:,:) = mask(  var(1,(/0,2/),:,:),((prob((/0,5/),:,:).lt.siglvl).or.(prob((/1,6/),:,:).lt.siglvl)),True)
 var_u(1,1,:,:) = mask(var_u(1,1,:,:),((prob(2,:,:).lt.siglvl).or.(prob(3,:,:).lt.siglvl).or.(prob(4,:,:).lt.siglvl)),True)
 var_v(1,1,:,:) = mask(var_v(1,1,:,:),((prob(2,:,:).lt.siglvl).or.(prob(3,:,:).lt.siglvl).or.(prob(4,:,:).lt.siglvl)),True)
+  var(1,1,:,:) = mask(  var(1,1,:,:),((prob(2,:,:).lt.siglvl).or.(prob(3,:,:).lt.siglvl).or.(prob(4,:,:).lt.siglvl)),True)
 
 printVarSummary(var_u)
+printVarSummary(var)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -153,32 +164,68 @@ printVarSummary(var_u)
     ;  res@tmYLMinorOutwardLengthF = -0.
     ;  res@tmYRMinorOutwardLengthF = -0.
 
-    res@gsnCenterString = ""
-    res@gsnLeftString   = ""
-    res@gsnRightString  = ""
+    res@gsnCenterString      = ""
+    res@gsnLeftString      = ""
+    res@gsnRightString      = ""
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
+    
+;---------set the attribute of the contour-----------------
+    res@cnFillOn         = True
+    res@cnLinesOn        = False ;True
+    res@cnLineLabelsOn   = False
+    res@cnInfoLabelOn    = False
+   
+    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
+    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
+    ;res@cnLevels             = ispan(0,60,10)
+    ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
+    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res@cnMinLevelValF        = 1          ; set min contour level
+    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
+    ;res@cnLevelSpacingF       = 1        ; set contour interval
+
+    res@gsnSpreadColors      = False  ;True              ; turn of the full color map
+    res@gsnSpreadColorStart  = 11                ; start at color 17
+    res@gsnSpreadColorEnd    = 2                ; end at color 200
+    
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbOrientation        = "Horizontal"
+    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-2
+    res@pmLabelBarOrthogonalPosF = 0.2
+    res@pmLabelBarParallelPosF   = 0.5
 
 ;----------set the attribute of the vector-------------------
-     res@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
-     res@vcVectorDrawOrder          = "PostDraw"
-     res@vcLineArrowThicknessF      = vc_thick
-     res@vcMinDistanceF             = 0.035
-     ;res@vcRefMagnitudeF            = 30.0             ; define vector ref mag
-     res@vcRefLengthF               = 0.05           ; define length of vec ref
-     res@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
-     ;res@vcRefAnnoSide              = "Bottom"          
-     ;res@vcRefAnnoJust              = "TopRight"
-     res@vcRefAnnoOrthogonalPosF    = -0.75           ; move ref vector along Y-axis
-     res@vcRefAnnoParallelPosF      = 0.2            ; move ref vector along X-axis
-     res@vcRefAnnoPerimOn           = False         ;close the border
-     res@vcRefAnnoFont              = font_index
-     res@vcRefAnnoFontHeightF       = vcref_font
-     res@vcRefAnnoString1On         = False
-     res@vcRefAnnoString2On         = True
-     ;res@vcRefAnnoString2           = "30m/s"
-     res@vcLineArrowHeadMinSizeF   = 0.015
-     res@vcLineArrowHeadMaxSizeF   = 0.015
+    resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMinDistanceF             = 0.035
+    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = -0.78           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.25            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    ;resvc@vcRefAnnoString2           = "30m/s"
+    resvc@vcLineArrowHeadMinSizeF   = 0.01
+    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -206,6 +253,7 @@ printVarSummary(var_u)
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
+
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"  ;"portrait"
@@ -219,16 +267,33 @@ printVarSummary(var_u)
 
     vcref  = (/(/200,200,20/),(/40,40,5/)/)  ;the level of 850hpa    ctrl,nudg,diff
 
+    minlvl = (/(/15 ,55 , 0/),(/-80,-16,-16/)/)
+    maxlvl = (/(/615,130,30/),(/ 80, 16, 16/)/)
+    spacig = (/(/40 ,5  , 2/),(/ 10, 2 ,  2/)/)
+
 do nc = 0, ncase-1,1
+if(nc.eq.0) then
+    res@cnFillPalette = "precip3_16lev"
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+else
+    res@cnFillPalette = "BlueDarkRed18"
+    ;blue and red, has 18 colors,2-10 is blue
+end if 
     do nv = 0 ,nvar-1,1
         nn = nv +1
         np = nvar*nc + nv
         res@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
         res@gsnRightString  = draw_var(nv)
-        res@vcRefMagnitudeF   = vcref(nc,nv)                ; define vector ref mag
-        res@vcRefAnnoString2  = vcref(nc,nv) + " " + unit
-        plot(np) = gsn_csm_vector_map_ce(wks,var_u(nc,nv,:,:),var_v(nc,nv,:,:),res)
+        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
+        res@cnMaxLevelValF       := maxlvl(nc,nv) ;32    ; set max contour level
+        res@cnMinLevelValF       := minlvl(nc,nv)       ; set min contour level
+        resvc@vcRefMagnitudeF   = vcref(nc,nv)                ; define vector ref mag
+        resvc@vcRefAnnoString2  = vcref(nc,nv) + " " + unit
+        plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res) 
+        plotvc(np) = gsn_csm_vector(wks,var_u(nc,nv,:,:),var_v(nc,nv,:,:),resvc)
         gtop(np)   = gsn_csm_contour(wks,phis,res_gtop)
+        overlay(plot(np),plotvc(np))
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         print(max(var_u(nc,nv,{lats:latn},{lonl:lonr})))

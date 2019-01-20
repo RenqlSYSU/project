@@ -45,6 +45,7 @@ ncase = dimsizes(filein)
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 q     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+dp     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 ps    = new((/nyear,ntime,nlat,nlon/),float)
 
 do nf = 0,ncase-1,1 
@@ -84,8 +85,8 @@ qv_vari = dim_variance_n(qv,0)
 qu := dim_avg_n(qu,0)  ;get integrated qu(lat,lon)
 qv := dim_avg_n(qv,0)  ;get integrated qu(lat,lon)
 
-ste_qu = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(u,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qu(ntime,lat,lon)
-ste_qv = dim_sum_n(dim_avg_n(q,0)*dim_avg_n(v,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qv(ntime,lat,lon)
+ste_qu := dim_sum_n(dim_avg_n(q,0)*dim_avg_n(u,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qu(ntime,lat,lon)
+ste_qv := dim_sum_n(dim_avg_n(q,0)*dim_avg_n(v,0)*dim_avg_n(dp,0),0)/g ;get steady integrated qv(ntime,lat,lon)
 ste_qu := dim_avg_n(ste_qu,0)
 ste_qv := dim_avg_n(ste_qv,0)
 

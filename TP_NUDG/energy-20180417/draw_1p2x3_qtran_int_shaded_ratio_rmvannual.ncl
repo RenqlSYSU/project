@@ -40,7 +40,7 @@ latn = 55  ;60
 lonl = 30  ;20
 lonr = 150 ;220
 siglvl = 0.05
-ntime  = 27*92
+ntime  = 27
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
@@ -262,7 +262,7 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref  = (/(/200,200,20/),(/40,40,5/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/200,500,50/),(/40,100,50/)/)  ;the level of 850hpa    ctrl,nudg,diff
 
     minlvl = (/(/15 ,55 , 0/),(/-80,-16,-16/)/)
     maxlvl = (/(/615,130,30/),(/ 80, 16, 16/)/)

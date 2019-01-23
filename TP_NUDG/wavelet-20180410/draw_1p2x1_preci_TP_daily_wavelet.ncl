@@ -17,15 +17,19 @@ begin
    mp_thick       = 5.0
    font_index     = 22
 
-
 area =(/"STP","CTP","NTP","TP","SEA","NEA","EA"/)  ;S mean south,N mean North,EA mean East Asia
 lats = (/25  ,30   ,35   ,25  , 22  , 30  , 20 /) ;-20
 latn = (/30  ,35   ,40   ,40  , 30  , 45  , 45 /)  ;60
 lonl = (/70  ,70   ,70   ,70  ,107  ,107  ,107 /)  ;20
 lonr = (/105 ,105  ,105  ,105 ,130  ,130  ,122 /);130 ;220
-na = 0;5;4;3;2;1
-isnormal = 1 ;1 mean normalized
-narea = dimsizes(area)
+lev  = (/850,500,200/)
+draw_var   = (/"U","V","T","preci"/)
+unit       = (/"m~S~2~N~/s~S~2~N~","m~S~2~N~/s~S~2~N~","k~S~2~N~","mm~S~2~N~/day~S~2~N~"/)
+var_name   = (/"wave"/)
+na = 3
+nv = 2
+nl = 2
+isnormal = 0 ;1 mean normalized
 
 if (isnormal.eq.1) then
 cnlevels =  (/0.002,0.005 ,0.009,0.015,0.02 , \
@@ -37,23 +41,17 @@ cnlevels  = (/0.01,0.03,0.06,0.1 ,0.15, \
               1   ,1.2 ,1.5 ,2   ,2.5 , 3 , 4/)
 end if
 
-;do na = 0,narea-1,1 
-;path       = "/home/ys17-19/renql/project/TP_NUDG"
-path       = "/users/yangsong3/renql/project/TP_NUDG"
-;filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_TP_JJAdaily_wavelet.nc"
-;fig_name   = path + "/wavelet-20180410/fig/1p3x1_preci_TP_daily_wavelet_nobias"
-      ;case = (/"(a) CTRL","(b) NG24h","(c) NG6h"/)
-filename   = path + "/wavelet-20180410/mdata/" + (/"CTRL","NUDG6h"/) + "-preci_" + area(na) + "_daily_wavelet-stand.nc"
+path    = "/home/ys17-19/renql/project/TP_NUDG"
+filename = path + "/wavelet-20180410/mdata/" + \
+            (/"CTRL","NUDG6h","NUDG24h"/) + "_clim_daily_wavelet_" + area(na) + lev(nl) + draw_var(nv) + ".nc"
+    case = (/"(a) CTRL", "(b) NG24h", "(c) NG6h"/)  
+fig_out  = "pdf" ;"eps";"x11"
+
 if(isnormal.eq.1) then
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_365daily_wavelet_nobias-stand"
+    fig_name   = path + "/wavelet-20180410/fig/clim_daily_wavelet_nobias-stand_" + area(na) + lev(nl) + draw_var(nv)
 else
-fig_name   = path + "/wavelet-20180410/fig/1p2x1_preci_" + area(na) + "_365daily_wavelet_nobias"
+    fig_name   = path + "/wavelet-20180410/fig/clim_daily_wavelet_nobias_" + area(na) + lev(nl) + draw_var(nv)
 end if
-      case = (/"(a) CTRL","(b) NG6h"/)  
-fig_out    = "pdf" ;"eps";"x11"
-draw_var   = "preci"
-unit       = "mm~S~2~N~/day~S~2~N~"
-var_name   = (/"wave"/)
 
 f = addfile(filename(0),"r")
 ncase  = dimsizes(case)
@@ -89,7 +87,7 @@ printVarSummary(power)
 printVarSummary(sig)
 printVarSummary(var)
 
-exponent = ispan(2,13,2)
+exponent = ispan(2,8,2)
 ylabel   = exp( exponent*log(2.0) )
 print(ylabel)
 
@@ -135,8 +133,8 @@ print(ylabel)
     res@tmYRMinorOutwardLengthF = 0.01
 
 ;---------set the attribute of the x y axis------------
-    res@tiXAxisOn       = False
-    res@tiXAxisString   = "Year"
+    ;res@tiXAxisOn       = False
+    res@tiXAxisString   = "Day"
     
     res@tiYAxisOn       = True
     res@tiYAxisFont     = font_index
@@ -144,8 +142,8 @@ print(ylabel)
     res@tiYAxisString   = "period(days)"
     
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(1,ntime,365)
-    res@tmXBLabels      = ispan(1979,2005,1)
+    res@tmXBValues      = ispan(15,ntime,30)
+    res@tmXBLabels      = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
     
     res@trYReverse          = True   ; reverse y-axis
     res@tmYLMode            = "Explicit"
@@ -158,30 +156,17 @@ print(ylabel)
     res@tmYMajorGridLineColor          = "black"
     res@tmYMajorGridThicknessF         = 4.0
 
+    res_sig                  = True
+    res_sig = res
 ;------------set the attribute of the contour----------------------
     res@cnFillOn         = True
     res@cnLinesOn        = False
-    ;res@cnFillPalette       = "BlAqGrYeOrReVi200"   ; set color map
-    ;res@cnFillMode          = "RasterFill"          ; turn on raster mode
-    ;res@cnRasterSmoothingOn = True                  ; turn on raster smoothing
     res@cnLineLabelsOn   = False  ; True
     res@cnFillMode          = "RasterFill"          ; turn on raster mode
     res@cnRasterSmoothingOn = True                  ; turn on raster smoothing
 
     res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     res@cnLevels             = cnlevels
-    ;colors       = new((/18/),integer)
-    ;colors(0:8)  = ispan(2,10,1)
-    ;colors(9:17) = ispan(13,21,1)
-    ;res@cnFillColors         = colors 
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = -0.09       ; set min contour level
-    ;res@cnMaxLevelValF        = 0.09       ; set max contour level
-    ;res@cnLevelSpacingF       = 0.01        ; set contour interval
-
-;    res@gsnSpreadColors      = True              ; turn of the full color map
-;    res@gsnSpreadColorStart  = 2                ; start at color 17
-;    res@gsnSpreadColorEnd    = 21                ; end at color 200
 
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "Horizontal"   ;"Vertical"
@@ -191,29 +176,14 @@ print(ylabel)
     res@lbBoxLineThicknessF  = mp_thick-2
     
 ;----------Set res sig-----------
-    res_sig                  = True
-    res_sig@gsnDraw          = False
-    res_sig@gsnFrame         = False
-    
     res_sig@tiXAxisOn       = False
     res_sig@tiYAxisOn       = False
-    res_sig@tmXBMode        = "Explicit"
-    res_sig@tmXBValues      = ispan(1,ntime,365)
-    res_sig@tmXBLabels      = ispan(1979,2005,1)
-    res_sig@trYReverse          = True   ; reverse y-axis
-    res_sig@tmYLMode            = "Explicit"
-    res_sig@tmYLValues          = ylabel
-    res_sig@tmYLLabels          = ylabel
     res_sig@tmLabelAutoStride   = True
 
     res_sig@cnFillOn         = True;False       ; Fill contours
     res_sig@cnLinesOn        = False;True      ; turn off contour lines
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
     res_sig@cnInfoLabelOn    = False
-;    res_sig@cnLineThicknessF = mp_thick
-;    res_sig@cnLineColors     = "black"
-;    res_sig@cnLevelSelectionMode = "ExplicitLevels"
-;    res_sig@cnLevels         = 
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
@@ -235,15 +205,11 @@ print(ylabel)
 ;-----------------------------------------------------------------------
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF  = subtitle_font
-    res@gsnRightString   = draw_var + " (" + unit +")"
+    res@gsnRightString   = draw_var(nv) + " (" + unit(nv) +")"
     res@gsnCenterString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)" 
 
     resp  = True    
     resp@gsnMaximize   = True
-;    resp@txFont        = font_index
-;    resp@txFontHeightF = title_font 
-;    resp@txFontThicknessF = title_thick
-;    resp@txString      =  fig_title 
     resp@gsnPaperOrientation = "landscape"
 
 do nc = 0,ncase-1,1
@@ -258,6 +224,5 @@ do nc = 0,ncase-1,1
 end do
 
 gsn_panel(wks,plot,(/ncase,1/),resp)
-;end do
 end
 

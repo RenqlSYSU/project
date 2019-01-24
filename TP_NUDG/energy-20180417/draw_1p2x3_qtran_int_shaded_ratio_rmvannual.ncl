@@ -5,18 +5,6 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-;define the thickness and height of the title,tick and label
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
-   vcref_font     = 0.02
-   tick_thick     = 5.0
-   subtitle_thick = 5.0  ;not have this attribute
-   title_thick    = 5.0
-   mp_thick       = 5.0
-   vc_thick       = 2.5
-   font_index     = 22
-
 draw_var = (/"climate","steady","transient"/) 
 var_name_u = (/"qu","ste_qu","edd_qu"/)
 var_name_v = (/"qv","ste_qv","edd_qv"/)
@@ -25,25 +13,26 @@ ave_name   = (/"qu","qv","edd_qu","edd_qv"/)
 unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_JJAave_qtran_int_rmvannual.nc"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
+filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_JJAave_qtran_int_rmvannual.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_shaded_ratio_rmvannual"
-    case   = (/" CTRL"," NG6h-CTRL"/)
-pre_case   = (/"(a","(b"/)
+fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_rmvannual"
+    case   = (/" CTRL"," CTRL-NG24h"," CTRL-NG6h"/)
+pre_case   = (/"(a","(b","(c"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
 ;area: east Asia
-lats = -15 ;-20
-latn = 55  ;60
-lonl = 30  ;20
-lonr = 150 ;220
+lats = (/15 ,-15/) ;-20
+latn = (/55 ,55 /) ;60
+lonl = (/70 ,30 /) ;20
+lonr = (/150,150/) ;220
 siglvl = 0.05
 ntime  = 27
+na = 0
 
 f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case)
 nvar   = dimsizes(draw_var)
@@ -77,30 +66,26 @@ f = addfile(filename(nf),"r")
 do nv = 0,nvar-1,1
     print("read " + case(nf) + " " + var_name_u(nv))
     print("read " + case(nf) + " " + var_name_v(nv))
-    var_u(nf,nv,:,:)  = f->$var_name_u(nv)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    var_v(nf,nv,:,:)  = f->$var_name_v(nv)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    var_u(nf,nv,:,:)  = f->$var_name_u(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var_v(nf,nv,:,:)  = f->$var_name_v(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 do nv = 0,nvari-1,1
     print("read " + case(nf) + " " + vari_name(nv))
     print("read " + case(nf) + " " + ave_name(nv))
-    vari(nf,nv,:,:)  = f->$vari_name(nv)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-     ave(nf,nv,:,:)  = f->$ave_name(nv)$({lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,nv,:,:)  = f->$vari_name(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+     ave(nf,nv,:,:)  = f->$ave_name(nv)$ ({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 end do
 
+do nc = 1, ncase-1, 1
+    prob = ttest(ave(0,:,:,:),vari(0,:,:,:),ntime,ave(nc,:,:,:),vari(nc,:,:,:),ntime,True,False)
+    var_u(nc,:,:,:) = var_u(0,:,:,:) - var_u(nc,:,:,:) 
+    var_v(nc,:,:,:) = var_v(0,:,:,:) - var_v(nc,:,:,:) 
+    ;var_v(nc,(/0,2/),:,:) = mask(var_v(nc,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
+    ;var_u(nc,(/0,2/),:,:) = mask(var_u(nc,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
+end do
 var  = sqrt(var_u^2 + var_v^2)
-var(:,1,:,:) = var(:,1,:,:)/var(:,0,:,:)*100
-var(:,2,:,:) = var(:,2,:,:)/var(:,0,:,:)*100
 copy_VarMeta(var_u,var)
-
-prob = ttest(ave(0,:,:,:),vari(0,:,:,:),ntime,ave(1,:,:,:),vari(1,:,:,:),ntime,True,False)
-var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
-var_v(1,:,:,:) = var_v(1,:,:,:) - var_v(0,:,:,:)
-  var(1,:,:,:) =   var(1,:,:,:)  -  var(0,:,:,:)
-
-var_v(1,(/0,2/),:,:) = mask(var_v(1,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
-var_u(1,(/0,2/),:,:) = mask(var_u(1,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
-  var(1,(/0,2/),:,:) = mask(  var(1,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
 
 printVarSummary(var_u)
 printVarSummary(var)
@@ -108,7 +93,19 @@ printVarSummary(var)
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
+;define the thickness and height of the title,tick and label
+   tick_font      = 0.03
+   subtitle_font  = 0.03
+   title_font     = 0.03
+   vcref_font     = 0.02
+   tick_thick     = 5.0
+   subtitle_thick = 5.0  ;not have this attribute
+   title_thick    = 5.0
+   mp_thick       = 3.0
+   vc_thick       = 2.5
+   font_index     = 22
+
+wks = gsn_open_wks(fig_out,fig_name)
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
@@ -125,10 +122,10 @@ printVarSummary(var)
 
 ;-------set the attribute of the map-------------------
     res@mpCenterLonF     = 180.
-    res@mpMaxLatF        = latn
-    res@mpMinLatF        = lats
-    res@mpMaxLonF        = lonr
-    res@mpMinLonF        = lonl
+    res@mpMaxLatF        = latn(na)
+    res@mpMinLatF        = lats(na)
+    res@mpMaxLonF        = lonr(na)
+    res@mpMinLonF        = lonl(na)
     res@gsnMajorLatSpacing = 15
     res@gsnMinorLatSpacing = 15
     res@gsnMajorLonSpacing = 30
@@ -262,20 +259,30 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref  = (/(/200,500,50/),(/40,100,50/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/200,200,20/),(/40,40,5/),(/40,40,5/)/)  ;the level of 850hpa    ctrl,nudg,diff
 
-    minlvl = (/(/15 ,55 , 0/),(/-80,-16,-16/)/)
-    maxlvl = (/(/615,130,30/),(/ 80, 16, 16/)/)
-    spacig = (/(/40 ,5  , 2/),(/ 10, 2 ,  2/)/)
+    ;minlvl = (/(/15 ,45 , 0/),(/-80,-16,-16/),(/-80,-16,-16/)/) ;used for East Asian Shaded ration
+    ;maxlvl = (/(/615,120,30/),(/ 80, 16, 16/),(/ 80, 16, 16/)/)
+    ;spacig = (/(/40 ,5  , 2/),(/ 10, 2 , 2 /),(/ 10, 2 , 2 /)/)
+
+if(na.eq.1) then
+    minlvl = (/(/15 ,15 , 0/),(/ 0, 0, 0/),(/ 0, 0, 0/)/) ;used for East Asian moist transiation
+    maxlvl = (/(/615,615,30/),(/45,45,15/),(/45,45,15/)/)
+    spacig = (/(/40 ,40 , 2/),(/ 3, 3, 1/),(/ 3, 3, 1/)/)
+else
+    minlvl = (/(/30 ,30 , 0/),(/20,20,2   /),(/20,20,2   /)/) ;used for East Asian moist transiation
+    maxlvl = (/(/180,180,30/),(/95,95,10.5/),(/95,95,10.5/)/)
+    spacig = (/(/10 ,10 , 2/),(/ 5, 5,0.5 /),(/ 5, 5,0.5 /)/)
+end if
 
 do nc = 0, ncase-1,1
-if(nc.eq.0) then
+;if(nc.eq.0) then
     res@cnFillPalette = "precip3_16lev"
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-else
-    res@cnFillPalette = "BlueDarkRed18"
-    ;blue and red, has 18 colors,2-10 is blue
-end if 
+;    ;blue and yellow and red, has 17 colors,2-18,2 is white
+;else
+;    res@cnFillPalette = "BlueDarkRed18"
+;    ;blue and red, has 18 colors,2-10 is blue
+;end if 
     do nv = 0 ,nvar-1,1
         nn = nv +1
         np = nvar*nc + nv
@@ -293,8 +300,8 @@ end if
         overlay(plot(np),plotvc(np))
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        print(max(var_u(nc,nv,{lats:latn},{lonl:lonr})))
-        print(min(var_u(nc,nv,{lats:latn},{lonl:lonr})))
+        print(max(var_u(nc,nv,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(min(var_u(nc,nv,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do 
     gsn_panel(wks,plot,(/ncase,nvar/),resp)

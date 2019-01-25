@@ -9,13 +9,13 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 path    = "/home/ys17-19/renql"
 filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
 fig_name   = path + "/project/TP_NUDG/cross_section/fig/clim_preci_daily_evolution_lat_time"
-    case   = (/"(a) CTRL","(b) NG24h","(c) NG6h"/)  ;this can be used as left string
+    case   = (/"(a) CTRL","(b) NG6h","(c) NG24h"/)  ;this can be used as left string
 fig_out    ="png"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
@@ -69,14 +69,15 @@ do nt = 0,nyear-1,1
     end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
-var := dim_avg_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
 vari = dim_variance_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
+var := dim_avg_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
 var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 printVarSummary(temp&time)
 
 ;do nc = 1,2
-;    var(nc,:,:) = var(nc,:,:) - var(0,:,:)
-;    prob((nc-1),:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
+    var(2,:,:) = var(0,:,:) - var(1,:,:)
+    ;prob(nc,:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
+    case   = (/"(a) CTRL","(b) NG6h","(c) CTRL-NG6h"/)
 ;end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))
@@ -164,14 +165,16 @@ printVarSummary(var)
     res@cnMaxLevelValF        = 16;32        ; set max contour level
     res@cnLevelSpacingF       = 1        ; set contour interval
 
-    res@gsnSpreadColors      = True              ; turn of the full color map
+    res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
     res@gsnSpreadColorEnd    = 21                ; end at color 200
     
-    res@lbLabelBarOn         = False   ; the label bar
-    res@lbOrientation        = "vertical"
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 2
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-2
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -187,7 +190,7 @@ printVarSummary(var)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    resp@gsnPanelLabelBar = True
+    resp@gsnPanelLabelBar = False
     resp@lbOrientation    = "Horizontal"
     resp@lbLabelStride    = 2
     resp@lbLabelFont      = font_index              ; make labels smaller
@@ -198,8 +201,23 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+    minlvl = (/0 ,0 ,-4 /) ;used for East Asian moist transiation
+    maxlvl = (/16,16, 4 /) ;used for CTRL-NUDG
+    spacig = (/1 ,1 ,0.5/)
+    
     do nc = 0, ncase-1,1
+if(nc.le.1) then
+    res@cnFillPalette := "precip3_16lev"
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+else
+    res@cnFillPalette := "BlueDarkRed18"
+    ;blue and red, has 18 colors,2-10 is blue
+end if 
         res@gsnLeftString   = case(nc)
+        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
+        res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
+        res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
         plot(nc)  = gsn_csm_lat_time(wks,var(nc,:,:),res)
         print(max(var(nc,:,:)))
         print(min(var(nc,:,:)))

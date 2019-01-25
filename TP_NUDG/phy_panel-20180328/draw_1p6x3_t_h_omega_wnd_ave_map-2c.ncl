@@ -18,7 +18,7 @@ begin
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    vc_thick       = 2.0
-   mp_thick       = 4.0
+   mp_thick       = 3.0
    font_index     = 22
 
 draw_var = (/"T(~S~o~N~C)","Z(gpm)","omega(10~S~-2~N~ Pa/s)"/)  ;this is the variable used to draw, can used as center string
@@ -31,14 +31,15 @@ lev      = (/850,500,200/)
 nm = 2
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_varname(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/phy_panel-20180328/fig/1p6x3_t_h_omega_wnd_" + months(nm) + var_name(0) 
-    case   = (/" CTRL"," NG6h-CTRL"/)
+    case   = (/" CTRL"," CTRL-NG6h"/)
 pre_case   = (/(/"(a","(b"/),(/"(c","(d"/),(/"(e","(f"/)/)
-fig_out    = "eps";"pdf";"x11"
-;fig_out    = "pdf";"x11"
+;fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -87,24 +88,24 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 do nf = 0 ,ncase-1, 1
 do nv = 0 ,nvar-1,1
     f = addfile(filename(nf)+draw_varname(nv)+".nc","r")
-     var(nf,nv,:,:,:)  = f->$var_name(0)$(nm,:,:,:) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,nv,:,:,:)  = f->$var_name(1)$(nm,:,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+     var(nf,nv,:,:,:)  = f->$var_name(0)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,nv,:,:,:)  = f->$var_name(1)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 f = addfile(filename(nf)+draw_varname(3)+".nc","r")
- var_u(nf,:,:,:)  = f->$var_name(0)$(nm,:,:,:) ;get an array (ncase,nmonth,nlat,nlon)
-vari_u(nf,:,:,:)  = f->$var_name(1)$(nm,:,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+ var_u(nf,:,:,:)  = f->$var_name(0)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+vari_u(nf,:,:,:)  = f->$var_name(1)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 f = addfile(filename(nf)+draw_varname(4)+".nc","r")
- var_v(nf,:,:,:)  = f->$var_name(0)$(nm,:,:,:) ;get an array (ncase,nmonth,nlat,nlon)
-vari_v(nf,:,:,:)  = f->$var_name(1)$(nm,:,:,:) ;get an array (ncase,nmonth,nlat,nlon)
+ var_v(nf,:,:,:)  = f->$var_name(0)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+vari_v(nf,:,:,:)  = f->$var_name(1)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),27,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),27,True,False)
 prob_u(nf,:,:,:) = ttest(var_u(0,:,:,:),vari_u(0,:,:,:),27,var_u(nf+1,:,:,:),vari_u(nf+1,:,:,:),27,True,False)
 prob_v(nf,:,:,:) = ttest(var_v(0,:,:,:),vari_v(0,:,:,:),27,var_v(nf+1,:,:,:),vari_v(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:) ;get the difference between CTRL and NUDG
-var_u(nf+1,:,:,:)= var_u(nf+1,:,:,:) - var_u(0,:,:,:) ;get the difference between CTRL and NUDG
-var_v(nf+1,:,:,:)= var_v(nf+1,:,:,:) - var_v(0,:,:,:) ;get the difference between CTRL and NUDG
+var(nf+1,:,:,:,:)= var(0,:,:,:,:) - var(nf+1,:,:,:,:) ;get the difference between CTRL and NUDG
+var_u(nf+1,:,:,:)= var_u(0,:,:,:) - var_u(nf+1,:,:,:) ;get the difference between CTRL and NUDG
+var_v(nf+1,:,:,:)= var_v(0,:,:,:) - var_v(nf+1,:,:,:) ;get the difference between CTRL and NUDG
 end do
 
 var(0,0,:,:,:) = var(0,0,:,:,:)-273.15      ;convert unit from K to C

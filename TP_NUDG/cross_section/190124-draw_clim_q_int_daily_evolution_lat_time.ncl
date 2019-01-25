@@ -73,7 +73,7 @@ do nt = 0,nyear-1,1
     var(nc,nt,:,:) = temp({lat|:},{time|:})
 end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
-var := dim_avg_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
+var := dim_avg_n(var,1) ;get var(ncase,nlat,ntime)
 printVarSummary(temp&time)
 
 do nc = 1,2
@@ -167,14 +167,16 @@ printVarSummary(var)
     ;res@cnMaxLevelValF        = 58;32        ; set max contour level
     ;res@cnLevelSpacingF       = 3        ; set contour interval
 
-    res@gsnSpreadColors      = True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 2                ; start at color 17
-    res@gsnSpreadColorEnd    = 21                ; end at color 200
+    ;res@gsnSpreadColors      = True              ; turn of the full color map
+    ;res@gsnSpreadColorStart  = 2                ; start at color 17
+    ;res@gsnSpreadColorEnd    = 21                ; end at color 200
     
     res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "vertical"
+    res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelStride        = 2
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-2
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -191,15 +193,15 @@ printVarSummary(var)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = False;True
-    resp@lbOrientation    = "Horizontal"
-    resp@lbLabelStride    = 2
-    resp@lbLabelFont      = font_index              ; make labels smaller
-    resp@lbLabelFontHeightF = tick_font
-    resp@lbLabelFontThicknessF = tick_thick
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05
-    resp@txFontHeightF = title_font 
-    resp@txFontThicknessF = title_thick
+    ;resp@lbOrientation    = "Horizontal"
+    ;resp@lbLabelStride    = 2
+    ;resp@lbLabelFont      = font_index              ; make labels smaller
+    ;resp@lbLabelFontHeightF = tick_font
+    ;resp@lbLabelFontThicknessF = tick_thick
+    ;resp@pmLabelBarWidthF  = 0.8
+    ;resp@pmLabelBarHeightF = 0.05
+    ;resp@txFontHeightF = title_font 
+    ;resp@txFontThicknessF = title_thick
 
     minlvl = (/10,-8,-8/) ;used for East Asian moist transiation
     maxlvl = (/58, 8, 8/) ;used for CTRL-NUDG

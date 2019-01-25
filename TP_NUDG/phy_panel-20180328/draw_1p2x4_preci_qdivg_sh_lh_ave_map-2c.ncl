@@ -18,15 +18,15 @@ months   = (/"DJF","MAM","JJA","SON"/)
 nm = 2
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-;path     = "/home/ys17-19/renql/project/TP_NUDG"
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/phy_panel-20180328/fig/1p2x4_preci_TMQ_sh_lh_" + months(nm) + var_name(0) 
-    case   = (/" CTRL"," NG6h-CTRL"/)
+    case   = (/" CTRL"," CTRL - NG6h"/)
 pre_case   = (/"(a","(b"/)
-;fig_out    = "pdf";"x11"
-fig_out    = "eps";"x11"
+fig_out    = "pdf";"x11"
+;fig_out    = "eps";"x11"
 
 ;area: east Asia
 lats = -15 ;-20
@@ -68,7 +68,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 4.0
+   mp_thick       = 3.0
    font_index     = 22
 
 ;================================================================
@@ -84,7 +84,7 @@ end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:) ;get the difference between CTRL and NUDG
+var(nf+1,:,:,:)= var(0,:,:,:) - var(nf+1,:,:,:)  ;get the difference between CTRL and NUDG
 end do
 
 ;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)

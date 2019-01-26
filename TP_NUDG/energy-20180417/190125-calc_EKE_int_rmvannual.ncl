@@ -55,8 +55,8 @@ do nf = 0,ncase-1,1
 ;==========================================================
 ;read the data
 ;============================================================
-printVarSummary(u)
 do nt = 0,nyear-1,1
+printVarSummary(u)
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->U(select_time,{lev},{lats:latn},{lonl:lonr})

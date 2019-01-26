@@ -12,7 +12,7 @@ path    = "/home/ys17-19/renql"
 filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE.nc"
+fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_500EKE.nc"
 var_name= (/"U","V","PS"/)
 case    = (/"CTRL","NG24h","NG6h"/)
 ncase   = dimsizes(case)
@@ -25,6 +25,7 @@ latn = 60
 lonl = 20
 lonr = 220
 lev  = (/1000,925,850,700,600,500,400,300,200/)
+;lev  = (/500,400,300,200/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -51,12 +52,11 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 0,ncase-1,1 
+do nf = 2,ncase-1,1 
 ;==========================================================
 ;read the data
 ;============================================================
 do nt = 0,nyear-1,1
-printVarSummary(u)
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
@@ -77,7 +77,8 @@ printVarSummary(dp)
 
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
 
@@ -121,7 +122,7 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600,500,400,300,200hPa "
+fileatt@discription   = "rmvannual cycle, the integration is based on 500,400,300,200hPa "
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate

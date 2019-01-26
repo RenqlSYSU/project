@@ -12,7 +12,7 @@ path    = "/home/ys17-19/renql"
 filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_EKE_int_rmvannual.nc"
+fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE.nc"
 var_name= (/"U","V","PS"/)
 case    = (/"CTRL","NG24h","NG6h"/)
 ncase   = dimsizes(case)
@@ -44,15 +44,22 @@ u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 ps    = new((/nyear,ntime,nlat,nlon/),float)
+var_month  = new((/nyear,12 ,nlat,nlon/),float)
+var_season = new((/nyear,4  ,nlat,nlon/),float)
+month_ave  = new((/      12 ,nlat,nlon/),float)
+month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
+season_ave = new((/       4 ,nlat,nlon/),float)
+season_vari= new((/       4 ,nlat,nlon/),float)
 
 do nf = 0,ncase-1,1 
 ;==========================================================
 ;read the data
 ;============================================================
+printVarSummary(u)
 do nt = 0,nyear-1,1
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-u(nt,:,:,:,:)   = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
+u(nt,:,:,:,:)  = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
@@ -60,8 +67,8 @@ v(nt,:,:,:,:)  = f->V(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-ps(nt,:,:,:)  = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
-dp(nt,:,:,:,:)  = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),30000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
+ps(nt,:,:,:)   = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),20000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
 
 printVarSummary(ps)
@@ -77,6 +84,33 @@ EKE_vari = dim_variance_n(var,0)
 EKE@long_name = "Integrated transient eddies kinetic energy"
 EKE@units     = "J" 
 
+time = cd_calendar(f->time,0)
+do nm = 0,11,1
+    select_time := ind(time(:,1).eq.nm+1)
+    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+end do
+
+;----------calculate the season average-----------------------
+mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
+do ns = 0,3,1
+    nm = ns*3 ;nm = 0,3,6,9
+    if(nm.eq.0) then
+    var_season(:,ns,:,:) = ( var_month(:,11  ,:,:)*mdays(11)   + \
+                             var_month(:,nm  ,:,:)*mdays(nm)   + \
+                             var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
+    else
+    var_season(:,ns,:,:) = ( var_month(:,nm-1,:,:)*mdays(nm-1) + \
+                             var_month(:,nm  ,:,:)*mdays(nm)   + \
+                             var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
+    end if
+end do
+month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
+month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
+season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
+season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
+printVarSummary(month_ave)
+printVarSummary(season_ave)
+
 ;========================================================================
 ;save the data
 ;=======================================================================
@@ -87,33 +121,49 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "the integration is based on 1000,925,850,700,600,500,400,300,200hPa "
+fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600,500,400,300,200hPa "
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"time","lat" ,"lon"/)
-dimSizes = (/ntime ,nlat  ,nlon /)
-dimUnlim = (/False ,False ,False/)
+dimNames = (/"month","season","time","lat","lon"/);
+dimSizes = (/  12   ,  4     ,ntime ,nlat ,nlon/) ;
+dimUnlim = (/False  ,False   ,False ,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
+filevardef(ncdf,"month" ,"integer",(/"month" /))
+filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
 filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
+filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
+filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"time",u&time)
 filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
 filevarattdef(ncdf,"EKE",EKE)
+filevarattdef(ncdf,"month_ave",EKE)
+filevarattdef(ncdf,"season_ave",EKE)
+filevarattdef(ncdf,"month_vari",EKE)
+filevarattdef(ncdf,"season_vari",EKE)
 
+ncdf->month  = ispan(1,12,1)
+ncdf->season = (/1212,345,678,91011/)
 ncdf->time = (/u&time/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
 ncdf->EKE  = (/EKE/)
 ncdf->EKE_vari  = (/EKE_vari/)
+ncdf->month_ave   = (/month_ave/)
+ncdf->season_ave  = (/season_ave/)
+ncdf->month_vari  = (/month_vari/)
+ncdf->season_vari = (/season_vari/)
 end do
 end
 

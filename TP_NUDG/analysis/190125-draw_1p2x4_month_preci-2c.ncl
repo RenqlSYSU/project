@@ -16,8 +16,8 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2
-nv = 1;11;9;5;4;3;2;1
-imonth = (/4,5,6,7/)
+nv = 0
+imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -31,10 +31,10 @@ pre_case   = (/"(a","(b"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = 20 ;-15 ;-20
-latn = 55 ;55  ;60
-lonl = 30 ;30  ;20
-lonr = 150;150 ;220
+lats = -15 ;20 ;-20
+latn = 55  ;55 ;60
+lonl = 30  ;30 ;20
+lonr = 150 ;150;220
 siglvl = 0.05
 
 f = addfile(gtopfile,"r")
@@ -261,7 +261,7 @@ if(nv.eq.0) then ;preci
     spacig = (/(/ 1 , 1 , 1 , 1 /),(/0.5 , 0.5 , 0.5, 0.5/)/);1 ,1 ,1 ,1 
 end if
 
-if(nv.eq.1) then ;preci
+if(nv.eq.1) then ;U
     minlvl = (/(/ 0, 0, 0, 0/),(/-4.0,-4.0 ,-4.0,-4.0/)/);-8,-8,-8,-8
     maxlvl = (/(/45,45,45,45/),(/4.0 , 4.0 , 4.0, 4.0/)/);8 ,8 ,8 ,8 
     spacig = (/(/ 3, 3, 3, 3/),(/0.5 , 0.5 , 0.5, 0.5/)/);1 ,1 ,1 ,1 

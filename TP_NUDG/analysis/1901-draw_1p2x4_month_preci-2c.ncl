@@ -8,26 +8,27 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"U"  /)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~ J","m/s"/)    ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+draw_var = (/"preci" ,"EKE"        ,"q1" ,"U"  /)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~ J","10~S~-2~N~ K/S","m/s"/)    ;this can be used as right string 
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2
-nv = 1
-imonth = ispan(4,7,1);(/4,5,6,7/)
+nv = 2
+;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_month_ave_500" + draw_var(nv) + ".nc"
+filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
-    case   = (/" CTRL"," CTRL-NG6h"/)
-pre_case   = (/"(a","(b"/)
+    case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+pre_case   = (/"(a","(b","(c"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -49,10 +50,10 @@ vari = new((/ncase  ,nmonth,nlat,nlon/),float)
 prob = new((/ncase-1,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/2*nmonth/),graphic)
-    plot2    = new((/nmonth/),graphic)
-    gtop     = new((/2*nmonth/),graphic)
-    line     = new((/2*nmonth/),graphic)
+    plot     = new((/ncase*nmonth/),graphic)
+    plot2    = new((/(ncase-1)*nmonth/),graphic)
+    gtop     = new((/ncase*nmonth/),graphic)
+    line     = new((/ncase*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -69,7 +70,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 3.0
+   mp_thick       = 2.0
    font_index     = 22
 
 ;================================================================
@@ -77,7 +78,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf),"r")
-    if(nv.eq.2) then
+    if(nv.eq.3) then
     fig_name  = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + lev(nl) + var_name(0) + "-2c" 
     fig_title = "Climate " + lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
     var(nf,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -90,11 +91,15 @@ end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= var(0,:,:,:) - var(nf+1,:,:,:)   ;get the difference between CTRL and NUDG
+var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
 if(nv.eq.1) then
     var = var/10000
+end if
+
+if(nv.eq.2) then   ;q1
+    var = var*100
 end if
 
 ;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
@@ -260,9 +265,9 @@ printVarSummary(prob)
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then ;preci
-    minlvl = (/ 1 ,-4.0/);-8,-8,-8,-8
-    maxlvl = (/16 ,4.0 /);8 ,8 ,8 ,8 
-    spacig = (/ 1 ,0.5 /);1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-4.0,-4.0/);-8,-8,-8,-8
+    maxlvl = (/16 ,4.0 ,4.0 /);8 ,8 ,8 ,8 
+    spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.1) then ;EKE
@@ -271,7 +276,13 @@ if(nv.eq.1) then ;EKE
     spacig = (/ 2 , 2 /);1 ,1 ,1 ,1 
 end if
 
-if(nv.eq.2) then ;U
+if(nv.eq.2) then ;q1
+    minlvl = (/0  ,-8 ,-8/)
+    maxlvl = (/75 , 8 , 8/)
+    spacig = (/ 5 , 1 , 1/)
+end if
+
+if(nv.eq.3) then ;U
     minlvl = (/ 0,-4.0/);-8,-8,-8,-8
     maxlvl = (/45, 4.0/);8 ,8 ,8 ,8 
     spacig = (/ 3, 0.5/);1 ,1 ,1 ,1 
@@ -287,7 +298,8 @@ else
 end if 
     do nm = 0,nmonth-1,1
         nn = nm +1
-        np = 4*nc + nm
+        np = nmonth*nc + nm
+        np2= nmonth*(nc-1) + nm
         res@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
         res@gsnRightString  = months(imonth(nm)) 
         res@gsnSpreadColors       = False              ; turn of the full color map
@@ -301,8 +313,8 @@ end if
         end if
         if(nc.gt.0) then
             plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-            plot2(nm)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-            overlay(plot(np),plot2(nm))
+            plot2(np2)   = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            overlay(plot(np),plot2(np2))
         else
             plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         end if

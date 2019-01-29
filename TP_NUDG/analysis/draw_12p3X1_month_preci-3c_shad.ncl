@@ -8,13 +8,13 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL","DCQ","DTCOND","HFLX","TS","DTHFLX","PS"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day","kg/kg/day","K/s","W/m","C~S~o~N~","k/S","Pa"/)    ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-nv = 0;11;9;5;4;3;2;1
+draw_var = (/"preci","qdivg","SHFLX","LHFLX","PRECC","PRECL","DCQ","DTCOND","HFLX","TS","DTHFLX","PS","q1"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","g/(s*m*m)","W/m~S~2~N~","W/m~S~2~N~","mm/day","mm/day","kg/kg/day","K/s","W/m","C~S~o~N~","k/S","Pa","10~S~-1~N~ K/s"/)    ;this can be used as right string 
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+nv = 12;11;9;5;4;3;2;1
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -23,7 +23,8 @@ gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/analysis/fig/12p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
-    case   = (/"(a) CTRL","(b) CTRL-NG6h","(c) CTRL-NG24h"/)
+    case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
+    ;case   = (/"(a) CTRL","(b) CTRL-NG6h","(c) CTRL-NG24h"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -79,11 +80,15 @@ end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var(nf+1,:,:,:)= var(0,:,:,:) - var(nf+1,:,:,:)   ;get the difference between CTRL and NUDG
+var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
 if(nv.eq.9) then
 var(0,:,:,:) = var(0,:,:,:) - 273.15  ;convert unit from K to C
+end if
+
+if(nv.eq.12) then
+var = var*10  ;convert unit from K to C
 end if
 
 ;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
@@ -304,6 +309,12 @@ if(nv.eq.10) then
     spacig = (/0.05,0.01 , 0.01 /)
 end if
 
+if(nv.eq.12) then
+    minlvl = (/0  ,-1.6,-1.6/)
+    maxlvl = (/7.5 ,1.6 ,1.6 /)
+    spacig = (/0.5,0.2 ,0.2 /)
+end if
+
 do nm = 0,nmonth-1,1
     do nc = 0, ncase-1,1
 if((nv.gt.3.or.nv.eq.0).and.nc.eq.0) then
@@ -315,7 +326,7 @@ else
 end if 
         res@gsnLeftString   = case(nc)
         res@gsnSpreadColors       = False              ; turn of the full color map
-        if(nv.gt.10) then
+        if(nv.gt.13) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
         else
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

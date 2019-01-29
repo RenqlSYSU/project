@@ -5,8 +5,8 @@
 ;                                                    2019/01/28
 ;*********************************************************************************
 begin
-;draw_var = (/"500EKE"     ,"200uwnd"  /)  ;this is the variable used to draw, can used as center string
-draw_var = (/"AKE","200uwnd"  /)  ;this is the variable used to draw, can used as center string
+draw_var = (/"500EKE"     ,"200uwnd"  /)  ;this is the variable used to draw, can used as center string
+;draw_var = (/"500AKE","200uwnd"  /)  ;this is the variable used to draw, can used as center string
 unit     = (/"10~S~4~N~ J","m/s"      /)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
@@ -143,9 +143,9 @@ end do
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     ;res@cnFillPalette = "GMT_gray" ;has 10 colors 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 2 ;0          ; set min contour level
-    res@cnMaxLevelValF        = 34;40 ;32     ; set max contour level
-    res@cnLevelSpacingF       = 2 ;5        ; set contour interval
+    res@cnMinLevelValF        = 2       ;10    ; set min contour level
+    res@cnMaxLevelValF        = 50 ;32  ;170   ; set max contour level
+    res@cnLevelSpacingF       = 3       ;10  ; set contour interval
     
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
@@ -172,17 +172,20 @@ end do
     res_line@cnLineLabelsOn   = False      ; turn off contour line labels
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 2.5
-    res_line@cnMonoLineColor  = False
+    res_line@cnMonoLineColor  = True ;False
+    res_line@cnLineColor      = "black"
+    res_line@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_line@cnLevels         = (/20/)
     
 ;    cmap = read_colormap_file("GMT_gray") ;has 10 colors 
-    res_line@cnLinePalette  = "GMT_gray" ;has 64 colors blue green yellow,red
+;    res_line@cnLinePalette  = "GMT_gray" ;has 64 colors blue green yellow,red
 ;    res_line@cnLinePalette  = "GMT_cool"  ;has 64 colors blue green yellow,red
 ;    res_line@cnLinePalette = "WhBlGrYeRe"  ;has 100 colors,start with white
-    res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res_line@cnMinLevelValF        = 8  ;4          ; set min contour level
-    res_line@cnMaxLevelValF        = 32 ;60 ;32        ; set max contour level
-    res_line@cnLevelSpacingF       = 8 ;        ; set contour interval
-    res_line@cnLineColors     =  (/8,6,4,2/) ;(/"lemonchiffon","lemonchiffon1","lemonchiffon2","lemonchiffon3","lemonchiffon4"/)
+;    res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+;    res_line@cnMinLevelValF        = 8  ;4          ; set min contour level
+;    res_line@cnMaxLevelValF        = 32 ;60 ;32        ; set max contour level
+;    res_line@cnLevelSpacingF       = 8 ;        ; set contour interval
+;    res_line@cnLineColors     =  (/8,6,4,2/) ;(/"lemonchiffon","lemonchiffon1","lemonchiffon2","lemonchiffon3","lemonchiffon4"/)
 ;    res_line@cnSpanLinePalette = True
     
     ;res_line@gsnSpreadColors      = False;True              ; turn of the full color map
@@ -240,9 +243,9 @@ do nm = 0,nmonth-1,1
     res@gsnRightString  = draw_var(0) + " (" + unit(0) + ")"
     plot(nm) = gsn_csm_contour_map_ce(wks,var(0,nm,:,:),res)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
-    ;line(nm) = gsn_csm_contour(wks,var(1,nm,:,:),res_line)
+    line(nm) = gsn_csm_contour(wks,var(1,nm,:,:),res_line)
     overlay(plot(nm),gtop(nm))
-    ;overlay(plot(nm),line(nm))
+    overlay(plot(nm),line(nm))
     axis(nm) = gsn_add_polyline( wks, plot(nm), alon, alat(nm,:), lnres )
     print(max(var(0,nm,{lats:latn},{lonl:lonr})))
     print(min(var(0,nm,{lats:latn},{lonl:lonr})))

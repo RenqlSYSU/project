@@ -14,10 +14,10 @@ unit     = "kg/(s*m)" ;"K"   ;this can be used as right string
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_JJAave_qtran_int_rmvannual.nc"
+filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_JJAave_qtran_int_rmvannual.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_rmvannual"
-    case   = (/" CTRL"," CTRL-NG24h"," CTRL-NG6h"/)
+    case   = (/" CTRL"," NG6h-CTRL"," NG24h-CTRL"/)
 pre_case   = (/"(a","(b","(c"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
@@ -79,8 +79,8 @@ end do
 
 do nc = 1, ncase-1, 1
     prob = ttest(ave(0,:,:,:),vari(0,:,:,:),ntime,ave(nc,:,:,:),vari(nc,:,:,:),ntime,True,False)
-    var_u(nc,:,:,:) = var_u(0,:,:,:) - var_u(nc,:,:,:) 
-    var_v(nc,:,:,:) = var_v(0,:,:,:) - var_v(nc,:,:,:) 
+    var_u(nc,:,:,:) =  var_u(nc,:,:,:) - var_u(0,:,:,:) 
+    var_v(nc,:,:,:) =  var_v(nc,:,:,:) - var_v(0,:,:,:) 
     ;var_v(nc,(/0,2/),:,:) = mask(var_v(nc,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
     ;var_u(nc,(/0,2/),:,:) = mask(var_u(nc,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
 end do

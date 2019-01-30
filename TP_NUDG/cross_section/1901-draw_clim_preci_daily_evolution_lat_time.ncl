@@ -75,9 +75,9 @@ var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 printVarSummary(temp&time)
 
 ;do nc = 1,2
-    var(2,:,:) = var(0,:,:) - var(1,:,:)
+    var(2,:,:) = var(1,:,:) - var(0,:,:)
     ;prob(nc,:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-    case   = (/"(a) CTRL","(b) NG6h","(c) CTRL-NG6h"/)
+    case   = (/"(a) CTRL","(b) NG6h","(c) NG6h-CTRL"/)
 ;end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))

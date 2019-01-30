@@ -77,9 +77,9 @@ var := dim_avg_n(var,1) ;get var(ncase,nlat,ntime)
 printVarSummary(temp&time)
 
 do nc = 1,2
-    var(nc,:,:) = var(0,:,:) - var(nc,:,:) 
+    var(nc,:,:) = var(nc,:,:) - var(0,:,:) 
     ;prob((nc-1),:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-    case   = (/"(a) CTRL","(b) CTRL-NG6h","(c) CTRL-NG24h"/)
+    case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
 end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))

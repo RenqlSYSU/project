@@ -16,7 +16,7 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2
-nv = 0
+nv = 2;0
 imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
 
@@ -29,7 +29,7 @@ fig_name = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
     case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
-pre_case   = (/"(a","(b","(c"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -87,16 +87,17 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;read data
 ;====================================================================
 axlon = phis&lon
-axlat = new((/ncase,nmonth,nlon/),float)
+axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
 do nf = 0 ,ncase-1, 1
     u_f = addfile(ufilename(nf),"r")
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-;do nm = 0, nmonth-1,1
-;do inln = 0, nlon-1,1
-;   axlat(nf,nm,inln) = lat1(maxind(u(nf,nm,:,inln)))
-;end do
-;end do
+do nm = 0, nmonth-1,1
+do inln = 0, nlon-1,1
+   axlat(nf,nm,inln) = lat1(maxind(u(nf,nm,:,inln)))
+end do
+end do
+printVarSummary(axlat)
     
     f = addfile(filename(nf),"r")
     if(nv.eq.3) then
@@ -146,6 +147,7 @@ var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
+printVarSummary(u)
 printVarSummary(prob)
 
 
@@ -336,31 +338,31 @@ if(nv.eq.1) then ;EKE
 end if
 
 if(nv.eq.2) then ;q1
-    minlvl = (/0  ,-8 ,-8/)
-    maxlvl = (/75 , 8 , 8/)
-    spacig = (/ 5 , 1 , 1/)
+    minlvl = (/0  ,-16,-16/)
+    maxlvl = (/75 , 16, 16/)
+    spacig = (/ 5 , 2 ,  2/)
 end if
 
 if(nv.eq.3) then ;U
-    minlvl = (/ 0,-4.0/);-8,-8,-8,-8
-    maxlvl = (/45, 4.0/);8 ,8 ,8 ,8 
-    spacig = (/ 3, 0.5/);1 ,1 ,1 ,1 
+    minlvl = (/ 0,-4.0,-4.0/);-8,-8,-8,-8
+    maxlvl = (/45, 4.0, 4.0/);8 ,8 ,8 ,8 
+    spacig = (/ 3, 0.5, 0.5/);1 ,1 ,1 ,1 
 end if
 
 do nc = 0, ncase-1,1
 if(nc.eq.0) then
-    res@cnFillPalette = "precip3_16lev"
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
+   res@cnFillPalette = "precip3_16lev"
+   ;blue and yellow and red, has 17 colors,2-18,2 is white
 else
     res@cnFillPalette = "BlueDarkRed18"
-    ;blue and red, has 18 colors,2-10 is blue
+   ;blue and red, has 18 colors,2-10 is blue
 end if 
     do nm = 0,nmonth-1,1
         nn = nm +1
         np = nmonth*nc + nm
         np2= nmonth*(nc-1) + nm
-        res@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
-        res@gsnRightString  = months(imonth(nm)) 
+        res@gsnLeftString   = pre_case(np) + ") " + case(nc)
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(nv) ;+ " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         if(nv.gt.10) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
@@ -370,17 +372,13 @@ end if
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         end if
-        ;if(nc.gt.0) then
-            plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-            plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-            overlay(plot(np),plot2(np))
-        ;else
-        ;    plot(np)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        ;end if
+        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
+        plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+        overlay(plot(np),plot2(np))
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
     end do 

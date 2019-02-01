@@ -288,6 +288,7 @@ printVarSummary(prob)
     lnres2@gsLineColor          = "black"
     lnres2@gsLineDashPattern    = 1
     lnres2@gsLineThicknessF     = 3.5
+
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
     res_gtop@gsnDraw          = False

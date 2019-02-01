@@ -12,11 +12,11 @@ begin
    tick_font      = 0.03
    subtitle_font  = 0.03
    title_font     = 0.03
-   vcref_font     = 0.03
+   vcref_font     = 0.015
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 2.0
+   vc_thick       = 1.8
    mp_thick       = 1.5
    font_index     = 22
 
@@ -37,9 +37,9 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 filename  = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" + draw_varname(0) + ".nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p2x4_wind_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
+fig_name = path + "/analysis/fig/1p2x4_" + lev(nl) + "wind_" + draw_var(0) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
-fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
+fig_title  = "Climate " + draw_var(0) + " (" + unit(0) + ")"
     case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
@@ -61,7 +61,7 @@ alonr = (/122 ,122,105/)
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-navr   = dimsizes(draw_varname)
+nvar   = dimsizes(draw_varname)
 ncase  = dimsizes(case)
 nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
@@ -95,7 +95,7 @@ axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
 do nf = 0 ,ncase-1, 1
     u_f = addfile(ufilename(nf),"r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(2)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 do nm = 0, nmonth-1,1
 do inln = 0, nlon-1,1
    axlat(nf,nm,inln) = lat1(maxind(u(nf,nm,:,inln)))
@@ -135,12 +135,14 @@ end do
 ;----------------------------------------------
 
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),27,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),27,True,False)
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
 var(:,2,:,:,:) = var(:,2,:,:,:)*100  ;q1*100
-var(1:2,:,:,:,:) = mask(var(1:2,:,:,:,:),prob.lt.siglvl,True)
+var(1:2,0,:,:,:) = mask(var(1:2,0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+var(1:2,1,:,:,:) = mask(var(1:2,1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+var(1:2,2,:,:,:) = mask(var(1:2,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(var)
@@ -246,14 +248,14 @@ printVarSummary(prob)
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
-    resvc@vcLineArrowColor           = "black"
+    resvc@vcLineArrowColor           = "gray20"
     resvc@vcMinDistanceF             = 0.032
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.2           ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.4           ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -336,12 +338,12 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/5 ,1,1/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/5 ,2,2/), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/15,3,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
-if(nl.eq.0) then
-    minlvl = (/0  ,-16,-16/)  ;q1
-    maxlvl = (/75 , 16, 16/)
+    vcref         = (/(/7 ,3,3/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/7 ,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/15,4,4/)/)   ;the level of 200hpa    ctrl,nudg,diff
+    
+    minlvl = (/5  ,-16,-16/)  ;q1
+    maxlvl = (/80 , 16, 16/)
     spacig = (/ 5 , 2 ,  2/)
 
 do nc = 0, ncase-1,1
@@ -355,7 +357,7 @@ end if
     do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(nv) ;+ " (" + unit(nv) + ")" 
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(0) ;+ " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -366,12 +368,12 @@ end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
         wind(np)    = gsn_csm_vector(wks,var(nc,0,nm,:,:),var(nc,1,nm,:,:),resvc)
         overlay(plot(np),wind(np))
-        plot_u(np)  = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        overlay(plot(np),plot_u(np))
+        ;plot_u(np)  = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+        ;overlay(plot(np),plot_u(np))
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+        ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,2,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,2,nm,{lats:latn},{lonl:lonr})))
     end do 

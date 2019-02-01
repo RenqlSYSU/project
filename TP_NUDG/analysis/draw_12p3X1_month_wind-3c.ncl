@@ -15,32 +15,36 @@ begin
 draw_var = (/"U","V","wind"/)  ;this is the variable used to draw, can used as center string
 unit     = "m/s" ;"K"   ;this can be used as right string 
 ;unit     = "m~S~2~N~/s~S~2~N~"   ;this can be used as right string 
-;var_name = (/"season_vari"/) ;this is the var_name in data file
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev  = (/850,500,200/)  ;can used as right string
 nl = 1;1
 nv = 2
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-filename = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/4p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
+;path     = "/users/yangsong3/renql/project/TP_NUDG"
+path    = "/home/ys17-19/renql/project/TP_NUDG"
+filename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
+gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+fig_name = path + "/analysis/fig/12p3X1_" + draw_var(nv) + "_" + var_name(0) + "-3c-" + lev(nl)
 ;fig_title  = "Seasonly " + draw_var(nv) + " Variance in " ;+season
 fig_title  = "Climate Seasonal " + draw_var(nv) + " in " ;+season
     ;case   = (/"AMIP_CTRL","(CTRL-NUDG24h)/CTRL%","(CTRL-NUDG6h)/CTRL%"/)
-    case   = (/"AMIP_CTRL","CTRL-NUDG24h","CTRL-NUDG6h"/)
+    case   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;-20
-latn = 55  ;60
-lonl = 30  ;20
-lonr = 150 ;220
+lats = -90 ;-15 ;-20
+latn =  90 ;55  ;60
+lonl =  0  ;30  ;20
+lonr = 360 ;150 ;220
 siglvl = 0.05
 
+f = addfile(gtopfile,"r")
+phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 f = addfile(filename(0)+ draw_var(0) + ".nc","r")
 ncase  = dimsizes(case)
 nmonth = dimsizes(months)
@@ -49,8 +53,10 @@ nlon   = getfilevardimsizes(f,"lon")
 nlev   = getfilevardimsizes(f,"lev")
 var_u  = new((/ncase  ,nmonth,nlat,nlon/),float)
 var_v  = new((/ncase  ,nmonth,nlat,nlon/),float)
-vari   = new((/ncase  ,nmonth,nlat,nlon/),float)
-prob = new((/ncase-1,nmonth,nlat,nlon/),float)
+vari_u = new((/ncase  ,nmonth,nlat,nlon/),float)
+vari_v = new((/ncase  ,nmonth,nlat,nlon/),float)
+prob_u = new((/ncase-1,nmonth,nlat,nlon/),float)
+prob_v = new((/ncase-1,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/3/),graphic)
@@ -82,26 +88,27 @@ nv = 0
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
     var_u(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
+    vari_u(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
 end do
 
 nv = 1
 do nf = 0 ,ncase-1, 1
     f = addfile(filename(nf)+ draw_var(nv) + ".nc","r")
     var_v(nf,:,:,:)  = f->$var_name(0)$(:,{lev(nl)},:,:) ;get an array (ncase,nmonth,nlat,nlon)
+    vari_v(nf,:,:,:) = f->$var_name(1)$(:,{lev(nl)},:,:);get an array (ncase,nmonth,nlat,nlon)
 end do
 
 do nf = 0 ,ncase-2,1
 ;prob(nf,:,:,:) = ftest(var(0,:,:,:),27,var(nf+1,:,:,:),27,0)
-prob(nf,:,:,:) = ttest(var_u(0,:,:,:),vari(0,:,:,:),27,var_u(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
-var_u(nf+1,:,:,:)= (var_u(0,:,:,:) - var_u(nf+1,:,:,:));/abs(var_u_temp)*100 ;get the difference between CTRL and NUDG
-var_v(nf+1,:,:,:)= (var_v(0,:,:,:) - var_v(nf+1,:,:,:));/abs(var_v_temp)*100 ;get the difference between CTRL and NUDG
+prob_u(nf,:,:,:) = ttest(var_u(0,:,:,:),vari_u(0,:,:,:),27,var_u(nf+1,:,:,:),vari_u(nf+1,:,:,:),27,True,False)
+prob_v(nf,:,:,:) = ttest(var_v(0,:,:,:),vari_v(0,:,:,:),27,var_v(nf+1,:,:,:),vari_v(nf+1,:,:,:),27,True,False)
+var_u(nf+1,:,:,:)= var_u(nf+1,:,:,:) - var_u(0,:,:,:);/abs(var_u_temp)*100 ;get the difference between CTRL and NUDG
+var_v(nf+1,:,:,:)= var_v(nf+1,:,:,:) - var_v(0,:,:,:);/abs(var_v_temp)*100 ;get the difference between CTRL and NUDG
 end do
 
-prob = mask(prob,prob.lt.siglvl,True)
-copy_VarMeta(var_u(0,0,:,:),prob(0,0,:,:))
+var_u(1:2,:,:,:) = mask(var_u(1:2,:,:,:),((prob_u.lt.siglvl).or.(prob_v.lt.siglvl)),True)
+var_v(1:2,:,:,:) = mask(var_v(1:2,:,:,:),((prob_u.lt.siglvl).or.(prob_v.lt.siglvl)),True)
 printVarSummary(var_u)
-printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -152,7 +159,7 @@ printVarSummary(prob)
     ;  res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
-    res@gsnScalarContour = True
+    res@gsnScalarContour = False
     res@cnFillOn         = True
     res@cnLinesOn        = False ;True
     res@cnLineLabelsOn   = False
@@ -181,41 +188,28 @@ printVarSummary(prob)
      res@vcRefAnnoString2On         = True
      ;res@vcRefAnnoString2           = "30m/s"
 
-;----------Set res sig-----------
-    res_sig                  = True
-    res_sig@gsnDraw          = False
-    res_sig@gsnFrame         = False
-    res_sig@cnFillOn         = True       ; Fill contours
-    res_sig@cnLinesOn        = False;True      ; turn off contour lines
-    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
-    res_sig@cnMonoFillPattern= True;False
-    res_sig@cnFillPattern    = 11
-    res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 1.
-    res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "darkslategray"
-    res_sig@cnFillDotSizeF   = 0.1
-    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
-    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
-    ;res_sig@cnLevels             = (/0.01/)
-    ;res_sig@cnFillPattern        = "GMT_gray"
-    ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
-    
-    res_sig@gsnCenterString      = ""
-    res_sig@gsnRightStringFontHeightF = subtitle_font
-    res_sig@gsnLeftStringFontHeightF  = subtitle_font
-    res_sig@gsnLeftString    = " "
-    res_sig@gsnRightString   = " "
-
 ;--------set the attribute of polygon--------------
     lnres                      = True
     lnres@gsLineColor          = "black"
     lnres@gsLineDashPattern    = 0
     lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
+
+;--------set the attribute of gtop--------------
+    res_gtop                  = True
+    res_gtop@gsnDraw          = False
+    res_gtop@gsnFrame         = False
+    res_gtop@cnFillOn         = False
+    res_gtop@cnLinesOn        = True      ; turn off contour lines
+    res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_gtop@cnInfoLabelOn    = False
+    res_gtop@cnLineThicknessF = mp_thick
+    res_gtop@cnLineColor      = "black"
+    res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_gtop@cnLevels         = (/1500/)
+    res_gtop@gsnCenterString      = ""
+    res_gtop@gsnLeftString    = " "
+    res_gtop@gsnRightString   = " "
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -238,25 +232,25 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/10,1,1/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,2,2/), \  ;the level of 500hpa    ctrl,nudg,diff
+    vcref         = (/(/10,3,3/), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/10,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/25,3,3/)/)   ;the level of 200hpa    ctrl,nudg,diff
 do nm = 0 ,nmonth-1,1
     do nc = 0, ncase-1,1
         res@gsnLeftString   = case(nc)
-        if(nc.gt.0) then
-            res@gsnScalarContour = True
-            res@vcRefMagnitudeF       = vcref(nl,nc)                ; define vector ref mag
-            res@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
-            res@gsnRightString  = "siglvl: " + siglvl
-            plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob(nc-1,nm,:,:),res)
-        else
+        ;if(nc.gt.0) then
+        ;    res@gsnScalarContour = True
+        ;    res@vcRefMagnitudeF       = vcref(nl,nc)                ; define vector ref mag
+        ;    res@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
+        ;    res@gsnRightString  = "siglvl: " + siglvl
+        ;    plot(nc)     = gsn_csm_vector_scalar_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),prob(nc-1,nm,:,:),res)
+        ;else
             res@gsnScalarContour = False
             res@vcRefMagnitudeF       = vcref(nl,nc)             ; define vector ref mag
             res@vcRefAnnoString2      = vcref(nl,nc)+"m/s"
             res@gsnRightString   = unit + " " + lev(nl) + "hPa" ;draw_var(nv) 
             plot(nc)     = gsn_csm_vector_map_ce(wks,var_u(nc,nm,:,:),var_v(nc,nm,:,:),res)
-        end if
+        ;end if
         line(nc) = gsn_add_polyline( wks, plot(nc), lonx, latx, lnres )
         print(max(var_u(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var_u(nc,nm,{lats:latn},{lonl:lonr})))

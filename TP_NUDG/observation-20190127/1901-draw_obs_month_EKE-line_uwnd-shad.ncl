@@ -5,7 +5,7 @@
 ;                                                    2019/01/28
 ;*********************************************************************************
 begin
-draw_var = (/"500EKE"     ,"200uwnd"  /)  ;this is the variable used to draw, can used as center string
+draw_var = (/"500SKE"     ,"200uwnd"  /)  ;this is the variable used to draw, can used as center string
 ;draw_var = (/"500AKE","200uwnd"  /)  ;this is the variable used to draw, can used as center string
 unit     = (/"10~S~4~N~ J","m/s"      /)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
@@ -143,9 +143,9 @@ end do
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     ;res@cnFillPalette = "GMT_gray" ;has 10 colors 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 2       ;10    ; set min contour level
-    res@cnMaxLevelValF        = 50 ;32  ;170   ; set max contour level
-    res@cnLevelSpacingF       = 3       ;10  ; set contour interval
+    res@cnMinLevelValF        = 10       ;2    ; set min contour level
+    res@cnMaxLevelValF        = 170 ;32  ;50   ; set max contour level
+    res@cnLevelSpacingF       = 10       ;3  ; set contour interval
     
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 

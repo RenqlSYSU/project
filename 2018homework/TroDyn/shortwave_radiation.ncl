@@ -11,10 +11,10 @@
 
 begin
 ;---Define parameters------------------
-lat  = fspan(-90.0, 90.0, 19)
+lat  = fspan(-80.0, 80.0, 17)
 lat@long_name = "latitude"
 lat@units     = "degrees_north"
-print(lat(17:18))
+print(lat(15:16))
 
 time = ispan(1, 365, 1) ;Summer Solstice June 22 is the 173 day
 nlat = dimsizes(lat)
@@ -32,17 +32,23 @@ day_angle   = 2*pai*(time-1)/ntime
 dist_ratio  = 1.00011 + 0.034221*cos(day_angle) + 0.00128*sin(day_angle) + \
                 0.000719*cos(2*day_angle) + 0.000077*sin(2*day_angle)
 sun_point   = obliquity*cos(2*pai*(173-time)/ntime) ;unit is the degree, Point of direct sunlight
+printVarSummary(sun_point)
+print(sun_point(168:178))
 print(dist_ratio(168:178))
 print(dist_ratio(350:360))
 
 do ilat = 0, nlat-1,1
-    hour_angle(ilat,:) = acos(-tan(pai*sun_point/180.0)*tan(pai*lat(ilat)/180.0))
-    ;short_radi(ilat,:) = (day_period/pai/10000/4.18)*solar_const*dist_ratio*(hour_angle(ilat,:)*sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
-    ;                     cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0)*sin(hour_angle(ilat,:)))
-    short_radi(ilat,:) = solar_const*dist_ratio*(sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
-                            cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0))
+    term = -(tan(pai*sun_point/180.0)*tan(pai*lat(ilat)/180.0))
+    term = where(abs(term).gt.1,1,term)
+    hour_angle(ilat,:) = acos(term)
+    short_radi(ilat,:) = (day_period/pai/10000/4.18)*solar_const*dist_ratio*(hour_angle(ilat,:)*sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
+                         cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0)*sin(hour_angle(ilat,:)))
+    ;short_radi(ilat,:) = solar_const*dist_ratio*(sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
+    ;                        cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0))
 end do
-print(hour_angle(18,168:178));*180/pai)
+print(hour_angle(8,168:178));*180/pai)
+short_radi = mask(short_radi,short_radi.eq.acos(-2),False)
+;short_radi@_FillValue = -nan
 short_radi!0    = "lat"
 short_radi&lat  = lat
 short_radi!1    = "time"

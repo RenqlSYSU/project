@@ -11,7 +11,7 @@
 
 begin
 ;---Define parameters------------------
-lat  = fspan(-80.0, 80.0, 17)
+lat  = fspan(-88.0, 88.0, 23)
 lat@long_name = "latitude"
 lat@units     = "degrees_north"
 print(lat(15:16))
@@ -23,7 +23,7 @@ hour_angle = new((/nlat,ntime/),float)
 short_radi = new((/nlat,ntime/),float)
 
 pai  = 3.1415926
-obliquity   = 23.45 ;unit is the degree, obliquity of the ecliptic
+obliquity   = 23.43 ;unit is the degree, obliquity of the ecliptic
 day_period  = 24*60*60  ;unit is s, the time of an all day
 solar_const = 1365 ;W/cm2
 
@@ -39,22 +39,22 @@ print(dist_ratio(350:360))
 
 do ilat = 0, nlat-1,1
     term = -(tan(pai*sun_point/180.0)*tan(pai*lat(ilat)/180.0))
-    term = where(abs(term).gt.1,1,term)
+    term = where(term.gt.1,1,term)
+    term = where(term.lt.-1,-1,term)
     hour_angle(ilat,:) = acos(term)
-    short_radi(ilat,:) = (day_period/pai/10000/4.18)*solar_const*dist_ratio*(hour_angle(ilat,:)*sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
-                         cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0)*sin(hour_angle(ilat,:)))
-    ;short_radi(ilat,:) = solar_const*dist_ratio*(sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
-    ;                        cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0))
+    ;short_radi(ilat,:) = (day_period/pai/100000)*solar_const*dist_ratio*(hour_angle(ilat,:)*sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
+    ;                     cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0)*sin(hour_angle(ilat,:)))
+    short_radi(ilat,:) = solar_const*dist_ratio*(sin(pai*lat(ilat)/180.0)*sin(pai*sun_point/180.0)+ \
+                            cos(pai*lat(ilat)/180.0)*cos(pai*sun_point/180.0))
 end do
 print(hour_angle(8,168:178));*180/pai)
-short_radi = mask(short_radi,short_radi.eq.acos(-2),False)
-;short_radi@_FillValue = -nan
+short_radi = where(short_radi.lt.0,0,short_radi)
 short_radi!0    = "lat"
 short_radi&lat  = lat
 short_radi!1    = "time"
 short_radi&time = time
-unit = "cal/cm~S~2~N~/day"
-;unit = "W/m~S~2~N~"
+;unit = "10~S~5~N~ J/m~S~2~N~/day"
+unit = "W/m~S~2~N~"
 printVarSummary(hour_angle)
 printVarSummary(short_radi)
 
@@ -74,9 +74,9 @@ printVarSummary(short_radi)
    font_index     = 22
 
 figname = "shortwave_radiation" 
-fig_title = "Incoming Solar Shortwave Radiation" 
+fig_title = "Noon Incoming Solar Shortwave Radiation" 
 months  = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
+wks  = gsn_open_wks("pdf",figname)      ; send graphics to PNG file
   
     gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -155,8 +155,8 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
     ;res@cnLevels             = ispan(0,60,10)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnMinLevelValF        =  0          ; set min contour level
-    res@cnMaxLevelValF        = 750  ;32        ; set max contour level
-    res@cnLevelSpacingF       =  50        ; set contour interval
+    res@cnMaxLevelValF        = 1350 ;450  ;32        ; set max contour level
+    res@cnLevelSpacingF       = 90   ; 30        ; set contour interval
 
     res@gsnSpreadColors      = False            ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -169,9 +169,9 @@ wks  = gsn_open_wks("png",figname)      ; send graphics to PNG file
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbBoxLineThicknessF  = mp_thick-2
 
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.15
-    res@pmLabelBarParallelPosF       = 0.5
+    ;res@pmLabelBarZone               = 0
+    ;res@pmLabelBarOrthogonalPosF     = 0.1
+    ;res@pmLabelBarParallelPosF       = 0.5
 
 ;-----------set the attribute of the polyline---------------
     lres                = True

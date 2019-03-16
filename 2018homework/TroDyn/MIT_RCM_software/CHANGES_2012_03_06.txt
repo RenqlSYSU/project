@@ -1,0 +1,30 @@
+BUG FIX IN CODE 2012 6 MARCH, TIM CRONIN AND DAN CHAVAS
+- FIXED OPTION FOR NON-INTERACTIVE WATER VAPOR IN RADIATION CODE: ORIGINAL VERSION SIMPLY FIXED WATER VAPOR CONSTANT FOR ALL TIME; NOW CODE ALLOWS WATER VAPOR TO VARY IN TIME, BUT RADIATION CODE USES STORED VECTOR OF THE INITIAL VERTICAL PROFILE OF WATER VAPOR.
+SEARCH rc_ver2.f FOR "twc" FOR LOCATIONS WHERE CODE HAS BEEN UPDATED
+
+
+Line 46:
+	  REAL RT(NA), RV2(NA), RVFIX(NA) ! total water and water vapor (sb)
+C
+C 2012-03-06: twcronin and drchavas added variable RVFIX -- fixed mixing ratio 
+C to be used in radiation scheme
+
+
+Line 384:
+         RVFIX(I)=R1(I)
+C twc/drc - RVFIX initialized to R1 -- value from initial sounding
+
+
+Line 788:
+          RV2(I) = FRNETM*RV2(I)+(1-FRNETM)*RVFIX(I)
+C
+C twc/drc -- set mixing ratio called into radiation scheme -- RV2(I)
+C    use prognostic mixing ratio (R2(I)-cloud water) if FRNETM=1 (H2OI='y')
+C    or use the mixing ratio from the initial sounding (RVFIX) 
+C    in the case that H2OI='n' and FRNETM=0
+
+
+Line 1118:
+C         R3(I)=R1(I)+2.*DT*FRNET(I)*FRNETM
+C twc/drc fix to spuriously setting mixing ratio tendency to zero if water vapor not interactive
+         R3(I)=R1(I)+2.*DT*FRNET(I)

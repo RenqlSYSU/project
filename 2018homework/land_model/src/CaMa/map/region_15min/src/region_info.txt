@@ -1,0 +1,5 @@
+'../../global_15min/'          !! global map directory
+-80.0                        !! west edge (regional)
+-45.0                        !! east edge
+  6.0                        !! north edge
+-21.0                        !! south edge

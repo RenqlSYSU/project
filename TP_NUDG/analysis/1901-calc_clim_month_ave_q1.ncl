@@ -1,7 +1,7 @@
 ;***************************************************************************
 ;filename:      calc_clim_month_ave_q1.ncl
 ;output_file:   Clim_month_ave_q1.nc 
-;1. read the 27 years "QRL","DTCOND","DTV" (TLLL) of 3 case at East AsiaI(15S£­55N£¬30-150E) 
+;1. read the 27 years "QRL","QRS","DTCOND","DTV" (TLLL) of 3 case at East Asia
 ;2. calc the sum of the three variables and integrated over vertical coordinate
 ;3. calc the climatology month average (nmonth,nlat,nlon),and the season average (nseason,nlat,nlon).
 ;
@@ -16,7 +16,7 @@ filein  = (/"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/AMIP_C5PM.cam.h0.",\
             "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/AMIP_C5PM_TP_NUDG.cam.h0.",\
             "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/AMIP_C5PM_TP_NUDG.cam.h0."/)
 fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_q1.nc"
-var_name  = (/"QRL","QRS","DTCOND","DTV"/)
+var_name = (/"QRL","QRS","DTCOND","DTV"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 

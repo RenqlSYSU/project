@@ -22,7 +22,7 @@
 # 2. Please set "ncdata" namelist variable in user_nl_cam,
 # which share the same name as BRCH_NAME 
 #
-# 3. Please check your specific init conditions and restart
+# 3. Please check your specific inititial conditions and restart
 # files are in the proper dir, also provide your rpointers 
 # in a separate dir
 #=========================================================

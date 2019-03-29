@@ -8,13 +8,21 @@
 ;                                           2018/01/18
 ;******************************************************************************
 begin
-path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
-var_name = (/"U","V","T","Z3","Q","OMEGA","RELHUM"/)
-years    = ispan(1979,2005,1)   ;the calculate time
+path    = "/home/ys17-19/renql"
+;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+;                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+;                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+;fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
+;years    = ispan(1979,2005,1)   ;the calculate time
+
+
+;remove TP experiment, sample number is ten years 
+case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
+years   = ispan(21,30,1)   ;the calculate time
+
+var_name = (/"U"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
 
 ;area: east Asia
 lats = -90 ;-20
@@ -42,8 +50,11 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0 ,3 ,1 
+do nv = 0 ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
+if(nf.eq.1)
+years   = ispan(41,50,1)   ;the calculate time
+end if
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------

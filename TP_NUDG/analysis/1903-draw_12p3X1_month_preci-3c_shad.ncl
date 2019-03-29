@@ -340,7 +340,7 @@ end if
             plot2(nc-1)  = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
             overlay(plot(nc),plot2(nc-1))
         else
-            res@gsnRightString   = unit(nv) ;draw_var(nv) 
+            res@gsnRightString   = draw_var(nv)+ "(" + unit(nv) + ")" 
             plot(nc)     = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         end if
         gtop(nc) = gsn_csm_contour(wks,phis,res_gtop)

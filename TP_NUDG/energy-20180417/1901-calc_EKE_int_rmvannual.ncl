@@ -9,14 +9,20 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_500EKE.nc"
+;case    = (/"CTRL","NG24h","NG6h"/)
+;filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+;                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+;                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+;fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_500EKE.nc"
+;years   = ispan(1979,2005,1)   ;the calculate time
+
+;remove TP experiment, sample number is ten years 
+case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE.nc"
 var_name= (/"U","V","PS"/)
-case    = (/"CTRL","NG24h","NG6h"/)
 ncase   = dimsizes(case)
-years   = ispan(1979,2005,1)   ;the calculate time
+years   = ispan(21,30,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
@@ -25,7 +31,6 @@ latn = 60
 lonl = 20
 lonr = 220
 lev  = (/1000,925,850,700,600,500,400,300,200/)
-;lev  = (/500,400,300,200/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -52,7 +57,10 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 2,ncase-1,1 
+do nf = 1,1,1 
+if(nf.eq.1)
+years   = ispan(41,50,1)   ;the calculate time
+end if
 ;==========================================================
 ;read the data
 ;============================================================
@@ -77,8 +85,8 @@ printVarSummary(dp)
 
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n((edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n( (edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
 

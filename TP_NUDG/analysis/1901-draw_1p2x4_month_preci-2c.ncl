@@ -8,27 +8,35 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"q1" ,"U"  /)  ;this is the variable used to draw, can used as center string
+draw_var = (/"preci" ,"EKE"        ,"q1"            ,"U"  /)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day","10~S~4~N~ J","10~S~-2~N~ K/S","m/s"/)    ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
-nl = 2
+nl = 2 ;used to read westerly jet
 nv = 2;0
-imonth = ispan(4,7,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-filename  = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
-ufilename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" + draw_var(3) + ".nc"
+;case1   = (/"TP_CTRL","TP_CR"/)
+;case2   = (/"CTRL","noTP-CTRL"/)
+;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+;nsample = 10
+case1   = (/"CTRL","NUDG6h","NUDG24h"/)
+case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+nsample = 27
+
+filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(3) + ".nc"
 fig_name = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
-    case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
@@ -49,7 +57,7 @@ alonr = (/122 ,122,105/)
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-ncase  = dimsizes(case)
+ncase  = dimsizes(case2)
 nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
@@ -64,6 +72,7 @@ prob = new((/ncase-1,nmonth,nlat,nlon/),float)
     gtop     = new((/ncase*nmonth/),graphic)
     line     = new((/ncase*nmonth/),graphic)
     axis     = new((/ncase*nmonth/),graphic)
+    plot_sig = new((/(ncase-1)*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -89,15 +98,17 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 axlon = phis&lon
 axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
+print(lat1)
 do nf = 0 ,ncase-1, 1
     u_f = addfile(ufilename(nf),"r")
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-do nm = 0, nmonth-1,1
-do inln = 0, nlon-1,1
-   axlat(nf,nm,inln) = lat1(maxind(u(nf,nm,:,inln)))
-end do
-end do
-printVarSummary(axlat)
+    do nm = 0, nmonth-1,1
+    do inln = 0, nlon-1,1
+        lat_ind = maxind(u(nf,nm,{20:50},inln))+18; + ind(lat1.eq.20)
+        axlat(nf,nm,inln) = lat1(lat_ind)
+    end do
+    end do
+    printVarSummary(axlat)
     
     f = addfile(filename(nf),"r")
     if(nv.eq.3) then
@@ -112,26 +123,26 @@ printVarSummary(axlat)
 end do
 
 ;------calc the area average q1 and print---------------
-;narea = dimsizes(area)
-;do na = 0, narea-1,1
-;    if(na.eq.2) then
-;    var1 := var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)})
-;    phis1:= conform(var1,phis({alats(na):alatn(na)},{alonl(na):alonr(na)}),(/2,3/))
-;    var1 := mask(var1,phis1.gt.1500,True)
-;    printVarSummary(var1)
-;    copy_VarMeta(var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)}),var1)
-;    temp = wgt_areaave_Wrap(var1,1.0,1.0,0) 
-;    else
-;    temp = wgt_areaave_Wrap(var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)}),1.0,1.0,0) 
-;    end if
-;    do nm = 0, nmonth-1,1
-;    print(months(imonth(nm)) + " " + area(na) + ": " + temp(:,nm))
-;    end do
-;end do
-;----------------------------------------------
-
+narea = dimsizes(area)                                                                              ;
+do na = 0, narea-1,1                                                                                ;
+    if(na.eq.2) then                                                                                ;
+        var1 := var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)})                                ;
+        phis1:= conform(var1,phis({alats(na):alatn(na)},{alonl(na):alonr(na)}),(/2,3/))             ;
+        var1 := mask(var1,phis1.gt.1500,True)                                                       ;
+        printVarSummary(var1)                                                                       ;
+        copy_VarMeta(var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)}),var1)                     ;
+        temp = wgt_areaave_Wrap(var1,1.0,1.0,0)                                                     ;
+    else                                                                                            ;
+        temp = wgt_areaave_Wrap(var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)}),1.0,1.0,0)     ;
+    end if                                                                                          ;
+    do nm = 0, nmonth-1,1                                                                           ;
+        print(months(imonth(nm)) + " " + area(na) + ": " + temp(:,nm))                              ;
+    end do                                                                                          ;
+end do                                                                                              ;
+;----------------------------------------------                                                     
+                                                                                                    
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),27,var(nf+1,:,:,:),vari(nf+1,:,:,:),27,True,False)
+prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
@@ -143,8 +154,9 @@ if(nv.eq.2) then   ;q1
     var = var*100
 end if
 
-var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
-;prob = mask(prob,prob.lt.siglvl,True)
+;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
+;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
+prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(u)
@@ -305,6 +317,30 @@ printVarSummary(prob)
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
 
+;----------Set res sig-----------
+    res_sig                  = True       ; use plot options
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@gsnFrame         = False
+    res_sig@gsnDraw          = False
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
+    res_sig@cnInfoLabelOn    = False
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/3000,1000/)
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
+
+;--------set the attribute of polygon--------------
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -332,16 +368,16 @@ if(nv.eq.0) then ;preci
     spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1 
 end if
 
-if(nv.eq.1) then ;EKE
+if(nv.eq.1.or.nv.eq.4) then ;EKE
     minlvl = (/ 2 ,-16,-16/);-8,-8,-8,-8
     maxlvl = (/50 , 16, 16/);8 ,8 ,8 ,8 
     spacig = (/ 3 , 2 , 2 /);1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.2) then ;q1
-    minlvl = (/0  ,-16,-16/)
-    maxlvl = (/75 , 16, 16/)
-    spacig = (/ 5 , 2 ,  2/)
+    minlvl = (/0  ,-8,-8 /)
+    maxlvl = (/75 , 8,  8/)
+    spacig = (/ 5 , 1,  1/)
 end if
 
 if(nv.eq.3) then ;U
@@ -362,8 +398,8 @@ end if
         nn = nm +1
         np = nmonth*nc + nm
         np2= nmonth*(nc-1) + nm
-        res@gsnLeftString   = pre_case(np) + ") " + case(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(nv) ;+ " (" + unit(nv) + ")" 
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         if(nv.gt.10) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
@@ -374,14 +410,20 @@ end if
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        overlay(plot(np),plot2(np))
+        ;plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+        ;overlay(plot(np),plot2(np))
+        if(nc.gt.0)
+            plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            overlay(plot(np),plot_sig(np2))
+        end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+        ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
+        print(max(u(nc,nm,{lats:latn},{lonl:lonr})))
+        print(min(u(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
 end do ;for the month 
 

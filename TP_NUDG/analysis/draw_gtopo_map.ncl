@@ -8,11 +8,13 @@
 ;*********************************************************************************
 begin
 ;the path of the file
-path = "/users/yangsong3/renql/project/TP_NUDG"
+path    = "/home/ys17-19/renql/project/TP_NUDG"
+;filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
+filename = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+;filename = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
 fig_name   = path + "/analysis/fig/topography_nudg_zone_gray"
-filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
-fig_title  = "Topography" ; + var_name + " in " + lev + " hPa"
-fig_out    = "eps";"x11"
+fig_title  = "noTP";"CTRL" ; + var_name + " in " + lev + " hPa"
+fig_out    = "pdf";"eps";"x11"
 ;fig_out    = "eps";"pdf";"x11"
 var_name   = "PHIS"
 unit       = "x100 gpm"
@@ -46,7 +48,7 @@ plonr = 150
    tick_thick     = 5.0
    subtitle_thick = 6.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 5.0
+   mp_thick       = 3.0
    font_index     = 22
 
 ;the number of the panel plot
@@ -158,21 +160,21 @@ copy_VarMeta(var1,var)
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-    ;res@tiMainString         = fig_title 
-    ;res@tiMainFontHeightF    = title_font
-    ;res@tiMainFontColor      = "black"
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
+    res@tiMainString         = fig_title 
+    res@tiMainFontHeightF    = title_font
+    res@tiMainFontColor      = "black"
     res@gsnRightString      = unit 
     res@gsnLeftString       = var_name ;""
     
     plot = gsn_csm_contour_map_ce(wks,var,res)
     ;plot = gsn_csm_map_ce(wks,res)
-do na = 0,narea-1,1
+;do na = 0,narea-1,1
     ;lnres@gsFillColor    = fillcolor(na)
     ;lnres@gsFillOpacityF = opacity(na)
-    line(na) = gsn_add_polygon( wks, plot, lonx(:,na), latx(:,na), lnres )
-end do 
+;    line(na) = gsn_add_polygon( wks, plot, lonx(:,na), latx(:,na), lnres )
+;end do 
     ;text = gsn_add_text( wks, plot, "NUDG", lonm(0), latm(0),txres)
 
 draw(plot)

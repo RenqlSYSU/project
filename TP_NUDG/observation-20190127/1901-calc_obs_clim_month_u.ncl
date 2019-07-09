@@ -6,8 +6,8 @@ begin
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-var_name = (/"uwnd","vwnd"/)
-nv  = 0
+var_name = (/"uwnd","vwnd","hgt"/)
+nv  = 2
 
 years    = ispan(1979,2005,1)
 years@calendar = "standard"
@@ -18,7 +18,7 @@ latn = 60
 lonl = 20
 lonr = 220
 lev  = (/850,500,200/)
-nl = 2
+nl = 1
 
 fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_" + lev(nl) + var_name(nv) + ".nc"
 ;==========================================================
@@ -26,6 +26,9 @@ fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_" + lev(nl) + var_name(nv) 
 ;============================================================
 f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
 vars = f->$var_name(0)$(0,0,{lats:latn},{lonl:lonr})
+printVarSummary(vars)
+print(vars(20:30,50:52))
+
 ntime = 365
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)

@@ -1,30 +1,26 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_month_preci-3c_shad.ncl
-;input_data:    CTRL-Clim_month_ave_preci.nc 
-;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
-;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
-;then do the significance testing, the dot mean the difference is significance
+;Draw the shaded map of monthly average uwnd in east asia. 
+;overlap the contour map of monthly EKE.
 ;                                                     by Ql Ren
-;                                                    2018/01/18
+;                                                    2019/01/28
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"U"  ,"hgt"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~ J","m/s","m~S~2~N~/s~S~2~N~"/)    ;this can be used as right string 
+draw_var = (/"500EKE"     ,"200uwnd"  ,"500Z"/)  ;this is the variable used to draw, can used as center string
+;draw_var = (/"500AKE","200uwnd"  /)  ;this is the variable used to draw, can used as center string
+unit     = (/"10~S~4~N~ J","m/s"      /)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-lev = (/850,500,200/)
-nl = 2
-nv = 1
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-filename = path + "/mdata/Obs_Clim_month_ave_EKE.nc"
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_"
 gtopfile = path1 + "gtopo_1.5x1.5.nc"
-fig_name = path + "/fig/Obs_" + draw_var(nv) + "_" + var_name(0)
-fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
+;fig_name = path + "/fig/ERA-Interim_" + draw_var(0) + "-line_" + draw_var(1) + "-shad_" + var_name(0)
+fig_name = path + "/fig/ERA-Interim_" + draw_var(1) + "-line_" + draw_var(0) + "-shad_" + var_name(0)
+fig_title  = "Climate " + draw_var(0) + " (" + unit(0) + ") and " + draw_var(1)
 pre_case   = (/"(a","(b","(c","(d"/)
 fig_out    ="pdf";"x11"
 
@@ -40,20 +36,13 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nmonth = dimsizes(months)
 nlat   = dimsizes(phis&latitude)
 nlon   = dimsizes(phis&longitude)
-var  = new((/nmonth,nlat,nlon/),float)
+var  = new((/2,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/nmonth/),graphic)
-    gtop     = new((/nmonth/),graphic)
     line     = new((/nmonth/),graphic)
-
-;set the area of the box
-maxlon = 105
-minlon = 70
-maxlat = 40
-minlat = 25
-lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
-latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
+    gtop     = new((/nmonth/),graphic)
+    axis     = new((/nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -62,26 +51,29 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 3.0
+   mp_thick       = 1.5
    font_index     = 22
 
 ;================================================================
 ;read data
 ;====================================================================
-f = addfile(filename,"r")
-if(nv.eq.2) then
-    fig_name  = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + lev(nl) + var_name(0) + "-2c" 
-    fig_title = "Climate " + lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
-    var  = f->$var_name(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-else
-    var  = f->$var_name(0)$(:,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-end if
-
-if(nv.eq.1) then
-    var = var/10000
-end if
-
+nv = 0
+f = addfile(filename+draw_var(nv)+".nc","r")
+var(nv,:,:,:) = f->$var_name(0)$(:,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nv,:,:,:) = var(nv,:,:,:)/10000
+nv = 1
+f = addfile(filename+draw_var(nv)+".nc","r")
+var(nv,:,:,:)  = f->$var_name(0)$(:,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 printVarSummary(var)
+
+alon = var&lon
+alat = new((/nmonth,nlon/),float)
+lat1 = var&lat
+do nm = 0, nmonth-1,1
+do inln = 0, nlon-1,1
+   alat(nm,inln) = maxind(var(1,nm,:,inln))
+end do
+end do
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -142,26 +134,22 @@ printVarSummary(var)
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
-    res@cnLinesOn        = False ;True
+    res@cnLinesOn        = False
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
-    ;res@cnLineThicknessF = 0
-    ;res@gsnContourZeroLineThicknessF = 4.0
-    ;res@cnLineColor      = "blue"
-   
-    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
-    ;res@cnLevels             = ispan(0,60,10)
-    ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = 1          ; set min contour level
-    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    ;res@cnLevelSpacingF       = 1        ; set contour interval
+;    res@cnLineThicknessF = 1.0
 
-    res@gsnSpreadColors      = False  ;True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 11                ; start at color 17
-    res@gsnSpreadColorEnd    = 2                ; end at color 200
+    res@cnFillPalette = "precip3_16lev"
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;res@cnFillPalette = "GMT_gray" ;has 10 colors 
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnMinLevelValF        = 10       ;2    ; set min contour level
+    res@cnMaxLevelValF        = 170 ;32  ;50   ; set max contour level
+    res@cnLevelSpacingF       = 10       ;3  ; set contour interval
+    
+    res@gsnSpreadColors      = False              ; turn of the full color map
+    res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
+    res@gsnSpreadColorEnd    = 0                ; end at color 200
     
     res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "Horizontal"
@@ -173,34 +161,41 @@ printVarSummary(var)
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.15
     res@pmLabelBarParallelPosF       = 0.5
-;----------Set res sig-----------
-    res_sig                  = True
-    res_sig@gsnDraw          = False
-    res_sig@gsnFrame         = False
-    res_sig@cnFillOn         = True       ; Fill contours
-    res_sig@cnLinesOn        = False;True      ; turn off contour lines
-    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
-    res_sig@cnMonoFillPattern= True;False
-    res_sig@cnFillPattern    = 11
-    res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 0.5
-    res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "grey0"
-    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
-    
-    res_sig@gsnCenterString      = ""
-    res_sig@gsnLeftString    = " "
-    res_sig@gsnRightString   = " "
 
-;--------set the attribute of polygon--------------
-    lnres                      = True
-    lnres@gsLineColor          = "black"
-    lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = 4.0
-    ;lnres@gsLineLabelString    = "TP"
+;----------Set res line-----------
+    res_line                  = True
+    res_line@gsnDraw          = False
+    res_line@gsnFrame         = False
+    res_line@gsnAddCyclic     = False
+    res_line@cnFillOn         = False       ; Fill contours
+    res_line@cnLinesOn        = True      ; turn off contour lines
+    res_line@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_line@cnInfoLabelOn    = False
+    res_line@cnLineThicknessF = 2.5
+    res_line@cnMonoLineColor  = True ;False
+    res_line@cnLineColor      = "black"
+    res_line@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_line@cnLevels         = (/20/)
+    
+;    cmap = read_colormap_file("GMT_gray") ;has 10 colors 
+;    res_line@cnLinePalette  = "GMT_gray" ;has 64 colors blue green yellow,red
+;    res_line@cnLinePalette  = "GMT_cool"  ;has 64 colors blue green yellow,red
+;    res_line@cnLinePalette = "WhBlGrYeRe"  ;has 100 colors,start with white
+;    res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+;    res_line@cnMinLevelValF        = 8  ;4          ; set min contour level
+;    res_line@cnMaxLevelValF        = 32 ;60 ;32        ; set max contour level
+;    res_line@cnLevelSpacingF       = 8 ;        ; set contour interval
+;    res_line@cnLineColors     =  (/8,6,4,2/) ;(/"lemonchiffon","lemonchiffon1","lemonchiffon2","lemonchiffon3","lemonchiffon4"/)
+;    res_line@cnSpanLinePalette = True
+    
+    ;res_line@gsnSpreadColors      = False;True              ; turn of the full color map
+    ;res_line@gsnSpreadColorStart  = 8                ; start at color 17
+    ;res_line@gsnSpreadColorEnd    = 97                ; end at color 200
+    res_line@lbLabelBarOn         = False   ; the label bar
+    
+    res_line@gsnCenterString      = ""
+    res_line@gsnLeftString    = " "
+    res_line@gsnRightString   = " "
 
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
@@ -210,7 +205,7 @@ printVarSummary(var)
     res_gtop@cnLinesOn        = True      ; turn off contour lines
     res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
     res_gtop@cnInfoLabelOn    = False
-    res_gtop@cnLineThicknessF = 4.0
+    res_gtop@cnLineThicknessF = mp_thick
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/1500/)
@@ -218,14 +213,18 @@ printVarSummary(var)
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
 
+;--------set the attribute of polygon--------------
+    lnres                      = True
+    lnres@gsLineColor          = "black"
+    lnres@gsLineDashPattern    = 1
+    lnres@gsLineThicknessF     = 3.5
+    ;lnres@gsLineLabelString    = "TP"
+
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-   ; res@tiMainString         = fig_title + "in" + months(m)
-    ;res@tiMainFontHeightF    = 0.04
-   ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
-    res@gsnStringFont         = font_index
+    res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
 
     resp  = True    
@@ -239,38 +238,17 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(nv.eq.0) then ;preci
-    minlvl = (/ 1 /);-8,-8,-8,-8
-    maxlvl = (/16 /);8 ,8 ,8 ,8 
-    spacig = (/ 1 /);1 ,1 ,1 ,1 
-end if
-
-if(nv.eq.1) then ;EKE
-    minlvl = (/ 2 /);-8,-8,-8,-8
-    maxlvl = (/34 /);8 ,8 ,8 ,8 
-    spacig = (/ 2 /);1 ,1 ,1 ,1 
-end if
-
-    res@cnFillPalette = "precip3_16lev"
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
 do nm = 0,nmonth-1,1
     res@gsnLeftString   = months(nm) 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
-    res@gsnSpreadColors       = False              ; turn of the full color map
-    if(nv.gt.10) then
-    res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
-    else
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnLevelSpacingF       := spacig        ; set contour interval
-    res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
-    res@cnMinLevelValF        := minlvl       ; set min contour level
-    end if
-    plot(nm)     = gsn_csm_contour_map_ce(wks,var(nm,:,:),res)
+    res@gsnRightString  = draw_var(0) + " (" + unit(0) + ")"
+    plot(nm) = gsn_csm_contour_map_ce(wks,var(0,nm,:,:),res)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
+    line(nm) = gsn_csm_contour(wks,var(1,nm,:,:),res_line)
     overlay(plot(nm),gtop(nm))
-    ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-    print(max(var(nm,{lats:latn},{lonl:lonr})))
-    print(min(var(nm,{lats:latn},{lonl:lonr})))
+    overlay(plot(nm),line(nm))
+    axis(nm) = gsn_add_polyline( wks, plot(nm), alon, alat(nm,:), lnres )
+    print(max(var(0,nm,{lats:latn},{lonl:lonr})))
+    print(min(var(0,nm,{lats:latn},{lonl:lonr})))
 end do 
 
 ;    resp@txString      = fig_title

@@ -19,7 +19,7 @@ path    = "/home/ys17-19/renql"
 ;remove TP experiment, sample number is ten years 
 case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
 filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
-fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE.nc"
+fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
 var_name= (/"U","V","PS"/)
 ncase   = dimsizes(case)
 years   = ispan(21,30,1)   ;the calculate time
@@ -57,7 +57,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 1,1,1 
+do nf = 0,0,1 
 if(nf.eq.1)
 years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -85,7 +85,8 @@ printVarSummary(dp)
 
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
@@ -130,10 +131,10 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "rmvannual cycle, the integration is based on 500,400,300,200hPa "
+fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600,500hPa " ;500,400,300,200
 fileattdef(ncdf,fileatt)  
 
-;define all coordinate
+;define all coordinate`
 dimNames = (/"month","season","time","lat","lon"/);
 dimSizes = (/  12   ,  4     ,ntime ,nlat ,nlon/) ;
 dimUnlim = (/False  ,False   ,False ,False,False/);

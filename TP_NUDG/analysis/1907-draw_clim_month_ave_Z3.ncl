@@ -8,8 +8,8 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"U"  ,"500hgt"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~ J","m/s","m~S~2~N~/s~S~2~N~"/)    ;this can be used as right string 
+draw_var = (/"preci" ,"EKE"        ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~ J","m/s","m" /)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -19,13 +19,23 @@ nl = 1
 nv = 3
 
 ;the path of the file
-path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
-path1  = "/home/ys17-19/data-observation/ERA-interim/"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
-gtopfile = path1 + "gtopo_1.5x1.5.nc"
-fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
+path    = "/home/ys17-19/renql/project/TP_NUDG"
+case1   = (/"TP_CTRL","TP_CR"/)
+case2   = (/"CTRL"   ,"noTP"/)
+;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+nsample = 10
+;case1   = (/"CTRL","NUDG6h","NUDG24h"/)
+;case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+;gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+;nsample = 27
+;
+nc = 0
+filename  = path + "/analysis/mdata/" + case1(nc) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+fig_name = path + "/analysis/fig/1p3x4_" + case2(nc) + "_" + lev(nl) + draw_var(nv) + "_" + var_name(0) + "-2c" 
+;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
-pre_case   = (/"(a","(b","(c","(d"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -35,11 +45,11 @@ lonl = 30  ;30 ;20
 lonr = 150 ;150;220
 
 f = addfile(gtopfile,"r")
-phis   = short2flt(f->z(0,{lats:latn},{lonl:lonr}))
+phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nmonth = dimsizes(months)
-nlat   = dimsizes(phis&latitude)
-nlon   = dimsizes(phis&longitude)
+nlat   = dimsizes(phis&lat)
+nlon   = dimsizes(phis&lon)
 var  = new((/nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
@@ -69,7 +79,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;read data
 ;====================================================================
 f = addfile(filename,"r")
-var  = f->$var_name(0)$(:,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+var  = f->$var_name(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 
 if(nv.eq.1) then
     var = var/10000
@@ -245,11 +255,23 @@ if(nv.eq.1) then ;EKE
     spacig = (/ 2 /);1 ,1 ,1 ,1 
 end if
 
+if(nv.eq.2) then ;U
+    minlvl = (/ 2 /);-8,-8,-8,-8
+    maxlvl = (/50 /);8 ,8 ,8 ,8 
+    spacig = (/ 3 /);1 ,1 ,1 ,1 
+end if
+
+if(nv.eq.3) then ;Z3
+    minlvl = (/5600 /);-8,-8,-8,-8
+    maxlvl = (/5920 /);8 ,8 ,8 ,8 
+    spacig = (/ 20  /);1 ,1 ,1 ,1 
+end if
+
     res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 do nm = 0,nmonth-1,1
     res@gsnLeftString   = months(nm) 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
     res@gsnSpreadColors       = False              ; turn of the full color map
     if(nv.gt.2) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels

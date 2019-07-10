@@ -8,30 +8,30 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"q1"            ,"U"  /)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~ J","10~S~-2~N~ K/S","m/s"/)    ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+draw_var = (/"preci" ,"lowEKE"        ,"q1"            ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~ J","10~S~-2~N~ K/S","m/s","m" /)  ;this can be used as right string 
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
-nv = 2;0
-;imonth = ispan(4,7,1);(/4,5,6,7/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
+nv = 1;0
+imonth = ispan(8,11,1);(/4,5,6,7/)
+;imonth = ispan(0,3,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-;case1   = (/"TP_CTRL","TP_CR"/)
-;case2   = (/"CTRL","noTP-CTRL"/)
+case1   = (/"TP_CTRL","TP_CR"/)
+case2   = (/"CTRL","noTP-CTRL"/)
 ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
-;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
-;nsample = 10
-case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-nsample = 27
-
+gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+nsample = 10
+;case1   = (/"CTRL","NUDG6h","NUDG24h"/)
+;case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+;gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+;nsample = 27
+;
 filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(3) + ".nc"
 fig_name = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
@@ -123,6 +123,7 @@ do nf = 0 ,ncase-1, 1
 end do
 
 ;------calc the area average q1 and print---------------
+if(nv.eq.2) then
 narea = dimsizes(area)                                                                              ;
 do na = 0, narea-1,1                                                                                ;
     if(na.eq.2) then                                                                                ;
@@ -138,7 +139,8 @@ do na = 0, narea-1,1                                                            
     do nm = 0, nmonth-1,1                                                                           ;
         print(months(imonth(nm)) + " " + area(na) + ": " + temp(:,nm))                              ;
     end do                                                                                          ;
-end do                                                                                              ;
+end do          
+end if
 ;----------------------------------------------                                                     
                                                                                                     
 do nf = 0 ,ncase-2,1
@@ -161,7 +163,6 @@ copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(u)
 printVarSummary(prob)
-
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -410,8 +411,8 @@ end if
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        ;plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        ;overlay(plot(np),plot2(np))
+        plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+        overlay(plot(np),plot2(np))
         if(nc.gt.0)
             plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
             overlay(plot(np),plot_sig(np2))
@@ -419,7 +420,7 @@ end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(max(u(nc,nm,{lats:latn},{lonl:lonr})))

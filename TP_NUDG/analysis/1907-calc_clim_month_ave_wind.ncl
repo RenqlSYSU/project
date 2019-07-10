@@ -22,7 +22,7 @@ filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year 
 fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 years   = ispan(21,30,1)   ;the calculate time
 
-var_name = (/"U"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
+var_name = (/"Z3"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
 
 ;area: east Asia
 lats = -90 ;-20
@@ -61,7 +61,7 @@ end if
 do nt = 0,nyear-1,1
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end do   ;the loop of 27 years
+end do 
 
 time = cd_calendar(f->time,0)
 do nm = 0,11,1

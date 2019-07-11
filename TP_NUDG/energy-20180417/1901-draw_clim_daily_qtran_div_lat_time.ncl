@@ -16,7 +16,7 @@ filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p3x3_clim_daily_qtran_div_lat_time"
     case   = (/" CTRL"," NG6h"," NG24h"/)
-pre_case   = (/"(a","(b","(c"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
@@ -26,7 +26,7 @@ latn = (/40 , 45/)  ;60
 lonl = (/70 ,110/)  ;20
 lonr = (/105,122/)  ;130 ;220
 lat_spacing = 5
-na = 0
+na = 1
 
 f    = addfile(filename(0),"r")
 vars:= f->$var_name_u(0)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -225,7 +225,7 @@ do nc = 0, ncase-1,1
     do nv = 0 ,nvar-1,1
         nn = nv +1
         np = nvar*nc + nv
-        res@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
+        res@gsnLeftString   = pre_case(np) + ")" + case(nc)
         res@gsnRightString  = draw_var(nv) + " " + lonl(na)+" - "+lonr(na)+"E" 
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval

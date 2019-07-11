@@ -18,7 +18,7 @@ filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_rmvannual"
     case   = (/" CTRL"," NG6h-CTRL"," NG24h-CTRL"/)
-pre_case   = (/"(a","(b","(c"/)
+pre_case   = (/"(a","(a","(b","(c","(c","(d","(e","(f","(g"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
@@ -286,7 +286,7 @@ do nc = 0, ncase-1,1
     do nv = 0 ,nvar-1,1
         nn = nv +1
         np = nvar*nc + nv
-        res@gsnLeftString   = pre_case(nc) + nn + ")" + case(nc)
+        res@gsnLeftString   = pre_case(np) + ")" + case(nc)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval

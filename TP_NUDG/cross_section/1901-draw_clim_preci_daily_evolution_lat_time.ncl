@@ -16,7 +16,7 @@ years    = ispan(1979,2005,1)   ;the calculate time
 
 fig_name   = path + "/project/TP_NUDG/cross_section/fig/clim_preci_daily_evolution_lat_time"
     case   = (/"(a) CTRL","(b) NG6h","(c) NG24h"/)  ;this can be used as left string
-fig_out    ="png"       ;"x11"
+fig_out    ="pdf"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
@@ -77,7 +77,7 @@ printVarSummary(temp&time)
 ;do nc = 1,2
     var(2,:,:) = var(1,:,:) - var(0,:,:)
     ;prob(nc,:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-    case   = (/"(a) CTRL","(b) NG6h","(c) NG6h-CTRL"/)
+    case   = (/"(i) CTRL","(j) NG6h","(k) NG6h-CTRL"/)
 ;end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))

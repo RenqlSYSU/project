@@ -1,6 +1,4 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_month_preci-3c_shad.ncl
-;input_data:    CTRL-Clim_month_ave_preci.nc 
 ;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
 ;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
 ;then do the significance testing, the dot mean the difference is significance
@@ -12,7 +10,7 @@ begin
    tick_font      = 0.03
    subtitle_font  = 0.03
    title_font     = 0.03
-   vcref_font     = 0.015
+   vcref_font     = 0.02
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
@@ -20,29 +18,31 @@ begin
    mp_thick       = 1.5
    font_index     = 22
 
-draw_var = (/"q1"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"10~S~-2~N~ K/s"/)    ;this can be used as right string 
-draw_varname = (/"U","V","q1"/)  ;this is the variable used to draw, can used as center string
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+draw_var = (/"q1"  ,"OMEGA"         /)  ;this is the variable used to draw, can used as center string
+unit     = (/"W/kg","10~S~-2~N~ Pa/s"/)    ;this can be used as right string 
+draw_varname = (/"Q1","omega"/)  ;this is the variable used to draw, can used as center string
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
-nl = 2
-imonth = ispan(4,7,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
+nl = 0
+nv = 1
+;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 filename  = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-ufilename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" + draw_varname(0) + ".nc"
+ufilename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_U.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p2x4_" + lev(nl) + "wind_" + draw_var(0) + "_" + var_name(0) + "-2c" 
+fig_name = path + "/analysis/fig/1p2x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
-fig_title  = "Climate " + draw_var(0) + " (" + unit(0) + ")"
+fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
     case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    ="pdf";"x11"
+;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(f","(h","(i","(j","(k","(l"/)
+fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 lats = -15 ;20 ;-20
@@ -51,21 +51,14 @@ lonl = 30  ;30 ;20
 lonr = 150 ;150;220
 siglvl = 0.05
 
-;area of index, India,Tibet,Philippines,Maritime_continent
-area  = (/"North China","South China","TP_NUDG"/)
-alats = (/30  ,20 ,25 /)
-alatn = (/40  ,30 ,40 /)
-alonl = (/107 ,107,70 /)
-alonr = (/122 ,122,105/)
-
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-nvar   = dimsizes(draw_varname)
 ncase  = dimsizes(case)
 nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
+nvar = 3
 u      = new((/ncase  ,nmonth,nlat,nlon/),float)
 var    = new((/ncase  ,nvar,nmonth,nlat,nlon/),float)
 vari   = new((/ncase  ,nvar,nmonth,nlat,nlon/),float)
@@ -102,44 +95,39 @@ do inln = 0, nlon-1,1
 end do
 end do
 printVarSummary(axlat)
-   
-do nv = 0, nvar-1, 1
-    f = addfile(filename(nf)+draw_varname(nv)+".nc","r")
-    if(nv.le.1) then
-    var(nf,nv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,nv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    else
-    var(nf,nv,:,:,:)  = f->$var_name(0)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,nv,:,:,:) = f->$var_name(1)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    end if
-end do
-end do
 
-;------calc the area average q1 and print---------------
-;narea = dimsizes(area)
-;do na = 0, narea-1,1
-;    if(na.eq.2) then
-;    var1 := var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)})
-;    phis1:= conform(var1,phis({alats(na):alatn(na)},{alonl(na):alonr(na)}),(/2,3/))
-;    var1 := mask(var1,phis1.gt.1500,True)
-;    printVarSummary(var1)
-;    copy_VarMeta(var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)}),var1)
-;    temp = wgt_areaave_Wrap(var1,1.0,1.0,0) 
-;    else
-;    temp = wgt_areaave_Wrap(var(:,:,{alats(na):alatn(na)},{alonl(na):alonr(na)}),1.0,1.0,0) 
-;    end if
-;    do nm = 0, nmonth-1,1
-;    print(months(imonth(nm)) + " " + area(na) + ": " + temp(:,nm))
-;    end do
-;end do
-;----------------------------------------------
+inv = 0
+f = addfile(filename(nf)+"U.nc","r")
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+inv = 1
+f = addfile(filename(nf)+"V.nc","r")
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+inv = 2
+f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
+if(nv.eq.0) then
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+else
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
+end do
 
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),27,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),27,True,False)
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
-var(:,2,:,:,:) = var(:,2,:,:,:)*100  ;q1*100
+if(nv.eq.0) then
+    var(:,2,:,:,:) = var(:,2,:,:,:)*1000 ;Q1,transform unit from K/S to W/kg
+end if
+
+if(nv.eq.1) then
+    var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
+end if
+
 var(1:2,0,:,:,:) = mask(var(1:2,0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:2,1,:,:,:) = mask(var(1:2,1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:2,2,:,:,:) = mask(var(1:2,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
@@ -255,7 +243,7 @@ printVarSummary(prob)
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.4           ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -338,26 +326,34 @@ printVarSummary(prob)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/7 ,3,3/), \  ;the level of 850hpa    ctrl,nudg,diff
+    vcref         = (/(/7 ,2,2/), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/7 ,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4,4/)/)   ;the level of 200hpa    ctrl,nudg,diff
-    
+if(nv.eq.0) 
     minlvl = (/5  ,-16,-16/)  ;q1
     maxlvl = (/80 , 16, 16/)
     spacig = (/ 5 , 2 ,  2/)
+end if
+
+if(nv.eq.1) 
+    minlvl = (/-8 ,-4 , -4/)  ;omega*100
+    maxlvl = (/ 8 , 4 ,  4/)
+    spacig = (/ 1 ,0.5,0.5/)
+end if
 
 do nc = 0, ncase-1,1
-if(nc.eq.0) then
-   res@cnFillPalette = "precip3_16lev"
-   ;blue and yellow and red, has 17 colors,2-18,2 is white
-else
+if(nc.gt.0.or.nv.eq.1) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
+else
+   res@cnFillPalette = "precip3_16lev"
+   ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
     do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(0) ;+ " (" + unit(nv) + ")" 
+        ;res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(0) ;+ " (" + unit(nv) + ")" 
+        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval

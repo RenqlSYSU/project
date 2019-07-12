@@ -1,11 +1,8 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_month_preci-3c_shad.ncl
-;input_data:    CTRL-Clim_month_ave_preci.nc 
-;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
-;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
-;then do the significance testing, the dot mean the difference is significance
+;Draw monthly preci in every month(3*4) of one case, just simply view 
+;the distribution of a variable.
 ;                                                     by Ql Ren
-;                                                    2018/01/18
+;                                                    2019/07/12
 ;*********************************************************************************
 begin
 draw_var = (/"preci" ,"EKE"        ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string

@@ -4,6 +4,9 @@
 ;read the 27 years variable(TLLL) of one case at East AsiaI(15S£­55N£¬30-150E) 
 ;and then calculate the month average to get an array of (nmonth,nlat,nlon),
 ;then calculate the season average (nseason,nlat,nlon).
+;
+;Modification:
+;20190712: add the case of noTP
 ;                                            by Ql_Ren
 ;                                           2018/01/18
 ;******************************************************************************

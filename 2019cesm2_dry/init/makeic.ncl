@@ -88,7 +88,7 @@
     ;===================================================================  
 
        setfileoption("nc","Format","LargeFile")
-       diro = "/project/cas/islas/temp/"                         ; Output directory
+       diro = "/home/ys17-19/renql/project/2019cesm2_dry/init/data"                         ; Output directory
   
        if (icase.eq.0) then 
         filo = "DABIp2004."+res+".L"+nlev+".nc"                 ; Output file name

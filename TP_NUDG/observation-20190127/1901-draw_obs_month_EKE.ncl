@@ -1,9 +1,5 @@
 ;*********************************************************************
-;filename:      draw_12p3X1_month_preci-3c_shad.ncl
-;input_data:    CTRL-Clim_month_ave_preci.nc 
-;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
-;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
-;then do the significance testing, the dot mean the difference is significance
+;draw shaded monthly EKE or other variables
 ;                                                     by Ql Ren
 ;                                                    2018/01/18
 ;*********************************************************************************
@@ -16,16 +12,22 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 1
-nv = 3
+nv = 1
+
+;parameter for bw_bandpass_filter
+ca = 7.0 ;day
+cb = 2.5 
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
+;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
+;fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc" 
+fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0) + "-" + cb + "-" + ca + "day"
 gtopfile = path1 + "gtopo_1.5x1.5.nc"
-fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
-pre_case   = (/"(a","(b","(c","(d"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
@@ -241,15 +243,15 @@ end if
 
 if(nv.eq.1) then ;EKE
     minlvl = (/ 2 /);-8,-8,-8,-8
-    maxlvl = (/34 /);8 ,8 ,8 ,8 
-    spacig = (/ 2 /);1 ,1 ,1 ,1 
+    maxlvl = (/26 /);8 ,8 ,8 ,8 
+    spacig = (/1.5/);1 ,1 ,1 ,1 
 end if
 
     res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 do nm = 0,nmonth-1,1
-    res@gsnLeftString   = months(nm) 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnLeftString   = pre_case(nm) + ") Obs" 
+    res@gsnRightString  = months(nm) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     res@gsnSpreadColors       = False              ; turn of the full color map
     if(nv.gt.2) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
@@ -259,7 +261,7 @@ do nm = 0,nmonth-1,1
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl       ; set min contour level
     end if
-    plot(nm)     = gsn_csm_contour_map_ce(wks,var(nm,:,:),res)
+    plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),gtop(nm))
     ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )

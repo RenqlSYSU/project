@@ -1,21 +1,22 @@
 ;*********************************************************************
-;Draw the shaded map of monthly average uwnd in east asia. 
-;overlap the contour map of monthly EKE.
+;Draw the shaded map of monthly average EKE in east asia. 
+;overlap the contour map of monthly 500 hgt
+;then overlap the monthly axis of 200 westerly jet and 20 m/s isotach of 200hPa uwind
 ;                                                     by Ql Ren
-;                                                    2019/01/28
+;                                                    2019/07
 ;*********************************************************************************
 begin
 draw_var = (/"EKE"        ,"200uwnd","500hgt"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"10~S~4~N~ J","m/s"    ,"m"     /)    ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var 
 gtopfile = path1 + "gtopo_1.5x1.5.nc"
 ;fig_name = path + "/fig/ERA-Interim_" + draw_var(0) + "-line_" + draw_var(1) + "-shad_" + var_name(0)
 fig_name = path + "/fig/ERA-Interim_" + draw_var(1) + "-line_" + draw_var(0) + "-shad_" + var_name(0)

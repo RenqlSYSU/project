@@ -16,11 +16,14 @@ var_name = (/"uwnd","vwnd"/)
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 7.0 ;day
+ca = 10.0 ;day
 cb = 2.5 
 
-;fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_lowEKE.nc"
-fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
+if(option.eq.0) then
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_intEKE.nc"
+else
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
+end if
 g  = 9.8 ;m/(s*s)
 years    = ispan(1979,2005,1)
 years@calendar = "standard"
@@ -108,21 +111,21 @@ var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntim
 ;var   = dim_sum_n((filt_v(:,:,5:8,:,:)*filt_v(:,:,5:8,:,:) + filt_u(:,:,5:8,:,:)*filt_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)*filt_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 else
-;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-;edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-;edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((v*v + u*u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((v(:,:,5:8,:,:)*v(:,:,5:8,:,:) + u(:,:,5:8,:,:)*u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 end if
 
 EKE   = dim_avg_n(var,0) 
-EKE_vari = dim_variance_n(var,0) 
+;EKE_vari = dim_variance_n(var,0) 
 
 EKE@long_name = "Daily Integrated transient eddies kinetic energy"
 ;EKE@long_name = "Integrated all kinetic energy"
@@ -150,9 +153,9 @@ do ns = 0,3,1
     end if
 end do
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
+;month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
+;season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 printVarSummary(month_ave)
 printVarSummary(season_ave)
 
@@ -186,11 +189,11 @@ filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
 ;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
 ;filevardef(ncdf,"SKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
-filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
+;filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
-filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
-filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
+;filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
+;filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"time",t&time)
@@ -200,8 +203,8 @@ filevarattdef(ncdf,"EKE",EKE)
 ;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
-filevarattdef(ncdf,"month_vari",EKE)
-filevarattdef(ncdf,"season_vari",EKE)
+;filevarattdef(ncdf,"month_vari",EKE)
+;filevarattdef(ncdf,"season_vari",EKE)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
@@ -209,12 +212,10 @@ ncdf->time = (/t&time/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
 ncdf->EKE  = (/EKE/)
-ncdf->EKE_vari  = (/EKE_vari/)
-;ncdf->SKE  = (/EKE/)
-;ncdf->SKE_vari  = (/EKE_vari/)
+;ncdf->EKE_vari  = (/EKE_vari/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
-ncdf->month_vari  = (/month_vari/)
-ncdf->season_vari = (/season_vari/)
+;ncdf->month_vari  = (/month_vari/)
+;ncdf->season_vari = (/season_vari/)
 end
 

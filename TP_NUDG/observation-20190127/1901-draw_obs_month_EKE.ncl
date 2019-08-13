@@ -15,13 +15,13 @@ nl = 1
 nv = 1
 
 ;parameter for bw_bandpass_filter
-ca = 7.0 ;day
+ca = 10.0 ;day
 cb = 2.5 
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
+;filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + ".nc"
 ;fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
 filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc" 
 fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0) + "-" + cb + "-" + ca + "day"
@@ -31,10 +31,12 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;20 ;-20
-latn = 55  ;55 ;60
-lonl = 30  ;30 ;20
-lonr = 150 ;150;220
+lats = -90 ;-15 ;20 ;-20
+latn =  90 ;55  ;55 ;60
+lonl =  0  ;30  ;30 ;20
+lonr = 360 ;150 ;150;220
+lat_spacing = 45
+lon_spacing = 60
 
 f = addfile(gtopfile,"r")
 phis   = short2flt(f->z(0,{lats:latn},{lonl:lonr}))
@@ -64,7 +66,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 3.0
+   mp_thick       = 1.5
    font_index     = 22
 
 ;================================================================
@@ -105,8 +107,8 @@ printVarSummary(var)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 10
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLatSpacing = lat_spacing
+    res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -243,8 +245,10 @@ end if
 
 if(nv.eq.1) then ;EKE
     minlvl = (/ 2 /);-8,-8,-8,-8
-    maxlvl = (/26 /);8 ,8 ,8 ,8 
-    spacig = (/1.5/);1 ,1 ,1 ,1 
+    maxlvl = (/34 /);8 ,8 ,8 ,8 
+    spacig = (/2/);1 ,1 ,1 ,1 
+    ;maxlvl = (/82/);8 ,8 ,8 ,8 
+    ;spacig = (/5/);1 ,1 ,1 ,1 
 end if
 
     res@cnFillPalette = "precip3_16lev"

@@ -1,34 +1,34 @@
 ;***************************************************************************
 ;use the post-processing data to calculate climatology daily transient eddies
-;1. do bandpass filtering;  2. calc transient eddies kinetic energy (EkE)
+;1. remove annual cycle;  2. calc transient eddies kinetic energy (EkE)
 ;3. calc climatology daily EKE
-;4. store EKE on each level
 ;The ncl functions have been used are: dpres_plevel_Wrap,dim_sum_n_Wrap,dim_avg_n_Wrap
 ;dim_rmvmean_n_Wrap
 ;                                            by Ql_Ren
 ;                                           2019/01/25
 ;******************************************************************************
 begin
-path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
-path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
-var_name = (/"uwnd","vwnd"/)
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+path    = "/home/ys17-19/renql"
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
-;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5 
-
-if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_EKE.nc"
+if(case_option.eq.0) then
+    case    = (/"CTRL","NG24h","NG6h"/)
+    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_intEKE.nc"
+    years   = ispan(1979,2005,1)   ;the calculate time
 else
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+    ;remove TP experiment, sample number is ten years 
+    case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
+    years   = ispan(21,30,1)   ;the calculate time
 end if
 
+var_name= (/"U","V","PS"/)
+ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
-years    = ispan(1979,2005,1)
-years@calendar = "standard"
 
 ;area: east Asia
 lats = -90 ;-20
@@ -40,18 +40,17 @@ lev  = (/1000,925,850,700,600,500,400,300,200/)
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f_model = addfile(path3,"r")
-    t   = f_model->U(:,0,{lats:latn},{lonl:lonr})
-printVarSummary(t)
-
-f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
-vars = f->$var_name(0)$(0,0,{lats:latn},{lonl:lonr})
-ntime = 365
+f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
+time = cd_calendar(f->time,0)
+select_time = ind(time(:,1).ge.1.and.time(:,1).le.12)
+ntime = dimsizes(select_time)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
+ncase = dimsizes(filein)
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
@@ -63,61 +62,44 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
+do nf = 0,0,1 
+if((case_option.eq.1).and.(nf.eq.1))
+    years   = ispan(41,50,1)   ;the calculate time
+end if
 ;==========================================================
 ;read the data
 ;============================================================
-index  = new((/ntime/),integer)
-index1 = new((/ntime/),integer)
-index(0:58)   = ispan(0,58,1)
-index(59:364) = ispan(60,365,1)
-
 do nt = 0,nyear-1,1
-print("read: " + years(nt))
-if(isleapyear(years(nt))) then ;leap year,366 day
-    nv = 0
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-    u(nt,:,:,:,:)  = f->$var_name(nv)$(index,{lev},{lats:latn},{lonl:lonr})
-    nv = 1
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-    v(nt,:,:,:,:)  = f->$var_name(nv)$(index,{lev},{lats:latn},{lonl:lonr})
-else   ;non-leap year, 365 day
-    nv = 0
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-    u(nt,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-    nv = 1
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-    v(nt,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end if
-end do
-printVarSummary(u)
+nv = 0
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+u(nt,:,:,:,:)  = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
 
-if(option.eq.1) then
-fca = 1.0/ca
-fcb = 1.0/cb
-opt = False
-filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
-print(filt_u(0,0:10,0,30,30))
-var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
-else
-ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+nv = 1
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+v(nt,:,:,:,:)  = f->V(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 2
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+ps(nt,:,:,:)   = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),20000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
+end do
+
+printVarSummary(ps)
+printVarSummary(u)
+printVarSummary(dp)
+
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;get (nyear,ntime,nlat,nlon)
-end if
-printVarSummary(var)
-print(var(0,1,8,50,20:30))
+var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+;var   =  (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
+;var   =  (edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
+EKE   = dim_avg_n(var,0) 
+EKE_vari = dim_variance_n(var,0) 
 
-EKE   = dim_avg_n(var,0)  ;daily 
-;EKE_vari = dim_variance_n(var,0) 
-
-EKE@long_name = "Daily Integrated transient eddies kinetic energy"
-;EKE@long_name = "Integrated all kinetic energy"
-;EKE@long_name = "Integrated steady kinetic energy"
+EKE@long_name = "Integrated transient eddies kinetic energy"
 EKE@units     = "J" 
 
-time = cd_calendar(f_model->time,0)
+time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
     var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
@@ -138,28 +120,26 @@ do ns = 0,3,1
     end if
 end do
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-;month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
+month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-;season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
+season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 printVarSummary(month_ave)
 printVarSummary(season_ave)
 
 ;========================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout)
-ncdf = addfile(fileout,"c")
+system("rm -f " + fileout(nf))
+ncdf = addfile(fileout(nf),"c")
 setfileoption(ncdf,"definemode",True)
 
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-;fileatt@discription   = "the integration is based on 1000,925,850,700,600,500hPa "
-fileatt@discription   = "the integration is based on 1000,925,850,700,600,500,400,300,200hPa "
-;fileatt@discription   = "the integration is based on 500,400,300,200hPa "
+fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600,500hPa 500,400,300,200"
 fileattdef(ncdf,fileatt)  
 
-;define all coordinate
+;define all coordinate`
 dimNames = (/"month","season","time","lev","lat","lon"/);
 dimSizes = (/  12   ,  4     ,ntime ,nlev ,nlat ,nlon/) ;
 dimUnlim = (/False  ,False   ,False ,False,False,False/);
@@ -168,42 +148,40 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 ;define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
-filevardef(ncdf,"time",typeof(t&time),getvardims(t&time))
+filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
 filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
-;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
-;filevardef(ncdf,"SKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lev","lat","lon"/))
-;filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lev","lat","lon"/))
-;filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))
-;filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lev","lat","lon"/))
+filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))
+filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lev","lat","lon"/))
 
 ;define var attribute
-filevarattdef(ncdf,"time",t&time)
+filevarattdef(ncdf,"time",u&time)
 filevarattdef(ncdf,"lev",u&level)
 filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
 filevarattdef(ncdf,"EKE",EKE)
-;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
-;filevarattdef(ncdf,"month_vari",EKE)
-;filevarattdef(ncdf,"season_vari",EKE)
+filevarattdef(ncdf,"month_vari",EKE)
+filevarattdef(ncdf,"season_vari",EKE)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
-ncdf->time = (/t&time/)
+ncdf->time = (/u&time/)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
 ncdf->EKE  = (/EKE/)
-;ncdf->EKE_vari  = (/EKE_vari/)
+ncdf->EKE_vari  = (/EKE_vari/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
-;ncdf->month_vari  = (/month_vari/)
-;ncdf->season_vari = (/season_vari/)
+ncdf->month_vari  = (/month_vari/)
+ncdf->season_vari = (/season_vari/)
+end do
 end
 

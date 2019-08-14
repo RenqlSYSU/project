@@ -19,8 +19,9 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 1
-imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
+imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -34,19 +35,21 @@ case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 nsample = 27
 
-filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 fig_name  = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;20 ;-20
-latn = 55  ;55 ;60
-lonl = 30  ;30 ;20
-lonr = 150 ;150;220
+lats = -90 ;-15 ;20 ;-20
+latn =  90 ;55  ;55 ;60
+lonl =  0  ;30  ;30 ;20
+lonr = 360 ;150 ;150;220
+lat_spacing = 45
+lon_spacing = 60
 siglvl = 0.05
 
 ;area of index, India,Tibet,Philippines,Maritime_continent
@@ -57,7 +60,7 @@ alonl = (/107 ,107,70 /)
 alonr = (/122 ,122,105/)
 
 f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = f->PHIS;({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case2)
 nmonth = dimsizes(imonth)
@@ -67,6 +70,8 @@ u    = new((/ncase  ,nmonth,nlat,nlon/),float)
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
 vari = new((/ncase  ,nmonth,nlat,nlon/),float)
 prob = new((/ncase-1,nmonth,nlat,nlon/),float)
+print(nlat)
+print(nlon)
 
 ;the number of the panel plot
     plot     = new((/ncase*nmonth/),graphic)
@@ -101,13 +106,14 @@ axlon = phis&lon
 axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
 print(lat1)
-print(ind(lat1.eq.20))
+;print(ind(lat1.eq.20))
 do nf = 0 ,ncase-1, 1
     u_f = addfile(ufilename(nf),"r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},:,:);{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    print(nf)
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
+        lat_ind = maxind(u(nf,nm,{20:50},inln)); + 37;ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
     end do
@@ -120,8 +126,8 @@ do nf = 0 ,ncase-1, 1
     var(nf,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     vari(nf,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     else
-    var(nf,:,:,:)  = f->$var_name(0)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,:,:,:) = f->$var_name(1)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    var(nf,:,:,:)  = f->$var_name(0)$(imonth,:,:);{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    vari(nf,:,:,:) = f->$var_name(1)$(imonth,:,:);{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do
 
@@ -193,8 +199,8 @@ printVarSummary(prob)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 10
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLatSpacing = lat_spacing
+    res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -416,8 +422,8 @@ end if
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        overlay(plot(np),plot2(np))
+        ;plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+        ;overlay(plot(np),plot2(np))
         ;if(nc.gt.0)
         ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
         ;    overlay(plot(np),plot_sig(np2))
@@ -425,7 +431,7 @@ end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+        ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(max(u(nc,nm,{lats:latn},{lonl:lonr})))

@@ -21,10 +21,10 @@ cb = 2.5
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-;filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + ".nc"
-;fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc" 
-fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0) + "-" + cb + "-" + ca + "day"
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + ".nc"
+fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
+;filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc" 
+;fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0) + "-" + cb + "-" + ca + "day"
 gtopfile = path1 + "gtopo_1.5x1.5.nc"
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
@@ -171,34 +171,6 @@ printVarSummary(var)
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.15
     res@pmLabelBarParallelPosF       = 0.5
-;----------Set res sig-----------
-    res_sig                  = True
-    res_sig@gsnDraw          = False
-    res_sig@gsnFrame         = False
-    res_sig@cnFillOn         = True       ; Fill contours
-    res_sig@cnLinesOn        = False;True      ; turn off contour lines
-    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
-    res_sig@cnMonoFillPattern= True;False
-    res_sig@cnFillPattern    = 11
-    res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 0.5
-    res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "grey0"
-    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
-    
-    res_sig@gsnCenterString      = ""
-    res_sig@gsnLeftString    = " "
-    res_sig@gsnRightString   = " "
-
-;--------set the attribute of polygon--------------
-    lnres                      = True
-    lnres@gsLineColor          = "black"
-    lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = 4.0
-    ;lnres@gsLineLabelString    = "TP"
 
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
@@ -208,7 +180,7 @@ printVarSummary(var)
     res_gtop@cnLinesOn        = True      ; turn off contour lines
     res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
     res_gtop@cnInfoLabelOn    = False
-    res_gtop@cnLineThicknessF = 4.0
+    res_gtop@cnLineThicknessF = 3.0
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/1500/)
@@ -226,9 +198,29 @@ printVarSummary(var)
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF = subtitle_font
 
+;---------set the attribute of the contour-----------------
+    res_line = res
+    res_line@cnFillOn         = False
+    res_line@cnLinesOn        = True
+    res_line@cnLineLabelsOn   = False
+    res_line@cnInfoLabelOn    = False
+    res_line@cnLineThicknessF = 3.0
+;    res_line@gsnContourZeroLineThicknessF = 3.0
+    res_line@cnLineColor      = "blue"
+   
+    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
+    ;res_line@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
+    ;res_line@cnLevels             = ispan(0,60,10)
+    ;res_line@cnFillColors         = (/-1,20,47,57,94,127,152/)
+    ;res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res_line@cnMinLevelValF        = 1          ; set min contour level
+    ;res_line@cnMaxLevelValF        = 13 ;32        ; set max contour level
+    res_line@cnLevelSpacingF       = 10        ; set contour interval
+
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "portrait"
+    resp@gsnPaperOrientation = "landscape";"portrait"
     ;resp@gsnPanelLabelBar = True
     ;resp@pmLabelBarWidthF  = 0.5
     ;resp@pmLabelBarHeightF = 0.05
@@ -254,8 +246,10 @@ end if
     res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 do nm = 0,nmonth-1,1
-    res@gsnLeftString   = pre_case(nm) + ") Obs" 
-    res@gsnRightString  = months(nm) + " " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnLeftString   = pre_case(nm) + ") Obs " + months(nm)
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
+    res_line@gsnLeftString   = pre_case(nm) + ") Obs " + months(nm)
+    res_line@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
     res@gsnSpreadColors       = False              ; turn of the full color map
     if(nv.gt.2) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
@@ -265,10 +259,10 @@ do nm = 0,nmonth-1,1
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl       ; set min contour level
     end if
-    plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res)
+    ;plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res) ;draw shaded figure
+    plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res_line) ;draw contour figure
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),gtop(nm))
-    ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
     print(max(var(nm,{lats:latn},{lonl:lonr})))
     print(min(var(nm,{lats:latn},{lonl:lonr})))
 end do 

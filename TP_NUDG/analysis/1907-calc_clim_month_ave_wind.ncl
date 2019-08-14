@@ -12,20 +12,23 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-;                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-;                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-;fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
-;years    = ispan(1979,2005,1)   ;the calculate time
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
+if(case_option.eq.0) then
+    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
+    years    = ispan(1979,2005,1)   ;the calculate time
+else
+    ;remove TP experiment, sample number is ten years 
+    case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
+    years   = ispan(21,30,1)   ;the calculate time
+end if
 
-;remove TP experiment, sample number is ten years 
-case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
-filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
-fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
-years   = ispan(21,30,1)   ;the calculate time
-
-var_name = (/"Z3"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
+var_name = (/"U"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
 
 ;area: east Asia
 lats = -90 ;-20
@@ -55,8 +58,8 @@ season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
 do nv = 0 ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
-if(nf.eq.1)
-years   = ispan(41,50,1)   ;the calculate time
+if((case_option.eq.1).and.(nf.eq.1))
+    years   = ispan(41,50,1)   ;the calculate time
 end if
 ;---------------------------------------------------------------
 ;read the data

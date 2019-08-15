@@ -20,8 +20,8 @@ lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 1
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
-imonth = ispan(8,11,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"

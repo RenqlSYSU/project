@@ -6,10 +6,10 @@
 begin
 draw_var = (/"preci" ,"EKE"        ,"U"  ,"500hgt"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day","10~S~4~N~ J","m/s","m~S~2~N~/s~S~2~N~"/)    ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 1
 nv = 1
@@ -31,7 +31,7 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -90 ;-15 ;20 ;-20
+lats =  -90 ;-15 ;20 ;-20
 latn =  90 ;55  ;55 ;60
 lonl =  0  ;30  ;30 ;20
 lonr = 360 ;150 ;150;220
@@ -237,8 +237,8 @@ end if
 
 if(nv.eq.1) then ;EKE
     minlvl = (/ 2 /);-8,-8,-8,-8
-    maxlvl = (/34 /);8 ,8 ,8 ,8 
-    spacig = (/2/);1 ,1 ,1 ,1 
+    maxlvl = (/98 /);8 ,8 ,8 ,8 
+    spacig = (/6/);1 ,1 ,1 ,1 
     ;maxlvl = (/82/);8 ,8 ,8 ,8 
     ;spacig = (/5/);1 ,1 ,1 ,1 
 end if
@@ -259,8 +259,8 @@ do nm = 0,nmonth-1,1
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl       ; set min contour level
     end if
-    ;plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res) ;draw shaded figure
-    plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res_line) ;draw contour figure
+    plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res) ;draw shaded figure
+    ;plot(nm) = gsn_csm_contour_map_ce(wks,var(nm,:,:),res_line) ;draw contour figure
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),gtop(nm))
     print(max(var(nm,{lats:latn},{lonl:lonr})))
@@ -268,6 +268,6 @@ do nm = 0,nmonth-1,1
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end
 

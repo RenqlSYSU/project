@@ -16,7 +16,7 @@ var_name = (/"uwnd","vwnd"/)
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 20.0 ;day
+ca = 30.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then

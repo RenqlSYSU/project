@@ -4,6 +4,8 @@
 ;                                            by Ql_Ren
 ;                                           2019/01/21
 ;******************************************************************************
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
+
 begin
 path    = "/home/ys17-19/renql"
 filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -20,12 +22,12 @@ fig_out    ="pdf"       ;"x11"
 
 ;area:   TP , east Asia
 lats = (/25 , 20/)  ;-20
-latn = (/40 , 45/)  ;60
+latn = (/50 , 45/)  ;60
 lonl = (/70 ,110/)  ;20
 lonr = (/105,122/)  ;130 ;220
 lev  = (/200/)
 lat_spacing = 5
-na = 1
+na = 0
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -50,8 +52,13 @@ ntime = dimsizes(select_time)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var  = new((/ncase,nyear,nlat,ntime/),float)
+var   = new((/ncase,nyear,nlat,ntime/),float)
+diff  = new((/ncase,nlat,ntime/),float)
+axlat = new((/ncase,ntime/),double)
 plot  = new((/ncase/),graphic)
+plot2 = new((/ncase/),graphic)
+axis  = new((/ncase/),graphic)
+axis2  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
 ;read the data
@@ -68,15 +75,19 @@ end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
 var := dim_avg_n(var,1) ;get var(ncase,nlat,ntime)
 printVarSummary(temp&time)
-
-;do nc = 1,2
-;    var(nc,:,:) = var(nc,:,:) - var(0,:,:) 
-;    ;prob((nc-1),:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-;    case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
-;end do
-
 copy_VarMeta(temp(0,:),var(0,:,0))
+copy_VarMeta(temp(0,:),diff(0,:,0))
 printVarSummary(var)
+
+lat1 = var&lat
+do nc = 0,ncase-1,1
+    do nt = 0,ntime-1,1
+        lat_ind = maxind(var(nc,:,nt))
+        axlat(nc,nt) = lat1(lat_ind)
+    end do
+    diff(nc,:,:) = var(nc,:,:) - var(0,:,:)
+    ;case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
+end do
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -171,16 +182,53 @@ printVarSummary(var)
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-2
 
+;----------Set res line for the zonal wind differences-----------
+    res_line                  = True
+    res_line@gsnDraw          = False
+    res_line@gsnFrame         = False
+    res_line@gsnAddCyclic     = False
+    res_line@cnFillOn         = False       ; Fill contours
+    res_line@cnLinesOn        = True      ; turn off contour lines
+    res_line@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_line@cnInfoLabelOn    = False
+    res_line@cnLineThicknessF = 2.5
+    res_line@cnMonoLineColor  = True ;False
+    res_line@cnLineColor      = "black"
+    res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourNegLineDashPattern = 5
+    
+    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_line@cnLevelSpacingF      = 3        ; set contour interval
+;    res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+;    res_line@cnMinLevelValF        = 8  ;4          ; set min contour level
+;    res_line@cnMaxLevelValF        = 32 ;60 ;32        ; set max contour level
+;    res_line@cnLevelSpacingF       = 8 ;        ; set contour interval
+;    res_line@cnLineColors      =  (/8,6,4,2/) ;(/"lemonchiffon","lemonchiffon1","lemonchiffon2","lemonchiffon3","lemonchiffon4"/)
+;    res_line@cnSpanLinePalette = True
+    
+    res_line@gsnCenterString      = ""
+    res_line@gsnLeftString    = " "
+    res_line@gsnRightString   = " "
+
+;--------set the attribute of polygon for westerly jet axis-------------
+    lnres                      = True
+    lnres@gsLineColor          = "red"
+    lnres@gsLineDashPattern    = 0
+    lnres@gsLineThicknessF     = 5.0
+
+    lnres2                      = True
+    lnres2@gsLineColor          = "black"
+    lnres2@gsLineDashPattern    = 0
+    lnres2@gsLineThicknessF     = 5.0
+
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-   ; res@tiMainString         = fig_title + "in" + months(m)
-    ;res@tiMainFontHeightF    = 0.04
-   ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
+    res@gsnRightString  = "";draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
+    res@gsnLeftString   = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -208,12 +256,16 @@ else
     res@cnFillPalette := "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
 end if 
-        res@gsnLeftString   = case(nc)
+        ;res@gsnLeftString   = case(nc)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-        plot(nc)  = gsn_csm_lat_time(wks,var(nc,:,:),res)
+        plot(nc)   = gsn_csm_lat_time(wks,var(nc,:,:),res)
+        plot2(nc)  = gsn_csm_contour(wks,diff(1,:,:),res_line)
+        overlay(plot(nc),plot2(nc))
+        axis(nc)   = gsn_add_polyline( wks, plot(nc),ispan(0,(ntime-1),1) , axlat(nc,:), lnres )
+        axis2(nc)  = gsn_add_polyline( wks, plot(nc),ispan(0,(ntime-1),1) , axlat(1,:), lnres2 )
         print(max(var(nc,:,:)))
         print(min(var(nc,:,:)))
     end do 

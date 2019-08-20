@@ -16,7 +16,8 @@ if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_intEKE.nc"
+    ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_intEKE.nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_intSKE.nc"
     years   = ispan(1979,2005,1)   ;the calculate time
 else
     ;remove TP experiment, sample number is ten years 
@@ -88,15 +89,20 @@ printVarSummary(ps)
 printVarSummary(u)
 printVarSummary(dp)
 
+ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
 
-EKE@long_name = "Integrated transient eddies kinetic energy"
+EKE@long_name = "Integrated stationary waves kinetic energy"; "Integrated transient eddies kinetic energy"
 EKE@units     = "J" 
 
 time = cd_calendar(f->time,0)
@@ -151,8 +157,10 @@ filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
-filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
-filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
+filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
+filevardef(ncdf,"SKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
+;filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
+;filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
 filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
@@ -162,7 +170,8 @@ filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 filevarattdef(ncdf,"time",u&time)
 filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
-filevarattdef(ncdf,"EKE",EKE)
+;filevarattdef(ncdf,"EKE",EKE)
+filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
 filevarattdef(ncdf,"month_vari",EKE)
@@ -173,8 +182,10 @@ ncdf->season = (/1212,345,678,91011/)
 ncdf->time = (/u&time/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
-ncdf->EKE  = (/EKE/)
-ncdf->EKE_vari  = (/EKE_vari/)
+ncdf->SKE  = (/EKE/)
+ncdf->SKE_vari  = (/EKE_vari/)
+;ncdf->EKE  = (/EKE/)
+;ncdf->EKE_vari  = (/EKE_vari/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
 ncdf->month_vari  = (/month_vari/)

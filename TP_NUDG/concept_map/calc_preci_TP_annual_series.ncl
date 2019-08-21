@@ -9,20 +9,20 @@
 ;******************************************************************************
 begin
 ;the path of the file
-path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-preci_6TP_annual_series.nc"
-case     = (/"CTRL","NG24h","NG6h"/)
+path    = "/home/ys17-19/renql"
+filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fileout = path + "/project/TP_NUDG/concept_map/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-preci_2EA_annual_series.nc"
+case     = (/"CTRL","NG6h","NG24h"/)
 var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-area = (/"SETP","SCTP","SWTP","CETP","CWTP","NTP"/);"ESTP","ECTP","NTP","SEA","NEA"/) "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/25    ,25    ,25    ,30    ,30    ,35   /);25    ,30    ,35   , 22  , 30  /) 25  ,25   ,30   , ;-20
-latn = (/30    ,30    ,30    ,35    ,35    ,40   /);30    ,35    ,40   , 30  , 45  /) 40  ,30   ,35   , ;60
-lonl = (/100   ,85    ,70    ,90    ,70    ,70   /);100   ,90    ,70   ,107  ,107  /) 70  ,70   ,70   , ;20
-lonr = (/105   ,100   ,85    ,105   ,90    ,105  /);105   ,105   ,105  ,130  ,130  /) 105 ,105  ,105  , ;130 ;220
+area = (/"SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/ 22  , 30  /); 25  ,25   ,30   , ;-20
+latn = (/ 30  , 45  /); 40  ,30   ,35   , ;60
+lonl = (/107  ,115  /); 70  ,70   ,70   , ;20
+lonr = (/130  ,130  /); 105 ,105  ,105  , ;130 ;220
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -33,7 +33,7 @@ nvar  = dimsizes(var_name)
 narea = dimsizes(area)
 var   = new((/narea,nyear,365/),float)
 
-do nc = 0,ncase-1,1
+do nc = 2,ncase-1,1
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
 ;--------------------------------------------------------------
@@ -65,7 +65,7 @@ setfileoption(ncdf,"DefineMode",True)
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
 fileAtt@discription   = "The annual cycle of area average's preci,unit is mm/day" + \
-        "the area is SETP,SCTP,SWTP,CETP,CWTP,NTP"
+        "the area is SEA, NEA";SETP,SCTP,SWTP,CETP,CWTP,NTP"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

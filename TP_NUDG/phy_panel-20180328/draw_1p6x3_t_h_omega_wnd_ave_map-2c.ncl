@@ -42,10 +42,10 @@ pre_case   = (/(/"(a","(b"/),(/"(c","(d"/),(/"(e","(f"/)/)
 fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;-20
-latn = 55  ;60
-lonl = 30  ;20
-lonr = 150 ;220
+lats = -90 ;-15 ;-20
+latn =  90 ;55  ;60
+lonl =  0  ;30  ;20
+lonr = 360 ;150 ;220
 siglvl = 0.05
 
 f = addfile(gtopfile,"r")
@@ -55,7 +55,7 @@ ncase  = dimsizes(case)
 nlev   = dimsizes(lev)
 nmonth = dimsizes(months)
 nvar   = dimsizes(draw_var)
-nlat   = dimsizes(phis&lat)
+nlat   = dimsizes(phis&lat)+2
 nlon   = dimsizes(phis&lon)
 var    = new((/ncase  ,nvar,nlev,nlat,nlon/),float)
 var_u  = new((/ncase       ,nlev,nlat,nlon/),float)
@@ -66,6 +66,8 @@ vari_v = new((/ncase       ,nlev,nlat,nlon/),float)
 prob   = new((/ncase-1,nvar,nlev,nlat,nlon/),float)
 prob_u = new((/ncase-1     ,nlev,nlat,nlon/),float)
 prob_v = new((/ncase-1     ,nlev,nlat,nlon/),float)
+print(nlat)
+print(nlon)
 
 ;the number of the panel plot
     plot     = new((/ncase*nvar*nlev/),graphic)
@@ -87,6 +89,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 do nf = 0 ,ncase-1, 1
 do nv = 0 ,nvar-1,1
+    print(nv)
     f = addfile(filename(nf)+draw_varname(nv)+".nc","r")
      var(nf,nv,:,:,:)  = f->$var_name(0)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     vari(nf,nv,:,:,:)  = f->$var_name(1)$(nm,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -132,7 +135,7 @@ printVarSummary(prob)
     res@gsnFrame         = False
     res@gsnDraw          = False
     res@gsnMaximize      = True
-    res@gsnAddCyclic     = False
+    res@gsnAddCyclic     = True;False
     res@gsnPaperOrientation = "portrait"
     ;res@vpHeightF        = 0.25
     ;res@vpWidthF         = 0.8
@@ -143,9 +146,9 @@ printVarSummary(prob)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 15
+    res@gsnMajorLatSpacing = 45
     res@gsnMinorLatSpacing = 15
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLonSpacing = 60
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"

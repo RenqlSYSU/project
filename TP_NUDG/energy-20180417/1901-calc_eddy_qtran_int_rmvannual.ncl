@@ -11,21 +11,20 @@ path    = "/home/ys17-19/renql"
 filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_JJA_qtran_int_rmvannual.nc"
-var_name= (/"U","V","Q","PS"/)
+fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_Ttran_int_rmvannual.nc"
+;var_name= (/"U","V","Q","PS"/)
+var_name= (/"U","V","T","PS"/)
 case    = (/"CTRL","NG24h","NG6h"/)
 ncase   = dimsizes(case)
 years   = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
-lats = -20
-latn = 60
-lonl = 20
-lonr = 220
+lats = -90 ;-20
+latn =  90 ;60
+lonl =  0  ;20
+lonr = 360 ;220
 lev  = (/1000,925,850,700,600,500,400,300/)
-;lev  = (/600,500,400,300/)        ; high lev, according to Jiang Xinwen's paper
-;lev  = (/1000,925,850,700,600/)   ;low lev
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -54,19 +53,19 @@ do nf = 0,ncase-1,1
 do nt = 0,nyear-1,1
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-u(nt,:,:,:,:)   = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
+u(nt,:,:,:,:)   = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-v(nt,:,:,:,:)  = f->V(select_time,{lev},{lats:latn},{lonl:lonr})
+v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-q(nt,:,:,:,:)   = f->Q(select_time,{lev},{lats:latn},{lonl:lonr})
+q(nt,:,:,:,:)   = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 3
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-ps(nt,:,:,:)  = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+ps(nt,:,:,:)  = f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
 dp(nt,:,:,:,:)  = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),30000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
 
@@ -91,10 +90,10 @@ edd_qv := dim_sum_n(edd_q*edd_v*dp,2)/g
 edd_qu := dim_avg_n(edd_qu,0) ;get transient eddy integrated qu(lat,lon)
 edd_qv := dim_avg_n(edd_qv,0)
 
-qu@long_name = "Integrated zonal moisture transport"
-qv@long_name = "Integrated meridional moisture transport"
-ste_qu@long_name = "steady Integrated meridional moisture transport"
-edd_qu@long_name = "transient eddy Integrated meridional moisture transport"
+qu@long_name = "Integrated zonal temperature transport"
+qv@long_name = "Integrated meridional temperature transport"
+ste_qu@long_name = "steady Integrated meridional temperature transport"
+edd_qu@long_name = "transient eddy Integrated meridional temperature transport"
 qu@units     = "kg/(s*m)" 
 qv@units     = "kg/(s*m)" 
 

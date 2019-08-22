@@ -28,7 +28,7 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
-var_name = (/"U"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
+var_name = (/"OMEGA"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
 
 ;area: east Asia
 lats = -90 ;-20

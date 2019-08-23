@@ -10,30 +10,34 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"     ,"q1"  ,"U"  /)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~ J","W/kg","m/s"/)  ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+draw_var = (/"preci" ,"EKE"        ,"q1"  ,"U"  ,"uv"               /)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~ J","W/kg","m/s","10~S~4~N~ m~S~2~N~s~S~-2~N~"/)  ;this can be used as right string 
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
-nv = 1
+nv = 4
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-;case1   = (/"TP_CTRL","TP_CR"/)
-;case2   = (/"CTRL","noTP-CTRL"/)
-;;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
-;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
-;nsample = 10
-case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-nsample = 27
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+if(case_option.eq.1) then
+    case1   = (/"TP_CTRL","TP_CR"/)
+    case2   = (/"CTRL","noTP-CTRL"/)
+    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    nsample = 10
+else
+    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
+    case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
+end if 
 
 filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
@@ -163,6 +167,10 @@ end if
 
 if(nv.eq.2) then   ;q1
     var = var*1000 ;transform unit from K/S to w/kg
+end if
+
+if(nv.eq.4) then   ;uv
+    var = var/10000 ;transform unit from K/S to w/kg
 end if
 
 var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
@@ -378,7 +386,7 @@ if(nv.eq.0) then ;preci
     spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1 
 end if
 
-if(nv.eq.1.or.nv.eq.4) then ;EKE
+if(nv.eq.1) then ;EKE
     minlvl = (/ 2 ,-16,-16/);-8,-8,-8,-8
     maxlvl = (/50 , 16, 16/);8 ,8 ,8 ,8 
     spacig = (/ 3 , 2 , 2 /);1 ,1 ,1 ,1 
@@ -396,13 +404,19 @@ if(nv.eq.3) then ;U
     spacig = (/ 3, 0.5, 0.5/);1 ,1 ,1 ,1 
 end if
 
+if(nv.eq.4) then ;uv
+    minlvl = (/-8.0,-4.0,-4.0/);-8,-8,-8,-8
+    maxlvl = (/ 8.0, 4.0, 4.0/);8 ,8 ,8 ,8 
+    spacig = (/ 1.0, 0.5, 0.5/);1 ,1 ,1 ,1 
+end if
+
 do nc = 0, ncase-1,1
-if(nc.eq.0) then
-   res@cnFillPalette = "precip3_16lev"
-   ;blue and yellow and red, has 17 colors,2-18,2 is white
-else
+if(nc.lt.0.or.nv.eq.4) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
+else
+   res@cnFillPalette = "precip3_16lev"
+   ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
     do nm = 0,nmonth-1,1
         nn = nm +1

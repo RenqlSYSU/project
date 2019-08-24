@@ -12,16 +12,21 @@
 begin
 draw_var = (/"preci" ,"EKE"        ,"q1"  ,"U"  ,"uv"               /)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day","10~S~4~N~ J","W/kg","m/s","10~S~4~N~ m~S~2~N~s~S~-2~N~"/)  ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
-nv = 4
-;imonth = ispan(4,7,1);(/4,5,6,7/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
+nv = 1
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
+
+;parameter for bw_bandpass_filter
+ca = 7.0 ;day
+cb = 2.5 
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -33,13 +38,17 @@ if(case_option.eq.1) then
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
 else
-    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+    case1   = (/"CTRL" ,"NUDG6h"    ,"NUDG24h"     /) ;,"NUDG24h"
+    case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/) ;, " NG24h-CTRL"
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if 
 
-filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
+if(nv.eq.1.and.option.eq.1) then
+    filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
+else
+    filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
+end if  
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 fig_name  = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -48,10 +57,10 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -90 ;-15 ;20 ;-20
-latn =  90 ;55  ;55 ;60
-lonl =  0  ;30  ;30 ;20
-lonr = 360 ;150 ;150;220
+lats = -15 ;20 ;-20 -90 ;
+latn = 55  ;55 ;60   90 ;
+lonl = 30  ;30 ;20   0  ;
+lonr = 150 ;150;220 360 ;
 lat_spacing = 45
 lon_spacing = 60
 siglvl = 0.05
@@ -64,7 +73,7 @@ alonl = (/107 ,107,70 /)
 alonr = (/122 ,122,105/)
 
 f = addfile(gtopfile,"r")
-phis   = f->PHIS;({lats:latn},{lonl:lonr})
+phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case2)
 nmonth = dimsizes(imonth)
@@ -109,11 +118,11 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 axlon = phis&lon
 axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
-print(lat1)
+;print(lat1)
 ;print(ind(lat1.eq.20))
 do nf = 0 ,ncase-1, 1
     u_f = addfile(ufilename(nf),"r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},:,:);{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     print(nf)
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
@@ -130,10 +139,17 @@ do nf = 0 ,ncase-1, 1
     var(nf,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     vari(nf,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     else
-    var(nf,:,:,:)  = f->$var_name(0)$(imonth,:,:);{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    vari(nf,:,:,:) = f->$var_name(1)$(imonth,:,:);{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    var(nf,:,:,:)  = f->$var_name(0)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    vari(nf,:,:,:) = f->$var_name(1)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     end if
 end do
+vari = where(vari.le.0.000001.and.vari.ge.-0.000001,0.01,vari)
+print("read data have done")
+printVarSummary(var)
+printVarSummary(vari)
+
+print(var(1,1,10:50,80))
+print(vari(1,1,10:50,80))
 
 ;------calc the area average q1 and print---------------
 if(nv.eq.2) then
@@ -157,9 +173,10 @@ end if
 ;----------------------------------------------                                                     
                                                                                                     
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
+;prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
+printVarSummary(prob)
 
 if(nv.eq.1) then ;EKE
     var = var/10000
@@ -173,13 +190,11 @@ if(nv.eq.4) then   ;uv
     var = var/10000 ;transform unit from K/S to w/kg
 end if
 
-var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
+;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
 ;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True) ;use for noTP
-prob = mask(prob,prob.lt.siglvl,True)
-copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
-printVarSummary(var)
+;prob = mask(prob,prob.lt.siglvl,True)
+;copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(u)
-printVarSummary(prob)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -411,7 +426,7 @@ if(nv.eq.4) then ;uv
 end if
 
 do nc = 0, ncase-1,1
-if(nc.lt.0.or.nv.eq.4) then
+if(nc.gt.0.or.nv.eq.4) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
 else

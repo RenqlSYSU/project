@@ -15,16 +15,16 @@ nl = 1
 nv = 1
 
 ;parameter for bw_bandpass_filter
-ca = 10.0 ;day
+ca = 30.0 ;day
 cb = 2.5 
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + ".nc"
-fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
-;filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc" 
-;fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0) + "-" + cb + "-" + ca + "day"
+;filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + ".nc"
+;fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0)
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_int" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc" 
+fig_name = path + "/fig/ERA-Interim_" + draw_var(nv) + "_" + var_name(0) + "-" + cb + "-" + ca + "day"
 gtopfile = path1 + "gtopo_1.5x1.5.nc"
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)

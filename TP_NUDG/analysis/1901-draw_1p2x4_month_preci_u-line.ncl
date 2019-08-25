@@ -57,10 +57,10 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;20 ;-20 -90 ;
-latn = 55  ;55 ;60   90 ;
-lonl = 30  ;30 ;20   0  ;
-lonr = 150 ;150;220 360 ;
+lats = -90 ;-15 ;20 ;-20 
+latn =  90 ;55  ;55 ;60  
+lonl =  0  ;30  ;30 ;20  
+lonr = 360 ;150 ;150;220 
 lat_spacing = 45
 lon_spacing = 60
 siglvl = 0.05
@@ -77,7 +77,7 @@ phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case2)
 nmonth = dimsizes(imonth)
-nlat   = dimsizes(phis&lat)
+nlat   = dimsizes(phis&lat)+2
 nlon   = dimsizes(phis&lon)
 u    = new((/ncase  ,nmonth,nlat,nlon/),float)
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
@@ -173,7 +173,7 @@ end if
 ;----------------------------------------------                                                     
                                                                                                     
 do nf = 0 ,ncase-2,1
-;prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
+prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 printVarSummary(prob)
@@ -192,8 +192,8 @@ end if
 
 ;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
 ;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True) ;use for noTP
-;prob = mask(prob,prob.lt.siglvl,True)
-;copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
+prob = mask(prob,prob.lt.siglvl,True)
+copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(u)
 
 ;==============================================================
@@ -453,10 +453,10 @@ end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         ;plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
         ;overlay(plot(np),plot2(np))
-        ;if(nc.gt.0)
-        ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-        ;    overlay(plot(np),plot_sig(np2))
-        ;end if
+        if(nc.gt.0)
+            plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            overlay(plot(np),plot_sig(np2))
+        end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )

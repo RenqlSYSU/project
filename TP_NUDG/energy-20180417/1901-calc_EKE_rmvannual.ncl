@@ -10,23 +10,38 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+
+;parameter for bw_bandpass_filter
+ca = 7.0 ;day
+cb = 2.5 
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG24h","NG6h"/)
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE.nc"
     years   = ispan(1979,2005,1)   ;the calculate time
+    if(option.eq.0) then
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_EKE.nc"
+        ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_uv.nc"
+    else
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+    end if  
 else
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
     years   = ispan(21,30,1)   ;the calculate time
+    if(option.eq.0) then
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE.nc"
+        ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uv.nc"
+    else
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+    end if  
 end if
 
-var_name= (/"U","V","PS"/)
+var_name= (/"U","V"/)
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 
@@ -53,8 +68,6 @@ nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
-ps    = new((/nyear,ntime,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlev,nlat,nlon/),float)
@@ -62,7 +75,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nf = 0,0,1 
+do nf = 0,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -77,22 +90,24 @@ u(nt,:,:,:,:)  = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
 nv = 1
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->V(select_time,{lev},{lats:latn},{lonl:lonr})
-
-nv = 2
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-ps(nt,:,:,:)   = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
-dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),20000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
-
-printVarSummary(ps)
 printVarSummary(u)
-printVarSummary(dp)
 
-edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-;var   =  (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
-;var   =  (edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
+if(option.eq.1) then
+    fca = 1.0/ca
+    fcb = 1.0/cb    
+    opt = False
+    filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
+    filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+    var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
+    print(filt_u(10,180,2,150,10:20))
+    delete(filt_u)
+    delete(filt_v)  
+else
+    edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+    edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))   
+    var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+end if
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
 
@@ -125,6 +140,7 @@ season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 printVarSummary(month_ave)
 printVarSummary(season_ave)
+print(month_ave(6,2,10,10:20))
 
 ;========================================================================
 ;save the data

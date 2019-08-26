@@ -77,7 +77,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 2,2,1 
+do nf = 0,0,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -98,7 +98,8 @@ f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 ps(nt,:,:,:)   = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
 dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),20000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
-
+u = linmsg_n(u,(/-1/),1)
+v = linmsg_n(v,(/-1/),1)
 print(u(10,10,2,10:20,30))
 
 if(option.eq.1) then
@@ -107,8 +108,6 @@ fcb = 1.0/cb
 opt = False
 filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
 filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
-filt_u = mask(filt_u,filt_u.eq.1e+20,False)
-filt_v = mask(filt_v,filt_v.eq.1e+20,False)
 var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((filt_v(:,:,5:8,:,:)*filt_v(:,:,5:8,:,:) + filt_u(:,:,5:8,:,:)*filt_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)*filt_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
@@ -127,8 +126,8 @@ var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral 
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 end if
-inf =4555555555555555555555555555555555555555555555555555.777777777
-var = mask(var,var.eq.inf,False)
+;inf =4555555555555555555555555555555555555555555555555555.777777777
+;var = mask(var,var.eq.inf,False)
 
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 

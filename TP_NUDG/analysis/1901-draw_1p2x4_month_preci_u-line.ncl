@@ -402,9 +402,9 @@ if(nv.eq.0) then ;preci
 end if
 
 if(nv.eq.1) then ;EKE
-    minlvl = (/ 2 ,-16,-16/);-8,-8,-8,-8
-    maxlvl = (/50 , 16, 16/);8 ,8 ,8 ,8 
-    spacig = (/ 3 , 2 , 2 /);1 ,1 ,1 ,1 
+    minlvl = (/ 2 ,-8,-8/);-8,-8,-8,-8-16,-16
+    maxlvl = (/34 ,8 ,8 /);8 ,8 ,8 ,8  16, 16
+    spacig = (/ 2 ,1 ,1 /);1 ,1 ,1 ,1  2 , 2 
 end if
 
 if(nv.eq.2) then ;q1

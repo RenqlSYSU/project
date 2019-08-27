@@ -20,9 +20,9 @@ lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 1
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
-imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(8,11,1);(/4,5,6,7/)
+imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;parameter for bw_bandpass_filter
 ca = 7.0 ;day
@@ -57,12 +57,12 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -90 ;-15 ;20 ;-20 
-latn =  90 ;55  ;55 ;60  
-lonl =  0  ;30  ;30 ;20  
-lonr = 360 ;150 ;150;220 
-lat_spacing = 45
-lon_spacing = 60
+lats = -90 ;20 ;-20 -15 ;
+latn =  90 ;55 ;60  55  ;
+lonl =  0  ;30 ;20  30  ;
+lonr = 360 ;150;220 150 ;
+lat_spacing = 45 ;15 ;
+lon_spacing = 60 ;30 ;
 siglvl = 0.05
 
 ;area of index, India,Tibet,Philippines,Maritime_continent
@@ -126,7 +126,7 @@ do nf = 0 ,ncase-1, 1
     print(nf)
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{20:50},inln)); + 37;ind(lat1.eq.20)
+        lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
     end do
@@ -174,12 +174,14 @@ end if
                                                                                                     
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
+;var(nf+1,:,:,:)= var(nf+1,:,:,:)/var(0,:,:,:)*100-100   ;get the difference between CTRL and NUDG
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 printVarSummary(prob)
 
 if(nv.eq.1) then ;EKE
     var = var/10000
+    ;var(0,:,:,:) = var(0,:,:,:)/10000
 end if
 
 if(nv.eq.2) then   ;q1
@@ -190,7 +192,7 @@ if(nv.eq.4) then   ;uv
     var = var/10000 ;transform unit from K/S to w/kg
 end if
 
-;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
+var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
 ;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True) ;use for noTP
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
@@ -402,9 +404,9 @@ if(nv.eq.0) then ;preci
 end if
 
 if(nv.eq.1) then ;EKE
-    minlvl = (/ 2 ,-8,-8/);-8,-8,-8,-8-16,-16
-    maxlvl = (/34 ,8 ,8 /);8 ,8 ,8 ,8  16, 16
-    spacig = (/ 2 ,1 ,1 /);1 ,1 ,1 ,1  2 , 2 
+    minlvl = (/ 1 ,-4.0,-4.0/);-8,-8,-8,-8-16,-16
+    maxlvl = (/17 ,4.0 ,4.0 /);8 ,8 ,8 ,8  16, 16
+    spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1  2 , 2 
 end if
 
 if(nv.eq.2) then ;q1
@@ -453,10 +455,10 @@ end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         ;plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
         ;overlay(plot(np),plot2(np))
-        if(nc.gt.0)
-            plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-            overlay(plot(np),plot_sig(np2))
-        end if
+        ;if(nc.gt.0)
+        ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+        ;    overlay(plot(np),plot_sig(np2))
+        ;end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )

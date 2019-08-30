@@ -9,8 +9,8 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 7.0 ;day
@@ -75,7 +75,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nf = 0,2,1 
+do nf = 1,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -152,7 +152,7 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600,500hPa 500,400,300,200"
+fileatt@discription   = "rmvannual cycle"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate`

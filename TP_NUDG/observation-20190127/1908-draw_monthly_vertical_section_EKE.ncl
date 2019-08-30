@@ -19,16 +19,15 @@ cb = 2.5
 ;area: east Asia
 lats = -15 ;20 ;-20
 latn = 55  ;55 ;60
-lonl = 210;30  ;30 ;20
-lonr = 330;150 ;150;220
-lat = 45 ;used to plot vertical section
-
+lonl =30  ;30 ;20  210;
+lonr =150 ;150;220 330;
+lat = 40 ;used to plot vertical section
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 path1  = "/home/ys17-19/data-observation/ERA-interim/"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
-;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc" 
+;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc" 
 gtopfile = path1 + "gtopo_1.5x1.5.nc"
 fig_name = path + "/fig/1p1x4_ERA-Interim_vertical_section_" + lat + draw_var(nv)
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
@@ -117,8 +116,8 @@ printVarSummary(var)
     ;res@cnFillPalette = "GMT_gray" ;has 10 colors 
     res@cnLevelSelectionMode  = "ManualLevels" ;"AutomaticLevels" ; set manual contour levels
     res@cnMinLevelValF        = 0    ; set min contour level
-    res@cnMaxLevelValF        = 48   ; set max contour level
-    res@cnLevelSpacingF       = 3  ; set contour interval
+    res@cnMaxLevelValF        = 160   ; set max contour level
+    res@cnLevelSpacingF       = 10  ; set contour interval
     
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 

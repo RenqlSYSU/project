@@ -1570,7 +1570,11 @@ subroutine tphysac (ztodt,   cam_in,  &
         ! define the coefficient of buffer
         if ( stat_lat >= 25.0 .and. stat_lat <= 40.0 ) then
             if ( stat_lon >= 70.0 .and. stat_lon <= 105.0 ) then 
-                e = 1
+                if ( state%phis >= 30000) then
+                    e = 1
+                else
+                    e = exp ( -(abs( state%phis - 30000 )))
+                end if
             else
                 e = exp ( -( abs( stat_lon - 87.5 )- 17.5 ))
             end if

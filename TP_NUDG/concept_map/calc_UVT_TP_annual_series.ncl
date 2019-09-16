@@ -13,6 +13,14 @@ case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/)
 var_name = (/"U","V","T","OMEGA","Z3"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
+path    = "/home/ys17-19/renql/model/F2000_CAM5/pro"
+filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/)
+var_name = (/"U","V","T","OMEGA","Z3"/)
+years    = ispan(1979,2005,1)   ;the calculate time
+
 ;area of TP 
 lats = 25 
 latn = 40

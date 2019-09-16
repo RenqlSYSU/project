@@ -45,7 +45,12 @@ begin
         len          = dimsizes(out_name_ele)
         out_name     = pro_dir+out_name_ele(len-1)
         clim_var1    = clim_var1/n_esm
-        
+
+cf = ezfftf_n(clim_var1,0)
+cf(:,4:,:,:,:)  = 0
+clim_var1 = ezfftb_n(cf,cf@xbar,1)
+printVarSummary(clim_var1)
+
         ;Write
         print("3D EXTRACT: "+fdname3d(i)+" Writing: "+out_name)
         write_TLLL_to_nc(fdname3d(i),clim_var1,out_name)

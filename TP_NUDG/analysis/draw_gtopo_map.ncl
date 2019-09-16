@@ -9,11 +9,11 @@
 begin
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-;filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
-filename = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+filename   = path + "/analysis/mdata/gtopo30_0.9x1.25.nc"
+;filename = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
 ;filename = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
 fig_name   = path + "/analysis/fig/topography_nudg_zone_gray"
-fig_title  = "noTP";"CTRL" ; + var_name + " in " + lev + " hPa"
+fig_title  = "CTRL";"CTRL" ; + var_name + " in " + lev + " hPa"
 fig_out    = "pdf";"eps";"x11"
 ;fig_out    = "eps";"pdf";"x11"
 var_name   = "PHIS"
@@ -116,24 +116,26 @@ copy_VarMeta(var1,var)
     ;  res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
-    res@cnFillOn         = True
-    res@cnLinesOn        = False ;True
-    res@cnLineLabelsOn   = False
+    res@cnFillOn         = False
+    res@cnLinesOn        = True
+    res@cnLineLabelsOn   = True
     res@cnInfoLabelOn    = False
-    ;res@cnLineThicknessF = 0
+    res@cnLineThicknessF = 2
     ;res@gsnContourZeroLineThicknessF = 4.0
-    ;res@cnLineColor      = "blue"
+    res@cnMonoLineColor   = False
+    res@cnLineColors      = (/"blue","red","green","purple"/)
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res@cnLevels         = (/15,25,30,40/)
     
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 10         ; set min contour level
-    res@cnMaxLevelValF        = 50 ;32        ; set max contour level
-    res@cnLevelSpacingF       = 5        ; set contour interval
-;    res@cnFillColors          =  
-    res@gsnSpreadColors      = True              ; turn of the full color map
-    res@gsnSpreadColorStart  = 11                ; start at color 17
-    res@gsnSpreadColorEnd    = 2                ; end at color 200
+    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res@cnMinLevelValF        = 10         ; set min contour level
+    ;res@cnMaxLevelValF        = 50 ;32        ; set max contour level
+    ;res@cnLevelSpacingF       = 5        ; set contour interval
+    ;res@gsnSpreadColors      = True              ; turn of the full color map
+    ;res@gsnSpreadColorStart  = 11                ; start at color 17
+    ;res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
@@ -170,11 +172,11 @@ copy_VarMeta(var1,var)
     
     plot = gsn_csm_contour_map_ce(wks,var,res)
     ;plot = gsn_csm_map_ce(wks,res)
-;do na = 0,narea-1,1
+do na = 0,narea-1,1
     ;lnres@gsFillColor    = fillcolor(na)
     ;lnres@gsFillOpacityF = opacity(na)
-;    line(na) = gsn_add_polygon( wks, plot, lonx(:,na), latx(:,na), lnres )
-;end do 
+    line(na) = gsn_add_polygon( wks, plot, lonx(:,na), latx(:,na), lnres )
+end do 
     ;text = gsn_add_text( wks, plot, "NUDG", lonm(0), latm(0),txres)
 
 draw(plot)

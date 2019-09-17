@@ -21,7 +21,7 @@ lev = (/850,500,200/)
 u_nl = 2 ;used to read westerly jet
 z_nl = 1 ;used to read geopotential height
 nv = 0
-imonth = ispan(0,11,1)
+imonth = ispan(4,7,1)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -48,7 +48,7 @@ fig_out    ="pdf";"x11"
 
 ;area: east Asia
 lats = 5 ;20 ;-20
-latn = 55  ;55 ;60
+latn = 60  ;55 ;60
 lonl = 30  ;30 ;20
 lonr = 150 ;150;220
 siglvl = 0.05
@@ -63,6 +63,7 @@ nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 u    = new((/ncase  ,nmonth,nlat,nlon/),float)
+u2   = new((/ncase  ,nmonth,nlat,nlon/),float)
 z    = new((/ncase  ,nmonth,nlat,nlon/),float)
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
 vari = new((/ncase  ,nmonth,nlat,nlon/),float)
@@ -113,6 +114,7 @@ do nf = 0 ,ncase-1, 1
     
     u_f = addfile(ufilename(nf),"r")
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(u_nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    u2(nf,:,:,:) = u_f->$var_name(0)$(imonth,{lev(z_nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
         lat_ind = maxind(u(nf,nm,{5:50},inln)); + ind(lat1.eq.20)
@@ -137,6 +139,11 @@ var = var/10000
 var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
+
+xlon = conform(u,axlon,3)
+u2 = mask(u2,xlon.lt.110,False)
+z  = mask(z ,xlon.lt.110,False)
+
 printVarSummary(var)
 printVarSummary(u)
 printVarSummary(z)
@@ -355,7 +362,7 @@ end if
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     do nm = 0,nmonth-1,1
-        res@gsnLeftString   = pre_case(nm) + ") " + months(nm)
+        res@gsnLeftString   = pre_case(nm) + ") " + months(imonth(nm))
         res@gsnRightString  = "200U & 500hgt" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         if(nv.gt.10) then
@@ -379,8 +386,8 @@ end if
         overlay(plot(nm),plotz1(nm))
         overlay(plot(nm),plotu2(nm))
         overlay(plot(nm),plotz2(nm))
-        axisz1(nm)   = gsn_csm_contour(wks,u(0,nm,:,:),zaxis)
-        axisz2(nm)   = gsn_csm_contour(wks,u(1,nm,:,:),zaxis2)
+        axisz1(nm)   = gsn_csm_contour(wks,u2(0,nm,:,:),zaxis)
+        axisz2(nm)   = gsn_csm_contour(wks,u2(1,nm,:,:),zaxis2)
         overlay(plot(nm),axisz1(nm))
         overlay(plot(nm),axisz2(nm))
         axisu1(nm) = gsn_add_polyline( wks, plot(nm), axlon, axlat(0,nm,:), uaxis )
@@ -394,6 +401,6 @@ end if
     end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end
 

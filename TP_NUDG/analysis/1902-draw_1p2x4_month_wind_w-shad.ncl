@@ -18,18 +18,19 @@ begin
    mp_thick       = 1.5
    font_index     = 22
 
-draw_var = (/"q1"  ,"OMEGA"         /)  ;this is the variable used to draw, can used as center string
-unit     = (/"W/kg","10~S~-2~N~ Pa/s"/)    ;this can be used as right string 
-draw_varname = (/"Q1","omega"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"q1"  ,"OMEGA"          ,"preci" /)  ;this is the variable used to draw, can used as center string
+unit     = (/"W/kg","10~S~-2~N~ Pa/s","mm/day"/)    ;this can be used as right string 
+draw_varname = (/"Q1","omega","preci"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
-nl = 2
-nv = 0
-;imonth = ispan(4,7,1);(/4,5,6,7/)
+nl = 0
+nv = 2
 imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -46,10 +47,12 @@ fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
 lats = 0 ;20 ;-20
-latn = 70  ;55 ;60
+latn = 80  ;55 ;60
 lonl = 60  ;30 ;20
-lonr = 180 ;150;220
+lonr = 230 ;150;220
 siglvl = 0.05
+lat_spacing = 20
+lon_spacing = 40
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
@@ -106,7 +109,7 @@ var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) 
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.eq.0) then
+if(nv.eq.0.or.nv.eq.2) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -163,8 +166,8 @@ printVarSummary(prob)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 10
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLatSpacing = lat_spacing
+    res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -341,6 +344,12 @@ if(nv.eq.1)
     spacig = (/ 1 ,0.5,0.5/)
 end if
 
+if(nv.eq.2) then ;preci
+    minlvl = (/ 1 ,-4.0,-4.0/);-8,-8,-8,-8
+    maxlvl = (/16 ,4.0 ,4.0 /);8 ,8 ,8 ,8 
+    spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1 
+end if
+
 do nc = 0, ncase-1,1
 if(nc.gt.0.or.nv.eq.1) then
     res@cnFillPalette = "BlueDarkRed18"
@@ -352,8 +361,8 @@ end if
     do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case(nc)
-        ;res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(0) ;+ " (" + unit(nv) + ")" 
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ")" 
+        ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval

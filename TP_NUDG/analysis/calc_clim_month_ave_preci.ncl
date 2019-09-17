@@ -8,21 +8,32 @@
 ;                                           2018/01/18
 ;******************************************************************************
 begin
-path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_DTHFLX.nc"
-var_name = (/"SHFLX","LHFLX"/)
-;var_name = (/"PRECC","PRECL"/)
-years    = ispan(1979,2005,1)   ;the calculate time
-choice   = 1 ;1 means to calc T change due to Heat Flux ; 0 means to calc precipitation
+path    = "/home/ys17-19/renql"
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+
+if(case_option.eq.0) then
+    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_preci.nc"
+    years    = ispan(1979,2005,1)   ;the calculate time
+else
+    ;remove TP experiment, sample number is ten years 
+    case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_preci.nc"
+    years   = ispan(21,30,1)   ;the calculate time
+end if
+
+;var_name = (/"SHFLX","LHFLX"/)
+var_name = (/"PRECC","PRECL"/)
+choice   = 0 ;1 means to calc T change due to Heat Flux ; 0 means to calc precipitation
 
 ;area: east Asia
-lats = -15 ;-20
-latn = 55  ;60
-lonl = 30  ;20
-lonr = 150 ;220
+lats = -90 ;-20
+latn =  90 ;60
+lonl =  0  ;20
+lonr = 360 ;220
 ;lev  = (/850,500,200/)
 
 ;==========================================================
@@ -43,6 +54,7 @@ month_ave  = new((/      12 ,nlat,nlon/),float)
 month_vari = new((/      12 ,nlat,nlon/),float)
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
+printVarSummary(vars)
 
 do nf = 0 , ncase-1,1
 ;---------------------------------------------------------------
@@ -65,9 +77,10 @@ if(choice.eq.1) then
     g  = 9.8 ;gravitational acceleration, N/kg, PS/g is th weight of air, kg
     dst = 0.39 ;air density, unit is kg/m3
     var = var/(cp*dst)
+else
+    var  = var*1000*3600*24 ;convert m/s to mm/day
 end if
 
-;var  = var*1000*3600*24
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)

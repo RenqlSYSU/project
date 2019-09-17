@@ -12,19 +12,19 @@
 ;******************************************************************************
 begin
 path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = (/"/users/yangsong3/L_Zealot/F/AMIP_C5PM/exe/AMIP_C5PM.cam.h0.",\
-            "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/pre_data_24h/AMIP_C5PM_TP_NUDG.cam.h0.",\
-            "/users/yangsong3/L_Zealot/F/AMIP_C5PM_TP_NUDG/exe/AMIP_C5PM_TP_NUDG.cam.h0."/)
+filein  = (/"/users/yangsong3/renql/F/AMIP_C5PM/exe/AMIP_C5PM.cam.h0.",\
+            "/users/yangsong3/renql/F/AMIP_C5PM_TP_NUDG/pre_data_24h/AMIP_C5PM_TP_NUDG.cam.h0.",\
+            "/users/yangsong3/renql/F/AMIP_C5PM_TP_NUDG/exe/AMIP_C5PM_TP_NUDG.cam.h0."/)
 fileout = path + "/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_q1.nc"
 var_name = (/"QRL","QRS","DTCOND","DTV"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
-lats = -15 ;-20
-latn = 55  ;60
-lonl = 30  ;20
-lonr = 150 ;220
+lats = -90 ;-20
+latn = 90  ;60
+lonl = 0  ;20
+lonr = 360 ;220
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -101,7 +101,7 @@ setfileoption(ncdf,"DefineMode",True)
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
 fileAtt@discription   = "the monthly and seasonal average of q1, calc by" + \
-                "QRL (Longwave heating rate), DTCOND (T tendency - moist processes), DTV(T vertical diffusion)"
+                "QRS,QRL (Longwave heating rate), DTCOND (T tendency - moist processes), DTV(T vertical diffusion)"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

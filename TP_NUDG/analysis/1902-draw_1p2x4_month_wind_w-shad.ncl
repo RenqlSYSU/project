@@ -21,13 +21,13 @@ begin
 draw_var = (/"q1"  ,"OMEGA"         /)  ;this is the variable used to draw, can used as center string
 unit     = (/"W/kg","10~S~-2~N~ Pa/s"/)    ;this can be used as right string 
 draw_varname = (/"Q1","omega"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
-nl = 0
-nv = 1
+nl = 2
+nv = 0
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
 
@@ -42,13 +42,13 @@ fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
     case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
 ;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(f","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = -15 ;20 ;-20
-latn = 55  ;55 ;60
-lonl = 30  ;30 ;20
-lonr = 150 ;150;220
+lats = 0 ;20 ;-20
+latn = 70  ;55 ;60
+lonl = 60  ;30 ;20
+lonr = 180 ;150;220
 siglvl = 0.05
 
 f = addfile(gtopfile,"r")
@@ -330,9 +330,9 @@ printVarSummary(prob)
                       (/7 ,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4,4/)/)   ;the level of 200hpa    ctrl,nudg,diff
 if(nv.eq.0) 
-    minlvl = (/5  ,-16,-16/)  ;q1
-    maxlvl = (/80 , 16, 16/)
-    spacig = (/ 5 , 2 ,  2/)
+    minlvl = (/0  ,-80,-80/)  ;q1
+    maxlvl = (/750, 80, 80/)
+    spacig = (/50 , 10, 10/)
 end if
 
 if(nv.eq.1) 

@@ -26,18 +26,19 @@ draw_varname = (/"Q1","omega","preci"/)  ;this is the variable used to draw, can
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
-nl = 0
+nl = 2
 nv = 2
-imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
-;imonth = ispan(8,11,1);(/4,5,6,7/)
+imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 filename  = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_U.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p2x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
+fig_name = path + "/analysis/fig/1p3x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + months(imonth(0)) + "-3c" 
+;fig_name = path + "/analysis/fig/1p3x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
     case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
@@ -46,16 +47,17 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(f","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = 0 ;20 ;-20
-latn = 80  ;55 ;60
-lonl = 60  ;30 ;20
-lonr = 230 ;150;220
+lats = (/0  ,0  ,0  ,-70,-70,-70,20 ,-70/);-20
+latn = (/70 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
+lonl = (/30 ,150,270,30 ,150,270,30 ,0  /);20
+lonr = (/150,270,390,150,270,390,150,360/);220
 siglvl = 0.05
 lat_spacing = 20
-lon_spacing = 40
+lon_spacing = 30
 
+na = 7
 f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case)
 nmonth = dimsizes(imonth)
@@ -91,7 +93,7 @@ axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
 do nf = 0 ,ncase-1, 1
     u_f = addfile(ufilename(nf),"r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(2)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(2)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 do nm = 0, nmonth-1,1
 do inln = 0, nlon-1,1
    axlat(nf,nm,inln) = lat1(maxind(u(nf,nm,:,inln)))
@@ -101,20 +103,20 @@ printVarSummary(axlat)
 
 inv = 0
 f = addfile(filename(nf)+"U.nc","r")
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 inv = 1
 f = addfile(filename(nf)+"V.nc","r")
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
 if(nv.eq.0.or.nv.eq.2) then
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 end do
 
@@ -151,21 +153,27 @@ printVarSummary(prob)
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
+do na = 0, 5, 1
+print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na) + ", lonr = " + lonr(na))
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
     res@gsnMaximize      = True
-    res@gsnAddCyclic     = False
+    res@gsnAddCyclic     = True;False
     res@gsnPaperOrientation = "portrait"
     ;res@vpHeightF        = 0.25
     ;res@vpWidthF         = 0.8
 
 ;-------set the attribute of the map-------------------
+if(na.eq.2.or.na.eq.5) then
+    res@mpCenterLonF     = 0.
+else
     res@mpCenterLonF     = 180.
-    res@mpMaxLatF        = latn
-    res@mpMinLatF        = lats
-    res@mpMaxLonF        = lonr
-    res@mpMinLonF        = lonl
+end if
+    res@mpMaxLatF        = latn(na)
+    res@mpMinLatF        = lats(na)
+    res@mpMaxLonF        = lonr(na)
+    res@mpMinLonF        = lonl(na)
     res@gsnMajorLatSpacing = lat_spacing
     res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
@@ -377,14 +385,17 @@ end if
         ;overlay(plot(np),plot_u(np))
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
+        if(na.eq.0.or.na.eq.6) then
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
+        end if
         ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
-        print(max(var(nc,2,nm,{lats:latn},{lonl:lonr})))
-        print(min(var(nc,2,nm,{lats:latn},{lonl:lonr})))
+        print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do ;for the month 
 
     resp@txString      = fig_title
     gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+end do
 end
 

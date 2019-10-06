@@ -21,24 +21,24 @@ begin
 draw_var = (/"q1"  ,"OMEGA"          ,"preci" /)  ;this is the variable used to draw, can used as center string
 unit     = (/"W/kg","10~S~-2~N~ Pa/s","mm/day"/)    ;this can be used as right string 
 draw_varname = (/"Q1","omega","preci"/)  ;this is the variable used to draw, can used as center string
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
-nl = 2
-nv = 2
-;imonth = ispan(0,3,1);(/4,5,6,7/)
+nl = 1
+nv = 1
+imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
-imonth = ispan(8,11,1);(/4,5,6,7/)
+;imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 filename  = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_U.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/analysis/fig/1p3x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + months(imonth(0)) + "-3c" 
-;fig_name = path + "/analysis/fig/1p3x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+;fig_name = path + "/analysis/fig/1p3x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + months(imonth(0)) + "-3c" 
+fig_name = path + "/analysis/fig/1p3x4_" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
     case   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
@@ -47,15 +47,15 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(f","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/0  ,0  ,0  ,-70,-70,-70,20 ,-70/);-20
+lats = (/0  ,0  ,0  ,-70,-70,-70,-15,-70/);-20
 latn = (/70 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
 lonl = (/30 ,150,270,30 ,150,270,30 ,0  /);20
 lonr = (/150,270,390,150,270,390,150,360/);220
 siglvl = 0.05
-lat_spacing = 20
+lat_spacing = 15
 lon_spacing = 30
+na = 6
 
-na = 7
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
@@ -153,7 +153,7 @@ printVarSummary(prob)
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
-do na = 0, 5, 1
+;do na = 0, 5, 1
 print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na) + ", lonr = " + lonr(na))
     res                  = True
     res@gsnFrame         = False
@@ -176,6 +176,7 @@ end if
     res@mpMinLonF        = lonl(na)
     res@gsnMajorLatSpacing = lat_spacing
     res@gsnMajorLonSpacing = lon_spacing
+    res@gsnAddCyclic     = False
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -369,8 +370,8 @@ end if
     do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ")" 
-        ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
+        ;res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ")" 
+        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -396,6 +397,6 @@ end do ;for the month
 
     resp@txString      = fig_title
     gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-end do
+;end do
 end
 

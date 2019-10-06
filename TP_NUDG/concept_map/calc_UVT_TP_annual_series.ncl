@@ -5,27 +5,20 @@
 ;******************************************************************************
 begin
 ;the path of the file
-path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/)
-var_name = (/"U","V","T","OMEGA","Z3"/)
+path    = "/home/ys17-19/renql"
+filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fileout = path + "/project/TP_NUDG/concept_map/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-preci_2EA_annual_series.nc"
+case     = (/"CTRL","NG6h","NG24h"/)
+var_name = (/"PRECC","PRECL"/)
 years    = ispan(1979,2005,1)   ;the calculate time
 
-path    = "/home/ys17-19/renql/model/F2000_CAM5/pro"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-case     = (/"AMIP_CTRL","NUDG24h","NUDG6h"/)
-var_name = (/"U","V","T","OMEGA","Z3"/)
-years    = ispan(1979,2005,1)   ;the calculate time
-
-;area of TP 
-lats = 25 
-latn = 40
-lonl = 70
-lonr = 105
+area = (/"SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/ 22  , 30  /); 25  ,25   ,30   , ;-20
+latn = (/ 30  , 45  /); 40  ,30   ,35   , ;60
+lonl = (/107  ,115  /); 70  ,70   ,70   , ;20
+lonr = (/130  ,130  /); 105 ,105  ,105  , ;130 ;220
 lev  = (/850,500,200/)
 
 ;==========================================================
@@ -35,7 +28,8 @@ nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(var_name)
 nlev  = dimsizes(lev)
-var         = new((/nyear,365,nlev/),float)
+narea = dimsizes(area)
+var   = new((/narea,nyear,365,nlev/),float)
 
 do nv = 4,nvar-1,1
 fileout = path + "/concept_map/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-" + var_name(nv) + "_TP_annual_series.nc"

@@ -18,7 +18,8 @@ if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_MJ_JA_ave_"
+    ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_"
     years    = ispan(1979,2005,1)   ;the calculate time
 else
     ;remove TP experiment, sample number is ten years 
@@ -28,7 +29,7 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
-var_name = (/"OMEGA"/) ;,"V","T","Z3","Q","OMEGA","RELHUM"/)
+var_name = (/"U","V","T","Z3","Q","OMEGA","RELHUM"/)
 
 ;area: east Asia
 lats = -90 ;-20

@@ -9,7 +9,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
@@ -23,10 +23,9 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_EKE.nc"
-        ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_uv.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
     end if  
 else
     ;remove TP experiment, sample number is ten years 

@@ -10,14 +10,17 @@
 begin
 draw_var = (/"corr"/)
 var_name = (/"corr"/)
-case1    = (/"NUDG6h"/)
-case2    = (/"NG6h-CTRL"/)
+case1    = (/"CTRL","NUDG6h"/)
+case2    = (/"CTRL","NG6h-CTRL"/)
+t_option = (/"AMJ","allyear"/)
 mxlag    = 10
+nc = 1
+nt = 1
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/TP_NUDG"
-filein   = path + "/correlation-20191018/mdata/" + case1 + "-AMJ_daily_" + mxlag + "delay_corri.nc"
-fig_name = path + "/correlation-20191018/fig/" + case1 + "-AMJ_daily_" + mxlag + "delay_corri"
+filein   = path + "/correlation-20191018/mdata/" + case1(nc) + "-" + t_option(nt) + "_daily_" + mxlag + "delay_corri.nc"
+fig_name = path + "/correlation-20191018/fig/" + case1(nc) + "-" + t_option(nt) + "_daily_" + mxlag + "delay_corri"
 fig_title= "Daily Delay Correlation" 
 fig_out  = "pdf" ;"eps" ;"x,11"
 pre_case = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i"/)
@@ -141,7 +144,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@gsnPaperOrientation = "landscape"
 
 do na = 0, narea-1,1
-    resxy@gsnLeftString   = pre_case(na) + ") " + case2
+    resxy@gsnLeftString   = pre_case(na) + ") " + case2(nc)
     resxy@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
     if(na.eq.1) then
         resxy@pmLegendDisplayMode = "Always"

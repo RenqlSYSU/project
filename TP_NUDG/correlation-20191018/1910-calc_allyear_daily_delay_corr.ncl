@@ -21,7 +21,7 @@ if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/correlation-20191018/mdata/" + "NUDG6h" + "-AMJ_daily_" + mxlag + "delay_corri.nc"
+    fileout = path + "/project/TP_NUDG/correlation-20191018/mdata/" + "NUDG6h" + "-allyear_daily_" + mxlag + "delay_corri.nc"
 else
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
@@ -50,7 +50,7 @@ print(area(na))
 f    = addfile(filein(0)+years(0)+".daily."+var_name(3)+".nc","r")
 vars:= f->$var_name(3)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.5.and.time(:,1).le.6)
+select_time = ind(time(:,1).ge.1.and.time(:,1).le.12)
 ntime = dimsizes(select_time)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -64,10 +64,10 @@ u     := new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
 q     := new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
 dp    := new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
-corr1 := new((/6,nyear,nlat,nlon,(mxlag+1)/),float)
-corr2 := new((/6,nyear,nlat,nlon,(mxlag+1)/),float)
-corr11 := new((/6,nyear,(mxlag+1)/),float)
-corr22 := new((/6,nyear,(mxlag+1)/),float)
+corr1  := new((/6,nlat,nlon,(mxlag+1)/),float)
+corr2  := new((/6,nlat,nlon,(mxlag+1)/),float)
+corr11 := new((/6,(mxlag+1)/),float)
+corr22 := new((/6,(mxlag+1)/),float)
 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -129,35 +129,39 @@ intEKE(1,:,:,:,:) = intEKE(1,:,:,:,:) - intEKE(0,:,:,:,:)
 intQTE(1,:,:,:,:) = intQTE(1,:,:,:,:) - intQTE(0,:,:,:,:)
 div850(1,:,:,:,:) = div850(1,:,:,:,:) - div850(0,:,:,:,:)
 
-copy_VarMeta(vars(0,0,:,:),preci(0,0,0,:,:))
+preci  := reshape(preci, (/ncase,nyear*ntime,nlat,nlon/))
+intEKE := reshape(intEKE,(/ncase,nyear*ntime,nlat,nlon/))
+intQTE := reshape(intQTE,(/ncase,nyear*ntime,nlat,nlon/))
+div850 := reshape(div850,(/ncase,nyear*ntime,nlat,nlon/))
+
+copy_VarMeta(vars(0,0,:,:),preci(0,0,:,:))
 preci!0 = "case"
-preci!1 = "year"
-preci!2 = "time"
+preci!1 = "time"
 copy_VarMeta(preci,intEKE)
 copy_VarMeta(preci,intQTE)
 copy_VarMeta(preci,div850)
-corr1(0,:,:,:,:) = esccr(preci(case|1,year|:,lat|:,lon|:,time|:),intEKE(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr1(1,:,:,:,:) = esccr(preci(case|1,year|:,lat|:,lon|:,time|:),intQTE(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr1(2,:,:,:,:) = esccr(preci(case|1,year|:,lat|:,lon|:,time|:),div850(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr1(3,:,:,:,:) = esccr(intEKE(case|1,year|:,lat|:,lon|:,time|:),intQTE(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr1(4,:,:,:,:) = esccr(intEKE(case|1,year|:,lat|:,lon|:,time|:),div850(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr1(5,:,:,:,:) = esccr(intQTE(case|1,year|:,lat|:,lon|:,time|:),div850(case|1,year|:,lat|:,lon|:,time|:),mxlag)
+corr1(0,:,:,:) = esccr(preci(case|1,lat|:,lon|:,time|:),intEKE(case|1,lat|:,lon|:,time|:),mxlag)
+corr1(1,:,:,:) = esccr(preci(case|1,lat|:,lon|:,time|:),intQTE(case|1,lat|:,lon|:,time|:),mxlag)
+corr1(2,:,:,:) = esccr(preci(case|1,lat|:,lon|:,time|:),div850(case|1,lat|:,lon|:,time|:),mxlag)
+corr1(3,:,:,:) = esccr(intEKE(case|1,lat|:,lon|:,time|:),intQTE(case|1,lat|:,lon|:,time|:),mxlag)
+corr1(4,:,:,:) = esccr(intEKE(case|1,lat|:,lon|:,time|:),div850(case|1,lat|:,lon|:,time|:),mxlag)
+corr1(5,:,:,:) = esccr(intQTE(case|1,lat|:,lon|:,time|:),div850(case|1,lat|:,lon|:,time|:),mxlag)
 
-corr2(0,:,:,:,:) = esccr(intEKE(case|1,year|:,lat|:,lon|:,time|:),preci(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr2(1,:,:,:,:) = esccr(intQTE(case|1,year|:,lat|:,lon|:,time|:),preci(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr2(2,:,:,:,:) = esccr(div850(case|1,year|:,lat|:,lon|:,time|:),preci(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr2(3,:,:,:,:) = esccr(intQTE(case|1,year|:,lat|:,lon|:,time|:),intEKE(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr2(4,:,:,:,:) = esccr(div850(case|1,year|:,lat|:,lon|:,time|:),intEKE(case|1,year|:,lat|:,lon|:,time|:),mxlag)
-corr2(5,:,:,:,:) = esccr(div850(case|1,year|:,lat|:,lon|:,time|:),intQTE(case|1,year|:,lat|:,lon|:,time|:),mxlag)
+corr2(0,:,:,:) = esccr(intEKE(case|1,lat|:,lon|:,time|:),preci(case|1,lat|:,lon|:,time|:),mxlag)
+corr2(1,:,:,:) = esccr(intQTE(case|1,lat|:,lon|:,time|:),preci(case|1,lat|:,lon|:,time|:),mxlag)
+corr2(2,:,:,:) = esccr(div850(case|1,lat|:,lon|:,time|:),preci(case|1,lat|:,lon|:,time|:),mxlag)
+corr2(3,:,:,:) = esccr(intQTE(case|1,lat|:,lon|:,time|:),intEKE(case|1,lat|:,lon|:,time|:),mxlag)
+corr2(4,:,:,:) = esccr(div850(case|1,lat|:,lon|:,time|:),intEKE(case|1,lat|:,lon|:,time|:),mxlag)
+corr2(5,:,:,:) = esccr(div850(case|1,lat|:,lon|:,time|:),intQTE(case|1,lat|:,lon|:,time|:),mxlag)
 
-copy_VarMeta(vars(0,0,:,:),corr1(0,0,:,:,0))
-copy_VarMeta(vars(0,0,:,:),corr2(0,0,:,:,0))
+copy_VarMeta(vars(0,0,:,:),corr1(0,:,:,0))
+copy_VarMeta(vars(0,0,:,:),corr2(0,:,:,0))
 do nm = 0,mxlag,1
-    corr11(:,:,nm) = wgt_areaave(corr1(:,:,:,:,nm),1.0,1.0,0) ;The rightmost dimensions should correspond to "latitude" (lat) and "longitude" (lon)
-    corr22(:,:,nm) = wgt_areaave(corr2(:,:,:,:,nm),1.0,1.0,0)
+    corr11(:,nm) = wgt_areaave(corr1(:,:,:,nm),1.0,1.0,0) ;The rightmost dimensions should correspond to "latitude" (lat) and "longitude" (lon)
+    corr22(:,nm) = wgt_areaave(corr2(:,:,:,nm),1.0,1.0,0)
 end do
-corr(na,:,0:mxlag-1) = dim_avg_n(corr11(:,:,1:mxlag:-1),1) ;calc climate and negative lag
-corr(na,:,mxlag:)    = dim_avg_n(corr22(:,:,0:mxlag:),1)   ;calc climate and positive lag
+corr(na,:,0:mxlag-1) = corr11(:,1:mxlag:-1) ;negative lag
+corr(na,:,mxlag:)    = corr22(:,0:mxlag:)   ;positive lag
 end do
 
 ;=======================================================================

@@ -87,15 +87,15 @@ end if
 do nt = 0,nyear-1,1
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-u(nt,:,:,:,:)  = f->U(select_time,{lev},{lats:latn},{lonl:lonr})
+u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-v(nt,:,:,:,:)  = f->V(select_time,{lev},{lats:latn},{lonl:lonr})
+v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-ps(nt,:,:,:)   = f->PS(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+ps(nt,:,:,:)   = f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
 dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),20000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
 u = linmsg_n(u,(/-1/),1)

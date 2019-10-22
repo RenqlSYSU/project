@@ -23,9 +23,9 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
 else
     ;remove TP experiment, sample number is ten years 
@@ -33,23 +33,29 @@ else
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE.nc"
-        ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uv.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
 end if
 
-var_name= (/"U","V"/)
+var_name= (/"U","V","T","OMEGA"/)
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
+cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
+R  = 287.0
+a  = 6378388 ;the radius of earth, m
+pi = atan(1.0)*4
+print(pi)
 
 ;area: east Asia
-lats = -90 ;-20
-latn =  90 ;60
-lonl =  0  ;20
-lonr = 360 ;220
-lev  = (/1000,925,850,700,600,500,400,300,200/)
+lats = -20 ;-90 ;
+latn = 60  ; 90 ;
+lonl = 20  ; 0  ;
+lonr = 220 ;360 ;
+lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+month_s = 5
+month_e = 8
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -57,7 +63,7 @@ lev  = (/1000,925,850,700,600,500,400,300,200/)
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 time = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.1.and.time(:,1).le.12)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -67,14 +73,11 @@ nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
-var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
-month_ave  = new((/      12 ,nlev,nlat,nlon/),float)
-month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
-season_ave = new((/       4 ,nlev,nlat,nlon/),float)
-season_vari= new((/       4 ,nlev,nlat,nlon/),float)
+t     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+w     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+multi_lev  = conform(u, lev*100, 2)
 
-do nf = 2,2,1 
+do nf = 0,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -89,8 +92,20 @@ u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 nv = 1
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 2
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 3
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
 printVarSummary(u)
+
+lat  = f->lat
+lon  = f->lon
+coslat = cos(lat*pi/180.0)
 
 if(option.eq.1) then
     fca = 1.0/ca
@@ -103,43 +118,26 @@ if(option.eq.1) then
     delete(filt_u)
     delete(filt_v)  
 else
-    edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-    edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))   
-    var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+    clm_u = dim_avg_n(u,0)
+    clm_v = dim_avg_n(v,0) 
+    clm_t = dim_avg_n(t,0) 
+    clm_w = dim_avg_n(w,0) 
+    edd_u = u - conform(u,clm_u,(/1,2,3,4/))
+    edd_v = v - conform(v,clm_v,(/1,2,3,4/))   
+    edd_t = t - conform(t,clm_t,(/1,2,3,4/))   
+    edd_w = w - conform(w,clm_w,(/1,2,3,4/))  
+
+    do nla = 0, nlat-1, 1
+        Qeddy(:,:,:,nla,:) = - dim_avg_n((edd_u(:,:,:,nla,:)/a/coslat(nla))*center_finite_diff_n(edd_t(:,:,:,nla,:), lon, False, 0, 3) , 0)
+    end do
+    Qeddy = Qeddy - dim_avg_n((edd_v/a)*center_finite_diff_n(edd_t, lat, False, 0, 3) , 0)
+    sigm0 = (R/cp)*(clm_t/multi_lev) - center_finite_diff_n(clm_t, lev*100, False, 0, 1)
+    Qeddy = (R/cp)*dim_avg_n((edd_w*edd_t/multi_lev),0) - dim_avg_n( center_finite_diff_n(edd_w*edd_t, lev*100, False, 0, 2) ,0)
+    Qd    = - sigm0*clm_w - 
 end if
-EKE   = dim_avg_n(var,0) 
-EKE_vari = dim_variance_n(var,0) 
 
 EKE@long_name = "Integrated transient eddies kinetic energy"
 EKE@units     = "J" 
-
-time = cd_calendar(f->time,0)
-do nm = 0,11,1
-    select_time := ind(time(:,1).eq.nm+1)
-    var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-end do
-
-;----------calculate the season average-----------------------
-mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
-do ns = 0,3,1
-    nm = ns*3 ;nm = 0,3,6,9
-    if(nm.eq.0) then
-    var_season(:,ns,:,:,:) = ( var_month(:,11  ,:,:,:)*mdays(11)   + \
-                               var_month(:,nm  ,:,:,:)*mdays(nm)   + \
-                               var_month(:,nm+1,:,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
-    else
-    var_season(:,ns,:,:,:) = ( var_month(:,nm-1,:,:,:)*mdays(nm-1) + \
-                               var_month(:,nm  ,:,:,:)*mdays(nm)   + \
-                               var_month(:,nm+1,:,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
-    end if
-end do
-month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-printVarSummary(month_ave)
-printVarSummary(season_ave)
-print(month_ave(6,2,10,10:20))
 
 ;========================================================================
 ;save the data

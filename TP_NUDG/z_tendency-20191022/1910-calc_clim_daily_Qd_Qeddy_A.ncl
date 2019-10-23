@@ -1,9 +1,14 @@
 ;***************************************************************************
-;use the post-processing data to calculate climatology daily transient eddies
-;1. remove annual cycle;  2. calc transient eddies kinetic energy (EkE)
-;3. calc climatology daily EKE
-;The ncl functions have been used are: dpres_plevel_Wrap,dim_sum_n_Wrap,dim_avg_n_Wrap
-;dim_rmvmean_n_Wrap
+;use the post-processing data to calculate Qd, Qeddy and A
+;1. calc climate and transient U V T W
+;2. calc transient Qeddy and A, climate Qd 
+;3. calc climatology daily Qeddy and A
+;4. calc climatology daily forcing induced by Qeddy and Qd,
+;   which can influence geopotential tendency
+;
+;The ncl functions have been used are: 
+;   dim_avg_n_Wrap, center_finite_diff_n, conform
+;   dim_rmvmean_n_Wrap
 ;                                            by Ql_Ren
 ;                                           2019/01/25
 ;******************************************************************************
@@ -75,7 +80,30 @@ u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-multi_lev  = conform(u, lev*100, 2)
+Qd    = new((/nyear,ntime,nlev,nlat,nlon/),float)
+Qd_t  = new((/nyear,ntime,nlev,nlat,nlon/),float)
+Qeddy = new((/nyear,ntime,nlev,nlat,nlon/),float)
+A     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+f_Qd    = new((/    ntime,nlev,nlat,nlon/),float)
+f_Qd_t  = new((/    ntime,nlev,nlat,nlon/),float)
+f_Qeddy = new((/    ntime,nlev,nlat,nlon/),float)
+
+iyear = 0
+iday  = 1
+ilev  = 2
+ilat  = 3
+ilon  = 4
+lat  = f->lat
+lon  = f->lon
+lat  = lat*pi/180.0
+lon  = lon*pi/180.0
+coslat     = conform(u,cos(lat*pi/180.0),ilat)
+tanlat     = conform(u,tan(lat*pi/180.0),ilat)
+lev5d  = conform(u, lev*100, ilev)
+opt    = 0     ;used by center_finite_diff_n, no meanging 
+cyclic = False ;used by center_finite_diff_n
+;means NOT treated as cyclic in differenced coordinates
+;the end values will use a one-sided difference scheme for the end points. 
 
 do nf = 0,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
@@ -101,43 +129,91 @@ nv = 3
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
-printVarSummary(u)
-
-lat  = f->lat
-lon  = f->lon
-coslat = cos(lat*pi/180.0)
+printVarSummary(w)
 
 if(option.eq.1) then
     fca = 1.0/ca
     fcb = 1.0/cb    
     opt = False
-    filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-    filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
-    var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
-    print(filt_u(10,180,2,150,10:20))
-    delete(filt_u)
-    delete(filt_v)  
+    edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
+    edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 else
-    clm_u = dim_avg_n(u,0)
-    clm_v = dim_avg_n(v,0) 
-    clm_t = dim_avg_n(t,0) 
-    clm_w = dim_avg_n(w,0) 
-    edd_u = u - conform(u,clm_u,(/1,2,3,4/))
-    edd_v = v - conform(v,clm_v,(/1,2,3,4/))   
-    edd_t = t - conform(t,clm_t,(/1,2,3,4/))   
-    edd_w = w - conform(w,clm_w,(/1,2,3,4/))  
-
-    do nla = 0, nlat-1, 1
-        Qeddy(:,:,:,nla,:) = - dim_avg_n((edd_u(:,:,:,nla,:)/a/coslat(nla))*center_finite_diff_n(edd_t(:,:,:,nla,:), lon, False, 0, 3) , 0)
-    end do
-    Qeddy = Qeddy - dim_avg_n((edd_v/a)*center_finite_diff_n(edd_t, lat, False, 0, 3) , 0)
-    sigm0 = (R/cp)*(clm_t/multi_lev) - center_finite_diff_n(clm_t, lev*100, False, 0, 1)
-    Qeddy = (R/cp)*dim_avg_n((edd_w*edd_t/multi_lev),0) - dim_avg_n( center_finite_diff_n(edd_w*edd_t, lev*100, False, 0, 2) ,0)
-    Qd    = - sigm0*clm_w - 
+    clm_u = conform(u, dim_avg_n(u,iyear), (/1,2,3,4/))
+    clm_v = conform(v, dim_avg_n(v,iyear), (/1,2,3,4/)) 
+    clm_t = conform(t, dim_avg_n(t,iyear), (/1,2,3,4/)) 
+    clm_w = conform(w, dim_avg_n(w,iyear), (/1,2,3,4/)) 
+    edd_u = u - clm_u
+    edd_v = v - clm_v   
+    edd_t = t - clm_t   
+    edd_w = w - clm_w  
 end if
 
-EKE@long_name = "Integrated transient eddies kinetic energy"
-EKE@units     = "J" 
+;==========================================================
+;calc forcing factors: Qeddy, Qd, A
+;============================================================
+Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,cyclic,opt,ilon) \
+         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
+         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+Qeddy := dim_avg_n(Qeddy,iyear)*24*3600
+print(Qeddy(15,5,30,30))
+
+sigm0 = (R/cp)*(clm_t/lev5d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev)
+Qd   :=   (clm_u/a/coslat) * center_finite_diff_n(clm_t,lon,cyclic,opt,ilon) \
+        + (clm_v/a       ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat) \
+        - sigm0 * clm_w 
+Qd_t := Qd + center_finite_diff_n(clm_t,2*24*3600,cyclic,opt,itime)
+Qd   := dim_avg_n(Qd   ,iyear)*24*3600 - Qeddy
+Qd_t := dim_avg_n(Qd_t ,iyear)*24*3600 - Qeddy
+print(Qd_t(15,5,30,30))
+print(Qd  (15,5,30,30))
+
+A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v              ,lon    ,cyclic,opt,ilon),lon    ,cyclic,opt,ilon)\
+     -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_v*edd_v*coslat       ,lon    ,cyclic,opt,ilon),lat    ,cyclic,opt,ilat)\
+     -(1.0   /a  /coslat       )*center_finite_diff_n(center_finite_diff_n(edd_v*edd_w              ,lon    ,cyclic,opt,ilon),lev*100,cyclic,opt,ilev)\
+     -(tanlat/a/a/coslat       )*                    (center_finite_diff_n(edd_u*edd_u              ,lon    ,cyclic,opt,ilon)                         \
+     +(1.0   /a/a/coslat       )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_u              ,lat    ,cyclic,opt,ilat),lon    ,cyclic,opt,ilon)\
+     +(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat),lat    ,cyclic,opt,ilat)\
+     +(tanlat/a/a/coslat/coslat)*                    (center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat)                         \
+     +(1.0   /a                )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_w              ,lat    ,cyclic,opt,ilat),lev*100,cyclic,opt,ilev)\
+     -(tanlat/a                )*                    (center_finite_diff_n(edd_u*edd_w              ,lev*100,cyclic,opt,ilev)                          
+A := dim_avg_n(A,iyear)
+print(A(15,5,30,30))
+
+Qeddy@long_name = "Climatology daily transient eddy heating"
+Qeddy@units     = "K/Day" 
+Qd_t@long_name = "Climatology daily diabatic heating, including local tendency of T"
+Qd_t@units     = "K/Day" 
+Qd@long_name = "Climatology daily diabatic heating"
+Qd@units     = "K/Day" 
+A@long_name = "Climatology daily diabatic heating"
+A@units     = "s^-2" 
+
+;==========================================================
+;calc Qd foring and Qeddy forcing 
+;============================================================
+sigm1 = dim_avg_n(sigm0*R/lev5d,iyear)
+lev4d = dim_avg_n(lev5d,iyear)
+f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat*pi/180.0), ilat-1)
+
+do ilat = 0, nlat-1
+if (abs(lat(ilat) ).lt. 10. ) then
+f0(:,:,ilat,:)= f0@_FillValue
+end if
+end do
+
+f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qd_t   = -f0*R*center_finite_diff_n((Qd_t /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
+
+f_Qeddy@long_name = "Climatology daily transient eddy heating"
+f_Qeddy@units     = "s^-2" 
+f_Qd_t@long_name  = "Climatology daily diabatic heating, including local tendency of T"
+f_Qd_t@units      = "s^-2" 
+f_Qd@long_name    = "Climatology daily diabatic heatinig"
+f_Qd@units        = "s^-2" 
+print(f_Qeddy(15,5,30,30))
+print(f_Qd_t (15,5,30,30))
+print(f_Qd   (15,5,30,30))
 
 ;========================================================================
 ;save the data
@@ -149,52 +225,53 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "rmvannual cycle"
+fileatt@discription   = "months from " + month_s + " to " + month_e + "daily three forcing factors, Qd, Qeddy, A"
 fileattdef(ncdf,fileatt)  
 
-;define all coordinate`
-dimNames = (/"month","season","time","lev","lat","lon"/);
-dimSizes = (/  12   ,  4     ,ntime ,nlev ,nlat ,nlon/) ;
-dimUnlim = (/False  ,False   ,False ,False,False,False/);
+;define all coordinate
+dimNames = (/"time","lev","lat","lon"/);
+dimSizes = (/ntime ,nlev ,nlat ,nlon/) ;
+dimUnlim = (/False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"month" ,"integer",(/"month" /))
-filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
 filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
-filevardef(ncdf,"EKE",typeof(EKE),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lev","lat","lon"/))
-filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lev","lat","lon"/))
-filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))
-filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lev","lat","lon"/))
+filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"Qd"   ,typeof(Qd   ),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"Qd_t" ,typeof(Qd_t ),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"A"    ,typeof(A    ),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"f_Qd   ",typeof(f_Qd   ),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"f_Qd_t ",typeof(f_Qd_t ),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"f_Qeddy",typeof(f_Qeddy),(/"time","lev","lat","lon"/))
+
 
 ;define var attribute
 filevarattdef(ncdf,"time",u&time)
 filevarattdef(ncdf,"lev",u&level)
 filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
-filevarattdef(ncdf,"EKE",EKE)
-filevarattdef(ncdf,"month_ave",EKE)
-filevarattdef(ncdf,"season_ave",EKE)
-filevarattdef(ncdf,"month_vari",EKE)
-filevarattdef(ncdf,"season_vari",EKE)
+filevarattdef(ncdf,"Qeddy",Qeddy)
+filevarattdef(ncdf,"Qd"   ,Qd   )
+filevarattdef(ncdf,"Qd_t" ,Qd_t )
+filevarattdef(ncdf,"A"    ,A    )
+filevarattdef(ncdf,"f_Qeddy",f_Qeddy)
+filevarattdef(ncdf,"f_Qd"   ,f_Qd   )
+filevarattdef(ncdf,"f_Qd_t" ,f_Qd_t )
 
-ncdf->month  = ispan(1,12,1)
-ncdf->season = (/1212,345,678,91011/)
 ncdf->time = (/u&time/)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
-ncdf->EKE  = (/EKE/)
-ncdf->EKE_vari  = (/EKE_vari/)
-ncdf->month_ave   = (/month_ave/)
-ncdf->season_ave  = (/season_ave/)
-ncdf->month_vari  = (/month_vari/)
-ncdf->season_vari = (/season_vari/)
+ncdf->Qeddy = (/Qeddy/)
+ncdf->Qd    = (/Qd   /)
+ncdf->Qd_t  = (/Qd_t /)
+ncdf->A     = (/A    /)
+ncdf->f_Qeddy = (/f_Qeddy/)
+ncdf->f_Qd    = (/f_Qd   /)
+ncdf->f_Qd_t  = (/f_Qd_t /)
 end do
 end
 

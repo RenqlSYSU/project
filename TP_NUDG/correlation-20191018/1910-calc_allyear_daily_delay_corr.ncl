@@ -15,13 +15,14 @@ path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 mxlag = 10
+fnc = 0
 
 if(case_option.eq.0) then
-    case    = (/"CTRL","NG6h"/);"NG24h",
+    case    = (/"CTRL","NUDG6h"/);"NG24h",
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/correlation-20191018/mdata/" + "NUDG6h" + "-allyear_daily_" + mxlag + "delay_corri.nc"
+    fileout = path + "/project/TP_NUDG/correlation-20191018/mdata/" + case(fnc) + "-allyear_daily_" + mxlag + "delay_corri.nc"
 else
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
@@ -77,6 +78,7 @@ end if
 ;============================================================
 do nf = 0,1,1
 do nt = 0,nyear-1,1
+print("read data " + case(nf) + " " + years(nt))
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 preci(nf,nt,:,:,:)   = f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
@@ -101,28 +103,25 @@ end do
 preci = preci*24*3600*1000 ;convert m/s to mm/day
 printVarSummary(u)
 
+div850 := uv2dv_cfd( u(:,:,:,2,:,:), v(:,:,:,2,:,:), vars&lat, vars&lon, 2)
 if(option.eq.1) then
     fca = 1.0/ca
     fcb = 1.0/cb    
     opt = False
-    filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-    filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
-    filt_q = bw_bandpass_filter(q,fca,fcb,opt,1)
-    intEKE   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-    QTE = uv2dv_cfd( filt_q*filt_u, filt_q*filt_v, vars&lat, vars&lon, 2)
-    intQTE = dim_sum_n(QTE*dp,3)/g 
-    print(filt_u(10,180,2,150,10:20))
-    delete(filt_u)
-    delete(filt_v)  
+    edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
+    edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+    edd_q = bw_bandpass_filter(q,fca,fcb,opt,1)
 else
-    edd_q := q - conform(q,dim_avg_n(q,1),(/0,2,3,4,5/))
-    edd_u := u - conform(u,dim_avg_n(u,1),(/0,2,3,4,5/))
-    edd_v := v - conform(v,dim_avg_n(v,1),(/0,2,3,4,5/))   
-    intEKE := dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,3)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-    QTE := uv2dv_cfd( edd_q*edd_u, edd_q*edd_v, vars&lat, vars&lon, 2)
-    intQTE := dim_sum_n(QTE*dp,3)/g 
+    edd_q = q - conform(q,dim_avg_n(q,1),(/0,2,3,4,5/))
+    edd_u = u - conform(u,dim_avg_n(u,1),(/0,2,3,4,5/))
+    edd_v = v - conform(v,dim_avg_n(v,1),(/0,2,3,4,5/))   
+    preci = preci  - conform(preci ,dim_avg_n(preci ,1),(/0,2,3,4/))   
+    div850= div850 - conform(div850,dim_avg_n(div850,1),(/0,2,3,4/))   
 end if
-div850 := uv2dv_cfd( u(:,:,:,2,:,:), v(:,:,:,2,:,:), vars&lat, vars&lon, 2)
+intEKE := dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,3)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+QTE := uv2dv_cfd( edd_q*edd_u, edd_q*edd_v, vars&lat, vars&lon, 2)
+intQTE := dim_sum_n(QTE*dp,3)/g 
+delete([/edd_u,edd_v,edd_q/])
 
 preci(1,:,:,:,:)  = preci(1,:,:,:,:)  - preci(0,:,:,:,:)
 intEKE(1,:,:,:,:) = intEKE(1,:,:,:,:) - intEKE(0,:,:,:,:)
@@ -140,19 +139,19 @@ preci!1 = "time"
 copy_VarMeta(preci,intEKE)
 copy_VarMeta(preci,intQTE)
 copy_VarMeta(preci,div850)
-corr1(0,:,:,:) = esccr(preci(case|1,lat|:,lon|:,time|:),intEKE(case|1,lat|:,lon|:,time|:),mxlag)
-corr1(1,:,:,:) = esccr(preci(case|1,lat|:,lon|:,time|:),intQTE(case|1,lat|:,lon|:,time|:),mxlag)
-corr1(2,:,:,:) = esccr(preci(case|1,lat|:,lon|:,time|:),div850(case|1,lat|:,lon|:,time|:),mxlag)
-corr1(3,:,:,:) = esccr(intEKE(case|1,lat|:,lon|:,time|:),intQTE(case|1,lat|:,lon|:,time|:),mxlag)
-corr1(4,:,:,:) = esccr(intEKE(case|1,lat|:,lon|:,time|:),div850(case|1,lat|:,lon|:,time|:),mxlag)
-corr1(5,:,:,:) = esccr(intQTE(case|1,lat|:,lon|:,time|:),div850(case|1,lat|:,lon|:,time|:),mxlag)
+corr1(0,:,:,:) = esccr(preci(case|fnc,lat|:,lon|:,time|:),intEKE(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr1(1,:,:,:) = esccr(preci(case|fnc,lat|:,lon|:,time|:),intQTE(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr1(2,:,:,:) = esccr(preci(case|fnc,lat|:,lon|:,time|:),div850(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr1(3,:,:,:) = esccr(intQTE(case|fnc,lat|:,lon|:,time|:),intEKE(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr1(4,:,:,:) = esccr(div850(case|fnc,lat|:,lon|:,time|:),intEKE(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr1(5,:,:,:) = esccr(div850(case|fnc,lat|:,lon|:,time|:),intQTE(case|fnc,lat|:,lon|:,time|:),mxlag)
 
-corr2(0,:,:,:) = esccr(intEKE(case|1,lat|:,lon|:,time|:),preci(case|1,lat|:,lon|:,time|:),mxlag)
-corr2(1,:,:,:) = esccr(intQTE(case|1,lat|:,lon|:,time|:),preci(case|1,lat|:,lon|:,time|:),mxlag)
-corr2(2,:,:,:) = esccr(div850(case|1,lat|:,lon|:,time|:),preci(case|1,lat|:,lon|:,time|:),mxlag)
-corr2(3,:,:,:) = esccr(intQTE(case|1,lat|:,lon|:,time|:),intEKE(case|1,lat|:,lon|:,time|:),mxlag)
-corr2(4,:,:,:) = esccr(div850(case|1,lat|:,lon|:,time|:),intEKE(case|1,lat|:,lon|:,time|:),mxlag)
-corr2(5,:,:,:) = esccr(div850(case|1,lat|:,lon|:,time|:),intQTE(case|1,lat|:,lon|:,time|:),mxlag)
+corr2(0,:,:,:) = esccr(intEKE(case|fnc,lat|:,lon|:,time|:),preci(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr2(1,:,:,:) = esccr(intQTE(case|fnc,lat|:,lon|:,time|:),preci(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr2(2,:,:,:) = esccr(div850(case|fnc,lat|:,lon|:,time|:),preci(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr2(3,:,:,:) = esccr(intEKE(case|fnc,lat|:,lon|:,time|:),intQTE(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr2(4,:,:,:) = esccr(intEKE(case|fnc,lat|:,lon|:,time|:),div850(case|fnc,lat|:,lon|:,time|:),mxlag)
+corr2(5,:,:,:) = esccr(intQTE(case|fnc,lat|:,lon|:,time|:),div850(case|fnc,lat|:,lon|:,time|:),mxlag)
 
 copy_VarMeta(vars(0,0,:,:),corr1(0,:,:,0))
 copy_VarMeta(vars(0,0,:,:),corr2(0,:,:,0))
@@ -160,8 +159,8 @@ do nm = 0,mxlag,1
     corr11(:,nm) = wgt_areaave(corr1(:,:,:,nm),1.0,1.0,0) ;The rightmost dimensions should correspond to "latitude" (lat) and "longitude" (lon)
     corr22(:,nm) = wgt_areaave(corr2(:,:,:,nm),1.0,1.0,0)
 end do
-corr(na,:,0:mxlag-1) = corr11(:,1:mxlag:-1) ;negative lag
-corr(na,:,mxlag:)    = corr22(:,0:mxlag:)   ;positive lag
+corr(na,:,0:mxlag-1) = corr22(:,1:mxlag:-1) ;negative lag
+corr(na,:,mxlag:)    = corr11(:,0:mxlag:)   ;positive lag
 end do
 
 ;=======================================================================

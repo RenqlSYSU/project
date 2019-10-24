@@ -12,17 +12,18 @@
 begin
 draw_var = (/"preci" ,"EKE"        ,"q1"  ,"U"  ,"uv"               /)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day","10~S~4~N~ J","W/kg","m/s","10~S~4~N~ m~S~2~N~s~S~-2~N~"/)  ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
-nv = 1
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+nv = 0
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+u_option = False ;True means draw the line of upper westerly jet
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
-imonth = ispan(8,11,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;parameter for bw_bandpass_filter
 ca = 7.0 ;day
@@ -30,39 +31,47 @@ cb = 2.5
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL","noTP-CTRL"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
-else
+end if
+
+if(case_option.eq.0) then
     case1   = (/"CTRL" ,"NUDG6h"    ,"NUDG24h"     /) ;,"NUDG24h"
     case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/) ;, " NG24h-CTRL"
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if 
 
+if(case_option.eq.2) then
+    case1    = (/"F2000","NG6h"/)
+    case2    = (/"F2000","NG6h-F2000"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
+end if 
+
 if(nv.eq.1.and.option.eq.1) then
     filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
 else
-    filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
+    filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 end if  
-ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-fig_name  = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "-2c" 
+fig_name  = path + "/analysis/fig/" + case1(0) + " -" + draw_var(nv) + "_" + var_name(0) + "-2c" 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -90 ;20 ;-20 -15 ;
-latn =  90 ;55 ;60  55  ;
-lonl =  0  ;30 ;20  30  ;
-lonr = 360 ;150;220 150 ;
-lat_spacing = 45 ;15 ;
-lon_spacing = 60 ;30 ;
+lats = -15 ; -90 ;20 ;-20
+latn = 55  ;  90 ;55 ;60 
+lonl = 30  ;  0  ;30 ;20 
+lonr = 150 ; 360 ;150;220
+lat_spacing = 15 ;45 ;
+lon_spacing = 30 ;60 ;
 siglvl = 0.05
 
 ;area of index, India,Tibet,Philippines,Maritime_continent
@@ -77,7 +86,7 @@ phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case2)
 nmonth = dimsizes(imonth)
-nlat   = dimsizes(phis&lat)+2
+nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 u    = new((/ncase  ,nmonth,nlat,nlon/),float)
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
@@ -121,17 +130,20 @@ lat1 = phis&lat
 ;print(lat1)
 ;print(ind(lat1.eq.20))
 do nf = 0 ,ncase-1, 1
-    u_f = addfile(ufilename(nf),"r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
-    print(nf)
-    do nm = 0, nmonth-1,1
-    do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
-        axlat(nf,nm,inln) = lat1(lat_ind)
-    end do
-    end do
-    printVarSummary(axlat)
-    
+if(u_option) then
+    ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+    ;u_f = addfile(ufilename(nf),"r")
+    ;u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    ;print(nf)
+    ;do nm = 0, nmonth-1,1
+    ;do inln = 0, nlon-1,1
+    ;    lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
+    ;    axlat(nf,nm,inln) = lat1(lat_ind)
+    ;end do
+    ;end do
+    ;printVarSummary(axlat)
+end if
+
     f = addfile(filename(nf),"r")
     if(nv.eq.3) then
     fig_name  = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + lev(nl) + var_name(0) + "-2c" 
@@ -192,8 +204,11 @@ if(nv.eq.4) then   ;uv
     var = var/10000 ;transform unit from K/S to w/kg
 end if
 
-var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
-;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True) ;use for noTP
+if(case_option.eq.0) then 
+    var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)      ;use for NUDG
+else
+    var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True) ;use for noTP
+end if
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(u)
@@ -453,20 +468,22 @@ end if
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        ;plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        ;overlay(plot(np),plot2(np))
-        ;if(nc.gt.0)
-        ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-        ;    overlay(plot(np),plot_sig(np2))
-        ;end if
+        if(nc.gt.0)
+            plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+            overlay(plot(np),plot_sig(np2))
+        end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+        if(u_option) then
+            plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+            overlay(plot(np),plot2(np))
+            axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
+            print(max(u(nc,nm,{lats:latn},{lonl:lonr})))
+            print(min(u(nc,nm,{lats:latn},{lonl:lonr})))
+        end if
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
-        print(max(u(nc,nm,{lats:latn},{lonl:lonr})))
-        print(min(u(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
 end do ;for the month 
 

@@ -13,14 +13,16 @@ var_name = (/"corr"/)
 case1    = (/"CTRL","NUDG6h"/)
 case2    = (/"CTRL","NG6h-CTRL"/)
 t_option = (/"AMJ","allyear"/)
+ave_option = (/"","_average_first"/)
 mxlag    = 10
-nc = 1
-nt = 1
+nc = 0
+nt = 0
+nave = 1
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/TP_NUDG"
-filein   = path + "/correlation-20191018/mdata/" + case1(nc) + "-" + t_option(nt) + "_daily_" + mxlag + "delay_corri.nc"
-fig_name = path + "/correlation-20191018/fig/" + case1(nc) + "-" + t_option(nt) + "_daily_" + mxlag + "delay_corri"
+filein   = path + "/correlation-20191018/mdata/" + case1(nc) + "-" + t_option(nt) + "_daily_" + mxlag + "delay_corri" + ave_option(nave) + ".nc"
+fig_name = path + "/correlation-20191018/fig/" + case1(nc) + "-" + t_option(nt) + "_daily_" + mxlag + "delay_corri" + ave_option(nave)
 fig_title= "Daily Delay Correlation" 
 fig_out  = "pdf" ;"eps" ;"x,11"
 pre_case = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i"/)
@@ -51,7 +53,7 @@ var   = f->$var_name$
 print(var(0,2,:))
 narea = dimsizes(area)
 plot  = new((/narea/),graphic)
-label = (/"EKE&preci","QTE&preci","div&preci","QTE&EKE","div&EKE","div&QTE"/)
+label = (/"EKE&preci","QTE&preci","div&preci","EKE&QTE","EKE&div","QTE&div"/)
 
 ;===============================================
 ;draw the figure
@@ -75,8 +77,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tiXAxisOn = True
     resxy@tiXAxisString = "lag(days)"
     resxy@tiYAxisOn = False
-    resxy@trYMinF = -0.4;floor(min(var))
-    resxy@trYMaxF = 0.2 ;ceil(max(var))
+    resxy@trYMinF = -0.5 ;floor(min(var)); -0.4;
+    resxy@trYMaxF =  0.5 ;ceil(max(var)) ; 0.2 ;
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index

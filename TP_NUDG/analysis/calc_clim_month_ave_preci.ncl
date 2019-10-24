@@ -9,7 +9,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -17,7 +17,9 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_preci.nc"
     years    = ispan(1979,2005,1)   ;the calculate time
-else
+end if
+
+if(case_option.eq.1) then 
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
@@ -25,21 +27,29 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
+if(case_option.eq.2) then
+    case    = (/"F2000","NG6h"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_preci.nc"
+    years    = ispan(1,30,1)   ;the calculate time
+end if
+
 ;var_name = (/"SHFLX","LHFLX"/)
 var_name = (/"PRECC","PRECL"/)
 choice   = 0 ;1 means to calc T change due to Heat Flux ; 0 means to calc precipitation
 
 ;area: east Asia
-lats = -90 ;-20
-latn =  90 ;60
-lonl =  0  ;20
-lonr = 360 ;220
+lats = -20 ;-90 ;
+latn = 60  ; 90 ;
+lonl = 20  ; 0  ;
+lonr = 220 ;360 ;
 ;lev  = (/850,500,200/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -61,12 +71,14 @@ do nf = 0 , ncase-1,1
 ;read the data
 ;--------------------------------------------------------------
 var = 0
+do nv = 0,nvar-1,1 
+files = systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0,nyear-1,1
-    do nv = 0,nvar-1,1 
-        f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
-    end do  ;the loop of PRECC and PRECL
+    print(files(nt))
+    f  = addfile(files(nt),"r")
+    var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
 end do   ;the loop of 27 years 
+end do  ;the loop of PRECC and PRECL
 
 if(choice.eq.1) then 
 ;    do nt = 0,nyear-1,1

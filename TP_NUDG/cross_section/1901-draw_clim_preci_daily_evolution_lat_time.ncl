@@ -8,14 +8,31 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
 path    = "/home/ys17-19/renql"
-filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-var_name = (/"PRECC","PRECL"/)
-years    = ispan(1979,2005,1)   ;the calculate time
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
-fig_name   = path + "/project/TP_NUDG/cross_section/fig/clim_preci_daily_evolution_lat_time"
-    case   = (/"(a) CTRL","(b) NG6h","(c) NG24h"/)  ;this can be used as left string
+if(case_option.eq.0) then
+    case    = (/"CTRL","NG6h","NG6h-CTRL"/)
+    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    years    = ispan(1979,2005,1)   ;the calculate time
+end if
+
+if(case_option.eq.1) then 
+    ;remove TP experiment, sample number is ten years 
+    case    = (/"TP_CTRL","TP_CR","TP_CTRL-TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    years   = ispan(21,30,1)   ;the calculate time
+end if
+
+if(case_option.eq.2) then
+    case    = (/"F2000","NG6h","NG6h-CTRL"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+    years    = ispan(1,30,1)   ;the calculate time
+end if
+
+var_name = (/"PRECC","PRECL"/)
+fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-clim_preci_daily_evolution_lat_time"
 fig_out    ="pdf"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
@@ -41,7 +58,7 @@ na = 1
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.5.and.time(:,1).le.8)
@@ -50,26 +67,28 @@ nlon  = dimsizes(vars&lon)
 ntime = dimsizes(select_time)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
-ncase = dimsizes(filein)
+ncase = dimsizes(case)
 var   = new((/ncase,nyear,nlat,ntime/),float)
-prob  = new((/(ncase-1)  ,nlat,ntime/),float)
+prob  = new((/(ncase-2)  ,nlat,ntime/),float)
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
 var = 0
-do nc = 0 , ncase-1,1
+do nc = 0 , ncase-2,1
+do nv = 0,nvar-1,1 
+files = systemfunc("ls "+filein(nc)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0,nyear-1,1
-    do nv = 0,nvar-1,1 
-        f     = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-        temp := f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
-        temp := dim_avg_n_Wrap(temp,2)
-        var(nc,nt,:,:) = var(nc,nt,:,:) + temp({lat|:},{time|:})
-    end do  ;the loop of PRECC and PRECL
+    print(files(nt))
+    f  = addfile(files(nt),"r")
+    temp := f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    temp := dim_avg_n_Wrap(temp,2)
+    var(nc,nt,:,:) = var(nc,nt,:,:) + temp({lat|:},{time|:})
+end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
-vari = dim_variance_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
+;vari = dim_variance_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
 var := dim_avg_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
 var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 printVarSummary(temp&time)
@@ -77,7 +96,6 @@ printVarSummary(temp&time)
 ;do nc = 1,2
     var(2,:,:) = var(1,:,:) - var(0,:,:)
     ;prob(nc,:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-    case   = (/"(i) CTRL","(j) NG6h","(k) NG6h-CTRL"/)
 ;end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))

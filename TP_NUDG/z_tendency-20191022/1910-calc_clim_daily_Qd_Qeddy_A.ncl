@@ -28,9 +28,9 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
 else
     ;remove TP experiment, sample number is ten years 
@@ -38,9 +38,9 @@ else
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-    else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
+    else                                                      
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
 end if
 
@@ -89,16 +89,16 @@ f_Qd_t  = new((/    ntime,nlev,nlat,nlon/),float)
 f_Qeddy = new((/    ntime,nlev,nlat,nlon/),float)
 
 iyear = 0
-iday  = 1
+itime = 1
 ilev  = 2
 ilat  = 3
 ilon  = 4
-lat  = f->lat
-lon  = f->lon
+lat  = vars&lat
+lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
-coslat     = conform(u,cos(lat*pi/180.0),ilat)
-tanlat     = conform(u,tan(lat*pi/180.0),ilat)
+coslat = conform(u,cos(lat),ilat)
+tanlat = conform(u,tan(lat),ilat)
 lev5d  = conform(u, lev*100, ilev)
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
@@ -113,6 +113,7 @@ end if
 ;read the data
 ;============================================================
 do nt = 0,nyear-1,1
+print("handle with " + case(nf) + " " + years(nt))
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
@@ -147,9 +148,10 @@ else
     edd_t = t - clm_t   
     edd_w = w - clm_w  
 end if
+printVarSummary(clm_u)
 
 ;==========================================================
-;calc forcing factors: Qeddy, Qd, A
+;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
 Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,cyclic,opt,ilon) \
          - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
@@ -170,12 +172,12 @@ print(Qd  (15,5,30,30))
 A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v              ,lon    ,cyclic,opt,ilon),lon    ,cyclic,opt,ilon)\
      -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_v*edd_v*coslat       ,lon    ,cyclic,opt,ilon),lat    ,cyclic,opt,ilat)\
      -(1.0   /a  /coslat       )*center_finite_diff_n(center_finite_diff_n(edd_v*edd_w              ,lon    ,cyclic,opt,ilon),lev*100,cyclic,opt,ilev)\
-     -(tanlat/a/a/coslat       )*                    (center_finite_diff_n(edd_u*edd_u              ,lon    ,cyclic,opt,ilon)                         \
+     -(tanlat/a/a/coslat       )*                     center_finite_diff_n(edd_u*edd_u              ,lon    ,cyclic,opt,ilon)                         \
      +(1.0   /a/a/coslat       )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_u              ,lat    ,cyclic,opt,ilat),lon    ,cyclic,opt,ilon)\
      +(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat),lat    ,cyclic,opt,ilat)\
-     +(tanlat/a/a/coslat/coslat)*                    (center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat)                         \
+     +(tanlat/a/a/coslat/coslat)*                     center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat)                         \
      +(1.0   /a                )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_w              ,lat    ,cyclic,opt,ilat),lev*100,cyclic,opt,ilev)\
-     -(tanlat/a                )*                    (center_finite_diff_n(edd_u*edd_w              ,lev*100,cyclic,opt,ilev)                          
+     -(tanlat/a                )*                     center_finite_diff_n(edd_u*edd_w              ,lev*100,cyclic,opt,ilev)
 A := dim_avg_n(A,iyear)
 print(A(15,5,30,30))
 
@@ -189,7 +191,7 @@ A@long_name = "Climatology daily diabatic heating"
 A@units     = "s^-2" 
 
 ;==========================================================
-;calc Qd foring and Qeddy forcing 
+;calc Qd foring and Qeddy forcing, dimension is 4d 
 ;============================================================
 sigm1 = dim_avg_n(sigm0*R/lev5d,iyear)
 lev4d = dim_avg_n(lev5d,iyear)

@@ -5,15 +5,20 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
-draw_var = (/"f_Qd" ,"f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+var_option = 0
+
+if(var_option.eq.0) then 
+    draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    unit     = (/"K/Day","K/Day","10~S~-10~N~s~S~-2~N~"/)  ;this can be used as right string 
+else
+    draw_var = (/"f_Qd" ,"f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"MJ","JA"/)
 lev = (/850,500,200/)
-nl = 1
-dnc  = 0    ;chose which case to draw
+nl = 0
+fnc  = 0    ;chose which case to draw
 diff = True ;whether draw the difference
 
 ;the path of the file
@@ -22,7 +27,7 @@ case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+    case2   = (/"CTRL","NG6h-CTRL", "NG24h-CTRL"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -32,8 +37,9 @@ else
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
 end if
+
 filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
-fig_name = path + "/analysis/fig/1p2x3_clim_MJ-JA_Qd_Qeddy_A-" + lev(nl)  
+fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_Qd_Qeddy_A-" + lev(nl)  
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
@@ -60,8 +66,8 @@ f = addfile(filename(0),"r")
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
-var   = new((/ncase,nvar,ntime ,nlat,nlon/),float)
-var_m = new((/ncase,nvar,nmonth,nlat,nlon/),float)
+var   = new((/ncase,nvar,ntime ,nlat,nlon/),double)
+var_m = new((/ncase,nvar,nmonth,nlat,nlon/),double)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
@@ -92,10 +98,15 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     do nv = 0, nvar-1,1
-    var(nc,nv,:,:,:)  = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    var(nc,nv,:,:,:)  = f->$draw_var(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     end do
+end do 
+
+if(var_option.eq.0) then 
+    var(:,2,:,:,:) = var(:,2,:,:,:)*10^10 ;convert units of A from s^-2 to 10^-11 s^-2
+else 
+    var = var*10^10
 end if
-var(:,2,:,:,:) = var(:,2,:,:,:)*10^11 ;convert units of A from s^-2 to 10^-11 s^-2
 printVarSummary(var)
 
 ;calc ealy(56) and late(78) stage of the summer 
@@ -262,11 +273,11 @@ printVarSummary(var_m)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(nl.eq.1) then ;preci
-    minlvl = (/-2.4,-2.4,-4 /);
-    maxlvl = (/2.4 ,2.4 , 4 /);
-    spacig = (/0.3 ,0.3 ,0.5/);
-end if
+;if(nl.eq.1) then ;preci
+    minlvl = (/-4 ,-4 ,-4 /);
+    maxlvl = (/ 4 , 4 , 4 /);
+    spacig = (/0.5,0.5,0.5/);
+;end if
 
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
@@ -290,6 +301,7 @@ do nv = 0,nvar-1,1
     end if 
     print(max(var(fnc,nv,nm,{lats:latn},{lonl:lonr})))
     print(min(var(fnc,nv,nm,{lats:latn},{lonl:lonr})))
+end do 
 end do 
 
 ;    resp@txString      = fig_title

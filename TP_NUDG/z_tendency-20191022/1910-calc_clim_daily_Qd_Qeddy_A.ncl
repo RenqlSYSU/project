@@ -48,7 +48,7 @@ var_name= (/"U","V","T","OMEGA"/)
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
-R  = 287.0
+R  = 287.0  ; J/(kg*K) for dry air
 a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 print(pi)
@@ -84,9 +84,9 @@ Qd    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 Qd_t  = new((/nyear,ntime,nlev,nlat,nlon/),float)
 Qeddy = new((/nyear,ntime,nlev,nlat,nlon/),float)
 A     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-f_Qd    = new((/    ntime,nlev,nlat,nlon/),float)
-f_Qd_t  = new((/    ntime,nlev,nlat,nlon/),float)
-f_Qeddy = new((/    ntime,nlev,nlat,nlon/),float)
+f_Qd    = new((/    ntime,nlev,nlat,nlon/),double)
+f_Qd_t  = new((/    ntime,nlev,nlat,nlon/),double)
+f_Qeddy = new((/    ntime,nlev,nlat,nlon/),double)
 
 iyear = 0
 itime = 1
@@ -156,7 +156,7 @@ printVarSummary(clm_u)
 Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,cyclic,opt,ilon) \
          - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
          + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
-Qeddy := dim_avg_n(Qeddy,iyear)*24*3600
+Qeddy := dim_avg_n(Qeddy,iyear)
 print(Qeddy(15,5,30,30))
 
 sigm0 = (R/cp)*(clm_t/lev5d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev)
@@ -164,8 +164,8 @@ Qd   :=   (clm_u/a/coslat) * center_finite_diff_n(clm_t,lon,cyclic,opt,ilon) \
         + (clm_v/a       ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat) \
         - sigm0 * clm_w 
 Qd_t := Qd + center_finite_diff_n(clm_t,2*24*3600,cyclic,opt,itime)
-Qd   := dim_avg_n(Qd   ,iyear)*24*3600 - Qeddy
-Qd_t := dim_avg_n(Qd_t ,iyear)*24*3600 - Qeddy
+Qd   := dim_avg_n(Qd   ,iyear) - Qeddy
+Qd_t := dim_avg_n(Qd_t ,iyear) - Qeddy
 print(Qd_t(15,5,30,30))
 print(Qd  (15,5,30,30))
 
@@ -182,11 +182,11 @@ A := dim_avg_n(A,iyear)
 print(A(15,5,30,30))
 
 Qeddy@long_name = "Climatology daily transient eddy heating"
-Qeddy@units     = "K/Day" 
+Qeddy@units     = "K/s" 
 Qd_t@long_name = "Climatology daily diabatic heating, including local tendency of T"
-Qd_t@units     = "K/Day" 
+Qd_t@units     = "K/s" 
 Qd@long_name = "Climatology daily diabatic heating"
-Qd@units     = "K/Day" 
+Qd@units     = "K/s" 
 A@long_name = "Climatology daily diabatic heating"
 A@units     = "s^-2" 
 
@@ -195,13 +195,13 @@ A@units     = "s^-2"
 ;============================================================
 sigm1 = dim_avg_n(sigm0*R/lev5d,iyear)
 lev4d = dim_avg_n(lev5d,iyear)
-f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat*pi/180.0), ilat-1)
+f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
-do ilat = 0, nlat-1
-if (abs(lat(ilat) ).lt. 10. ) then
-f0(:,:,ilat,:)= f0@_FillValue
-end if
-end do
+;do ilat = 0, nlat-1
+;if (abs(lat(ilat)*180.0/pi ).lt. 10. ) then
+;f0(:,:,ilat,:)= A@_FillValue
+;end if
+;end do
 
 f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
 f_Qd_t   = -f0*R*center_finite_diff_n((Qd_t /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
@@ -213,9 +213,12 @@ f_Qd_t@long_name  = "Climatology daily diabatic heating, including local tendenc
 f_Qd_t@units      = "s^-2" 
 f_Qd@long_name    = "Climatology daily diabatic heatinig"
 f_Qd@units        = "s^-2" 
+sigm1@long_name = "One kind of static stability measured by potential temperature"
+sigm1@units     = "J/(Pa^2*Kg)" 
 print(f_Qeddy(15,5,30,30))
 print(f_Qd_t (15,5,30,30))
 print(f_Qd   (15,5,30,30))
+print(lat(0:9))
 
 ;========================================================================
 ;save the data
@@ -241,12 +244,13 @@ filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
 filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
+filevardef(ncdf,"sigm1",typeof(sigm1),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"Qd"   ,typeof(Qd   ),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"Qd_t" ,typeof(Qd_t ),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"A"    ,typeof(A    ),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"f_Qd   ",typeof(f_Qd   ),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"f_Qd_t ",typeof(f_Qd_t ),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"Qd"   ,typeof(Qd),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"Qd_t" ,typeof(Qd_t),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"A"    ,typeof(A),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"f_Qd",typeof(f_Qd),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"f_Qd_t",typeof(f_Qd_t),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"f_Qeddy",typeof(f_Qeddy),(/"time","lev","lat","lon"/))
 
 
@@ -255,25 +259,27 @@ filevarattdef(ncdf,"time",u&time)
 filevarattdef(ncdf,"lev",u&level)
 filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
+filevarattdef(ncdf,"sigm1",sigm1)
 filevarattdef(ncdf,"Qeddy",Qeddy)
-filevarattdef(ncdf,"Qd"   ,Qd   )
-filevarattdef(ncdf,"Qd_t" ,Qd_t )
-filevarattdef(ncdf,"A"    ,A    )
+filevarattdef(ncdf,"Qd"   ,Qd)
+filevarattdef(ncdf,"Qd_t" ,Qd_t)
+filevarattdef(ncdf,"A"    ,A)
 filevarattdef(ncdf,"f_Qeddy",f_Qeddy)
-filevarattdef(ncdf,"f_Qd"   ,f_Qd   )
-filevarattdef(ncdf,"f_Qd_t" ,f_Qd_t )
+filevarattdef(ncdf,"f_Qd"   ,f_Qd)
+filevarattdef(ncdf,"f_Qd_t" ,f_Qd_t)
 
 ncdf->time = (/u&time/)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
+ncdf->sigm1 = (/sigm1/)
 ncdf->Qeddy = (/Qeddy/)
-ncdf->Qd    = (/Qd   /)
-ncdf->Qd_t  = (/Qd_t /)
-ncdf->A     = (/A    /)
+ncdf->Qd    = (/Qd/)
+ncdf->Qd_t  = (/Qd_t/)
+ncdf->A     = (/A/)
 ncdf->f_Qeddy = (/f_Qeddy/)
-ncdf->f_Qd    = (/f_Qd   /)
-ncdf->f_Qd_t  = (/f_Qd_t /)
+ncdf->f_Qd    = (/f_Qd/)
+ncdf->f_Qd_t  = (/f_Qd_t/)
 end do
 end
 

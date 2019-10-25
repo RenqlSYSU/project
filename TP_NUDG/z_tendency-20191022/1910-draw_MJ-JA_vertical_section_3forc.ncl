@@ -4,33 +4,37 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
-draw_var = (/"f_Qd" ,"f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+var_option = 1
+fnc  = 0   ;chose which case to draw
+diff = True ;whether draw the difference
+
+if(var_option.eq.0) then 
+    draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    unit     = (/"K/Day","K/Day","10~S~-10~N~s~S~-2~N~"/)  ;this can be used as right string 
+else
+    draw_var = (/"f_Qd" ,"f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    unit     = (/"10~S~-6~N~s~S~-2~N~","10~S~-6~N~s~S~-2~N~","10~S~-10~N~s~S~-2~N~"/)  ;this can be used as right string 
+end if
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-dnc  = 0    ;chose which case to draw
-diff = True ;whether draw the difference
 
 ;area: east Asia
 area = (/"TP","EA"/)
 lats = (/15 ,15 /);20 ;-20
 latn = (/55 ,55 /) ;55 ;60
-lonl = (/70 ,105 /) ;30 ;20
-lonr = (/105,140/) ;150;220
+lonl = (/70 ,110 /) ;30 ;20
+lonr = (/105,130/) ;150;220
 month_s = 5
 month_e = 8
 na = 1
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+    case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -41,7 +45,7 @@ else
     nsample = 10
 end if
 filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
-fig_name = path + "/analysis/fig/1p2x3_mj-ja_height_lat_3Q_" + area(na)
+fig_name = path + "/z_tendency-20191022/fig/1p2x3_mj-ja_height_lat_3Q_" + area(na)
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
@@ -61,8 +65,8 @@ vars = f->Qd(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
-var   = new((/ncase,nvar,ntime ,nlev,nlat,nlon/),float)
-var_m = new((/ncase,nvar,nmonth,nlev,nlat/),float)
+var   = new((/ncase,nvar,ntime ,nlev,nlat,nlon/),double)
+var_m = new((/ncase,nvar,nmonth,nlev,nlat/),double)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
@@ -85,11 +89,16 @@ var_m = new((/ncase,nvar,nmonth,nlev,nlat/),float)
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     do nv = 0, nvar-1,1
-    var(nc,nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var(nc,nv,:,:,:,:)  = f->$draw_var(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end do
+end do
+var := dim_avg_n(var,5)
+if(var_option.eq.0) then 
+    var(:,2,:,:,:) = var(:,2,:,:,:)*10^10 ;convert units of A from s^-2 to 10^-11 s^-2
+else 
+    var(:,2,:,:,:) = var(:,2,:,:,:)*10^10 ;convert units of A from s^-2 to 10^-11 s^-2
+    var(:,0:1,:,:,:) = var(:,0:1,:,:,:)*10^6 ;convert units of A from s^-2 to 10^-11 s^-2
 end if
-var = dim_avg_n(var,5)
-var(:,2,:,:,:) = var(:,2,:,:,:)*10^11 ;convert units of A from s^-2 to 10^-11 s^-2
 printVarSummary(var)
 
 ;calc ealy(56) and late(78) stage of the summer 
@@ -98,6 +107,13 @@ var_m(:,:,0,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
 var_m(:,:,1,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
+printVarSummary(var_m)
+
+if(diff) then 
+do nc = 1, ncase-1, 1
+    var_m(nc,:,:,:,:) = var_m(nc,:,:,:,:) - var_m(0,:,:,:,:)
+end do 
+end if
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -175,7 +191,7 @@ copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
     res@tiYAxisOn = False
     res@tmYRLabelsOn = False
     res@tmXBMode = "Manual"
-    res@tmXBTickSpacingF   = 15
+    res@tmXBTickSpacingF   = 10
     res@tmXBTickStartF     = lats(na)
     res@tmXBTickEndF       = latn(na)
 
@@ -202,20 +218,40 @@ copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    minlvl = (/-2.4,-2.4,-4 /);
-    maxlvl = (/2.4 ,2.4 , 4 /);
-    spacig = (/0.3 ,0.3 ,0.5/);
+if(var_option.eq.0) then 
+    minlvl = (/-2.4,-2.4,-0.8/);
+    maxlvl = (/ 2.4, 2.4, 0.8/);
+    spacig = (/ 0.3, 0.3, 0.1/);
+end if
 
+
+if(var_option.eq.1) then
+if(fnc.gt.0) then 
+    minlvl = (/-16,-16,-2.4/);
+    maxlvl = (/ 16, 16, 2.4/);
+    spacig = (/  2,  2, 0.3/);
+else
+    minlvl = (/-24,-24,-0.8/);
+    maxlvl = (/ 24, 24, 0.8/);
+    spacig = (/ 3 , 3 , 0.1/);
+end if
+end if
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
 do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
     np = nm*nvar + nv
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
-    res@gsnRightString  = lonl(na) "-" lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
-    plot(np) = gsn_csm_pres_hgt(wks,var(fnc,nv,nm,:,:),res)
-    print(max(var(fnc,nv,nm,:,:)))
-    print(min(var(fnc,nv,nm,:,:)))
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnSpreadColors       = False              ; turn of the full color map
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
+    plot(np) = gsn_csm_pres_hgt(wks,var_m(fnc,nv,nm,:,:),res)
+    print(max(var_m(fnc,nv,nm,:,:)))
+    print(min(var_m(fnc,nv,nm,:,:)))
+end do 
 end do 
 
 ;    resp@txString      = fig_title

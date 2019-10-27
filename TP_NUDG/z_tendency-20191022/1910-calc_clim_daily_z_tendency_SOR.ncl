@@ -58,7 +58,7 @@ dzdt  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 term  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 diff  = new((/nvar/),double)
 
-rf   = 1.25;0.75 ;relaxing factor
+rf   = 0.25;0.75 ;relaxing factor
 critical = 1e-8
 itime = 1
 ilev  = 2
@@ -72,10 +72,9 @@ lon  = lon*pi/180.0
 dlon = lon(4)-lon(3)
 dlat = lat(4)-lat(3)
 dlev = lev
-dlev(1:(nlev-1)) = (lev(0:(nlev-2)) - lev(1:(nlev-1)))*100 
+dlev(1:(nlev-1)) = (- lev(0:(nlev-2)) + lev(1:(nlev-1)))*100 
 dlev(0) = dlev(1) 
 dlev5  = conform(dzdt,dlev,ilev)
-f0     = conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
 coslat = conform(dzdt,cos(lat),ilat)
 tanlat = conform(dzdt,tan(lat),ilat)
 coe110 = 1/(coslat*coslat*dlon*dlon) ;111 means z,y,x
@@ -98,18 +97,19 @@ do nv = 0, nvar-1, 1
 end do
 sigm1 = f->sigm1(select_time,{lev},{lats:latn},{lonl:lonr})
 copy_VarMeta(forc,dzdt)
-forc  = where(ismissing(forc),0,forc)
+;forc  = where(ismissing(forc),0,forc)
+forc = linmsg_n(forc,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
 
-ave = dim_avg_n_Wrap(sigm1,0)
-ave := dim_avg_n_Wrap(ave,(/1,2/))
+ave = wgt_areaave_Wrap(sigm1,1.0,1.0,0)
+ave := dim_avg_n_Wrap(ave,0)
+ave = where(ave.eq.0.0, 1e-5, ave)
+sigm1 := conform(dzdt,ave,ilev)
 if (any(ismissing(ave))) then
     print("ave has missing")
 end if
-do nz = 0,nlev-1,1
-    sigm1(:,nz,:,:) = where(ismissing(sigm1(:,nz,:,:)),ave(nz),sigm1(:,nz,:,:))
-end do
-sigm1 = where(sigm1.eq.0.0, 1e-5, sigm1)
-sigm1 := conform(dzdt,sigm1,(/itime,ilev,ilat,ilon/))
+;sigm1 = linmsg_n(sigm1,-1,ilon-1)
+;sigm1 = where(sigm1.eq.0.0, 1e-5, sigm1)
+;sigm1 := conform(dzdt,sigm1,(/itime,ilev,ilat,ilon/))
 
 if (any(ismissing(forc))) then
     print("forc has missing")
@@ -123,12 +123,13 @@ printVarSummary(sigm1)
 ;==========================================================
 ;define coefficient and calc dzdt
 ;============================================================
+f0    = conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
 term1 = center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev)/2/dlev5 
 term2 = 1/sigm1/dlev5/dlev5 
 print(term1(0,0,0,0,0:9))
 print(term2(0,0,0,0,0:9))
-coe211 = f0*f0*a*a*(term2) ; + term1
-coe011 = f0*f0*a*a*(term2) ; - term1
+coe211 = f0*f0*a*a*(term2 + term1)
+coe011 = f0*f0*a*a*(term2 - term1)
 coe111 = -2/coslat/coslat/dlon/dlon - 2/dlat/dlat - 2*f0*f0*a*a*term2
 coe111 = where(coe111.eq.0,1e-5,coe111)
 delete([/term1,term2/])
@@ -158,14 +159,16 @@ printVarSummary(dzdt)
 if (any(ismissing(dzdt))) then
     print("dzdt has missing")
 end if
-do while (iter.lt.200)
+
+do while (iter.lt.5000)
     print("")
     print(iter + " iteration")
     dzdt0 = dzdt
     do nz = 1, nlev-2, 1
     do ny = 1, nlat-2, 1
     do nx = 1, nlon-2, 1
-        term(:,:,nz,ny,nx) = coe110(:,:,nz,ny,nx)*dzdt(:,:,nz,ny,nx+1) + coe121(:,:,nz,ny,nx)*dzdt(:,:,nz,ny+1,nx) + coe211(:,:,nz,ny,nx)*dzdt(:,:,nz+1,ny,nx) +\
+        term(:,:,nz,ny,nx) = coe111(:,:,nz,ny,nx)*dzdt(:,:,nz,ny,nx) + \
+                             coe110(:,:,nz,ny,nx)*dzdt(:,:,nz,ny,nx+1) + coe121(:,:,nz,ny,nx)*dzdt(:,:,nz,ny+1,nx) + coe211(:,:,nz,ny,nx)*dzdt(:,:,nz+1,ny,nx) +\
                              coe110(:,:,nz,ny,nx)*dzdt(:,:,nz,ny,nx-1) + coe101(:,:,nz,ny,nx)*dzdt(:,:,nz,ny-1,nx) + coe011(:,:,nz,ny,nx)*dzdt(:,:,nz-1,ny,nx) 
         dzdt(:,:,nz,ny,nx) = dzdt(:,:,nz,ny,nx) + (rf/coe111(:,:,nz,ny,nx))*(f0(:,:,nz,ny,nx)*a*a*forc(:,:,nz,ny,nx)-term(:,:,nz,ny,nx))
         ;print("")
@@ -183,7 +186,7 @@ do while (iter.lt.200)
     dzdt(:,:,:,:,0     ) = dzdt(:,:,:,:,1     )
     dzdt(:,:,:,:,nlon-1) = dzdt(:,:,:,:,nlon-2)
     
-    dzdt(:,:,:,0     ,:) = dzdt(:,:,:,1     ,:)
+    dzdt(:,:,:,0     ,:) = 0 ;dzdt(:,:,:,1     ,:)
     dzdt(:,:,:,nlat-1,:) = dzdt(:,:,:,nlat-2,:)
     
     dzdt(3,:,0     ,:,:) = dzdt(3,:,1     ,:,:)  ;lower boundary for A
@@ -215,22 +218,32 @@ end if
     iter = iter + 1
 end do
 
+do ilat = 0, nlat-1
+if (abs(lat(ilat)*180.0/pi ).lt. 10. ) then
+f0(:,:,ilat,:)= f0@_FillValue
+end if
+end do
+
 dudt = - center_finite_diff_n(dzdt,lat    ,cyclic,opt,ilat)/f0
-dtdt = - center_finite_diff_n(dzdt,lev*100,cyclic,opt,ilev)*conform(dzdt,lev*100,ilev)/r
-dbdt = - center_finite_diff_n(dzdt,lat    ,cyclic,opt,ilat)
+dvdt =   center_finite_diff_n(dzdt,lon    ,cyclic,opt,ilon)/f0
+dTdt = - center_finite_diff_n(dzdt,lev*100,cyclic,opt,ilev)*conform(dzdt,lev*100,ilev)/R
+dbdt = - center_finite_diff_n(dTdt,lat    ,cyclic,opt,ilat)
 
 copy_VarMeta(forc,dzdt)
 copy_VarMeta(forc,dudt)
-copy_VarMeta(forc,dtdt)
+copy_VarMeta(forc,dvdt)
+copy_VarMeta(forc,dTdt)
 copy_VarMeta(forc,dbdt)
 
 nvar@long_name = "dzdt induced by f_Qd, f_Qd_t, f_Qeddy and A" 
 dzdt@long_name = "Climatology daily geopotential tendency"
 dudt@long_name = "Climatology daily zonal wind tendency"
+dvdt@long_name = "Climatology daily meridional wind tendency"
 dTdt@long_name = "Climatology daily temperature tendency"
-dbdt@long_name = "Climatology daily baroclinicity tendency"
+dbdt@long_name = "Climatology daily baroclinicity(-dTdy) tendency"
 dzdt@units     = "m^2/s^3" 
 dudt@units     = "m/s^2" 
+dvdt@units     = "m/s^2" 
 dTdt@units     = "K/s" 
 dbdt@units     = "K/(m*s)" 
 
@@ -260,6 +273,7 @@ filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
 filevardef(ncdf,"dzdt",typeof(dzdt),(/"nvar","time","lev","lat","lon"/))
 filevardef(ncdf,"dudt",typeof(dudt),(/"nvar","time","lev","lat","lon"/))
+filevardef(ncdf,"dvdt",typeof(dvdt),(/"nvar","time","lev","lat","lon"/))
 filevardef(ncdf,"dTdt",typeof(dTdt),(/"nvar","time","lev","lat","lon"/))
 filevardef(ncdf,"dbdt",typeof(dbdt),(/"nvar","time","lev","lat","lon"/))
 
@@ -272,6 +286,7 @@ filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
 filevarattdef(ncdf,"dzdt",dzdt)
 filevarattdef(ncdf,"dudt",dudt)
+filevarattdef(ncdf,"dvdt",dvdt)
 filevarattdef(ncdf,"dTdt",dTdt)
 filevarattdef(ncdf,"dbdt",dbdt)
 
@@ -282,6 +297,7 @@ ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
 ncdf->dzdt = (/dzdt/)
 ncdf->dudt = (/dudt/)
+ncdf->dvdt = (/dvdt/)
 ncdf->dTdt = (/dTdt/)
 ncdf->dbdt = (/dbdt/)
 end do

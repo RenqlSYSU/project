@@ -1,0 +1,3381 @@
+ relaxing factor is    1.25000000000000     
+ critical value is   9.999999939225290E-009
+  
+/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_daily_4forc_6coe.dat                                                                                                            
+ irec =         9721
+     Finish reading 
+        forc(5:10,5,5,5,1) are   0.2112439E-08   0.1088807E-08   0.9292939E-09   0.7998155E-09   0.2632647E-09   0.1003440E-09
+          coe110(5:10,5,5) are   0.2263673E+04   0.2263673E+04   0.2263673E+04   0.2263673E+04   0.2263673E+04   0.2263673E+04
+  
+    1 iteration
+ Iterative difference of f_Qd is    1.50392686878013     
+ Iterative difference of f_Qd_t is    1.48333656467679     
+ Iterative difference of f_Qeddy is    1.71978781812650     
+ Iterative difference of A is   9.247383645375602E-004
+  
+    2 iteration
+ Iterative difference of f_Qd is   0.426857405778878     
+ Iterative difference of f_Qd_t is   0.390528452002575     
+ Iterative difference of f_Qeddy is   0.487661071443800     
+ Iterative difference of A is   9.603680057485294E-003
+  
+    3 iteration
+ Iterative difference of f_Qd is   0.247444342881864     
+ Iterative difference of f_Qd_t is   0.226391324274571     
+ Iterative difference of f_Qeddy is   0.282706723846865     
+ Iterative difference of A is   7.244472642586241E-003
+  
+    4 iteration
+ Iterative difference of f_Qd is   0.130460556249670     
+ Iterative difference of f_Qd_t is   0.119367882507416     
+ Iterative difference of f_Qeddy is   0.149031332001083     
+ Iterative difference of A is   5.166426166285026E-003
+  
+    5 iteration
+ Iterative difference of f_Qd is   6.750928854659222E-002
+ Iterative difference of f_Qd_t is   6.177552155784882E-002
+ Iterative difference of f_Qeddy is   7.710038369891725E-002
+ Iterative difference of A is   4.035043818731468E-003
+  
+    6 iteration
+ Iterative difference of f_Qd is   3.470079866591602E-002
+ Iterative difference of f_Qd_t is   3.175984264314469E-002
+ Iterative difference of f_Qeddy is   3.961213870009184E-002
+ Iterative difference of A is   3.287547000802414E-003
+  
+    7 iteration
+ Iterative difference of f_Qd is   2.266727265198201E-002
+ Iterative difference of f_Qd_t is   2.334603816534320E-002
+ Iterative difference of f_Qeddy is   2.694716620845194E-002
+ Iterative difference of A is   3.254406099808118E-003
+  
+    8 iteration
+ Iterative difference of f_Qd is   1.714735966631895E-002
+ Iterative difference of f_Qd_t is   1.766154223118882E-002
+ Iterative difference of f_Qeddy is   2.041649828096509E-002
+ Iterative difference of A is   3.693918207780275E-003
+  
+    9 iteration
+ Iterative difference of f_Qd is   1.304652320667429E-002
+ Iterative difference of f_Qd_t is   1.343762485335290E-002
+ Iterative difference of f_Qeddy is   1.556276327948905E-002
+ Iterative difference of A is   3.691116608494461E-003
+  
+   10 iteration
+ Iterative difference of f_Qd is   1.002935709264854E-002
+ Iterative difference of f_Qd_t is   1.032951332690993E-002
+ Iterative difference of f_Qeddy is   1.198895272499034E-002
+ Iterative difference of A is   3.441392836194438E-003
+  
+   11 iteration
+ Iterative difference of f_Qd is   7.806084274995406E-003
+ Iterative difference of f_Qd_t is   8.039077048037691E-003
+ Iterative difference of f_Qeddy is   9.352420538379869E-003
+ Iterative difference of A is   3.090576109837082E-003
+  
+   12 iteration
+ Iterative difference of f_Qd is   6.153865347950455E-003
+ Iterative difference of f_Qd_t is   6.336925295006179E-003
+ Iterative difference of f_Qeddy is   7.390119037538861E-003
+ Iterative difference of A is   2.724680586321051E-003
+  
+   13 iteration
+ Iterative difference of f_Qd is   4.912166795993350E-003
+ Iterative difference of f_Qd_t is   5.057740212468353E-003
+ Iterative difference of f_Qeddy is   5.912770299821846E-003
+ Iterative difference of A is   2.380418843600986E-003
+  
+   14 iteration
+ Iterative difference of f_Qd is   3.967297840660106E-003
+ Iterative difference of f_Qd_t is   4.084408527923772E-003
+ Iterative difference of f_Qeddy is   4.786406530907783E-003
+ Iterative difference of A is   2.086791927456883E-003
+  
+   15 iteration
+ Iterative difference of f_Qd is   3.239189308413687E-003
+ Iterative difference of f_Qd_t is   3.334432303206847E-003
+ Iterative difference of f_Qeddy is   3.916690600848982E-003
+ Iterative difference of A is   1.832995367774249E-003
+  
+   16 iteration
+ Iterative difference of f_Qd is   2.671206714503715E-003
+ Iterative difference of f_Qd_t is   2.749450033549622E-003
+ Iterative difference of f_Qeddy is   3.236864542874862E-003
+ Iterative difference of A is   1.614753180356292E-003
+  
+   17 iteration
+ Iterative difference of f_Qd is   2.244226293224572E-003
+ Iterative difference of f_Qd_t is   2.287846667307525E-003
+ Iterative difference of f_Qeddy is   2.702491637303184E-003
+ Iterative difference of A is   1.425264801331028E-003
+  
+   18 iteration
+ Iterative difference of f_Qd is   2.026299760775535E-003
+ Iterative difference of f_Qd_t is   1.933983218685792E-003
+ Iterative difference of f_Qeddy is   2.289543594473753E-003
+ Iterative difference of A is   1.260091921537053E-003
+  
+   19 iteration
+ Iterative difference of f_Qd is   1.852752918206135E-003
+ Iterative difference of f_Qd_t is   1.689185020745443E-003
+ Iterative difference of f_Qeddy is   1.952895100679836E-003
+ Iterative difference of A is   1.116467063073109E-003
+  
+   20 iteration
+ Iterative difference of f_Qd is   1.700657910717995E-003
+ Iterative difference of f_Qd_t is   1.548913867126758E-003
+ Iterative difference of f_Qeddy is   1.715467595431341E-003
+ Iterative difference of A is   9.929824587565084E-004
+  
+   21 iteration
+ Iterative difference of f_Qd is   1.566649050522728E-003
+ Iterative difference of f_Qd_t is   1.425411222123599E-003
+ Iterative difference of f_Qeddy is   1.543554515150258E-003
+ Iterative difference of A is   8.908286056781532E-004
+  
+   22 iteration
+ Iterative difference of f_Qd is   1.459997950957415E-003
+ Iterative difference of f_Qd_t is   1.318772573791142E-003
+ Iterative difference of f_Qeddy is   1.437274072523295E-003
+ Iterative difference of A is   8.010095390460284E-004
+  
+   23 iteration
+ Iterative difference of f_Qd is   1.380844434824842E-003
+ Iterative difference of f_Qd_t is   1.245193075345208E-003
+ Iterative difference of f_Qeddy is   1.357696781663545E-003
+ Iterative difference of A is   7.219338218040147E-004
+  
+   24 iteration
+ Iterative difference of f_Qd is   1.314602936253413E-003
+ Iterative difference of f_Qd_t is   1.183562630133028E-003
+ Iterative difference of f_Qeddy is   1.292169631138158E-003
+ Iterative difference of A is   6.522028717686201E-004
+  
+   25 iteration
+ Iterative difference of f_Qd is   1.252174763688510E-003
+ Iterative difference of f_Qd_t is   1.126932025788889E-003
+ Iterative difference of f_Qeddy is   1.230772514930485E-003
+ Iterative difference of A is   5.918752851970799E-004
+  
+   26 iteration
+ Iterative difference of f_Qd is   1.193060011223115E-003
+ Iterative difference of f_Qd_t is   1.073338925361857E-003
+ Iterative difference of f_Qeddy is   1.172662015681954E-003
+ Iterative difference of A is   5.406208316179606E-004
+  
+   27 iteration
+ Iterative difference of f_Qd is   1.137091402215559E-003
+ Iterative difference of f_Qd_t is   1.022624541911286E-003
+ Iterative difference of f_Qeddy is   1.117667089599275E-003
+ Iterative difference of A is   4.955576756058983E-004
+  
+   28 iteration
+ Iterative difference of f_Qd is   1.088542486708616E-003
+ Iterative difference of f_Qd_t is   9.770177963188270E-004
+ Iterative difference of f_Qeddy is   1.070185444341260E-003
+ Iterative difference of A is   4.556164434300208E-004
+  
+   29 iteration
+ Iterative difference of f_Qd is   1.043909101833038E-003
+ Iterative difference of f_Qd_t is   9.367547850182983E-004
+ Iterative difference of f_Qeddy is   1.026425465115104E-003
+ Iterative difference of A is   4.197684225725890E-004
+  
+   30 iteration
+ Iterative difference of f_Qd is   1.000979368382240E-003
+ Iterative difference of f_Qd_t is   8.980281237122786E-004
+ Iterative difference of f_Qeddy is   9.843366672229112E-004
+ Iterative difference of A is   3.875319264132829E-004
+  
+   31 iteration
+ Iterative difference of f_Qd is   9.597520319196695E-004
+ Iterative difference of f_Qd_t is   8.608375841443472E-004
+ Iterative difference of f_Qeddy is   9.439173066510403E-004
+ Iterative difference of A is   3.599042196890771E-004
+  
+   32 iteration
+ Iterative difference of f_Qd is   9.202091212214339E-004
+ Iterative difference of f_Qd_t is   8.251677678815100E-004
+ Iterative difference of f_Qeddy is   9.051492563412963E-004
+ Iterative difference of A is   3.353896914307861E-004
+  
+   33 iteration
+ Iterative difference of f_Qd is   8.823201643492068E-004
+ Iterative difference of f_Qd_t is   7.909918900732074E-004
+ Iterative difference of f_Qeddy is   8.680021587336162E-004
+ Iterative difference of A is   3.130802103996355E-004
+  
+   34 iteration
+ Iterative difference of f_Qd is   8.460454956843652E-004
+ Iterative difference of f_Qd_t is   7.582747547741284E-004
+ Iterative difference of f_Qeddy is   8.324366828992569E-004
+ Iterative difference of A is   2.927455560133713E-004
+  
+   35 iteration
+ Iterative difference of f_Qd is   8.113388488068460E-004
+ Iterative difference of f_Qd_t is   7.269750940728029E-004
+ Iterative difference of f_Qeddy is   7.988085855263546E-004
+ Iterative difference of A is   2.741816411630620E-004
+  
+   36 iteration
+ Iterative difference of f_Qd is   7.795084932943480E-004
+ Iterative difference of f_Qd_t is   6.978242694496359E-004
+ Iterative difference of f_Qeddy is   7.678126853559383E-004
+ Iterative difference of A is   2.572074227489875E-004
+  
+   37 iteration
+ Iterative difference of f_Qd is   7.491924301598063E-004
+ Iterative difference of f_Qd_t is   6.704866376896004E-004
+ Iterative difference of f_Qeddy is   7.380729633797989E-004
+ Iterative difference of A is   2.426486258564620E-004
+  
+   38 iteration
+ Iterative difference of f_Qd is   7.201233165321022E-004
+ Iterative difference of f_Qd_t is   6.442792951511025E-004
+ Iterative difference of f_Qeddy is   7.095519564730909E-004
+ Iterative difference of A is   2.294384102542284E-004
+  
+   39 iteration
+ Iterative difference of f_Qd is   6.922603343093928E-004
+ Iterative difference of f_Qd_t is   6.191653881721521E-004
+ Iterative difference of f_Qeddy is   6.822097752436224E-004
+ Iterative difference of A is   2.172342667678337E-004
+  
+   40 iteration
+ Iterative difference of f_Qd is   6.655610937889508E-004
+ Iterative difference of f_Qd_t is   5.951065665198360E-004
+ Iterative difference of f_Qeddy is   6.560050119514341E-004
+ Iterative difference of A is   2.059432737529683E-004
+  
+   41 iteration
+ Iterative difference of f_Qd is   6.399823692616186E-004
+ Iterative difference of f_Qd_t is   5.720636636308077E-004
+ Iterative difference of f_Qeddy is   6.308954594053048E-004
+ Iterative difference of A is   1.954818914626649E-004
+  
+   42 iteration
+ Iterative difference of f_Qd is   6.154806796817153E-004
+ Iterative difference of f_Qd_t is   5.499972348942395E-004
+ Iterative difference of f_Qeddy is   6.068386771071396E-004
+ Iterative difference of A is   1.862023561674739E-004
+  
+   43 iteration
+ Iterative difference of f_Qd is   5.920127437567119E-004
+ Iterative difference of f_Qd_t is   5.288679805683372E-004
+ Iterative difference of f_Qeddy is   5.837924338668865E-004
+ Iterative difference of A is   1.779438278389431E-004
+  
+   44 iteration
+ Iterative difference of f_Qd is   5.695358332136607E-004
+ Iterative difference of f_Qd_t is   5.086370749253152E-004
+ Iterative difference of f_Qeddy is   5.620636467536938E-004
+ Iterative difference of A is   1.702118644931749E-004
+  
+   45 iteration
+ Iterative difference of f_Qd is   5.485527318600941E-004
+ Iterative difference of f_Qd_t is   4.893888114498729E-004
+ Iterative difference of f_Qeddy is   5.416357083172368E-004
+ Iterative difference of A is   1.629629775188254E-004
+  
+   46 iteration
+ Iterative difference of f_Qd is   5.286221216742118E-004
+ Iterative difference of f_Qd_t is   4.714637185241413E-004
+ Iterative difference of f_Qeddy is   5.220249476408992E-004
+ Iterative difference of A is   1.572027197224383E-004
+  
+   47 iteration
+ Iterative difference of f_Qd is   5.095956837824350E-004
+ Iterative difference of f_Qd_t is   4.542656016470470E-004
+ Iterative difference of f_Qeddy is   5.037296664431451E-004
+ Iterative difference of A is   1.523699248927243E-004
+  
+   48 iteration
+ Iterative difference of f_Qd is   4.919664344031072E-004
+ Iterative difference of f_Qd_t is   4.381092539885098E-004
+ Iterative difference of f_Qeddy is   4.863531303092514E-004
+ Iterative difference of A is   1.483897978809632E-004
+  
+   49 iteration
+ Iterative difference of f_Qd is   4.749960539307679E-004
+ Iterative difference of f_Qd_t is   4.228764811126592E-004
+ Iterative difference of f_Qeddy is   4.696223508936018E-004
+ Iterative difference of A is   1.448630094070570E-004
+  
+   50 iteration
+ Iterative difference of f_Qd is   4.586597713031812E-004
+ Iterative difference of f_Qd_t is   4.082190653713971E-004
+ Iterative difference of f_Qeddy is   4.535132893996527E-004
+ Iterative difference of A is   1.418508478104570E-004
+  
+   51 iteration
+ Iterative difference of f_Qd is   4.429334101152677E-004
+ Iterative difference of f_Qd_t is   3.941147458996486E-004
+ Iterative difference of f_Qeddy is   4.380024657317863E-004
+ Iterative difference of A is   1.394721657455517E-004
+  
+   52 iteration
+ Iterative difference of f_Qd is   4.277934517720183E-004
+ Iterative difference of f_Qd_t is   3.805418888121678E-004
+ Iterative difference of f_Qeddy is   4.230670217802157E-004
+ Iterative difference of A is   1.371155733695317E-004
+  
+   53 iteration
+ Iterative difference of f_Qd is   4.132170801885021E-004
+ Iterative difference of f_Qd_t is   3.674795261259592E-004
+ Iterative difference of f_Qeddy is   4.086847666656609E-004
+ Iterative difference of A is   1.347819031515159E-004
+  
+   54 iteration
+ Iterative difference of f_Qd is   3.991822114868190E-004
+ Iterative difference of f_Qd_t is   3.549073809989492E-004
+ Iterative difference of f_Qeddy is   3.948342072961838E-004
+ Iterative difference of A is   1.324502669745953E-004
+  
+   55 iteration
+ Iterative difference of f_Qd is   3.856675115525496E-004
+ Iterative difference of f_Qd_t is   3.428058819276575E-004
+ Iterative difference of f_Qeddy is   3.814945670176442E-004
+ Iterative difference of A is   1.300792863150853E-004
+  
+   56 iteration
+ Iterative difference of f_Qd is   3.726524038242737E-004
+ Iterative difference of f_Qd_t is   3.311561680914912E-004
+ Iterative difference of f_Qeddy is   3.686457946641061E-004
+ Iterative difference of A is   1.276781909871055E-004
+  
+   57 iteration
+ Iterative difference of f_Qd is   3.601170692808936E-004
+ Iterative difference of f_Qd_t is   3.199400876525149E-004
+ Iterative difference of f_Qeddy is   3.562685659184509E-004
+ Iterative difference of A is   1.252553257142068E-004
+  
+   58 iteration
+ Iterative difference of f_Qd is   3.480424402508148E-004
+ Iterative difference of f_Qd_t is   3.091401905037511E-004
+ Iterative difference of f_Qeddy is   3.443442785629469E-004
+ Iterative difference of A is   1.228182192543337E-004
+  
+   59 iteration
+ Iterative difference of f_Qd is   3.364101893825119E-004
+ Iterative difference of f_Qd_t is   2.987397166943073E-004
+ Iterative difference of f_Qeddy is   3.328550429242613E-004
+ Iterative difference of A is   1.203736493451540E-004
+  
+   60 iteration
+ Iterative difference of f_Qd is   3.252027148797146E-004
+ Iterative difference of f_Qd_t is   2.887225815423333E-004
+ Iterative difference of f_Qeddy is   3.218414544096104E-004
+ Iterative difference of A is   1.179277034985115E-004
+  
+   61 iteration
+ Iterative difference of f_Qd is   3.145836021473669E-004
+ Iterative difference of f_Qd_t is   2.790733582619526E-004
+ Iterative difference of f_Qeddy is   3.114555372174532E-004
+ Iterative difference of A is   1.154858357317132E-004
+  
+   62 iteration
+ Iterative difference of f_Qd is   3.044469263050811E-004
+ Iterative difference of f_Qd_t is   2.699604824298457E-004
+ Iterative difference of f_Qeddy is   3.014266567875484E-004
+ Iterative difference of A is   1.130529193656311E-004
+  
+   63 iteration
+ Iterative difference of f_Qd is   2.946591097091542E-004
+ Iterative difference of f_Qd_t is   2.612310529862549E-004
+ Iterative difference of f_Qeddy is   2.918239469171663E-004
+ Iterative difference of A is   1.106332960488362E-004
+  
+   64 iteration
+ Iterative difference of f_Qd is   2.853892524752877E-004
+ Iterative difference of f_Qd_t is   2.528041330724026E-004
+ Iterative difference of f_Qeddy is   2.826811570420182E-004
+ Iterative difference of A is   1.082308211863619E-004
+  
+   65 iteration
+ Iterative difference of f_Qd is   2.764634001118718E-004
+ Iterative difference of f_Qd_t is   2.448374861708791E-004
+ Iterative difference of f_Qeddy is   2.738373849040035E-004
+ Iterative difference of A is   1.058489059631157E-004
+  
+   66 iteration
+ Iterative difference of f_Qd is   2.678297220856801E-004
+ Iterative difference of f_Qd_t is   2.371526087666248E-004
+ Iterative difference of f_Qeddy is   2.652826840367772E-004
+ Iterative difference of A is   1.034905561573341E-004
+  
+   67 iteration
+ Iterative difference of f_Qd is   2.594784269698489E-004
+ Iterative difference of f_Qd_t is   2.297212343149585E-004
+ Iterative difference of f_Qeddy is   2.570074072775000E-004
+ Iterative difference of A is   1.011584079406097E-004
+  
+   68 iteration
+ Iterative difference of f_Qd is   2.514000283713111E-004
+ Iterative difference of f_Qd_t is   2.225347250791390E-004
+ Iterative difference of f_Qeddy is   2.490022040342391E-004
+ Iterative difference of A is   9.885476085854088E-005
+  
+   69 iteration
+ Iterative difference of f_Qd is   2.435853404711349E-004
+ Iterative difference of f_Qd_t is   2.155847251201909E-004
+ Iterative difference of f_Qeddy is   2.412580164769321E-004
+ Iterative difference of A is   9.658160818113489E-005
+  
+   70 iteration
+ Iterative difference of f_Qd is   2.360254727594852E-004
+ Iterative difference of f_Qd_t is   2.088631545746067E-004
+ Iterative difference of f_Qeddy is   2.337660748625431E-004
+ Iterative difference of A is   9.434066480562206E-005
+  
+   71 iteration
+ Iterative difference of f_Qd is   2.287118241379657E-004
+ Iterative difference of f_Qd_t is   2.023622034459591E-004
+ Iterative difference of f_Qeddy is   2.265178921725605E-004
+ Iterative difference of A is   9.213339288634270E-005
+  
+   72 iteration
+ Iterative difference of f_Qd is   2.216360765328190E-004
+ Iterative difference of f_Qd_t is   1.960743250340527E-004
+ Iterative difference of f_Qeddy is   2.195052582115234E-004
+ Iterative difference of A is   8.996102535793749E-005
+  
+   73 iteration
+ Iterative difference of f_Qd is   2.147901881397948E-004
+ Iterative difference of f_Qd_t is   1.899922291027853E-004
+ Iterative difference of f_Qeddy is   2.127202332925793E-004
+ Iterative difference of A is   8.782458750900002E-005
+  
+   74 iteration
+ Iterative difference of f_Qd is   2.081663864018091E-004
+ Iterative difference of f_Qd_t is   1.841088748718439E-004
+ Iterative difference of f_Qeddy is   2.061551416150317E-004
+ Iterative difference of A is   8.572491675399793E-005
+  
+   75 iteration
+ Iterative difference of f_Qd is   2.017571608029511E-004
+ Iterative difference of f_Qd_t is   1.784174639020905E-004
+ Iterative difference of f_Qeddy is   1.998025644220705E-004
+ Iterative difference of A is   8.366268074246064E-005
+  
+   76 iteration
+ Iterative difference of f_Qd is   1.955552555496787E-004
+ Iterative difference of f_Qd_t is   1.729114329327985E-004
+ Iterative difference of f_Qeddy is   1.936553330130278E-004
+ Iterative difference of A is   8.163839393489532E-005
+  
+   77 iteration
+ Iterative difference of f_Qd is   1.895536621962651E-004
+ Iterative difference of f_Qd_t is   1.675844467181886E-004
+ Iterative difference of f_Qeddy is   1.877065216710425E-004
+ Iterative difference of A is   7.965243276654346E-005
+  
+   78 iteration
+ Iterative difference of f_Qd is   1.837456122643563E-004
+ Iterative difference of f_Qd_t is   1.624303909024613E-004
+ Iterative difference of f_Qeddy is   1.819494405577229E-004
+ Iterative difference of A is   7.770504951141143E-005
+  
+   79 iteration
+ Iterative difference of f_Qd is   1.781245698946402E-004
+ Iterative difference of f_Qd_t is   1.574433649652526E-004
+ Iterative difference of f_Qeddy is   1.763776286176078E-004
+ Iterative difference of A is   7.579638495099159E-005
+  
+   80 iteration
+ Iterative difference of f_Qd is   1.726842245643317E-004
+ Iterative difference of f_Qd_t is   1.526176752630684E-004
+ Iterative difference of f_Qeddy is   1.709848465267783E-004
+ Iterative difference of A is   7.392647994444116E-005
+  
+   81 iteration
+ Iterative difference of f_Qd is   1.674184838968765E-004
+ Iterative difference of f_Qd_t is   1.479478281873822E-004
+ Iterative difference of f_Qeddy is   1.657650697150237E-004
+ Iterative difference of A is   7.209528598976951E-005
+  
+   82 iteration
+ Iterative difference of f_Qd is   1.623214665847986E-004
+ Iterative difference of f_Qd_t is   1.434285234561336E-004
+ Iterative difference of f_Qeddy is   1.607124814844846E-004
+ Iterative difference of A is   7.030267485876127E-005
+  
+   83 iteration
+ Iterative difference of f_Qd is   1.573874954436325E-004
+ Iterative difference of f_Qd_t is   1.390546475507556E-004
+ Iterative difference of f_Qeddy is   1.558214662441409E-004
+ Iterative difference of A is   6.854844738196902E-005
+  
+   84 iteration
+ Iterative difference of f_Qd is   1.526110906100789E-004
+ Iterative difference of f_Qd_t is   1.348212673089599E-004
+ Iterative difference of f_Qeddy is   1.510866028749877E-004
+ Iterative difference of A is   6.683234145423139E-005
+  
+   85 iteration
+ Iterative difference of f_Qd is   1.479869628946626E-004
+ Iterative difference of f_Qd_t is   1.307236236804607E-004
+ Iterative difference of f_Qeddy is   1.465026582375267E-004
+ Iterative difference of A is   6.515403932553631E-005
+  
+   86 iteration
+ Iterative difference of f_Qd is   1.435100072971832E-004
+ Iterative difference of f_Qd_t is   1.267571256504257E-004
+ Iterative difference of f_Qeddy is   1.420645808311860E-004
+ Iterative difference of A is   6.351317423700098E-005
+  
+   87 iteration
+ Iterative difference of f_Qd is   1.391752966907189E-004
+ Iterative difference of f_Qd_t is   1.229173443342349E-004
+ Iterative difference of f_Qeddy is   1.377674946120844E-004
+ Iterative difference of A is   6.190933645683350E-005
+  
+   88 iteration
+ Iterative difference of f_Qd is   1.349780756774721E-004
+ Iterative difference of f_Qd_t is   1.192000072453014E-004
+ Iterative difference of f_Qeddy is   1.336066929740268E-004
+ Iterative difference of A is   6.034207876682088E-005
+  
+   89 iteration
+ Iterative difference of f_Qd is   1.309137546196201E-004
+ Iterative difference of f_Qd_t is   1.156009927366364E-004
+ Iterative difference of f_Qeddy is   1.295776328959705E-004
+ Iterative difference of A is   5.881092144580623E-005
+  
+   90 iteration
+ Iterative difference of f_Qd is   1.269779038456098E-004
+ Iterative difference of f_Qd_t is   1.121163246155868E-004
+ Iterative difference of f_Qeddy is   1.256759292579124E-004
+ Iterative difference of A is   5.731535679262371E-005
+  
+   91 iteration
+ Iterative difference of f_Qd is   1.231662480322276E-004
+ Iterative difference of f_Qd_t is   1.087421669305338E-004
+ Iterative difference of f_Qeddy is   1.218973493256198E-004
+ Iterative difference of A is   5.585485322783315E-005
+  
+   92 iteration
+ Iterative difference of f_Qd is   1.194746607615371E-004
+ Iterative difference of f_Qd_t is   1.054748189280239E-004
+ Iterative difference of f_Qeddy is   1.182378074038939E-004
+ Iterative difference of A is   5.442885901001983E-005
+  
+   93 iteration
+ Iterative difference of f_Qd is   1.159157744849357E-004
+ Iterative difference of f_Qd_t is   1.023107101769394E-004
+ Iterative difference of f_Qeddy is   1.146933596574695E-004
+ Iterative difference of A is   5.303680559967140E-005
+  
+   94 iteration
+ Iterative difference of f_Qd is   1.124831922722919E-004
+ Iterative difference of f_Qd_t is   9.925662288211984E-005
+ Iterative difference of f_Qeddy is   1.112856363071832E-004
+ Iterative difference of A is   5.167811070090969E-005
+  
+   95 iteration
+ Iterative difference of f_Qd is   1.091563640938098E-004
+ Iterative difference of f_Qd_t is   9.631540704993502E-005
+ Iterative difference of f_Qeddy is   1.079870487520063E-004
+ Iterative difference of A is   5.035218100864561E-005
+  
+   96 iteration
+ Iterative difference of f_Qd is   1.059319133008690E-004
+ Iterative difference of f_Qd_t is   9.346507105949253E-005
+ Iterative difference of f_Qeddy is   1.047900584165776E-004
+ Iterative difference of A is   4.905841468683808E-005
+  
+   97 iteration
+ Iterative difference of f_Qd is   1.028065728947980E-004
+ Iterative difference of f_Qd_t is   9.070269498107075E-005
+ Iterative difference of f_Qeddy is   1.016914234180447E-004
+ Iterative difference of A is   4.779620360084551E-005
+  
+   98 iteration
+ Iterative difference of f_Qd is   9.977718212180603E-005
+ Iterative difference of f_Qd_t is   8.802545488300478E-005
+ Iterative difference of f_Qeddy is   9.868800723727283E-005
+ Iterative difference of A is   4.656493532541675E-005
+  
+   99 iteration
+ Iterative difference of f_Qd is   9.684068314681771E-005
+ Iterative difference of f_Qd_t is   8.543061976631211E-005
+ Iterative difference of f_Qeddy is   9.577677542225993E-005
+ Iterative difference of A is   4.536399494787548E-005
+  
+  100 iteration
+ Iterative difference of f_Qd is   9.399411780709743E-005
+ Iterative difference of f_Qd_t is   8.291554857813715E-005
+ Iterative difference of f_Qeddy is   9.295479237144549E-005
+ Iterative difference of A is   4.419276668433426E-005
+  
+  101 iteration
+ Iterative difference of f_Qd is   9.123462444741992E-005
+ Iterative difference of f_Qd_t is   8.047768730328614E-005
+ Iterative difference of f_Qeddy is   9.021921819696299E-005
+ Iterative difference of A is   4.305063532537845E-005
+  
+  102 iteration
+ Iterative difference of f_Qd is   8.855943483713352E-005
+ Iterative difference of f_Qd_t is   7.811456613522616E-005
+ Iterative difference of f_Qeddy is   8.756730566918114E-005
+ Iterative difference of A is   4.193698752636039E-005
+  
+  103 iteration
+ Iterative difference of f_Qd is   8.596587116903309E-005
+ Iterative difference of f_Qd_t is   7.582379672531336E-005
+ Iterative difference of f_Qeddy is   8.499639724241642E-005
+ Iterative difference of A is   4.085121295590265E-005
+  
+  104 iteration
+ Iterative difference of f_Qd is   8.345134314047264E-005
+ Iterative difference of f_Qd_t is   7.360306951054163E-005
+ Iterative difference of f_Qeddy is   8.250392216191393E-005
+ Iterative difference of A is   3.979270531532728E-005
+  
+  105 iteration
+ Iterative difference of f_Qd is   8.101334511591979E-005
+ Iterative difference of f_Qd_t is   7.145015111864605E-005
+ Iterative difference of f_Qeddy is   8.008739365162471E-005
+ Iterative difference of A is   3.876255544952613E-005
+  
+  106 iteration
+ Iterative difference of f_Qd is   7.864945337047319E-005
+ Iterative difference of f_Qd_t is   6.936288184968692E-005
+ Iterative difference of f_Qeddy is   7.774440618209255E-005
+ Iterative difference of A is   3.776071051096730E-005
+  
+  107 iteration
+ Iterative difference of f_Qd is   7.635732341346180E-005
+ Iterative difference of f_Qd_t is   6.733917323358679E-005
+ Iterative difference of f_Qeddy is   7.547263281777739E-005
+ Iterative difference of A is   3.678407634107907E-005
+  
+  108 iteration
+ Iterative difference of f_Qd is   7.413468739102952E-005
+ Iterative difference of f_Qd_t is   6.537700566152521E-005
+ Iterative difference of f_Qeddy is   7.326982264268395E-005
+ Iterative difference of A is   3.583208419616520E-005
+  
+  109 iteration
+ Iterative difference of f_Qd is   7.197935156649099E-005
+ Iterative difference of f_Qd_t is   6.347442609069137E-005
+ Iterative difference of f_Qeddy is   7.113379826297062E-005
+ Iterative difference of A is   3.490417240058913E-005
+  
+  110 iteration
+ Iterative difference of f_Qd is   6.988919387741765E-005
+ Iterative difference of f_Qd_t is   6.162954582047964E-005
+ Iterative difference of f_Qeddy is   6.906245338558770E-005
+ Iterative difference of A is   3.399978680736562E-005
+  
+  111 iteration
+ Iterative difference of f_Qd is   6.786216156755287E-005
+ Iterative difference of f_Qd_t is   5.984053833896219E-005
+ Iterative difference of f_Qeddy is   6.705375047116185E-005
+ Iterative difference of A is   3.311838119416516E-005
+  
+  112 iteration
+ Iterative difference of f_Qd is   6.589626889243194E-005
+ Iterative difference of f_Qd_t is   5.810563723769591E-005
+ Iterative difference of f_Qeddy is   6.510571845980140E-005
+ Iterative difference of A is   3.225941760070898E-005
+  
+  113 iteration
+ Iterative difference of f_Qd is   6.398959489706951E-005
+ Iterative difference of f_Qd_t is   5.642313419378792E-005
+ Iterative difference of f_Qeddy is   6.321645056839992E-005
+ Iterative difference of A is   3.142236661299140E-005
+  
+  114 iteration
+ Iterative difference of f_Qd is   6.214028126388244E-005
+ Iterative difference of f_Qd_t is   5.479137701706882E-005
+ Iterative difference of f_Qeddy is   6.138410215737744E-005
+ Iterative difference of A is   3.060670759929586E-005
+  
+  115 iteration
+ Iterative difference of f_Qd is   6.034653022935627E-005
+ Iterative difference of f_Qd_t is   5.320876776097883E-005
+ Iterative difference of f_Qeddy is   5.960688866588071E-005
+ Iterative difference of A is   2.981192890272495E-005
+  
+  116 iteration
+ Iterative difference of f_Qd is   5.860660256787331E-005
+ Iterative difference of f_Qd_t is   5.167376089561942E-005
+ Iterative difference of f_Qeddy is   5.788308361300010E-005
+ Iterative difference of A is   2.903752799418395E-005
+  
+  117 iteration
+ Iterative difference of f_Qd is   5.691881564046791E-005
+ Iterative difference of f_Qd_t is   5.018486154095836E-005
+ Iterative difference of f_Qeddy is   5.621101666376110E-005
+ Iterative difference of A is   2.828301158989445E-005
+  
+  118 iteration
+ Iterative difference of f_Qd is   5.528593702336382E-005
+ Iterative difference of f_Qd_t is   4.874139361642910E-005
+ Iterative difference of f_Qeddy is   5.458907175829447E-005
+ Iterative difference of A is   2.754789573674449E-005
+  
+  119 iteration
+ Iterative difference of f_Qd is   5.370463062815550E-005
+ Iterative difference of f_Qd_t is   4.734704820404112E-005
+ Iterative difference of f_Qeddy is   5.301568530198530E-005
+ Iterative difference of A is   2.683170586877462E-005
+  
+  120 iteration
+ Iterative difference of f_Qd is   5.217018011916680E-005
+ Iterative difference of f_Qd_t is   4.599409399777543E-005
+ Iterative difference of f_Qeddy is   5.148934441528974E-005
+ Iterative difference of A is   2.613397683762925E-005
+  
+  121 iteration
+ Iterative difference of f_Qd is   5.068114737359630E-005
+ Iterative difference of f_Qd_t is   4.468125580795596E-005
+ Iterative difference of f_Qeddy is   5.000858524131097E-005
+ Iterative difference of A is   2.545425291973318E-005
+  
+  122 iteration
+ Iterative difference of f_Qd is   4.923613969669283E-005
+ Iterative difference of f_Qd_t is   4.340729897840678E-005
+ Iterative difference of f_Qeddy is   4.857582882367845E-005
+ Iterative difference of A is   2.479208780254566E-005
+  
+  123 iteration
+ Iterative difference of f_Qd is   4.783380837718176E-005
+ Iterative difference of f_Qd_t is   4.217102808441037E-005
+ Iterative difference of f_Qeddy is   4.718733346000675E-005
+ Iterative difference of A is   2.414704455216271E-005
+  
+  124 iteration
+ Iterative difference of f_Qd is   4.647284728599710E-005
+ Iterative difference of f_Qd_t is   4.097128567062680E-005
+ Iterative difference of f_Qeddy is   4.583988788268989E-005
+ Iterative difference of A is   2.351869556423310E-005
+  
+  125 iteration
+ Iterative difference of f_Qd is   4.515199151725047E-005
+ Iterative difference of f_Qd_t is   3.980695102758641E-005
+ Iterative difference of f_Qeddy is   4.453223558438524E-005
+ Iterative difference of A is   2.290662250014133E-005
+  
+  126 iteration
+ Iterative difference of f_Qd is   4.387001607080582E-005
+ Iterative difference of f_Qd_t is   3.867693900622138E-005
+ Iterative difference of f_Qeddy is   4.326315971739381E-005
+ Iterative difference of A is   2.231041621002239E-005
+  
+  127 iteration
+ Iterative difference of f_Qd is   4.262573457501639E-005
+ Iterative difference of f_Qd_t is   3.758019886934000E-005
+ Iterative difference of f_Qeddy is   4.203148182378019E-005
+ Iterative difference of A is   2.172967664424222E-005
+  
+  128 iteration
+ Iterative difference of f_Qd is   4.141799804906199E-005
+ Iterative difference of f_Qd_t is   3.651571317918323E-005
+ Iterative difference of f_Qeddy is   4.083606060507894E-005
+ Iterative difference of A is   2.116401275466771E-005
+  
+  129 iteration
+ Iterative difference of f_Qd is   4.024569370365133E-005
+ Iterative difference of f_Qd_t is   3.548249671993936E-005
+ Iterative difference of f_Qeddy is   3.967579072991501E-005
+ Iterative difference of A is   2.061304238706006E-005
+  
+  130 iteration
+ Iterative difference of f_Qd is   3.910774377926390E-005
+ Iterative difference of f_Qd_t is   3.447959545462009E-005
+ Iterative difference of f_Qeddy is   3.854960167926774E-005
+ Iterative difference of A is   2.007639216572432E-005
+  
+  131 iteration
+ Iterative difference of f_Qd is   3.800310442086952E-005
+ Iterative difference of f_Qd_t is   3.350608551503514E-005
+ Iterative difference of f_Qeddy is   3.745645662776853E-005
+ Iterative difference of A is   1.955369737148549E-005
+  
+  132 iteration
+ Iterative difference of f_Qd is   3.693076458798072E-005
+ Iterative difference of f_Qd_t is   3.256107222400495E-005
+ Iterative difference of f_Qeddy is   3.639535136042149E-005
+ Iterative difference of A is   1.904460181388276E-005
+  
+  133 iteration
+ Iterative difference of f_Qd is   3.588974499949688E-005
+ Iterative difference of f_Qd_t is   3.164368914927718E-005
+ Iterative difference of f_Qeddy is   3.536531322381742E-005
+ Iterative difference of A is   1.854875769857940E-005
+  
+  134 iteration
+ Iterative difference of f_Qd is   3.487909711197279E-005
+ Iterative difference of f_Qd_t is   3.075309718751640E-005
+ Iterative difference of f_Qeddy is   3.436540011036993E-005
+ Iterative difference of A is   1.806582549067175E-005
+  
+  135 iteration
+ Iterative difference of f_Qd is   3.389790213036148E-005
+ Iterative difference of f_Qd_t is   2.988848367825592E-005
+ Iterative difference of f_Qeddy is   3.339469947538642E-005
+ Iterative difference of A is   1.759547377463803E-005
+  
+  136 iteration
+ Iterative difference of f_Qd is   3.294527005075210E-005
+ Iterative difference of f_Qd_t is   2.904906154634762E-005
+ Iterative difference of f_Qeddy is   3.245232738537107E-005
+ Iterative difference of A is   1.713737911158801E-005
+  
+  137 iteration
+ Iterative difference of f_Qd is   3.202033873363902E-005
+ Iterative difference of f_Qd_t is   2.823406847250742E-005
+ Iterative difference of f_Qeddy is   3.153742759709477E-005
+ Iterative difference of A is   1.669122589441872E-005
+  
+  138 iteration
+ Iterative difference of f_Qd is   3.112227300697962E-005
+ Iterative difference of f_Qd_t is   2.744276609056157E-005
+ Iterative difference of f_Qeddy is   3.064917066608608E-005
+ Iterative difference of A is   1.625670620135702E-005
+  
+  139 iteration
+ Iterative difference of f_Qd is   3.025026379834678E-005
+ Iterative difference of f_Qd_t is   2.667443921129664E-005
+ Iterative difference of f_Qeddy is   2.978675308419609E-005
+ Iterative difference of A is   1.583351964840746E-005
+  
+  140 iteration
+ Iterative difference of f_Qd is   2.940352729531581E-005
+ Iterative difference of f_Qd_t is   2.592839507143535E-005
+ Iterative difference of f_Qeddy is   2.894939644489808E-005
+ Iterative difference of A is   1.542137324109585E-005
+  
+  141 iteration
+ Iterative difference of f_Qd is   2.858130413251753E-005
+ Iterative difference of f_Qd_t is   2.520396260728003E-005
+ Iterative difference of f_Qeddy is   2.813634663563491E-005
+ Iterative difference of A is   1.501998122596833E-005
+  
+  142 iteration
+ Iterative difference of f_Qd is   2.778285860580154E-005
+ Iterative difference of f_Qd_t is   2.450049175222596E-005
+ Iterative difference of f_Qeddy is   2.734687305661759E-005
+ Iterative difference of A is   1.462906494209375E-005
+  
+  143 iteration
+ Iterative difference of f_Qd is   2.700747791140046E-005
+ Iterative difference of f_Qd_t is   2.381735275738123E-005
+ Iterative difference of f_Qeddy is   2.658026786465928E-005
+ Iterative difference of A is   1.424835267295824E-005
+  
+  144 iteration
+ Iterative difference of f_Qd is   2.625447141014342E-005
+ Iterative difference of f_Qd_t is   2.315393553455752E-005
+ Iterative difference of f_Qeddy is   2.583584524207955E-005
+ Iterative difference of A is   1.387757949900155E-005
+  
+  145 iteration
+ Iterative difference of f_Qd is   2.552316991567827E-005
+ Iterative difference of f_Qd_t is   2.250964902072300E-005
+ Iterative difference of f_Qeddy is   2.511294068908987E-005
+ Iterative difference of A is   1.351648715103466E-005
+  
+  146 iteration
+ Iterative difference of f_Qd is   2.481292500574467E-005
+ Iterative difference of f_Qd_t is   2.188392056370891E-005
+ Iterative difference of f_Qeddy is   2.441091033949377E-005
+ Iterative difference of A is   1.316482386477455E-005
+  
+  147 iteration
+ Iterative difference of f_Qd is   2.412310835625542E-005
+ Iterative difference of f_Qd_t is   2.127619532786562E-005
+ Iterative difference of f_Qeddy is   2.372913029868168E-005
+ Iterative difference of A is   1.282234423667650E-005
+  
+  148 iteration
+ Iterative difference of f_Qd is   2.345311109677728E-005
+ Iterative difference of f_Qd_t is   2.068593571966093E-005
+ Iterative difference of f_Qeddy is   2.306699600327505E-005
+ Iterative difference of A is   1.248880908125659E-005
+  
+  149 iteration
+ Iterative difference of f_Qd is   2.280234318751545E-005
+ Iterative difference of f_Qd_t is   2.011262083190940E-005
+ Iterative difference of f_Qeddy is   2.242392160165668E-005
+ Iterative difference of A is   1.216398529002224E-005
+  
+  150 iteration
+ Iterative difference of f_Qd is   2.217023281637226E-005
+ Iterative difference of f_Qd_t is   1.955574590664644E-005
+ Iterative difference of f_Qeddy is   2.179933935501227E-005
+ Iterative difference of A is   1.184764569216699E-005
+  
+  151 iteration
+ Iterative difference of f_Qd is   2.155622581589273E-005
+ Iterative difference of f_Qd_t is   1.901482181557168E-005
+ Iterative difference of f_Qeddy is   2.119269905773158E-005
+ Iterative difference of A is   1.153956891716129E-005
+  
+  152 iteration
+ Iterative difference of f_Qd is   2.095978509935453E-005
+ Iterative difference of f_Qd_t is   1.848937455779104E-005
+ Iterative difference of f_Qeddy is   2.060346747687070E-005
+ Iterative difference of A is   1.123953925926020E-005
+  
+  153 iteration
+ Iterative difference of f_Qd is   2.038039011530157E-005
+ Iterative difference of f_Qd_t is   1.797894477402473E-005
+ Iterative difference of f_Qeddy is   2.003112781014810E-005
+ Iterative difference of A is   1.094734654412052E-005
+  
+  154 iteration
+ Iterative difference of f_Qd is   1.981753631991739E-005
+ Iterative difference of f_Qd_t is   1.748308727705927E-005
+ Iterative difference of f_Qeddy is   1.947517916146141E-005
+ Iterative difference of A is   1.066278599752210E-005
+  
+  155 iteration
+ Iterative difference of f_Qd is   1.927073466669038E-005
+ Iterative difference of f_Qd_t is   1.700137059739565E-005
+ Iterative difference of f_Qeddy is   1.893513603375141E-005
+ Iterative difference of A is   1.038565811625411E-005
+  
+  156 iteration
+ Iterative difference of f_Qd is   1.873951111298205E-005
+ Iterative difference of f_Qd_t is   1.653337654438508E-005
+ Iterative difference of f_Qeddy is   1.841052783846386E-005
+ Iterative difference of A is   1.011576854124258E-005
+  
+  157 iteration
+ Iterative difference of f_Qd is   1.822340614250628E-005
+ Iterative difference of f_Qd_t is   1.607869978137444E-005
+ Iterative difference of f_Qeddy is   1.790089842108183E-005
+ Iterative difference of A is   9.852927933005906E-006
+  
+  158 iteration
+ Iterative difference of f_Qd is   1.772197430367078E-005
+ Iterative difference of f_Qd_t is   1.563694741517352E-005
+ Iterative difference of f_Qeddy is   1.740580560213867E-005
+ Iterative difference of A is   9.596951849284024E-006
+  
+  159 iteration
+ Iterative difference of f_Qd is   1.723478376290666E-005
+ Iterative difference of f_Qd_t is   1.520773859899766E-005
+ Iterative difference of f_Qeddy is   1.692482073335777E-005
+ Iterative difference of A is   9.348105260166203E-006
+  
+  160 iteration
+ Iterative difference of f_Qd is   1.676141587274999E-005
+ Iterative difference of f_Qd_t is   1.479070414855260E-005
+ Iterative difference of f_Qeddy is   1.645752826828772E-005
+ Iterative difference of A is   9.105756960973641E-006
+  
+  161 iteration
+ Iterative difference of f_Qd is   1.630146475392613E-005
+ Iterative difference of f_Qd_t is   1.438548617060248E-005
+ Iterative difference of f_Qeddy is   1.600352534700950E-005
+ Iterative difference of A is   8.869719058609421E-006
+  
+  162 iteration
+ Iterative difference of f_Qd is   1.585453689116612E-005
+ Iterative difference of f_Qd_t is   1.399173770397222E-005
+ Iterative difference of f_Qeddy is   1.556242139438835E-005
+ Iterative difference of A is   8.639827064919545E-006
+  
+  163 iteration
+ Iterative difference of f_Qd is   1.542025074233871E-005
+ Iterative difference of f_Qd_t is   1.360912237240164E-005
+ Iterative difference of f_Qeddy is   1.513383773141946E-005
+ Iterative difference of A is   8.415920734569649E-006
+  
+  164 iteration
+ Iterative difference of f_Qd is   1.499823636018360E-005
+ Iterative difference of f_Qd_t is   1.323731404858502E-005
+ Iterative difference of f_Qeddy is   1.471740719950765E-005
+ Iterative difference of A is   8.197843960718737E-006
+  
+  165 iteration
+ Iterative difference of f_Qd is   1.458813502660389E-005
+ Iterative difference of f_Qd_t is   1.287599652938232E-005
+ Iterative difference of f_Qeddy is   1.431277379669582E-005
+ Iterative difference of A is   7.985444672781519E-006
+  
+  166 iteration
+ Iterative difference of f_Qd is   1.418959889852578E-005
+ Iterative difference of f_Qd_t is   1.252486322190355E-005
+ Iterative difference of f_Qeddy is   1.391959232607820E-005
+ Iterative difference of A is   7.778574736347008E-006
+  
+  167 iteration
+ Iterative difference of f_Qd is   1.380229066597072E-005
+ Iterative difference of f_Qd_t is   1.218361683950203E-005
+ Iterative difference of f_Qeddy is   1.353752805527408E-005
+ Iterative difference of A is   7.577089855178784E-006
+  
+  168 iteration
+ Iterative difference of f_Qd is   1.342588322041788E-005
+ Iterative difference of f_Qd_t is   1.185196910808567E-005
+ Iterative difference of f_Qeddy is   1.316625638762836E-005
+ Iterative difference of A is   7.380849475302140E-006
+  
+  169 iteration
+ Iterative difference of f_Qd is   1.306005933481014E-005
+ Iterative difference of f_Qd_t is   1.152964048187211E-005
+ Iterative difference of f_Qeddy is   1.280546254330689E-005
+ Iterative difference of A is   7.189716691235332E-006
+  
+  170 iteration
+ Iterative difference of f_Qd is   1.270451135331613E-005
+ Iterative difference of f_Qd_t is   1.121635986844199E-005
+ Iterative difference of f_Qeddy is   1.245484125161900E-005
+ Iterative difference of A is   7.003558154198425E-006
+  
+  171 iteration
+ Iterative difference of f_Qd is   1.235894089155615E-005
+ Iterative difference of f_Qd_t is   1.091186436295855E-005
+ Iterative difference of f_Qeddy is   1.211409645263117E-005
+ Iterative difference of A is   6.822243982396864E-006
+  
+  172 iteration
+ Iterative difference of f_Qd is   1.202305854641761E-005
+ Iterative difference of f_Qd_t is   1.061589899092885E-005
+ Iterative difference of f_Qeddy is   1.178294100894622E-005
+ Iterative difference of A is   6.645647673355487E-006
+  
+  173 iteration
+ Iterative difference of f_Qd is   1.169658361539067E-005
+ Iterative difference of f_Qd_t is   1.032821645917392E-005
+ Iterative difference of f_Qeddy is   1.146109642658627E-005
+ Iterative difference of A is   6.473646018200635E-006
+  
+  174 iteration
+ Iterative difference of f_Qd is   1.137924382488276E-005
+ Iterative difference of f_Qd_t is   1.004857691550703E-005
+ Iterative difference of f_Qeddy is   1.114829258495875E-005
+ Iterative difference of A is   6.306119017905967E-006
+  
+  175 iteration
+ Iterative difference of f_Qd is   1.107077506729698E-005
+ Iterative difference of f_Qd_t is   9.776747715510570E-006
+ Iterative difference of f_Qeddy is   1.084426747576667E-005
+ Iterative difference of A is   6.142949801536679E-006
+  
+  176 iteration
+ Iterative difference of f_Qd is   1.077092114692285E-005
+ Iterative difference of f_Qd_t is   9.512503197486866E-006
+ Iterative difference of f_Qeddy is   1.054876695009976E-005
+ Iterative difference of A is   5.984024546322117E-006
+  
+  177 iteration
+ Iterative difference of f_Qd is   1.047943353371661E-005
+ Iterative difference of f_Qd_t is   9.255624464389600E-006
+ Iterative difference of f_Qeddy is   1.026154447374139E-005
+ Iterative difference of A is   5.829232399662612E-006
+  
+  178 iteration
+ Iterative difference of f_Qd is   1.019607112504040E-005
+ Iterative difference of f_Qd_t is   9.005899172964682E-006
+ Iterative difference of f_Qeddy is   9.982360890656294E-006
+ Iterative difference of A is   5.678465402980323E-006
+  
+  179 iteration
+ Iterative difference of f_Qd is   9.920600015415892E-006
+ Iterative difference of f_Qd_t is   8.763121329642687E-006
+ Iterative difference of f_Qeddy is   9.710984193771199E-006
+ Iterative difference of A is   5.531618417355111E-006
+  
+  180 iteration
+ Iterative difference of f_Qd is   9.652793273230709E-006
+ Iterative difference of f_Qd_t is   8.527091093231409E-006
+ Iterative difference of f_Qeddy is   9.447189303221637E-006
+ Iterative difference of A is   5.388589050990544E-006
+  
+  181 iteration
+ Iterative difference of f_Qd is   9.392430725098377E-006
+ Iterative difference of f_Qd_t is   8.297614583728519E-006
+ Iterative difference of f_Qeddy is   9.208272071979662E-006
+ Iterative difference of A is   5.249277588388612E-006
+  
+  182 iteration
+ Iterative difference of f_Qd is   9.139298746768665E-006
+ Iterative difference of f_Qd_t is   8.082001770416680E-006
+ Iterative difference of f_Qeddy is   8.984426626616054E-006
+ Iterative difference of A is   5.113586921307728E-006
+  
+  183 iteration
+ Iterative difference of f_Qd is   8.893190061011469E-006
+ Iterative difference of f_Qd_t is   7.885370626237176E-006
+ Iterative difference of f_Qeddy is   8.766063307550503E-006
+ Iterative difference of A is   4.981422481311476E-006
+  
+  184 iteration
+ Iterative difference of f_Qd is   8.662295505390549E-006
+ Iterative difference of f_Qd_t is   7.693569915815518E-006
+ Iterative difference of f_Qeddy is   8.553046610085269E-006
+ Iterative difference of A is   4.852692174083309E-006
+  
+  185 iteration
+ Iterative difference of f_Qd is   8.451552059574735E-006
+ Iterative difference of f_Qd_t is   7.506479647607228E-006
+ Iterative difference of f_Qeddy is   8.345244424563802E-006
+ Iterative difference of A is   4.727306315279942E-006
+  
+  186 iteration
+ Iterative difference of f_Qd is   8.245982336740204E-006
+ Iterative difference of f_Qd_t is   7.323982855890476E-006
+ Iterative difference of f_Qeddy is   8.142527949287631E-006
+ Iterative difference of A is   4.605177567991101E-006
+  
+  187 iteration
+ Iterative difference of f_Qd is   8.045458006575301E-006
+ Iterative difference of f_Qd_t is   7.145965522634135E-006
+ Iterative difference of f_Qeddy is   7.944771605882667E-006
+ Iterative difference of A is   4.486220881809097E-006
+  
+  188 iteration
+ Iterative difference of f_Qd is   7.849853966276910E-006
+ Iterative difference of f_Qd_t is   6.972316501464848E-006
+ Iterative difference of f_Qeddy is   7.751852956806166E-006
+ Iterative difference of A is   4.370353433341689E-006
+  
+  189 iteration
+ Iterative difference of f_Qd is   7.659048257654955E-006
+ Iterative difference of f_Qd_t is   6.802927443760876E-006
+ Iterative difference of f_Qeddy is   7.563652625205974E-006
+ Iterative difference of A is   4.257494568246298E-006
+  
+  190 iteration
+ Iterative difference of f_Qd is   7.472921986339393E-006
+ Iterative difference of f_Qd_t is   6.637692726581268E-006
+ Iterative difference of f_Qeddy is   7.380054216667153E-006
+ Iterative difference of A is   4.147565744768225E-006
+  
+  191 iteration
+ Iterative difference of f_Qd is   7.291359243224993E-006
+ Iterative difference of f_Qd_t is   6.476509382617734E-006
+ Iterative difference of f_Qeddy is   7.200944243269253E-006
+ Iterative difference of A is   4.040490478618083E-006
+  
+  192 iteration
+ Iterative difference of f_Qd is   7.114247027994319E-006
+ Iterative difference of f_Qd_t is   6.319277032030418E-006
+ Iterative difference of f_Qeddy is   7.026212049544844E-006
+ Iterative difference of A is   3.936194289315062E-006
+  
+  193 iteration
+ Iterative difference of f_Qd is   6.941475174545436E-006
+ Iterative difference of f_Qd_t is   6.165897815990640E-006
+ Iterative difference of f_Qeddy is   6.855749740308087E-006
+ Iterative difference of A is   3.834604647855525E-006
+  
+  194 iteration
+ Iterative difference of f_Qd is   6.772936278647002E-006
+ Iterative difference of f_Qd_t is   6.016276332076326E-006
+ Iterative difference of f_Qeddy is   6.689452110544142E-006
+ Iterative difference of A is   3.735650925734690E-006
+  
+  195 iteration
+ Iterative difference of f_Qd is   6.608525627175427E-006
+ Iterative difference of f_Qd_t is   5.870319571405630E-006
+ Iterative difference of f_Qeddy is   6.527216577085354E-006
+ Iterative difference of A is   3.639264345222520E-006
+  
+  196 iteration
+ Iterative difference of f_Qd is   6.448141129558604E-006
+ Iterative difference of f_Qd_t is   5.727936857300581E-006
+ Iterative difference of f_Qeddy is   6.368943111956238E-006
+ Iterative difference of A is   3.545377931003096E-006
+  
+  197 iteration
+ Iterative difference of f_Qd is   6.291683250763541E-006
+ Iterative difference of f_Qd_t is   5.589039785730554E-006
+ Iterative difference of f_Qeddy is   6.214534177692577E-006
+ Iterative difference of A is   3.453926462955448E-006
+  
+  198 iteration
+ Iterative difference of f_Qd is   6.139054946167899E-006
+ Iterative difference of f_Qd_t is   5.453542167212916E-006
+ Iterative difference of f_Qeddy is   6.063894664141978E-006
+ Iterative difference of A is   3.364846430192053E-006
+  
+  199 iteration
+ Iterative difference of f_Qd is   5.990161598159321E-006
+ Iterative difference of f_Qd_t is   5.321359970347772E-006
+ Iterative difference of f_Qeddy is   5.916931827058131E-006
+ Iterative difference of A is   3.278075986280424E-006
+  
+  200 iteration
+ Iterative difference of f_Qd is   5.844910954306420E-006
+ Iterative difference of f_Qd_t is   5.192411266684988E-006
+ Iterative difference of f_Qeddy is   5.773555228221622E-006
+ Iterative difference of A is   3.193554905626950E-006
+  
+  201 iteration
+ Iterative difference of f_Qd is   5.703213067292240E-006
+ Iterative difference of f_Qd_t is   5.066616177249600E-006
+ Iterative difference of f_Qeddy is   5.633676677174043E-006
+ Iterative difference of A is   3.111224540951890E-006
+  
+  202 iteration
+ Iterative difference of f_Qd is   5.564980236211214E-006
+ Iterative difference of f_Qd_t is   4.943896820250315E-006
+ Iterative difference of f_Qeddy is   5.497210174350287E-006
+ Iterative difference of A is   3.031027781923157E-006
+  
+  203 iteration
+ Iterative difference of f_Qd is   5.430126949635544E-006
+ Iterative difference of f_Qd_t is   4.824177260352724E-006
+ Iterative difference of f_Qeddy is   5.364071855914337E-006
+ Iterative difference of A is   2.952909014752869E-006
+  
+  204 iteration
+ Iterative difference of f_Qd is   5.298569830034655E-006
+ Iterative difference of f_Qd_t is   4.707383459135600E-006
+ Iterative difference of f_Qeddy is   5.234179939778150E-006
+ Iterative difference of A is   2.876814083015156E-006
+  
+  205 iteration
+ Iterative difference of f_Qd is   5.170227579582437E-006
+ Iterative difference of f_Qd_t is   4.593443226928035E-006
+ Iterative difference of f_Qeddy is   5.107454673157485E-006
+ Iterative difference of A is   2.802690249310499E-006
+  
+  206 iteration
+ Iterative difference of f_Qd is   5.045020927556959E-006
+ Iterative difference of f_Qd_t is   4.482286175874761E-006
+ Iterative difference of f_Qeddy is   4.983818281480840E-006
+ Iterative difference of A is   2.730486158003878E-006
+  
+  207 iteration
+ Iterative difference of f_Qd is   4.922872578978776E-006
+ Iterative difference of f_Qd_t is   4.373843674198435E-006
+ Iterative difference of f_Qeddy is   4.863194918595937E-006
+ Iterative difference of A is   2.660151798956900E-006
+  
+  208 iteration
+ Iterative difference of f_Qd is   4.803707164571097E-006
+ Iterative difference of f_Qd_t is   4.268048801707447E-006
+ Iterative difference of f_Qeddy is   4.745510618207882E-006
+ Iterative difference of A is   2.591638472163732E-006
+  
+  209 iteration
+ Iterative difference of f_Qd is   4.687451192118136E-006
+ Iterative difference of f_Qd_t is   4.164836306465997E-006
+ Iterative difference of f_Qeddy is   4.630693246677337E-006
+ Iterative difference of A is   2.524898753306429E-006
+  
+  210 iteration
+ Iterative difference of f_Qd is   4.574032998978794E-006
+ Iterative difference of f_Qd_t is   4.064142562466844E-006
+ Iterative difference of f_Qeddy is   4.518672456974016E-006
+ Iterative difference of A is   2.459886460240077E-006
+  
+  211 iteration
+ Iterative difference of f_Qd is   4.463382705925667E-006
+ Iterative difference of f_Qd_t is   3.965905528598157E-006
+ Iterative difference of f_Qeddy is   4.409379643792455E-006
+ Iterative difference of A is   2.396556620371318E-006
+  
+  212 iteration
+ Iterative difference of f_Qd is   4.355432172066520E-006
+ Iterative difference of f_Qd_t is   3.870064708477727E-006
+ Iterative difference of f_Qeddy is   4.302747899854326E-006
+ Iterative difference of A is   2.334865438768929E-006
+  
+  213 iteration
+ Iterative difference of f_Qd is   4.250114951042522E-006
+ Iterative difference of f_Qd_t is   3.776561111511895E-006
+ Iterative difference of f_Qeddy is   4.198711973373015E-006
+ Iterative difference of A is   2.274770267306561E-006
+  
+  214 iteration
+ Iterative difference of f_Qd is   4.147366248263840E-006
+ Iterative difference of f_Qd_t is   3.685337214787143E-006
+ Iterative difference of f_Qeddy is   4.097208226489651E-006
+ Iterative difference of A is   2.216229574442119E-006
+  
+  215 iteration
+ Iterative difference of f_Qd is   4.047122879349135E-006
+ Iterative difference of f_Qd_t is   3.596336926047633E-006
+ Iterative difference of f_Qeddy is   3.998174594906090E-006
+ Iterative difference of A is   2.159202915881855E-006
+  
+  216 iteration
+ Iterative difference of f_Qd is   3.949323229487933E-006
+ Iterative difference of f_Qd_t is   3.509505547675401E-006
+ Iterative difference of f_Qeddy is   3.901550548433830E-006
+ Iterative difference of A is   2.103650905957433E-006
+  
+  217 iteration
+ Iterative difference of f_Qd is   3.853907214006885E-006
+ Iterative difference of f_Qd_t is   3.424789741440781E-006
+ Iterative difference of f_Qeddy is   3.807277052705199E-006
+ Iterative difference of A is   2.049535189842591E-006
+  
+  218 iteration
+ Iterative difference of f_Qd is   3.760816239858911E-006
+ Iterative difference of f_Qd_t is   3.342137494293657E-006
+ Iterative difference of f_Qeddy is   3.715296531630469E-006
+ Iterative difference of A is   1.996818416364829E-006
+  
+  219 iteration
+ Iterative difference of f_Qd is   3.669993168073371E-006
+ Iterative difference of f_Qd_t is   3.261498085008196E-006
+ Iterative difference of f_Qeddy is   3.625552831069273E-006
+ Iterative difference of A is   1.945464211689646E-006
+  
+  220 iteration
+ Iterative difference of f_Qd is   3.581382277299122E-006
+ Iterative difference of f_Qd_t is   3.182822051653322E-006
+ Iterative difference of f_Qeddy is   3.537991183234085E-006
+ Iterative difference of A is   1.895437153552962E-006
+  
+  221 iteration
+ Iterative difference of f_Qd is   3.494929228117782E-006
+ Iterative difference of f_Qd_t is   3.106061159902779E-006
+ Iterative difference of f_Qeddy is   3.452558172099829E-006
+ Iterative difference of A is   1.846702746267220E-006
+  
+  222 iteration
+ Iterative difference of f_Qd is   3.410581028390897E-006
+ Iterative difference of f_Qd_t is   3.031168372195220E-006
+ Iterative difference of f_Qeddy is   3.369201699663510E-006
+ Iterative difference of A is   1.799227396351993E-006
+  
+  223 iteration
+ Iterative difference of f_Qd is   3.328285999436298E-006
+ Iterative difference of f_Qd_t is   2.958097817650635E-006
+ Iterative difference of f_Qeddy is   3.287870953067734E-006
+ Iterative difference of A is   1.752978388792556E-006
+  
+  224 iteration
+ Iterative difference of f_Qd is   3.247993743113464E-006
+ Iterative difference of f_Qd_t is   2.886804762795153E-006
+ Iterative difference of f_Qeddy is   3.208516372525672E-006
+ Iterative difference of A is   1.707923863955921E-006
+  
+  225 iteration
+ Iterative difference of f_Qd is   3.169655109665215E-006
+ Iterative difference of f_Qd_t is   2.817245582941580E-006
+ Iterative difference of f_Qeddy is   3.131089620120320E-006
+ Iterative difference of A is   1.664032795088005E-006
+  
+  226 iteration
+ Iterative difference of f_Qd is   3.093222166506565E-006
+ Iterative difference of f_Qd_t is   2.749377734437286E-006
+ Iterative difference of f_Qeddy is   3.055543549380924E-006
+ Iterative difference of A is   1.621274966400604E-006
+  
+  227 iteration
+ Iterative difference of f_Qd is   3.018648167683186E-006
+ Iterative difference of f_Qd_t is   2.683159727508849E-006
+ Iterative difference of f_Qeddy is   2.981832175553284E-006
+ Iterative difference of A is   1.579620951801947E-006
+  
+  228 iteration
+ Iterative difference of f_Qd is   2.945887524165997E-006
+ Iterative difference of f_Qd_t is   2.618551099894256E-006
+ Iterative difference of f_Qeddy is   2.909910646730490E-006
+ Iterative difference of A is   1.539042094057461E-006
+  
+  229 iteration
+ Iterative difference of f_Qd is   2.874895774943736E-006
+ Iterative difference of f_Qd_t is   2.555512390992054E-006
+ Iterative difference of f_Qeddy is   2.839735215660194E-006
+ Iterative difference of A is   1.499510484634023E-006
+  
+  230 iteration
+ Iterative difference of f_Qd is   2.805629558750439E-006
+ Iterative difference of f_Qd_t is   2.494005116929904E-006
+ Iterative difference of f_Qeddy is   2.771263212218017E-006
+ Iterative difference of A is   1.460998944024725E-006
+  
+  231 iteration
+ Iterative difference of f_Qd is   2.738046586635984E-006
+ Iterative difference of f_Qd_t is   2.433991745928038E-006
+ Iterative difference of f_Qeddy is   2.704453016748321E-006
+ Iterative difference of A is   1.423481002529869E-006
+  
+  232 iteration
+ Iterative difference of f_Qd is   2.672105615036252E-006
+ Iterative difference of f_Qd_t is   2.375435674672327E-006
+ Iterative difference of f_Qeddy is   2.639264033803962E-006
+ Iterative difference of A is   1.386930881681556E-006
+  
+  233 iteration
+ Iterative difference of f_Qd is   2.607766419839008E-006
+ Iterative difference of f_Qd_t is   2.318301204905920E-006
+ Iterative difference of f_Qeddy is   2.575656666829740E-006
+ Iterative difference of A is   1.351323476001323E-006
+  
+  234 iteration
+ Iterative difference of f_Qd is   2.544989770772443E-006
+ Iterative difference of f_Qd_t is   2.262553520936822E-006
+ Iterative difference of f_Qeddy is   2.513592293276051E-006
+ Iterative difference of A is   1.316634335396180E-006
+  
+  235 iteration
+ Iterative difference of f_Qd is   2.483737406619446E-006
+ Iterative difference of f_Qd_t is   2.208158667482002E-006
+ Iterative difference of f_Qeddy is   2.453033240468888E-006
+ Iterative difference of A is   1.282839647861675E-006
+  
+  236 iteration
+ Iterative difference of f_Qd is   2.423972011153519E-006
+ Iterative difference of f_Qd_t is   2.155083528253970E-006
+ Iterative difference of f_Qeddy is   2.393942761989842E-006
+ Iterative difference of A is   1.249916222797326E-006
+  
+  237 iteration
+ Iterative difference of f_Qd is   2.365657189348780E-006
+ Iterative difference of f_Qd_t is   2.103295804939398E-006
+ Iterative difference of f_Qeddy is   2.336285014753470E-006
+ Iterative difference of A is   1.217841474630832E-006
+  
+  238 iteration
+ Iterative difference of f_Qd is   2.308757444648146E-006
+ Iterative difference of f_Qd_t is   2.052763996816115E-006
+ Iterative difference of f_Qeddy is   2.280025036577316E-006
+ Iterative difference of A is   1.186593406948822E-006
+  
+  239 iteration
+ Iterative difference of f_Qd is   2.253238156366827E-006
+ Iterative difference of f_Qd_t is   2.003457380845425E-006
+ Iterative difference of f_Qeddy is   2.225128724317460E-006
+ Iterative difference of A is   1.156150597033528E-006
+  
+  240 iteration
+ Iterative difference of f_Qd is   2.199065557987462E-006
+ Iterative difference of f_Qd_t is   1.955345992284835E-006
+ Iterative difference of f_Qeddy is   2.171562812635502E-006
+ Iterative difference of A is   1.126492180791513E-006
+  
+  241 iteration
+ Iterative difference of f_Qd is   2.146206715843840E-006
+ Iterative difference of f_Qd_t is   1.908400605724059E-006
+ Iterative difference of f_Qeddy is   2.119294853220044E-006
+ Iterative difference of A is   1.097597838100456E-006
+  
+  242 iteration
+ Iterative difference of f_Qd is   2.094629508356260E-006
+ Iterative difference of f_Qd_t is   1.862592716731643E-006
+ Iterative difference of f_Qeddy is   2.068293194500831E-006
+ Iterative difference of A is   1.069447778523705E-006
+  
+  243 iteration
+ Iterative difference of f_Qd is   2.044302605874043E-006
+ Iterative difference of f_Qd_t is   1.817894523817309E-006
+ Iterative difference of f_Qeddy is   2.018526962015155E-006
+ Iterative difference of A is   1.042022727422084E-006
+  
+  244 iteration
+ Iterative difference of f_Qd is   1.995195450899684E-006
+ Iterative difference of f_Qd_t is   1.774278910994520E-006
+ Iterative difference of f_Qeddy is   1.969966039103849E-006
+ Iterative difference of A is   1.015303912393559E-006
+  
+  245 iteration
+ Iterative difference of f_Qd is   1.947278238927097E-006
+ Iterative difference of f_Qd_t is   1.731719430648343E-006
+ Iterative difference of f_Qeddy is   1.922581048183214E-006
+ Iterative difference of A is   9.892730501431107E-007
+  
+  246 iteration
+ Iterative difference of f_Qd is   1.900521899696195E-006
+ Iterative difference of f_Qd_t is   1.690190286920273E-006
+ Iterative difference of f_Qeddy is   1.876343332488789E-006
+ Iterative difference of A is   9.639123336145639E-007
+  
+  247 iteration
+ Iterative difference of f_Qd is   1.854898078964412E-006
+ Iterative difference of f_Qd_t is   1.649666319505916E-006
+ Iterative difference of f_Qeddy is   1.831224938166065E-006
+ Iterative difference of A is   9.392044195300625E-007
+  
+  248 iteration
+ Iterative difference of f_Qd is   1.810379120642525E-006
+ Iterative difference of f_Qd_t is   1.610122987823898E-006
+ Iterative difference of f_Qeddy is   1.787198597013456E-006
+ Iterative difference of A is   9.151324161949664E-007
+  
+  249 iteration
+ Iterative difference of f_Qd is   1.766938049537620E-006
+ Iterative difference of f_Qd_t is   1.571536355590708E-006
+ Iterative difference of f_Qeddy is   1.744237709426499E-006
+ Iterative difference of A is   8.916798717156088E-007
+  
+  250 iteration
+ Iterative difference of f_Qd is   1.724548554373623E-006
+ Iterative difference of f_Qd_t is   1.533883075860443E-006
+ Iterative difference of f_Qeddy is   1.702316327959613E-006
+ Iterative difference of A is   8.688307624044045E-007
+  
+  251 iteration
+ Iterative difference of f_Qd is   1.683184971321833E-006
+ Iterative difference of f_Qd_t is   1.497140376290063E-006
+ Iterative difference of f_Qeddy is   1.661409141151537E-006
+ Iterative difference of A is   8.465694816221087E-007
+  
+  252 iteration
+ Iterative difference of f_Qd is   1.642822267944322E-006
+ Iterative difference of f_Qd_t is   1.461286044942417E-006
+ Iterative difference of f_Qeddy is   1.621491457860780E-006
+ Iterative difference of A is   8.248808288056908E-007
+  
+  253 iteration
+ Iterative difference of f_Qd is   1.603436027525912E-006
+ Iterative difference of f_Qd_t is   1.426298416300903E-006
+ Iterative difference of f_Qeddy is   1.582539191944538E-006
+ Iterative difference of A is   8.037499988448882E-007
+  
+  254 iteration
+ Iterative difference of f_Qd is   1.565002433732282E-006
+ Iterative difference of f_Qd_t is   1.392156357755969E-006
+ Iterative difference of f_Qeddy is   1.544528847305382E-006
+ Iterative difference of A is   7.831625717501928E-007
+  
+  255 iteration
+ Iterative difference of f_Qd is   1.527498255840531E-006
+ Iterative difference of f_Qd_t is   1.358839256369176E-006
+ Iterative difference of f_Qeddy is   1.507437503350806E-006
+ Iterative difference of A is   7.631045025099231E-007
+  
+  256 iteration
+ Iterative difference of f_Qd is   1.490900834091174E-006
+ Iterative difference of f_Qd_t is   1.326327005914812E-006
+ Iterative difference of f_Qeddy is   1.471242800810124E-006
+ Iterative difference of A is   7.435621113324048E-007
+  
+  257 iteration
+ Iterative difference of f_Qd is   1.455188065623003E-006
+ Iterative difference of f_Qd_t is   1.294599994393353E-006
+ Iterative difference of f_Qeddy is   1.435922927808114E-006
+ Iterative difference of A is   7.245220740598884E-007
+  
+  258 iteration
+ Iterative difference of f_Qd is   1.420338390595299E-006
+ Iterative difference of f_Qd_t is   1.263639091732272E-006
+ Iterative difference of f_Qeddy is   1.401456606504176E-006
+ Iterative difference of A is   7.059714128444111E-007
+  
+  259 iteration
+ Iterative difference of f_Qd is   1.386330778854750E-006
+ Iterative difference of f_Qd_t is   1.233425637854613E-006
+ Iterative difference of f_Qeddy is   1.367823079807817E-006
+ Iterative difference of A is   6.878974871237648E-007
+  
+  260 iteration
+ Iterative difference of f_Qd is   1.353144716643995E-006
+ Iterative difference of f_Qd_t is   1.203941430973077E-006
+ Iterative difference of f_Qeddy is   1.335002098583338E-006
+ Iterative difference of A is   6.702879847709370E-007
+  
+  261 iteration
+ Iterative difference of f_Qd is   1.320760193972842E-006
+ Iterative difference of f_Qd_t is   1.175168716324726E-006
+ Iterative difference of f_Qeddy is   1.302973909156346E-006
+ Iterative difference of A is   6.531309134950869E-007
+  
+  262 iteration
+ Iterative difference of f_Qd is   1.289157692044990E-006
+ Iterative difference of f_Qd_t is   1.147090175037530E-006
+ Iterative difference of f_Qeddy is   1.271719241052738E-006
+ Iterative difference of A is   6.364145925079334E-007
+  
+  263 iteration
+ Iterative difference of f_Qd is   1.258318171132311E-006
+ Iterative difference of f_Qd_t is   1.119688913319566E-006
+ Iterative difference of f_Qeddy is   1.241219295188695E-006
+ Iterative difference of A is   6.201276443636161E-007
+  
+  264 iteration
+ Iterative difference of f_Qd is   1.228223058750977E-006
+ Iterative difference of f_Qd_t is   1.092948451995174E-006
+ Iterative difference of f_Qeddy is   1.211455732133548E-006
+ Iterative difference of A is   6.042589870153964E-007
+  
+  265 iteration
+ Iterative difference of f_Qd is   1.198854238045749E-006
+ Iterative difference of f_Qd_t is   1.066852716190281E-006
+ Iterative difference of f_Qeddy is   1.182410660941630E-006
+ Iterative difference of A is   5.887978260944032E-007
+  
+  266 iteration
+ Iterative difference of f_Qd is   1.170194036535094E-006
+ Iterative difference of f_Qd_t is   1.041386025336932E-006
+ Iterative difference of f_Qeddy is   1.154066627970241E-006
+ Iterative difference of A is   5.737336474503224E-007
+  
+  267 iteration
+ Iterative difference of f_Qd is   1.142225215175485E-006
+ Iterative difference of f_Qd_t is   1.016533083444959E-006
+ Iterative difference of f_Qeddy is   1.126406606231922E-006
+ Iterative difference of A is   5.590562097337187E-007
+  
+  268 iteration
+ Iterative difference of f_Qd is   1.114930957574894E-006
+ Iterative difference of f_Qd_t is   9.922789695471224E-007
+ Iterative difference of f_Qeddy is   1.099413984819581E-006
+ Iterative difference of A is   5.447555373409158E-007
+  
+  269 iteration
+ Iterative difference of f_Qd is   1.088294859591388E-006
+ Iterative difference of f_Qd_t is   9.686091284565046E-007
+ Iterative difference of f_Qeddy is   1.073072558699373E-006
+ Iterative difference of A is   5.308219134664283E-007
+  
+  270 iteration
+ Iterative difference of f_Qd is   1.062300919126014E-006
+ Iterative difference of f_Qd_t is   9.455093617112553E-007
+ Iterative difference of f_Qeddy is   1.047366518774212E-006
+ Iterative difference of A is   5.172458732924379E-007
+  
+  271 iteration
+ Iterative difference of f_Qd is   1.036933526196715E-006
+ Iterative difference of f_Qd_t is   9.229658187621947E-007
+ Iterative difference of f_Qeddy is   1.022280442051354E-006
+ Iterative difference of A is   5.065529865787809E-007
+  
+  272 iteration
+ Iterative difference of f_Qd is   1.012177453265511E-006
+ Iterative difference of f_Qd_t is   9.009649883789939E-007
+ Iterative difference of f_Qeddy is   9.977992822332582E-007
+ Iterative difference of A is   4.987246761891002E-007
+  
+  273 iteration
+ Iterative difference of f_Qd is   9.880178457391531E-007
+ Iterative difference of f_Qd_t is   8.794936902402350E-007
+ Iterative difference of f_Qeddy is   9.739083604159982E-007
+ Iterative difference of A is   4.910167117253526E-007
+  
+  274 iteration
+ Iterative difference of f_Qd is   9.644402128965168E-007
+ Iterative difference of f_Qd_t is   8.585390668183757E-007
+ Iterative difference of f_Qeddy is   9.505933560756408E-007
+ Iterative difference of A is   4.834272561017160E-007
+  
+  275 iteration
+ Iterative difference of f_Qd is   9.414304187119193E-007
+ Iterative difference of f_Qd_t is   8.380885753410394E-007
+ Iterative difference of f_Qeddy is   9.278402982697276E-007
+ Iterative difference of A is   4.759545000256743E-007
+  
+  276 iteration
+ Iterative difference of f_Qd is   9.189746732890525E-007
+ Iterative difference of f_Qd_t is   8.181299800576192E-007
+ Iterative difference of f_Qeddy is   9.056355570330465E-007
+ Iterative difference of A is   4.685966615712751E-007
+  
+  277 iteration
+ Iterative difference of f_Qd is   8.970595241943047E-007
+ Iterative difference of f_Qd_t is   7.986513446758825E-007
+ Iterative difference of f_Qeddy is   8.839658350197344E-007
+ Iterative difference of A is   4.613519857823122E-007
+  
+  278 iteration
+ Iterative difference of f_Qd is   8.756718482029469E-007
+ Iterative difference of f_Qd_t is   7.796410249338859E-007
+ Iterative difference of f_Qeddy is   8.628181592876261E-007
+ Iterative difference of A is   4.542187442564249E-007
+  
+  279 iteration
+ Iterative difference of f_Qd is   8.547988431424625E-007
+ Iterative difference of f_Qd_t is   7.633975367942608E-007
+ Iterative difference of f_Qeddy is   8.421798734399577E-007
+ Iterative difference of A is   4.471952347515334E-007
+  
+  280 iteration
+ Iterative difference of f_Qd is   8.344280199995557E-007
+ Iterative difference of f_Qd_t is   7.516602705992699E-007
+ Iterative difference of f_Qeddy is   8.220386297150273E-007
+ Iterative difference of A is   4.402797807944413E-007
+  
+  281 iteration
+ Iterative difference of f_Qd is   8.145471952006322E-007
+ Iterative difference of f_Qd_t is   7.401021868080025E-007
+ Iterative difference of f_Qeddy is   8.023823815372921E-007
+ Iterative difference of A is   4.334707312939924E-007
+  
+  282 iteration
+ Iterative difference of f_Qd is   7.951444830449350E-007
+ Iterative difference of f_Qd_t is   7.287205867601530E-007
+ Iterative difference of f_Qeddy is   7.831993760476497E-007
+ Iterative difference of A is   4.267664601587812E-007
+  
+  283 iteration
+ Iterative difference of f_Qd is   7.762082884360533E-007
+ Iterative difference of f_Qd_t is   7.175128113015745E-007
+ Iterative difference of f_Qeddy is   7.644781469355599E-007
+ Iterative difference of A is   4.201653659239701E-007
+  
+  284 iteration
+ Iterative difference of f_Qd is   7.577272996689421E-007
+ Iterative difference of f_Qd_t is   7.064762402647293E-007
+ Iterative difference of f_Qeddy is   7.462075073856600E-007
+ Iterative difference of A is   4.136658713817937E-007
+  
+  285 iteration
+ Iterative difference of f_Qd is   7.396904814632732E-007
+ Iterative difference of f_Qd_t is   6.956082919261537E-007
+ Iterative difference of f_Qeddy is   7.283765432221367E-007
+ Iterative difference of A is   4.072664232190014E-007
+  
+  286 iteration
+ Iterative difference of f_Qd is   7.220870681355629E-007
+ Iterative difference of f_Qd_t is   6.849064224712965E-007
+ Iterative difference of f_Qeddy is   7.109746062855526E-007
+ Iterative difference of A is   4.009654916549508E-007
+  
+  287 iteration
+ Iterative difference of f_Qd is   7.057194582700196E-007
+ Iterative difference of f_Qd_t is   6.743681254762698E-007
+ Iterative difference of f_Qeddy is   6.939913077888549E-007
+ Iterative difference of A is   3.947615700942292E-007
+  
+  288 iteration
+ Iterative difference of f_Qd is   6.948347430059225E-007
+ Iterative difference of f_Qd_t is   6.639909313852638E-007
+ Iterative difference of f_Qeddy is   6.774165121105347E-007
+ Iterative difference of A is   3.886531747721196E-007
+  
+  289 iteration
+ Iterative difference of f_Qd is   6.841168443227734E-007
+ Iterative difference of f_Qd_t is   6.537724070057420E-007
+ Iterative difference of f_Qeddy is   6.612403304490089E-007
+ Iterative difference of A is   3.826388444221843E-007
+  
+  290 iteration
+ Iterative difference of f_Qd is   6.736712321467678E-007
+ Iterative difference of f_Qd_t is   6.437372551287325E-007
+ Iterative difference of f_Qeddy is   6.454531148551712E-007
+ Iterative difference of A is   3.767171399258508E-007
+  
+  291 iteration
+ Iterative difference of f_Qd is   6.634409254772586E-007
+ Iterative difference of f_Qd_t is   6.338658763201804E-007
+ Iterative difference of f_Qeddy is   6.300454523204546E-007
+ Iterative difference of A is   3.708866439919214E-007
+  
+  292 iteration
+ Iterative difference of f_Qd is   6.533617994174470E-007
+ Iterative difference of f_Qd_t is   6.241447303451803E-007
+ Iterative difference of f_Qeddy is   6.150081590106105E-007
+ Iterative difference of A is   3.651459608245908E-007
+  
+  293 iteration
+ Iterative difference of f_Qd is   6.434317284683376E-007
+ Iterative difference of f_Qd_t is   6.145715613263894E-007
+ Iterative difference of f_Qeddy is   6.003322746625517E-007
+ Iterative difference of A is   3.594937157981853E-007
+  
+  294 iteration
+ Iterative difference of f_Qd is   6.336486142576730E-007
+ Iterative difference of f_Qd_t is   6.051441463800385E-007
+ Iterative difference of f_Qeddy is   5.860090570609933E-007
+ Iterative difference of A is   3.539285551431778E-007
+  
+  295 iteration
+ Iterative difference of f_Qd is   6.240103852636798E-007
+ Iterative difference of f_Qd_t is   5.958602951701072E-007
+ Iterative difference of f_Qeddy is   5.720299768065262E-007
+ Iterative difference of A is   3.484491456354558E-007
+  
+  296 iteration
+ Iterative difference of f_Qd is   6.145149965366449E-007
+ Iterative difference of f_Qd_t is   5.867178494499241E-007
+ Iterative difference of f_Qeddy is   5.583867119969554E-007
+ Iterative difference of A is   3.430541742797336E-007
+  
+  297 iteration
+ Iterative difference of f_Qd is   6.051604294226610E-007
+ Iterative difference of f_Qd_t is   5.777146826254492E-007
+ Iterative difference of f_Qeddy is   5.450711431792543E-007
+ Iterative difference of A is   3.377423480159514E-007
+  
+  298 iteration
+ Iterative difference of f_Qd is   5.959446912865048E-007
+ Iterative difference of f_Qd_t is   5.688486993059814E-007
+ Iterative difference of f_Qeddy is   5.320753484645835E-007
+ Iterative difference of A is   3.325123934117945E-007
+  
+  299 iteration
+ Iterative difference of f_Qd is   5.868658152479583E-007
+ Iterative difference of f_Qd_t is   5.601178348765487E-007
+ Iterative difference of f_Qeddy is   5.193915985773900E-007
+ Iterative difference of A is   3.273630563747302E-007
+  
+  300 iteration
+ Iterative difference of f_Qd is   5.779593213934599E-007
+ Iterative difference of f_Qd_t is   5.515200550676967E-007
+ Iterative difference of f_Qeddy is   5.070123522202263E-007
+ Iterative difference of A is   3.222931018542850E-007
+  
+  301 iteration
+ Iterative difference of f_Qd is   5.691961400544621E-007
+ Iterative difference of f_Qd_t is   5.430533555239765E-007
+ Iterative difference of f_Qeddy is   4.949302514871412E-007
+ Iterative difference of A is   3.173013135660072E-007
+  
+  302 iteration
+ Iterative difference of f_Qd is   5.605625140805981E-007
+ Iterative difference of f_Qd_t is   5.347157614010549E-007
+ Iterative difference of f_Qeddy is   4.831381173082960E-007
+ Iterative difference of A is   3.123864936976483E-007
+  
+  303 iteration
+ Iterative difference of f_Qd is   5.520566122110306E-007
+ Iterative difference of f_Qd_t is   5.265053269329009E-007
+ Iterative difference of f_Qeddy is   4.716289451305034E-007
+ Iterative difference of A is   3.075474626413645E-007
+  
+  304 iteration
+ Iterative difference of f_Qd is   5.436766269835934E-007
+ Iterative difference of f_Qd_t is   5.184201350388710E-007
+ Iterative difference of f_Qeddy is   4.604006694775009E-007
+ Iterative difference of A is   3.027830587174624E-007
+  
+  305 iteration
+ Iterative difference of f_Qd is   5.354207744672108E-007
+ Iterative difference of f_Qd_t is   5.104582969108450E-007
+ Iterative difference of f_Qeddy is   4.494466080695592E-007
+ Iterative difference of A is   2.980921379018304E-007
+  
+  306 iteration
+ Iterative difference of f_Qd is   5.272872940160003E-007
+ Iterative difference of f_Qd_t is   5.026179516216117E-007
+ Iterative difference of f_Qeddy is   4.387549573763028E-007
+ Iterative difference of A is   2.934735735648630E-007
+  
+  307 iteration
+ Iterative difference of f_Qd is   5.192744480068956E-007
+ Iterative difference of f_Qd_t is   4.948972657237150E-007
+ Iterative difference of f_Qeddy is   4.283193925057327E-007
+ Iterative difference of A is   2.889262562056141E-007
+  
+  308 iteration
+ Iterative difference of f_Qd is   5.113805215850760E-007
+ Iterative difference of f_Qd_t is   4.872944328725842E-007
+ Iterative difference of f_Qeddy is   4.181337419084663E-007
+ Iterative difference of A is   2.844490932015636E-007
+  
+  309 iteration
+ Iterative difference of f_Qd is   5.036038224185031E-007
+ Iterative difference of f_Qd_t is   4.798076734284160E-007
+ Iterative difference of f_Qeddy is   4.081919835370595E-007
+ Iterative difference of A is   2.800410085445054E-007
+  
+  310 iteration
+ Iterative difference of f_Qd is   4.959426804398807E-007
+ Iterative difference of f_Qd_t is   4.724352340914478E-007
+ Iterative difference of f_Qeddy is   3.984882413175794E-007
+ Iterative difference of A is   2.757009425987701E-007
+  
+  311 iteration
+ Iterative difference of f_Qd is   4.883954476055281E-007
+ Iterative difference of f_Qd_t is   4.651753875203196E-007
+ Iterative difference of f_Qeddy is   3.890167814719903E-007
+ Iterative difference of A is   2.714278518551119E-007
+  
+  312 iteration
+ Iterative difference of f_Qd is   4.809604976382074E-007
+ Iterative difference of f_Qd_t is   4.580264319647455E-007
+ Iterative difference of f_Qeddy is   3.797720092221790E-007
+ Iterative difference of A is   2.672207086787393E-007
+  
+  313 iteration
+ Iterative difference of f_Qd is   4.736362257942370E-007
+ Iterative difference of f_Qd_t is   4.509866909046915E-007
+ Iterative difference of f_Qeddy is   3.707484651782611E-007
+ Iterative difference of A is   2.630785010835843E-007
+  
+  314 iteration
+ Iterative difference of f_Qd is   4.664210486128237E-007
+ Iterative difference of f_Qd_t is   4.440545126843491E-007
+ Iterative difference of f_Qeddy is   3.619408222819975E-007
+ Iterative difference of A is   2.590002324853215E-007
+  
+  315 iteration
+ Iterative difference of f_Qd is   4.593134036723345E-007
+ Iterative difference of f_Qd_t is   4.372282701669249E-007
+ Iterative difference of f_Qeddy is   3.533438823963286E-007
+ Iterative difference of A is   2.549849214778053E-007
+  
+  316 iteration
+ Iterative difference of f_Qd is   4.523117493578435E-007
+ Iterative difference of f_Qd_t is   4.305063603690477E-007
+ Iterative difference of f_Qeddy is   3.449525732765468E-007
+ Iterative difference of A is   2.510316015967139E-007
+  
+  317 iteration
+ Iterative difference of f_Qd is   4.454145646143673E-007
+ Iterative difference of f_Qd_t is   4.238872041402789E-007
+ Iterative difference of f_Qeddy is   3.367619454616722E-007
+ Iterative difference of A is   2.471393211035764E-007
+  
+  318 iteration
+ Iterative difference of f_Qd is   4.386203487222184E-007
+ Iterative difference of f_Qd_t is   4.173692457918807E-007
+ Iterative difference of f_Qeddy is   3.287671693011363E-007
+ Iterative difference of A is   2.433071427552710E-007
+  
+  319 iteration
+ Iterative difference of f_Qd is   4.319276210463380E-007
+ Iterative difference of f_Qd_t is   4.109509527819646E-007
+ Iterative difference of f_Qeddy is   3.209635320508553E-007
+ Iterative difference of A is   2.395341435917388E-007
+  
+  320 iteration
+ Iterative difference of f_Qd is   4.253349208203222E-007
+ Iterative difference of f_Qd_t is   4.046308153819907E-007
+ Iterative difference of f_Qeddy is   3.133464349797110E-007
+ Iterative difference of A is   2.358194147182753E-007
+  
+  321 iteration
+ Iterative difference of f_Qd is   4.188723478578717E-007
+ Iterative difference of f_Qd_t is   3.984073463319908E-007
+ Iterative difference of f_Qeddy is   3.059113906633826E-007
+ Iterative difference of A is   2.321620610908591E-007
+  
+  322 iteration
+ Iterative difference of f_Qd is   4.125082795135120E-007
+ Iterative difference of f_Qd_t is   3.922790805391610E-007
+ Iterative difference of f_Qeddy is   2.986540202261356E-007
+ Iterative difference of A is   2.285612013131887E-007
+  
+  323 iteration
+ Iterative difference of f_Qd is   4.062388666362104E-007
+ Iterative difference of f_Qd_t is   3.862445747439269E-007
+ Iterative difference of f_Qeddy is   2.915700507317986E-007
+ Iterative difference of A is   2.250159674263476E-007
+  
+  324 iteration
+ Iterative difference of f_Qd is   4.000627520654894E-007
+ Iterative difference of f_Qd_t is   3.803024072120305E-007
+ Iterative difference of f_Qeddy is   2.846553126024942E-007
+ Iterative difference of A is   2.215255047075763E-007
+  
+  325 iteration
+ Iterative difference of f_Qd is   3.939785968515644E-007
+ Iterative difference of f_Qd_t is   3.744511774183765E-007
+ Iterative difference of f_Qeddy is   2.779057370581872E-007
+ Iterative difference of A is   2.180889714712125E-007
+  
+  326 iteration
+ Iterative difference of f_Qd is   3.879850800493460E-007
+ Iterative difference of f_Qd_t is   3.686895057486601E-007
+ Iterative difference of f_Qeddy is   2.713173537609304E-007
+ Iterative difference of A is   2.147055388696320E-007
+  
+  327 iteration
+ Iterative difference of f_Qd is   3.820808984942269E-007
+ Iterative difference of f_Qd_t is   3.630160331875507E-007
+ Iterative difference of f_Qeddy is   2.648862883238012E-007
+ Iterative difference of A is   2.113743907022122E-007
+  
+  328 iteration
+ Iterative difference of f_Qd is   3.762647666034555E-007
+ Iterative difference of f_Qd_t is   3.574294210285586E-007
+ Iterative difference of f_Qeddy is   2.586087600731091E-007
+ Iterative difference of A is   2.080947232214764E-007
+  
+  329 iteration
+ Iterative difference of f_Qd is   3.705354161592962E-007
+ Iterative difference of f_Qd_t is   3.519283505765310E-007
+ Iterative difference of f_Qeddy is   2.524810796510069E-007
+ Iterative difference of A is   2.048657449507316E-007
+  
+  330 iteration
+ Iterative difference of f_Qd is   3.648915961021633E-007
+ Iterative difference of f_Qd_t is   3.465115228549163E-007
+ Iterative difference of f_Qeddy is   2.464996469338232E-007
+ Iterative difference of A is   2.016866764899955E-007
+  
+  331 iteration
+ Iterative difference of f_Qd is   3.593320723280918E-007
+ Iterative difference of f_Qd_t is   3.411776583234390E-007
+ Iterative difference of f_Qeddy is   2.406609487561051E-007
+ Iterative difference of A is   1.985567503412240E-007
+  
+  332 iteration
+ Iterative difference of f_Qd is   3.538556274883774E-007
+ Iterative difference of f_Qd_t is   3.359254965927365E-007
+ Iterative difference of f_Qeddy is   2.349615568567054E-007
+ Iterative difference of A is   1.954752107231287E-007
+  
+  333 iteration
+ Iterative difference of f_Qd is   3.484610607775059E-007
+ Iterative difference of f_Qd_t is   3.307537961502738E-007
+ Iterative difference of f_Qeddy is   2.293981257936450E-007
+ Iterative difference of A is   1.924413134000904E-007
+  
+  334 iteration
+ Iterative difference of f_Qd is   3.431471877436351E-007
+ Iterative difference of f_Qd_t is   3.256613340788840E-007
+ Iterative difference of f_Qeddy is   2.239673909248951E-007
+ Iterative difference of A is   1.894543254993622E-007
+  
+  335 iteration
+ Iterative difference of f_Qd is   3.379128400860659E-007
+ Iterative difference of f_Qd_t is   3.206469057917896E-007
+ Iterative difference of f_Qeddy is   2.186661664967116E-007
+ Iterative difference of A is   1.865135253486562E-007
+  
+  336 iteration
+ Iterative difference of f_Qd is   3.327568654587845E-007
+ Iterative difference of f_Qd_t is   3.157093247606844E-007
+ Iterative difference of f_Qeddy is   2.134913436382946E-007
+ Iterative difference of A is   1.836182022976838E-007
+  
+  337 iteration
+ Iterative difference of f_Qd is   3.276781272770410E-007
+ Iterative difference of f_Qd_t is   3.108474222576936E-007
+ Iterative difference of f_Qeddy is   2.084398885923711E-007
+ Iterative difference of A is   1.807676565581274E-007
+  
+  338 iteration
+ Iterative difference of f_Qd is   3.226755045239275E-007
+ Iterative difference of f_Qd_t is   3.060600470856240E-007
+ Iterative difference of f_Qeddy is   2.035088408208763E-007
+ Iterative difference of A is   1.779611990360228E-007
+  
+  339 iteration
+ Iterative difference of f_Qd is   3.177478915617274E-007
+ Iterative difference of f_Qd_t is   3.013460653372713E-007
+ Iterative difference of f_Qeddy is   1.986953112563528E-007
+ Iterative difference of A is   1.751981511712974E-007
+  
+  340 iteration
+ Iterative difference of f_Qd is   3.128941979389267E-007
+ Iterative difference of f_Qd_t is   2.967043601230686E-007
+ Iterative difference of f_Qeddy is   1.939964805949823E-007
+ Iterative difference of A is   1.724778447764405E-007
+  
+  341 iteration
+ Iterative difference of f_Qd is   3.081133482089361E-007
+ Iterative difference of f_Qd_t is   2.921338313421028E-007
+ Iterative difference of f_Qeddy is   1.894095975167598E-007
+ Iterative difference of A is   1.697996218823303E-007
+  
+  342 iteration
+ Iterative difference of f_Qd is   3.034042817323321E-007
+ Iterative difference of f_Qd_t is   2.876333954136660E-007
+ Iterative difference of f_Qeddy is   1.849319771346503E-007
+ Iterative difference of A is   1.671628345814580E-007
+  
+  343 iteration
+ Iterative difference of f_Qd is   2.987659525150940E-007
+ Iterative difference of f_Qd_t is   2.832019850604155E-007
+ Iterative difference of f_Qeddy is   1.805609993327240E-007
+ Iterative difference of A is   1.645668448737540E-007
+  
+  344 iteration
+ Iterative difference of f_Qd is   2.941973290004375E-007
+ Iterative difference of f_Qd_t is   2.788385490464299E-007
+ Iterative difference of f_Qeddy is   1.762941072083746E-007
+ Iterative difference of A is   1.620110245223894E-007
+  
+  345 iteration
+ Iterative difference of f_Qd is   2.896973939126891E-007
+ Iterative difference of f_Qd_t is   2.745420519551650E-007
+ Iterative difference of f_Qeddy is   1.721288055110681E-007
+ Iterative difference of A is   1.594947548989520E-007
+  
+  346 iteration
+ Iterative difference of f_Qd is   2.852651440577933E-007
+ Iterative difference of f_Qd_t is   2.703114739500620E-007
+ Iterative difference of f_Qeddy is   1.680626591955836E-007
+ Iterative difference of A is   1.570174268429331E-007
+  
+  347 iteration
+ Iterative difference of f_Qd is   2.808995901654524E-007
+ Iterative difference of f_Qd_t is   2.661458105542372E-007
+ Iterative difference of f_Qeddy is   1.640932919023952E-007
+ Iterative difference of A is   1.545784405147105E-007
+  
+  348 iteration
+ Iterative difference of f_Qd is   2.766081726077695E-007
+ Iterative difference of f_Qd_t is   2.620506043679235E-007
+ Iterative difference of f_Qeddy is   1.602183846392824E-007
+ Iterative difference of A is   1.521772052576371E-007
+  
+  349 iteration
+ Iterative difference of f_Qd is   2.723909419363214E-007
+ Iterative difference of f_Qd_t is   2.580223069570051E-007
+ Iterative difference of f_Qeddy is   1.564356742235484E-007
+ Iterative difference of A is   1.498131394542766E-007
+  
+  350 iteration
+ Iterative difference of f_Qd is   2.682369210351906E-007
+ Iterative difference of f_Qd_t is   2.540556166838806E-007
+ Iterative difference of f_Qeddy is   1.527429520989387E-007
+ Iterative difference of A is   1.474856703934796E-007
+  
+  351 iteration
+ Iterative difference of f_Qd is   2.641451890303230E-007
+ Iterative difference of f_Qd_t is   2.501495987954072E-007
+ Iterative difference of f_Qeddy is   1.491380629027594E-007
+ Iterative difference of A is   1.451942341344249E-007
+  
+  352 iteration
+ Iterative difference of f_Qd is   2.601148378191323E-007
+ Iterative difference of f_Qd_t is   2.463033325285531E-007
+ Iterative difference of f_Qeddy is   1.456189032307542E-007
+ Iterative difference of A is   1.429382753695765E-007
+  
+  353 iteration
+ Iterative difference of f_Qd is   2.561449719130741E-007
+ Iterative difference of f_Qd_t is   2.425159109243485E-007
+ Iterative difference of f_Qeddy is   1.421834203742256E-007
+ Iterative difference of A is   1.407172473017349E-007
+  
+  354 iteration
+ Iterative difference of f_Qd is   2.522347082750155E-007
+ Iterative difference of f_Qd_t is   2.387864406058413E-007
+ Iterative difference of f_Qeddy is   1.388296110120535E-007
+ Iterative difference of A is   1.385306115028739E-007
+  
+  355 iteration
+ Iterative difference of f_Qd is   2.483831761540024E-007
+ Iterative difference of f_Qd_t is   2.351140415946494E-007
+ Iterative difference of f_Qeddy is   1.355555201455749E-007
+ Iterative difference of A is   1.363778378020344E-007
+  
+  356 iteration
+ Iterative difference of f_Qd is   2.445895169417116E-007
+ Iterative difference of f_Qd_t is   2.314978471006264E-007
+ Iterative difference of f_Qeddy is   1.323592398599915E-007
+ Iterative difference of A is   1.342584041452450E-007
+  
+  357 iteration
+ Iterative difference of f_Qd is   2.408528840085189E-007
+ Iterative difference of f_Qd_t is   2.279370033462201E-007
+ Iterative difference of f_Qeddy is   1.292389081274103E-007
+ Iterative difference of A is   1.321717964825487E-007
+  
+  358 iteration
+ Iterative difference of f_Qd is   2.371724425504103E-007
+ Iterative difference of f_Qd_t is   2.244306693548366E-007
+ Iterative difference of f_Qeddy is   1.261927078319292E-007
+ Iterative difference of A is   1.301175086426687E-007
+  
+  359 iteration
+ Iterative difference of f_Qd is   2.335473694397953E-007
+ Iterative difference of f_Qd_t is   2.209780167808373E-007
+ Iterative difference of f_Qeddy is   1.232188655345134E-007
+ Iterative difference of A is   1.280950422100600E-007
+  
+  360 iteration
+ Iterative difference of f_Qd is   2.299768530758875E-007
+ Iterative difference of f_Qd_t is   2.175782297135151E-007
+ Iterative difference of f_Qeddy is   1.203156505431846E-007
+ Iterative difference of A is   1.261039064138873E-007
+  
+  361 iteration
+ Iterative difference of f_Qd is   2.264600932324820E-007
+ Iterative difference of f_Qd_t is   2.142305044979843E-007
+ Iterative difference of f_Qeddy is   1.174813737785108E-007
+ Iterative difference of A is   1.241436180070277E-007
+  
+  362 iteration
+ Iterative difference of f_Qd is   2.229963009161423E-007
+ Iterative difference of f_Qd_t is   2.109340495552031E-007
+ Iterative difference of f_Qeddy is   1.147143868403255E-007
+ Iterative difference of A is   1.222137011517958E-007
+  
+  363 iteration
+ Iterative difference of f_Qd is   2.195846982144117E-007
+ Iterative difference of f_Qd_t is   2.076880852002611E-007
+ Iterative difference of f_Qeddy is   1.120130809564857E-007
+ Iterative difference of A is   1.203136873108735E-007
+  
+  364 iteration
+ Iterative difference of f_Qd is   2.162245181592040E-007
+ Iterative difference of f_Qd_t is   2.044918434762795E-007
+ Iterative difference of f_Qeddy is   1.093758861016314E-007
+ Iterative difference of A is   1.184431151302155E-007
+  
+  365 iteration
+ Iterative difference of f_Qd is   2.129150045789181E-007
+ Iterative difference of f_Qd_t is   2.013445679674951E-007
+ Iterative difference of f_Qeddy is   1.068012699875776E-007
+ Iterative difference of A is   1.166015303356166E-007
+  
+  366 iteration
+ Iterative difference of f_Qd is   2.096554119622625E-007
+ Iterative difference of f_Qd_t is   1.982455136448694E-007
+ Iterative difference of f_Qeddy is   1.042877371820738E-007
+ Iterative difference of A is   1.147884856221235E-007
+  
+  367 iteration
+ Iterative difference of f_Qd is   2.064450053151402E-007
+ Iterative difference of f_Qd_t is   1.951939466861112E-007
+ Iterative difference of f_Qeddy is   1.018338282275655E-007
+ Iterative difference of A is   1.130035405464812E-007
+  
+  368 iteration
+ Iterative difference of f_Qd is   2.032830600236062E-007
+ Iterative difference of f_Qd_t is   1.921891443169496E-007
+ Iterative difference of f_Qeddy is   9.943811874954522E-008
+ Iterative difference of A is   1.112462614293389E-007
+  
+  369 iteration
+ Iterative difference of f_Qd is   2.001688617263644E-007
+ Iterative difference of f_Qd_t is   1.892303946424319E-007
+ Iterative difference of f_Qeddy is   9.709921863776394E-008
+ Iterative difference of A is   1.095162212414076E-007
+  
+  370 iteration
+ Iterative difference of f_Qd is   1.971017061629804E-007
+ Iterative difference of f_Qd_t is   1.863169964955690E-007
+ Iterative difference of f_Qeddy is   9.481577114764383E-008
+ Iterative difference of A is   1.078129995126052E-007
+  
+  371 iteration
+ Iterative difference of f_Qd is   1.940808990589550E-007
+ Iterative difference of f_Qd_t is   1.834482592642968E-007
+ Iterative difference of f_Qeddy is   9.258645220291961E-008
+ Iterative difference of A is   1.061361822275383E-007
+  
+  372 iteration
+ Iterative difference of f_Qd is   1.911057559860797E-007
+ Iterative difference of f_Qd_t is   1.806235027513974E-007
+ Iterative difference of f_Qeddy is   9.050838276937478E-008
+ Iterative difference of A is   1.044853617248893E-007
+  
+  373 iteration
+ Iterative difference of f_Qd is   1.881756022297301E-007
+ Iterative difference of f_Qd_t is   1.778420570079653E-007
+ Iterative difference of f_Qeddy is   8.850900282564994E-008
+ Iterative difference of A is   1.028601366043908E-007
+  
+  374 iteration
+ Iterative difference of f_Qd is   1.852897726652668E-007
+ Iterative difference of f_Qd_t is   1.751032621872574E-007
+ Iterative difference of f_Qeddy is   8.655397013782734E-008
+ Iterative difference of A is   1.012601116325007E-007
+  
+  375 iteration
+ Iterative difference of f_Qd is   1.824476116305332E-007
+ Iterative difference of f_Qd_t is   1.724064683959400E-007
+ Iterative difference of f_Qeddy is   8.464230050100191E-008
+ Iterative difference of A is   9.968489764287242E-008
+  
+  376 iteration
+ Iterative difference of f_Qd is   1.796484727987872E-007
+ Iterative difference of f_Qd_t is   1.697510355414336E-007
+ Iterative difference of f_Qeddy is   8.277303146890513E-008
+ Iterative difference of A is   9.813411144810047E-008
+  
+  377 iteration
+ Iterative difference of f_Qd is   1.768917190542348E-007
+ Iterative difference of f_Qd_t is   1.671363331944356E-007
+ Iterative difference of f_Qeddy is   8.095638018637552E-008
+ Iterative difference of A is   9.660737574864776E-008
+  
+  378 iteration
+ Iterative difference of f_Qd is   1.741767223710326E-007
+ Iterative difference of f_Qd_t is   1.645617404353976E-007
+ Iterative difference of f_Qeddy is   7.918426868456369E-008
+ Iterative difference of A is   9.510431904133886E-008
+  
+  379 iteration
+ Iterative difference of f_Qd is   1.715028636914244E-007
+ Iterative difference of f_Qd_t is   1.620266457244210E-007
+ Iterative difference of f_Qeddy is   7.745109538437323E-008
+ Iterative difference of A is   9.362457552958801E-008
+  
+  380 iteration
+ Iterative difference of f_Qd is   1.688695328060444E-007
+ Iterative difference of f_Qd_t is   1.595304467525045E-007
+ Iterative difference of f_Qeddy is   7.575600474620664E-008
+ Iterative difference of A is   9.216778504208406E-008
+  
+  381 iteration
+ Iterative difference of f_Qd is   1.662761282355228E-007
+ Iterative difference of f_Qd_t is   1.570725503097052E-007
+ Iterative difference of f_Qeddy is   7.410295675171208E-008
+ Iterative difference of A is   9.073359293998266E-008
+  
+  382 iteration
+ Iterative difference of f_Qd is   1.637220571107899E-007
+ Iterative difference of f_Qd_t is   1.546523721506973E-007
+ Iterative difference of f_Qeddy is   7.249589757847563E-008
+ Iterative difference of A is   8.932165003645853E-008
+  
+  383 iteration
+ Iterative difference of f_Qd is   1.612067350624871E-007
+ Iterative difference of f_Qd_t is   1.522693368555608E-007
+ Iterative difference of f_Qeddy is   7.092381063434489E-008
+ Iterative difference of A is   8.793161251604079E-008
+  
+  384 iteration
+ Iterative difference of f_Qd is   1.587295861025725E-007
+ Iterative difference of f_Qd_t is   1.499228777057486E-007
+ Iterative difference of f_Qeddy is   6.938593545037508E-008
+ Iterative difference of A is   8.656314184310628E-008
+  
+  385 iteration
+ Iterative difference of f_Qd is   1.562900425172015E-007
+ Iterative difference of f_Qd_t is   1.476124365474771E-007
+ Iterative difference of f_Qeddy is   6.788190696051591E-008
+ Iterative difference of A is   8.521590469140645E-008
+  
+  386 iteration
+ Iterative difference of f_Qd is   1.538875447426938E-007
+ Iterative difference of f_Qd_t is   1.453374636737649E-007
+ Iterative difference of f_Qeddy is   6.642376217894791E-008
+ Iterative difference of A is   8.388957286058381E-008
+  
+  387 iteration
+ Iterative difference of f_Qd is   1.515215412688231E-007
+ Iterative difference of f_Qd_t is   1.430974176865225E-007
+ Iterative difference of f_Qeddy is   6.499703683908106E-008
+ Iterative difference of A is   8.258382319854297E-008
+  
+  388 iteration
+ Iterative difference of f_Qd is   1.491914885251924E-007
+ Iterative difference of f_Qd_t is   1.408917653820604E-007
+ Iterative difference of f_Qeddy is   6.360105492741672E-008
+ Iterative difference of A is   8.129833751926822E-008
+  
+  389 iteration
+ Iterative difference of f_Qd is   1.468968507693444E-007
+ Iterative difference of f_Qd_t is   1.387199816235869E-007
+ Iterative difference of f_Qeddy is   6.223515486422290E-008
+ Iterative difference of A is   8.003280253712081E-008
+  
+  390 iteration
+ Iterative difference of f_Qd is   1.446370999861474E-007
+ Iterative difference of f_Qd_t is   1.365815492288848E-007
+ Iterative difference of f_Qeddy is   6.090939270965087E-008
+ Iterative difference of A is   7.878690978270486E-008
+  
+  391 iteration
+ Iterative difference of f_Qd is   1.424187568363489E-007
+ Iterative difference of f_Qd_t is   1.344759588363040E-007
+ Iterative difference of f_Qeddy is   5.961383091031627E-008
+ Iterative difference of A is   7.756035553282796E-008
+  
+  392 iteration
+ Iterative difference of f_Qd is   1.402346686391574E-007
+ Iterative difference of f_Qd_t is   1.324027088093517E-007
+ Iterative difference of f_Qeddy is   5.834590623750996E-008
+ Iterative difference of A is   7.635284073959428E-008
+  
+  393 iteration
+ Iterative difference of f_Qd is   1.380836703759707E-007
+ Iterative difference of f_Qd_t is   1.303613050966136E-007
+ Iterative difference of f_Qeddy is   5.710503032940739E-008
+ Iterative difference of A is   7.516407095667886E-008
+  
+  394 iteration
+ Iterative difference of f_Qd is   1.359652704096756E-007
+ Iterative difference of f_Qd_t is   1.283512611437165E-007
+ Iterative difference of f_Qeddy is   5.590043488474736E-008
+ Iterative difference of A is   7.399375626711974E-008
+  
+  395 iteration
+ Iterative difference of f_Qd is   1.338789841851679E-007
+ Iterative difference of f_Qd_t is   1.263720977593211E-007
+ Iterative difference of f_Qeddy is   5.472321475087291E-008
+ Iterative difference of A is   7.284161122108473E-008
+  
+  396 iteration
+ Iterative difference of f_Qd is   1.318243341135589E-007
+ Iterative difference of f_Qd_t is   1.244233430205792E-007
+ Iterative difference of f_Qeddy is   5.357085078316892E-008
+ Iterative difference of A is   7.170735475910996E-008
+  
+  397 iteration
+ Iterative difference of f_Qd is   1.298008494936796E-007
+ Iterative difference of f_Qd_t is   1.225045321577752E-007
+ Iterative difference of f_Qeddy is   5.244284839722724E-008
+ Iterative difference of A is   7.059071014986658E-008
+  
+  398 iteration
+ Iterative difference of f_Qd is   1.278080664136351E-007
+ Iterative difference of f_Qd_t is   1.206152074437368E-007
+ Iterative difference of f_Qeddy is   5.134955395743809E-008
+ Iterative difference of A is   6.949140492272347E-008
+  
+  399 iteration
+ Iterative difference of f_Qd is   1.258455276480219E-007
+ Iterative difference of f_Qd_t is   1.187549181014616E-007
+ Iterative difference of f_Qeddy is   5.027910232428823E-008
+ Iterative difference of A is   6.840917080442981E-008
+  
+  400 iteration
+ Iterative difference of f_Qd is   1.239127825863710E-007
+ Iterative difference of f_Qd_t is   1.169232201818186E-007
+ Iterative difference of f_Qeddy is   4.923101791032627E-008
+ Iterative difference of A is   6.734374365102713E-008
+  
+  401 iteration
+ Iterative difference of f_Qd is   1.220093871199569E-007
+ Iterative difference of f_Qd_t is   1.151196764772461E-007
+ Iterative difference of f_Qeddy is   4.820869971408279E-008
+ Iterative difference of A is   6.629486338648356E-008
+  
+  402 iteration
+ Iterative difference of f_Qd is   1.201349035724088E-007
+ Iterative difference of f_Qd_t is   1.133438564124636E-007
+ Iterative difference of f_Qeddy is   4.721400961036140E-008
+ Iterative difference of A is   6.526227394262896E-008
+  
+  403 iteration
+ Iterative difference of f_Qd is   1.182889005986627E-007
+ Iterative difference of f_Qd_t is   1.115953359473280E-007
+ Iterative difference of f_Qeddy is   4.623988298811318E-008
+ Iterative difference of A is   6.424572319648804E-008
+  
+  404 iteration
+ Iterative difference of f_Qd is   1.164709531012616E-007
+ Iterative difference of f_Qd_t is   1.098736974792548E-007
+ Iterative difference of f_Qeddy is   4.528589650281897E-008
+ Iterative difference of A is   6.324496290371039E-008
+  
+  405 iteration
+ Iterative difference of f_Qd is   1.146806421462206E-007
+ Iterative difference of f_Qd_t is   1.081785297443391E-007
+ Iterative difference of f_Qeddy is   4.436074950387933E-008
+ Iterative difference of A is   6.225974865303394E-008
+  
+  406 iteration
+ Iterative difference of f_Qd is   1.129175548788934E-007
+ Iterative difference of f_Qd_t is   1.065094277249816E-007
+ Iterative difference of f_Qeddy is   4.345500473953295E-008
+ Iterative difference of A is   6.129006993767228E-008
+  
+  407 iteration
+ Iterative difference of f_Qd is   1.111812844324656E-007
+ Iterative difference of f_Qd_t is   1.048659925566471E-007
+ Iterative difference of f_Qeddy is   4.276572786090366E-008
+ Iterative difference of A is   6.033576278353936E-008
+  
+  408 iteration
+ Iterative difference of f_Qd is   1.094714298568306E-007
+ Iterative difference of f_Qd_t is   1.032478314324549E-007
+ Iterative difference of f_Qeddy is   4.208792532480084E-008
+ Iterative difference of A is   5.939627173608131E-008
+  
+  409 iteration
+ Iterative difference of f_Qd is   1.077875960266497E-007
+ Iterative difference of f_Qd_t is   1.016545575121056E-007
+ Iterative difference of f_Qeddy is   4.142089825992512E-008
+ Iterative difference of A is   5.847136760515036E-008
+  
+  410 iteration
+ Iterative difference of f_Qd is   1.061293935663253E-007
+ Iterative difference of f_Qd_t is   1.000857898377470E-007
+ Iterative difference of f_Qeddy is   4.076447467755116E-008
+ Iterative difference of A is   5.756082472772525E-008
+  
+  411 iteration
+ Iterative difference of f_Qd is   1.044964387671675E-007
+ Iterative difference of f_Qd_t is   9.854115324116688E-008
+ Iterative difference of f_Qeddy is   4.011848534781447E-008
+ Iterative difference of A is   5.666442091868847E-008
+  
+  412 iteration
+ Iterative difference of f_Qd is   1.028883535119339E-007
+ Iterative difference of f_Qd_t is   9.702027825098450E-008
+ Iterative difference of f_Qeddy is   3.948276375807802E-008
+ Iterative difference of A is   5.578193741314665E-008
+  
+  413 iteration
+ Iterative difference of f_Qd is   1.013047651919965E-007
+ Iterative difference of f_Qd_t is   9.552280102673172E-008
+ Iterative difference of f_Qeddy is   3.885714606349268E-008
+ Iterative difference of A is   5.491315881525627E-008
+  
+  414 iteration
+ Iterative difference of f_Qd is   9.974530663795292E-008
+ Iterative difference of f_Qd_t is   9.404836324479471E-008
+ Iterative difference of f_Qeddy is   3.824147104644800E-008
+ Iterative difference of A is   5.405787304726614E-008
+  
+  415 iteration
+ Iterative difference of f_Qd is   9.820961603679290E-008
+ Iterative difference of f_Qd_t is   9.259661204723962E-008
+ Iterative difference of f_Qeddy is   3.763558007819148E-008
+ Iterative difference of A is   5.321587129899358E-008
+  
+  416 iteration
+ Iterative difference of f_Qd is   9.669733685947410E-008
+ Iterative difference of f_Qd_t is   9.116719992948927E-008
+ Iterative difference of f_Qeddy is   3.703931706830477E-008
+ Iterative difference of A is   5.238694797881846E-008
+  
+  417 iteration
+ Iterative difference of f_Qd is   9.520811779326760E-008
+ Iterative difference of f_Qd_t is   8.975978468654666E-008
+ Iterative difference of f_Qeddy is   3.645252843412911E-008
+ Iterative difference of A is   5.157090065882261E-008
+  
+  418 iteration
+ Iterative difference of f_Qd is   9.374161265372077E-008
+ Iterative difference of f_Qd_t is   8.837402931238109E-008
+ Iterative difference of f_Qeddy is   3.587506304959104E-008
+ Iterative difference of A is   5.076753003359011E-008
+  
+  419 iteration
+ Iterative difference of f_Qd is   9.229748033174820E-008
+ Iterative difference of f_Qd_t is   8.700960193444227E-008
+ Iterative difference of f_Qeddy is   3.530677221506157E-008
+ Iterative difference of A is   4.997663986773190E-008
+  
+  420 iteration
+ Iterative difference of f_Qd is   9.087538470776285E-008
+ Iterative difference of f_Qd_t is   8.566617572995996E-008
+ Iterative difference of f_Qeddy is   3.474750961225334E-008
+ Iterative difference of A is   4.919803695143353E-008
+  
+  421 iteration
+ Iterative difference of f_Qd is   8.947499458965974E-008
+ Iterative difference of f_Qd_t is   8.434342885308560E-008
+ Iterative difference of f_Qeddy is   3.419713126757463E-008
+ Iterative difference of A is   4.843153105166600E-008
+  
+  422 iteration
+ Iterative difference of f_Qd is   8.809598363822280E-008
+ Iterative difference of f_Qd_t is   8.304104435726337E-008
+ Iterative difference of f_Qeddy is   3.365549551591698E-008
+ Iterative difference of A is   4.767693486729986E-008
+  
+  423 iteration
+ Iterative difference of f_Qd is   8.673803030510852E-008
+ Iterative difference of f_Qd_t is   8.175871012497393E-008
+ Iterative difference of f_Qeddy is   3.312246296140707E-008
+ Iterative difference of A is   4.693406398768862E-008
+  
+  424 iteration
+ Iterative difference of f_Qd is   8.540081775912020E-008
+ Iterative difference of f_Qd_t is   8.049611879097293E-008
+ Iterative difference of f_Qeddy is   3.259789643924281E-008
+ Iterative difference of A is   4.620273683997658E-008
+  
+  425 iteration
+ Iterative difference of f_Qd is   8.408403382462529E-008
+ Iterative difference of f_Qd_t is   7.925296767290202E-008
+ Iterative difference of f_Qeddy is   3.208166098620305E-008
+ Iterative difference of A is   4.548277465635589E-008
+  
+  426 iteration
+ Iterative difference of f_Qd is   8.278737091476848E-008
+ Iterative difference of f_Qd_t is   7.802895870059889E-008
+ Iterative difference of f_Qeddy is   3.157362379576159E-008
+ Iterative difference of A is   4.477400142354274E-008
+  
+  427 iteration
+ Iterative difference of f_Qd is   8.151052596034811E-008
+ Iterative difference of f_Qd_t is   7.682379834584099E-008
+ Iterative difference of f_Qeddy is   3.107365419510212E-008
+ Iterative difference of A is   4.407624383984295E-008
+  
+  428 iteration
+ Iterative difference of f_Qd is   8.025320036037648E-008
+ Iterative difference of f_Qd_t is   7.563719755295656E-008
+ Iterative difference of f_Qeddy is   3.058162359437754E-008
+ Iterative difference of A is   4.338933128305959E-008
+  
+  429 iteration
+ Iterative difference of f_Qd is   7.901509990098157E-008
+ Iterative difference of f_Qd_t is   7.446887167420618E-008
+ Iterative difference of f_Qeddy is   3.009740547369952E-008
+ Iterative difference of A is   4.271309575281344E-008
+  
+  430 iteration
+ Iterative difference of f_Qd is   7.779593470943688E-008
+ Iterative difference of f_Qd_t is   7.331854039996019E-008
+ Iterative difference of f_Qeddy is   2.962087533196420E-008
+ Iterative difference of A is   4.204737185059364E-008
+  
+  431 iteration
+ Iterative difference of f_Qd is   7.659541918000196E-008
+ Iterative difference of f_Qd_t is   7.218592769494755E-008
+ Iterative difference of f_Qeddy is   2.915191066321654E-008
+ Iterative difference of A is   4.139199672272866E-008
+  
+  432 iteration
+ Iterative difference of f_Qd is   7.541327192318176E-008
+ Iterative difference of f_Qd_t is   7.107076173450480E-008
+ Iterative difference of f_Qeddy is   2.869039092173904E-008
+ Iterative difference of A is   4.074681003046234E-008
+  
+  433 iteration
+ Iterative difference of f_Qd is   7.424921569937348E-008
+ Iterative difference of f_Qd_t is   6.997277483605444E-008
+ Iterative difference of f_Qeddy is   2.823619749451299E-008
+ Iterative difference of A is   4.011165390658579E-008
+  
+  434 iteration
+ Iterative difference of f_Qd is   7.310297736248805E-008
+ Iterative difference of f_Qd_t is   6.889170340576220E-008
+ Iterative difference of f_Qeddy is   2.778921366283771E-008
+ Iterative difference of A is   3.948637292421238E-008
+  
+  435 iteration
+ Iterative difference of f_Qd is   7.197428780010215E-008
+ Iterative difference of f_Qd_t is   6.782728786611236E-008
+ Iterative difference of f_Qeddy is   2.734932457977915E-008
+ Iterative difference of A is   3.887081405015702E-008
+  
+  436 iteration
+ Iterative difference of f_Qd is   7.086288187968179E-008
+ Iterative difference of f_Qd_t is   6.677927260386601E-008
+ Iterative difference of f_Qeddy is   2.691641723309018E-008
+ Iterative difference of A is   3.826482661674693E-008
+  
+  437 iteration
+ Iterative difference of f_Qd is   6.976849838786700E-008
+ Iterative difference of f_Qd_t is   6.574740590370790E-008
+ Iterative difference of f_Qeddy is   2.649038042092447E-008
+ Iterative difference of A is   3.766826227823671E-008
+  
+  438 iteration
+ Iterative difference of f_Qd is   6.869087997496068E-008
+ Iterative difference of f_Qd_t is   6.473143989316893E-008
+ Iterative difference of f_Qeddy is   2.607110472017775E-008
+ Iterative difference of A is   3.708097498326957E-008
+  
+  439 iteration
+ Iterative difference of f_Qd is   6.762977310418791E-008
+ Iterative difference of f_Qd_t is   6.373113048451298E-008
+ Iterative difference of f_Qeddy is   2.565848245699755E-008
+ Iterative difference of A is   3.650282093042509E-008
+  
+  440 iteration
+ Iterative difference of f_Qd is   6.658492799054699E-008
+ Iterative difference of f_Qd_t is   6.274623731358786E-008
+ Iterative difference of f_Qeddy is   2.525240768249705E-008
+ Iterative difference of A is   3.593365853872890E-008
+  
+  441 iteration
+ Iterative difference of f_Qd is   6.555609855223715E-008
+ Iterative difference of f_Qd_t is   6.177652368951833E-008
+ Iterative difference of f_Qeddy is   2.485277614022903E-008
+ Iterative difference of A is   3.537334841837922E-008
+  
+  442 iteration
+ Iterative difference of f_Qd is   6.454304235514741E-008
+ Iterative difference of f_Qd_t is   6.082175653225608E-008
+ Iterative difference of f_Qeddy is   2.445948524233341E-008
+ Iterative difference of A is   3.482175332499352E-008
+  
+  443 iteration
+ Iterative difference of f_Qd is   6.354552056254958E-008
+ Iterative difference of f_Qd_t is   5.988170632487480E-008
+ Iterative difference of f_Qeddy is   2.407243404069746E-008
+ Iterative difference of A is   3.427873813705712E-008
+  
+  444 iteration
+ Iterative difference of f_Qd is   6.256329787958717E-008
+ Iterative difference of f_Qd_t is   5.895614705155386E-008
+ Iterative difference of f_Qeddy is   2.369152320310340E-008
+ Iterative difference of A is   3.374416981971086E-008
+  
+  445 iteration
+ Iterative difference of f_Qd is   6.159614251034090E-008
+ Iterative difference of f_Qd_t is   5.804485615204177E-008
+ Iterative difference of f_Qeddy is   2.331665498373804E-008
+ Iterative difference of A is   3.321791739049028E-008
+  
+  446 iteration
+ Iterative difference of f_Qd is   6.064382609581240E-008
+ Iterative difference of f_Qd_t is   5.714761447091557E-008
+ Iterative difference of f_Qeddy is   2.294773320107510E-008
+ Iterative difference of A is   3.269985189308794E-008
+  
+  447 iteration
+ Iterative difference of f_Qd is   5.970612367532657E-008
+ Iterative difference of f_Qd_t is   5.626514561164406E-008
+ Iterative difference of f_Qeddy is   2.258466321011961E-008
+ Iterative difference of A is   3.218984636157475E-008
+  
+  448 iteration
+ Iterative difference of f_Qd is   5.878281363275520E-008
+ Iterative difference of f_Qd_t is   5.539659370720068E-008
+ Iterative difference of f_Qeddy is   2.222735187855547E-008
+ Iterative difference of A is   3.168777578939179E-008
+  
+  449 iteration
+ Iterative difference of f_Qd is   5.787367764881202E-008
+ Iterative difference of f_Qd_t is   5.454140805660757E-008
+ Iterative difference of f_Qeddy is   2.187570756506142E-008
+ Iterative difference of A is   3.119351710571469E-008
+  
+  450 iteration
+ Iterative difference of f_Qd is   5.697928675283195E-008
+ Iterative difference of f_Qd_t is   5.369938384496703E-008
+ Iterative difference of f_Qeddy is   2.152978280400321E-008
+ Iterative difference of A is   3.070694913663921E-008
+  
+  451 iteration
+ Iterative difference of f_Qd is   5.610008859281007E-008
+ Iterative difference of f_Qd_t is   5.287031937684789E-008
+ Iterative difference of f_Qeddy is   2.118947367568680E-008
+ Iterative difference of A is   3.022795258197930E-008
+  
+  452 iteration
+ Iterative difference of f_Qd is   5.523434971899110E-008
+ Iterative difference of f_Qd_t is   5.205401602988158E-008
+ Iterative difference of f_Qeddy is   2.085455523895274E-008
+ Iterative difference of A is   2.975640998707785E-008
+  
+  453 iteration
+ Iterative difference of f_Qd is   5.438186660667796E-008
+ Iterative difference of f_Qd_t is   5.125027820705730E-008
+ Iterative difference of f_Qeddy is   2.052494185288828E-008
+ Iterative difference of A is   2.929220571028061E-008
+  
+  454 iteration
+ Iterative difference of f_Qd is   5.354243874785766E-008
+ Iterative difference of f_Qd_t is   5.045891328858340E-008
+ Iterative difference of f_Qeddy is   2.020054924766271E-008
+ Iterative difference of A is   2.883522589734906E-008
+  
+  455 iteration
+ Iterative difference of f_Qd is   5.271586861043537E-008
+ Iterative difference of f_Qd_t is   4.967973159589190E-008
+ Iterative difference of f_Qeddy is   1.988129449026661E-008
+ Iterative difference of A is   2.838535845327110E-008
+  
+  456 iteration
+ Iterative difference of f_Qd is   5.190196159660099E-008
+ Iterative difference of f_Qd_t is   4.891254633612729E-008
+ Iterative difference of f_Qeddy is   1.956709597865716E-008
+ Iterative difference of A is   2.794249301775811E-008
+  
+  457 iteration
+ Iterative difference of f_Qd is   5.110052599599166E-008
+ Iterative difference of f_Qd_t is   4.815717356398269E-008
+ Iterative difference of f_Qeddy is   1.925787340272683E-008
+ Iterative difference of A is   2.750652093423678E-008
+  
+  458 iteration
+ Iterative difference of f_Qd is   5.031137294752783E-008
+ Iterative difference of f_Qd_t is   4.741343214136745E-008
+ Iterative difference of f_Qeddy is   1.895354773888240E-008
+ Iterative difference of A is   2.707733522708082E-008
+  
+  459 iteration
+ Iterative difference of f_Qd is   4.953431639908093E-008
+ Iterative difference of f_Qd_t is   4.668114368883494E-008
+ Iterative difference of f_Qeddy is   1.865404121990412E-008
+ Iterative difference of A is   2.665483057450596E-008
+  
+  460 iteration
+ Iterative difference of f_Qd is   4.876917306237058E-008
+ Iterative difference of f_Qd_t is   4.596013254741863E-008
+ Iterative difference of f_Qeddy is   1.835927731976689E-008
+ Iterative difference of A is   2.623890328233222E-008
+  
+  461 iteration
+ Iterative difference of f_Qd is   4.801576238217323E-008
+ Iterative difference of f_Qd_t is   4.525022573916709E-008
+ Iterative difference of f_Qeddy is   1.806918073022148E-008
+ Iterative difference of A is   2.582945126056516E-008
+  
+  462 iteration
+ Iterative difference of f_Qd is   4.727390648384677E-008
+ Iterative difference of f_Qd_t is   4.455125292247494E-008
+ Iterative difference of f_Qeddy is   1.778367734453154E-008
+ Iterative difference of A is   2.542637399845921E-008
+  
+  463 iteration
+ Iterative difference of f_Qd is   4.654343014384027E-008
+ Iterative difference of f_Qd_t is   4.386304635261781E-008
+ Iterative difference of f_Qeddy is   1.750269423557264E-008
+ Iterative difference of A is   2.502957253697896E-008
+  
+  464 iteration
+ Iterative difference of f_Qd is   4.582416075196369E-008
+ Iterative difference of f_Qd_t is   4.318544084792528E-008
+ Iterative difference of f_Qeddy is   1.722615964130404E-008
+ Iterative difference of A is   2.463894945188561E-008
+  
+  465 iteration
+ Iterative difference of f_Qd is   4.511592826801983E-008
+ Iterative difference of f_Qd_t is   4.251827374554540E-008
+ Iterative difference of f_Qeddy is   1.695400293679622E-008
+ Iterative difference of A is   2.425440882229506E-008
+  
+  466 iteration
+ Iterative difference of f_Qd is   4.441856518754353E-008
+ Iterative difference of f_Qd_t is   4.186138486197977E-008
+ Iterative difference of f_Qeddy is   1.668615463054461E-008
+ Iterative difference of A is   2.387585621137917E-008
+  
+  467 iteration
+ Iterative difference of f_Qd is   4.373190650493880E-008
+ Iterative difference of f_Qd_t is   4.121461646272584E-008
+ Iterative difference of f_Qeddy is   1.642254632977513E-008
+ Iterative difference of A is   2.350319864533219E-008
+  
+  468 iteration
+ Iterative difference of f_Qd is   4.305578967748330E-008
+ Iterative difference of f_Qd_t is   4.057781321890885E-008
+ Iterative difference of f_Qeddy is   1.616311073784210E-008
+ Iterative difference of A is   2.313634458734996E-008
+  
+  469 iteration
+ Iterative difference of f_Qd is   4.239005458716444E-008
+ Iterative difference of f_Qd_t is   3.995082217128632E-008
+ Iterative difference of f_Qeddy is   1.590778162517160E-008
+ Iterative difference of A is   2.277520391659633E-008
+  
+  470 iteration
+ Iterative difference of f_Qd is   4.173454351032169E-008
+ Iterative difference of f_Qd_t is   3.933349269989034E-008
+ Iterative difference of f_Qeddy is   1.565649381993738E-008
+ Iterative difference of A is   2.241968790543496E-008
+  
+  471 iteration
+ Iterative difference of f_Qd is   4.108910107731428E-008
+ Iterative difference of f_Qd_t is   3.872567648196060E-008
+ Iterative difference of f_Qeddy is   1.540918318767778E-008
+ Iterative difference of A is   2.206970920381676E-008
+  
+  472 iteration
+ Iterative difference of f_Qd is   4.045357424389828E-008
+ Iterative difference of f_Qd_t is   3.812722745811722E-008
+ Iterative difference of f_Qeddy is   1.516578661351492E-008
+ Iterative difference of A is   2.172518180762126E-008
+  
+  473 iteration
+ Iterative difference of f_Qd is   3.982781224915952E-008
+ Iterative difference of f_Qd_t is   3.753800180417155E-008
+ Iterative difference of f_Qeddy is   1.492624199044522E-008
+ Iterative difference of A is   2.138602104781451E-008
+  
+  474 iteration
+ Iterative difference of f_Qd is   3.921166659382955E-008
+ Iterative difference of f_Qd_t is   3.695785788862538E-008
+ Iterative difference of f_Qeddy is   1.469048819722173E-008
+ Iterative difference of A is   2.105214356312723E-008
+  
+  475 iteration
+ Iterative difference of f_Qd is   3.860499099518286E-008
+ Iterative difference of f_Qd_t is   3.638665624665013E-008
+ Iterative difference of f_Qeddy is   1.445846508946365E-008
+ Iterative difference of A is   2.072346728465915E-008
+  
+  476 iteration
+ Iterative difference of f_Qd is   3.800764136491913E-008
+ Iterative difference of f_Qd_t is   3.582425954148927E-008
+ Iterative difference of f_Qeddy is   1.423011347493654E-008
+ Iterative difference of A is   2.039991141419492E-008
+  
+  477 iteration
+ Iterative difference of f_Qd is   3.741947576969828E-008
+ Iterative difference of f_Qd_t is   3.527053253887108E-008
+ Iterative difference of f_Qeddy is   1.400537511008285E-008
+ Iterative difference of A is   2.008139639970118E-008
+  
+  478 iteration
+ Iterative difference of f_Qd is   3.684035440381858E-008
+ Iterative difference of f_Qd_t is   3.472534206537536E-008
+ Iterative difference of f_Qeddy is   1.378419267356740E-008
+ Iterative difference of A is   1.976784392795396E-008
+  
+  479 iteration
+ Iterative difference of f_Qd is   3.627013955755792E-008
+ Iterative difference of f_Qd_t is   3.418855699021880E-008
+ Iterative difference of f_Qeddy is   1.356650975760376E-008
+ Iterative difference of A is   1.945917689222948E-008
+  
+  480 iteration
+ Iterative difference of f_Qd is   3.570869558508147E-008
+ Iterative difference of f_Qd_t is   3.366004817798376E-008
+ Iterative difference of f_Qeddy is   1.335227085429332E-008
+ Iterative difference of A is   1.915531938124528E-008
+  
+  481 iteration
+ Iterative difference of f_Qd is   3.515588887538501E-008
+ Iterative difference of f_Qd_t is   3.313968847560786E-008
+ Iterative difference of f_Qeddy is   1.314142133654328E-008
+ Iterative difference of A is   1.885619666181296E-008
+  
+  482 iteration
+ Iterative difference of f_Qd is   3.461158782193732E-008
+ Iterative difference of f_Qd_t is   3.262735267075059E-008
+ Iterative difference of f_Qeddy is   1.293390744809206E-008
+ Iterative difference of A is   1.856173515498577E-008
+  
+  483 iteration
+ Iterative difference of f_Qd is   3.407566279275617E-008
+ Iterative difference of f_Qd_t is   3.212291746490514E-008
+ Iterative difference of f_Qeddy is   1.272967628659569E-008
+ Iterative difference of A is   1.827186242044608E-008
+  
+  484 iteration
+ Iterative difference of f_Qd is   3.354798610482115E-008
+ Iterative difference of f_Qd_t is   3.162626144520911E-008
+ Iterative difference of f_Qeddy is   1.252867579408685E-008
+ Iterative difference of A is   1.798650714544651E-008
+  
+  485 iteration
+ Iterative difference of f_Qd is   3.302843199241498E-008
+ Iterative difference of f_Qd_t is   3.113726505538789E-008
+ Iterative difference of f_Qeddy is   1.233085473745926E-008
+ Iterative difference of A is   1.770559911358494E-008
+  
+  486 iteration
+ Iterative difference of f_Qd is   3.251687657676583E-008
+ Iterative difference of f_Qd_t is   3.065581057190223E-008
+ Iterative difference of f_Qeddy is   1.213616270174557E-008
+ Iterative difference of A is   1.742906920458760E-008
+  
+  487 iteration
+ Iterative difference of f_Qd is   3.201319784566434E-008
+ Iterative difference of f_Qd_t is   3.018178206491695E-008
+ Iterative difference of f_Qeddy is   1.194455007233648E-008
+ Iterative difference of A is   1.715684936113258E-008
+  
+  488 iteration
+ Iterative difference of f_Qd is   3.151727561529968E-008
+ Iterative difference of f_Qd_t is   2.971506538398949E-008
+ Iterative difference of f_Qeddy is   1.175596802348820E-008
+ Iterative difference of A is   1.688887258689820E-008
+  
+  489 iteration
+ Iterative difference of f_Qd is   3.102899151855021E-008
+ Iterative difference of f_Qd_t is   2.925554812250805E-008
+ Iterative difference of f_Qeddy is   1.157036850769726E-008
+ Iterative difference of A is   1.662507291772322E-008
+  
+  490 iteration
+ Iterative difference of f_Qd is   3.054822895988060E-008
+ Iterative difference of f_Qd_t is   2.880311959470652E-008
+ Iterative difference of f_Qeddy is   1.138770424117218E-008
+ Iterative difference of A is   1.636538541640274E-008
+  
+  491 iteration
+ Iterative difference of f_Qd is   3.007487310623461E-008
+ Iterative difference of f_Qd_t is   2.835767080747523E-008
+ Iterative difference of f_Qeddy is   1.120792869060624E-008
+ Iterative difference of A is   1.610974614818517E-008
+  
+  492 iteration
+ Iterative difference of f_Qd is   2.960881084843742E-008
+ Iterative difference of f_Qd_t is   2.791909443780952E-008
+ Iterative difference of f_Qeddy is   1.103099606558806E-008
+ Iterative difference of A is   1.585809217231546E-008
+  
+  493 iteration
+ Iterative difference of f_Qd is   2.914993078341477E-008
+ Iterative difference of f_Qd_t is   2.748728480418683E-008
+ Iterative difference of f_Qeddy is   1.085686129908593E-008
+ Iterative difference of A is   1.561036151970056E-008
+  
+  494 iteration
+ Iterative difference of f_Qd is   2.869812318687104E-008
+ Iterative difference of f_Qd_t is   2.706213784401529E-008
+ Iterative difference of f_Qeddy is   1.068548004701415E-008
+ Iterative difference of A is   1.536649318401896E-008
+  
+  495 iteration
+ Iterative difference of f_Qd is   2.825327998987048E-008
+ Iterative difference of f_Qd_t is   2.664355108284236E-008
+ Iterative difference of f_Qeddy is   1.051680866611532E-008
+ Iterative difference of A is   1.512642710589131E-008
+  
+  496 iteration
+ Iterative difference of f_Qd is   2.781529474674485E-008
+ Iterative difference of f_Qd_t is   2.623142362438019E-008
+ Iterative difference of f_Qeddy is   1.035080420767193E-008
+ Iterative difference of A is   1.489010415249743E-008
+  
+  497 iteration
+ Iterative difference of f_Qd is   2.738406262295032E-008
+ Iterative difference of f_Qd_t is   2.582565610973961E-008
+ Iterative difference of f_Qeddy is   1.018742440471281E-008
+ Iterative difference of A is   1.465746611172165E-008
+  
+  498 iteration
+ Iterative difference of f_Qd is   2.695948036427614E-008
+ Iterative difference of f_Qd_t is   2.542615070311866E-008
+ Iterative difference of f_Qeddy is   1.002662766767630E-008
+ Iterative difference of A is   1.442845567111925E-008
+  
+  499 iteration
+ Iterative difference of f_Qd is   2.654144627342592E-008
+ Iterative difference of f_Qd_t is   2.503281107185326E-008
+ Iterative difference of f_Qeddy is   9.868373059256780E-009
+ Iterative difference of A is   1.420301641011021E-008
+  
+  500 iteration
+ Iterative difference of f_Qd is   2.612986019050190E-008
+ Iterative difference of f_Qd_t is   2.464554234912070E-008
+ Iterative difference of f_Qeddy is   9.712620300909858E-009
+ Iterative difference of A is   1.398109277742782E-008
+  
+  501 iteration
+ Iterative difference of f_Qd is   2.572462346611681E-008
+ Iterative difference of f_Qd_t is   2.426425113220484E-008
+ Iterative difference of f_Qeddy is   9.559329750084139E-009
+ Iterative difference of A is   1.376263008851658E-008
+  
+  502 iteration
+ Iterative difference of f_Qd is   2.532563894057718E-008
+ Iterative difference of f_Qd_t is   2.388884544173020E-008
+ Iterative difference of f_Qeddy is   9.408462393932851E-009
+ Iterative difference of A is   1.354757450363134E-008
+  
+  503 iteration
+ Iterative difference of f_Qd is   2.493281092523503E-008
+ Iterative difference of f_Qd_t is   2.351923471212089E-008
+ Iterative difference of f_Qeddy is   9.259979843675992E-009
+ Iterative difference of A is   1.333587301916364E-008
+  
+  504 iteration
+ Iterative difference of f_Qd is   2.454604517603334E-008
+ Iterative difference of f_Qd_t is   2.315532976037565E-008
+ Iterative difference of f_Qeddy is   9.113844314651010E-009
+ Iterative difference of A is   1.312747345224609E-008
+  
+  505 iteration
+ Iterative difference of f_Qd is   2.416524887225574E-008
+ Iterative difference of f_Qd_t is   2.279704277652686E-008
+ Iterative difference of f_Qeddy is   8.970018627613846E-009
+ Iterative difference of A is   1.292232443294607E-008
+  
+  506 iteration
+ Iterative difference of f_Qd is   2.379033059917920E-008
+ Iterative difference of f_Qd_t is   2.244428729198181E-008
+ Iterative difference of f_Qeddy is   8.828466190958020E-009
+ Iterative difference of A is   1.272037537976278E-008
+  
+  507 iteration
+ Iterative difference of f_Qd is   2.342120032552270E-008
+ Iterative difference of f_Qd_t is   2.209697816434389E-008
+ Iterative difference of f_Qeddy is   8.689150996811501E-009
+ Iterative difference of A is   1.252157650613248E-008
+  
+  508 iteration
+ Iterative difference of f_Qd is   2.305776938002838E-008
+ Iterative difference of f_Qd_t is   2.175503155616224E-008
+ Iterative difference of f_Qeddy is   8.552037608243121E-009
+ Iterative difference of A is   1.232587879115496E-008
+  
+  509 iteration
+ Iterative difference of f_Qd is   2.269995043541542E-008
+ Iterative difference of f_Qd_t is   2.141836491758448E-008
+ Iterative difference of f_Qeddy is   8.417091149504757E-009
+ Iterative difference of A is   1.213323397569049E-008
+  
+  510 iteration
+ Iterative difference of f_Qd is   2.234765748539494E-008
+ Iterative difference of f_Qd_t is   2.108689695903485E-008
+ Iterative difference of f_Qeddy is   8.284277302561885E-009
+ Iterative difference of A is   1.194359454934936E-008
+  
+  511 iteration
+ Iterative difference of f_Qd is   2.200080582862377E-008
+ Iterative difference of f_Qd_t is   2.076054764384161E-008
+ Iterative difference of f_Qeddy is   8.153562291047384E-009
+ Iterative difference of A is   1.175691374073404E-008
+  
+  512 iteration
+ Iterative difference of f_Qd is   2.165931204441834E-008
+ Iterative difference of f_Qd_t is   2.043923815831308E-008
+ Iterative difference of f_Qeddy is   8.024912877659454E-009
+ Iterative difference of A is   1.157314549987513E-008
+  
+  513 iteration
+ Iterative difference of f_Qd is   2.132309397800958E-008
+ Iterative difference of f_Qd_t is   2.012289089916089E-008
+ Iterative difference of f_Qeddy is   7.898296350717510E-009
+ Iterative difference of A is   1.139224449584614E-008
+  
+  514 iteration
+ Iterative difference of f_Qd is   2.099207071885878E-008
+ Iterative difference of f_Qd_t is   1.981142945008119E-008
+ Iterative difference of f_Qeddy is   7.773680520259049E-009
+ Iterative difference of A is   1.121416609898250E-008
+  
+  515 iteration
+ Iterative difference of f_Qd is   2.066616258287676E-008
+ Iterative difference of f_Qd_t is   1.950477857221369E-008
+ Iterative difference of f_Qeddy is   7.651033706113433E-009
+ Iterative difference of A is   1.103886637177434E-008
+  
+  516 iteration
+ Iterative difference of f_Qd is   2.034529109767869E-008
+ Iterative difference of f_Qd_t is   1.920286417898820E-008
+ Iterative difference of f_Qeddy is   7.530324731613511E-009
+ Iterative difference of A is   1.086630205845811E-008
+  
+  517 iteration
+ Iterative difference of f_Qd is   2.002937897743057E-008
+ Iterative difference of f_Qd_t is   1.890561331487420E-008
+ Iterative difference of f_Qeddy is   7.411522913404120E-009
+ Iterative difference of A is   1.069643057721031E-008
+  
+  518 iteration
+ Iterative difference of f_Qd is   1.971835011070622E-008
+ Iterative difference of f_Qd_t is   1.861295415234512E-008
+ Iterative difference of f_Qeddy is   7.294598059924204E-009
+ Iterative difference of A is   1.052921000431820E-008
+  
+  519 iteration
+ Iterative difference of f_Qd is   1.941212954314001E-008
+ Iterative difference of f_Qd_t is   1.832481595978597E-008
+ Iterative difference of f_Qeddy is   7.179520453409055E-009
+ Iterative difference of A is   1.036459906572293E-008
+  
+  520 iteration
+ Iterative difference of f_Qd is   1.911064345357441E-008
+ Iterative difference of f_Qd_t is   1.804112909325334E-008
+ Iterative difference of f_Qeddy is   7.066260852275560E-009
+ Iterative difference of A is   1.020255713311650E-008
+  
+  521 iteration
+ Iterative difference of f_Qd is   1.881381914928953E-008
+ Iterative difference of f_Qd_t is   1.776182497739351E-008
+ Iterative difference of f_Qeddy is   6.954790475292849E-009
+ Iterative difference of A is   1.004304420464293E-008
+  
+  522 iteration
+ Iterative difference of f_Qd is   1.852158503521176E-008
+ Iterative difference of f_Qd_t is   1.748683608896254E-008
+ Iterative difference of f_Qeddy is   6.845081001148612E-009
+ Iterative difference of A is   9.886020899910891E-009
+  
+  523 iteration
+ Iterative difference of f_Qd is   1.823387060654116E-008
+ Iterative difference of f_Qd_t is   1.721609594208112E-008
+ Iterative difference of f_Qeddy is   6.737104558257601E-009
+ Iterative difference of A is   9.731448451103311E-009
+  
+  524 iteration
+ Iterative difference of f_Qd is   1.795060643140431E-008
+ Iterative difference of f_Qd_t is   1.694953906785160E-008
+ Iterative difference of f_Qeddy is   6.630833714136447E-009
+ Iterative difference of A is   9.579288691051110E-009
+  
+  525 iteration
+ Iterative difference of f_Qd is   1.767172413047122E-008
+ Iterative difference of f_Qd_t is   1.668710100872009E-008
+ Iterative difference of f_Qeddy is   6.526241475186823E-009
+ Iterative difference of A is   9.429504046944842E-009
+  
+  526 iteration
+ Iterative difference of f_Qd is   1.739715636914912E-008
+ Iterative difference of f_Qd_t is   1.642871828985357E-008
+ Iterative difference of f_Qeddy is   6.423301272817650E-009
+ Iterative difference of A is   9.282057528842147E-009
+  
+  527 iteration
+ Iterative difference of f_Qd is   1.712683682982691E-008
+ Iterative difference of f_Qd_t is   1.617432841567040E-008
+ Iterative difference of f_Qeddy is   6.321986964746146E-009
+ Iterative difference of A is   9.136912719259413E-009
+  
+  528 iteration
+ Iterative difference of f_Qd is   1.686070021230876E-008
+ Iterative difference of f_Qd_t is   1.592386984989105E-008
+ Iterative difference of f_Qeddy is   6.222272818951630E-009
+ Iterative difference of A is   8.994033769051807E-009
+  
+  529 iteration
+ Iterative difference of f_Qd is   1.659868220302285E-008
+ Iterative difference of f_Qd_t is   1.567728199732346E-008
+ Iterative difference of f_Qeddy is   6.124133513025001E-009
+ Iterative difference of A is   8.853385383318646E-009
+  
+  530 iteration
+ Iterative difference of f_Qd is   1.634071946981716E-008
+ Iterative difference of f_Qd_t is   1.543450519865888E-008
+ Iterative difference of f_Qeddy is   6.027544128964571E-009
+ Iterative difference of A is   8.714932817933951E-009
+  
+  531 iteration
+ Iterative difference of f_Qd is   1.608674964808168E-008
+ Iterative difference of f_Qd_t is   1.519548070445104E-008
+ Iterative difference of f_Qeddy is   5.932480140165633E-009
+ Iterative difference of A is   8.578641866536021E-009
+  
+  532 iteration
+ Iterative difference of f_Qd is   1.583671131602862E-008
+ Iterative difference of f_Qd_t is   1.496015067554979E-008
+ Iterative difference of f_Qeddy is   5.838917411637307E-009
+ Iterative difference of A is   8.444478854455900E-009
+  
+  533 iteration
+ Iterative difference of f_Qd is   1.559054399382503E-008
+ Iterative difference of f_Qd_t is   1.472845815534557E-008
+ Iterative difference of f_Qeddy is   5.746832190678397E-009
+ Iterative difference of A is   8.312410631344802E-009
+  
+  534 iteration
+ Iterative difference of f_Qd is   1.534818812147509E-008
+ Iterative difference of f_Qd_t is   1.450034706283049E-008
+ Iterative difference of f_Qeddy is   5.656201100805863E-009
+ Iterative difference of A is   8.182404559247888E-009
+  
+  535 iteration
+ Iterative difference of f_Qd is   1.510958504320759E-008
+ Iterative difference of f_Qd_t is   1.427576218088894E-008
+ Iterative difference of f_Qeddy is   5.567001138068531E-009
+ Iterative difference of A is   8.054428510002182E-009
+  
+  536 iteration
+ Iterative difference of f_Qd is   1.487467700183806E-008
+ Iterative difference of f_Qd_t is   1.405464913895038E-008
+ Iterative difference of f_Qeddy is   5.479209660205070E-009
+ Iterative difference of A is   7.928450853527183E-009
+  
+  537 iteration
+ Iterative difference of f_Qd is   1.464340711838583E-008
+ Iterative difference of f_Qd_t is   1.383695440344834E-008
+ Iterative difference of f_Qeddy is   5.392804386860836E-009
+ Iterative difference of A is   7.804440450885977E-009
+  
+  538 iteration
+ Iterative difference of f_Qd is   1.441571938209929E-008
+ Iterative difference of f_Qd_t is   1.362262526003952E-008
+ Iterative difference of f_Qeddy is   5.307763391131093E-009
+ Iterative difference of A is   7.682366647129499E-009
+  
+  539 iteration
+ Iterative difference of f_Qd is   1.419155863571081E-008
+ Iterative difference of f_Qd_t is   1.341160981013431E-008
+ Iterative difference of f_Qeddy is   5.224065091971597E-009
+ Iterative difference of A is   7.562199263490277E-009
+  
+  540 iteration
+ Iterative difference of f_Qd is   1.397087056589572E-008
+ Iterative difference of f_Qd_t is   1.320385694617704E-008
+ Iterative difference of f_Qeddy is   5.141688250945992E-009
+ Iterative difference of A is   7.443908592178264E-009
+  
+  541 iteration
+ Iterative difference of f_Qd is   1.375360168332299E-008
+ Iterative difference of f_Qd_t is   1.299931635294696E-008
+ Iterative difference of f_Qeddy is   5.060611968756359E-009
+ Iterative difference of A is   7.327465383153570E-009
+  
+  542 iteration
+ Iterative difference of f_Qd is   1.353969932135421E-008
+ Iterative difference of f_Qd_t is   1.279793848023639E-008
+ Iterative difference of f_Qeddy is   4.980815673967520E-009
+ Iterative difference of A is   7.212840844776983E-009
+  
+  543 iteration
+ Iterative difference of f_Qd is   1.332911161175745E-008
+ Iterative difference of f_Qd_t is   1.259967454978958E-008
+ Iterative difference of f_Qeddy is   4.902279123657552E-009
+ Iterative difference of A is   7.100006630582703E-009
+  
+  544 iteration
+ Iterative difference of f_Qd is   1.312178748210518E-008
+ Iterative difference of f_Qd_t is   1.240447652451140E-008
+ Iterative difference of f_Qeddy is   4.824982394310492E-009
+ Iterative difference of A is   6.988934836893099E-009
+  
+  545 iteration
+ Iterative difference of f_Qd is   1.291767663842702E-008
+ Iterative difference of f_Qd_t is   1.221229710976837E-008
+ Iterative difference of f_Qeddy is   4.748905881165819E-009
+ Iterative difference of A is   6.879597990458799E-009
+  
+  546 iteration
+ Iterative difference of f_Qd is   1.271672955393405E-008
+ Iterative difference of f_Qd_t is   1.202308973734245E-008
+ Iterative difference of f_Qeddy is   4.674030286292222E-009
+ Iterative difference of A is   6.771969048458698E-009
+  
+  547 iteration
+ Iterative difference of f_Qd is   1.251916754681573E-008
+ Iterative difference of f_Qd_t is   1.183680855632377E-008
+ Iterative difference of f_Qeddy is   4.600336620756013E-009
+ Iterative difference of A is   6.666021385706364E-009
+  
+  548 iteration
+ Iterative difference of f_Qd is   1.232468974663239E-008
+ Iterative difference of f_Qd_t is   1.165340841923282E-008
+ Iterative difference of f_Qeddy is   4.527806195730663E-009
+ Iterative difference of A is   6.561728795300564E-009
+  
+  549 iteration
+ Iterative difference of f_Qd is   1.213322112052218E-008
+ Iterative difference of f_Qd_t is   1.147284487291317E-008
+ Iterative difference of f_Qeddy is   4.456420616208434E-009
+ Iterative difference of A is   6.459065470410669E-009
+  
+  550 iteration
+ Iterative difference of f_Qd is   1.194471538866482E-008
+ Iterative difference of f_Qd_t is   1.129507414812311E-008
+ Iterative difference of f_Qeddy is   4.386161783168779E-009
+ Iterative difference of A is   6.358006012950265E-009
+  
+  551 iteration
+ Iterative difference of f_Qd is   1.175912697553780E-008
+ Iterative difference of f_Qd_t is   1.112005315129574E-008
+ Iterative difference of f_Qeddy is   4.317011882302643E-009
+ Iterative difference of A is   6.258525417530969E-009
+  
+  552 iteration
+ Iterative difference of f_Qd is   1.157641100080903E-008
+ Iterative difference of f_Qd_t is   1.094773944675803E-008
+ Iterative difference of f_Qeddy is   4.248953379241971E-009
+ Iterative difference of A is   6.160599063873007E-009
+  
+  553 iteration
+ Iterative difference of f_Qd is   1.139652327022955E-008
+ Iterative difference of f_Qd_t is   1.077809125586346E-008
+ Iterative difference of f_Qeddy is   4.181969022161794E-009
+ Iterative difference of A is   6.064202718756781E-009
+  
+  554 iteration
+ Iterative difference of f_Qd is   1.121942025915368E-008
+ Iterative difference of f_Qd_t is   1.061106744137952E-008
+ Iterative difference of f_Qeddy is   4.116041828336123E-009
+ Iterative difference of A is   5.969312525180848E-009
+  
+  555 iteration
+ Iterative difference of f_Qd is   1.104505911167161E-008
+ Iterative difference of f_Qd_t is   1.044662749838041E-008
+ Iterative difference of f_Qeddy is   4.051155087824235E-009
+ Iterative difference of A is   5.875904995423023E-009
+  
+  556 iteration
+ Iterative difference of f_Qd is   1.087339762066014E-008
+ Iterative difference of f_Qd_t is   1.028473154644077E-008
+ Iterative difference of f_Qeddy is   3.987292350677088E-009
+ Iterative difference of A is   5.783957009739341E-009
+  
+  557 iteration
+ Iterative difference of f_Qd is   1.070439422908367E-008
+ Iterative difference of f_Qd_t is   1.012534031575793E-008
+ Iterative difference of f_Qeddy is   3.924437434526737E-009
+ Iterative difference of A is   5.693445805088349E-009
+  
+  558 iteration
+ Iterative difference of f_Qd is   1.053800800527444E-008
+ Iterative difference of f_Qd_t is   9.968415146718174E-009
+ Iterative difference of f_Qeddy is   3.862574405721214E-009
+ Iterative difference of A is   5.604348973613227E-009
+  
+  559 iteration
+ Iterative difference of f_Qd is   1.037419865290712E-008
+ Iterative difference of f_Qd_t is   9.813917966911695E-009
+ Iterative difference of f_Qeddy is   3.801687589082350E-009
+ Iterative difference of A is   5.516644458088138E-009
+  
+  560 iteration
+ Iterative difference of f_Qd is   1.021292648324332E-008
+ Iterative difference of f_Qd_t is   9.661811296770434E-009
+ Iterative difference of f_Qeddy is   3.741761554027986E-009
+ Iterative difference of A is   5.430310540859365E-009
+  
+  561 iteration
+ Iterative difference of f_Qd is   1.005415241513152E-008
+ Iterative difference of f_Qd_t is   9.512058227884035E-009
+ Iterative difference of f_Qeddy is   3.682781115439335E-009
+ Iterative difference of A is   5.345325844278992E-009
+  
+  562 iteration
+ Iterative difference of f_Qd is   9.897837967634548E-009
+ Iterative difference of f_Qd_t is   9.364622426902974E-009
+ Iterative difference of f_Qeddy is   3.624731330408373E-009
+ Iterative difference of A is   5.261669324633372E-009
+ iteration has been finished

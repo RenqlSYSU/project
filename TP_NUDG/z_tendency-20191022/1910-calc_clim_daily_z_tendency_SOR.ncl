@@ -23,7 +23,8 @@ end if
 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_dzdt.nc"
-var_name = (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name2 = (/"Qd","Qd_t","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -54,6 +55,7 @@ nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
 forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
+q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
 dzdt  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 term  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 diff  = new((/nvar/),double)
@@ -94,6 +96,9 @@ print("handle with " + case(nf))
 f      = addfile(filein(nf),"r")
 do nv = 0, nvar-1, 1
     forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+end do
+do nv = 0, 2, 1
+    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
 end do
 sigm1 = f->sigm1(select_time,{lev},{lats:latn},{lonl:lonr})
 copy_VarMeta(forc,dzdt)

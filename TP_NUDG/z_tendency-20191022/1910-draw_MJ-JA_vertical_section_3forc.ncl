@@ -5,18 +5,27 @@
 ;*********************************************************************************
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-var_option = 1
+var_option = 2
 fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference
 
 if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-    unit     = (/"K/Day","K/Day","10~S~-10~N~s~S~-2~N~"/)  ;this can be used as right string 
-else
-    draw_var = (/"f_Qd" ,"f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-    unit     = (/"10~S~-6~N~s~S~-2~N~","10~S~-6~N~s~S~-2~N~","10~S~-10~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var = (/"Qdt"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd_t"   ,"Qeddy"/)  ;use to read variables
+    unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+if(var_option.eq.1) then 
+    draw_var = (/"fQdt" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"f_Qd_t","f_Qeddy","A","total"/)  ;use to read variables
+    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
+if(var_option.eq.2) then 
+    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt"/)  ;
+    unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
+    nnv = 0 ;used to read dzdt induced by different forcing
+    select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
@@ -44,8 +53,14 @@ else
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
 end if
-filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
-fig_name = path + "/z_tendency-20191022/fig/1p2x3_mj-ja_height_lat_3Q_" + area(na)
+
+if(var_option.lt.2)
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(0) + area(na)
+else
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(nnv) + area(na)
+end if
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
@@ -61,7 +76,11 @@ nvar   = dimsizes(draw_var)
 ncase  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
-vars = f->Qd(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+if(var_option.le.1)
+    vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+else
+    vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
@@ -88,18 +107,29 @@ var_m = new((/ncase,nvar,nmonth,nlev,nlat/),double)
 ;====================================================================
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
-    do nv = 0, nvar-1,1
-    var(nc,nv,:,:,:,:)  = f->$draw_var(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    end do
+    if(var_option.le.1)
+        do nv = 0, nvar-2,1
+        var(nc,nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end do
+    else
+        var(nc,0:2,:,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
 end do
 var := dim_avg_n(var,5)
-if(var_option.eq.0) then 
-    var(:,2,:,:,:) = var(:,2,:,:,:)*10^10 ;convert units of A from s^-2 to 10^-11 s^-2
-else 
-    var(:,2,:,:,:) = var(:,2,:,:,:)*10^10 ;convert units of A from s^-2 to 10^-11 s^-2
-    var(:,0:1,:,:,:) = var(:,0:1,:,:,:)*10^6 ;convert units of A from s^-2 to 10^-11 s^-2
-end if
+var(:,nvar-1,:,:,:) = dim_sum_n(var(:,0:(nvar-2),:,:,:),1)
 printVarSummary(var)
+
+if(var_option.eq.0) then 
+    var = var*24*3600 ;convert units of Q from K/s to K/Day 
+end if
+
+if(var_option.eq.1) then 
+    var = var*10^10
+end if
+
+if(var_option.eq.2) then 
+    var = var*10^3
+end if
 
 ;calc ealy(56) and late(78) stage of the summer 
 select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
@@ -219,30 +249,41 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.0) then 
-    minlvl = (/-2.4,-2.4,-0.8/);
-    maxlvl = (/ 2.4, 2.4, 0.8/);
-    spacig = (/ 0.3, 0.3, 0.1/);
+    minlvl = (/-2.4,-2.4,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 2.4/);
+    spacig = (/ 0.3, 0.3, 0.3/);
 end if
 
 
 if(var_option.eq.1) then
-if(fnc.gt.0) then 
-    minlvl = (/-16,-16,-2.4/);
-    maxlvl = (/ 16, 16, 2.4/);
-    spacig = (/  2,  2, 0.3/);
+if(fnc.eq.0) then 
+    minlvl = (/-2.4,-2.4,-0.8,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 0.8, 2.4/);
+    spacig = (/ 0.3, 0.3, 0.1, 0.3/);
 else
-    minlvl = (/-24,-24,-0.8/);
-    maxlvl = (/ 24, 24, 0.8/);
-    spacig = (/ 3 , 3 , 0.1/);
+    minlvl = (/-1.6,-1.6,-1.6,-1.6/);-2.4,-2.4,-2.4,-2.4
+    maxlvl = (/ 1.6, 1.6, 1.6, 1.6/); 2.4, 2.4, 2.4, 2.4
+    spacig = (/ 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3
 end if
 end if
+    
+if(var_option.eq.2) then 
+    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/);
+end if
+
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
 do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
     np = nm*nvar + nv
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
+    if(var_option.eq.2) then 
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
+    else
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval

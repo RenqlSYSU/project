@@ -108,7 +108,7 @@ program iteration
 !read the data
 !============================================================
     dzdt = 0.0
-    do iter = 1, 5000, 1
+    do iter = 1, 100000, 1
         write(ilog,*) " "
         write(ilog,"(I5,A10)") iter, " iteration"
         
@@ -117,21 +117,18 @@ program iteration
         do ny = 2, nlat-1, 1
         do nx = 2, nlon-1, 1
             term(nx,ny,nz,:,:) = coe111(nx,ny,nz)*dzdt(nx,ny,nz,:,:) + & 
-                                 coe110(nx,ny,nz)*dzdt(nx+1,ny,nz,:,:) + coe121(nx,ny,nz)*dzdt(nz,ny+1,nx,:,:) + coe211(nx,ny,nz)*dzdt(nx,ny,nz+1,:,:) +&
-                                 coe110(nx,ny,nz)*dzdt(nx-1,ny,nz,:,:) + coe101(nx,ny,nz)*dzdt(nz,ny-1,nx,:,:) + coe011(nx,ny,nz)*dzdt(nx,ny,nz-1,:,:) 
+                                 coe110(nx,ny,nz)*dzdt(nx+1,ny,nz,:,:) + coe121(nx,ny,nz)*dzdt(nx,ny+1,nz,:,:) + coe211(nx,ny,nz)*dzdt(nx,ny,nz+1,:,:) +&
+                                 coe110(nx,ny,nz)*dzdt(nx-1,ny,nz,:,:) + coe101(nx,ny,nz)*dzdt(nx,ny-1,nz,:,:) + coe011(nx,ny,nz)*dzdt(nx,ny,nz-1,:,:) 
             dzdt(nx,ny,nz,:,:) = dzdt(nx,ny,nz,:,:) + (rf/coe111(nx,ny,nz))*(f0(nx,ny,nz)*a*a*forc(nx,ny,nz,:,:)-term(nx,ny,nz,:,:))
         end do
         end do
         end do
-        !write(ilog,) term(nx,ny,nz,2,2,)+" = "+coe110(2,2,nx,ny,nz)+"*"+dzdt(2,2,nx,ny,nz+1)+" + "+coe121(2,2,nx,ny,nz)+"*"+dzdt(2,2,nz,ny+1,nx)+" + "+coe211(2,2,nx,ny,nz)+"*"+dzdt(2,2,nz+1,ny,nx) +\
-        !                         " + "+coe110(2,2,nx,ny,nz)+"*"+dzdt(2,2,nx,ny,nz-1)+" + "+coe101(2,2,nx,ny,nz)+"*"+dzdt(2,2,nz,ny-1,nx)+" + "+coe011(2,2,nx,ny,nz)+"*"+dzdt(2,2,nz-1,ny,nx))
-        !write(ilog,) dzdt(nx,ny,nz,2,2)+" = "+dzdt(2,2,nx,ny,nz)+" + ( "+rf+" / "+coe111(2,2,nx,ny,nz)+" ) * ("+f0(2,2,nx,ny,nz)+"*a*a*"+forc(2,2,nx,ny,nz)+" - "+term(2,2,nx,ny,nz)+" )")
     
     !boundary conditions
-        dzdt(1   ,:,:,:,:) = dzdt(1     ,:,:,:,:)
+        dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
         dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
         
-        dzdt(:,1   ,:,:,:) = 0 !dzdt(:,:,:,1     ,:)
+        dzdt(:,1   ,:,:,:) = dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
         dzdt(:,:,1   ,:,4) = dzdt(:,:,2     ,:,4)  !lower boundary for A
@@ -151,11 +148,13 @@ program iteration
             exit
         end if 
     end do
+    write(ilog,*) dzdt(130:150:4,60,16,60,1)
+    write(ilog,*) dzdt(130:150:4,60,10,60,1)
     
 !========================================================================
 !save the data
 !=======================================================================
-    open(unit=ifile,file=fileout,status='replace',form='unformatted',convert='LITTLE_ENDIAN',access='direct',recl=pr*nlat*nlon)
+    open(unit=ifile,file=fileout,status='replace',form='binary',convert='LITTLE_ENDIAN',access='direct',recl=pr*nlat*nlon)
     irec = 1
     do nv = 1, nvar, 1
     do nt = 1, ntime, 1
@@ -165,6 +164,7 @@ program iteration
     end do
     end do
     end do
+    write(ilog,*) "irec = ", irec
     close(ifile)
     close(ilog)
 end program

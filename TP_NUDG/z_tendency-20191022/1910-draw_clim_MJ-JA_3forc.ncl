@@ -5,10 +5,15 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option = 0
+var_option  = 2
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+nl = 1 ;(/850,500,200/)
+fnc  = 0    ;chose which case to draw
+diff = True ;whether draw the difference
+
 if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
+    draw_var = (/"Qdt"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd_t"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
@@ -19,19 +24,15 @@ end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = "10~s~-3~n~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
+    unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 months   = (/"MJ","JA"/)
 lev = (/850,500,200/)
-nl = 0
-fnc  = 0    ;chose which case to draw
-diff = True ;whether draw the difference
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL", "NG24h-CTRL"/)
@@ -109,7 +110,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
-    if(var_option.lt.2)
+    if(var_option.le.1)
         do nv = 0, nvar-2,1
         var(nc,nv,:,:,:)  = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
@@ -138,6 +139,12 @@ var_m(:,:,0,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
 var_m(:,:,1,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
 printVarSummary(var_m)
+
+if(diff) then 
+do nc = 1, ncase-1, 1
+    var_m(nc,:,:,:,:) = var_m(nc,:,:,:,:) - var_m(0,:,:,:,:)
+end do 
+end if
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -297,17 +304,23 @@ printVarSummary(var_m)
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.0) then ;Q
-    minlvl = (/-4 ,-4 ,-4 /);
-    maxlvl = (/ 4 , 4 , 4 /);
-    spacig = (/0.5,0.5,0.5/);
+    minlvl = (/-2.4,-2.4,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 2.4/);
+    spacig = (/0.3 ,0.3 ,0.3 /);
 end if
 
 if(var_option.eq.1) then ;forc
-    minlvl = (/-4 ,-4 ,-4 ,-4 /);
-    maxlvl = (/ 4 , 4 , 4 , 4 /);
-    spacig = (/0.5,0.5,0.5,0.5/);
+if(fnc.eq.0) then 
+    minlvl = (/-4 ,-4 ,-4 ,-4 /);-8,-8
+    maxlvl = (/ 4 , 4 , 4 , 4 /); 8, 8
+    spacig = (/0.5,0.5,0.5,0.5/); 1, 1
+else
+    minlvl = (/-4 ,-4 ,-4 ,-4 /);-8,-8
+    maxlvl = (/ 4 , 4 , 4 , 4 /); 8, 8
+    spacig = (/0.5,0.5,0.5,0.5/); 1, 1
 end if
-
+end if
+    
 if(var_option.eq.2) then ;dzdt
     minlvl = (/-1.6,-1.6,-1.6,-1.6/);
     maxlvl = (/1.6 ,1.6 ,1.6 ,1.6 /);
@@ -322,7 +335,11 @@ do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
     np = nm*nvar + nv
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm)
+    if(var_option.eq.2) then 
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nnv) + ")"
+    else
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
+    end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval

@@ -65,34 +65,48 @@ lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
 
-dlon = lon(4)-lon(3)
-dlat = lat(4)-lat(3)
 dlev = lev
 dlev(1:(nlev-1)) = (- lev(0:(nlev-2)) + lev(1:(nlev-1)))*100 
 dlev(0) = dlev(1) 
 dlev5  = conform(dzdt,dlev,ilev)
-coslat = conform(dzdt,cos(lat),ilat)
-tanlat = conform(dzdt,tan(lat),ilat)
 
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1, 1, 1 
+do nf = 2, 2, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
 ;============================================================
-setfileoption("bin","WriteByteOrder","LittleEndian")
-dzdt = fbindirread(filedat(nf),0,(/nvar,ntime,nlev,nlat,nlon/),"double")
-print(dzdt(0,59,15,59,119))
-print(dzdt(0,59,10,59,130:140))
+setfileoption("bin","ReadByteOrder","LittleEndian")
+irec = 0
+do nv = 0, nvar-1, 1
+do nt = 0, ntime-1, 1
+do nz = 0, nlev-1, 1
+    dzdt(nv,nt,nz,:,:) = fbindirread(filedat(nf),irec,(/nlat,nlon/),"double")
+    irec = irec + 1
+end do
+end do
+end do
+print(dzdt(0:3,59,15,59,119))
+print(dzdt(0,59,15,59,129:149:4))
+print(dzdt(0,59, 9,59,129:149:4))
 
 ;==========================================================
 ;define coefficient and calc dzdt
 ;============================================================
 f0    = conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
+f0@_FillValue = dzdt@_FillValue
+printVarSummary(f0)
+
+do ny = 0, nlat-1
+if (abs(lat(ny)*180.0/pi ).lt. 10. ) then
+f0(:,:,:,ny,:)= f0@_FillValue
+end if
+end do
+printVarSummary(dzdt)
 dudt = - center_finite_diff_n(dzdt,lat    ,cyclic,opt,ilat)/f0
 dvdt =   center_finite_diff_n(dzdt,lon    ,cyclic,opt,ilon)/f0
 dTdt = - center_finite_diff_n(dzdt,lev*100,cyclic,opt,ilev)*conform(dzdt,lev*100,ilev)/R

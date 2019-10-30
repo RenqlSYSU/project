@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql"
 var_name = (/"U","V","T"/)
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -18,30 +18,30 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
-else
+end if
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
 end if
-
-;area of TP 
-lats = 25 
-latn = 40
-lonl = 70
-lonr = 105
+if(case_option.eq.2) then
+    case    = (/"F2000","NG6h"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+    years    = ispan(1,30,1)   ;the calculate time
+end if
+area = (/"TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/25  , 22  , 30  /)
+latn = (/40  , 30  , 45  /)
+lonl = (/70  ,107  ,115  /)
+lonr = (/105 ,130  ,130  /)
 lev  = (/850,500,200/)
 
-nv = 2
-nl = 2
-nc = 0
-
-;fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/" + case(nc) + "_" + var_name(nv) + "_" + lev(nl)
-fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/1p3x3_" + var_name(nv)
-;fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/3p3x3_UVT"
-fig_title = case(nc) + " " + var_name(nv) + " " + lev(nl)
-
-f   = addfile(filein(0)+years(0)+".daily."+var_name(nv)+".nc","r")
+nv = 0;1;2
+do na = 0,2,1
+fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/1p3x3_JJA_" + var_name(nv) + "-" + area(na)
+f   = addfile(filein(0)+years(9)+".daily."+var_name(nv)+".nc","r")
 time        = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.4.and.time(:,1).le.9)
 ntime       = dimsizes(select_time)
@@ -53,8 +53,8 @@ alltime = ntime*nyear
 ;define array to calc the average of 27 years
 var  = new((/nyear,ntime/),float)
 plot = new((/ncase*nlev/),graphic)
-splt = new((/4,toint(ntime/2)/),float)
-splt = 0
+;splt = new((/4,toint(alltime/2)/),float)
+;splt = 0
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
@@ -68,28 +68,36 @@ wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
 np = 0
 do nl = 0, nlev-1 ,1
 do nc = 0, ncase-1 ,1
-    if((case_option.eq.1).and.(nc.eq.1))
+if((case_option.eq.1).and.(nc.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
-    end if
+end if
+if((case_option.eq.1).and.(nc.eq.0))
+    years   = ispan(21,30,1)   ;the calculate time
+end if
+files = systemfunc("ls "+filein(nc)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0, nyear-1 ,1
+    if(case_option.eq.2) then 
+    f   = addfile(files(nt),"r")
+    else
     f   = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var1 = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr})
+    end if
+    var1 := f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     var(nt,:) = wgt_areaave_Wrap(var1,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
 end do
 ;var = var - conform(var,dim_avg_n(var,0),1)  ;remove annual cycle
 
-do nt = 0, nyear-1 ,1
+;do nt = 0, nyear-1 ,1
 ; calculate spectrum
-  sdof = specx_anal(var(nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
-;  sdof = specx_anal(ndtooned(var),d,sm,pct) ;returns the degrees of freedom as a scalar.
+;  sdof = specx_anal(var(nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+  sdof = specx_anal(ndtooned(var),d,sm,pct) ;returns the degrees of freedom as a scalar.
 
 ; return 4 curves to be plotted, first is the input spectrum, second is Markov "Red Noise" spectrum
 ; the last two numbers are the confidence levels
-  ;splt = specx_ci (sdof, 0.05, 0.95)
-  splt_term = specx_ci (sdof, 0.05, 0.95)
-  splt = splt + splt_term
-end do
-splt = splt/nyear
+  splt = specx_ci (sdof, 0.05, 0.95)
+;  splt_term = specx_ci (sdof, 0.05, 0.95)
+;  splt = splt + splt_term
+;end do
+;splt = splt/nyear
 printVarSummary(sdof)
 printVarSummary(splt)        ; splt(4,:)
 
@@ -142,7 +150,7 @@ k=5
     resxy@tiYAxisString = "Variance/freq"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
-    resxy@trYMaxF = 50
+    resxy@trYMaxF = 500
     ;resxy@trXLog  = True
     ;resxy@trXMinF = 1
     ;resxy@trXMaxF = 10000
@@ -184,17 +192,17 @@ k=5
     resxy@gsnStringFont         = font_index
     resxy@gsnStringFontHeightF = subtitle_font
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
-    resxy@gsnLeftString    = case(nc)
+    resxy@gsnLeftString    = case(nc) + " " + area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
     resxy@gsnRightString   = var_name(nv) + " " + lev(nl) + "hPa" 
 
    ;ip   = ind(frq.le.0.2)    ; all indices for "short" periods
-   ip   = ind(frq.ge.0.02)    ; all indices for "short" periods
+   ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
    plot(np) = gsn_csm_xy(wks,p(ip), splt(:,ip),resxy)     
    ;plot(np) = gsn_csm_xy(wks,p, splt,resxy)     
    ;plot = gsn_csm_xy(wks, frq(ip), splt(:,ip), resxy)     
    ;plot = gsn_csm_xy(wks, frq, splt, resxy)     
    np = np + 1
-   print(max(splt(:,ip)))
+   ;print(max(splt(:,ip)))
 end do 
 end do
 
@@ -210,8 +218,9 @@ end do
     resp@txFontThicknessF = title_thick
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/ncase,nlev/),resp)
+    gsn_panel(wks,plot,(/nlev,ncase/),resp)
 
 ;draw(wks)
 ;frame(wks)
+end do
 end

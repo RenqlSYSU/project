@@ -67,6 +67,9 @@ season_vari= new((/       4 ,nlat,nlon/),float)
 printVarSummary(vars)
 
 do nf = 0 , ncase-1,1
+if((case_option.eq.1).and.(nf.eq.1))
+    years   = ispan(41,50,1)   ;the calculate time
+end if
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
@@ -74,8 +77,11 @@ var = 0
 do nv = 0,nvar-1,1 
 files = systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0,nyear-1,1
-    print(files(nt))
-    f  = addfile(files(nt),"r")
+    if(case_option.eq.2) then 
+    f   = addfile(files(nt),"r")
+    else
+    f   = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    end if
     var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(:,{lats:latn},{lonl:lonr})
 end do   ;the loop of 27 years 
 end do  ;the loop of PRECC and PRECL

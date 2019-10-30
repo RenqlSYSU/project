@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql"
 var_name = (/"U","V","T"/)
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -18,7 +18,9 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
-else
+end if
+
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case1   = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     case    = (/"CTRL","noTP"/)
@@ -26,7 +28,12 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
-;area of TP 
+if(case_option.eq.2) then
+    case    = (/"F2000","NG6h"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+    years    = ispan(1,30,1)   ;the calculate time
+end if
 area = (/"TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
 lats = (/25  , 22  , 30  /)
 latn = (/40  , 30  , 45  /)
@@ -34,12 +41,10 @@ lonl = (/70  ,107  ,115  /)
 lonr = (/105 ,130  ,130  /)
 lev  = (/850,500,200/)
 
-nv = 0
-do na = 1,2,1
-
+nv = 1 
+do na = 0,2,1
 fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/1p3x3_" + var_name(nv) + "-" + area(na)
-
-f   = addfile(filein(0)+years(0)+".daily."+var_name(nv)+".nc","r")
+f   = addfile(filein(0)+years(9)+".daily."+var_name(nv)+".nc","r")
 time        = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.1.and.time(:,1).le.12)
 ntime       = dimsizes(select_time)
@@ -70,9 +75,14 @@ end if
 if((case_option.eq.1).and.(nc.eq.0))
     years   = ispan(21,30,1)   ;the calculate time
 end if
+files = systemfunc("ls "+filein(nc)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0, nyear-1 ,1
+    if(case_option.eq.2) then 
+    f   = addfile(files(nt),"r")
+    else
     f   = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var1 = f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
+    var1 := f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     var(nt,:) = wgt_areaave_Wrap(var1,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
 end do
 ;var = var - conform(var,dim_avg_n(var,0),1)  ;remove annual cycle

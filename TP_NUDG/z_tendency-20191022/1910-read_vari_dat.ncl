@@ -22,8 +22,8 @@ else
 end if
 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_dzdt.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_dzdt.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly.nc"
 var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
@@ -34,7 +34,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -20 ;-90 ;
+lats = 10;-20 ;-90 ;
 latn = 60  ; 90 ;
 lonl = 20  ; 0  ;
 lonr = 220 ;360 ;
@@ -47,9 +47,10 @@ month_e = 8
 ;============================================================
 f    = addfile(filein(0),"r")
 vars:= f->Qd(:,{lev},{lats:latn},{lonl:lonr})
-time = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
-ntime = dimsizes(select_time)
+;time = cd_calendar(f->time,0)
+;select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+;ntime = dimsizes(select_time)
+ntime = 2 
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
@@ -75,7 +76,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 2, 2, 1 
+do nf = 0, 1, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -90,9 +91,9 @@ do nz = 0, nlev-1, 1
 end do
 end do
 end do
-print(dzdt(0:3,59,15,59,119))
-print(dzdt(0,59,15,59,129:149:4))
-print(dzdt(0,59, 9,59,129:149:4))
+print(dzdt(0:3,0,15,29,119))
+print(dzdt(0,0,15,29,129:149:4))
+print(dzdt(0,0, 9,29,129:149:4))
 
 ;==========================================================
 ;define coefficient and calc dzdt
@@ -146,7 +147,7 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"nvar","integer",(/"var"/))
-filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
+;filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
 filevardef(ncdf,"lev" ,typeof(vars&lev),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
@@ -158,7 +159,7 @@ filevardef(ncdf,"dbdt",typeof(dbdt),(/"var","time","lev","lat","lon"/))
 
 
 ;define var attribute
-filevarattdef(ncdf,"time",vars&time)
+;filevarattdef(ncdf,"time",vars&time)
 filevarattdef(ncdf,"lev",vars&lev)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
@@ -168,7 +169,7 @@ filevarattdef(ncdf,"dvdt",dvdt)
 filevarattdef(ncdf,"dTdt",dTdt)
 filevarattdef(ncdf,"dbdt",dbdt)
 
-ncdf->time = (/vars&time/)
+;ncdf->time = (/vars&time/)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)

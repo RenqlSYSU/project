@@ -49,7 +49,7 @@ program iteration
     read(*,*) nc
     if(nc.eq.1) then 
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_daily_4forc_6coe_monthly.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_monthly.dat"     
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_monthly0.dat"     
     else if(nc.eq.2) then
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_daily_4forc_6coe_monthly.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_monthly.dat"     
@@ -128,7 +128,7 @@ program iteration
         dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
         dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
         
-        dzdt(:,1   ,:,:,:) = dzdt(:,2     ,:,:,:)
+        dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
         dzdt(:,:,1   ,:,4) = dzdt(:,:,2     ,:,4)  !lower boundary for A

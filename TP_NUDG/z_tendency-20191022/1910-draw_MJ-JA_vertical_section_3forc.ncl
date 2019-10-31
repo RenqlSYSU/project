@@ -5,6 +5,7 @@
 ;*********************************************************************************
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+month_option = True 
 var_option = 2
 fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference
@@ -58,7 +59,11 @@ if(var_option.lt.2)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(0) + area(na)
 else
+    if(month_option) then
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly.nc"
+    else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
+    end if
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(nnv) + area(na)
 end if
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -77,14 +82,16 @@ ncase  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
 if(var_option.le.1)
-    vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    vars = f->$var_name(nv)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
     vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
+if(.not.(month_option)) then 
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
-var   = new((/ncase,nvar,ntime ,nlev,nlat,nlon/),double)
+var   = new((/ncase,nvar,ntime ,nlat,nlon/),double)
+end if
 var_m = new((/ncase,nvar,nmonth,nlev,nlat/),double)
 
 ;the number of the panel plot
@@ -105,6 +112,18 @@ var_m = new((/ncase,nvar,nmonth,nlev,nlat/),double)
 ;================================================================
 ;read data
 ;====================================================================
+if(month_option) then
+do nc = 0, ncase-1, 1
+    f = addfile(filename(nc),"r")
+    if(var_option.le.1)
+        do nv = 0, nvar-2,1
+        var_m(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        end do
+    else
+        var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
+end do
+else
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
@@ -115,21 +134,10 @@ do nc = 0, ncase-1, 1
         var(nc,0:2,:,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do
+else
 var := dim_avg_n(var,5)
 var(:,nvar-1,:,:,:) = dim_sum_n(var(:,0:(nvar-2),:,:,:),1)
 printVarSummary(var)
-
-if(var_option.eq.0) then 
-    var = var*24*3600 ;convert units of Q from K/s to K/Day 
-end if
-
-if(var_option.eq.1) then 
-    var = var*10^10
-end if
-
-if(var_option.eq.2) then 
-    var = var*10^3
-end if
 
 ;calc ealy(56) and late(78) stage of the summer 
 select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)

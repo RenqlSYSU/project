@@ -128,7 +128,7 @@ program iteration
         dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
         dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
         
-        dzdt(:,1   ,:,:,:) = dzdt(:,2     ,:,:,:)
+        dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
         dzdt(:,:,1   ,:,4) = dzdt(:,:,2     ,:,4)  !lower boundary for A

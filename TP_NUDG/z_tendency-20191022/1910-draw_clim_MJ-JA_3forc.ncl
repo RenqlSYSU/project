@@ -5,7 +5,8 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option  = 2
+var_option   = 2
+month_option = True 
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nl = 1 ;(/850,500,200/)
 fnc  = 0    ;chose which case to draw
@@ -24,7 +25,7 @@ end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
+    unit     = (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
@@ -34,8 +35,8 @@ lev = (/850,500,200/)
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/"CTRL","NG6h-CTRL", "NG24h-CTRL"/)
+    case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"/)
+    case2   = (/"CTRL","NG6h-CTRL"/);, "NG24h-CTRL"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -50,7 +51,11 @@ if(var_option.lt.2)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_" + var_name(0) + "-" + lev(nl)  
 else
+    if(month_option) then
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly.nc"
+    else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
+    end if
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_" + var_name(nnv) + "-" + lev(nl)  
 end if
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -58,7 +63,7 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;20 ;-20
+lats = 15 ;20 ;-20
 latn = 55  ;55 ;60
 lonl = 30  ;30 ;20
 lonr = 150 ;150;220
@@ -76,10 +81,12 @@ nvar   = dimsizes(draw_var)
 ncase  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
+if(.not.(month_option)) then 
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
 var   = new((/ncase,nvar,ntime ,nlat,nlon/),double)
+end if
 var_m = new((/ncase,nvar,nmonth,nlat,nlon/),double)
 
 ;the number of the panel plot
@@ -108,6 +115,18 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;================================================================
 ;read data
 ;====================================================================
+if(month_option) then
+do nc = 0, ncase-1, 1
+    f = addfile(filename(nc),"r")
+    if(var_option.le.1)
+        do nv = 0, nvar-2,1
+        var_m(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        end do
+    else
+        var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
+end do 
+else
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
@@ -118,26 +137,25 @@ do nc = 0, ncase-1, 1
         var(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do 
-var(:,nvar-1,:,:,:) = dim_sum_n(var(:,0:(nvar-2),:,:,:),1)
-
-if(var_option.eq.0) then 
-    var = var*24*3600 ;convert units of Q from K/s to K/Day 
-end if
-
-if(var_option.eq.1) then 
-    var = var*10^10
-end if
-
-if(var_option.eq.2) then 
-    var = var*10^3
-end if
-printVarSummary(var)
-
 ;calc ealy(56) and late(78) stage of the summer 
 select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
 var_m(:,:,0,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
 var_m(:,:,1,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
+printVarSummary(var_m)
+end if
+
+var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
+
+if(var_option.eq.0) then 
+    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
+end if
+if(var_option.eq.1) then 
+    var_m = var_m*10^10
+end if
+;if(var_option.eq.2) then 
+;    var_m = var_m*10^3
+;end if
 printVarSummary(var_m)
 
 if(diff) then 
@@ -345,14 +363,14 @@ do nv = 0,nvar-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np)     = gsn_csm_contour_map_ce(wks,var(fnc,nv,nm,:,:),res)
+    plot(np)     = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,nm,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
     if(case_option.eq.0) then 
     line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
     end if 
-    print(max(var(fnc,nv,nm,{lats:latn},{lonl:lonr})))
-    print(min(var(fnc,nv,nm,{lats:latn},{lonl:lonr})))
+    print(max(var_m(fnc,nv,nm,{lats:latn},{lonl:lonr})))
+    print(min(var_m(fnc,nv,nm,{lats:latn},{lonl:lonr})))
 end do 
 end do 
 

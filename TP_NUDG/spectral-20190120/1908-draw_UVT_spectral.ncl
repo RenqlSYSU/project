@@ -38,7 +38,7 @@ lonl = (/70  ,107  ,115  /)
 lonr = (/105 ,130  ,130  /)
 lev  = (/850,500,200/)
 
-nv = 0;1;2
+nv = 0
 do na = 0,2,1
 fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/1p3x3_JJA_" + var_name(nv) + "-" + area(na)
 f   = addfile(filein(0)+years(9)+".daily."+var_name(nv)+".nc","r")
@@ -150,7 +150,7 @@ k=5
     resxy@tiYAxisString = "Variance/freq"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
-    resxy@trYMaxF = 500
+    ;resxy@trYMaxF = 500
     ;resxy@trXLog  = True
     ;resxy@trXMinF = 1
     ;resxy@trXMaxF = 10000
@@ -197,6 +197,7 @@ k=5
 
    ;ip   = ind(frq.le.0.2)    ; all indices for "short" periods
    ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
+   resxy@trYMaxF = max(splt(:,ip)) 
    plot(np) = gsn_csm_xy(wks,p(ip), splt(:,ip),resxy)     
    ;plot(np) = gsn_csm_xy(wks,p, splt,resxy)     
    ;plot = gsn_csm_xy(wks, frq(ip), splt(:,ip), resxy)     

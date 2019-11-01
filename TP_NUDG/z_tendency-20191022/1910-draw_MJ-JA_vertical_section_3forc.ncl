@@ -5,8 +5,8 @@
 ;*********************************************************************************
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-month_option = True 
-var_option = 2
+month_option = False; True 
+var_option = 3
 fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference
 
@@ -27,6 +27,18 @@ if(var_option.eq.2) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.3) then
+    var_name = (/"Qeddy","A"/)  ;
+    unit     = (/"K/Day","10~S~-10~N~s~S~-2~N~"/)
+    nnv = 0 ;used to read dzdt induced by different forcing
+    if(nnv.eq.0) then 
+    draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "total"/)  ;this is the variable used to draw, can used as center string
+    select = (/0,1,2,3/)
+    else
+    draw_var = (/"-duVdx", "-dvVdy", "total"/)  ;this is the variable used to draw, can used as center string
+    select = (/0,1/)
+    end if
+end if
 months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
@@ -43,8 +55,8 @@ na = 1
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
+    case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"
+    case2   = (/"CTRL","NG6h-CTRL"/);,"NG24h-CTRL"
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -58,7 +70,9 @@ end if
 if(var_option.lt.2)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(0) + area(na)
-else
+end if
+
+if(var_option.eq.2)
     if(month_option) then
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly.nc"
     else
@@ -66,6 +80,11 @@ else
     end if
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(nnv) + area(na)
 end if
+if(var_option.eq.3)
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_eddy_flux.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_eddy_flux_" + var_name(nnv) + area(na)
+end if
+
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
@@ -87,12 +106,12 @@ else
     vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 if(.not.(month_option)) then 
-time = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
-ntime = dimsizes(select_time)
-var   = new((/ncase,nvar,ntime ,nlat,nlon/),double)
+    time = cd_calendar(f->time,0)
+    select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+    ntime = dimsizes(select_time)
+    var   = new((/ncase,nvar,ntime ,nlev,nlat,nlon/),double)
 end if
-var_m = new((/ncase,nvar,nmonth,nlev,nlat/),double)
+var_m = new((/ncase,nvar,nmonth,nlev,nlat,nlon/),double)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
@@ -117,10 +136,10 @@ do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
         do nv = 0, nvar-2,1
-        var_m(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,nv,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     else
-        var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do
 else
@@ -131,20 +150,36 @@ do nc = 0, ncase-1, 1
         var(nc,nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     else
-        var(nc,0:2,:,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var(nc,0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do
-else
-var := dim_avg_n(var,5)
-var(:,nvar-1,:,:,:) = dim_sum_n(var(:,0:(nvar-2),:,:,:),1)
-printVarSummary(var)
-
 ;calc ealy(56) and late(78) stage of the summer 
 select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
-var_m(:,:,0,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
+var_m(:,:,0,:,:,:) = dim_avg_n(var(:,:,select_time,:,:,:),2)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
-var_m(:,:,1,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
+var_m(:,:,1,:,:,:) = dim_avg_n(var(:,:,select_time,:,:,:),2)
+end if
+var_m := dim_avg_n(var_m,5)
+var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
+printVarSummary(var_m)
+
+if(var_option.eq.0) then 
+    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
+end if
+if(var_option.eq.1) then 
+    var_m = var_m*10^10
+end if
+if(var_option.eq.2) then 
+    var_m = var_m*10^3
+end if
+if(var_option.eq.3) then
+if(nnv.eq.0) then
+    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
+else
+    var_m = var_m*10^10
+end if
+end if
 printVarSummary(var_m)
 
 if(diff) then 
@@ -276,9 +311,21 @@ end if
 end if
     
 if(var_option.eq.2) then 
-    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
-    spacig = (/ 0.3, 0.3, 0.3, 0.3/);
+    minlvl = (/-16,-16,-16,-16/);,-1.6,-1.6,-1.6,-1.6
+    maxlvl = (/ 16, 16, 16, 16/);,1.6 ,1.6 ,1.6 ,1.6 
+    spacig = (/ 2 , 2 , 2 , 2 /);,0.2 ,0.2 ,0.2 ,0.2 
+end if
+
+if(var_option.eq.3) then 
+if(nnv.eq.0) then
+    minlvl = (/-0.8,-0.8,-0.8,-0.8,-0.8/);-2.4,-2.4,-2.4,-2.4,-2.4
+    maxlvl = (/ 0.8, 0.8, 0.8, 0.8, 0.8/); 2.4, 2.4, 2.4, 2.4, 2.4
+    spacig = (/ 0.1, 0.1, 0.1, 0.1, 0.1/); 0.3, 0.3, 0.3, 0.3, 0.3
+else
+    minlvl = (/-0.8,-0.8,-0.8/);
+    maxlvl = (/ 0.8, 0.8, 0.8/);
+    spacig = (/ 0.1, 0.1, 0.1/);
+end if
 end if
 
     res@cnFillPalette = "BlueDarkRed18"
@@ -287,7 +334,7 @@ do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
     np = nm*nvar + nv
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
-    if(var_option.eq.2) then 
+    if(var_option.ge.2) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"

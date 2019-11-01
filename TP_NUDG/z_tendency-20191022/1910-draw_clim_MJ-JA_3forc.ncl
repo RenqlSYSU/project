@@ -6,15 +6,15 @@
 ;*********************************************************************************
 begin
 var_option   = 2
-month_option = True 
+month_option =  True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl = 1 ;(/850,500,200/)
+nl = 3 ;(/850,700,500,200/)
 fnc  = 0    ;chose which case to draw
 diff = True ;whether draw the difference
 
 if(var_option.eq.0) then 
-    draw_var = (/"Qdt"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd_t"   ,"Qeddy"/)  ;use to read variables
+    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
@@ -25,12 +25,12 @@ end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
+    unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 months   = (/"MJ","JA"/)
-lev = (/850,500,200/)
+lev = (/850,700,500,200/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -63,7 +63,7 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = 15 ;20 ;-20
+lats = 20 ;-20
 latn = 55  ;55 ;60
 lonl = 30  ;30 ;20
 lonr = 150 ;150;220
@@ -139,9 +139,9 @@ do nc = 0, ncase-1, 1
 end do 
 ;calc ealy(56) and late(78) stage of the summer 
 select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
-var_m(:,:,0,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
+var_m(:,:,0,:,:) = dim_avg_n_Wrap(var(:,:,select_time,:,:),2)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
-var_m(:,:,1,:,:) = dim_avg_n(var(:,:,select_time,:,:),2)
+var_m(:,:,1,:,:) = dim_avg_n_Wrap(var(:,:,select_time,:,:),2)
 printVarSummary(var_m)
 end if
 
@@ -153,9 +153,9 @@ end if
 if(var_option.eq.1) then 
     var_m = var_m*10^10
 end if
-;if(var_option.eq.2) then 
-;    var_m = var_m*10^3
-;end if
+if(var_option.eq.2) then 
+    var_m = var_m*10^3
+end if
 printVarSummary(var_m)
 
 if(diff) then 
@@ -328,21 +328,15 @@ if(var_option.eq.0) then ;Q
 end if
 
 if(var_option.eq.1) then ;forc
-if(fnc.eq.0) then 
-    minlvl = (/-4 ,-4 ,-4 ,-4 /);-8,-8
-    maxlvl = (/ 4 , 4 , 4 , 4 /); 8, 8
-    spacig = (/0.5,0.5,0.5,0.5/); 1, 1
-else
-    minlvl = (/-4 ,-4 ,-4 ,-4 /);-8,-8
-    maxlvl = (/ 4 , 4 , 4 , 4 /); 8, 8
-    spacig = (/0.5,0.5,0.5,0.5/); 1, 1
-end if
+    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
+    spacig = (/0.3 ,0.3 ,0.3 ,0.3 /);
 end if
     
 if(var_option.eq.2) then ;dzdt
-    minlvl = (/-1.6,-1.6,-1.6,-1.6/);
-    maxlvl = (/1.6 ,1.6 ,1.6 ,1.6 /);
-    spacig = (/0.2 ,0.2 ,0.2 ,0.2 /);
+    minlvl = (/-16,-16,-16,-16/);,-1.6,-1.6,-1.6,-1.6
+    maxlvl = (/ 16, 16, 16, 16/);,1.6 ,1.6 ,1.6 ,1.6 
+    spacig = (/ 2 , 2 , 2 , 2 /);,0.2 ,0.2 ,0.2 ,0.2 
 end if
 
     res@cnFillPalette = "BlueDarkRed18"

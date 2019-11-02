@@ -21,10 +21,10 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly.dat"
-var_name = (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-var_name2 = (/"Qd","Qd_t","Qeddy"/)  ;this is the variable used to draw, can used as center string
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global2.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly-global.dat"
+var_name = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -33,10 +33,10 @@ a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 
 ;area: east Asia
-lats = 10 ;-90 ;
-latn = 60  ; 90 ;
-lonl = 20  ; 0  ;
-lonr = 220 ;360 ;
+lats = -2 ;-90 ;
+latn = 90  ; 90 ;
+lonl = 0  ; 0  ;
+lonr = 360 ;360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 5
 month_e = 8
@@ -84,7 +84,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, ncase-1, 1 
+do nf = 1, 2, 1 
 ;==========================================================
 ;read the data
 ;============================================================
@@ -94,7 +94,7 @@ select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 do nv = 0, nvar-1, 1
     forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
-do nv = 0, 2, 1
+do nv = 0, nvar-2, 1
     q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
 end do
 sigm1 := f->sigm1(select_time,{lev},{lats:latn},{lonl:lonr})
@@ -173,7 +173,7 @@ end do
 end do
 end do
 
-do nv = 0, 2, 1
+do nv = 0, nvar-2, 1
 do nt = 0, 1, 1
 do nl = 0, 1, 1
     fbindirwrite(fileout(nf),q3_m(nv,nt,nl,:,:))

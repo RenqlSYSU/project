@@ -28,7 +28,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A-global.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A-global2.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -54,7 +54,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -20;-90 ;
+lats = -2 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
@@ -77,10 +77,6 @@ nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 Qd    = new((/nyear,ntime,nlev,nlat,nlon/),float)
-Qeddy = new((/nyear,ntime,nlev,nlat,nlon/),float)
-A     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-f_Qd    = new((/    ntime,nlev,nlat,nlon/),double)
-f_Qeddy = new((/    ntime,nlev,nlat,nlon/),double)
 
 iyear = 0
 itime = 1
@@ -96,7 +92,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,0,1 
+do nf = 2,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -126,6 +122,10 @@ nv = 3
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
+u = linmsg_n(u,-1,ilon)
+v = linmsg_n(v,-1,ilon)
+t = linmsg_n(t,-1,ilon)
+w = linmsg_n(w,-1,ilon)
 printVarSummary(w)
 
 if(option.eq.1) then

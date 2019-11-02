@@ -21,10 +21,11 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly.nc"
-var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global2.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.nc"
+;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -34,10 +35,10 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = 10;-20 ;-90 ;
-latn = 60  ; 90 ;
-lonl = 20  ; 0  ;
-lonr = 220 ;360 ;
+lats = -2 ;-20 ;-90 ;
+latn = 90  ; 90 ;
+lonl = 0  ; 0  ;
+lonr = 360 ;360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 5
 month_e = 8
@@ -76,7 +77,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, 1, 1 
+do nf = 2, 2, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -91,7 +92,7 @@ do nz = 0, nlev-1, 1
 end do
 end do
 end do
-print(dzdt(0:3,0,15,29,119))
+print(dzdt(0:(nvar-1),0,15,29,119))
 print(dzdt(0,0,15,29,129:149:4))
 print(dzdt(0,0, 9,29,129:149:4))
 
@@ -141,8 +142,8 @@ fileattdef(ncdf,fileatt)
 
 ;define all coordinate
 dimNames = (/"var","time","lev","lat","lon"/);
-dimSizes = (/4    ,ntime ,nlev ,nlat ,nlon/) ;
-dimUnlim = (/False ,False ,False,False,False/);
+dimSizes = (/nvar ,ntime ,nlev ,nlat ,nlon/) ;
+dimUnlim = (/False,False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)

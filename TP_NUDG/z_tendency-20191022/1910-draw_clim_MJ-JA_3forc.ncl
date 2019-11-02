@@ -27,7 +27,7 @@ if(var_option.eq.2) then
     var_name = (/"dzdt","dudt","dTdt"/)  ;
     unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
-    select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 months   = (/"MJ","JA"/)
 lev = (/850,700,500,200/)
@@ -52,7 +52,7 @@ if(var_option.lt.2)
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
@@ -63,10 +63,10 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = 20 ;-20
-latn = 55  ;55 ;60
-lonl = 30  ;30 ;20
-lonr = 150 ;150;220
+lats = 0   ;20 
+latn = 89  ;55 
+lonl = 10   ;30 
+lonr = 350 ;150
 month_s = 5
 month_e = 8
 
@@ -117,6 +117,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 if(month_option) then
 do nc = 0, ncase-1, 1
+    print(filename(nc))
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
         do nv = 0, nvar-2,1
@@ -334,18 +335,19 @@ if(var_option.eq.1) then ;forc
 end if
     
 if(var_option.eq.2) then ;dzdt
-    minlvl = (/-16,-16,-16,-16/);,-1.6,-1.6,-1.6,-1.6
-    maxlvl = (/ 16, 16, 16, 16/);,1.6 ,1.6 ,1.6 ,1.6 
-    spacig = (/ 2 , 2 , 2 , 2 /);,0.2 ,0.2 ,0.2 ,0.2 
+    minlvl = (/-8,-8,-8,-8/);,-1.6,-1.6,-1.6,-1.6
+    maxlvl = (/ 8, 8, 8, 8/);,1.6 ,1.6 ,1.6 ,1.6 
+    spacig = (/ 1, 1, 1, 1/);,0.2 ,0.2 ,0.2 ,0.2 
 end if
 
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
-do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
-    np = nm*nvar + nv
+do nm = 0,nmonth-1,1
+    ;np = nm*nvar + nv
+    np = nv*nmonth + nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm)
     if(var_option.eq.2) then 
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nnv) + ")"
@@ -369,6 +371,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
 end
 

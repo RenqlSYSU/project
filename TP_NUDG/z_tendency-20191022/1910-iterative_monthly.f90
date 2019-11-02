@@ -9,8 +9,8 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 4 , ntime = 2, nlev = 18   
-    integer, parameter :: nlat = 53 , nlon = 161 , ilog  = 10 , ifile = 12
+    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 2, nlev = 18   
+    integer, parameter :: nlat = 98 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
     character(len=200) :: logname, fileout, filename
@@ -26,7 +26,7 @@ program iteration
     real(kind=pr), parameter :: pi = atan(1.0)*4                      
 
     real(kind=pr), dimension(nlon,nlat,nlev,ntime,nvar) :: forc, dzdt, dzdt0, term  
-    real(kind=pr), dimension(nlon,nlat,2,ntime,3) :: q3
+    real(kind=pr), dimension(nlon,nlat,2,ntime,nvar2) :: q3
     real(kind=pr), dimension(nlon,nlat,nlev) :: coe111, coe110, coe101, coe121, coe011, coe211, f0 
     real(kind=pr), dimension(nlev) :: lev,dlev 
     real(kind=pr), dimension(nvar) :: diff
@@ -36,7 +36,7 @@ program iteration
     dlev(1) = dlev(2)
     
     logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iteration_infor_monthly.txt"
-    var_name = (/"f_Qd   ","f_Qd_t ","f_Qeddy","A      "/) 
+    var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf
     write(ilog,*) "critical value is ", critical
@@ -48,14 +48,14 @@ program iteration
     print*, "please input the number of case,1 or 2 or 3"
     read(*,*) nc
     if(nc.eq.1) then 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_daily_4forc_6coe_monthly.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_monthly0.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_daily_4forc_6coe_monthly-global.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_monthly-global.dat"     
     else if(nc.eq.2) then
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_daily_4forc_6coe_monthly.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_monthly.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_daily_4forc_6coe_monthly-global.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_monthly-global.dat"     
     else
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_daily_4forc_6coe_monthly.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_monthly.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_daily_4forc_6coe_monthly-global.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_monthly-global.dat"     
     end if
     write(ilog,"(A200)") filename 
 
@@ -73,7 +73,7 @@ program iteration
     end do
     end do
     
-    do nv = 1, 3, 1
+    do nv = 1, nvar-1, 1
     do nt = 1, ntime, 1
     do nz = 1, 2, 1
         read(ifile,rec=irec) ((q3(nx,ny,nz,nt,nv),nx=1,nlon),ny=1,nlat)
@@ -125,16 +125,17 @@ program iteration
         end do
     
     !boundary conditions
-        dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
-        dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
+        dzdt(1   ,:,:,:,:) = dzdt(nlon   ,:,:,:,:) !Periodic boundary for x
+        !dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
+        !dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
         
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
-        dzdt(:,:,1   ,:,4) = dzdt(:,:,2     ,:,4)  !lower boundary for A
-        dzdt(:,:,nlev,:,4) = dzdt(:,:,nlev-1,:,4)  !upper boundary for A
-        dzdt(:,:,1   ,:,1:3) = dzdt(:,:,2     ,:,1:3) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
-        dzdt(:,:,nlev,:,1:3) = dzdt(:,:,nlev-1,:,1:3) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
+        dzdt(:,:,1   ,:,nvar) = dzdt(:,:,2     ,:,nvar)  !lower boundary for A
+        dzdt(:,:,nlev,:,nvar) = dzdt(:,:,nlev-1,:,nvar)  !upper boundary for A
+        dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
+        dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
         
         do nv = 1, nvar ,1 
             write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,16,1,nv)

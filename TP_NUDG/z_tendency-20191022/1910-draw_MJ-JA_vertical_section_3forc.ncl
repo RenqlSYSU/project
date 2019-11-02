@@ -5,10 +5,10 @@
 ;*********************************************************************************
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-month_option = False; True 
-var_option = 3
-fnc  = 0   ;chose which case to draw
-diff = True ;whether draw the difference
+month_option =  True 
+var_option = 2
+fnc  = 1   ;chose which case to draw
+diff = True ;whether draw the difference ;False;
 
 if(var_option.eq.0) then 
     draw_var = (/"Qdt"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -25,29 +25,29 @@ if(var_option.eq.2) then
     var_name = (/"dzdt","dudt","dTdt"/)  ;
     unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
-    select = (/0,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
     var_name = (/"Qeddy","A"/)  ;
     unit     = (/"K/Day","10~S~-10~N~s~S~-2~N~"/)
     nnv = 0 ;used to read dzdt induced by different forcing
     if(nnv.eq.0) then 
-    draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "total"/)  ;this is the variable used to draw, can used as center string
-    select = (/0,1,2,3/)
+        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "total"/)  ;this is the variable used to draw, can used as center string
+        select = (/0,1,2,3/)
     else
-    draw_var = (/"-duVdx", "-dvVdy", "total"/)  ;this is the variable used to draw, can used as center string
-    select = (/0,1/)
+        draw_var = (/"-duVdx", "-dvVdy", "total"/)  ;this is the variable used to draw, can used as center string
+        select = (/0,1/)
     end if
 end if
 months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
 ;area: east Asia
-area = (/"TP","EA"/)
-lats = (/15 ,15 /);20 ;-20
-latn = (/55 ,55 /) ;55 ;60
-lonl = (/70 ,110 /) ;30 ;20
-lonr = (/105,130/) ;150;220
+area = (/"TP","EA","NH"/)
+lats = (/15  ,0   , 0  /);20 ;-20
+latn = (/55  ,89  , 89 /) ;55 ;60
+lonl = (/70  ,110 , 10 /) ;30 ;20
+lonr = (/105 ,130 ,350 /) ;150;220
 month_s = 5
 month_e = 8
 na = 1
@@ -56,7 +56,11 @@ na = 1
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"
+    if(diff) then 
     case2   = (/"CTRL","NG6h-CTRL"/);,"NG24h-CTRL"
+    else
+    case2   = (/"CTRL","NG6h"/);,"NG24h-CTRL"
+    end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -74,7 +78,7 @@ end if
 
 if(var_option.eq.2)
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
@@ -310,10 +314,16 @@ else
 end if
 end if
     
-if(var_option.eq.2) then 
-    minlvl = (/-16,-16,-16,-16/);,-1.6,-1.6,-1.6,-1.6
-    maxlvl = (/ 16, 16, 16, 16/);,1.6 ,1.6 ,1.6 ,1.6 
-    spacig = (/ 2 , 2 , 2 , 2 /);,0.2 ,0.2 ,0.2 ,0.2 
+if(var_option.eq.2) then
+if((fnc.eq.1).and.diff) then
+    minlvl = (/-4 ,-1.6,-1.6,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
+    maxlvl = (/ 4 , 1.6, 1.6, 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
+    spacig = (/0.5, 0.2, 0.2,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+else
+    minlvl = (/-24,-8 ,-0.8,-24/);
+    maxlvl = (/ 24, 8 , 0.8, 24/);
+    spacig = (/  3, 1 , 0.1, 3 /);
+end if
 end if
 
 if(var_option.eq.3) then 

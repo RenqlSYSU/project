@@ -6,30 +6,44 @@
 ;                                           2018/03/30
 ;******************************************************************************
 begin
-path    = "/users/yangsong3/renql/project/TP_NUDG"
-filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/data/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-;filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-;                  "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-var_name = (/"PRECC","PRECL"/)
-years    = ispan(1979,2005,1)   ;the calculate time
+path    = "/home/ys17-19/renql"
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
-fig_name   = path + "/cross_section/fig/1p3x1_TP_JJApreci_daily_ano_lat_time-2c" 
-    case   = (/"(a) CTRL-climCTRL","(b) NG6h-climND6h","(c) NG6h-climCTRL"/);this can be used as left string
-;fig_name   = path + "/cross_section/fig/1p3x1_EA_JJApreci_daily_ano_lat_time-2c-24h" 
-;    case   = (/"(a) CTRL-climCTRL","(b) NG24h-climND6h","(c) NG24h-climCTRL"/);this can be used as left string
-;fig_out    = "eps";"pdf";"x11"
-fig_out    = "pdf";"x11"
+if(case_option.eq.0) then
+    case   = (/"CTRL-climCTRL","NG6h-climNG6h","NG6h-climCTRL"/);this can be used as left string
+    filein = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    years  = ispan(1979,2005,1)   ;the calculate time
+end if
+
+if(case_option.eq.1) then 
+    ;remove TP experiment, sample number is ten years 
+    case    = (/"TP_CTRL","TP_CR","TP_CTRL-TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    years   = ispan(21,30,1)   ;the calculate time
+end if
+
+if(case_option.eq.2) then
+    case   = (/"F2000-climF2000","NG6h-climNG6h","NG6h-climF2000"/);this can be used as left string
+    filein = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+    years  = ispan(1,30,1)   ;the calculate time
+end if
+
+area = (/"TP","EA"/)
+lats = (/25  , 20 /) ;-20
+latn = (/40  , 45 /)  ;60
+lonl = (/100 ,107 /)  ;20
+lonr = (/105 ,130 /);130 ;220
+lat_spacing = 5
+na = 1
+
+var_name = (/"PRECC","PRECL"/)
+fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-preci_daily_evolution_lat_time-" + area(na)
+fig_out    ="pdf"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
-;area:   TP , east Asia
-lats = (/25 , 20/) ;-20
-latn = (/40 , 45/)  ;60
-lonl = (/100,107/)  ;20
-lonr = (/105,130/);130 ;220
-lat_spacing = 5
-na = 0
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.015
@@ -127,7 +141,7 @@ printVarSummary(var)
 
     res@tmXBMode        = "Explicit"
     res@tmXBValues      = ispan(0,nday-1,18)
-    res@tmXBLabels      = ispan(1979,2005,2)
+    res@tmXBLabels      = ispan(1,30,2);ispan(1979,2005,2)
     res@tmXBMinorValues = ispan(0,nday-1,9)
 
     ;res@tmYLMode        = "Manual"

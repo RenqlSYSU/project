@@ -14,6 +14,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+diff = True
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -23,6 +24,9 @@ end if
 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global2.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly-global.dat"
+if(diff) then 
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly-global-diff.dat"
+end if
 var_name = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -84,7 +88,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1, 2, 1 
+do nf = 1, 1, 1 
 ;==========================================================
 ;read the data
 ;============================================================
@@ -100,6 +104,25 @@ end do
 sigm1 := f->sigm1(select_time,{lev},{lats:latn},{lonl:lonr})
 forc = linmsg_n(forc,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
 q3   = linmsg_n(q3  ,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
+
+if(diff) then
+    forc0 = forc
+    q30 = q3
+    print("handle with " + case(0))
+    f      = addfile(filein(0),"r")
+    do nv = 0, nvar-1, 1
+        forc0(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    end do
+    do nv = 0, nvar-2, 1
+        q30(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
+    end do
+    sigm10 := f->sigm1(select_time,{lev},{lats:latn},{lonl:lonr})
+    forc0 = linmsg_n(forc0,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
+    q30   = linmsg_n(q30  ,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
+    forc = forc - forc0
+    q3   = q3   - q30
+    sigm1=(sigm1+sigm10)/2
+end if
 
 ave := wgt_areaave_Wrap(sigm1,1.0,1.0,0)
 ave := dim_avg_n_Wrap(ave,0)

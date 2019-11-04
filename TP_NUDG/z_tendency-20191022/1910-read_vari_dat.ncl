@@ -22,8 +22,8 @@ else
 end if
 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global2.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global-diff.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global-diff.nc"
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -77,7 +77,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 2, 2, 1 
+do nf = 1, 1, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data

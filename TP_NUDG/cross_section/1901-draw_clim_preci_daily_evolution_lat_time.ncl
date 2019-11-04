@@ -5,7 +5,6 @@
 ;                                           2019/01/21
 ;******************************************************************************
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
-
 begin
 path    = "/home/ys17-19/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
@@ -32,7 +31,7 @@ if(case_option.eq.2) then
 end if
 
 var_name = (/"PRECC","PRECL"/)
-fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-clim_preci_daily_evolution_lat_time"
+fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-preci_daily_evolution_lat_time"
 fig_out    ="pdf"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
@@ -69,7 +68,6 @@ nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(case)
 var   = new((/ncase,nyear,nlat,ntime/),float)
-prob  = new((/(ncase-2)  ,nlat,ntime/),float)
 plot  = new((/ncase/),graphic)
 
 ;---------------------------------------------------------------
@@ -89,16 +87,15 @@ end do  ;the loop of PRECC and PRECL
 end do   ;the loop of 27 years
 end do   ;the loop of 3 cases 
 ;vari = dim_variance_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
-var := dim_avg_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
+;var := dim_avg_n_Wrap(var,1) ;get var(ncase,nlat,ntime)
 var  = var*1000*3600*24  ;convert unit from m/s to mm/day
 printVarSummary(temp&time)
 
 ;do nc = 1,2
-    var(2,:,:) = var(1,:,:) - var(0,:,:)
-    ;prob(nc,:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
+    var(2,:,:,:) = var(1,:,:,:) - var(0,:,:,:)
 ;end do
 
-copy_VarMeta(temp(0,:),var(0,:,0))
+copy_VarMeta(temp(0,:),var(0,0,:,0))
 printVarSummary(var)
 
 ;==============================================================
@@ -223,6 +220,7 @@ printVarSummary(var)
     maxlvl = (/16,16, 4 /) ;used for CTRL-NUDG
     spacig = (/1 ,1 ,0.5/)
     
+    do nt = 0, nyear-1,1
     do nc = 0, ncase-1,1
 if(nc.le.1) then
     res@cnFillPalette := "precip3_16lev"
@@ -236,11 +234,12 @@ end if
         res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-        plot(nc)  = gsn_csm_lat_time(wks,var(nc,:,:),res)
-        print(max(var(nc,:,:)))
-        print(min(var(nc,:,:)))
+        plot(nc)  = gsn_csm_lat_time(wks,var(nc,nt,:,:),res)
+        print(max(var(nc,nt,:,:)))
+        print(min(var(nc,nt,:,:)))
     end do 
 
     gsn_panel(wks,plot,(/ncase,1/),resp)
+end do 
 end
 

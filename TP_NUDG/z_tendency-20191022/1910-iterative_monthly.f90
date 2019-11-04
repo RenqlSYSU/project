@@ -18,7 +18,7 @@ program iteration
     character(len=7),dimension(nvar) :: var_name 
     
     real(kind=pr), parameter :: rf  = 1.25 ! relaxing factor
-    real(kind=pr), parameter :: critical = 1e-8 
+    real(kind=pr), parameter :: critical = 1e-12 
     real(kind=pr), parameter :: g  = 9.8 !M/(S*S)                     
     real(kind=pr), parameter :: cP = 1004.0 ! J/(K KG)  [ m2/(K s2) ] 
     real(kind=pr), parameter :: R  = 287.0                            

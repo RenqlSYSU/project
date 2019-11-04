@@ -11,13 +11,13 @@ fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 
 if(var_option.eq.0) then 
-    draw_var = (/"Qdt"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd_t"   ,"Qeddy"/)  ;use to read variables
+    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"fQdt" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"f_Qd_t","f_Qeddy","A","total"/)  ;use to read variables
+    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
     unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.2) then 
@@ -44,8 +44,8 @@ lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,10
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
-lats = (/15  ,0   , 0  /);20 ;-20
-latn = (/55  ,89  , 89 /) ;55 ;60
+lats = (/15  ,15  , 0  /);20 ;-20
+latn = (/55  ,55  , 89 /) ;55 ;60
 lonl = (/70  ,110 , 10 /) ;30 ;20
 lonr = (/105 ,130 ,350 /) ;150;220
 month_s = 5
@@ -72,7 +72,7 @@ else
 end if
 
 if(var_option.lt.2)
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A-global.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(0) + area(na)
 end if
 
@@ -105,7 +105,7 @@ ncase  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
 if(var_option.le.1)
-    vars = f->$var_name(nv)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    vars = f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
     vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
@@ -301,21 +301,20 @@ if(var_option.eq.0) then
     spacig = (/ 0.3, 0.3, 0.3/);
 end if
 
-
 if(var_option.eq.1) then
-if(fnc.eq.0) then 
+if(fnc.eq.0) then
     minlvl = (/-2.4,-2.4,-0.8,-2.4/);
     maxlvl = (/ 2.4, 2.4, 0.8, 2.4/);
     spacig = (/ 0.3, 0.3, 0.1, 0.3/);
 else
-    minlvl = (/-1.6,-1.6,-1.6,-1.6/);-2.4,-2.4,-2.4,-2.4
-    maxlvl = (/ 1.6, 1.6, 1.6, 1.6/); 2.4, 2.4, 2.4, 2.4
-    spacig = (/ 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3
+    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/);
 end if
 end if
     
 if(var_option.eq.2) then
-if((fnc.eq.1).and.diff) then
+if((fnc.eq.1)) then  ;.and.diff 
     minlvl = (/-4 ,-1.6,-1.6,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
     maxlvl = (/ 4 , 1.6, 1.6, 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
     spacig = (/0.5, 0.2, 0.2,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5

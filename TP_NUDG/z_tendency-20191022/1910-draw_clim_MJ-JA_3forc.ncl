@@ -6,11 +6,11 @@
 ;*********************************************************************************
 begin
 var_option   = 2
-month_option =  True;False
+month_option = True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl = 3 ;(/850,700,500,200/)
-fnc  = 0    ;chose which case to draw
-diff = True ;whether draw the difference
+nl = 4 ;(/925,850,700,500,200/)
+fnc  = 1;0    ;chose which case to draw
+diff = True;False ;whether draw the difference
 
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -29,8 +29,13 @@ if(var_option.eq.2) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.3) then 
+    draw_var = (/"sigm1"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"sigm1"/)  ;use to read variables
+    unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
+end if
 months   = (/"MJ","JA"/)
-lev = (/850,700,500,200/)
+lev = (/925,850,700,500,200/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -47,8 +52,8 @@ else
     nsample = 10
 end if
 
-if(var_option.lt.2)
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
+if((var_option.lt.2).or.(var_option.eq.3))
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A-global.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
@@ -63,15 +68,17 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = 0   ;20 
-latn = 89  ;55 
-lonl = 10   ;30 
-lonr = 350 ;150
+area = (/"TP","EA","NH"/)
+lats = (/15  ,0   , 0  /);20 ;-20
+latn = (/55  ,55  , 89 /) ;55 ;60
+lonl = (/70  ,30  , 10 /) ;30 ;20
+lonr = (/105 ,150 ,350 /) ;150;220
 month_s = 5
 month_e = 8
+na = 1
 
 f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats:latn},{lonl:lonr})
+phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nmonth = dimsizes(months)
 nlat   = dimsizes(phis&lat)
@@ -119,23 +126,23 @@ if(month_option) then
 do nc = 0, ncase-1, 1
     print(filename(nc))
     f = addfile(filename(nc),"r")
-    if(var_option.le.1)
+    if((var_option.lt.2).or.(var_option.eq.3))
         do nv = 0, nvar-2,1
-        var_m(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     else
-        var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do 
 else
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
-    if(var_option.le.1)
+    if((var_option.lt.2).or.(var_option.eq.3))
         do nv = 0, nvar-2,1
-        var(nc,nv,:,:,:)  = f->$var_name(nv)$(select_time,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        var(nc,nv,:,:,:)  = f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     else
-        var(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+        var(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do 
 ;calc ealy(56) and late(78) stage of the summer 
@@ -156,6 +163,9 @@ if(var_option.eq.1) then
 end if
 if(var_option.eq.2) then 
     var_m = var_m*10^3
+end if
+if(var_option.eq.3) then 
+    var_m = var_m*10^5
 end if
 printVarSummary(var_m)
 
@@ -187,10 +197,10 @@ end if
 
 ;-------set the attribute of the map-------------------
     res@mpCenterLonF     = 180.
-    res@mpMaxLatF        = latn
-    res@mpMinLatF        = lats
-    res@mpMaxLonF        = lonr
-    res@mpMinLonF        = lonl
+    res@mpMaxLatF        = latn(na) 
+    res@mpMinLatF        = lats(na)
+    res@mpMaxLonF        = lonr(na)
+    res@mpMinLonF        = lonl(na)
     res@gsnMajorLatSpacing = 15
     res@gsnMajorLonSpacing = 30
     res@mpFillOn         = False
@@ -335,19 +345,31 @@ if(var_option.eq.1) then ;forc
 end if
     
 if(var_option.eq.2) then ;dzdt
+if(fnc.eq.0) then 
     minlvl = (/-8,-8,-8,-8/);,-1.6,-1.6,-1.6,-1.6
     maxlvl = (/ 8, 8, 8, 8/);,1.6 ,1.6 ,1.6 ,1.6 
     spacig = (/ 1, 1, 1, 1/);,0.2 ,0.2 ,0.2 ,0.2 
+else
+    minlvl = (/-2.4,-2.4,-2.4,-2.4/);,-1.6,-1.6,-1.6,-1.6
+    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);,1.6 ,1.6 ,1.6 ,1.6 
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/);,0.2 ,0.2 ,0.2 ,0.2 
+end if
 end if
 
+if(var_option.eq.3) then ;forc
+    minlvl = (/-0.4/);-4 
+    maxlvl = (/ 0.4/); 4 
+    spacig = (/0.05/);0.5
+end if
+    
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
-do nv = 0,nvar-1,1
 do nm = 0,nmonth-1,1
-    ;np = nm*nvar + nv
-    np = nv*nmonth + nm
+do nv = 0,nvar-1,1
+    np = nm*nvar + nv
+   ; np = nv*nmonth + nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm)
     if(var_option.eq.2) then 
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nnv) + ")"
@@ -359,19 +381,19 @@ do nm = 0,nmonth-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np)     = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,nm,:,:),res)
+    plot(np) = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,nm,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
     if(case_option.eq.0) then 
     line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
     end if 
-    print(max(var_m(fnc,nv,nm,{lats:latn},{lonl:lonr})))
-    print(min(var_m(fnc,nv,nm,{lats:latn},{lonl:lonr})))
+    print(max(var_m(fnc,nv,nm,:,:)))
+    print(min(var_m(fnc,nv,nm,:,:)))
 end do 
 end do 
 
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+   ; gsn_panel(wks,plot,(/nvar,nmonth/),resp)
 end
 

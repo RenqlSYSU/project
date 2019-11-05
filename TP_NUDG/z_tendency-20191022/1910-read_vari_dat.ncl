@@ -21,9 +21,9 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global2.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global-diff.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global-diff.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.nc"
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -66,6 +66,7 @@ lat  = vars&lat
 lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
+coslat = conform(dzdt,cos(lat),ilat)
 
 dlev = lev
 dlev(1:(nlev-1)) = (- lev(0:(nlev-2)) + lev(1:(nlev-1)))*100 
@@ -77,7 +78,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1, 1, 1 
+do nf = 0, 2, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -109,10 +110,10 @@ f0(:,:,:,ny,:)= f0@_FillValue
 end if
 end do
 printVarSummary(dzdt)
-dudt = - center_finite_diff_n(dzdt,lat    ,cyclic,opt,ilat)/f0
-dvdt =   center_finite_diff_n(dzdt,lon    ,cyclic,opt,ilon)/f0
+dudt = - center_finite_diff_n(dzdt*coslat,lat,cyclic,opt,ilat)/f0/a/coslat
+dvdt =   center_finite_diff_n(dzdt       ,lon,cyclic,opt,ilon)/f0/a/coslat
 dTdt = - center_finite_diff_n(dzdt,lev*100,cyclic,opt,ilev)*conform(dzdt,lev*100,ilev)/R
-dbdt = - center_finite_diff_n(dTdt,lat    ,cyclic,opt,ilat)
+dbdt = - center_finite_diff_n(dTdt*coslat,lat,cyclic,opt,ilat)/a/coslat
 
 ;nvar@long_name = "dzdt induced by f_Qd, f_Qd_t, f_Qeddy and A" 
 dzdt@long_name = "Climatology daily geopotential tendency"

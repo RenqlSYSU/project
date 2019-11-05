@@ -21,7 +21,7 @@ fig_name   = path + "/project/TP_NUDG/cross_section/fig/clim_200U_daily_evolutio
 fig_out    ="pdf"       ;"x11"
 
 ;area:   TP , east Asia
-lats = (/25 , 20/)  ;-20
+lats = (/25 , 15/)  ;-20
 latn = (/50 , 45/)  ;60
 lonl = (/70 ,110/)  ;20
 lonr = (/105,122/)  ;130 ;220
@@ -45,7 +45,7 @@ na = 0
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.5.and.time(:,1).le.8)
+select_time = ind(time(:,1).ge.1.and.time(:,1).le.8)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 ntime = dimsizes(select_time)
@@ -116,8 +116,8 @@ end do
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),20)
-    res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    res@tmXBValues      = ispan(15,(ntime-1),30) ;ispan(0,(ntime-1),20)
+    res@tmXBLabels      = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"/) ;(/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)

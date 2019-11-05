@@ -62,9 +62,6 @@ nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 u     = new((/ntime,nlev,nlat,nlon/),float)
-v     = new((/ntime,nlev,nlat,nlon/),float)
-t     = new((/ntime,nlev,nlat,nlon/),float)
-w     = new((/ntime,nlev,nlat,nlon/),float)
 
 iday  = 0
 ilev  = 1
@@ -87,7 +84,7 @@ if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
 
-do nt = 0,8,1;nyear-1,1
+do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
 ;==========================================================
 ;read the data and calc apparent heat source Q1
@@ -112,11 +109,12 @@ printVarSummary(w)
 sigm0 = (R/cp)*(t/lev4d) - center_finite_diff_n(t,lev*100,cyclic,opt,ilev)
 Q1    =   (u/a/coslat) * center_finite_diff_n(t,lon,loncyc,opt,ilon) \
         + (v/a       ) * center_finite_diff_n(t,lat,cyclic,opt,ilat) \
-        - sigm0 * w + center_finite_diff_n(t,2*24*3600,cyclic,opt,iday)
+        - sigm0 * w + center_finite_diff_n(t,24*3600,cyclic,opt,iday)
+delete([/v,t,w/])
 Q1    = Q1*cp
 print(Q1(15,5,30,30))
 
-Q1@long_name = "Climatology daily transient eddy heating"
+Q1@long_name = "Apparent Heat Source calc from temperature equation"
 Q1@units     = "W/kg" 
 
 ;========================================================================

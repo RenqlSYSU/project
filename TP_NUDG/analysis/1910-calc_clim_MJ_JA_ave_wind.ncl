@@ -28,14 +28,15 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
-var_name = (/"U","V","T","Z3","Q"/) ;,"OMEGA","RELHUM"
+var_name = (/"U","V","T","Z3","Q","dzdt","Ahgt","dTdy"/) ;,"OMEGA","RELHUM"
+nv = 7
 
 ;area: east Asia
-lats = -20 ;-90 ;
-latn = 60  ;90  ;
-lonl = 20  ;0   ;
-lonr = 220 ;360 ;
-lev  = (/1000,925,850,700,600,500,400,300,200/)
+lats = -2 ;-90 ;
+latn = 90  ;90  ;
+lonl = 0  ;0   ;
+lonr = 360 ;360 ;
+lev  = (/1000,925,850,700,600,500,400,300,200,100/)
 month_s = 5
 month_e = 8
 
@@ -44,19 +45,22 @@ month_e = 8
 ;============================================================
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
+time1 = cd_calendar(f->time,0)
+select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
 nmonth = 2
+ntime = dimsizes(select_time1)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-var        = new((/nyear,365   ,nlev,nlat,nlon/),float)
+var        = new((/nyear,ntime ,nlev,nlat,nlon/),float)
 var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nv = 3 ,nvar-1 ,1 
+;do nv = 6 ,6 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -65,15 +69,53 @@ end if
 ;read the data
 ;--------------------------------------------------------------
 do nt = 0,nyear-1,1
+if((nv.eq.5).or.(nv.eq.6)) then
+    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(3)+".nc","r")
+    var(nt,:,:,:,:) = f->$var_name(3)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+end if
+if(nv.eq.7) then
+    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(2)+".nc","r")
+    var(nt,:,:,:,:) = f->$var_name(2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+end if
+if(nv.lt.5) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-end do 
+    var(nt,:,:,:,:) = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+end if
+end do
 
-time = cd_calendar(f->time,0)
+if(nv.eq.5) then ;calc dzdt
+    opt    = 0     ;used by center_finite_diff_n, no meanging 
+    cyclic = False ;used by center_finite_diff_n
+    ;means NOT treated as cyclic in differenced coordinates
+    ;the end values will use a one-sided difference scheme for the end points. 
+    var = linmsg_n(var,-1,4)
+    var = center_finite_diff_n(var,24*3600,cyclic,opt,1)
+    var@long_name = "geopotential tendencyi tendency"
+    var@units     = "gpm/s" 
+end if
+
+time = cd_calendar(f->time(select_time1),0)
 select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
 var_month(:,0,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
 var_month(:,1,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+
+if(nv.eq.6) then ;calc dzdt
+var_month = var_month - conform(var_month,dim_avg_n(var_month,4),(/0,1,2,3/))
+var_month@long_name = "zonal asymmetric geopotential height"
+var_month@units     = "gpm" 
+end if
+
+if(nv.eq.7) then ;calc dzdt
+a  = 6378388 ;the radius of earth, m
+pi = atan(1.0)*4
+lat = var&lat
+lat = lat*pi/180.0
+coslat = conform(var_month,cos(lat),3)
+var_month = tofloat(center_finite_diff_n(var_month*coslat,lat,False,0,3)/a/coslat)
+var_month@long_name = "dTdy, meridional gradient of temperature"
+var_month@units     = "K/m" 
+end if
 
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
@@ -121,6 +163,6 @@ ncdf->lon = (/vars&lon/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->month_vari  = (/month_vari/)
 end do
-end do
+;end do ;loop of variable
 end
 

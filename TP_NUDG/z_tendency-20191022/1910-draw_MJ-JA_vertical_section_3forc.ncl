@@ -5,8 +5,8 @@
 ;*********************************************************************************
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-month_option =  True 
-var_option = 2
+month_option = True 
+var_option = 4
 fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 
@@ -24,7 +24,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 3 ;used to read dzdt induced by different forcing
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -39,6 +39,13 @@ if(var_option.eq.3) then
         select = (/0,1/)
     end if
 end if
+if(var_option.eq.4) then 
+    draw_var = (/"b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    nnv = 0 ;used to read dzdt induced by different forcing
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
@@ -50,7 +57,7 @@ lonl = (/70  ,110 , 10 /) ;30 ;20
 lonr = (/105 ,130 ,350 /) ;150;220
 month_s = 5
 month_e = 8
-na = 1
+na = 0
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -87,6 +94,10 @@ end if
 if(var_option.eq.3)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_eddy_flux.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_eddy_flux_" + var_name(nnv) + area(na)
+end if
+if(var_option.eq.4)
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly_advection.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_advect_" + var_name(nnv) + area(na)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -174,7 +185,7 @@ if(var_option.eq.1) then
     var_m = var_m*10^10
 end if
 
-if(var_option.eq.2) then
+if((var_option.eq.2).or.(var_option.eq.4)) then
 if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
@@ -325,7 +336,7 @@ else
 end if
 end if
     
-if(var_option.eq.2) then
+if((var_option.eq.2).or.(var_option.eq.4)) then
 if(nnv.eq.0) then   ;dzdt
 if((fnc.eq.0)) then  ;.and.diff 
     minlvl = (/-24,-8 ,-0.8,-24/);
@@ -338,9 +349,15 @@ else
 end if
 end if
 if(nnv.eq.1) then ;dudt
+if((fnc.eq.0)) then  ;.and.diff 
+    minlvl = (/-8 ,-4 ,-4 ,-8 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
+    maxlvl = (/ 8 , 4 , 4 , 8 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
+    spacig = (/ 1 ,0.5,0.5, 1 /);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+else
     minlvl = (/-4 ,-4 ,-4 ,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
     maxlvl = (/ 4 , 4 , 4 , 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
     spacig = (/0.5,0.5,0.5,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+end if
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
@@ -353,7 +370,7 @@ else
     spacig = (/ 1, 1, 1, 1/); 2 , 2 , 2 , 2 
 end if
 end if
-if(nnv.eq.3) then
+if(nnv.eq.3) then ;dbdt
 if((fnc.eq.0)) then  ;.and.diff 
     minlvl = (/-24,-24,-24,-24/);
     maxlvl = (/ 24, 24, 24, 24/);

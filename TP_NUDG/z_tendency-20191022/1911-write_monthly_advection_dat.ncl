@@ -81,7 +81,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, 1, 1 
+do nf = 1, 1, 1 
 ;==========================================================
 ;read the data
 ;============================================================

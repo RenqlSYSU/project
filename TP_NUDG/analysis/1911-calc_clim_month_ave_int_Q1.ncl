@@ -58,7 +58,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 0,2,1 
+do nf = 1,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -146,10 +146,10 @@ filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 ;define var attribute
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"month_ave",EKE)
-filevarattdef(ncdf,"season_ave",EKE)
-filevarattdef(ncdf,"month_vari",EKE)
-filevarattdef(ncdf,"season_vari",EKE)
+filevarattdef(ncdf,"month_ave",var)
+filevarattdef(ncdf,"season_ave",var)
+filevarattdef(ncdf,"month_vari",var)
+filevarattdef(ncdf,"season_vari",var)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)

@@ -9,7 +9,7 @@ var_option   = 2
 month_option = True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nl = 4 ;(/925,850,700,500,200/)
-fnc  = 1;0    ;chose which case to draw
+fnc  = 0    ;chose which case to draw
 diff = True;False ;whether draw the difference
 
 if(var_option.eq.0) then 
@@ -25,8 +25,8 @@ end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = "10~S~-3~N~" + (/"m~S~2~N~/s~S~3~N~","m/s~S~2~N~","K/s"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
@@ -158,12 +158,26 @@ var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
 if(var_option.eq.0) then 
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
 end if
+
 if(var_option.eq.1) then 
     var_m = var_m*10^10
 end if
+
 if(var_option.eq.2) then 
+if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
+if(nnv.eq.1) then
+    var_m = var_m*10^5
+end if
+if(nnv.eq.2) then
+    var_m = var_m*10^6
+end if
+if(nnv.eq.3) then
+    var_m = var_m*10^12
+end if
+end if
+
 if(var_option.eq.3) then 
     var_m = var_m*10^5
 end if
@@ -345,14 +359,49 @@ if(var_option.eq.1) then ;forc
 end if
     
 if(var_option.eq.2) then ;dzdt
-if(fnc.eq.0) then 
-    minlvl = (/-8,-8,-8,-8/);,-1.6,-1.6,-1.6,-1.6
-    maxlvl = (/ 8, 8, 8, 8/);,1.6 ,1.6 ,1.6 ,1.6 
-    spacig = (/ 1, 1, 1, 1/);,0.2 ,0.2 ,0.2 ,0.2 
+if(nnv.eq.0) then   ;dzdt
+if((fnc.eq.0)) then  ;.and.diff 
+    minlvl = (/-24,-8 ,-0.8,-24/);
+    maxlvl = (/ 24, 8 , 0.8, 24/);
+    spacig = (/  3, 1 , 0.1, 3 /);
 else
-    minlvl = (/-2.4,-2.4,-2.4,-2.4/);,-1.6,-1.6,-1.6,-1.6
-    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);,1.6 ,1.6 ,1.6 ,1.6 
-    spacig = (/ 0.3, 0.3, 0.3, 0.3/);,0.2 ,0.2 ,0.2 ,0.2 
+    minlvl = (/-4 ,-1.6,-1.6,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
+    maxlvl = (/ 4 , 1.6, 1.6, 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
+    spacig = (/0.5, 0.2, 0.2,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+end if
+end if
+if(nnv.eq.1) then ;dudt
+if((fnc.eq.0)) then  ;.and.diff 
+    minlvl = (/-8 ,-4 ,-4 ,-8 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
+    maxlvl = (/ 8 , 4 , 4 , 8 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
+    spacig = (/ 1 ,0.5,0.5, 1 /);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+else
+    minlvl = (/-4 ,-4 ,-4 ,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
+    maxlvl = (/ 4 , 4 , 4 , 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
+    spacig = (/0.5,0.5,0.5,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+end if
+end if
+if(nnv.eq.2) then ;dTdt
+if((fnc.eq.0)) then  ;.and.diff 
+    minlvl = (/-32,-32,-32,-32/);
+    maxlvl = (/ 32, 32, 32, 32/);
+    spacig = (/ 4 , 4 , 4 , 4 /);
+else
+    minlvl = (/-8,-8,-8,-8/);-16,-16,-16,-16
+    maxlvl = (/ 8, 8, 8, 8/); 16, 16, 16, 16
+    spacig = (/ 1, 1, 1, 1/); 2 , 2 , 2 , 2 
+end if
+end if
+if(nnv.eq.3) then ;dbdt
+if((fnc.eq.0)) then  ;.and.diff 
+    minlvl = (/-24,-24,-24,-24/);
+    maxlvl = (/ 24, 24, 24, 24/);
+    spacig = (/  3,  3,  3,  3/);
+else
+    minlvl = (/-24,-24,-24,-24/);
+    maxlvl = (/ 24, 24, 24, 24/);
+    spacig = (/  3,  3,  3,  3/);
+end if
 end if
 end if
 

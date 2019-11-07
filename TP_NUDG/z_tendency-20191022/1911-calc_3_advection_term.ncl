@@ -78,7 +78,7 @@ loncyc = True ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,2,1 
+do nf = 2,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -103,9 +103,9 @@ nv = 2
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
-clm_u = dim_avg_n(u,iyear)
-clm_v = dim_avg_n(v,iyear)
-clm_t = dim_avg_n(t,iyear)
+clm_u = dim_avg_n(u,0)
+clm_v = dim_avg_n(v,0)
+clm_t = dim_avg_n(t,0)
 delete([/u,v,t/])
 printVarSummary(clm_u)
 clm_u = linmsg_n(clm_u,-1,ilon)
@@ -123,6 +123,8 @@ delete(lev4d)
 vort  = (1/a/coslat)*(center_finite_diff_n(clm_v,lon,loncyc,opt,ilon) - center_finite_diff_n(clm_u*coslat,lat,cyclic,opt,ilat))
 b1 = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) \
      - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)
+print(vort(1,10,20:30))
+print(b1(0,10,20:30))
 delete(vort)
 
 b2 = - 2*(2.0*pi/24.0/3600.0)*coslat*clm_v/a

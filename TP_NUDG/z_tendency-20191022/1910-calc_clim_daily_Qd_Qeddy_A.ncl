@@ -28,7 +28,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A-global2.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_JFMA_daily_Qd_Qeddy_A-global.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -59,8 +59,8 @@ latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-month_s = 5
-month_e = 8
+month_s = 1
+month_e = 4
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -94,7 +94,7 @@ cyclic = False ;used by center_finite_diff_n
 
 do nf = 2,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
-    years   = ispan(41,50,1)   ;the calculate time
+    years  = ispan(41,50,1)   ;the calculate time
 end if
 ;==========================================================
 ;read the data

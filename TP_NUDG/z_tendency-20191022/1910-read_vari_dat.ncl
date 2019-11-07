@@ -25,7 +25,8 @@ filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_d
 filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.dat"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly-global.nc"
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+;var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -110,10 +111,10 @@ f0(:,:,:,ny,:)= f0@_FillValue
 end if
 end do
 printVarSummary(dzdt)
-dudt = - center_finite_diff_n(dzdt*coslat,lat,cyclic,opt,ilat)/f0/a/coslat
-dvdt =   center_finite_diff_n(dzdt       ,lon,cyclic,opt,ilon)/f0/a/coslat
+dudt = - center_finite_diff_n(dzdt,lat,cyclic,opt,ilat)/f0/a
+dvdt =   center_finite_diff_n(dzdt,lon,cyclic,opt,ilon)/f0/a/coslat
 dTdt = - center_finite_diff_n(dzdt,lev*100,cyclic,opt,ilev)*conform(dzdt,lev*100,ilev)/R
-dbdt = - center_finite_diff_n(dTdt*coslat,lat,cyclic,opt,ilat)/a/coslat
+dbdt = - center_finite_diff_n(dTdt,lat,cyclic,opt,ilat)/a
 
 ;nvar@long_name = "dzdt induced by f_Qd, f_Qd_t, f_Qeddy and A" 
 dzdt@long_name = "Climatology daily geopotential tendency"

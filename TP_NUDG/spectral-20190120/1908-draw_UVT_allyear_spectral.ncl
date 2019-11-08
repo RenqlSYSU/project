@@ -10,7 +10,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql"
 var_name = (/"U","V","T"/)
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -145,7 +145,7 @@ k=20
     resxy@tiYAxisString = "Variance/freq"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
-    resxy@trYMaxF = 500
+    resxy@trYMaxF = 1000
     ;resxy@trXLog  = True
     ;resxy@trXMinF = 1
     ;resxy@trXMaxF = 10000

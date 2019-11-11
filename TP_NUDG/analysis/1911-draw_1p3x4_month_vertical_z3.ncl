@@ -7,6 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
+path1   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -24,10 +25,10 @@ end if
 draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s"/)    ;this can be used as right string 
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy"/)  ;this is the variable used to draw, can used as center string
-lev  = (/1000,925,850,700,600,500,400,300,200,100/)
-nv = 5
+lev  = (/1000,925,850,700,600,500,400,300,200/)
+nv = 3
 
-var_option = 2
+var_option = 3
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -38,7 +39,7 @@ end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -49,6 +50,19 @@ imonth = ispan(0,1,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
+if(var_option.eq.3) then 
+var_name = draw_var(nv) ;this is the var_name in data file
+months   = (/"JF","MA","MJ","JA"/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
+month_s = 1
+month_e = 8
+filein  = path1+(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+lev  := (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+years    = ispan(1979,2005,1)   ;the calculate time
+end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
@@ -57,7 +71,7 @@ fig_out    = "pdf";"x11""eps";
 area = (/"TP","EA","NH"/)
 lats = (/15  ,15  , 0  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,110 , 10 /) ;30 ;20
+lonl = (/70  ,130 , 10 /) ;30 ;20
 lonr = (/105 ,130 ,350 /) ;150;220
 lat_spacing = 15
 lon_spacing = 30
@@ -92,11 +106,36 @@ var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
 ;read data
 ;====================================================================
 printVarSummary(var)
-do nf = 0 ,ncase-1, 1
-print(filename(nf) + draw_var(nv) + ".nc")
-f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-end do
+if(var_option.eq.3) then 
+    f    = addfile(filein(0)+years(0)+".daily."+var_name+".nc","r")
+    time = cd_calendar(f->time,0)
+    select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+    ntime = dimsizes(select_time)
+    nyear = dimsizes(years)
+    var0 = new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
+    
+    do nf = 0 , ncase-1,1
+    do nt = 0,nyear-1,1
+    f  = addfile(filein(nf)+years(nt)+".daily."+var_name+".nc","r")
+    var0(nf,nt,:,:,:,:) = f->$var_name$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end do 
+    end do
+    var0 := dim_avg_n_Wrap(var0,1)
+    
+    do nm = 0, nmonth-1, 1
+    mons = 2*nm + 1
+    mone = 2*nm + 2
+    select_time1 := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
+    var(:,nm,:,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:,:),1)
+    end do
+else
+    do nf = 0 ,ncase-1, 1
+    print(filename(nf) + draw_var(nv) + ".nc")
+    f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
+    var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    end do
+end if
+printVarSummary(var)
 var := dim_avg_n_Wrap(var,4)
 
 if(nv.eq.1) then

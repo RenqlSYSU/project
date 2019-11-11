@@ -6,8 +6,8 @@
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 4
-fnc  = 0   ;chose which case to draw
+var_option = 2
+fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 
 if(var_option.eq.0) then 
@@ -46,7 +46,8 @@ if(var_option.eq.4) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
-months   = (/"MJ","JA"/)
+months   = (/"JF","MA"/)
+;months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
 ;area: east Asia
@@ -55,8 +56,8 @@ lats = (/15  ,15  , 0  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
 lonl = (/70  ,110 , 10 /) ;30 ;20
 lonr = (/105 ,130 ,350 /) ;150;220
-month_s = 5
-month_e = 8
+month_s = 1
+month_e = 4
 na = 0
 
 ;the path of the file
@@ -85,19 +86,20 @@ end if
 
 if(var_option.eq.2)
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
+    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_JFMA_dzdt_month-g.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.3)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_eddy_flux.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_eddy_flux_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_eddy_flux_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.4)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly_advection.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_advect_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_advect_" + var_name(nnv) + area(na)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season

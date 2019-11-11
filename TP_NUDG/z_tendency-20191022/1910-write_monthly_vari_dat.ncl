@@ -14,7 +14,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-diff = True
+diff = False
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -22,8 +22,8 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global2.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly-global.dat"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_daily_Qd_Qeddy_A-global.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_4f6c_month-g.dat" 
 if(diff) then 
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly-global-diff.dat"
 end if
@@ -42,8 +42,8 @@ latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-month_s = 5
-month_e = 8
+month_s = 1
+month_e = 4
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -88,7 +88,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1, 1, 1 
+do nf = 0, 1, 1 
 ;==========================================================
 ;read the data
 ;============================================================
@@ -133,10 +133,10 @@ sigm1 := conform(vars(0,:,:,:),ave,ilev-2)
 ;sigm1 := conform(dzdt,sigm1,(/itime,ilev,ilat,ilon/))
 
 ;calc ealy(56) and late(78) stage of the summer 
-select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
+select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.(month_s+1))
 forc_m(:,0,:,:,:) = dim_avg_n(forc(:,select_time,:,:,:),1)
 q3_m(:,0,:,:,:) = dim_avg_n(q3(:,select_time,:,:,:),1)
-select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
+select_time := ind(time(:,1).ge.(month_e-1).and.time(:,1).le.month_e)
 forc_m(:,1,:,:,:) = dim_avg_n(forc(:,select_time,:,:,:),1)
 q3_m(:,1,:,:,:) = dim_avg_n(q3(:,select_time,:,:,:),1)
 printVarSummary(forc_m)
@@ -179,7 +179,7 @@ if (any(ismissing(coe211))) then
     print("coe211 has missing")
 end if
 
-print(forc(0,1,4,4,4:9))
+print(forc(0,0,4,4,4:9))
 print(coe110(4,4,4:9))
 
 ;==========================================================

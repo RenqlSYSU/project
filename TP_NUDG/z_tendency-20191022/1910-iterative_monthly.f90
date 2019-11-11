@@ -35,7 +35,7 @@ program iteration
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
     
-    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iteration_infor_monthly.txt"
+    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_JFMA.txt"
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf
@@ -48,14 +48,14 @@ program iteration
     print*, "please input the number of case,1 or 2 or 3"
     read(*,*) nc
     if(nc.eq.1) then 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_daily_4forc_6coe_monthly-global.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_monthly-global.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_JFMA_4f6c_month-g.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_JFMA_dzdt_month-g.dat"     
     else if(nc.eq.2) then
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_daily_4forc_6coe_monthly-global.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_monthly-global.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_JFMA_4f6c_month-g.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_JFMA_dzdt_month-g.dat"
     else
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_daily_4forc_6coe_monthly-global.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_monthly-global.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_JFMA_4f6c_month-g.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_JFMA_dzdt_month-g.dat"
     end if
     write(ilog,"(A200)") filename 
 

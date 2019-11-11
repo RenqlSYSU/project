@@ -28,7 +28,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_JFMA_daily_Qd_Qeddy_A-global.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_Qd_Qeddy_A-g.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -60,7 +60,7 @@ lonl =  0  ;
 lonr = 360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 1
-month_e = 4
+month_e = 8
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -76,7 +76,6 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-Qd    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 iyear = 0
 itime = 1
@@ -88,6 +87,7 @@ lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
 opt    = 0     ;used by center_finite_diff_n, no meanging 
+loncyc = True ;used by center_finite_diff_n
 cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
@@ -103,6 +103,7 @@ u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+Qeddy = new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
@@ -135,45 +136,50 @@ if(option.eq.1) then
     edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
     edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 else
-    clm_u = conform(u, dim_avg_n(u,iyear), (/1,2,3,4/))
-    clm_v = conform(v, dim_avg_n(v,iyear), (/1,2,3,4/)) 
-    clm_t = conform(t, dim_avg_n(t,iyear), (/1,2,3,4/)) 
-    clm_w = conform(w, dim_avg_n(w,iyear), (/1,2,3,4/)) 
-    edd_u = u - clm_u
-    edd_v = v - clm_v   
-    edd_t = t - clm_t   
-    edd_w = w - clm_w  
+    clm_u = dim_avg_n(u,iyear)
+    clm_v = dim_avg_n(v,iyear) 
+    clm_t = dim_avg_n(t,iyear) 
+    clm_w = dim_avg_n(w,iyear) 
+    edd_u = u - conform(u, clm_u, (/1,2,3,4/))
+    edd_v = v - conform(v, clm_v, (/1,2,3,4/))   
+    edd_t = t - conform(t, clm_t, (/1,2,3,4/))   
+    edd_w = w - conform(w, clm_w, (/1,2,3,4/))  
 end if
 printVarSummary(clm_u)
 delete([/u,v,t,w/])
 
-coslat = conform(Qd,cos(lat),ilat)
-tanlat = conform(Qd,tan(lat),ilat)
-lev5d  = conform(Qd, lev*100, ilev)
-
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
-sigm0 = (R/cp)*(clm_t/lev5d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev)
-Qd   :=   (clm_u/a/coslat) * center_finite_diff_n(clm_t,lon,cyclic,opt,ilon) \
-        + (clm_v/a       ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat) \
+coslat4d = conform(clm_u,cos(lat),ilat-1)
+tanlat4d = conform(clm_u,tan(lat),ilat-1)
+lev4d    = conform(clm_u, lev*100,ilev-1)
+
+sigm0 = (R/cp)*(clm_t/lev4d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
+Qd    =   (clm_u/a/coslat4d) * center_finite_diff_n(clm_t,lon,loncyc,opt,ilon-1) \
+        + (clm_v/a         ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat-1) \
         - sigm0 * clm_w 
 delete([/clm_u,clm_v,clm_t,clm_w/])
+delete([/coslat4d,tanlat4d/])
 
-Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,cyclic,opt,ilon) \
+coslat = conform(Qeddy,cos(lat),ilat)
+tanlat = conform(Qeddy,tan(lat),ilat)
+lev5d  = conform(Qeddy, lev*100,ilev)
+
+Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
          - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
          + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
 Qeddy := dim_avg_n(Qeddy,iyear)
 print(Qeddy(15,5,30,30))
 
-Qd   := dim_avg_n(Qd   ,iyear) - Qeddy
+Qd   = Qd - Qeddy
 print(Qd  (15,5,30,30))
 
-A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v              ,lon    ,cyclic,opt,ilon),lon    ,cyclic,opt,ilon)\
-     -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_v*edd_v*coslat       ,lon    ,cyclic,opt,ilon),lat    ,cyclic,opt,ilat)\
-     -(1.0   /a  /coslat       )*center_finite_diff_n(center_finite_diff_n(edd_v*edd_w              ,lon    ,cyclic,opt,ilon),lev*100,cyclic,opt,ilev)\
-     -(tanlat/a/a/coslat       )*                     center_finite_diff_n(edd_u*edd_u              ,lon    ,cyclic,opt,ilon)                         \
-     +(1.0   /a/a/coslat       )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_u              ,lat    ,cyclic,opt,ilat),lon    ,cyclic,opt,ilon)\
+A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v              ,lon    ,loncyc,opt,ilon),lon    ,loncyc,opt,ilon)\
+     -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_v*edd_v*coslat       ,lon    ,loncyc,opt,ilon),lat    ,cyclic,opt,ilat)\
+     -(1.0   /a  /coslat       )*center_finite_diff_n(center_finite_diff_n(edd_v*edd_w              ,lon    ,loncyc,opt,ilon),lev*100,cyclic,opt,ilev)\
+     -(tanlat/a/a/coslat       )*                     center_finite_diff_n(edd_u*edd_u              ,lon    ,loncyc,opt,ilon)                         \
+     +(1.0   /a/a/coslat       )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_u              ,lat    ,cyclic,opt,ilat),lon    ,loncyc,opt,ilon)\
      +(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat),lat    ,cyclic,opt,ilat)\
      +(tanlat/a/a/coslat/coslat)*                     center_finite_diff_n(edd_u*edd_v*coslat*coslat,lat    ,cyclic,opt,ilat)                         \
      +(1.0   /a                )*center_finite_diff_n(center_finite_diff_n(edd_u*edd_w              ,lat    ,cyclic,opt,ilat),lev*100,cyclic,opt,ilev)\
@@ -181,7 +187,7 @@ A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u
 A := dim_avg_n(A,iyear)
 print(A(15,5,30,30))
 delete([/edd_u,edd_v,edd_t,edd_w/])
-delete([/coslat,tanlat/])
+delete([/coslat,tanlat,lev5d/])
 
 Qeddy@long_name = "Climatology daily transient eddy heating"
 Qeddy@units     = "K/s" 
@@ -193,10 +199,8 @@ A@units     = "s^-2"
 ;==========================================================
 ;calc Qd foring and Qeddy forcing, dimension is 4d 
 ;============================================================
-sigm1 = dim_avg_n(sigm0*R/lev5d,iyear)
+sigm1 = sigm0*R/lev4d
 delete(sigm0)
-lev4d = dim_avg_n(lev5d,iyear)
-delete(lev5d)
 f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
 ;do ilat = 0, nlat-1
@@ -208,6 +212,7 @@ f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
 f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
 delete(lev4d)
+delete(f0)
 
 f_Qeddy@long_name = "Climatology daily transient eddy heating"
 f_Qeddy@units     = "s^-2" 

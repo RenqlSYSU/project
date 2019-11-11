@@ -21,12 +21,12 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A-global.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly_advection.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_monthly_advection.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_daily_Qd_Qeddy_A-global.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_dzdt_month-g.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_dzdt_month-g.nc"
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-;var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -41,8 +41,8 @@ latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-month_s = 5
-month_e = 8
+month_s = 1
+month_e = 4
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data

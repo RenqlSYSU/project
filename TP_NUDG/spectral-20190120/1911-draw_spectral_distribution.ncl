@@ -50,7 +50,7 @@ frq  = f->frq
 nfrq = dimsizes(spcx&frq)
 nlon = dimsizes(spcx&lon)
 ncase = dimsizes(case1)
-var  = new((/ncase,nfrq,nlon/),float)
+var  = new((/ncase,nfrq ,nlon/),float)
 plot = new((/ncase/),graphic)
 
 do nc = 0, ncase-1, 1
@@ -59,7 +59,36 @@ do nc = 0, ncase-1, 1
 end do
 printVarSummary(var)
 copy_VarMeta(spcx,var(0,:,:))
-    
+
+nfrq2 = 100
+nspc  = toint(nfrq/nfrq2)
+nsta  = nfrq - nspc*nfrq2
+print("nfrq = " + nfrq2 + ", spacing = " + nspc + ", start point = " + nsta)
+var2 = new((/ncase,nfrq2,nlon/),float)
+frq2 = new((/nfrq2/),float)
+calc_option = 1
+
+if(calc_option.eq.0) then 
+    frq2 = fspan(0.001,0.5,nfrq2)
+    var2 = linint1_n_Wrap(frq,var,False,frq2,0,1)
+else
+    do nfr = 0, nfrq2-1, 1
+        n1 = nsta - 1 + nspc * nfr
+        n2 = nsta - 1 + nspc *(nfr+1)
+        n3 = (n1+n2)/2
+        var2(:,nfr,:) = dim_avg_n_Wrap(var(:,n1:n2,:),1)
+        frq2(nfr) = frq(n3)
+    end do
+    var2!1   = "frq"
+    var2&frq = frq2
+end if
+
+printVarSummary(var2)
+print(frq2(0:20))
+print(frq(0:1000:100))
+print(var2(0,0:20,5))
+print(var(0,0:1000:100,5))
+
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
@@ -74,6 +103,9 @@ copy_VarMeta(spcx,var(0,:,:))
    font_index     = 22
    
    wks = gsn_open_wks(fig_out,fig_name)  
+  setvalues NhlGetWorkspaceObjectId()
+      "wsMaximumSize" : 300000000
+  end setvalues
 
     res                  = True
     res@gsnFrame         = False
@@ -90,14 +122,14 @@ copy_VarMeta(spcx,var(0,:,:))
     res@tiYAxisString   = "Frequency"
     res@tiXAxisString   = "Longitude"
 
-;    res@tmYLMode        = "Explicit"
-;    res@tmYLValues      = fspan(0.0,0.5,0.1)
-;    res@tmYLLabels      = fspan(0.0,0.5,0.1)
+    res@tmYLMode        = "Explicit"
+    res@tmYLValues      = fspan(0.0,0.5,6)
+    res@tmYLLabels      = fspan(0.0,0.5,6)
 
-    ;res@tmYLMode        = "Manual"
-    ;res@tmYLTickStartF  = lats(na)
-    ;res@tmYLTickEndF    = latn(na)
-    ;res@tmYLTickSpacingF= lat_spacing
+    res@tmXBMode        = "Manual"
+    res@tmXBTickStartF  = lonl(na)
+    res@tmXBTickEndF    = lonr(na)
+    res@tmXBTickSpacingF= 30 
 
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
@@ -139,12 +171,12 @@ copy_VarMeta(spcx,var(0,:,:))
    
     ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
+    ;res@cnLevels             = (/10,20,40,80,120,  160,200,300,400,600,  800,1000,1200,1400,1600,  1800,2000/)
     ;res@cnLevels             = ispan(0,60,10)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 0         ; set min contour level
-    res@cnMaxLevelValF        = 160       ; set max contour level
-    res@cnLevelSpacingF       = 10        ; set contour interval
+    res@cnMinLevelValF        = 10         ; set min contour level
+    res@cnMaxLevelValF        = 330       ; set max contour level
+    res@cnLevelSpacingF       = 20        ; set contour interval
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -166,7 +198,7 @@ copy_VarMeta(spcx,var(0,:,:))
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = var_name(nv) +" "+ lats(na)+" - "+latn(na)+"N"   
+    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+" - "+latn(na)+"N)"   
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -201,9 +233,10 @@ end if
     ;res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     ;res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
     ;res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-    plot(nc)  = gsn_csm_hov(wks,var(nc,ip,:),res)
-    print(max(var(nc,ip,:)))
-    print(min(var(nc,ip,:)))
+    ;plot(nc)  = gsn_csm_hov(wks,var(nc,ip,:),res)
+    plot(nc)  = gsn_csm_hov(wks,var2(nc,:,:),res)
+    print(max(var2(nc,:,:)))
+    print(min(var2(nc,:,:)))
 end do 
 
     gsn_panel(wks,plot,(/ncase,1/),resp)

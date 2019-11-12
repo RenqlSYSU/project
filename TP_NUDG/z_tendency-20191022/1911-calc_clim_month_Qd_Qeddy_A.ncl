@@ -94,7 +94,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,2,2
+do nf = 2,2,2
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -214,7 +214,6 @@ A_m@units     = "s^-2"
 ;============================================================
 lev4d = conform(A_m, lev*100,ilev-1)
 sigm1 = sigm0_m*R/lev4d
-delete(sigm0_m)
 f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
 ;do ilat = 0, nlat-1

@@ -57,8 +57,8 @@ imonth = ispan(0,3,1);(/4,5,6,7/)
 month_s = 1
 month_e = 8
 filein  = path1+(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 lev  := (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 years    = ispan(1979,2005,1)   ;the calculate time

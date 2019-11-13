@@ -41,8 +41,8 @@ lonl = (/70  ,107  ,115  /)
 lonr = (/105 ,130  ,130  /)
 lev  = (/850,500,200/)
 
-nv = 1 
-do na = 0,2,1
+nv = 0 
+do na = 0,0,1
 fig_name  = path + "/project/TP_NUDG/spectral-20190120/fig/1p3x3_" + var_name(nv) + "-" + area(na)
 f   = addfile(filein(0)+years(9)+".daily."+var_name(nv)+".nc","r")
 time        = cd_calendar(f->time,0)
@@ -88,7 +88,8 @@ end do
 ;var = var - conform(var,dim_avg_n(var,0),1)  ;remove annual cycle
 
 ; calculate spectrum
-  sdof = specx_anal(ndtooned(var),d,sm,pct) ;returns the degrees of freedom as a scalar.
+;  sdof = specx_anal(ndtooned(var),d,sm,pct) ;returns the degrees of freedom as a scalar.
+  sdof = specx_anal(dim_standardize(ndtooned(var),1),d,sm,pct) ;returns the degrees of freedom as a scalar.
 
 ; return 4 curves to be plotted, first is the input spectrum, second is Markov "Red Noise" spectrum
 ; the last two numbers are the confidence levels
@@ -145,7 +146,7 @@ k=20
     resxy@tiYAxisString = "Variance/freq"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
-    resxy@trYMaxF = 1000
+    resxy@trYMaxF = 50
     ;resxy@trXLog  = True
     ;resxy@trXMinF = 1
     ;resxy@trXMaxF = 10000

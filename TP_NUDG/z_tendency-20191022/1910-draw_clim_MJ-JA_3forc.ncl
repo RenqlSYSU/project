@@ -5,11 +5,11 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 2
+var_option   = 0
 month_option = True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl = 4 ;(/925,850,700,500,200/)
-fnc  = 0    ;chose which case to draw
+nl = 3 ;(/925,850,700,500,200/)
+fnc  = 1    ;chose which case to draw
 diff = True;False ;whether draw the difference
 
 if(var_option.eq.0) then 
@@ -34,7 +34,7 @@ if(var_option.eq.3) then
     var_name = (/"sigm1"/)  ;use to read variables
     unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
 end if
-months   = (/"MJ","JA"/)
+months   = (/"JF","MA","MJ","JA"/)
 lev = (/925,850,700,500,200/)
 
 ;the path of the file
@@ -53,18 +53,22 @@ else
 end if
 
 if((var_option.lt.2).or.(var_option.eq.3))
+    if(month_option) then
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A-g.nc"
+    else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A-global.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_" + var_name(0) + "-" + lev(nl)  
+    end if
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_MJ-JA_" + var_name(nnv) + "-" + lev(nl)  
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + var_name(nnv) + "-" + lev(nl)  
 end if
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia

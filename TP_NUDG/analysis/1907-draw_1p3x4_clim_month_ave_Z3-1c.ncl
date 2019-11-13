@@ -5,28 +5,32 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~ J","m/s","m" /)    ;this can be used as right string 
+draw_var = (/"preci" ,"EKE"        ,"U"  ,"Z3","PS"           ,"U10"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~ J","m/s","m" ,"hPa(+1000hPa)","m/s"/)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-lev = (/850,500,200/)
-nl = 1
-nv = 3
+lev = (/925,850,500,200/)
+nl = 0
+nv = 5
+case_option = 0
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case1   = (/"TP_CTRL","TP_CR"/)
-case2   = (/"CTRL"   ,"noTP"/)
-;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
-gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
-nsample = 10
-;case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-;case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
-;gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-;nsample = 27
-;
+if(case_option.eq.1) then 
+    case1   = (/"TP_CTRL","TP_CR"/)
+    case2   = (/"CTRL"   ,"noTP"/)
+    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    nsample = 10
+else
+    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
+    case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
+end if
+
 nc = 0
 filename  = path + "/analysis/mdata/" + case1(nc) + "-Clim_month_ave_" + draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/1p3x4_" + case2(nc) + "_" + lev(nl) + draw_var(nv) + "_" + var_name(0) + "-2c" 
@@ -76,10 +80,18 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;read data
 ;====================================================================
 f = addfile(filename,"r")
-var  = f->$var_name(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+if(nv.ge.4) then 
+    var  = f->$var_name(0)$(:,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+else
+    var  = f->$var_name(0)$(:,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
 
 if(nv.eq.1) then
     var = var/10000
+end if
+
+if(nv.eq.4) then
+    var = var/100-1000
 end if
 
 printVarSummary(var)
@@ -253,9 +265,9 @@ if(nv.eq.1) then ;EKE
 end if
 
 if(nv.eq.2) then ;U
-    minlvl = (/ 2 /);-8,-8,-8,-8
-    maxlvl = (/50 /);8 ,8 ,8 ,8 
-    spacig = (/ 3 /);1 ,1 ,1 ,1 
+    minlvl = (/-4 /); 2 -8,-8,-8,-8
+    maxlvl = (/ 4 /);50 8 ,8 ,8 ,8 
+    spacig = (/0.5/); 3 1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.3) then ;Z3
@@ -264,13 +276,31 @@ if(nv.eq.3) then ;Z3
     spacig = (/ 20  /);1 ,1 ,1 ,1 
 end if
 
-    res@cnFillPalette = "precip3_16lev"
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
+if(nv.eq.4) then ;PS
+    minlvl = (/-8/);-8,-8,-8,-8
+    maxlvl = (/ 8/);8 ,8 ,8 ,8 
+    spacig = (/ 1/);1 ,1 ,1 ,1 
+end if
+
+if(nv.eq.5) then ;U10
+    minlvl = (/-4 /); 2 -8,-8,-8,-8
+    maxlvl = (/ 4 /);50 8 ,8 ,8 ,8 
+    spacig = (/0.5/); 3 1 ,1 ,1 ,1 
+end if
+
+
+if(nv.lt.1) then
+   res@cnFillPalette = "precip3_16lev"
+   ;blue and yellow and red, has 17 colors,2-18,2 is white
+else
+    res@cnFillPalette = "BlueDarkRed18"
+   ;blue and red, has 18 colors,2-10 is blue
+end if 
 do nm = 0,nmonth-1,1
     res@gsnLeftString   = months(nm) 
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
     res@gsnSpreadColors       = False              ; turn of the full color map
-    if(nv.gt.2) then
+    if(nv.gt.6) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
     else
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

@@ -6,9 +6,10 @@
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 2
-fnc  = 1   ;chose which case to draw
+var_option = 3
+fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
+na = 1 ; "TP","EA","NH"
 
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -30,13 +31,13 @@ end if
 if(var_option.eq.3) then
     var_name = (/"Qeddy","A"/)  ;
     unit     = (/"K/Day","10~S~-10~N~s~S~-2~N~"/)
-    nnv = 0 ;used to read dzdt induced by different forcing
+    nnv = 1 ;used to read dzdt induced by different forcing
     if(nnv.eq.0) then 
-        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "total"/)  ;this is the variable used to draw, can used as center string
-        select = (/0,1,2,3/)
+        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "Qeddy"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2,3/)
     else
-        draw_var = (/"-duVdx", "-dvVdy", "total"/)  ;this is the variable used to draw, can used as center string
-        select = (/0,1/)
+        draw_var = (/"-duVdx", "-dvVdy", "A"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1/)
     end if
 end if
 if(var_option.eq.4) then 
@@ -46,7 +47,7 @@ if(var_option.eq.4) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
-months   = (/"JF","MA"/)
+months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
@@ -57,8 +58,7 @@ latn = (/55  ,55  , 89 /) ;55 ;60
 lonl = (/70  ,110 , 10 /) ;30 ;20
 lonr = (/105 ,130 ,350 /) ;150;220
 month_s = 1
-month_e = 4
-na = 0
+month_e = 8
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -80,21 +80,23 @@ else
 end if
 
 if(var_option.lt.2)
+    if(month_option) then
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A-g.nc"
+    else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A-global.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_MJ-JA_height_lat_" + var_name(0) + area(na)
+    end if
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if
-
 if(var_option.eq.2)
     if(month_option) then
-    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_JFMA_dzdt_month-g.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-g.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.3)
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_eddy_flux.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_eddy_flux_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.4)
@@ -103,7 +105,7 @@ if(var_option.eq.4)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    ="pdf";"x11"
 
 f = addfile(gtopfile,"r")
@@ -328,9 +330,9 @@ end if
 
 if(var_option.eq.1) then
 if(fnc.eq.0) then
-    minlvl = (/-2.4,-2.4,-0.8,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 0.8, 2.4/);
-    spacig = (/ 0.3, 0.3, 0.1, 0.3/);
+    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
+    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/);
 else
     minlvl = (/-2.4,-2.4,-2.4,-2.4/);
     maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
@@ -387,9 +389,9 @@ end if
 
 if(var_option.eq.3) then 
 if(nnv.eq.0) then
-    minlvl = (/-0.8,-0.8,-0.8,-0.8,-0.8/);-2.4,-2.4,-2.4,-2.4,-2.4
-    maxlvl = (/ 0.8, 0.8, 0.8, 0.8, 0.8/); 2.4, 2.4, 2.4, 2.4, 2.4
-    spacig = (/ 0.1, 0.1, 0.1, 0.1, 0.1/); 0.3, 0.3, 0.3, 0.3, 0.3
+    minlvl = (/-1.6,-1.6,-1.6,-1.6,-1.6/);-2.4,-2.4,-2.4,-2.4,-2.4/);-0.8,-0.8,-0.8,-0.8,-0.8/);
+    maxlvl = (/ 1.6, 1.6, 1.6, 1.6, 1.6/); 2.4, 2.4, 2.4, 2.4, 2.4/); 0.8, 0.8, 0.8, 0.8, 0.8/);
+    spacig = (/ 0.2, 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3, 0.3/); 0.1, 0.1, 0.1, 0.1, 0.1/);
 else
     minlvl = (/-0.8,-0.8,-0.8/);
     maxlvl = (/ 0.8, 0.8, 0.8/);

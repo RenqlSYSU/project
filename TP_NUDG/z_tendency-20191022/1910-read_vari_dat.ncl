@@ -21,9 +21,9 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_daily_Qd_Qeddy_A-global.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_dzdt_month-g.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_dzdt_month-g.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g700.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g700.nc"
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -40,19 +40,20 @@ lats = -2 ;-20 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
-lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev  = (/700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 1
-month_e = 4
+month_e = 8
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(0),"r")
-vars:= f->Qd(:,{lev},{lats:latn},{lonl:lonr})
+vars:= f->Qd(0,{lev},{lats:latn},{lonl:lonr})
 ;time = cd_calendar(f->time,0)
 ;select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ;ntime = dimsizes(select_time)
-ntime = 2 
+ntime = 4 
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
@@ -75,6 +76,7 @@ dlev(0) = dlev(1)
 dlev5  = conform(dzdt,dlev,ilev)
 
 opt    = 0     ;used by center_finite_diff_n, no meanging 
+loncyc = True ;used by center_finite_diff_n
 cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
@@ -94,9 +96,9 @@ do nz = 0, nlev-1, 1
 end do
 end do
 end do
-print(dzdt(0:(nvar-1),0,15,29,119))
-print(dzdt(0,0,15,29,129:149:4))
-print(dzdt(0,0, 9,29,129:149:4))
+print(dzdt(0:(nvar-1),0,9,29,119))
+print(dzdt(0,0,9,29,129:149:4))
+print(dzdt(0,0,9,29,129:149:4))
 
 ;==========================================================
 ;define coefficient and calc dzdt
@@ -112,7 +114,7 @@ end if
 end do
 printVarSummary(dzdt)
 dudt = - center_finite_diff_n(dzdt,lat,cyclic,opt,ilat)/f0/a
-dvdt =   center_finite_diff_n(dzdt,lon,cyclic,opt,ilon)/f0/a/coslat
+dvdt =   center_finite_diff_n(dzdt,lon,loncyc,opt,ilon)/f0/a/coslat
 dTdt = - center_finite_diff_n(dzdt,lev*100,cyclic,opt,ilev)*conform(dzdt,lev*100,ilev)/R
 dbdt = - center_finite_diff_n(dTdt,lat,cyclic,opt,ilat)/a
 

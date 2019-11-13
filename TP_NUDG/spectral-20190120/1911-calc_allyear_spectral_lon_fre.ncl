@@ -5,8 +5,6 @@
 ;                                           by Ql_Ren
 ;                                           2019/01/20
 ;******************************************************************************
-load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
-
 begin
 path    = "/home/ys17-19/renql"
 var_name = (/"U","V","T"/)
@@ -40,12 +38,13 @@ latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 30 ,70  ,107  ,115  /)
 lonr = (/150 ,105 ,130  ,130  /)
 nv = 1
-na = 0
+na = 1
 if(na.eq.0) then
 lev  = (/850,500,200/) ;850,500,
 fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 else
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 end if
 
@@ -69,7 +68,8 @@ altime = ntime*nyear
   sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
   pct = 0;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
-do nc = 2, ncase-1 ,1
+do nc = 0,1,1; ncase-1 ,1
+print("handle with " + case(nc) + " " + area(na))
 var  := new((/nyear,ntime,nlev,nlat,nlon/),float)
 spcx := new((/toint(altime/2),nlev,nlat,nlon/),float)
 
@@ -91,8 +91,13 @@ end do
 ;var = var - conform(var,dim_avg_n(var,0),1)  ;remove annual cycle
 printVarSummary(var)
 var  = linmsg_n(var, -1, 4)
+var  = linmsg_n(var, -1, 3)
+var  = linmsg_n(var, -1, 2)
 var1 = reshape(var,(/altime,nlev,nlat,nlon/))
 printVarSummary(var)
+if (any(ismissing(var1))) then
+    print("var1 has missing values")
+end if
 
 do nz = 0, nlev-1, 1
 do ny = 0, nlat-1, 1

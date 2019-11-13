@@ -9,7 +9,7 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 2, nlev = 18   
+    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 13 
     integer, parameter :: nlat = 98 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -18,7 +18,7 @@ program iteration
     character(len=7),dimension(nvar) :: var_name 
     
     real(kind=pr), parameter :: rf  = 1.25 ! relaxing factor
-    real(kind=pr), parameter :: critical = 1e-12 
+    real(kind=pr), parameter :: critical = 1e-8
     real(kind=pr), parameter :: g  = 9.8 !M/(S*S)                     
     real(kind=pr), parameter :: cP = 1004.0 ! J/(K KG)  [ m2/(K s2) ] 
     real(kind=pr), parameter :: R  = 287.0                            
@@ -31,11 +31,12 @@ program iteration
     real(kind=pr), dimension(nlev) :: lev,dlev 
     real(kind=pr), dimension(nvar) :: diff
 
-    lev  = (/1000.0,925.0,850.0,800.0,750.0,700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
+    lev  = (/700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
+    !lev  = (/1000.0,925.0,850.0,800.0,750.0,700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
     
-    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_JFMA.txt"
+    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_700_1-8.txt"
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf
@@ -48,14 +49,14 @@ program iteration
     print*, "please input the number of case,1 or 2 or 3"
     read(*,*) nc
     if(nc.eq.1) then 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_JFMA_4f6c_month-g.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_JFMA_dzdt_month-g.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month-g700.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month-g700.dat"     
     else if(nc.eq.2) then
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_JFMA_4f6c_month-g.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_JFMA_dzdt_month-g.dat"
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_4f6c_month-g700.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_month-g700.dat"
     else
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_JFMA_4f6c_month-g.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_JFMA_dzdt_month-g.dat"
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_4f6c_month-g700.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_month-g700.dat"
     end if
     write(ilog,"(A200)") filename 
 
@@ -102,6 +103,7 @@ program iteration
     write(ilog,*) "irec = ", irec 
     write(ilog,"(A20)") "Finish reading "
     write(ilog,"(A30,6(1x,E15.7))") "forc(5:10,5,5,1,1) are", forc(5:10,5,5,1,1) 
+    write(ilog,"(A30,6(1x,E15.7))") "forc(5,5:10,5,1,2) are", forc(5,5:10,5,1,2) 
     write(ilog,"(A30,6(1x,E15.7))") "coe110(5:10,5,5) are", coe110(5:10,5,5) 
 
 !==========================================================
@@ -138,18 +140,18 @@ program iteration
         dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
         
         do nv = 1, nvar ,1 
-            write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,16,1,nv)
+            write(ilog,*) "dzdt(120,30,10,1) induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,10,1,nv)
         end do
         do nv = 1, nvar ,1 
             diff(nv) = maxval(abs(dzdt(:,:,:,:,nv)-dzdt0(:,:,:,:,nv)))
-            write(ilog,*) "Iterative difference of "//trim(var_name(nv))//" is " ,diff(nv)
+            write(ilog,*) "Max iterative difference of "//trim(var_name(nv))//" is " ,diff(nv)
         end do
         if (maxval(diff).lt.critical) then 
             write(ilog,*) "iteration has been finished"
             exit
         end if 
     end do
-    write(ilog,*) dzdt(130:150:4,30,16,1,1)
+    write(ilog,*) dzdt(130:150:4,30,10,1,1)
     write(ilog,*) dzdt(130:150:4,30,10,1,1)
     
 !========================================================================

@@ -13,7 +13,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 diff = False
 
 if(case_option.eq.0) then
@@ -22,11 +22,8 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_daily_Qd_Qeddy_A-global.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_JFMA_4f6c_month-g.dat" 
-if(diff) then 
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_4forc_6coe_monthly-global-diff.dat"
-end if
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g700.dat" 
 var_name = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -41,26 +38,28 @@ lats = -2 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
-lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev2 = (/700,100/) ;hPa
+lev  = (/700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 1
-month_e = 4
+month_e = 8
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(0),"r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
-time = cd_calendar(f->time,0)
-select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
-ntime = dimsizes(select_time)
+;time = cd_calendar(f->time,0)
+;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+;ntime = dimsizes(select_time)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
-forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
-q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
-forc_m  = new((/nvar,2,nlev,nlat,nlon/),double)
-q3_m    = new((/3   ,2,2   ,nlat,nlon/),double)
+;forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
+;q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
+forc_m  = new((/nvar,4,nlev,nlat,nlon/),double)
+q3_m    = new((/2   ,4,2   ,nlat,nlon/),double)
 
 itime = 1
 ilev  = 2
@@ -94,16 +93,18 @@ do nf = 0, 1, 1
 ;============================================================
 print("handle with " + case(nf))
 f      = addfile(filein(nf),"r")
-select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 do nv = 0, nvar-1, 1
-    forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+;    forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
 end do
 do nv = 0, nvar-2, 1
-    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
+;    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
+    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
 end do
-sigm1 := f->sigm1(select_time,{lev},{lats:latn},{lonl:lonr})
-forc = linmsg_n(forc,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
-q3   = linmsg_n(q3  ,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
+sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
+;forc = linmsg_n(forc,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
+;q3   = linmsg_n(q3  ,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
 
 if(diff) then
     forc0 = forc
@@ -133,15 +134,15 @@ sigm1 := conform(vars(0,:,:,:),ave,ilev-2)
 ;sigm1 := conform(dzdt,sigm1,(/itime,ilev,ilat,ilon/))
 
 ;calc ealy(56) and late(78) stage of the summer 
-select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.(month_s+1))
-forc_m(:,0,:,:,:) = dim_avg_n(forc(:,select_time,:,:,:),1)
-q3_m(:,0,:,:,:) = dim_avg_n(q3(:,select_time,:,:,:),1)
-select_time := ind(time(:,1).ge.(month_e-1).and.time(:,1).le.month_e)
-forc_m(:,1,:,:,:) = dim_avg_n(forc(:,select_time,:,:,:),1)
-q3_m(:,1,:,:,:) = dim_avg_n(q3(:,select_time,:,:,:),1)
+;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.(month_s+1))
+;forc_m(:,0,:,:,:) = dim_avg_n(forc(:,select_time,:,:,:),1)
+;q3_m(:,0,:,:,:) = dim_avg_n(q3(:,select_time,:,:,:),1)
+;select_time := ind(time(:,1).ge.(month_e-1).and.time(:,1).le.month_e)
+;forc_m(:,1,:,:,:) = dim_avg_n(forc(:,select_time,:,:,:),1)
+;q3_m(:,1,:,:,:) = dim_avg_n(q3(:,select_time,:,:,:),1)
 printVarSummary(forc_m)
 
-if (any(ismissing(forc))) then
+if (any(ismissing(forc_m))) then
     print("forc has missing")
 end if
 if (any(ismissing(sigm1))) then
@@ -179,7 +180,8 @@ if (any(ismissing(coe211))) then
     print("coe211 has missing")
 end if
 
-print(forc(0,0,4,4,4:9))
+print(forc_m(0,0,4,4,4:9))
+print(forc_m(1,0,4,4:9,4))
 print(coe110(4,4,4:9))
 
 ;==========================================================
@@ -189,7 +191,7 @@ setfileoption("bin","WriteByteOrder","LittleEndian")
 system("rm -f " + fileout(nf))
 
 do nv = 0, nvar-1, 1
-do nt = 0, 1, 1
+do nt = 0, 3, 1
 do nl = 0, nlev-1, 1
     fbindirwrite(fileout(nf),forc_m(nv,nt,nl,:,:))
 end do
@@ -197,7 +199,7 @@ end do
 end do
 
 do nv = 0, nvar-2, 1
-do nt = 0, 1, 1
+do nt = 0, 3, 1
 do nl = 0, 1, 1
     fbindirwrite(fileout(nf),q3_m(nv,nt,nl,:,:))
 end do

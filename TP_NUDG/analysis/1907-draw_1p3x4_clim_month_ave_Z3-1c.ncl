@@ -12,8 +12,8 @@ unit     = (/"mm/day","10~S~4~N~ J","m/s","m" ,"hPa(+1000hPa)","m/s"/)    ;this 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/925,850,500,200/)
-nl = 0
-nv = 5
+nl = 3
+nv = 2
 case_option = 0
 
 ;the path of the file

@@ -6,8 +6,8 @@
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 3
-fnc  = 0   ;chose which case to draw
+var_option = 5
+fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 na = 1 ; "TP","EA","NH"
 
@@ -25,7 +25,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
+    nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -47,9 +47,22 @@ if(var_option.eq.4) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.5) then
+    var_name = (/"Qeddy","A"/)  ;
+    unit     = (/"K*m/s","m/s~S~2~N~"/)
+    nnv = 0 ;used to read dzdt induced by different forcing
+    if(nnv.eq.0) then 
+        draw_var = (/"uT", "vT", "wT", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    else
+        draw_var = (/"uS", "vS", "wS", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+end if
 months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
@@ -89,7 +102,7 @@ if(var_option.lt.2)
 end if
 if(var_option.eq.2)
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-g.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-g700.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
@@ -102,6 +115,10 @@ end if
 if(var_option.eq.4)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly_advection.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_advect_" + var_name(nnv) + area(na)
+end if
+if(var_option.eq.5)
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux2.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_eddy_flux2_" + var_name(nnv) + area(na)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -211,6 +228,14 @@ else
     var_m = var_m*10^10
 end if
 end if
+
+;if(var_option.eq.5) then
+;if(nnv.eq.0) then
+;    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
+;else
+;    var_m = var_m*10^10
+;end if
+;end if
 printVarSummary(var_m)
 
 if(diff) then 
@@ -343,17 +368,17 @@ end if
 if((var_option.eq.2).or.(var_option.eq.4)) then
 if(nnv.eq.0) then   ;dzdt
 if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-24,-8 ,-0.8,-24/);
-    maxlvl = (/ 24, 8 , 0.8, 24/);
-    spacig = (/  3, 1 , 0.1, 3 /);
+    minlvl = (/-8,-4 ,-4 ,-8/);
+    maxlvl = (/ 8, 4 , 4 , 8/);
+    spacig = (/ 1,0.5,0.5, 1/);
 else
-    minlvl = (/-4 ,-1.6,-1.6,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
-    maxlvl = (/ 4 , 1.6, 1.6, 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
-    spacig = (/0.5, 0.2, 0.2,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+    minlvl = (/-2.4,-2.4,-2.4,-2.4/);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
+    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
 end if
 end if
 if(nnv.eq.1) then ;dudt
-if((fnc.eq.0)) then  ;.and.diff 
+if((fnc.eq.2)) then  ;.and.diff 
     minlvl = (/-8 ,-4 ,-4 ,-8 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
     maxlvl = (/ 8 , 4 , 4 , 8 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
     spacig = (/ 1 ,0.5,0.5, 1 /);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
@@ -365,9 +390,9 @@ end if
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-32,-32,-32,-32/);
-    maxlvl = (/ 32, 32, 32, 32/);
-    spacig = (/ 4 , 4 , 4 , 4 /);
+    minlvl = (/-16,-16,-16,-16/);
+    maxlvl = (/ 16, 16, 16, 16/);
+    spacig = (/  2,  2,  2,  2/);
 else
     minlvl = (/-8,-8,-8,-8/);-16,-16,-16,-16
     maxlvl = (/ 8, 8, 8, 8/); 16, 16, 16, 16
@@ -396,6 +421,18 @@ else
     minlvl = (/-0.8,-0.8,-0.8/);
     maxlvl = (/ 0.8, 0.8, 0.8/);
     spacig = (/ 0.1, 0.1, 0.1/);
+end if
+end if
+
+if(var_option.eq.5) then 
+if(nnv.eq.0) then
+    minlvl = (/-24,-8,-0.16,-24/);
+    maxlvl = (/ 24, 8, 0.16, 24/);
+    spacig = (/  3, 1, 0.02,  3/);
+else
+    minlvl = (/-0.8,-0.8,-0.8,-0.8/);
+    maxlvl = (/ 0.8, 0.8, 0.8, 0.8/);
+    spacig = (/ 0.1, 0.1, 0.1, 0.1/);
 end if
 end if
 

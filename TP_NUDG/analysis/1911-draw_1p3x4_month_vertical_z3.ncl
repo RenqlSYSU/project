@@ -205,6 +205,9 @@ printVarSummary(var)
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
 ;    res@cnLineThicknessF = 1.0
+    
+    res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
+    res@cnLevels             = (/-32,-24,-16,-10,-5,-1,-0.5,-0.1, 0, 0.1, 0.5, 1, 5, 10, 16, 24, 32/)
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
@@ -308,10 +311,10 @@ end if
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
         res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) + " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
-        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
+        ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        ;res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
+        ;res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
+        ;res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))

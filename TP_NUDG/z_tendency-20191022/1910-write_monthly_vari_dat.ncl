@@ -22,8 +22,8 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g850.dat" 
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g_mis.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g_mis.dat" 
 var_name = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -38,9 +38,9 @@ lats = -2 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
-lev2 = (/850,100/) ;hPa
-lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev2 = (/1000,100/) ;hPa
+;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 1
 month_e = 8
 
@@ -103,8 +103,8 @@ do nv = 0, nvar-2, 1
     q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
 end do
 sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
-;forc = linmsg_n(forc,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
-;q3   = linmsg_n(q3  ,-1,ilon) ;-1 means the beginning and end points will be set to the nearest non-missing value.
+forc_m  = where(ismissing(forc_m),0,forc_m)
+q3_m    = where(ismissing(q3_m)  ,0,  q3_m)
 
 if(diff) then
     forc0 = forc

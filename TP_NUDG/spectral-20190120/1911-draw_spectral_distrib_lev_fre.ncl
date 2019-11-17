@@ -9,10 +9,16 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG/spectral-20190120"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+diff = True
+na = 2 ;"EA","TP","SEA","NEA"
+nv = 3 ;"U","V","T","vort"
 
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG6h"/) ;,"NG24h"
+    case1   = (/"CTRL","NUDG6h","NUDG24h"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG6h","NG24h"/) ;,"NG24h"
+    if(diff) then 
+    case2   = (/"CTRL","NG6h","NG6h-CTRL"/) ;,"NG24h"
+    end if
     years   = ispan(1979,2005,1)   ;the calculate time
 end if
 
@@ -34,43 +40,50 @@ lats = (/ 25 ,25  , 22  , 30  /)
 latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 30 ,70  ,107  ,115  /)
 lonr = (/150 ,105 ,130  ,130  /)
-lev  = (/850,500,200/)
-var_name = (/"U","V","T"/)
-nl = 2
-na = 0
-nv = 1
+lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+var_name = (/"U","V","T","vort"/)
 filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
-fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + var_name(nv) + "-" + area(na) + lev(nl)
+fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + var_name(nv) + "-" + area(na)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0),"r")
-spcx = f->spcx(:,{lev(nl)},:)
+spcx = f->spcx
 frq  = f->frq
 nfrq = dimsizes(spcx&frq)
-nlon = dimsizes(spcx&lon)
+nlev = dimsizes(spcx&lev)
 ncase = dimsizes(case1)
-var  = new((/ncase,nfrq ,nlon/),float)
+var  = new((/ncase,nfrq ,nlev/),float)
 plot = new((/ncase/),graphic)
 
 do nc = 0, ncase-1, 1
     f    = addfile(filein(nc),"r")
-    var(nc,:,:) = f->spcx(:,{lev(nl)},:)
+    var(nc,:,:) = f->spcx
 end do
 printVarSummary(var)
 copy_VarMeta(spcx,var(0,:,:))
+
+if(nv.eq.3) then 
+    var = var*10^11
+end if
+
+if(diff) then 
+    var(2,:,:) = var(1,:,:)/var(0,:,:)-1.0
+end if
 
 nfrq2 = 100
 nspc  = toint(nfrq/nfrq2)
 nsta  = nfrq - nspc*nfrq2
 print("nfrq = " + nfrq2 + ", spacing = " + nspc + ", start point = " + nsta)
-var2 = new((/ncase,nfrq2,nlon/),float)
+var2 = new((/ncase,nfrq2,nlev/),float)
 frq2 = new((/nfrq2/),float)
 calc_option = 1
 
-if(calc_option.eq.0) then 
+if(calc_option.eq.0) then
+    opt = 0 ;Reserved for future use. It is currently not used, but set it to 0
+    cyclic = False ;indicate whether the dim-th dimension of data is cyclic
     frq2 = fspan(0.001,0.5,nfrq2)
-    var2 = linint1_n_Wrap(frq,var,False,frq2,0,1)
+    var2 = linint1_n_Wrap(frq,var,cyclic,frq2,opt,1)
 else
     do nfr = 0, nfrq2-1, 1
         n1 = nsta - 1 + nspc * nfr
@@ -82,6 +95,7 @@ else
     var2!1   = "frq"
     var2&frq = frq2
 end if
+var2!0 = "case"
 
 printVarSummary(var2)
 print(frq2(0:20))
@@ -93,8 +107,8 @@ print(var(0,0:1000:100,5))
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.02
+   tick_font      = 0.03
+   subtitle_font  = 0.03
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -113,23 +127,21 @@ print(var(0,0:1000:100,5))
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.25
+    res@vpHeightF        = 0.8
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
     res@tiXAxisOn       = False
     res@tiYAxisOn       = False
-    res@tiYAxisString   = "Frequency"
-    res@tiXAxisString   = "Longitude"
+    res@tiXAxisString   = "Frequency"
 
-    res@tmYLMode        = "Explicit"
-    res@tmYLValues      = fspan(0.0,0.5,6)
-    res@tmYLLabels      = fspan(0.0,0.5,6)
-
-    res@tmXBMode        = "Manual"
-    res@tmXBTickStartF  = lonl(na)
-    res@tmXBTickEndF    = lonr(na)
-    res@tmXBTickSpacingF= 30 
+    res@tmXBMode        = "Explicit"
+    res@tmXBValues      = fspan(0.0,0.5,6)
+    res@tmXBLabels      = fspan(0.0,0.5,6)
+    
+    res@gsnPresHgtHeightLabelOn = False
+    res@tiYAxisOn = False
+    res@tmYRLabelsOn = False
 
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
@@ -173,10 +185,10 @@ print(var(0,0:1000:100,5))
     ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
     ;res@cnLevels             = (/10,20,40,80,120,  160,200,300,400,600,  800,1000,1200,1400,1600,  1800,2000/)
     ;res@cnLevels             = ispan(0,60,10)
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = 10         ; set min contour level
-    res@cnMaxLevelValF        = 330       ; set max contour level
-    res@cnLevelSpacingF       = 20        ; set contour interval
+    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res@cnMinLevelValF        = 10         ; set min contour level
+    ;res@cnMaxLevelValF        = 330       ; set max contour level
+    ;res@cnLevelSpacingF       = 20        ; set contour interval
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -198,7 +210,7 @@ print(var(0,0:1000:100,5))
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+" - "+latn(na)+"N)"   
+    res@gsnRightString  = var_name(nv) + " " + area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -214,31 +226,34 @@ print(var(0,0:1000:100,5))
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-;    minlvl = (/0 ,0 ,-4 /) ;used for East Asian moist transiation
-;    maxlvl = (/16,16, 4 /) ;used for CTRL-NUDG
-;    spacig = (/1 ,1 ,0.5/)
-    
+    minlvl := (/10 ,10 ,10 /) ;used for East Asian moist transiation
+    maxlvl := (/170,170,170/) ;used for CTRL-NUDG
+    spacig := (/10 ,10 ,10 /)
+if(diff) then 
+    minlvl := (/10 ,10 ,-0.8/) ;used for East Asian moist transiation
+    maxlvl := (/170,170, 0.8/) ;used for CTRL-NUDG
+    spacig := (/10 ,10 , 0.1/)
+end if
+
 ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
 
 do nc = 0, ncase-1,1
-if(nc.le.2) then
     res@cnFillPalette := "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
-else
+if((nc.eq.2).and.diff) then
     res@cnFillPalette := "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
 end if 
-    res@gsnLeftString   = pre_case(nc) + ") " + case1(nc)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
-    ;res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
-    ;res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-    ;plot(nc)  = gsn_csm_hov(wks,var(nc,ip,:),res)
-    plot(nc)  = gsn_csm_hov(wks,var2(nc,:,:),res)
+    res@gsnLeftString   = pre_case(nc) + ") " + case2(nc)
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
+    res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
+    res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
+    plot(nc)  = gsn_csm_pres_hgt(wks,var2(case|nc,lev|:,frq|:),res)
     print(max(var2(nc,:,:)))
     print(min(var2(nc,:,:)))
 end do 
 
-    gsn_panel(wks,plot,(/ncase,1/),resp)
+    gsn_panel(wks,plot,(/1,ncase/),resp)
 end
 

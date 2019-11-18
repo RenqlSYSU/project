@@ -54,7 +54,12 @@ nfrq = dimsizes(spcx&frq)
 nlev = dimsizes(spcx&lev)
 ncase = dimsizes(case1)
 var  = new((/ncase,nfrq ,nlev/),float)
-plot = new((/ncase/),graphic)
+plot = new((/ncase*3/),graphic)
+
+np = 0
+wks = gsn_open_wks(fig_out,fig_name)  
+do na = 1,3,1
+filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 
 do nc = 0, ncase-1, 1
     f    = addfile(filein(nc),"r")
@@ -116,11 +121,6 @@ print(var(0,0:1000:100,5))
    mp_thick       = 5.0
    font_index     = 22
    
-   wks = gsn_open_wks(fig_out,fig_name)  
-  setvalues NhlGetWorkspaceObjectId()
-      "wsMaximumSize" : 300000000
-  end setvalues
-
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
@@ -131,8 +131,10 @@ print(var(0,0:1000:100,5))
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
-    res@tiXAxisOn       = False
-    res@tiYAxisOn       = False
+    res@tiXAxisOn       = True
+    res@tiYAxisOn       = True
+    res@tiXAxisFont     = font_index 
+    res@tiYAxisFont     = font_index 
     res@tiXAxisString   = "Frequency"
 
     res@tmXBMode        = "Explicit"
@@ -195,11 +197,13 @@ print(var(0,0:1000:100,5))
     res@gsnSpreadColorEnd    = 21                ; end at color 200
     
     res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "Horizontal"
+    res@lbOrientation        = "Vertical";"Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-2
+    res@pmLabelBarWidthF  = 0.1
+    res@pmLabelBarHeightF = 0.8
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -231,11 +235,11 @@ print(var(0,0:1000:100,5))
     spacig := (/10 ,10 ,10 /)
 if(diff) then 
     minlvl := (/10 ,10 ,-0.8/) ;used for East Asian moist transiation
-    maxlvl := (/170,170, 0.8/) ;used for CTRL-NUDG
-    spacig := (/10 ,10 , 0.1/)
+    maxlvl := (/490,490, 0.8/) ;used for CTRL-NUDG
+    spacig := (/30 ,30 , 0.1/)
 end if
 
-ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
+;ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
 
 do nc = 0, ncase-1,1
     res@cnFillPalette := "precip3_16lev"
@@ -244,16 +248,18 @@ if((nc.eq.2).and.diff) then
     res@cnFillPalette := "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
 end if 
-    res@gsnLeftString   = pre_case(nc) + ") " + case2(nc)
+    res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
     res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-    plot(nc)  = gsn_csm_pres_hgt(wks,var2(case|nc,lev|:,frq|:),res)
+    plot(np)  = gsn_csm_pres_hgt(wks,var2(case|nc,lev|:,frq|:),res)
     print(max(var2(nc,:,:)))
     print(min(var2(nc,:,:)))
+    np = np + 1
+end do 
 end do 
 
-    gsn_panel(wks,plot,(/1,ncase/),resp)
+    gsn_panel(wks,plot,(/3,ncase/),resp)
 end
 

@@ -6,8 +6,8 @@
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 5
-fnc  = 1   ;chose which case to draw
+var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 na = 1 ; "TP","EA","NH"
 
@@ -61,7 +61,8 @@ if(var_option.eq.5) then
 end if
 months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
-lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 
 ;area: east Asia
@@ -102,7 +103,7 @@ if(var_option.lt.2)
 end if
 if(var_option.eq.2)
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-g700.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-g600.nc"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
@@ -368,9 +369,9 @@ end if
 if((var_option.eq.2).or.(var_option.eq.4)) then
 if(nnv.eq.0) then   ;dzdt
 if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-8,-4 ,-4 ,-8/);
-    maxlvl = (/ 8, 4 , 4 , 8/);
-    spacig = (/ 1,0.5,0.5, 1/);
+    minlvl = (/-4 ,-4 ,-4 ,-4 /);
+    maxlvl = (/ 4 , 4 , 4 , 4 /);
+    spacig = (/0.5,0.5,0.5,0.5/);
 else
     minlvl = (/-2.4,-2.4,-2.4,-2.4/);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
     maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 

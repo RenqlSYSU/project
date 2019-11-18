@@ -9,20 +9,20 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG/spectral-20190120"
 area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 35 ,25  , 22  , 30  /)
-latn = (/ 35 ,40  , 30  , 45  /)
+lats = (/ 25 ,25  , 22  , 30  /)
+latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 0  ,70  ,107  ,115  /)
-lonr = (/180 ,105 ,130  ,130  /)
+lonr = (/360 ,105 ,130  ,130  /)
 lon_spcing = 45
-lev  = (/850,500,400,300,200/)
+lev  = (/300,200/) ;500,400,300,
 var_name = (/"U","V","T","vort"/)
+stand = (/"","stand_"/)
 
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-area_option = True
+case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+stand_option = 0
 diff = True
 na = 0 ;"EA","TP","SEA","NEA"
 nv = 3 ;"U","V","T","vort"
-nl = 3 ;850,500,400,300,200
 
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/) ;,"NUDG24h"
@@ -46,54 +46,45 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
-if(area_option) then
-filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + "-area.nc"
-fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + var_name(nv) + "-" + lats(na) + "N_" + lev(nl)
-else
-filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
-fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + var_name(nv) + "-" + area(na)
-end if
+filein   = path + "/mdata/" + case1 + "-allyear_spec_" + stand(stand_option) + var_name(nv) + "-" + area(na) + "-area.nc"
+fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + stand(stand_option) + var_name(nv) + "-" + lats(na) + "N"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0),"r")
-if(area_option) then 
-spcx = f->spcx(:,{lev(nl)},{lats(na)},{lonl(na):lonr(na)})
-else
-spcx = f->spcx(:,{lev(nl)},{lonl(na):lonr(na)})
-end if
+spcx = f->spcx(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 frq  = f->frq
 nfrq = dimsizes(spcx&frq)
+nlev = dimsizes(lev)
 nlon = dimsizes(spcx&lon)
+nlat = dimsizes(spcx&lat)
 ncase = dimsizes(case1)
-var  = new((/ncase,nfrq ,nlon/),float)
-plot = new((/ncase/),graphic)
+var  = new((/ncase,nfrq,nlev,nlat,nlon/),float)
+plot = new((/ncase*nlev/),graphic)
 
 do nc = 0, ncase-1, 1
     f    = addfile(filein(nc),"r")
-    if(area_option) then 
-    var(nc,:,:) = f->spcx(:,{lev(nl)},{lats(na)},{lonl(na):lonr(na)})
-    else
-    var(nc,:,:) = f->spcx(:,{lev(nl)},{lonl(na):lonr(na)})
-    end if
+    var(nc,:,:,:,:) = f->spcx(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do
 printVarSummary(var)
-print(var(0,0:1000:100,5))
-copy_VarMeta(spcx,var(0,:,:))
+var := dim_avg_n_Wrap(var,3)
+print(var(0,0:1000:100,0,5))
 
+if(stand_option.eq.0) then
 if(nv.eq.3) then 
     var = var*10^11
 end if
+end if
 
 if(diff) then 
-    var(2,:,:) = var(1,:,:)/var(0,:,:)-1.0
+    var(2,:,:,:) = var(1,:,:,:)/var(0,:,:,:)-1.0
 end if
 
 nfrq2 = 100
 nspc  = toint(nfrq/nfrq2)
 nsta  = nfrq - nspc*nfrq2
 print("nfrq = " + nfrq2 + ", spacing = " + nspc + ", start point = " + nsta)
-var2 = new((/ncase,nfrq2,nlon/),float)
+var2 = new((/ncase,nfrq2,nlev,nlon/),float)
 frq2 = new((/nfrq2/),float)
 calc_option = 1
 
@@ -105,7 +96,7 @@ else
         n1 = nsta - 1 + nspc * nfr
         n2 = nsta - 1 + nspc *(nfr+1)
         n3 = (n1+n2)/2
-        var2(:,nfr,:) = dim_avg_n_Wrap(var(:,n1:n2,:),1)
+        var2(:,nfr,:,:) = dim_avg_n_Wrap(var(:,n1:n2,:,:),1)
         frq2(nfr) = frq(n3)
     end do
     var2!1   = "frq"
@@ -115,8 +106,8 @@ end if
 printVarSummary(var2)
 print(frq2(0:20))
 print(frq(0:1000:100))
-print(var2(0,0:20,5))
-print(var(0,0:1000:100,5))
+print(var2(0,0:20,0,5))
+print(var(0,0:1000:100,0,5))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -131,10 +122,8 @@ print(var(0,0:1000:100,5))
    mp_thick       = 5.0
    font_index     = 22
    
-   wks = gsn_open_wks(fig_out,fig_name)  
-  setvalues NhlGetWorkspaceObjectId()
-      "wsMaximumSize" : 300000000
-  end setvalues
+
+wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
 
     res                  = True
     res@gsnFrame         = False
@@ -231,11 +220,6 @@ print(var(0,0:1000:100,5))
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    if(area_option) then 
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)"   
-    else
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+" - "+latn(na)+"N)"   
-    end if
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -255,14 +239,22 @@ print(var(0,0:1000:100,5))
     minlvl := (/10 ,10 ,10 /) ;used for East Asian moist transiation
     maxlvl := (/170,170,170/) ;used for CTRL-NUDG
     spacig := (/10 ,10 ,10 /)
-if(diff) then 
+if(diff) then
+if(stand_option.eq.0) then 
     minlvl := (/10 ,10 ,-0.8/) ;used for East Asian moist transiation
     maxlvl := (/490,490, 0.8/) ;used for CTRL-NUDG
     spacig := (/30 ,30 , 0.1/)
+else
+    minlvl := (/0  , 0 ,-0.8/) ;used for East Asian moist transiation
+    maxlvl := (/4.8,4.8, 0.8/) ;used for CTRL-NUDG
+    spacig := (/0.3,0.3, 0.1/)
+end if
 end if
 
 ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
 
+np = 0
+do nl = 0, nlev-1,1
 do nc = 0, ncase-1,1
     res@cnFillPalette := "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -270,17 +262,20 @@ if((nc.eq.2).and.diff) then
     res@cnFillPalette := "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
 end if 
-    res@gsnLeftString   = pre_case(nc) + ") " + case2(nc)
+    res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
+    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+" - "+latn(na)+"N)"   
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
     res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
     ;plot(nc)  = gsn_csm_hov(wks,var(nc,ip,:),res)
-    plot(nc)  = gsn_csm_hov(wks,var2(nc,:,:),res)
-    print(max(var2(nc,:,:)))
-    print(min(var2(nc,:,:)))
+    plot(np)  = gsn_csm_hov(wks,var2(nc,:,nl,:),res)
+    print(max(var2(nc,:,nl,:)))
+    print(min(var2(nc,:,nl,:)))
+    np = np + 1
+end do 
 end do 
 
-    gsn_panel(wks,plot,(/1,ncase/),resp)
+    gsn_panel(wks,plot,(/nlev,ncase/),resp)
 end
 

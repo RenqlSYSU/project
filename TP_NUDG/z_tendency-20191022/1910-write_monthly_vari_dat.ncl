@@ -22,8 +22,8 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g_mis.nc"
-;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g_mis.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
+;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g600.dat"
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_month_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_4f6c_month.dat" 
 var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
@@ -41,7 +41,7 @@ latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
 lev2 = (/1000,100/) ;hPa
-;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 month_s = 1
@@ -61,8 +61,8 @@ nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
 ;forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 ;q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
-forc_m  = new((/nvar,4,nlev,nlat,nlon/),float)
-q3_m    = new((/2   ,4,2   ,nlat,nlon/),float)
+forc_m  = new((/nvar,4,nlev,nlat,nlon/),double)
+q3_m    = new((/2   ,4,2   ,nlat,nlon/),double)
 
 itime = 1
 ilev  = 2
@@ -81,9 +81,12 @@ dlev(0) = dlev(1)
 dlev3  = conform(vars(0,:,:,:),dlev,ilev-2)
 coslat = conform(vars(0,:,:,:),cos(lat),ilat-2)
 tanlat = conform(vars(0,:,:,:),tan(lat),ilat-2)
-coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
-coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
-coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
+coe110 = todouble(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
+coe101 = todouble(1/dlat/dlat + tanlat/2/dlat)
+coe121 = todouble(1/dlat/dlat - tanlat/2/dlat)
+;coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
+;coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
+;coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
 
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
@@ -99,13 +102,15 @@ f      = addfile(filein(nf),"r")
 ;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 do nv = 0, nvar-1, 1
 ;    forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
-    forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
+    ;forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
+    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
 end do
 do nv = 0, nvar-2, 1
 ;    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
-    q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
+    ;q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
+    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
 end do
-sigm1 := tofloat(f->sigm1(:,{lev},{lats:latn},{lonl:lonr}))
+sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
 ;forc_m  = where(ismissing(forc_m),0,forc_m)
 ;q3_m    = where(ismissing(q3_m)  ,0,  q3_m)
 
@@ -155,12 +160,12 @@ end if
 ;==========================================================
 ;define coefficient and calc dzdt
 ;============================================================
-f0    = conform(vars(0,:,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-2)
+f0    = todouble(conform(vars(0,:,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-2))
 term1 = center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev-2)/2/dlev3 
 term2 = 1/sigm1/dlev3/dlev3 
-coe211 = tofloat(f0*f0*a*a*(term2 + term1))
-coe011 = tofloat(f0*f0*a*a*(term2 - term1))
-coe111 = tofloat(-2/coslat/coslat/dlon/dlon - 2/dlat/dlat - 2*f0*f0*a*a*term2)
+coe211 = f0*f0*a*a*(term2 + term1)
+coe011 = f0*f0*a*a*(term2 - term1)
+coe111 = -2/coslat/coslat/dlon/dlon - 2/dlat/dlat - 2*f0*f0*a*a*term2
 coe111 = where(coe111.eq.0,1e-5,coe111)
 delete([/term1,term2/])
 
@@ -186,6 +191,8 @@ end if
 print(forc_m(0,0,4,4,4:9))
 print(forc_m(1,0,4,4:9,4))
 print(coe110(4,4,4:9))
+printVarSummary(coe011)
+printVarSummary(f0)
 
 ;==========================================================
 ;write to binary file

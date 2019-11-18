@@ -1,4 +1,0 @@
- relaxing factor is    1.25000000000000     
- critical value is   9.999999939225290E-009
-  
-/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/ERA-Interim_Clim_4f6c_month.dat                                                                                                          

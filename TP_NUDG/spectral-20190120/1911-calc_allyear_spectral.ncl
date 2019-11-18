@@ -41,17 +41,19 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
+do na = 0,0,1
+
 if(na.eq.0) then
 lev  = (/850,500,400,300,200/) ;850,500,
 if(area_option) then 
-fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_" + var_name(nv) + "-" + area(na) + "-area.nc"
+fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_stand_" + var_name(nv) + "-" + area(na) + "-area.nc"
 else
-fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
+fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_stand_" + var_name(nv) + "-" + area(na) + ".nc"
 end if
 else
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
+fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_stand_" + var_name(nv) + "-" + area(na) + ".nc"
 end if
 
 f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
@@ -134,11 +136,12 @@ printVarSummary(var)
 var  = linmsg_n(var, -1, 4)
 var  = linmsg_n(var, -1, 3)
 var  = linmsg_n(var, -1, 2)
-var1 = reshape(var,(/altime,nlev,nlat,nlon/))
+var1 := reshape(var,(/altime,nlev,nlat,nlon/))
 printVarSummary(var)
 if (any(ismissing(var1))) then
     print("var1 has missing values")
 end if
+var1 = dim_standardize_n_Wrap(var1,1,0)
 
 do nz = 0, nlev-1, 1
 do ny = 0, nlat-1, 1
@@ -210,5 +213,6 @@ ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->frq  = (/frq/)
 ncdf->spcx = (/spcx/)
+end do
 end do
 end

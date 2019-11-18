@@ -22,8 +22,11 @@ else
 end if
 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g850.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g850.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
+;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_month_Qd_Qeddy_A.nc"
+;filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_dzdt_month.dat"
+;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_dzdt_month.nc" 
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -40,8 +43,9 @@ lats = -2 ;-20 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
+;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 1
 month_e = 8
 
@@ -59,6 +63,7 @@ nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
 dzdt  = new((/nvar,ntime,nlev,nlat,nlon/),double)
+;dzdt  = new((/nvar,ntime,nlev,nlat,nlon/),float)
 
 itime = 1
 ilev  = 2
@@ -92,13 +97,14 @@ do nv = 0, nvar-1, 1
 do nt = 0, ntime-1, 1
 do nz = 0, nlev-1, 1
     dzdt(nv,nt,nz,:,:) = fbindirread(filedat(nf),irec,(/nlat,nlon/),"double")
+    ;dzdt(nv,nt,nz,:,:) = fbindirread(filedat(nf),irec,(/nlat,nlon/),"float")
     irec = irec + 1
 end do
 end do
 end do
 print(dzdt(0:(nvar-1),0,9,29,119))
-print(dzdt(0,0,9,29,129:149:4))
-print(dzdt(0,0,9,29,129:149:4))
+print(dzdt(0,0,9 ,29,129:149:4))
+print(dzdt(0,0,10,29,129:149:4))
 
 ;==========================================================
 ;define coefficient and calc dzdt

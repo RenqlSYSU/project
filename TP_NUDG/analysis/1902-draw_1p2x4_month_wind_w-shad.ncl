@@ -21,12 +21,12 @@ else
     nsample = 10
 end if
 
-draw_var = (/"q1"  ,"preci" ,"OMEGA"          ,"Z3" /)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Q1"  ,"preci" ,"OMEGA"          ,"Z3" /)  ;this is the variable used to draw, can used as center string
 unit     = (/"W/kg","mm/day","10~S~-2~N~ Pa/s","gpm"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,500,200/)
 nl = 0
-nv = 3
+nv = 0
 
 var_option = 2
 if(var_option.eq.0) then 
@@ -130,17 +130,17 @@ prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
-if(nv.eq.0) then
-    var(:,2,:,:,:) = var(:,2,:,:,:)*1000 ;Q1,transform unit from K/S to W/kg
-end if
+;if(nv.eq.0) then
+;    var(:,2,:,:,:) = var(:,2,:,:,:)*1000 ;Q1,transform unit from K/S to W/kg
+;end if
 
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
 end if
 
-var(1:(nvar-1),0,:,:,:) = mask(var(1:(nvar-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
-var(1:(nvar-1),1,:,:,:) = mask(var(1:(nvar-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
-var(1:(nvar-1),2,:,:,:) = mask(var(1:(nvar-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(var)

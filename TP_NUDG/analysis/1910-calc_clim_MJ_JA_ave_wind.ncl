@@ -32,11 +32,11 @@ var_name = (/"U","V","T","Z3","Q","dzdt","Ahgt","dTdy"/) ;,"OMEGA","RELHUM"
 nv = 7
 
 ;area: east Asia
-lats = -2 ;-90 ;
+lats = -20 ;-90 ;
 latn = 90  ;90  ;
 lonl = 0  ;0   ;
 lonr = 360 ;360 ;
-lev  = (/1000,925,850,700,600,500,400,300,200,100/)
+lev  = (/850,500,300,200,100/)
 month_s = 5
 month_e = 8
 
@@ -60,7 +60,7 @@ var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-;do nv = 6 ,6 ,1 
+do nv = 0 ,3 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -163,6 +163,6 @@ ncdf->lon = (/vars&lon/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->month_vari  = (/month_vari/)
 end do
-;end do ;loop of variable
+end do ;loop of variable
 end
 

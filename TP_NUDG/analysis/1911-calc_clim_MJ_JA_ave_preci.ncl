@@ -32,9 +32,9 @@ var_name = (/"PRECC","PRECL"/) ;,"OMEGA","RELHUM"
 
 ;area: east Asia
 lats = -20 ;-90 ;
-latn = 60  ; 90 ;
-lonl = 20  ; 0  ;
-lonr = 220 ;360 ;
+latn =  90 ;
+lonl =  0  ;
+lonr = 360 ;
 month_s = 5
 month_e = 8
 

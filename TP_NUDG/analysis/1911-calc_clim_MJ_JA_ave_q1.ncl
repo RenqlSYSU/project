@@ -33,9 +33,9 @@ g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
 lats = -20 ;-90 ;
-latn = 60  ; 90 ;
-lonl = 20  ; 0  ;
-lonr = 220 ;360 ;
+latn =  90 ;
+lonl =  0  ;
+lonr = 360 ;
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 5
 month_e = 8
@@ -109,7 +109,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileatt@discription   = "Integrated Apparent Heat Source calculated from temperature equation"
+fileAtt@discription   = "Integrated Apparent Heat Source calculated from temperature equation"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

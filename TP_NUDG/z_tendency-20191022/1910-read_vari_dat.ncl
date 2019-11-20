@@ -21,12 +21,12 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
-;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_month_Qd_Qeddy_A.nc"
-;filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_dzdt_month.dat"
-;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_dzdt_month.nc" 
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
+;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
+;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_month_Qd_Qeddy_A.nc"
+filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_dzdt_month.dat"
+fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_dzdt_month.nc" 
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -43,9 +43,9 @@ lats = -2 ;-20 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
-;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 month_s = 1
 month_e = 8
 
@@ -109,7 +109,7 @@ print(dzdt(0,0,10,29,129:149:4))
 ;==========================================================
 ;define coefficient and calc dzdt
 ;============================================================
-f0    = conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
+f0    = todouble(conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
 f0@_FillValue = dzdt@_FillValue
 printVarSummary(f0)
 

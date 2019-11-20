@@ -25,8 +25,8 @@ draw_var = (/"Q1"  ,"preci" ,"OMEGA"          ,"Z3" /)  ;this is the variable us
 unit     = (/"W/kg","mm/day","10~S~-2~N~ Pa/s","gpm"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,500,200/)
-nl = 0
-nv = 0
+nl = 1
+nv = 3
 
 var_option = 2
 if(var_option.eq.0) then 
@@ -98,8 +98,8 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 1.8
-   mp_thick       = 1.5
+   vc_thick       = 2.5
+   mp_thick       = 2.5
    font_index     = 22
 
 ;================================================================
@@ -125,6 +125,7 @@ vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl
 end if
 end do
 
+vari = where(abs(vari).le.0.000001,0.1,vari)
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
@@ -267,8 +268,8 @@ end if
     resvc@vcRefAnnoString1On         = False
     resvc@vcRefAnnoString2On         = True
     ;resvc@vcRefAnnoString2           = "30m/s"
-    resvc@vcLineArrowHeadMinSizeF   = 0.012
-    resvc@vcLineArrowHeadMaxSizeF   = 0.012
+    resvc@vcLineArrowHeadMinSizeF   = 0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
@@ -346,9 +347,9 @@ end if
                       (/7 ,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4,4/)/)   ;the level of 200hpa    ctrl,nudg,diff
 if(nv.eq.0) 
-    minlvl = (/0  ,-80,-80/)  ;q1
-    maxlvl = (/750, 80, 80/)
-    spacig = (/50 , 10, 10/)
+    minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
+    maxlvl = (/300, 160, 160/)      ; 80, 80
+    spacig = (/20 ,  20,  20/)      ; 10, 10
 end if
 
 if(nv.eq.1) then ;preci
@@ -391,8 +392,8 @@ else
 end if 
     do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lev(nl) + "hPa " +  draw_varname(nv) + " (" + unit(nv) + ")" 
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +   
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

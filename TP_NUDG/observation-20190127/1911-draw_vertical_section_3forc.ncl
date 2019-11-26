@@ -5,8 +5,9 @@
 ;*********************************************************************************
 begin
 month_option = True 
+year_option = False;True   ;calc yearly DJF 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-na = 1 ; "TP","EA","NH"
+na = 2 ; "TP","EA","NH"
 
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -16,13 +17,13 @@ end if
 if(var_option.eq.1) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
-    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -56,34 +57,41 @@ if(var_option.eq.5) then
         select   = (/0,1,2/)
     end if
 end if
-months   = (/"JF","MA","MJ","JA"/)
-lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+months   = (/"DJF"/)
+lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
+;months   = (/"JF","MA","MJ","JA"/)
+;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
 lats = (/15  ,15  , 0  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,110 , 10 /) ;30 ;20
-lonr = (/105 ,130 ,350 /) ;150;220
+lonl = (/70  ,110 , 1  /) ;30 ;20
+lonr = (/105 ,130 ,359 /) ;150;220
 month_s = 1
 month_e = 8
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-case   = "ERA-Interim"
+;case   = "ERA-Interim"
+case   = "NCEP1"
 
-if(var_option.lt.2)
+if(var_option.le.1)
     if(month_option) then
     filename = path + "mdata/" + case + "_Clim_month_Qd_Qeddy_A.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_Qd_Qeddy_A.nc"
     end if
+    if(year_option) then
+    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A.nc"
+    end if
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if
 if(var_option.eq.2)
     if(month_option) then
-    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
+    filename = path + "mdata/" + case + "_DJF_dzdt.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if
@@ -124,7 +132,8 @@ if(.not.(month_option)) then
     ntime = dimsizes(select_time)
     var   = new((/nvar,ntime,nlev,nlat,nlon/),double)
 end if
-var_m = new((/nvar,nmonth,nlev,nlat,nlon/),double)
+;var_m = new((/nvar,nmonth,nlev,nlat,nlon/),double)
+var_m = new((/nvar,nmonth,nlev,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
@@ -146,7 +155,11 @@ if(month_option) then
     f = addfile(filename,"r")
     if(var_option.le.1)
         do nv = 0, nvar-2,1
+        if(year_option) then 
+        var_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+        else
         var_m(nv,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end if
         end do
     else
         var_m(0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -176,7 +189,7 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.eq.1) then 
-    var_m = var_m*10^10
+    var_m = var_m*10^11
 end if
 
 if((var_option.eq.2).or.(var_option.eq.4)) then
@@ -184,7 +197,7 @@ if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
 if(nnv.eq.1) then
-    var_m = var_m*10^5
+    var_m = var_m*10^6
 end if
 if(nnv.eq.2) then
     var_m = var_m*10^6
@@ -321,21 +334,21 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.eq.1) then
-    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
-    spacig = (/ 0.3, 0.3, 0.3, 0.3/);
+    minlvl = (/-16,-16,-16,-16/);-8,-8,-8,-8,
+    maxlvl = (/ 16, 16, 16, 16/); 8, 8, 8, 8,
+    spacig = (/  2,  2,  2,  2/); 1, 1, 1, 1,
 end if
     
 if((var_option.eq.2).or.(var_option.eq.4)) then
 if(nnv.eq.0) then   ;dzdt
-    minlvl = (/-24,-24,-1.6,-24/);
-    maxlvl = (/ 24, 24, 1.6, 24/);
-    spacig = (/ 3 , 3 , 0.2, 3 /);
+    minlvl = (/-8,-8,-1.6,-8/);
+    maxlvl = (/ 8, 8, 1.6, 8/);
+    spacig = (/ 1, 1, 0.2, 1/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-8 ,-4 ,-4 ,-8 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
-    maxlvl = (/ 8 , 4 , 4 , 8 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
-    spacig = (/ 1 ,0.5,0.5, 1 /);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+    minlvl = (/-16,-16,-16,-16/);
+    maxlvl = (/ 16, 16, 16, 16/);
+    spacig = (/  2,  2,  2,  2/);
 end if
 if(nnv.eq.2) then ;dTdt
     minlvl = (/-16,-16,-16,-16/);

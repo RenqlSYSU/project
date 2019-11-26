@@ -9,8 +9,8 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 27 
-    integer, parameter :: nlat = 62 , nlon = 240 , ilog  = 10 , ifile = 12
+    integer, parameter :: pr = 4 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 
+    integer, parameter :: nlat = 37 , nlon = 144 , ilog  = 10 , ifile = 12
     !integer, parameter :: nlat = 98 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -34,7 +34,9 @@ program iteration
 
     !lev  = (/600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
     !lev  = (/1000.0,925.0,850.0,800.0,750.0,700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
-    lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+    !lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+    !lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
+    lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
     
@@ -57,8 +59,10 @@ program iteration
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_4f6c_month-g600.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_month-g600.dat"
     else if(nc.eq.0) then
-        filename = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/ERA-Interim_Clim_4f6c_month.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/ERA-Interim_Clim_dzdt_month.dat"
+        filename = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/NCEP1_DJF_4f6c.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/NCEP1_DJF_dzdt.dat"
+        !filename = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/ERA-Interim_Clim_4f6c_month.dat"
+        !fileout  = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/mdata/ERA-Interim_Clim_dzdt_month.dat"
     else
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_4f6c_month-g600.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_month-g600.dat"
@@ -139,12 +143,12 @@ program iteration
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
-        dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
-        dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
-        !dzdt(:,:,1   ,:,nvar) = dzdt(:,:,2     ,:,nvar)  !lower boundary for A
-        !dzdt(:,:,nlev,:,nvar) = dzdt(:,:,nlev-1,:,nvar)  !upper boundary for A
-        !dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
-        !dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
+        !dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
+        !dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
+        dzdt(:,:,1   ,:,nvar) = dzdt(:,:,2     ,:,nvar)  !lower boundary for A
+        dzdt(:,:,nlev,:,nvar) = dzdt(:,:,nlev-1,:,nvar)  !upper boundary for A
+        dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
+        dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
         
         do nv = 1, nvar ,1 
             write(ilog,*) "dzdt(120,30,10,1) induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,10,1,nv)
@@ -158,8 +162,8 @@ program iteration
             exit
         end if 
     end do
-    write(ilog,*) dzdt(130:150:4,30,10,1,1)
-    write(ilog,*) dzdt(130:150:4,30,11,1,1)
+    write(ilog,*) dzdt(100:140:4,30,10,1,1)
+    write(ilog,*) dzdt(100:140:4,30,11,1,1)
     
 !========================================================================
 !save the data

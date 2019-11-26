@@ -14,6 +14,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+year_option = True
 diff = False
 
 if(case_option.eq.0) then
@@ -24,8 +25,10 @@ end if
 
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g600.dat"
-filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_month_Qd_Qeddy_A.nc"
-fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim",""/) + "_Clim_4f6c_month.dat" 
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"ERA-Interim","NCEP1"/) + "-Clim_month_Qd_Qeddy_A-g.nc"
+;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"ERA-Interim","NCEP1"/) + "-Clim_4f6c_month-g600.dat"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
+fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
 var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -43,14 +46,15 @@ lonr = 360 ;360 ;
 lev2 = (/1000,100/) ;hPa
 ;lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/) ;ERA-Interim
+;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 month_s = 1
 month_e = 8
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0),"r")
+f    = addfile(filein(1),"r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 ;time = cd_calendar(f->time,0)
 ;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
@@ -59,10 +63,14 @@ nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
+;nmonth = dimsizes(vars&month)
 ;forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 ;q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
-forc_m  = new((/nvar,4,nlev,nlat,nlon/),double)
-q3_m    = new((/2   ,4,2   ,nlat,nlon/),double)
+ntime   = 1
+;forc_m  = new((/nvar,ntime,nlev,nlat,nlon/),double)
+;q3_m    = new((/2   ,ntime,2   ,nlat,nlon/),double)
+forc_m  = new((/nvar,ntime,nlev,nlat,nlon/),float)
+q3_m    = new((/2   ,ntime,2   ,nlat,nlon/),float)
 
 itime = 1
 ilev  = 2
@@ -78,22 +86,22 @@ dlat = lat(4)-lat(3)
 dlev = lev
 dlev(1:(nlev-1)) = (- lev(0:(nlev-2)) + lev(1:(nlev-1)))*100 
 dlev(0) = dlev(1) 
-dlev3  = conform(vars(0,:,:,:),dlev,ilev-2)
-coslat = conform(vars(0,:,:,:),cos(lat),ilat-2)
-tanlat = conform(vars(0,:,:,:),tan(lat),ilat-2)
-coe110 = todouble(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
-coe101 = todouble(1/dlat/dlat + tanlat/2/dlat)
-coe121 = todouble(1/dlat/dlat - tanlat/2/dlat)
-;coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
-;coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
-;coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
+dlev3  = conform(forc_m(0,0,:,:,:),dlev,ilev-2)
+coslat = conform(forc_m(0,0,:,:,:),cos(lat),ilat-2)
+tanlat = conform(forc_m(0,0,:,:,:),tan(lat),ilat-2)
+;coe110 = todouble(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
+;coe101 = todouble(1/dlat/dlat + tanlat/2/dlat)
+;coe121 = todouble(1/dlat/dlat - tanlat/2/dlat)
+coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
+coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
+coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
 
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, 0, 1 
+do nf = 1, 1, 1 
 ;==========================================================
 ;read the data
 ;============================================================
@@ -103,16 +111,29 @@ f      = addfile(filein(nf),"r")
 do nv = 0, nvar-1, 1
 ;    forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
     ;forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
-    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    ;forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
 end do
 do nv = 0, nvar-2, 1
 ;    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
     ;q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
-    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
+    ;q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
+    q3_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}),0)
 end do
-sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
+;sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
+sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
 ;forc_m  = where(ismissing(forc_m),0,forc_m)
 ;q3_m    = where(ismissing(q3_m)  ,0,  q3_m)
+
+;linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
+;p_in   = conform(forc_m0,lev0,ilev)
+;p_out  = conform(forc_m ,lev ,ilev)
+;forc_m = int2p_n(p_in,forc_m0,p_out,linlog,ilev)
+;delete([/p_in,p_out/])
+;p_in   = conform(sigm10,lev0,ilev-2)
+;p_out  = conform(forc_m(0,0,:,:,:) ,lev ,ilev-2)
+;sigm1  = int2p_n(p_in,sigm10 ,p_out,linlog,ilev-2)
+;delete([/p_in,p_out/])
 
 if(diff) then
     forc0 = forc
@@ -133,10 +154,10 @@ if(diff) then
     sigm1=(sigm1+sigm10)/2
 end if
 
-ave := wgt_areaave_Wrap(sigm1,1.0,1.0,0)
-ave := dim_avg_n_Wrap(ave,0)
-ave = where(ave.eq.0.0, 1e-5, ave)
-sigm1 := conform(vars(0,:,:,:),ave,ilev-2)
+;ave := wgt_areaave_Wrap(sigm1,1.0,1.0,0)
+;ave := dim_avg_n_Wrap(ave,0)
+;ave = where(ave.eq.0.0, 1e-5, ave)
+;sigm1 := conform(vars(0,:,:,:),ave,ilev-2)
 ;sigm1 = linmsg_n(sigm1,-1,ilon-1)
 ;sigm1 = where(sigm1.eq.0.0, 1e-5, sigm1)
 ;sigm1 := conform(dzdt,sigm1,(/itime,ilev,ilat,ilon/))
@@ -160,7 +181,8 @@ end if
 ;==========================================================
 ;define coefficient and calc dzdt
 ;============================================================
-f0    = todouble(conform(vars(0,:,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-2))
+;f0    = todouble(conform(vars(0,:,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-2))
+f0    = tofloat(conform(forc_m(0,0,:,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-2))
 term1 = center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev-2)/2/dlev3 
 term2 = 1/sigm1/dlev3/dlev3 
 coe211 = f0*f0*a*a*(term2 + term1)
@@ -201,7 +223,7 @@ setfileoption("bin","WriteByteOrder","LittleEndian")
 system("rm -f " + fileout(nf))
 
 do nv = 0, nvar-1, 1
-do nt = 0, 3, 1
+do nt = 0, ntime-1, 1
 do nl = 0, nlev-1, 1
     fbindirwrite(fileout(nf),forc_m(nv,nt,nl,:,:))
 end do
@@ -209,7 +231,7 @@ end do
 end do
 
 do nv = 0, nvar-2, 1
-do nt = 0, 3, 1
+do nt = 0, ntime-1, 1
 do nl = 0, 1, 1
     fbindirwrite(fileout(nf),q3_m(nv,nt,nl,:,:))
 end do

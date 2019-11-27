@@ -24,9 +24,9 @@ end if
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
-filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_avesigm.nc"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
 filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.dat"
-fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.nc" 
+fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt_19.nc" 
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -45,17 +45,17 @@ lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-;lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
-lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 month_s = 1
 month_e = 8
+nc = 1
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(1),"r")
-vars:= f->Qd(0,{lev(15:18)},{lats:latn},{lonl:lonr})
+f    = addfile(filein(nc),"r")
+vars:= f->Qd(0,{lev},{lats:latn},{lonl:lonr})
 ;time = cd_calendar(f->time,0)
 ;select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ;ntime = dimsizes(select_time)
@@ -88,7 +88,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1, 1, 1 
+do nf = nc, nc, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -111,7 +111,7 @@ print(dzdt(0,0,10,29,99:139:4))
 ;==========================================================
 ;define coefficient and calc dzdt
 ;============================================================
-;f0    = todouble(conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
+;f0   = todouble(conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
 f0    = tofloat(conform(dzdt,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
 f0@_FillValue = dzdt@_FillValue
 printVarSummary(f0)

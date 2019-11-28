@@ -15,13 +15,14 @@ path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 option   = 0 ;0 means remove seasonal mean, 1 means bandpass filter
+geo = False
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/NCEP1_DJF_Qd_Qeddy_A_geo.nc"
+    fileout  = path2 + "mdata/NCEP1_DJF_Qd_Qeddy_A_csa.nc"
 else                                     
     fileout  = path2 + "mdata/ERA-Interim_DJF_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -83,7 +84,7 @@ u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
+;z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
@@ -103,9 +104,9 @@ if(isleapyear(years(nt))) then ;leap year,366 day
     nv = 3
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
-    nv = 4
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
-    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    ;nv = 4
+    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    ;z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 else   ;non-leap year, 365 day
     nv = 0
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
@@ -119,35 +120,20 @@ else   ;non-leap year, 365 day
     nv = 3
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
-    nv = 4
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
-    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    ;nv = 4
+    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    ;z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
 printVarSummary(u)
 
-lev0 = lev
-lev  := (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-nlev = dimsizes(lev)
-Qeddy := new((/nyear,ntime,nlev,nlat,nlon/),double)
-
-linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
-p_in   = conform(u    ,lev0,ilev)
-p_out  = conform(Qeddy,lev ,ilev)
-u := int2p_n(p_in,u,p_out,linlog,ilev)
-v := int2p_n(p_in,v,p_out,linlog,ilev)
-t := int2p_n(p_in,t,p_out,linlog,ilev)
-z := int2p_n(p_in,z,p_out,linlog,ilev)
-w := int2p_n(p_in,w,p_out,linlog,ilev)
-delete([/p_in,p_out,linlog/])
-
-;if(geopotion) then
-dlev = -50*100 ;Pa
+if(geo) then
+dlev = -75*100 ;Pa
 coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
 f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
 z = z*g
-do nlv = 0,2,1
-    nl = 2 - nlv
+do nlv = 0,0,1
+    nl = 0 - nlv
     z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
     u1 = -center_finite_diff_n(z1,lat,cyclic,opt,ilat-1)/f0/a
     v1 =  center_finite_diff_n(z1,lon,loncyc,opt,ilon-1)/f0/a/coslat
@@ -160,13 +146,74 @@ do nlv = 0,2,1
     print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
     print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
     print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
-    z(:,:,nl,:,:) = z1
-    u(:,:,nl,:,:) = u1
-    v(:,:,nl,:,:) = v1
-    t(:,:,nl,:,:) = t1
+    z(:,:,nl,:,:) = (/z1/)
+    u(:,:,nl,:,:) = (/u1/)
+    v(:,:,nl,:,:) = (/v1/)
+    t(:,:,nl,:,:) = (/t1/)
 end do
 delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
-;end if
+end if
+
+u!0 = "year"
+v!0 = "year"
+t!0 = "year"
+w!0 = "year"
+lev0 = lev
+lev := fspan(1000,100,19)
+wts = tofloat(lev0) ;weights
+wts = 1.0
+;wts(0) = 0.1 ;1000
+;wts(1) = 0.2 ;925
+;wts(2) = 0.5 ;850
+knots = nlev - 2
+smth = 0.0
+nderiv = 0
+u_o = csa1x(lev0,u(year|:,time|:,lat|:,lon|:,level|:),wts,knots,smth,nderiv,lev)
+v_o = csa1x(lev0,v(year|:,time|:,lat|:,lon|:,level|:),wts,knots,smth,nderiv,lev)
+t_o = csa1x(lev0,t(year|:,time|:,lat|:,lon|:,level|:),wts,knots,smth,nderiv,lev)
+w_o = csa1x(lev0,w(year|:,time|:,lat|:,lon|:,level|:),wts,knots,smth,nderiv,lev)
+printVarSummary(u_o)
+u_o!0 = "year"
+u_o!1 = "time"
+u_o!2 = "lat"
+u_o!3 = "lon"
+u_o!4 = "lev"
+u := u_o(year|:,time|:,lev|:,lat|:,lon|:)
+u@_FillValue = default_fillvalue("float")
+v_o!0 = "year"
+v_o!1 = "time"
+v_o!2 = "lat"
+v_o!3 = "lon"
+v_o!4 = "lev"
+v := v_o(year|:,time|:,lev|:,lat|:,lon|:)
+v@_FillValue = default_fillvalue("float")
+t_o!0 = "year"
+t_o!1 = "time"
+t_o!2 = "lat"
+t_o!3 = "lon"
+t_o!4 = "lev"
+t := t_o(year|:,time|:,lev|:,lat|:,lon|:)
+t@_FillValue = default_fillvalue("float")
+w_o!0 = "year"
+w_o!1 = "time"
+w_o!2 = "lat"
+w_o!3 = "lon"
+w_o!4 = "lev"
+w := w_o(year|:,time|:,lev|:,lat|:,lon|:)
+w@_FillValue = default_fillvalue("float")
+
+nlev = dimsizes(lev)
+Qeddy := new((/nyear,ntime,nlev,nlat,nlon/),double)
+
+;linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
+;p_in   = conform(u    ,lev0,ilev)
+;p_out  = conform(Qeddy,lev ,ilev)
+;u := int2p_n(p_in,u,p_out,linlog,ilev)
+;v := int2p_n(p_in,v,p_out,linlog,ilev)
+;t := int2p_n(p_in,t,p_out,linlog,ilev)
+;z := int2p_n(p_in,z,p_out,linlog,ilev)
+;w := int2p_n(p_in,w,p_out,linlog,ilev)
+;delete([/p_in,p_out,linlog/])
 
 clm_u = dim_avg_n(u,itime)
 clm_v = dim_avg_n(v,itime) 
@@ -288,7 +335,7 @@ filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"sigm1",typeof(sigm1),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"qeddy",typeof(qeddy),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"Qd"   ,typeof(Qd),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Qd",typeof(f_Qd),(/"year","lev","lat","lon"/))

@@ -39,7 +39,7 @@ lats = -2 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+lev  = (/1000,925,850,700,600,500,400,350,300,250,200,175,150,125,100/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -53,7 +53,8 @@ f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r"
 vars = f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
-nlev  = dimsizes(lev)
+lev  := (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+nlev = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 nmonth= 4
@@ -63,6 +64,9 @@ A_m        = new((/nmonth,nlev,nlat,nlon/),double)
 f_Qd_m     = new((/nmonth,nlev,nlat,nlon/),double)
 f_Qeddy_m  = new((/nmonth,nlev,nlat,nlon/),double)
 sigm0_m    = new((/nmonth,nlev,nlat,nlon/),double)
+
+lev  := (/1000,925,850,700,600,500,400,350,300,250,200,175,150,125,100/)
+nlev = dimsizes(lev)
 
 iyear = 0
 itime = 1
@@ -83,6 +87,8 @@ cyclic = False ;used by center_finite_diff_n
 ;read the data
 ;============================================================
 do nm = 0, nmonth-1, 1
+lev  := (/1000,925,850,700,600,500,400,350,300,250,200,175,150,125,100/)
+nlev = dimsizes(lev)
 month_s = 2*nm + 1
 month_e = 2*nm + 2
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
@@ -91,7 +97,6 @@ u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-Qeddy := new((/nyear,ntime,nlev,nlat,nlon/),double)
 
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
@@ -127,6 +132,20 @@ else   ;non-leap year, 365 day
 end if
 end do
 printVarSummary(u)
+
+lev0 = lev
+lev  := (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+nlev = dimsizes(lev)
+Qeddy := new((/nyear,ntime,nlev,nlat,nlon/),double)
+
+linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
+p_in   = conform(u    ,lev0,ilev)
+p_out  = conform(Qeddy,lev ,ilev)
+u := int2p_n(p_in,u,p_out,linlog,ilev)
+v := int2p_n(p_in,v,p_out,linlog,ilev)
+t := int2p_n(p_in,t,p_out,linlog,ilev)
+w := int2p_n(p_in,w,p_out,linlog,ilev)
+delete([/p_in,p_out,linlog/])
 
 if(option.eq.1) then
     fca = 1.0/ca

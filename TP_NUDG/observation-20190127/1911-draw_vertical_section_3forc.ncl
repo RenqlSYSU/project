@@ -7,7 +7,7 @@ begin
 month_option = True 
 year_option = True   ;False;calc yearly DJF 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-na = 2 ; "TP","EA","NH"
+na = 1  ; "TP","EA","NH","CA"
 
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -61,14 +61,16 @@ months   = (/"DJF"/)
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
 ;months   = (/"JF","MA","MJ","JA"/)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 
 ;area: east Asia
-area = (/"TP","EA","NH"/)
-lats = (/15  ,15  , 0  /);20 ;-20
-latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,110 , 1  /) ;30 ;20
-lonr = (/105 ,130 ,359 /) ;150;220
+area = (/"TP","EA","NH","CA"/)
+lats = (/15  ,15  , 0  ,15 /);20 ;-20
+latn = (/55  ,55  , 89 ,45 /) ;55 ;60
+lonl = (/70  ,110 , 1  ,0  /) ;30 ;20
+lonr = (/105 ,130 ,359 ,70 /) ;150;220
 month_s = 1
 month_e = 8
 
@@ -85,7 +87,7 @@ if(var_option.le.1)
     filename = path + "mdata/" + case + "_Clim_daily_Qd_Qeddy_A.nc"
     end if
     if(year_option) then
-    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A.nc"
+    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A_19.nc"
     end if
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if
@@ -328,8 +330,8 @@ printVarSummary(var_m)
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.0) then 
-    minlvl = (/-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4/);
+    minlvl = (/-2.1,-2.1,-2.1/);
+    maxlvl = (/ 2.1, 2.1, 2.1/);
     spacig = (/ 0.3, 0.3, 0.3/);
 end if
 

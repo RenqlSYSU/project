@@ -9,8 +9,8 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 4 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 15 
-    integer, parameter :: nlat = 37 , nlon = 144 , ilog  = 10 , ifile = 12
+    integer, parameter :: pr = 4 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 
+    integer, parameter :: nlat = 33 , nlon = 144 , ilog  = 10 , ifile = 12
     !integer, parameter :: nlat = 98 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -35,11 +35,11 @@ program iteration
     !lev  = (/1000.0,925.0,850.0,800.0,750.0,700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
     !lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
     !lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
-    lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+    lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
     
-    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_obs_1-8_p0.txt"
+    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_obs_1-8.txt"
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf

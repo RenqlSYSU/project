@@ -7,7 +7,7 @@
 begin
 month_option = True;False
 year_option = True   ;False;calc yearly DJF 
-var_option   = 2
+var_option   = 0
 na = 2 ; "TP","EA","NH"
 nl = 4 ;(/925,850,700,500,200/)
 
@@ -19,13 +19,13 @@ end if
 if(var_option.eq.1) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
-    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
@@ -39,9 +39,10 @@ lev  = (/925,850,700,500,200/)
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-case   = "ERA-Interim"
-;case   = "NCEP1"
+;gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+;case   = "ERA-Interim"
+case   = "NCEP1"
+gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 
 if((var_option.le.1).or.(var_option.eq.3))
     if(month_option) then
@@ -50,12 +51,12 @@ if((var_option.le.1).or.(var_option.eq.3))
     filename = path + "mdata/" + case + "_Clim_daily_Qd_Qeddy_A.nc"
     end if
     if(year_option) then
-    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A.nc"
+    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A_19.nc"
     end if
     fig_name = path + "fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "mdata/" + case + "_DJF_dzdt.nc"
+    filename = path + "mdata/" + case + "_DJF_dzdt_19.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if
@@ -75,11 +76,11 @@ month_s = 5
 month_e = 8
 
 f = addfile(gtopfile,"r")
-phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
-phis   = phis/9.8   ;convert unit from m2/s2 to gpm
+phis   = short2flt(f->hgt(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+;phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nmonth = dimsizes(months)
-nlat   = dimsizes(phis&latitude)
-nlon   = dimsizes(phis&longitude)
+nlat   = dimsizes(phis&lat)  ;itude
+nlon   = dimsizes(phis&lon)  ;gitude
 nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
 
@@ -123,9 +124,9 @@ if(month_option) then
     if((var_option.lt.2).or.(var_option.eq.3))
         do nv = 0, nvar-2,1
         if(year_option) then 
-        var_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nv,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
         else
-        var_m(nv,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nv,:,:,:)  = f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if
         end do
     else
@@ -154,7 +155,7 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.eq.1) then 
-    var_m = var_m*10^10
+    var_m = var_m*10^11
 end if
 
 if(var_option.eq.2) then 
@@ -162,7 +163,7 @@ if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
 if(nnv.eq.1) then
-    var_m = var_m*10^5
+    var_m = var_m*10^6
 end if
 if(nnv.eq.2) then
     var_m = var_m*10^6
@@ -335,27 +336,27 @@ printVarSummary(var_m)
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.0) then ;Q
-    minlvl = (/-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4/);
-    spacig = (/0.3 ,0.3 ,0.3 /);
+    minlvl = (/-2.1,-2.1,-2.1/);
+    maxlvl = (/ 2.1, 2.1, 2.1/);
+    spacig = (/ 0.3, 0.3, 0.3/);
 end if
 
 if(var_option.eq.1) then ;forc
-    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
-    spacig = (/0.3 ,0.3 ,0.3 ,0.3 /);
+    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.2) then ;dzdt
 if(nnv.eq.0) then   ;dzdt
-    minlvl = (/-7,-7,-7,-7/);
-    maxlvl = (/ 7, 7, 7, 7/);
-    spacig = (/ 1, 1, 1, 1/);
+    minlvl = (/-3.5,-3.5,-3.5,-3.5/);
+    maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
+    spacig = (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-8 ,-4 ,-4 ,-8 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
-    maxlvl = (/ 8 , 4 , 4 , 8 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
-    spacig = (/ 1 ,0.5,0.5, 1 /);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
+    minlvl = (/-21,-21,-21,-21/);-8,-8,-8,-8,
+    maxlvl = (/ 21, 21, 21, 21/); 8, 8, 8, 8,
+    spacig = (/ 3 , 3 , 3 , 3 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.2) then ;dTdt
     minlvl = (/-32,-32,-32,-32/);

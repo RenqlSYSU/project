@@ -7,7 +7,7 @@ begin
 month_option = True 
 year_option = True   ;False;calc yearly DJF 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-na = 1  ; "TP","EA","NH","CA"
+na = 2  ; "TP","EA","NH","CA"
 
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -57,13 +57,14 @@ if(var_option.eq.5) then
         select   = (/0,1,2/)
     end if
 end if
-months   = (/"DJF"/)
+;months   = (/"DJF"/)
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
-;months   = (/"JF","MA","MJ","JA"/)
+months   = (/"JF","MA","MJ","JA"/)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
@@ -76,9 +77,8 @@ month_e = 8
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-;case   = "ERA-Interim"
-case   = "NCEP1"
+case   = "ERA-Interim"
+;case   = "NCEP1"
 
 if(var_option.le.1)
     if(month_option) then
@@ -93,7 +93,7 @@ if(var_option.le.1)
 end if
 if(var_option.eq.2)
     if(month_option) then
-    filename = path + "mdata/" + case + "_DJF_dzdt_19.nc"
+    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if
@@ -134,8 +134,8 @@ if(.not.(month_option)) then
     ntime = dimsizes(select_time)
     var   = new((/nvar,ntime,nlev,nlat,nlon/),double)
 end if
-;var_m = new((/nvar,nmonth,nlev,nlat,nlon/),double)
-var_m = new((/nvar,nmonth,nlev,nlat,nlon/),float)
+var_m = new((/nvar,nmonth,nlev,nlat,nlon/),double)
+;var_m = new((/nvar,nmonth,nlev,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)

@@ -90,9 +90,6 @@ lat  = vars&lat
 lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
-coslat = conform(u,cos(lat),ilat)
-sinlat = conform(u,sin(lat),ilat)
-lev5d  = conform(u, lev*100, ilev)
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
@@ -153,6 +150,8 @@ delete([/clm_u,clm_v,clm_t,clm_w/])
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
+coslat = conform(u,cos(lat),ilat)
+lev5d  = conform(u, lev*100, ilev)
 Qeddy6 = new((/nyear,4,ntime,nlev,nlat,nlon/),double)
 Qeddy6(:,0,:,:,:,:) = - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,cyclic,opt,ilon)
 Qeddy6(:,1,:,:,:,:) = - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) 
@@ -160,14 +159,17 @@ Qeddy6(:,2,:,:,:,:) = - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev
 Qeddy6(:,3,:,:,:,:) =   (R/cp)*(edd_w*edd_t)/lev5d 
 Qeddy = tofloat(dim_avg_n(Qeddy6,iyear))
 delete(Qeddy6)
+delete([/edd_t,edd_w,lev5d/])
 print(Qeddy(0,15,5,30,30))
 
+sinlat = conform(u,sin(lat),ilat)
 A6   = new((/nyear,2,ntime,nlev,nlat,nlon/),double)
-vort = center_finite_diff_n(edd_v,lon,cyclic,opt,ilon) - coslat*center_finite_diff_n(edd_u,lat,cyclic,opt,ilat) + sinlat*edd_u 
+vort = (center_finite_diff_n(edd_v,lon,cyclic,opt,ilon) - coslat*center_finite_diff_n(edd_u,lat,cyclic,opt,ilat) + sinlat*edd_u )/a/coslat
 A6(:,0,:,:,:,:) = -(1.0/a/a/coslat/coslat)*center_finite_diff_n(edd_u*vort, lon, cyclic, opt, ilon)
 A6(:,1,:,:,:,:) = -(1.0/a/a/coslat       )*center_finite_diff_n(edd_v*vort, lat, cyclic, opt, ilat)
 A = tofloat(dim_avg_n(A6,iyear))
 delete(A6)
+delete([/edd_u,edd_v,vort,coslat,sinlat/])
 print(A(0,15,5,30,30))
 
 Qeddy@long_name = "four terms of transient eddy heating, -dutdx, -dvtdy, -dwtdz, wt"

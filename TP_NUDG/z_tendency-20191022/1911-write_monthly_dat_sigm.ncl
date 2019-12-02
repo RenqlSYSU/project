@@ -17,6 +17,8 @@ case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
 csa = False 
+nc = 0
+ntime   = 4
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -26,7 +28,7 @@ end if
 
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g600.dat"
-filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_clim_month_Qd_Qeddy_A.nc"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_4f6c_month.dat"
 ;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
 ;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
@@ -52,7 +54,6 @@ lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,17
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 month_s = 1
 month_e = 8
-nc = 0
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -69,7 +70,6 @@ nvar  = dimsizes(var_name)
 ;nmonth = dimsizes(vars&month)
 ;forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 ;q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
-ntime   = 4
 
 if(ntype.eq.0) then 
 forc_m  = new((/nvar,ntime,nlev,nlat,nlon/),double)

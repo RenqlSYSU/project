@@ -5,10 +5,10 @@
 ;*********************************************************************************
 begin
 month_option = True 
-year_option = True   ;False;calc yearly DJF 
+year_option = False;calc yearly DJF 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-na = 2  ; "TP","EA","NH","CA"
 
+do na = 2,2,1
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
@@ -23,7 +23,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -61,15 +61,14 @@ end if
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
 months   = (/"JF","MA","MJ","JA"/)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
-;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
-lats = (/15  ,15  , 0  ,15 /);20 ;-20
-latn = (/55  ,55  , 89 ,45 /) ;55 ;60
+lats = (/15  , 0  , 0  , 0  /);20 ;-20
+latn = (/55  ,89  , 89 ,89  /) ;55 ;60
 lonl = (/70  ,110 , 1  ,0  /) ;30 ;20
 lonr = (/105 ,130 ,359 ,70 /) ;150;220
 month_s = 1
@@ -118,9 +117,9 @@ fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
 if(var_option.le.1)
-    vars = f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    vars := f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
-    vars = f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    vars := f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 nmonth = dimsizes(months)
 nlat   = dimsizes(vars&lat)
@@ -130,12 +129,12 @@ nvar   = dimsizes(draw_var)
 ncase  = dimsizes(case)
 if(.not.(month_option)) then 
     time = cd_calendar(f->time,0)
-    select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+    select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
     ntime = dimsizes(select_time)
-    var   = new((/nvar,ntime,nlev,nlat,nlon/),double)
+    var   := new((/nvar,ntime,nlev,nlat,nlon/),double)
 end if
-var_m = new((/nvar,nmonth,nlev,nlat,nlon/),double)
-;var_m = new((/nvar,nmonth,nlev,nlat,nlon/),float)
+var_m := new((/nvar,nmonth,nlev,nlat,nlon/),double)
+;var_m := new((/nvar,nmonth,nlev,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
@@ -413,5 +412,6 @@ end do
 
 ;    resp@txString      = fig_title
     gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+end do 
 end
 

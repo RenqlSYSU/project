@@ -6,11 +6,12 @@
 ;*********************************************************************************
 begin
 month_option = True;False
-year_option = True   ;False;calc yearly DJF 
+year_option = False;calc yearly DJF 
 var_option   = 0
 na = 2 ; "TP","EA","NH"
 nl = 4 ;(/925,850,700,500,200/)
 
+do nl = 3,4,1
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
@@ -33,16 +34,16 @@ if(var_option.eq.3) then
     var_name = (/"sigm1"/)  ;use to read variables
     unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
 end if
-months   = (/"DJF"/)
-;months   = (/"JF","MA","MJ","JA"/)
+;months   = (/"DJF"/)
+months   = (/"JF","MA","MJ","JA"/)
 lev  = (/925,850,700,500,200/) 
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-;gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-;case   = "ERA-Interim"
-case   = "NCEP1"
-gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
+gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+case   = "ERA-Interim"
+;case   = "NCEP1"
+;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 
 if((var_option.le.1).or.(var_option.eq.3))
     if(month_option) then
@@ -56,7 +57,7 @@ if((var_option.le.1).or.(var_option.eq.3))
     fig_name = path + "fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "mdata/" + case + "_DJF_dzdt_19.nc"
+    filename = path + "mdata/" + case + "_DJF_dzdt.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if
@@ -76,11 +77,11 @@ month_s = 5
 month_e = 8
 
 f = addfile(gtopfile,"r")
-phis   = short2flt(f->hgt(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
-;phis   = phis/9.8   ;convert unit from m2/s2 to gpm
+phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
+phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nmonth = dimsizes(months)
-nlat   = dimsizes(phis&lat)  ;itude
-nlon   = dimsizes(phis&lon)  ;gitude
+nlat   = dimsizes(phis&latitude )  ;
+nlon   = dimsizes(phis&longitude)  ;
 nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
 
@@ -405,7 +406,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-   ; gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+;    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+end do 
 end
 

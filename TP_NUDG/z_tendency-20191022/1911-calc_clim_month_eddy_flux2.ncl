@@ -54,7 +54,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -20 ;-90 ;
+lats = -2 ;-90 ;
 latn = 60  ; 90 ;
 lonl = 20  ; 0  ;
 lonr = 220 ;360 ;
@@ -80,6 +80,7 @@ nmonth= 4
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 Qeddy_m  = new((/   3,nmonth,nlev,nlat,nlon/),float)
 A_m      = new((/   3,nmonth,nlev,nlat,nlon/),float)
+M_m      = new((/   3,nmonth,nlev,nlat,nlon/),float)
 
 iyear = 0
 itime = 1
@@ -147,6 +148,7 @@ else
     edd_w = w - clm_w  
 end if
 printVarSummary(clm_u)
+print(edd_u(1,0,15,30,30:35))
 delete([/u,v,t,w/])
 delete([/clm_u,clm_v,clm_t,clm_w/])
 
@@ -159,22 +161,36 @@ Qeddy6(:,1,:,:,:,:) = edd_v*edd_t
 Qeddy6(:,2,:,:,:,:) = edd_w*edd_t
 Qeddy = tofloat(dim_avg_n(Qeddy6,iyear))
 delete(Qeddy6)
-print(Qeddy(0,15,5,30,30))
+print(Qeddy(0,15,5,30,30:35))
 
 A6   = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
-vort = center_finite_diff_n(edd_v,lon,cyclic,opt,ilon) - coslat*center_finite_diff_n(edd_u,lat,cyclic,opt,ilat) + sinlat*edd_u 
+vort = uv2vr_cfd(edd_u,edd_v,vars&lat,vars&lon,2) 
+;2 means Boundary points are estimated using one-sided difference schemes 
+;3 means the u and v arrays are cyclic in longitude, boundaries are estimated using a one-sided difference scheme
+;vort = (center_finite_diff_n(edd_v,lon,cyclic,opt,ilon) - coslat*center_finite_diff_n(edd_u,lat,cyclic,opt,ilat) + sinlat*edd_u )/a/coslat
 A6(:,0,:,:,:,:) = edd_u*vort
 A6(:,1,:,:,:,:) = edd_v*vort
 A6(:,2,:,:,:,:) = edd_w*vort
 A = tofloat(dim_avg_n(A6,iyear))
+print(vort(0,15,5,30,30:35))
 delete([/A6,vort/])
-delete([/edd_u,edd_v,edd_t,edd_w/])
 print(A(0,15,5,30,30))
+
+M6 = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
+M6(:,0,:,:,:,:) = edd_u*edd_v
+M6(:,1,:,:,:,:) = edd_u*edd_w
+M6(:,2,:,:,:,:) = edd_w*edd_v
+M = tofloat(dim_avg_n(M6,iyear))
+delete(M6)
+delete([/edd_u,edd_v,edd_t,edd_w/])
+print(M(0,15,5,30,30))
 
 Qeddy@long_name = "three terms of transient eddy heating, ut, vt, wt"
 Qeddy@units     = "K*m/s" 
-A@long_name = "three terms of diabatic heating, uvort, vvort, wvort"
+A@long_name = "three terms of vorticity transport, uvort, vvort, wvort"
 A@units     = "m*s^-2" 
+M@long_name = "three terms of momentum transport, uv, uw, vw"
+M@units     = "m^2*s^-2" 
 
 time1 = cd_calendar(f->time(select_time),0)
 do nm = 0, 3, 1
@@ -183,8 +199,9 @@ do nm = 0, 3, 1
     select_time1 := ind(time1(:,1).ge.month1_s.and.time1(:,1).le.month1_e)
     Qeddy_m(:,nm,:,:,:) = dim_avg_n_Wrap(Qeddy(:,select_time1,:,:,:),1)
         A_m(:,nm,:,:,:) = dim_avg_n_Wrap(    A(:,select_time1,:,:,:),1)
+        M_m(:,nm,:,:,:) = dim_avg_n_Wrap(    M(:,select_time1,:,:,:),1)
 end do 
-delete([/Qeddy,A/])
+delete([/Qeddy,A,M/])
 
 ;========================================================================
 ;save the data
@@ -197,7 +214,7 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "1-8 monthly three forcing factors, Qd, Qeddy, A"
+fileatt@discription   = "1-8 monthly flux terms"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
@@ -212,6 +229,7 @@ filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"Qeddy",typeof(Qeddy_m),(/"term1","time","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A_m)    ,(/"term1","time","lev","lat","lon"/))
+filevardef(ncdf,"M"    ,typeof(M_m)    ,(/"term1","time","lev","lat","lon"/))
 
 
 ;define var attribute
@@ -220,6 +238,7 @@ filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"Qeddy",Qeddy_m)
 filevarattdef(ncdf,"A"    ,A_m)
+filevarattdef(ncdf,"M"    ,M_m)
 
 ncdf->time = (/12,34,56,78/)
 ncdf->lev  = (/lev/)
@@ -227,6 +246,7 @@ ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->Qeddy = (/Qeddy_m/)
 ncdf->A     = (/A_m/)
+ncdf->M     = (/M_m/)
 end do
 end
 

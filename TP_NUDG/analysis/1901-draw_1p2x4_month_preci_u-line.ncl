@@ -31,7 +31,7 @@ cb = 2.5
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL","noTP-CTRL"/)

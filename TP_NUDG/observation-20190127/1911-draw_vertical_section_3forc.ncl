@@ -6,9 +6,9 @@
 begin
 month_option = True 
 year_option = False;calc yearly DJF 
-var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 3  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 
-do na = 2,2,1
+do na = 1,1,1
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
@@ -23,19 +23,32 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
+    nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
-    var_name = (/"Qeddy","A"/)  ;
-    unit     = (/"K/Day","10~S~-10~N~s~S~-2~N~"/)
-    nnv = 1 ;used to read dzdt induced by different forcing
+    var_name = (/"Qeddy","A","Sflux","Mflux","Tflux"/)  ;
+    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s^-2","m^2*s^-2","K*m/s"/)
+    nnv = 2 ;used to read dzdt induced by different forcing
     if(nnv.eq.0) then 
-        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "Qeddy"/)  ;this is the variable used to draw, can used as center string
-        select   = (/0,1,2,3/)
-    else
-        draw_var = (/"-duVdx", "-dvVdy", "A"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "Qeddy"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+    if(nnv.eq.1) then 
+        draw_var = (/"-duSdx", "-dvSdy", "A"/)  ;this is the variable used to draw, can used as center string
         select   = (/0,1/)
+    end if
+    if(nnv.eq.2) then 
+        draw_var = (/"uS", "vS", "wS", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+    if(nnv.eq.3) then 
+        draw_var = (/"uv", "uw", "wv", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+    if(nnv.eq.4) then 
+        draw_var = (/"uT", "vT", "wT", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
     end if
 end if
 if(var_option.eq.4) then 
@@ -45,25 +58,14 @@ if(var_option.eq.4) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
-if(var_option.eq.5) then
-    var_name = (/"Qeddy","A"/)  ;
-    unit     = (/"K*m/s","m/s~S~2~N~"/)
-    nnv = 0 ;used to read dzdt induced by different forcing
-    if(nnv.eq.0) then 
-        draw_var = (/"uT", "vT", "wT", "total"/)  ;this is the variable used to draw, can used as center string
-        select   = (/0,1,2/)
-    else
-        draw_var = (/"uS", "vS", "wS", "total"/)  ;this is the variable used to draw, can used as center string
-        select   = (/0,1,2/)
-    end if
-end if
 ;months   = (/"DJF"/)
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
 months   = (/"JF","MA","MJ","JA"/)
+lev  = (/1000, 925, 850, 700, 600, 500,400,300,250,200,175,150,125,100/) 
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
@@ -73,6 +75,8 @@ lonl = (/70  ,110 , 1  ,0  /) ;30 ;20
 lonr = (/105 ,130 ,359 ,70 /) ;150;220
 month_s = 1
 month_e = 8
+density = 1.1 ;km/m3
+g = 9.8 ;m2/s2
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
@@ -99,16 +103,12 @@ if(var_option.eq.2)
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.3)
-    filename = path + "mdata/" + case + "_Clim_month_eddy_flux.nc"
+    filename = path + "mdata/" + case + "_Clim_month_eddy_flux_density.nc"
     fig_name = path + "fig/1p2x3_height_lat_eddy_flux_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.4)
     filename = path + "mdata/" + case + "_Clim_dzdt_monthly_advection.nc"
     fig_name = path + "fig/1p2x3_height_lat_advect_" + var_name(nnv) + area(na)
-end if
-if(var_option.eq.5)
-    filename = path + "mdata/" + case + "-Clim_month_eddy_flux2.nc"
-    fig_name = path + "fig/1p2x3_height_lat_eddy_flux2_" + var_name(nnv) + area(na)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -209,20 +209,22 @@ end if
 end if
 
 if(var_option.eq.3) then
-if(nnv.eq.0) then
+if(nnv.eq.0) then  ;Qeddy
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
-else
+end if
+if(nnv.eq.1) then ;A
+    var_m = var_m*10^11
+end if
+if(nnv.eq.2) then ;Sflux
+    var_m = var_m*10^5
+end if
+if(nnv.eq.3) then ;Mflux
+    var_m = var_m*10^10
+end if
+if(nnv.eq.4) then ;Tflux
     var_m = var_m*10^10
 end if
 end if
-
-;if(var_option.eq.5) then
-;if(nnv.eq.0) then
-;    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
-;else
-;    var_m = var_m*10^10
-;end if
-;end if
 printVarSummary(var_m)
 
 ;==============================================================
@@ -364,26 +366,30 @@ end if
 end if
 
 if(var_option.eq.3) then 
-if(nnv.eq.0) then
-    minlvl = (/-1.6,-1.6,-1.6,-1.6,-1.6/);-2.4,-2.4,-2.4,-2.4,-2.4/);-0.8,-0.8,-0.8,-0.8,-0.8/);
-    maxlvl = (/ 1.6, 1.6, 1.6, 1.6, 1.6/); 2.4, 2.4, 2.4, 2.4, 2.4/); 0.8, 0.8, 0.8, 0.8, 0.8/);
-    spacig = (/ 0.2, 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3, 0.3/); 0.1, 0.1, 0.1, 0.1, 0.1/);
-else
-    minlvl = (/-0.8,-0.8,-0.8/);
-    maxlvl = (/ 0.8, 0.8, 0.8/);
+if(nnv.eq.0) then  ;Qeddy
+    minlvl = (/-1.4,-1.4,-1.4,-1.4/);-2.4,-2.4,-2.4,-2.4,-2.4/);-0.8,-0.8,-0.8,-0.8,-0.8/);
+    maxlvl = (/ 1.4, 1.4, 1.4, 1.4/); 2.4, 2.4, 2.4, 2.4, 2.4/); 0.8, 0.8, 0.8, 0.8, 0.8/);
+    spacig = (/ 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3, 0.3/); 0.1, 0.1, 0.1, 0.1, 0.1/);
+end if
+if(nnv.eq.1) then ;A
+    minlvl = (/-0.7,-0.7,-0.7/);
+    maxlvl = (/ 0.7, 0.7, 0.7/);
     spacig = (/ 0.1, 0.1, 0.1/);
 end if
+if(nnv.eq.2) then ;Sflux
+    minlvl = (/-16,-16,-16,-16/);
+    maxlvl = (/ 16, 16, 16, 16/);
+    spacig = (/  2,  2,  2,  2/);
 end if
-
-if(var_option.eq.5) then 
-if(nnv.eq.0) then
-    minlvl = (/-24,-8,-0.16,-24/);
-    maxlvl = (/ 24, 8, 0.16, 24/);
-    spacig = (/  3, 1, 0.02,  3/);
-else
+if(nnv.eq.3) then ;Mflux
     minlvl = (/-0.8,-0.8,-0.8,-0.8/);
     maxlvl = (/ 0.8, 0.8, 0.8, 0.8/);
     spacig = (/ 0.1, 0.1, 0.1, 0.1/);
+end if
+if(nnv.eq.4) then ;Tflux
+    minlvl = (/-24,-8,-0.16,-24/);
+    maxlvl = (/ 24, 8, 0.16, 24/);
+    spacig = (/  3, 1, 0.02,  3/);
 end if
 end if
 

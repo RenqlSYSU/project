@@ -11,7 +11,7 @@ path    = "/home/ys17-19/renql/project/TP_NUDG/spectral-20190120"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 diff = True
 na = 2 ;"EA","TP","SEA","NEA"
-nv = 3 ;"U","V","T","vort"
+nv = 1 ;"U","V","T","vort"
 
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/) ;,"NUDG24h"
@@ -60,7 +60,6 @@ np = 0
 wks = gsn_open_wks(fig_out,fig_name)  
 do na = 1,3,1
 filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
-
 do nc = 0, ncase-1, 1
     f    = addfile(filein(nc),"r")
     var(nc,:,:) = f->spcx
@@ -127,7 +126,7 @@ print(var(0,0:1000:100,5))
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.8
+    res@vpHeightF        = 0.6
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
@@ -155,7 +154,7 @@ print(var(0,0:1000:100,5))
     ; res@tmYLLabelFontAspectF   = 1.3
     res@tmYLLabelFontThicknessF  = tick_thick
     
-    res@tmYMinorGrid                   = True
+    res@tmYMinorGrid                   = False
     res@tmYMinorGridLineDashPattern    = 2
     res@tmYMinorGridLineColor          = "grey0"
     res@tmYMinorGridThicknessF         = 2.0
@@ -257,7 +256,8 @@ end if
     print(max(var2(nc,:,:)))
     print(min(var2(nc,:,:)))
     np = np + 1
-end do 
+end do
+delete(var2)
 end do 
 
     gsn_panel(wks,plot,(/3,ncase/),resp)

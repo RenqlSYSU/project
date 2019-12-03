@@ -20,7 +20,7 @@ ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A_sigm.nc"
 else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -174,7 +174,6 @@ tanlat4d = conform(clm_u,tan(lat),ilat-1)
 lev4d    = conform(clm_u, lev*100,ilev-1)
 
 sigm0 = (R/cp)*(clm_t/lev4d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
-sigm0 = conform(lev4d, wgt_areaave(sigm0,cos(lat),1.0,0), (/itime-1,ilev-1/))
 Qd    =   (clm_u/a/coslat4d) * center_finite_diff_n(clm_t,lon,loncyc,opt,ilon-1) \
         + (clm_v/a         ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat-1) \
         - sigm0 * clm_w 
@@ -224,8 +223,9 @@ A_m@units     = "s^-2"
 ;==========================================================
 ;calc Qd foring and Qeddy forcing, dimension is 4d 
 ;============================================================
-lev4d = conform(A_m, lev*100,ilev-1)
+lev4d   = conform(A_m, lev*100,ilev-1)
 sigm1 = sigm0_m*R/lev4d
+sigm1_m = conform(lev4d, wgt_areaave(sigm1,cos(lat),1.0,0), (/itime-1,ilev-1/)) ;
 f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
 ;do ilat = 0, nlat-1
@@ -234,8 +234,8 @@ f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 ;end if
 ;end do
 
-f_Qd_m     = -f0*R*center_finite_diff_n((Qd_m   /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
-f_Qeddy_m  = -f0*R*center_finite_diff_n((Qeddy_m/sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qd_m     = -f0*R*center_finite_diff_n((Qd_m   /sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qeddy_m  = -f0*R*center_finite_diff_n((Qeddy_m/sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
 delete(lev4d)
 delete(f0)
 

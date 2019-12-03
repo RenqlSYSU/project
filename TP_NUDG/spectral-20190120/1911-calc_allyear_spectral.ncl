@@ -14,9 +14,9 @@ latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 0  ,70  ,107  ,115  /)
 lonr = (/360 ,105 ,130  ,130  /)
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nv = 3
+nv = 1
 na = 0
-area_option = True
+area_option = False
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -41,7 +41,7 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
-do na = 0,0,1
+do na = 3,3,1
 
 if(na.eq.0) then
 lev  = (/850,500,400,300,200/) ;850,500,
@@ -130,7 +130,9 @@ do nt = 0, nyear-1 ,1
     end if
     var(nt,:,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do
+
 end if
+
 ;var = var - conform(var,dim_avg_n(var,0),1)  ;remove annual cycle
 printVarSummary(var)
 var  = linmsg_n(var, -1, 4)
@@ -141,7 +143,7 @@ printVarSummary(var)
 if (any(ismissing(var1))) then
     print("var1 has missing values")
 end if
-var1 = dim_standardize_n_Wrap(var1,1,0)
+;var1 = dim_standardize_n_Wrap(var1,1,0)
 
 do nz = 0, nlev-1, 1
 do ny = 0, nlat-1, 1

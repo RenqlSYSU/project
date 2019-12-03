@@ -58,7 +58,9 @@ lats = -2 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev2 = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
+lev3 = fspan(1000,100,19)
+lev = lev2
 month_s = 1
 month_e = 8
 
@@ -92,18 +94,18 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 2,2,1 
+do nf = 0,2,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
 ;==========================================================
 ;read the data
 ;============================================================
+lev := lev2
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-Qeddy = new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
@@ -128,6 +130,19 @@ v = linmsg_n(v,-1,ilon)
 t = linmsg_n(t,-1,ilon)
 w = linmsg_n(w,-1,ilon)
 printVarSummary(w)
+
+lev := lev3
+nlev = dimsizes(lev)
+Qeddy = new((/nyear,ntime,nlev,nlat,nlon/),float)
+
+linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
+p_in   = conform(u    ,lev2,ilev)
+p_out  = conform(Qeddy,lev3,ilev)
+u := int2p_n(p_in,u,p_out,linlog,ilev)
+v := int2p_n(p_in,v,p_out,linlog,ilev)
+t := int2p_n(p_in,t,p_out,linlog,ilev)
+w := int2p_n(p_in,w,p_out,linlog,ilev)
+delete([/p_in,p_out,linlog/])
 
 if(option.eq.1) then
     fca = 1.0/ca
@@ -171,6 +186,7 @@ Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,o
          + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
 Qeddy := dim_avg_n(Qeddy,iyear)
 print(Qeddy(15,5,30,30))
+delete(lev5d)
 
 Qd   = Qd - Qeddy
 print(Qd  (15,5,30,30))
@@ -187,7 +203,7 @@ A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u
 A := dim_avg_n(A,iyear)
 print(A(15,5,30,30))
 delete([/edd_u,edd_v,edd_t,edd_w/])
-delete([/coslat,tanlat,lev5d/])
+delete([/coslat,tanlat/])
 
 Qeddy@long_name = "Climatology daily transient eddy heating"
 Qeddy@units     = "K/s" 
@@ -199,6 +215,7 @@ A@units     = "s^-2"
 ;==========================================================
 ;calc Qd foring and Qeddy forcing, dimension is 4d 
 ;============================================================
+sigm0 = conform(lev4d, wgt_areaave(sigm0,1.0,1.0,0), (/iyear,ilev-1/));cos(lat) 
 sigm1 = sigm0*R/lev4d
 delete(sigm0)
 f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)

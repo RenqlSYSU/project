@@ -16,7 +16,7 @@ begin
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-var_name = (/"uwnd","vwnd","omega","air"/)
+var_name = (/"uwnd","vwnd","air","omega"/)
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
@@ -24,7 +24,7 @@ ca = 7.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_eddy_flux.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_eddy_flux_density1.nc"
 else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_eddy_flux-" + cb + "-" + ca + "day.nc"
 end if
@@ -35,7 +35,7 @@ R  = 287.0  ; J/(kg*K) for dry air
 a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 print(pi)
-years    = ispan(1979,2016,1)
+years    = ispan(1979,2005,1)
 years@calendar = "standard"
 
 ;area: east Asia
@@ -43,7 +43,7 @@ lats = -2
 latn = 90 
 lonl = 0  
 lonr = 360
-lev  = (/1000,975,950,925,900, 875,850,825,800,775, 750,700,650,600,550, 500,450,400,350,300, 250,225,200,175,150, 125,100/)
+lev  = (/1000, 925, 850, 700, 600, 500,400,300,250,200,175,150,125,100/) 
 month_s = 1
 month_e = 8
 
@@ -135,8 +135,10 @@ else
     edd_w = w - clm_w  
 end if
 printVarSummary(clm_u)
+lev5d = tofloat(conform(clm_t,lev*100,ilev))
+density = 1.293*(lev5d/101325.0)*(273.15/clm_t)
 delete([/u,v,t,w/])
-delete([/clm_u,clm_v,clm_t,clm_w/])
+delete([/clm_u,clm_v,clm_t,clm_w,lev5d/])
 
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
@@ -154,8 +156,8 @@ delete([/Qeddy6,Qeddy/])
 sinlat = conform(edd_u,sin(lat),ilat)
 A6   = new((/nyear,2,ntime,nlev,nlat,nlon/),double)
 vort = (center_finite_diff_n(edd_v,lon,cyclic,opt,ilon) - coslat*center_finite_diff_n(edd_u,lat,cyclic,opt,ilat) + sinlat*edd_u )/a/coslat
-A6(:,0,:,:,:,:) = -(1.0/a/a/coslat/coslat)*center_finite_diff_n(edd_u*vort, lon, cyclic, opt, ilon)
-A6(:,1,:,:,:,:) = -(1.0/a/a/coslat       )*center_finite_diff_n(edd_v*vort, lat, cyclic, opt, ilat)
+A6(:,0,:,:,:,:) = -(1.0/a/coslat)*center_finite_diff_n(edd_u*vort,        lon, cyclic, opt, ilon)
+A6(:,1,:,:,:,:) = -(1.0/a/coslat)*center_finite_diff_n(edd_v*vort*coslat, lat, cyclic, opt, ilat)
 A = tofloat(dim_avg_n(A6,iyear))
 A_m(:,nm,:,:,:) = dim_avg_n(A,itime)
 print(A(0,15,5,30,30:35))
@@ -165,7 +167,7 @@ delete([/A6,A,coslat,sinlat/])
 Sflux6   = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
 Sflux6(:,0,:,:,:,:) = edd_u*vort
 Sflux6(:,1,:,:,:,:) = edd_v*vort
-Sflux6(:,2,:,:,:,:) = edd_w*vort
+Sflux6(:,2,:,:,:,:) = edd_w*vort/density/g
 Sflux = tofloat(dim_avg_n(Sflux6,iyear))
 Sflux_m(:,nm,:,:,:) = dim_avg_n(Sflux,itime)
 print(Sflux(0,15,5,30,30:35))
@@ -174,7 +176,7 @@ delete([/Sflux6,Sflux,vort/])
 Tflux6 = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
 Tflux6(:,0,:,:,:,:) = edd_u*edd_t
 Tflux6(:,1,:,:,:,:) = edd_v*edd_t
-Tflux6(:,2,:,:,:,:) = edd_w*edd_t
+Tflux6(:,2,:,:,:,:) = edd_w*edd_t/density/g
 Tflux = tofloat(dim_avg_n(Tflux6,iyear))
 Tflux_m(:,nm,:,:,:) = dim_avg_n(Tflux,itime)
 print(Tflux(0,15,5,30,30:35))
@@ -182,38 +184,38 @@ delete([/Tflux6,Tflux/])
 
 Mflux6 = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
 Mflux6(:,0,:,:,:,:) = edd_u*edd_v
-Mflux6(:,1,:,:,:,:) = edd_u*edd_w
-Mflux6(:,2,:,:,:,:) = edd_w*edd_v
+Mflux6(:,1,:,:,:,:) = edd_u*edd_w/density/g
+Mflux6(:,2,:,:,:,:) = edd_w*edd_v/density/g
 Mflux = tofloat(dim_avg_n(Mflux6,iyear))
 Mflux_m(:,nm,:,:,:) = dim_avg_n(Mflux,itime)
 print(Mflux(0,15,5,30,30:35))
 delete([/Mflux6,Mflux/])
-delete([/edd_u,edd_v,edd_t,edd_w/])
+delete([/edd_u,edd_v,edd_t,edd_w,density/])
 end do 
 
-Qeddy@long_name = "four terms of transient eddy heating, -dutdx, -dvtdy, -dwtdz, wt"
-Qeddy@units     = "K/s" 
-A@long_name = "two terms of diabatic heating, -duvortdx, -dvvortdy"
-A@units     = "s^-2" 
-Tflux@long_name = "three terms of transient eddy heating, ut, vt, wt"
-Tflux@units     = "K*m/s" 
-Sflux@long_name = "three terms of vorticity transport, uvort, vvort, wvort"
-Sflux@units     = "m*s^-2" 
-Mflux@long_name = "three terms of momentum transport, uv, uw, vw"
-Mflux@units     = "m^2*s^-2" 
+Qeddy_m@long_name = "four terms of transient eddy heating, -dutdx, -dvtdy, -dwtdz, wt"
+Qeddy_m@units     = "K/s" 
+A_m@long_name = "two terms of diabatic heating, -duvortdx, -dvvortdy"
+A_m@units     = "s^-2" 
+Tflux_m@long_name = "three terms of transient eddy heating, ut, vt, wt"
+Tflux_m@units     = "K*m/s" 
+Sflux_m@long_name = "three terms of vorticity transport, uvort, vvort, wvort"
+Sflux_m@units     = "m*s^-2" 
+Mflux_m@long_name = "three terms of momentum transport, uv, uw, vw"
+Mflux_m@units     = "m^2*s^-2" 
 
 ;========================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf))
+system("rm -f " + fileout)
 setfileoption("nc","Format","LargeFile") 
-ncdf = addfile(fileout(nf),"c")
+ncdf = addfile(fileout,"c")
 setfileoption(ncdf,"definemode",True)
 
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "1-8 monthly three forcing factors, Qd, Qeddy, A"
+fileatt@discription   = "1-8 monthly three forcing factors, Qd, Qeddy, A, omega converted to dzdt"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate

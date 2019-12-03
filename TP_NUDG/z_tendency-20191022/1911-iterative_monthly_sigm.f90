@@ -9,7 +9,7 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 21 
+    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 17 
     integer, parameter :: nlat = 62 , nlon = 240 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -31,8 +31,8 @@ program iteration
     real(kind=pr), dimension(nlev) :: lev,dlev 
     real(kind=pr), dimension(nvar) :: diff
 
-!    lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-    lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+    lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+    !lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
     !lev  = (/1000.0,925.0,850.0,800.0,750.0,700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0/) 
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
@@ -143,12 +143,12 @@ program iteration
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
-        dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
-        dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
-        !dzdt(:,:,1   ,:,nvar) = dzdt(:,:,2     ,:,nvar)  !lower boundary for A
-        !dzdt(:,:,nlev,:,nvar) = dzdt(:,:,nlev-1,:,nvar)  !upper boundary for A
-        !dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
-        !dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
+        !dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
+        !dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
+        dzdt(:,:,1   ,:,nvar) = dzdt(:,:,2     ,:,nvar)  !lower boundary for A
+        dzdt(:,:,nlev,:,nvar) = dzdt(:,:,nlev-1,:,nvar)  !upper boundary for A
+        dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
+        dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
         
         do nv = 1, nvar ,1 
             write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,16,1,nv)

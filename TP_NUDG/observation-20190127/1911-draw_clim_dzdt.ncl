@@ -7,7 +7,7 @@
 begin
 month_option = True;False
 year_option = False;calc yearly DJF 
-var_option   = 0
+var_option  = 2
 na = 2 ; "TP","EA","NH"
 nl = 4 ;(/925,850,700,500,200/)
 
@@ -57,7 +57,7 @@ if((var_option.le.1).or.(var_option.eq.3))
     fig_name = path + "fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "mdata/" + case + "_DJF_dzdt.nc"
+    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if

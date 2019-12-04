@@ -16,8 +16,8 @@ path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
-ntime = 4
-nc = 0
+ntime = 1
+nc = 1
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -28,9 +28,15 @@ end if
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
+if(ntime.eq.1) then 
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
+filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.dat"
+fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.nc" 
+else
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A.nc"
 filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_dzdt_month.dat"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_dzdt_month.nc" 
+end if
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -50,9 +56,9 @@ lonr = 360 ;360 ;
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
-;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 month_s = 1
 month_e = 8
 

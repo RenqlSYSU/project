@@ -14,6 +14,8 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+ntime   = 1
+nc = 1
 csa = False 
 
 if(case_option.eq.0) then
@@ -24,7 +26,7 @@ end if
 
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g600.dat"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"ERA-Interim","NCEP1"/) + "-Clim_month_Qd_Qeddy_A.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"ERA-Interim","NCEP1"/) + "-Clim_month_Qd_Qeddy_A-1204.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"ERA-Interim","NCEP1"/) + "-Clim_4f6c_month.dat"
 ;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
 ;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
@@ -49,13 +51,12 @@ lev2 = (/1000,100/) ;hPa
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 month_s = 1
 month_e = 8
-nc = 0
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(nc),"r")
-vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
+vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 ;time = cd_calendar(f->time,0)
 ;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ;ntime = dimsizes(select_time)
@@ -66,7 +67,6 @@ nvar  = dimsizes(var_name)
 ;nmonth = dimsizes(vars&month)
 ;forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 ;q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
-ntime   = 4
 ;forc_m  = new((/nvar,ntime,nlev,nlat,nlon/),double)
 ;q3_m    = new((/2   ,ntime,2   ,nlat,nlon/),double)
 forc_m  = new((/nvar,ntime,nlev,nlat,nlon/),float)
@@ -96,17 +96,17 @@ f      = addfile(filein(nf),"r")
 do nv = 0, nvar-1, 1
 ;    forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
     ;forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
-    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-    ;forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
+;    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
 end do
 do nv = 0, nvar-2, 1
 ;    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
     ;q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
-    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
-    ;q3_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}),0)
+    ;q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
+    q3_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}),0)
 end do
-sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
-;sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
+;sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
+sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
 ;forc_m  = where(ismissing(forc_m),0,forc_m)
 ;q3_m    = where(ismissing(q3_m)  ,0,  q3_m)
 print(forc_m(0,0,0,4,4:9))

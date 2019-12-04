@@ -14,13 +14,14 @@ path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air"/)
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+nmonth= 4
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A_sigm.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A_sig0e.nc"
 else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -57,7 +58,6 @@ lev  := (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,1
 nlev = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
-nmonth= 4
 Qd_m       = new((/nmonth,nlev,nlat,nlon/),double)
 Qeddy_m    = new((/nmonth,nlev,nlat,nlon/),double)
 A_m        = new((/nmonth,nlev,nlat,nlon/),double)
@@ -184,9 +184,13 @@ coslat = conform(Qeddy,cos(lat),ilat)
 tanlat = conform(Qeddy,tan(lat),ilat)
 lev5d  = conform(Qeddy, lev*100,ilev)
 
-Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
-         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
-         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+sig0e := (R/cp)*(edd_t/lev5d) - center_finite_diff_n(edd_t,lev*100,cyclic,opt,ilev)
+Qeddy := - (edd_u/a/coslat) * center_finite_diff_n(edd_t,lon,loncyc,opt,ilon) \
+        - (edd_v/a       ) * center_finite_diff_n(edd_t,lat,cyclic,opt,ilat) \
+        + sig0e * edd_w 
+;Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
+;         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
+;         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
 Qeddy := dim_avg_n(Qeddy,iyear)
 Qd   = Qd - Qeddy
 print(Qeddy(15,5,30,30))
@@ -265,7 +269,7 @@ fileattdef(ncdf,fileatt)
 
 ;define all coordinate
 dimNames = (/"time","lev","lat","lon"/);
-dimSizes = (/   4  ,nlev ,nlat ,nlon/) ;
+dimSizes = (/nmonth,nlev ,nlat ,nlon/) ;
 dimUnlim = (/False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 

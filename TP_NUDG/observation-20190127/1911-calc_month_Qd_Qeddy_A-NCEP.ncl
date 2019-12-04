@@ -16,13 +16,14 @@ path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 option   = 0 ;0 means remove seasonal mean, 1 means bandpass filter
 geo = False
+csa = False 
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/NCEP1_DJF_Qd_Qeddy_A_csa.nc"
+    fileout  = path2 + "mdata/NCEP1_DJF_Qd_Qeddy_A_1204.nc"
 else                                     
     fileout  = path2 + "mdata/ERA-Interim_DJF_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -37,7 +38,7 @@ years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats =  10 ;-20
+lats =  -2 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -84,7 +85,6 @@ u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-;z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
@@ -154,6 +154,7 @@ end do
 delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
 end if
 
+if(csa) then 
 u!0 = "year"
 v!0 = "year"
 t!0 = "year"
@@ -201,19 +202,25 @@ w_o!3 = "lon"
 w_o!4 = "lev"
 w := w_o(year|:,time|:,lev|:,lat|:,lon|:)
 w@_FillValue = default_fillvalue("float")
-
 nlev = dimsizes(lev)
 Qeddy := new((/nyear,ntime,nlev,nlat,nlon/),double)
+else
 
-;linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
-;p_in   = conform(u    ,lev0,ilev)
-;p_out  = conform(Qeddy,lev ,ilev)
-;u := int2p_n(p_in,u,p_out,linlog,ilev)
-;v := int2p_n(p_in,v,p_out,linlog,ilev)
-;t := int2p_n(p_in,t,p_out,linlog,ilev)
-;z := int2p_n(p_in,z,p_out,linlog,ilev)
-;w := int2p_n(p_in,w,p_out,linlog,ilev)
-;delete([/p_in,p_out,linlog/])
+lev0 = lev
+lev := fspan(1000,100,19)
+nlev = dimsizes(lev)
+Qeddy := new((/nyear,ntime,nlev,nlat,nlon/),double)
+Qd    := new((/nyear,nlev,nlat,nlon/),double)
+
+linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
+p_in   = conform(u    ,lev0,ilev)
+p_out  = conform(Qeddy,lev ,ilev)
+u := int2p_n(p_in,u,p_out,linlog,ilev)
+v := int2p_n(p_in,v,p_out,linlog,ilev)
+t := int2p_n(p_in,t,p_out,linlog,ilev)
+w := int2p_n(p_in,w,p_out,linlog,ilev)
+delete([/p_in,p_out,linlog/])
+end if
 
 clm_u = dim_avg_n(u,itime)
 clm_v = dim_avg_n(v,itime) 
@@ -242,10 +249,10 @@ tanlat4d = conform(clm_u,tan(lat),ilat-1)
 lev4d    = conform(clm_u, lev*100,ilev-1)
 
 sigm0 = (R/cp)*(clm_t/lev4d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
-sigm0 = conform(lev4d, wgt_areaave(sigm0,cos(lat),1.0,0), (/iyear,ilev-1/))
 Qd    =   (clm_u/a/coslat4d) * center_finite_diff_n(clm_t,lon,loncyc,opt,ilon-1) \
         + (clm_v/a         ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat-1) \
         - sigm0 * clm_w 
+print(Qd  (1,5,30,30))
 delete([/clm_u,clm_v,clm_t,clm_w/])
 delete([/coslat4d,tanlat4d,lev4d/])
 
@@ -253,13 +260,18 @@ coslat = conform(Qeddy,cos(lat),ilat)
 tanlat = conform(Qeddy,tan(lat),ilat)
 lev5d  = conform(Qeddy, lev*100,ilev)
 
-Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
-         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
-         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+sig0e = (R/cp)*(edd_t/lev5d) - center_finite_diff_n(edd_t,lev*100,cyclic,opt,ilev)
+Qeddy = - (edd_u/a/coslat) * center_finite_diff_n(edd_t,lon,loncyc,opt,ilon) \
+        - (edd_v/a       ) * center_finite_diff_n(edd_t,lat,cyclic,opt,ilat) \
+        + sig0e * edd_w 
+;Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
+;         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
+;         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+
 Qeddy := dim_avg_n(Qeddy,itime)
-Qd   = Qd - Qeddy
 print(Qeddy(1,5,30,30))
-print(Qd  (1,5,30,30))
+Qd   = Qd - Qeddy
+delete([/sig0e,lev5d/])
 
 A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v              ,lon    ,loncyc,opt,ilon),lon    ,loncyc,opt,ilon)\
      -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_v*edd_v*coslat       ,lon    ,loncyc,opt,ilon),lat    ,cyclic,opt,ilat)\
@@ -273,7 +285,7 @@ A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u
 A := dim_avg_n(A,itime)
 print(A(1,5,30,30))
 delete([/edd_u,edd_v,edd_t,edd_w/])
-delete([/coslat,tanlat,lev5d/])
+delete([/coslat,tanlat/])
 
 Qeddy@long_name = "Climatology daily transient eddy heating"
 Qeddy@units     = "K/s" 
@@ -287,6 +299,7 @@ A@units     = "s^-2"
 ;============================================================
 lev4d = conform(A, lev*100,ilev-1)
 sigm1 = sigm0*R/lev4d
+sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/iyear,ilev-1/))
 f0    = conform(A, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
 ;do ilat = 0, nlat-1
@@ -295,8 +308,8 @@ f0    = conform(A, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 ;end if
 ;end do
 
-f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
-f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
 delete(lev4d)
 delete(f0)
 
@@ -335,7 +348,7 @@ filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"sigm1",typeof(sigm1),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"qeddy",typeof(qeddy),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"Qd"   ,typeof(Qd),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Qd",typeof(f_Qd),(/"year","lev","lat","lon"/))

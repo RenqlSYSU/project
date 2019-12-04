@@ -17,8 +17,9 @@ case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
 csa = False 
-nc = 0
-ntime   = 4
+ave_sigm = False 
+nc = 1
+ntime   = 1
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -28,10 +29,10 @@ end if
 
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-g600.dat"
-filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A.nc"
-fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_4f6c_month.dat"
-;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
-;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
+;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A.nc"
+;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_4f6c_month.dat"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
+fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
 var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -46,13 +47,13 @@ lats = -2  ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
-lev2 = (/800,100/) ;hPa
+lev2 = (/1000,100/) ;hPa
 ;lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/) ;ERA-Interim
-lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 month_s = 1
 month_e = 8
 
@@ -104,18 +105,30 @@ f      = addfile(filein(nf),"r")
 do nv = 0, nvar-1, 1
 ;    forc(nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
     ;forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
-    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-    ;forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
+;    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
 end do
 do nv = 0, nvar-2, 1
 ;    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
     ;q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
-    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
-    ;q3_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}),0)
+    ;q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
+    q3_m(nv,0,:,:,:)  = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}),0)
 end do
-sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
-sigm1 := conform(forc_m,sigm1,(/itime,ilev,ilat,ilon/))
-;sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
+sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
+sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
+;sigm1 := f->sigm1(:,{lev},{20:latn},{lonl:lonr})
+;sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
+
+if(ave_sigm) then
+    do nv = 0, nvar-2, 1
+    ;forc(nv,:,:,:,:)   = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    ;forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
+    forc_m(nv,:,:,:,:) = f->$var_name2(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    ;forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
+    end do
+    sigm1 := f->sigm1(:,{lev},{20:latn},{lonl:lonr})
+    sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
+end if
 ;forc_m  = where(ismissing(forc_m),0,forc_m)
 ;q3_m    = where(ismissing(q3_m)  ,0,  q3_m)
 print(forc_m(0,0,0,4,4:9))
@@ -212,11 +225,17 @@ end if
 
 term1 = center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev)/2/dlev4 
 term2 = 1/sigm1/dlev4/dlev4 
-coe211 = f0*f0*a*a*(term2 + term1)
-coe011 = f0*f0*a*a*(term2 - term1)
+coe211 = f0*f0*a*a*(term2 + term1);
+coe011 = f0*f0*a*a*(term2 - term1);
 coe111 = -2/coslat/coslat/dlon/dlon - 2/dlat/dlat - 2*f0*f0*a*a*term2
 coe111 = where(coe111.eq.0,1e-5,coe111)
-delete([/term1,term2/])
+delete([/term1,term2,dlev4/])
+
+if(ave_sigm) then
+    lev5d = conform(forc_m,lev*100,ilev)
+    forc_m(0:1,:,:,:,:) = -f0(0:1,:,:,:,:)*R*center_finite_diff_n((forc_m(0:1,:,:,:,:)/sigm1(0:1,:,:,:,:)/lev5d(0:1,:,:,:,:)),lev*100,cyclic,opt,ilev)
+    delete(lev5d)
+end if
 
 coe111@_FillValue = default_fillvalue(data_type(ntype))
 coe110@_FillValue = default_fillvalue(data_type(ntype))

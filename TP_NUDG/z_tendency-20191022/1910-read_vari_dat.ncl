@@ -29,11 +29,11 @@ end if
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
 if(ntime.eq.1) then 
-filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A.nc"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
 filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.dat"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.nc" 
 else
-filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A.nc"
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A2.nc"
 filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_dzdt_month.dat"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_dzdt_month.nc" 
 end if
@@ -49,7 +49,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -2 ;-20 ;-90 ;
+lats = 10 ;-20 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;

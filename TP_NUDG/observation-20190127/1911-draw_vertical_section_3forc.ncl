@@ -5,8 +5,18 @@
 ;*********************************************************************************
 begin
 month_option = True 
-year_option = False;calc yearly DJF 
-var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+year_option = True ;calc yearly DJF 
+var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = False;True  ;20191205, control the draw of jet stream
+months   = (/"DJF"/)
+;months   = (/"JF","MA","MJ","JA"/)
+;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
+lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/1000, 925, 850, 700, 600, 500,400,300,250,200,175,150,125,100/) 
+;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
+;case   = "ERA-Interim"
+case   = "NCEP1"
 
 do na = 1,3,1
 if(var_option.eq.0) then 
@@ -25,15 +35,11 @@ if(var_option.eq.2) then
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-    ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-    ;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-    lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 end if
 if(var_option.eq.3) then
-    var_name = (/"Qeddy","A","Sflux","Mflux","Tflux"/)  ;
-    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s^-2","m^2*s^-2","K*m/s"/)
-    nnv = 2 ;used to read dzdt induced by different forcing
-    lev  = (/1000, 925, 850, 700, 600, 500,400,300,250,200,175,150,125,100/) 
+    var_name = (/"Qeddy","A"                   ,"Sflux"                ,"Mflux"             ,"Tflux"/)  ;
+    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s~S~-2~N~","m~S~2~N~*s~S~-2~N~","K*m/s"/)
+    nnv = 3 ;used to read dzdt induced by different forcing
     if(nnv.eq.0) then 
         draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "Qeddy"/)  ;this is the variable used to draw, can used as center string
         select   = (/0,1,2/)
@@ -69,10 +75,6 @@ if(var_option.eq.5) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
-months   = (/"DJF"/)
-;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
-;months   = (/"JF","MA","MJ","JA"/)
-;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
@@ -87,23 +89,20 @@ g = 9.8 ;m2/s2
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-;case   = "ERA-Interim"
-case   = "NCEP1"
-
 if(var_option.le.1)
     if(month_option) then
-    filename = path + "mdata/" + case + "_Clim_month_Qd_Qeddy_A.nc"
+    filename = path + "mdata/" + case + "_Clim_month_Qd_Qeddy_A2.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_Qd_Qeddy_A.nc"
     end if
     if(year_option) then
-    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A_19.nc"
+    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A_1204.nc"
     end if
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if
 if(var_option.eq.2)
     if(month_option) then
-    ;filename = path + "mdata/" + case + "_Clim_dzdt_month-800.nc"
+    ;filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
     filename = path + "mdata/" + case + "_DJF_dzdt.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
@@ -146,6 +145,7 @@ var_m := new((/nvar,nmonth,nlev,nlat,nlon/),double)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
+    line     = new((/nvar*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -160,6 +160,15 @@ var_m := new((/nvar,nmonth,nlev,nlat,nlon/),double)
 ;================================================================
 ;read data
 ;====================================================================
+if(jet_option) then
+    f = addfile(path + "mdata/" + case + "_Clim_2month_uwnd.nc","r")
+    u := f->month_ave(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := dim_avg_n_Wrap(u,3)
+    u = mask(u, u.lt.0 , False) 
+    printVarSummary(u)
+    copy_VarMeta(vars(:,:,0),u(0,:,:))
+end if
+
 if(month_option) then
     f = addfile(filename,"r")
     if(var_option.le.1)
@@ -225,12 +234,6 @@ if(nnv.eq.1) then ;A
 end if
 if(nnv.eq.2) then ;Sflux
     var_m = var_m*10^5
-end if
-if(nnv.eq.3) then ;Mflux
-    var_m = var_m*10^10
-end if
-if(nnv.eq.4) then ;Tflux
-    var_m = var_m*10^10
 end if
 end if
 printVarSummary(var_m)
@@ -316,16 +319,23 @@ printVarSummary(var_m)
     res@tmXBTickEndF       = latn(na)
 
 ;---------set the attribute of the contour-----------------
-    res_line = res
+    res_line = True
+    res_line@gsnDraw          = False
+    res_line@gsnFrame         = False
     res_line@cnFillOn         = False
     res_line@cnLinesOn        = True
-    res_line@cnLineLabelsOn   = True
+    res_line@cnLineLabelsOn   = False
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 3.0
+    res_line@cnLineThicknessF = 2.0
     res_line@cnLineColor      = "black"
-   
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     res_line@cnLevelSpacingF       = 10        ; set contour interval
+    res_line@gsnPresHgtHeightLabelOn = False
+    res_line@tiYAxisOn = False
+    res_line@lbLabelBarOn     = False   ; the label bar
+    res_line@gsnCenterString  = ""
+    res_line@gsnLeftString    = " "
+    res_line@gsnRightString   = " "
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -390,14 +400,14 @@ if(nnv.eq.2) then ;Sflux
     spacig = (/  2,  2,  2,  2/);
 end if
 if(nnv.eq.3) then ;Mflux
-    minlvl = (/-0.8,-0.8,-0.8,-0.8/);
-    maxlvl = (/ 0.8, 0.8, 0.8, 0.8/);
-    spacig = (/ 0.1, 0.1, 0.1, 0.1/);
+    minlvl = (/-35,-35,-35,-35/);
+    maxlvl = (/ 35, 35, 35, 35/);
+    spacig = (/  5,  5,  5,  5/);
 end if
 if(nnv.eq.4) then ;Tflux
-    minlvl = (/-24,-8,-0.16,-24/);
-    maxlvl = (/ 24, 8, 0.16, 24/);
-    spacig = (/  3, 1, 0.02,  3/);
+    minlvl = (/-21,-21,-21,-21/);
+    maxlvl = (/ 21, 21, 21, 21/);
+    spacig = (/  3,  3,  3,  3/);
 end if
 end if
 
@@ -421,6 +431,12 @@ do nv = 0,nvar-1,1
     plot(np) = gsn_csm_pres_hgt(wks,var_m(nv,nm,:,:),res)
     print(max(var_m(nv,nm,:,:)))
     print(min(var_m(nv,nm,:,:)))
+
+    if(jet_option) then 
+    line(np) = gsn_csm_pres_hgt(wks,u(nm,:,:),res_line)
+    ;line(np) = gsn_csm_contour(wks,u(nm,:,:),res_line)
+    overlay(plot(np),line(np))
+    end if
 end do 
 end do 
 

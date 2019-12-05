@@ -6,7 +6,8 @@
 begin
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = True  ;20191205, control the draw of jet stream
 fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 na = 1 ; "TP","EA","NH"

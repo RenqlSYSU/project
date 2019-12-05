@@ -98,7 +98,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,2,1
+do nf = 0,2,2
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if

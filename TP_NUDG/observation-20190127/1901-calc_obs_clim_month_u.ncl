@@ -3,14 +3,14 @@
 ;                                           2019/01/28
 ;******************************************************************************
 begin
-;path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
-path1   = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
+path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
+;path1   = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","hgt"/)
 nv  = 0
 
-years    = ispan(1979,2016,1)
+years   = ispan(1979,2005,1)
 years@calendar = "standard"
 
 ;area: east Asia

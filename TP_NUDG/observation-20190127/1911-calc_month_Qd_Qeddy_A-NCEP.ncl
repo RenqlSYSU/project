@@ -15,7 +15,8 @@ path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 option   = 0 ;0 means remove seasonal mean, 1 means bandpass filter
-geo = False
+year_option = True;False
+geo = True ;False ;if true, only can calc 10N 
 csa = False 
 
 ;parameter for bw_bandpass_filter
@@ -38,7 +39,7 @@ years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats =  -2 ;-20
+lats =  10 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -85,6 +86,7 @@ u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
+z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
@@ -104,9 +106,9 @@ if(isleapyear(years(nt))) then ;leap year,366 day
     nv = 3
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
-    ;nv = 4
-    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
-    ;z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 4
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 else   ;non-leap year, 365 day
     nv = 0
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
@@ -120,9 +122,9 @@ else   ;non-leap year, 365 day
     nv = 3
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
-    ;nv = 4
-    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
-    ;z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 4
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
 printVarSummary(u)
@@ -132,12 +134,12 @@ dlev = -75*100 ;Pa
 coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
 f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
 z = z*g
-do nlv = 0,0,1
-    nl = 0 - nlv
+do nlv = 0,1,1
+    nl = 1 - nlv
     z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
-    u1 = -center_finite_diff_n(z1,lat,cyclic,opt,ilat-1)/f0/a
-    v1 =  center_finite_diff_n(z1,lon,loncyc,opt,ilon-1)/f0/a/coslat
-    t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z1)/dlev/R
+    u1 = -center_finite_diff_n(z(:,:,nl,:,:),lat,cyclic,opt,ilat-1)/f0/a
+    v1 =  center_finite_diff_n(z(:,:,nl,:,:),lon,loncyc,opt,ilon-1)/f0/a/coslat
+    t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z(:,:,nl,:,:))/dlev/R
     print(max(abs(z(:,:,nl,:,:)-z1)))
     print(max(abs(u(:,:,nl,:,:)-u1)))
     print(max(abs(v(:,:,nl,:,:)-v1)))
@@ -146,10 +148,10 @@ do nlv = 0,0,1
     print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
     print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
     print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
-    z(:,:,nl,:,:) = (/z1/)
+    ;z(:,:,nl,:,:) = (/z1/)
     u(:,:,nl,:,:) = (/u1/)
     v(:,:,nl,:,:) = (/v1/)
-    t(:,:,nl,:,:) = (/t1/)
+    ;t(:,:,nl,:,:) = (/t1/)
 end do
 delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
 end if
@@ -260,18 +262,19 @@ coslat = conform(Qeddy,cos(lat),ilat)
 tanlat = conform(Qeddy,tan(lat),ilat)
 lev5d  = conform(Qeddy, lev*100,ilev)
 
-sig0e = (R/cp)*(edd_t/lev5d) - center_finite_diff_n(edd_t,lev*100,cyclic,opt,ilev)
-Qeddy = - (edd_u/a/coslat) * center_finite_diff_n(edd_t,lon,loncyc,opt,ilon) \
-        - (edd_v/a       ) * center_finite_diff_n(edd_t,lat,cyclic,opt,ilat) \
-        + sig0e * edd_w 
-;Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
-;         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
-;         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+;sig0e = (R/cp)*(edd_t/lev5d) - center_finite_diff_n(edd_t,lev*100,cyclic,opt,ilev)
+;Qeddy = - (edd_u/a/coslat) * center_finite_diff_n(edd_t,lon,loncyc,opt,ilon) \
+;        - (edd_v/a       ) * center_finite_diff_n(edd_t,lat,cyclic,opt,ilat) \
+;        + sig0e * edd_w 
+Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
+         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
+         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
 
 Qeddy := dim_avg_n(Qeddy,itime)
 print(Qeddy(1,5,30,30))
 Qd   = Qd - Qeddy
-delete([/sig0e,lev5d/])
+;delete([/sig0e/])
+delete([/lev5d/])
 
 A := -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_u*edd_v              ,lon    ,loncyc,opt,ilon),lon    ,loncyc,opt,ilon)\
      -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(edd_v*edd_v*coslat       ,lon    ,loncyc,opt,ilon),lat    ,cyclic,opt,ilat)\
@@ -294,23 +297,39 @@ Qd@units     = "K/s"
 A@long_name = "Climatology daily diabatic heating"
 A@units     = "s^-2" 
 
+if(.not.(year_option)) then 
+    sigm0 := dim_avg_n_Wrap(sigm0,0)
+    Qd    := dim_avg_n_Wrap(Qd,0)
+    Qeddy := dim_avg_n_Wrap(Qeddy,0)
+    A     := dim_avg_n_Wrap(A,0)
+end if
+
 ;==========================================================
 ;calc Qd foring and Qeddy forcing, dimension is 4d 
 ;============================================================
-lev4d = conform(A, lev*100,ilev-1)
-sigm1 = sigm0*R/lev4d
-sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/iyear,ilev-1/))
-f0    = conform(A, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
-
 ;do ilat = 0, nlat-1
 ;if (abs(lat(ilat)*180.0/pi ).lt. 10. ) then
 ;f0(:,:,ilat,:)= A@_FillValue
 ;end if
 ;end do
 
+if(year_option) then 
+lev4d = conform(A, lev*100,ilev-1)
+sigm1 = sigm0*R/lev4d
+sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/iyear,ilev-1/))
+f0    = conform(A, 2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0), ilat-1)
 f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
 f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
 delete(lev4d)
+else
+lev3d = conform(A, lev*100,ilev-2)
+sigm1 = sigm0*R/lev3d
+sigm1_m = conform(lev3d, wgt_areaave(sigm1,1.0,1.0,0), (/ilev-2/))
+f0    = conform(A, 2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0), ilat-2)
+f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1_m/lev3d),lev*100,cyclic,opt,ilev-2)
+f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1_m/lev3d),lev*100,cyclic,opt,ilev-2)
+delete(lev3d)
+end if
 delete(f0)
 
 f_Qeddy@long_name = "Climatology daily transient eddy heating"
@@ -319,8 +338,6 @@ f_Qd@long_name    = "Climatology daily diabatic heatinig"
 f_Qd@units        = "s^-2" 
 sigm1@long_name = "One kind of static stability measured by potential temperature"
 sigm1@units     = "J/(Pa^2*Kg)" 
-print(f_Qeddy(1,5,30,30))
-print(f_Qd   (1,5,30,30))
 print(lat(0:9))
 
 ;========================================================================
@@ -334,7 +351,7 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "DJF mean three forcing factors, Qd, Qeddy, A"
+fileatt@discription   = "DJF mean three forcing factors, Qd, Qeddy, A, fixed f0, geo"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
@@ -347,13 +364,21 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
+if(year_option) then 
 filevardef(ncdf,"sigm1",typeof(sigm1),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"Qd"   ,typeof(Qd),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Qd",typeof(f_Qd),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Qeddy",typeof(f_Qeddy),(/"year","lev","lat","lon"/))
-
+else
+filevardef(ncdf,"sigm1",typeof(sigm1),(/"lev","lat","lon"/))
+filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"lev","lat","lon"/))
+filevardef(ncdf,"Qd"   ,typeof(Qd),(/"lev","lat","lon"/))
+filevardef(ncdf,"A"    ,typeof(A),(/"lev","lat","lon"/))
+filevardef(ncdf,"f_Qd",typeof(f_Qd),(/"lev","lat","lon"/))
+filevardef(ncdf,"f_Qeddy",typeof(f_Qeddy),(/"lev","lat","lon"/))
+end if
 
 ;define var attribute
 filevarattdef(ncdf,"lev",vars&level)

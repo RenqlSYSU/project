@@ -21,7 +21,7 @@ ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A_sig0e.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A2.nc"
 else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -64,9 +64,6 @@ A_m        = new((/nmonth,nlev,nlat,nlon/),double)
 f_Qd_m     = new((/nmonth,nlev,nlat,nlon/),double)
 f_Qeddy_m  = new((/nmonth,nlev,nlat,nlon/),double)
 sigm0_m    = new((/nmonth,nlev,nlat,nlon/),double)
-
-lev  := (/1000,925,850,700,600,500,400,350,300,250,200,175,150,125,100/)
-nlev = dimsizes(lev)
 
 iyear = 0
 itime = 1
@@ -173,6 +170,10 @@ coslat4d = conform(clm_u,cos(lat),ilat-1)
 tanlat4d = conform(clm_u,tan(lat),ilat-1)
 lev4d    = conform(clm_u, lev*100,ilev-1)
 
+;Qd :=   (1.0/a/coslat4d) * center_finite_diff_n(clm_u*clm_t         ,lon,loncyc,opt,ilon-1) \
+;      + (1.0/a/coslat4d) * center_finite_diff_n(clm_v*clm_t*coslat4d,lat,cyclic,opt,ilat-1) \
+;      - (R/cp)*(clm_w*clm_t)/lev4d + center_finite_diff_n(clm_w*clm_t,lev*100,cyclic,opt,ilev-1)
+
 sigm0 = (R/cp)*(clm_t/lev4d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
 Qd    =   (clm_u/a/coslat4d) * center_finite_diff_n(clm_t,lon,loncyc,opt,ilon-1) \
         + (clm_v/a         ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat-1) \
@@ -184,13 +185,13 @@ coslat = conform(Qeddy,cos(lat),ilat)
 tanlat = conform(Qeddy,tan(lat),ilat)
 lev5d  = conform(Qeddy, lev*100,ilev)
 
-sig0e := (R/cp)*(edd_t/lev5d) - center_finite_diff_n(edd_t,lev*100,cyclic,opt,ilev)
-Qeddy := - (edd_u/a/coslat) * center_finite_diff_n(edd_t,lon,loncyc,opt,ilon) \
-        - (edd_v/a       ) * center_finite_diff_n(edd_t,lat,cyclic,opt,ilat) \
-        + sig0e * edd_w 
-;Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
-;         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
-;         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+;sig0e := (R/cp)*(edd_t/lev5d) - center_finite_diff_n(edd_t,lev*100,cyclic,opt,ilev)
+;Qeddy := - (edd_u/a/coslat) * center_finite_diff_n(edd_t,lon,loncyc,opt,ilon) \
+;         - (edd_v/a       ) * center_finite_diff_n(edd_t,lat,cyclic,opt,ilat) \
+;         + sig0e * edd_w 
+Qeddy := - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,loncyc,opt,ilon) \
+         - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) \
+         + (R/cp)*(edd_w*edd_t)/lev5d - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
 Qeddy := dim_avg_n(Qeddy,iyear)
 Qd   = Qd - Qeddy
 print(Qeddy(15,5,30,30))
@@ -229,7 +230,7 @@ A_m@units     = "s^-2"
 ;============================================================
 lev4d   = conform(A_m, lev*100,ilev-1)
 sigm1 = sigm0_m*R/lev4d
-sigm1_m = conform(lev4d, wgt_areaave(sigm1,cos(lat),1.0,0), (/itime-1,ilev-1/)) ;
+sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/itime-1,ilev-1/)) ;
 f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
 ;do ilat = 0, nlat-1

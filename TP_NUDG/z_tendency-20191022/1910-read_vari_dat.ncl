@@ -13,10 +13,11 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
+obs_option = False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
-ntime = 1
+ntime = 4
 nc = 1
 
 if(case_option.eq.0) then
@@ -25,9 +26,11 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A-g.nc"
-;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.dat"
-;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-g600.nc"
+if(.not.(obs_option)) then 
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.nc"
+else
 if(ntime.eq.1) then 
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
 filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_dzdt.dat"
@@ -36,6 +39,7 @@ else
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A2.nc"
 filedat = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_dzdt_month.dat"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_dzdt_month.nc" 
+end if
 end if
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
@@ -49,7 +53,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = 10 ;-20 ;-90 ;
+lats = -2 ;-20 ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
@@ -101,7 +105,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = nc, nc, 1 
+do nf = 0, nc, 1 
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -116,9 +120,9 @@ do nz = 0, nlev-1, 1
 end do
 end do
 end do
-print(dzdt(0:(nvar-1),0,9,29,119))
-print(dzdt(0,0,9 ,29,99:139:4))
-print(dzdt(0,0,10,29,99:139:4))
+print(dzdt(0:(nvar-1),0,9,28,119))
+print(dzdt(0,0,9 ,28,99:139:4))
+print(dzdt(0,0,10,28,99:139:4))
 
 ;==========================================================
 ;define coefficient and calc dzdt

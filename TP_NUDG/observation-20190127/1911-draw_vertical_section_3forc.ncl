@@ -5,18 +5,18 @@
 ;*********************************************************************************
 begin
 month_option = True 
-year_option = True ;calc yearly DJF 
-var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = False;True  ;20191205, control the draw of jet stream
-months   = (/"DJF"/)
-;months   = (/"JF","MA","MJ","JA"/)
+year_option = False;True ;calc yearly DJF 
+var_option = 0  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = True  ;20191205, control the draw of jet stream
+;months   = (/"DJF"/)
+months   = (/"JF","MA","MJ","JA"/)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 ;lev  = (/1000, 925, 850, 700, 600, 500,400,300,250,200,175,150,125,100/) 
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
-;case   = "ERA-Interim"
-case   = "NCEP1"
+case   = "ERA-Interim"
+;case   = "NCEP1"
 
 do na = 1,3,1
 if(var_option.eq.0) then 
@@ -78,7 +78,7 @@ end if
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
-lats = (/15  , 0  , 0  , 0  /);20 ;-20
+lats = (/10  , 10 , 10  , 10  /);10 ;-20
 latn = (/55  ,89  , 89 ,89  /) ;55 ;60
 lonl = (/70  ,110 , 1  ,0  /) ;30 ;20
 lonr = (/105 ,130 ,359 ,70 /) ;150;220
@@ -91,12 +91,12 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 if(var_option.le.1)
     if(month_option) then
-    filename = path + "mdata/" + case + "_Clim_month_Qd_Qeddy_A2.nc"
+    filename = path + "mdata/" + case + "_Clim_month_Qd_Qeddy_A-geo.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_Qd_Qeddy_A.nc"
     end if
     if(year_option) then
-    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A_1204.nc"
+    filename = path + "mdata/" + case + "_DJF_Qd_Qeddy_A_1206.nc"
     end if
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if

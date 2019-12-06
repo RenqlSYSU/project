@@ -17,6 +17,7 @@ var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 option   = 0 ;0 means remove seasonal mean, 1 means bandpass filter
 year_option = True;False
 geo = True ;False ;if true, only can calc 10N 
+tp_option = True
 csa = False 
 
 ;parameter for bw_bandpass_filter
@@ -24,7 +25,7 @@ ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/NCEP1_DJF_Qd_Qeddy_A_1204.nc"
+    fileout  = path2 + "mdata/NCEP1_DJF_Qd_Qeddy_A_1206.nc"
 else                                     
     fileout  = path2 + "mdata/ERA-Interim_DJF_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -35,7 +36,7 @@ R  = 287.0  ; J/(kg*K) for dry air
 a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 print(pi)
-years    = ispan(1979,2016,1)
+years    = ispan(1979,1980,1)
 years@calendar = "standard"
 
 ;area: east Asia
@@ -153,6 +154,26 @@ do nlv = 0,1,1
     v(:,:,nl,:,:) = (/v1/)
     ;t(:,:,nl,:,:) = (/t1/)
 end do
+if(tp_option) then 
+    f_phis = addfile("/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc","r")
+    phis = f_phis->hgt(0,{lats:latn},{lonl:lonr}) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
+    phis := conform(z(:,:,0,:,:),phis,(/ilat-1,ilon-1/))
+    do nlv = 0,2,1
+    nl = 6 - nlv
+    z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
+    u1 = -center_finite_diff_n(z(:,:,nl,:,:),lat,cyclic,opt,ilat-1)/f0/a
+    v1 =  center_finite_diff_n(z(:,:,nl,:,:),lon,loncyc,opt,ilon-1)/f0/a/coslat
+    t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z(:,:,nl,:,:))/dlev/R
+    print(max(abs(z(:,:,nl,:,:)-z1)))
+    print(max(abs(u(:,:,nl,:,:)-u1)))
+    print(max(abs(v(:,:,nl,:,:)-v1)))
+    print(max(abs(t(:,:,nl,:,:)-t1)))
+    ;z(:,:,nl,:,:) = (/z1/)
+    u(:,:,nl,:,:) = where(phis.ge.6000,u1,u(:,:,nl,:,:))
+    v(:,:,nl,:,:) = where(phis.ge.6000,v1,v(:,:,nl,:,:))
+    ;t(:,:,nl,:,:) = (/t1/)
+    end do
+end if
 delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
 end if
 

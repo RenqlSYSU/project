@@ -19,7 +19,7 @@ ntype = 0
 
 year_option = True
 csa = False 
-ave_sigm = False 
+ave_sigm = True ;False 
 nc = 1
 ntime = 1
 
@@ -45,7 +45,7 @@ a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 
 ;area: east Asia
-lats = 10  ;-90 ;
+lats = 15  ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
@@ -131,11 +131,16 @@ end if
 
 if(ave_sigm) then
     do nv = 0, nvar-2, 1
-    ;forc(nv,:,:,:,:)   = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    if(year_option) then 
+    forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
+    sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{20:latn},{lonl:lonr}),0)
+    sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
+    else
     forc_m(nv,:,:,:,:) = f->$var_name2(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-    end do
     sigm1 := f->sigm1(:,{lev},{20:latn},{lonl:lonr})
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
+    end if
+    end do
 end if
 ;forc_m  = where(ismissing(forc_m),0,forc_m)
 ;q3_m    = where(ismissing(q3_m)  ,0,  q3_m)
@@ -223,7 +228,7 @@ if(ntype.eq.0) then
 coe110 = todouble(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
 coe101 = todouble(1/dlat/dlat + tanlat/2/dlat)
 coe121 = todouble(1/dlat/dlat - tanlat/2/dlat)
-f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0),ilat))
+f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
 else
 coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
 coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)

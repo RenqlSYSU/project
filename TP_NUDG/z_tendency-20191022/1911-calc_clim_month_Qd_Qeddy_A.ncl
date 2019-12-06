@@ -17,6 +17,7 @@ path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 nmonth = 4
+geo = True ;False ;if true, only can calc 10N 
 
 ;parameter for bw_bandpass_filter
 ca = 7.0 ;day
@@ -45,7 +46,7 @@ else
     end if  
 end if
 
-var_name = (/"U","V","T","OMEGA"/)
+var_name = (/"U","V","T","OMEGA","Z3"/)
 ncase    = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -55,7 +56,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -2 ;-90 ;
+lats =  10 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
@@ -118,6 +119,7 @@ u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
+z    := new((/nyear,ntime, 4  ,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
@@ -136,12 +138,45 @@ t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 nv = 3
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 4
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{(/1000,925,850,700/)},{lats:latn},{lonl:lonr})
 end do
 u = linmsg_n(u,-1,ilon)
 v = linmsg_n(v,-1,ilon)
 t = linmsg_n(t,-1,ilon)
 w = linmsg_n(w,-1,ilon)
+z = linmsg_n(z,-1,ilon)
 printVarSummary(w)
+
+if(geo) then
+dlev = -75*100 ;Pa
+coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
+f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
+z = z*g
+do nlv = 0,1,1
+    nl = 1 - nlv
+    ;z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
+    u1 = -center_finite_diff_n(z(:,:,nl,:,:),lat,cyclic,opt,ilat-1)/f0/a
+    v1 =  center_finite_diff_n(z(:,:,nl,:,:),lon,loncyc,opt,ilon-1)/f0/a/coslat
+    ;t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z(:,:,nl,:,:))/dlev/R
+    ;print(max(abs(z(:,:,nl,:,:)-z1)))
+    print(max(abs(u(:,:,nl,:,:)-u1)))
+    print(max(abs(v(:,:,nl,:,:)-v1)))
+    ;print(max(abs(t(:,:,nl,:,:)-t1)))
+    ;print(z(1,1,nl,10,10:20)-z1(1,1,10,10:20))
+    print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
+    print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
+    ;print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
+    ;z(:,:,nl,:,:) = (/z1/)
+    u(:,:,nl,:,:) = (/tofloat(u1)/)
+    v(:,:,nl,:,:) = (/tofloat(v1)/)
+    ;t(:,:,nl,:,:) = (/t1/)
+end do
+delete([/coslat,f0,dlev,u1,v1,z/])
+;delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
+end if
 
 lev := lev3
 nlev = dimsizes(lev)
@@ -236,7 +271,8 @@ A_m@units     = "s^-2"
 lev4d = conform(A_m, lev*100,ilev-1)
 sigm1 = sigm0_m*R/lev4d
 sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/0,ilev-1/));cos(lat) 
-f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
+;f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
+f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0), ilat-1)
 
 ;do ilat = 0, nlat-1
 ;if (abs(lat(ilat)*180.0/pi ).lt. 10. ) then

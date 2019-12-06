@@ -12,7 +12,7 @@ program iteration
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 21 !ERA 
     !integer, parameter :: nlat = 62 , nlon = 240 , ilog  = 10 , ifile = 12
     integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 !NCEP1
-    integer, parameter :: nlat = 33 , nlon = 144 , ilog  = 10 , ifile = 12
+    integer, parameter :: nlat = 31 , nlon = 144 , ilog  = 10 , ifile = 12
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 19
     !integer, parameter :: nlat = 98 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
@@ -42,7 +42,7 @@ program iteration
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
     
-    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_NCEP_1-8.txt"
+    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_ncep_1-8.txt"
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf

@@ -12,16 +12,17 @@ begin
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-var_name = (/"uwnd","vwnd","omega","air"/)
+var_name = (/"uwnd","vwnd","omega","air","hgt"/) ;unit of hgt is m2/s2
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 nmonth= 4
+geo = True ;False ;if true, only can calc 10N 
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
 cb = 2.5 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A2.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A-geo.nc"
 else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
 end if
@@ -36,7 +37,7 @@ years    = ispan(1979,2005,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats = -2 ;-20
+lats =  10 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -90,10 +91,13 @@ month_s = 2*nm + 1
 month_e = 2*nm + 2
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
+print("===================================================================")
+print("month from " + month_s + " to " + month_e + ", ntime = " + ntime)
 u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
+z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
@@ -113,6 +117,9 @@ if(isleapyear(years(nt))) then ;leap year,366 day
     nv = 3
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 4
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 else   ;non-leap year, 365 day
     nv = 0
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
@@ -126,9 +133,39 @@ else   ;non-leap year, 365 day
     nv = 3
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 4
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
 printVarSummary(u)
+
+if(geo) then
+dlev = -75*100 ;Pa
+coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
+f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
+;z = z*g 
+do nlv = 0,1,1
+    nl = 1 - nlv
+    z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
+    u1 = -center_finite_diff_n(z(:,:,nl,:,:),lat,cyclic,opt,ilat-1)/f0/a
+    v1 =  center_finite_diff_n(z(:,:,nl,:,:),lon,loncyc,opt,ilon-1)/f0/a/coslat
+    t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z(:,:,nl,:,:))/dlev/R
+    print(max(abs(z(:,:,nl,:,:)-z1)))
+    print(max(abs(u(:,:,nl,:,:)-u1)))
+    print(max(abs(v(:,:,nl,:,:)-v1)))
+    print(max(abs(t(:,:,nl,:,:)-t1)))
+    print(z(1,1,nl,10,10:20)-z1(1,1,10,10:20))
+    print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
+    print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
+    print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
+    ;z(:,:,nl,:,:) = (/z1/)
+    u(:,:,nl,:,:) = (/u1/)
+    v(:,:,nl,:,:) = (/v1/)
+    ;t(:,:,nl,:,:) = (/t1/)
+end do
+delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
+end if
 
 lev0 = lev
 lev  := (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
@@ -231,7 +268,7 @@ A_m@units     = "s^-2"
 lev4d   = conform(A_m, lev*100,ilev-1)
 sigm1 = sigm0_m*R/lev4d
 sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/itime-1,ilev-1/)) ;
-f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
+f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0), ilat-1)
 
 ;do ilat = 0, nlat-1
 ;if (abs(lat(ilat)*180.0/pi ).lt. 10. ) then

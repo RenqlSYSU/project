@@ -6,13 +6,13 @@
 begin
 month_option = True 
 year_option = False;True ;calc yearly DJF 
-var_option = 0  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 ;months   = (/"DJF"/)
 months   = (/"JF","MA","MJ","JA"/)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
-lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
+;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 ;lev  = (/1000, 925, 850, 700, 600, 500,400,300,250,200,175,150,125,100/) 
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
 case   = "ERA-Interim"
@@ -33,7 +33,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
+    nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -102,8 +102,8 @@ if(var_option.le.1)
 end if
 if(var_option.eq.2)
     if(month_option) then
-    ;filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
-    filename = path + "mdata/" + case + "_DJF_dzdt.nc"
+    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
+    ;filename = path + "mdata/" + case + "_DJF_dzdt.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if

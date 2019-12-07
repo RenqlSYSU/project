@@ -60,6 +60,7 @@ lats =  10 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
+zlev = (/1000,925,850,700,600,500,400/) ;hPa
 lev2 = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
 lev3 = fspan(1000,100,19)
 lev = lev2
@@ -75,6 +76,7 @@ nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
+nzlev = dimsizes(zlev)
 lev := lev3
 nlev  = dimsizes(lev)
 Qd_m       = new((/nmonth,nlev,nlat,nlon/),double)
@@ -99,7 +101,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,2,2
+do nf = 2,2,2
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -115,11 +117,11 @@ lev := lev2
 nlev  = dimsizes(lev)
 print("===================================================================")
 print("month from " + month_s + " to " + month_e + ", ntime = " + ntime)
-u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-w     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-z    := new((/nyear,ntime, 4  ,nlat,nlon/),float)
+u     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+v     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+t     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+w     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+z     := new((/nyear,ntime,nzlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
@@ -141,7 +143,7 @@ w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 4
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{(/1000,925,850,700/)},{lats:latn},{lonl:lonr})
+z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{zlev},{lats:latn},{lonl:lonr})
 end do
 u = linmsg_n(u,-1,ilon)
 v = linmsg_n(v,-1,ilon)
@@ -157,7 +159,7 @@ f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
 z = z*g
 do nlv = 0,1,1
     nl = 1 - nlv
-    ;z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
+    z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
     u1 = -center_finite_diff_n(z(:,:,nl,:,:),lat,cyclic,opt,ilat-1)/f0/a
     v1 =  center_finite_diff_n(z(:,:,nl,:,:),lon,loncyc,opt,ilon-1)/f0/a/coslat
     ;t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z(:,:,nl,:,:))/dlev/R

@@ -13,15 +13,16 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
 
-year_option = True
+obs_option = False ;True
+case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+year_option = False;True
 csa = False 
-ave_sigm = True ;False 
+ave_sigm = True 
 nc = 1
-ntime = 1
+ntime = 4
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -29,12 +30,18 @@ else
     case   = (/"TP_CTRL","TP_CR"/)
 end if
 
-;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A.nc"
-;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
-;filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A.nc"
-;fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_4f6c_month.dat"
+if(.not.(obs_option)) then 
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
+else
+if(ntime.eq.4) then 
+filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A-geo.nc"
+fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_4f6c_month.dat"
+else
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
+end if
+end if
 var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -45,15 +52,11 @@ a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 
 ;area: east Asia
-lats = 15  ;-90 ;
+lats = 10  ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0  ; 0  ;
 lonr = 360 ;360 ;
 lev2 = (/1000,100/) ;hPa
-;lev  = (/600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-;lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
-;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/) ;ERA-Interim
-;lev  = (/800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 month_s = 1
@@ -62,6 +65,7 @@ month_e = 8
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
+print(filein(nc))
 f    = addfile(filein(nc),"r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 ;time = cd_calendar(f->time,0)
@@ -133,11 +137,11 @@ if(ave_sigm) then
     do nv = 0, nvar-2, 1
     if(year_option) then 
     forc_m(nv,0,:,:,:) = dim_avg_n_Wrap(f->$var_name2(nv)$(:,{lev},{lats:latn},{lonl:lonr}),0)
-    sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{20:latn},{lonl:lonr}),0)
+    sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{10:latn},{lonl:lonr}),0)
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
     else
     forc_m(nv,:,:,:,:) = f->$var_name2(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-    sigm1 := f->sigm1(:,{lev},{20:latn},{lonl:lonr})
+    sigm1 := f->sigm1(:,{lev},{10:latn},{lonl:lonr})
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
     end if
     end do
@@ -228,7 +232,8 @@ if(ntype.eq.0) then
 coe110 = todouble(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
 coe101 = todouble(1/dlat/dlat + tanlat/2/dlat)
 coe121 = todouble(1/dlat/dlat - tanlat/2/dlat)
-f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
+;f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0),ilat));45.0*pi/180.0
+f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat));45.0*pi/180.0
 else
 coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
 coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)

@@ -6,7 +6,7 @@
 begin
 month_option = True 
 year_option = False;True ;calc yearly DJF 
-var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 ;months   = (/"DJF"/)
 months   = (/"JF","MA","MJ","JA"/)

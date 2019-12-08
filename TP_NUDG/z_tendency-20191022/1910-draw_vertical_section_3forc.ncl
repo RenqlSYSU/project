@@ -12,7 +12,9 @@ fnc  = 0   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 na = 1 ; "TP","EA","NH","CA"
 
-months   = (/"JF","MA","MJ","JA"/)
+months   = (/"DJF"/)
+;months   = (/"JF","MA","MJ","JA"/)
+nmonth = dimsizes(months)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
@@ -32,7 +34,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    nnv = 1;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -97,7 +99,11 @@ end if
 
 if(var_option.lt.2)
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy.nc"
+    if(nmonth.eq.1) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
+    else
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A.nc"
+    end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
     end if
@@ -105,7 +111,12 @@ if(var_option.lt.2)
 end if
 if(var_option.eq.2)
     if(month_option) then
+    if(nmonth.eq.1) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
+    else
+    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-f.nc"
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month-f.nc"
+    end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
@@ -131,7 +142,6 @@ fig_out    ="pdf";"x11"
 f = addfile(gtopfile,"r")
 phis   := f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-nmonth = dimsizes(months)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 nlev   = dimsizes(lev)
@@ -140,7 +150,11 @@ ncase  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
 if(var_option.le.1)
+if(nmonth.eq.1) then
+    vars := f->$var_name(0)$({lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+else
     vars := f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
 else
     vars := f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
@@ -181,9 +195,15 @@ if(month_option) then
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
+    if(nmonth.eq.1)
+        do nv = 0, nvar-2,1
+        var_m(nc,nv,0,:,:,:)  = f->$var_name(nv)$({lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end do
+    else
         do nv = 0, nvar-2,1
         var_m(nc,nv,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
+    end if
     else
         var_m(nc,0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if

@@ -60,7 +60,7 @@ lats =  10 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-zlev = (/1000,925,850,700,600,500,400/) ;hPa
+zlev = (/1000,925,850/) ;hPa ,700,600,500,400
 lev2 = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
 lev3 = fspan(1000,100,19)
 lev = lev2
@@ -101,7 +101,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 2,2,2
+do nf = 0,2,2
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -145,39 +145,41 @@ nv = 4
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{zlev},{lats:latn},{lonl:lonr})
 end do
-u = linmsg_n(u,-1,ilon)
-v = linmsg_n(v,-1,ilon)
-t = linmsg_n(t,-1,ilon)
-w = linmsg_n(w,-1,ilon)
-z = linmsg_n(z,-1,ilon)
+u = linmsg_n(u,-1,ilat)
+v = linmsg_n(v,-1,ilat)
+t = linmsg_n(t,-1,ilat)
+w = linmsg_n(w,-1,ilat)
+z = linmsg_n(z,-1,ilat)
 printVarSummary(w)
 
 if(geo) then
-dlev = -75*100 ;Pa
 coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
 f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
 z = z*g
+lat1 = vars&lat
+lat_ind = ind(lat1.le.80.0)
+lat2 = lat(lat_ind)
+printVarSummary(lat_ind)
 do nlv = 0,1,1
     nl = 1 - nlv
-    z1 = z(:,:,nl+2,:,:) + 2*R*t(:,:,nl+1,:,:)*dlev/lev(nl+1)/100
-    u1 = -center_finite_diff_n(z(:,:,nl,:,:),lat,cyclic,opt,ilat-1)/f0/a
-    v1 =  center_finite_diff_n(z(:,:,nl,:,:),lon,loncyc,opt,ilon-1)/f0/a/coslat
-    ;t1 = -lev(nl)*100*(z(:,:,nl+1,:,:)-z(:,:,nl,:,:))/dlev/R
-    ;print(max(abs(z(:,:,nl,:,:)-z1)))
-    print(max(abs(u(:,:,nl,:,:)-u1)))
-    print(max(abs(v(:,:,nl,:,:)-v1)))
-    ;print(max(abs(t(:,:,nl,:,:)-t1)))
-    ;print(z(1,1,nl,10,10:20)-z1(1,1,10,10:20))
+    z1 = z(:,:,nl+1,lat_ind,:) + R*t(:,:,nl,lat_ind,:)*(lev(nl+1)-lev(nl))*100/lev(nl)/100
+    u1 = -center_finite_diff_n(z1,lat2,cyclic,opt,ilat-1)/f0(:,:,lat_ind,:)/a        ;(:,:,nl,lat_ind,:)
+    v1 =  center_finite_diff_n(z1,lon ,loncyc,opt,ilon-1)/f0(:,:,lat_ind,:)/a/coslat(:,:,lat_ind,:) ;(:,:,nl,lat_ind,:)
+    t1 = -lev(nl)*100*(z(:,:,nl+1,lat_ind,:)-z1)/((lev(nl+1)-lev(nl))*100)/R
+    print(max(abs(z(:,:,nl,lat_ind,:)-z1)))
+    print(max(abs(u(:,:,nl,lat_ind,:)-u1)))
+    print(max(abs(v(:,:,nl,lat_ind,:)-v1)))
+    print(max(abs(t(:,:,nl,lat_ind,:)-t1)))
+    print(z(1,1,nl,10,10:20)-z1(1,1,10,10:20))
     print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
     print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
-    ;print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
-    ;z(:,:,nl,:,:) = (/z1/)
-    u(:,:,nl,:,:) = (/tofloat(u1)/)
-    v(:,:,nl,:,:) = (/tofloat(v1)/)
-    ;t(:,:,nl,:,:) = (/t1/)
+    print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
+    z(:,:,nl,lat_ind,:) = (/tofloat(z1)/)
+    u(:,:,nl,lat_ind,:) = (/tofloat(u1)/)
+    v(:,:,nl,lat_ind,:) = (/tofloat(v1)/)
+    ;t(:,:,nl,lat_ind,:) = (/tofloat(t1)/)
 end do
-delete([/coslat,f0,dlev,u1,v1,z/])
-;delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
+delete([/coslat,f0,u1,v1,z1,t1,z,lat1,lat_ind,lat2/])
 end if
 
 lev := lev3
@@ -273,8 +275,8 @@ A_m@units     = "s^-2"
 lev4d = conform(A_m, lev*100,ilev-1)
 sigm1 = sigm0_m*R/lev4d
 sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/0,ilev-1/));cos(lat) 
-;f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
-f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0), ilat-1)
+f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
+;f0    = conform(A_m, 2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0), ilat-1)
 
 ;do ilat = 0, nlat-1
 ;if (abs(lat(ilat)*180.0/pi ).lt. 10. ) then

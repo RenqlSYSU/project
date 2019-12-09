@@ -7,7 +7,9 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 path    = "/home/ys17-19/renql"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+month_s = 1
+month_e = 12
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG6h-CTRL"/)
@@ -68,7 +70,7 @@ na = 1
 f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.5.and.time(:,1).le.8)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 ntime = dimsizes(select_time)
@@ -135,8 +137,12 @@ printVarSummary(var)
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),20)
-    res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    res@tmXBValues      = ispan(0,(ntime-1),60)
+    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),30)
+    ;res@tmXBLabels      = (/"1 Mar","30 Mar","29 Apr","29 May","28 Jun","28 Jul","27 Aug"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),20)
+    ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)

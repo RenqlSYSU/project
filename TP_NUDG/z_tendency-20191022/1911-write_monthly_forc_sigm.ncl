@@ -20,7 +20,7 @@ obs_option = False ;True
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 year_option = False;True
 csa = False 
-ave_sigm = True 
+ave_sigm = False;True 
 nc = 0
 ntime = 1
 
@@ -36,7 +36,7 @@ filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_m
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 else
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_DJF_Qd_Qeddy_A.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month_lat.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 else
 if(ntime.eq.4) then 
@@ -262,8 +262,9 @@ coe110 = todouble(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
 coe101 = todouble(1/dlat/dlat + tanlat/2/dlat)
 coe121 = todouble(1/dlat/dlat - tanlat/2/dlat)
 if(ave_sigm) then
-f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat));45.0*pi/180.0
+f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0),ilat));45.0*pi/180.0
 else
+;f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat));45.0*pi/180.0
 f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0),ilat));45.0*pi/180.0
 end if
 else

@@ -30,7 +30,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_Qd_Qeddy_A.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_Qd_Qeddy_A_lon.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -145,11 +145,11 @@ nv = 4
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{zlev},{lats:latn},{lonl:lonr})
 end do
-u = linmsg_n(u,-1,ilat)
-v = linmsg_n(v,-1,ilat)
-t = linmsg_n(t,-1,ilat)
-w = linmsg_n(w,-1,ilat)
-z = linmsg_n(z,-1,ilat)
+u = linmsg_n(u,-1,ilon)
+v = linmsg_n(v,-1,ilon)
+t = linmsg_n(t,-1,ilon)
+w = linmsg_n(w,-1,ilon)
+z = linmsg_n(z,-1,ilon)
 printVarSummary(w)
 
 if(geo) then
@@ -157,7 +157,7 @@ coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
 f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
 z = z*g
 lat1 = vars&lat
-lat_ind = ind(lat1.le.80.0)
+lat_ind = ind(lat1.le.90.0)
 lat2 = lat(lat_ind)
 printVarSummary(lat_ind)
 do nlv = 0,1,1

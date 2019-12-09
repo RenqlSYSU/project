@@ -40,7 +40,7 @@ program iteration
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
     
-    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_DJF_lat_1-8-CTRL.txt"
+    logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_djf_1-8.txt"
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf
@@ -50,11 +50,12 @@ program iteration
     casename = (/"CTRL   ","NUDG6h ","NUDG24h"/)
     !casename = (/"TP_CTRL","TP_CR  "/)
 
-    print*, "please input the number of case,1 or 2 or 3"
-    read(*,*) nc
+    !print*, "please input the number of case,1 or 2 or 3"
+    !read(*,*) nc
+    nc = 1
     if(nc.eq.1) then 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month_lat.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month_lat.dat"     
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month_djf.dat"     
     else if(nc.eq.2) then
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG6h-Clim_dzdt_month.dat"     

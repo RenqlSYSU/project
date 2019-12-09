@@ -5,12 +5,18 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 0
+var_option   = 2
 month_option = True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl = 3 ;(/925,850,700,500,200/)
+nl = 4 ;(/925,850,700,500,200/)
 fnc  = 1    ;chose which case to draw
 diff = True;False ;whether draw the difference
+na = 1 ;"TP","EA","NH"
+
+;months   = (/"DJF"/)
+months   = (/"JF","MA","MJ","JA"/)
+nmonth = dimsizes(months)
+lev = (/925,850,700,500,200/)
 
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -25,8 +31,8 @@ end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-5~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    nnv = 1;0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
@@ -34,8 +40,6 @@ if(var_option.eq.3) then
     var_name = (/"sigm1"/)  ;use to read variables
     unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
 end if
-months   = (/"JF","MA","MJ","JA"/)
-lev = (/925,850,700,500,200/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -54,14 +58,22 @@ end if
 
 if((var_option.lt.2).or.(var_option.eq.3))
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A-g.nc"
+    if(nmonth.eq.1) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A-global.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A.nc"
+    end if
+    else
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
     end if
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly-global.nc"
+    if(nmonth.eq.1) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
+    else
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month.nc"
+    end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
@@ -73,13 +85,12 @@ fig_out    ="pdf";"x11"
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
-lats = (/15  ,0   , 0  /);20 ;-20
+lats = (/15  ,10   , 10  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
 lonl = (/70  ,30  , 10 /) ;30 ;20
 lonr = (/105 ,150 ,350 /) ;150;220
-month_s = 5
+month_s = 1
 month_e = 8
-na = 1
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -132,7 +143,11 @@ do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     if((var_option.lt.2).or.(var_option.eq.3))
         do nv = 0, nvar-2,1
+        if(nmonth.eq.1) then 
+        var_m(nc,nv,0,:,:)  = f->$var_name(nv)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        else
         var_m(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end if
         end do
     else
         var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -172,7 +187,7 @@ if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
 if(nnv.eq.1) then
-    var_m = var_m*10^5
+    var_m = var_m*10^6
 end if
 if(nnv.eq.2) then
     var_m = var_m*10^6
@@ -197,7 +212,7 @@ end if
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    ;gsn_define_colormap(wks,"BlueDarkRed18")
+    gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -351,39 +366,27 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.0) then ;Q
-    minlvl = (/-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4/);
-    spacig = (/0.3 ,0.3 ,0.3 /);
+    minlvl = (/-2.1,-2.1,-2.1/);
+    maxlvl = (/ 2.1, 2.1, 2.1/);
+    spacig = (/ 0.3, 0.3, 0.3/);
 end if
 
 if(var_option.eq.1) then ;forc
-    minlvl = (/-2.4,-2.4,-2.4,-2.4/);
-    maxlvl = (/ 2.4, 2.4, 2.4, 2.4/);
-    spacig = (/0.3 ,0.3 ,0.3 ,0.3 /);
+    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.2) then ;dzdt
 if(nnv.eq.0) then   ;dzdt
-if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-24,-8 ,-0.8,-24/);
-    maxlvl = (/ 24, 8 , 0.8, 24/);
-    spacig = (/  3, 1 , 0.1, 3 /);
-else
-    minlvl = (/-4 ,-1.6,-1.6,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
-    maxlvl = (/ 4 , 1.6, 1.6, 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
-    spacig = (/0.5, 0.2, 0.2,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
-end if
+    minlvl = (/-3.5,-3.5,-3.5,-3.5/);
+    maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
+    spacig = (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-8 ,-4 ,-4 ,-8 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
-    maxlvl = (/ 8 , 4 , 4 , 8 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
-    spacig = (/ 1 ,0.5,0.5, 1 /);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
-else
-    minlvl = (/-4 ,-4 ,-4 ,-4 /);,-1.6,-1.6,-1.6,-1.6;;;-4 ,-4 ,-4 ,-4 
-    maxlvl = (/ 4 , 4 , 4 , 4 /);, 1.6, 1.6, 1.6, 1.6;;; 4 , 4 , 4 , 4 
-    spacig = (/0.5,0.5,0.5,0.5/);, 0.2, 0.2, 0.2, 0.2;;;0.5,0.5,0.5,0.5
-end if
+    minlvl = (/-21,-21,-21,-21/);-8,-8,-8,-8,
+    maxlvl = (/ 21, 21, 21, 21/); 8, 8, 8, 8,
+    spacig = (/ 3 , 3 , 3 , 3 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
@@ -415,10 +418,11 @@ if(var_option.eq.3) then ;forc
     spacig = (/0.05/);0.5
 end if
     
-    res@cnFillPalette = "BlueDarkRed18"
+    ;res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
+    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
     np = nm*nvar + nv
@@ -446,7 +450,10 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
+    if(nmonth.eq.1) then
+    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    else
     gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-   ; gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    end if
 end
 

@@ -13,6 +13,11 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+var_name = (/"U","V","T","Z3","Q","dzdt","Ahgt","dTdy"/) ;,"OMEGA","RELHUM"
+nv = 0
+nmonth = 4
+month_s = 1
+month_e = 8
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -27,9 +32,6 @@ else
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
     years   = ispan(21,30,1)   ;the calculate time
 end if
-
-var_name = (/"U","V","T","Z3","Q","dzdt","Ahgt","dTdy"/) ;,"OMEGA","RELHUM"
-nv = 7
 
 ;area: east Asia
 lats = -20 ;-90 ;

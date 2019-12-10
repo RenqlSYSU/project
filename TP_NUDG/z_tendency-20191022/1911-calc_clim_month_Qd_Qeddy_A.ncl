@@ -30,7 +30,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_Qd_Qeddy_A_lon.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_Qd_Qeddy_A_lon58.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -109,8 +109,8 @@ end if
 ;read the data
 ;============================================================
 do nm = 0, nmonth-1, 1
-month_s = 2*nm + 1
-month_e = 2*nm + 2
+month_s = nm + 5
+month_e = nm + 5
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
 lev := lev2

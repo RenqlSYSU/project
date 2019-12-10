@@ -9,9 +9,9 @@ var_option   = 2
 month_option = True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nl = 4 ;(/925,850,700,500,200/)
-fnc  = 1    ;chose which case to draw
+fnc  = 0    ;chose which case to draw
 diff = True;False ;whether draw the difference
-na = 1 ;"TP","EA","NH"
+na = 2 ;"TP","EA","NH"
 
 ;months   = (/"DJF"/)
 months   = (/"JF","MA","MJ","JA"/)
@@ -72,7 +72,7 @@ else
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"

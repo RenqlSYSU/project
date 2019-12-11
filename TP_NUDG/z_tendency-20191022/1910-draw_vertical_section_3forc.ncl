@@ -4,7 +4,7 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = False;True  ;20191205, control the draw of jet stream
@@ -12,14 +12,17 @@ fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 na = 1 ; "TP","EA","NH","CA"
 
-;months   = (/"DJF"/)
-months   = (/"JF","MA","MJ","JA"/)
+;months  = (/"DJF"/)
+;months  = (/"JF","MA","MJ","JA"/)
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;months  = (/"May","Jun","Jul","Aug"/)
+months  = (/"Apr","May","Jun","Jul"/)
 nmonth = dimsizes(months)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
 
-do na = 1,3,1
+do na = 1,1,1
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
@@ -71,8 +74,8 @@ end if
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
-lats = (/15  , 10 , 10 , 10 /);15 ;-210
-latn = (/55  ,89  , 89 , 89 /) ;55 ;60
+lats = (/15  , 15 , 10 , 10 /);15 ;-210
+latn = (/55  , 55 , 89 , 89 /) ;55 ;60
 lonl = (/70  ,110 , 1  , 0  /) ;30 ;20
 lonr = (/105 ,130 ,359 , 70 /) ;150;220
 month_s = 1
@@ -89,12 +92,23 @@ if(case_option.eq.0) then
     end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
-else
+end if
+if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
+end if
+if(case_option.eq.2) then
+    case1   = (/"F2000","NG58"/)
+    if(diff) then 
+    case2   = (/"F2000","NG58-F2000"/)
+    else
+    case2   = (/"F2000","NG58"/)
+    end if
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
 end if
 
 if(var_option.lt.2)
@@ -102,7 +116,7 @@ if(var_option.lt.2)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -114,7 +128,7 @@ if(var_option.eq.2)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon47.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
@@ -392,9 +406,15 @@ end if
     
 if((var_option.eq.2).or.(var_option.eq.4)) then
 if(nnv.eq.0) then   ;dzdt
+if((fnc.eq.0)) then  ;.and.diff 
     minlvl = (/-3.5,-3.5,-3.5,-3.5/);
     maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
     spacig = (/ 0.5, 0.5, 0.5, 0.5/);
+else
+    minlvl = (/-2.1,-2.1,-2.1,-2.1/);
+    maxlvl = (/ 2.1, 2.1, 2.1, 2.1/);
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/);
+end if
 end if
 if(nnv.eq.1) then ;dudt
     minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
@@ -407,8 +427,8 @@ if(nnv.eq.2) then ;dTdt
     spacig = (/  2,  2,  2,  2/);
 end if
 if(nnv.eq.3) then ;dbdt
-    minlvl = (/-24,-24,-24,-24/);
-    maxlvl = (/ 24, 24, 24, 24/);
+    minlvl = (/-21,-21,-21,-21/);
+    maxlvl = (/ 21, 21, 21, 21/);
     spacig = (/  3,  3,  3,  3/);
 end if
 end if
@@ -445,9 +465,9 @@ do nv = 0,nvar-1,1
     np = nm*nvar + nv
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.2) then 
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nv) + ")"
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

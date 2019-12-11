@@ -6,7 +6,7 @@
 begin
 month_option = True 
 year_option = False;True ;calc yearly DJF 
-var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 ;months   = (/"DJF"/)
 months   = (/"JF","MA","MJ","JA"/)
@@ -33,7 +33,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -162,11 +162,11 @@ var_m := new((/nvar,nmonth,nlev,nlat,nlon/),double)
 ;====================================================================
 if(jet_option) then
     f = addfile(path + "mdata/" + case + "_Clim_2month_uwnd.nc","r")
-    u := f->month_ave(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->month_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
     u := dim_avg_n_Wrap(u,3)
     u = mask(u, u.lt.0 , False) 
     printVarSummary(u)
-    copy_VarMeta(vars(:,:,0),u(0,:,:))
+;    copy_VarMeta(vars(:,:,0),u(0,:,:))
 end if
 
 if(month_option) then
@@ -367,9 +367,9 @@ if(nnv.eq.0) then   ;dzdt
     spacig = (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-21,-21,-21,-21/);-8,-8,-8,-8,
-    maxlvl = (/ 21, 21, 21, 21/); 8, 8, 8, 8,
-    spacig = (/ 3 , 3 , 3 , 3 /); 1, 1, 1, 1,
+    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.2) then ;dTdt
     minlvl = (/-16,-16,-16,-16/);

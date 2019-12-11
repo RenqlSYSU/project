@@ -18,7 +18,7 @@ if(var_option.eq.0) then
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;  this is the variable used to draw, can used as center string
     var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
@@ -26,7 +26,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
+    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
@@ -57,7 +57,7 @@ if((var_option.le.1).or.(var_option.eq.3))
     fig_name = path + "fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc-800.nc"
+    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
     else
     filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
     end if
@@ -69,7 +69,7 @@ fig_out    ="pdf";"x11"
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
-lats = (/15  ,10   , 0  /);20 ;-20
+lats = (/15  ,10   ,10  /);20 ;-20
 latn = (/55  ,75  , 89 /) ;55 ;60
 lonl = (/70  ,60  , 1  /) ;30 ;20
 lonr = (/105 ,180 ,359 /) ;150;220

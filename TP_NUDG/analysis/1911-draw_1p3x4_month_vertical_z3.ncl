@@ -26,9 +26,9 @@ draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy"/)  ;this is the variable used t
 unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s"/)    ;this can be used as right string 
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy"/)  ;this is the variable used to draw, can used as center string
 lev  = (/1000,925,850,700,600,500,400,300,200/)
-nv = 3
+nv = 5
 
-var_option = 3
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -47,6 +47,7 @@ if(var_option.eq.2) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"MJ","JA"/)
 imonth = ispan(0,1,1);(/4,5,6,7/)
+lev  := (/1000,925,850,700,600,500,400,300,200,100/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -61,6 +62,7 @@ filein  = path1+(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 lev  := (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  := (/1000,925,850,700,600,500,400,300,200,100/)
 years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
@@ -71,7 +73,7 @@ fig_out    = "pdf";"x11""eps";
 area = (/"TP","EA","NH"/)
 lats = (/15  ,15  , 0  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,130 , 10 /) ;30 ;20
+lonl = (/70  ,110 , 10 /) ;30 ;20
 lonr = (/105 ,130 ,350 /) ;150;220
 lat_spacing = 15
 lon_spacing = 30
@@ -89,6 +91,7 @@ var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
+    line   = new((/ncase*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -99,7 +102,7 @@ var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
    vc_thick       = 1.8
-   mp_thick       = 1.5
+   mp_thick       = 3.0
    font_index     = 22
 
 ;================================================================
@@ -142,6 +145,11 @@ if(nv.eq.1) then
     var = var*9.8*10000 ;dzdt,transform unit from m/s to m2/s3
 end if
 
+if(nv.eq.3) then
+    u = mask(var, var.lt.0 , False) 
+    copy_VarMeta(var,u)
+end if
+
 if(nv.eq.4) then
     var = var-273.15 ;T,transform unit from K to C
 end if
@@ -160,7 +168,7 @@ printVarSummary(var)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    ;gsn_define_colormap(wks,"BlueDarkRed18")
+    gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -206,8 +214,8 @@ printVarSummary(var)
     res@cnInfoLabelOn    = False
 ;    res@cnLineThicknessF = 1.0
     
-    res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    res@cnLevels             = (/-32,-24,-16,-10,-5,-1,-0.5,-0.1, 0, 0.1, 0.5, 1, 5, 10, 16, 24, 32/)
+    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
+    ;res@cnLevels             = (/-32,-24,-16,-10,-5,-1,-0.5,-0.1, 0, 0.1, 0.5, 1, 5, 10, 16, 24, 32/)
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
@@ -250,6 +258,9 @@ printVarSummary(var)
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     res_line@cnLevelSpacingF       = 10        ; set contour interval
+    res_line@gsnCenterString      = ""
+    res_line@gsnLeftString    = " "
+    res_line@gsnRightString   = " "
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -263,9 +274,9 @@ printVarSummary(var)
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then 
-    minlvl = (/  100,-24,-24/);
-    maxlvl = (/16600, 24, 24/);
-    spacig = (/ 1100, 3 , 3 /);
+    minlvl = (/  100,-35,-35/);
+    maxlvl = (/16600, 35, 35/);
+    spacig = (/ 1100, 5 , 5 /);
 end if
 
 if(nv.eq.1) then 
@@ -281,15 +292,15 @@ if(nv.eq.2) then
 end if
 
 if(nv.eq.3) then 
-    minlvl = (/-32,-4 ,-4 /);
-    maxlvl = (/ 32, 4 , 4 /);
-    spacig = (/ 4 ,0.5,0.5/);
+    minlvl = (/-28,-7,-7/);
+    maxlvl = (/ 28, 7, 7/);
+    spacig = (/ 4 , 1, 1/);
 end if
 
 if(nv.eq.4) then 
-    minlvl = (/-40,-1.6,-1.6/);
-    maxlvl = (/ 20, 1.6, 1.6/);
-    spacig = (/ 4 , 0.2, 0.2/);
+    minlvl = (/-40,-2.1,-2.1/);
+    maxlvl = (/ 20, 2.1, 2.1/);
+    spacig = (/ 4 , 0.3, 0.3/);
 end if
 
 if(nv.eq.5) then 
@@ -298,30 +309,37 @@ if(nv.eq.5) then
     spacig = (/ 4 , 0.3, 0.3/);
 end if
 
+    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
-if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
-    res@cnFillPalette = "BlueDarkRed18"
-   ;blue and red, has 18 colors,2-10 is blue
-else
-   res@cnFillPalette = "precip3_16lev"
-   ;blue and yellow and red, has 17 colors,2-18,2 is white
-end if 
-    do nm = 0,nmonth-1,1
-        np = nmonth*nc + nm
+;if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
+;    res@cnFillPalette = "BlueDarkRed18"
+;   ;blue and red, has 18 colors,2-10 is blue
+;else
+;   res@cnFillPalette = "precip3_16lev"
+;   ;blue and yellow and red, has 17 colors,2-18,2 is white
+;end if 
+    ;do nm = 0,nmonth-1,1
+    ;    np = nmonth*nc + nm
+        np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) + " (" + unit(nv) + ")"
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv); + " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
-        ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        ;res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
-        ;res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
-        ;res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
+        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
+        if(nv.eq.3) then 
+        line(np) = gsn_csm_pres_hgt(wks,u(0,nm,:,:),res_line)
+        overlay(plot(np),line(np))
+        end if
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
 end do ;for the month 
 
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/nmonth,ncase/),resp)
 ;end do
 end
 

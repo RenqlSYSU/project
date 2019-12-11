@@ -9,10 +9,10 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG/spectral-20190120"
 area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 25 ,25  , 22  , 30  /)
-latn = (/ 40 ,40  , 30  , 45  /)
-lonl = (/ 0  ,70  ,107  ,115  /)
-lonr = (/360 ,105 ,130  ,130  /)
+lats = (/ 35 ,20  , 22  , 30  /)
+latn = (/ 35 ,40  , 30  , 45  /)
+lonl = (/ 0  , 0  ,107  ,115  /)
+lonr = (/180 ,180 ,130  ,130  /)
 lon_spcing = 45
 lev  = (/300,200/) ;500,400,300,
 var_name = (/"U","V","T","vort"/)

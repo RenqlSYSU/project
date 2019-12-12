@@ -7,9 +7,9 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 path    = "/home/ys17-19/renql"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-month_s = 1
-month_e = 12
+case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
+month_s = 4
+month_e = 8
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG6h-CTRL"/)
@@ -36,7 +36,7 @@ if(case_option.eq.3) then
     case    = (/"F2000","NG58","NG58-F2000"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years    = ispan(1,22,1)   ;the calculate time
+    years    = ispan(1,29,1)   ;the calculate time
 end if
 
 

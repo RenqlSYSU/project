@@ -14,8 +14,11 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+geo = True
+month_s = 5
+month_e = 8
 
 ;parameter for bw_bandpass_filter
 ca = 7.0 ;day
@@ -28,11 +31,13 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_Qd_Qeddy_A-g.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
-else
+end if  
+
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
@@ -44,7 +49,19 @@ else
     end if  
 end if
 
-var_name= (/"U","V","T","OMEGA"/)
+if(case_option.eq.2) then
+    case    = (/"F2000","NG58"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+    years    = ispan(1,29,1)   ;the calculate time
+    if(option.eq.0) then
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
+    else                                                      
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
+    end if  
+end if
+
+var_name= (/"U","V","T","OMEGA","Z3"/)
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -54,20 +71,19 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -2 ;-90 ;
+lats =  10 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
 lev2 = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
 lev3 = fspan(1000,100,19)
 lev = lev2
-month_s = 1
-month_e = 8
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+files := systemfunc("ls "+filein(0)+"*.daily."+var_name(0)+".nc" )
+f    = addfile(files(0),"r")
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 vars:= f->$var_name(0)$(select_time,{lev},{lats:latn},{lonl:lonr})
@@ -94,7 +110,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,2,1 
+do nf = 1,1,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -106,30 +122,71 @@ u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 w     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+z     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
 nv = 0
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
 u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
 t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 3
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
 w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+
+nv = 4
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
 u = linmsg_n(u,-1,ilon)
 v = linmsg_n(v,-1,ilon)
 t = linmsg_n(t,-1,ilon)
 w = linmsg_n(w,-1,ilon)
+z = linmsg_n(z,-1,ilon)
 printVarSummary(w)
+
+if(geo) then
+coslat = conform(z(:,:,0,:,:),cos(lat),ilat-1)
+f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat-1)
+z = z*g
+lat1 = vars&lat
+lat_ind = ind(lat1.le.90.0)
+lat2 = lat(lat_ind)
+printVarSummary(lat_ind)
+do nlv = 0,1,1
+    nl = 1 - nlv
+    z1 = z(:,:,nl+1,lat_ind,:) + R*t(:,:,nl,lat_ind,:)*(lev(nl+1)-lev(nl))*100/lev(nl)/100
+    u1 = -center_finite_diff_n(z1,lat2,cyclic,opt,ilat-1)/f0(:,:,lat_ind,:)/a        ;(:,:,nl,lat_ind,:)
+    v1 =  center_finite_diff_n(z1,lon ,loncyc,opt,ilon-1)/f0(:,:,lat_ind,:)/a/coslat(:,:,lat_ind,:) ;(:,:,nl,lat_ind,:)
+    t1 = -lev(nl)*100*(z(:,:,nl+1,lat_ind,:)-z1)/((lev(nl+1)-lev(nl))*100)/R
+    print(max(abs(z(:,:,nl,lat_ind,:)-z1)))
+    print(max(abs(u(:,:,nl,lat_ind,:)-u1)))
+    print(max(abs(v(:,:,nl,lat_ind,:)-v1)))
+    print(max(abs(t(:,:,nl,lat_ind,:)-t1)))
+    print(z(1,1,nl,10,10:20)-z1(1,1,10,10:20))
+    print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
+    print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
+    print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
+    z(:,:,nl,lat_ind,:) = (/tofloat(z1)/)
+    u(:,:,nl,lat_ind,:) = (/tofloat(u1)/)
+    v(:,:,nl,lat_ind,:) = (/tofloat(v1)/)
+    ;t(:,:,nl,lat_ind,:) = (/tofloat(t1)/)
+end do
+delete([/coslat,f0,u1,v1,z1,t1,z,lat1,lat_ind,lat2/])
+end if
 
 lev := lev3
 nlev = dimsizes(lev)
@@ -175,7 +232,7 @@ Qd    =   (clm_u/a/coslat4d) * center_finite_diff_n(clm_t,lon,loncyc,opt,ilon-1)
         + (clm_v/a         ) * center_finite_diff_n(clm_t,lat,cyclic,opt,ilat-1) \
         - sigm0 * clm_w 
 delete([/clm_u,clm_v,clm_t,clm_w/])
-delete([/coslat4d,tanlat4d/])
+delete([/coslat4d,tanlat4d,lev4d/])
 
 coslat = conform(Qeddy,cos(lat),ilat)
 tanlat = conform(Qeddy,tan(lat),ilat)
@@ -215,8 +272,9 @@ A@units     = "s^-2"
 ;==========================================================
 ;calc Qd foring and Qeddy forcing, dimension is 4d 
 ;============================================================
-sigm0 = conform(lev4d, wgt_areaave(sigm0,1.0,1.0,0), (/iyear,ilev-1/));cos(lat) 
+lev4d = conform(A,lev*100,ilev-1)
 sigm1 = sigm0*R/lev4d
+sigm1_m = conform(lev4d, wgt_areaave(sigm1,1.0,1.0,0), (/itime-1,ilev-1/));cos(lat) 
 delete(sigm0)
 f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 
@@ -226,8 +284,8 @@ f0    = conform(sigm1, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
 ;end if
 ;end do
 
-f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
-f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qd     = -f0*R*center_finite_diff_n((Qd   /sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
+f_Qeddy  = -f0*R*center_finite_diff_n((Qeddy/sigm1_m/lev4d),lev*100,cyclic,opt,ilev-1)
 delete(lev4d)
 delete(f0)
 
@@ -287,7 +345,7 @@ filevarattdef(ncdf,"f_Qeddy",f_Qeddy)
 filevarattdef(ncdf,"f_Qd"   ,f_Qd)
 
 ncdf->time = (/vars&time/)
-ncdf->lev  = (/lev/)
+ncdf->lev  = (/toint(lev)/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->sigm1 = (/sigm1/)

@@ -8,7 +8,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 
 begin
 path    = "/home/ys17-19/renql"
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
 na = 1
 month_s = 1
 month_e = 12
@@ -42,7 +42,7 @@ if(case_option.eq.3) then
     case    = (/"F2000","NG58","NG58-F2000"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years    = ispan(1,22,1)   ;the calculate time
+    years    = ispan(1,29,1)   ;the calculate time
 end if
 fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-clim_200U_daily_evolution_lat_time"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)

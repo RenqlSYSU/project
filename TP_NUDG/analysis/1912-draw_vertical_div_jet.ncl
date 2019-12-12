@@ -1,73 +1,24 @@
 ;*********************************************************************
-;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
-;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
-;then do the significance testing, the dot mean the difference is significance
+;calc and draw the climatic vertical distribution of divergence(shaded),
+;U (contour) and v&w(vector).
 ;                                                     by Ql Ren
-;                                                    2019/02/01
+;                                                    2019/12/12
 ;*********************************************************************************
 begin
-path    = "/home/ys17-19/renql/project/TP_NUDG"
-path1   = "/home/ys17-19/renql"
+path   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
-    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-    nsample = 27
-else
-    case1   = (/"TP_CTRL","TP_CR"/)
-    case2   = (/"CTRL"   ,"noTP"/)
-    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
-    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
-    nsample = 10
-end if
+vector = False
+draw_var = (/"Div"/)  ;this is the variable used to draw, can used as center string
+var_name = (/"U","V","OMEGA"/)
+unit     = (/"10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
+diff = False;True
 
-draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s"/)    ;this can be used as right string 
-draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy"/)  ;this is the variable used to draw, can used as center string
-lev  = (/1000,925,850,700,600,500,400,300,200/)
-nv = 6
-
-var_option = 3
-if(var_option.eq.0) then 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(0,3,1)
-filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-end if
-if(var_option.eq.1) then 
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
-filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-end if
-if(var_option.eq.2) then 
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"MJ","JA"/)
-imonth = ispan(0,1,1);(/4,5,6,7/)
-lev  := (/1000,925,850,700,600,500,400,300,200,100/)
-filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-end if
-if(var_option.eq.3) then 
-var_name = draw_var(nv) ;this is the var_name in data file
-months   = (/"JF","MA","MJ","JA"/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
-month_s = 1
+;months = (/"JF","MA","MJ","JA"/)
+months  = (/"May","Jun","Jul","Aug"/)
+nmonth = dimsizes(months)
+month_s = 5
 month_e = 8
-filein  = path1+(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                  "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-lev  := (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-;lev  := (/1000,925,850,700,600,500,400,300,200,100/)
-years    = ispan(1979,2005,1)   ;the calculate time
-end if
-
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11""eps";
+lev  = (/1000,925,850,700,600,500,400,300,200,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
@@ -79,18 +30,71 @@ lat_spacing = 15
 lon_spacing = 30
 na = 1
 
-f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
-phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-ncase  = dimsizes(case1)
-nmonth = dimsizes(imonth)
-nlat   = dimsizes(phis&lat)
-nlon   = dimsizes(phis&lon)
-nlev   = dimsizes(lev)
-var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
+if(case_option.eq.0) then
+    case1 = (/"CTRL","NG6h"/)
+    if(diff) then
+    case2 = (/"CTRL","NG6h-CTRL"/)
+    else
+    case2 = case1
+    end if
+    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+;                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    years    = ispan(1979,2005,1)   ;the calculate time
+end if
+
+if(case_option.eq.1) then
+    ;remove TP experiment, sample number is ten years 
+    case1 = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    if(diff) then
+    case2 = (/"CTRL","noTP-CTRL"/)
+    else
+    case2 = (/"CTRL","noTP"/)
+    end if
+    filein  = path + "/model/" + case1 + "/pro/" + case1 + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    years   = ispan(21,30,1)   ;the calculate time
+end if
+
+if(case_option.eq.2) then
+    case1 = (/"F2000","NG58"/)
+    if(diff) then
+    case2 = (/"F2000","NG58-F2000"/)
+    else
+    case2 = case1
+    end if
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+;                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+    years   = ispan(1,29,1)   ;the calculate time
+end if
+fig_name = path + "/project/TP_NUDG/analysis/fig/" + case1(0) + "_vertical_div_jet"
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+fig_out    = "pdf";"x11""eps";
+
+files := systemfunc("ls "+filein(0)+"*.daily.U.nc" )
+f      = addfile(files(0),"r")
+vars   = f->U(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+time   = cd_calendar(f->time,0)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+ntime = dimsizes(select_time)
+nyear = dimsizes(years)
+ncase = dimsizes(case1)
+nlat  = dimsizes(vars&lat)
+nlon  = dimsizes(vars&lon)
+nlev  = dimsizes(lev)
+u   = new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
+v   = new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
+u1  = new((/ncase,nmonth,nlev,nlat/),float)
+v1  = new((/ncase,nmonth,nlev,nlat/),float)
+var = new((/ncase,nmonth,nlev,nlat/),float)
+if(vector) then 
+w   = new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
+w1  = new((/ncase,nmonth,nlev,nlat/),float)
+end if
 
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
+    vect   = new((/ncase*nmonth/),graphic)
     line   = new((/ncase*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
@@ -108,61 +112,64 @@ var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
 ;================================================================
 ;read data
 ;====================================================================
-printVarSummary(var)
-if(var_option.eq.3) then 
-    f    = addfile(filein(0)+years(0)+".daily."+var_name+".nc","r")
-    time = cd_calendar(f->time,0)
-    select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
-    ntime = dimsizes(select_time)
-    nyear = dimsizes(years)
-    var0 = new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
-    
-    do nf = 0 , ncase-1,1
-    do nt = 0,nyear-1,1
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name+".nc","r")
-    var0(nf,nt,:,:,:,:) = f->$var_name$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    end do 
-    end do
-    var0 := dim_avg_n_Wrap(var0,1)
-    
-    do nm = 0, nmonth-1, 1
-    mons = 2*nm + 1
-    mone = 2*nm + 2
-    select_time1 := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
-    var(:,nm,:,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:,:),1)
-    end do
-else
-    do nf = 0 ,ncase-1, 1
-    print(filename(nf) + draw_var(nv) + ".nc")
-    f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-    var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    end do
-end if
-printVarSummary(var)
-var := dim_avg_n_Wrap(var,4)
-
-if(nv.eq.1) then
-    var = var*9.8*10000 ;dzdt,transform unit from m/s to m2/s3
-end if
-
-if(nv.eq.3) then
-    u = mask(var, var.lt.0 , False) 
-    copy_VarMeta(var,u)
-end if
-
-if(nv.eq.4) then
-    var = var-273.15 ;T,transform unit from K to C
-end if
-
-if(nv.eq.5) then
-    var = -var*10^6 ;transform dTdy to -dTdy
-end if
-
-do nf = 0 ,ncase-2,1
-var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
+do nf = 0 , ncase-1,1
+do nt = 0,nyear-1,1
+    nv = 0
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f      = addfile(files(nt),"r")
+    u(nf,nt,:,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    nv = 1
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f      = addfile(files(nt),"r")
+    v(nf,nt,:,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    if(vector) then 
+    nv = 2
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f      = addfile(files(nt),"r")
+    w(nf,nt,:,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
+end do 
 end do
+var0 = uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
+var0 = var0*10^6
+var0 := dim_avg_n_Wrap(var0,1)
+u := dim_avg_n_Wrap(u,1)
+v := dim_avg_n_Wrap(v,1)
+var0 := dim_avg_n_Wrap(var0,4)
+u := dim_avg_n_Wrap(u,4)
+v := dim_avg_n_Wrap(v,4)
+if(vector) then 
+w := dim_avg_n_Wrap(w,1)
+w := dim_avg_n_Wrap(w,4)
+end if
 
+do nm = 0, nmonth-1, 1
+mons = nm + 5
+mone = nm + 5
+select_time1 := ind(time(select_time,1).ge.mons.and.time(select_time,1).le.mone)
+var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
+u1(:,nm,:,:) = dim_avg_n_Wrap(u(:,select_time1,:,:),1)
+v1(:,nm,:,:) = dim_avg_n_Wrap(v(:,select_time1,:,:),1)
+if(vector) then 
+w1(:,nm,:,:) = dim_avg_n_Wrap(w(:,select_time1,:,:),1)
+end if
+end do
 printVarSummary(var)
+
+if(diff) then 
+var(1,:,:,:)= var(1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
+u1(1,:,:,:)= u1(1,:,:,:) - u1(0,:,:,:)   ;get the difference between CTRL and NUDG
+v1(1,:,:,:)= v1(1,:,:,:) - v1(0,:,:,:)   ;get the difference between CTRL and NUDG
+if(vector) then 
+w1(1,:,:,:)= w1(1,:,:,:) - w1(0,:,:,:)   ;get the difference between CTRL and NUDG
+copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
+end if
+end if
+;u1 = mask(u1, u1.lt.0 , False) 
+printVarSummary(var)
+copy_VarMeta(vars(:,:,0),var(0,0,:,:))
+copy_VarMeta(vars(:,:,0),u1(0,0,:,:))
+copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -255,6 +262,8 @@ printVarSummary(var)
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 3.0
     res_line@cnLineColor      = "black"
+    res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourNegLineDashPattern = 5
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     res_line@cnLevelSpacingF       = 10        ; set contour interval
@@ -273,44 +282,18 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(nv.eq.0) then 
-    minlvl = (/  100,-35,-35/);
-    maxlvl = (/16600, 35, 35/);
-    spacig = (/ 1100, 5 , 5 /);
-end if
-
-if(nv.eq.1) then 
-    minlvl = (/-4 ,-0.8,-0.8/);
-    maxlvl = (/ 4 , 0.8, 0.8/);
-    spacig = (/0.5, 0.1, 0.1/);
-end if
-
-if(nv.eq.2) then 
-    minlvl = (/-80,-24,-24/);
-    maxlvl = (/ 80, 24, 24/);
-    spacig = (/ 10, 3 , 3 /);
-end if
-
-if(nv.eq.3) then 
-    minlvl = (/-28,-7,-7/);
-    maxlvl = (/ 28, 7, 7/);
-    spacig = (/ 4 , 1, 1/);
-end if
-
-if(nv.eq.4) then 
-    minlvl = (/-40,-2.1,-2.1/);
-    maxlvl = (/ 20, 2.1, 2.1/);
-    spacig = (/ 4 , 0.3, 0.3/);
-end if
-
-if(nv.eq.5) then 
-    minlvl = (/ 0 ,-2.4,-2.4/);
-    maxlvl = (/ 60, 2.4, 2.4/);
-    spacig = (/ 4 , 0.3, 0.3/);
+if(diff) then 
+    minlvl = (/-7,-7/);
+    maxlvl = (/ 7, 7/);
+    spacig = (/ 1, 1/);
+else
+    minlvl = (/-7,-7/);
+    maxlvl = (/ 7, 7/);
+    spacig = (/ 1, 1/);
 end if
 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nm = 0,nmonth-1,1
+;do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
 ;if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
 ;    res@cnFillPalette = "BlueDarkRed18"
@@ -319,27 +302,26 @@ do nc = 0, ncase-1,1
 ;   res@cnFillPalette = "precip3_16lev"
 ;   ;blue and yellow and red, has 17 colors,2-18,2 is white
 ;end if 
-    ;do nm = 0,nmonth-1,1
-    ;    np = nmonth*nc + nm
-        np = ncase*nm + nc
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv); + " (" + unit(nv) + ")"
+    do nm = 0,nmonth-1,1
+        np = nmonth*nc + nm
+        ;np = ncase*nm + nc
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(nm) 
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var + " (" + unit + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
-        if(nv.eq.3) then 
-        line(np) = gsn_csm_pres_hgt(wks,u(0,nm,:,:),res_line)
+        line(np) = gsn_csm_pres_hgt(wks,u(nc,nm,:,:),res_line)
         overlay(plot(np),line(np))
-        end if
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
 end do ;for the month 
 
-    gsn_panel(wks,plot,(/nmonth,ncase/),resp)
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
 ;end do
 end
 

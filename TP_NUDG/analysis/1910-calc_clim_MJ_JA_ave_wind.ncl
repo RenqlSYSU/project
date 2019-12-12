@@ -23,9 +23,11 @@ if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_MJ_JA_ave_"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_2month_ave_"
     years    = ispan(1979,2005,1)   ;the calculate time
-else
+end if
+
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
@@ -33,23 +35,29 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
+if(case_option.eq.2) then
+    case    = (/"F2000","NGall","NG58"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+    years   = ispan(1,2,1)   ;the calculate time
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
+end if
 ;area: east Asia
-lats = -20 ;-90 ;
+lats = 0 ;-90 ;
 latn = 90  ;90  ;
 lonl = 0  ;0   ;
 lonr = 360 ;360 ;
-lev  = (/850,500,300,200,100/)
-month_s = 5
-month_e = 8
+lev  = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/850,500,300,200,100/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 time1 = cd_calendar(f->time,0)
 select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
-nmonth = 2
 ntime = dimsizes(select_time1)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -62,7 +70,7 @@ var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nv = 0 ,3 ,1 
+;do nv = 0 ,3 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -80,7 +88,8 @@ if(nv.eq.7) then
     var(nt,:,:,:,:) = f->$var_name(2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
 if(nv.lt.5) then
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f      = addfile(files(nt),"r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
@@ -97,10 +106,12 @@ if(nv.eq.5) then ;calc dzdt
 end if
 
 time = cd_calendar(f->time(select_time1),0)
-select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
-var_month(:,0,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
-select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
-var_month(:,1,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+do nm = 0, nmonth-1, 1
+    month_s = 2*nm + 1
+    month_e = 2*nm + 2
+    select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+    var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+end do
 
 if(nv.eq.6) then ;calc dzdt
 var_month = var_month - conform(var_month,dim_avg_n(var_month,4),(/0,1,2,3/))
@@ -139,7 +150,7 @@ fileattdef(ncdf,fileAtt)
 
 ;Define all Coordinate
 dimNames = (/"month","lev","lat","lon"/)
-dimSizes = (/  2    ,nlev ,nlat ,nlon/)
+dimSizes = (/nmonth ,nlev ,nlat ,nlon/)
 dimUnlim = (/False  ,False,False,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
@@ -158,13 +169,12 @@ filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"month_ave",var_month)
 filevarattdef(ncdf,"month_vari",var_month)
 
-ncdf->month  = (/56,78/)
 ncdf->lev = (/lev/)
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->month_vari  = (/month_vari/)
 end do
-end do ;loop of variable
+;end do ;loop of variable
 end
 

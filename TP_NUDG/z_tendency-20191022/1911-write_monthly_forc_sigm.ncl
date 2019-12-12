@@ -14,15 +14,15 @@
 begin
 path    = "/home/ys17-19/renql"
 data_type = (/"double","float"/)
-ntype = 0
+ntype = 1
 
 obs_option = False ;True
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 year_option = False;True
 csa = False 
 ave_sigm = False;True 
-nc = 0
-ntime = 4
+nc = 1
+ntime = 123
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -33,14 +33,19 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NGall","NG58"/)
+    case    = (/"F2000","NG58","NGall"/)
 end if
 
 if(.not.(obs_option)) then 
+if(ntime.gt.10) then 
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
+end if
 if(ntime.eq.4) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon47.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
-else
+end if
+if(ntime.eq.4) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_DJF_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
@@ -81,7 +86,7 @@ f    = addfile(filein(nc),"r")
 if(ntime.eq.1) then 
 vars:= f->$var_name(0)$({lev},{lats:latn},{lonl:lonr})
 else
-vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
+vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 end if
 ;time = cd_calendar(f->time,0)
 ;select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
@@ -90,9 +95,6 @@ nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nvar  = dimsizes(var_name)
-;nmonth = dimsizes(vars&month)
-;forc  = new((/nvar,ntime,nlev,nlat,nlon/),double)
-;q3    = new((/3   ,ntime,2   ,nlat,nlon/),double)
 
 if(ntype.eq.0) then 
 forc_m  = new((/nvar,ntime,nlev,nlat,nlon/),double)
@@ -116,7 +118,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, 2, 2
+do nf = 0, nc, 1
 ;==========================================================
 ;read the data
 ;============================================================
@@ -131,7 +133,11 @@ else
 if(ntime.eq.1) then 
     forc_m(nv,0,:,:,:) = f->$var_name(nv)$({lev},{lats:latn},{lonl:lonr})
 else
+    if(ntype.eq.0) then 
     forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    else
+    forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
+    end if
 end if
 end if
 end do
@@ -143,8 +149,11 @@ else
 if(ntime.eq.1) then 
     q3_m(nv,0,:,:,:)  = f->$var_name2(nv)$({lev2},{lats:latn},{lonl:lonr})
 else
-;    q3(nv,:,:,:,:)  = f->$var_name2(nv)$(select_time,{(/1000,100/)},{lats:latn},{lonl:lonr})
+    if(ntype.eq.0) then 
     q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
+    else
+    q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
+    end if
 end if
 end if
 end do
@@ -156,9 +165,18 @@ else
 if(ntime.eq.1) then 
 sigm1 := f->sigm1({lev},{lats:latn},{lonl:lonr})
 sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
-else
+end if
+if(ntime.eq.4) then 
 sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
 sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
+end if
+if(ntime.gt.13) then 
+if(ntype.eq.0) then 
+sigm1 := tofloat(dim_avg_n_Wrap(f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0))
+else
+sigm1 := dim_avg_n_Wrap(f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
+end if
+sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
 end if
 end if
 
@@ -273,18 +291,24 @@ else
 f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat));45.0*pi/180.0
 ;f0    = todouble(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(45.0*pi/180.0),ilat));45.0*pi/180.0
 end if
-else
-coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
-coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
-coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
-f0    = tofloat(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
-end if
-
 term1 = center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev)/2/dlev4 
 term2 = 1/sigm1/dlev4/dlev4 
 coe211 = f0*f0*a*a*(term2 + term1);
 coe011 = f0*f0*a*a*(term2 - term1);
 coe111 = -2/coslat/coslat/dlon/dlon - 2/dlat/dlat - 2*f0*f0*a*a*term2
+else
+coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
+coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
+coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
+f0    = tofloat(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
+
+term1 = tofloat(center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev)/2/dlev4 )
+term2 = tofloat(1/sigm1/dlev4/dlev4) 
+coe211 = tofloat(f0*f0*a*a*(term2 + term1));
+coe011 = tofloat(f0*f0*a*a*(term2 - term1));
+coe111 = tofloat(-2/coslat/coslat/dlon/dlon - 2/dlat/dlat - 2*f0*f0*a*a*term2)
+end if
+
 coe111 = where(coe111.eq.0,1e-5,coe111)
 delete([/term1,term2,dlev4/])
 
@@ -323,8 +347,8 @@ end if
 
 print(forc_m(0,0,0,4,4:9))
 print(forc_m(1,0,1,4:9,4))
-print(coe110(0,0,4,4,4:9))
-printVarSummary(coe011)
+print(coe111(0,0,4,4,4:9))
+printVarSummary(coe211)
 printVarSummary(f0)
 
 ;==========================================================
@@ -349,8 +373,8 @@ end do
 end do
 end do
 
-do nv = 0, nvar-1, 1
-do nt = 0, ntime-1, 1
+do nv = 0, 0,1;nvar-1, 1
+do nt = 0, 0,1;ntime-1, 1
 do nl = 0, nlev-1, 1
     fbindirwrite(fileout(nf),coe111(nv,nt,nl,:,:))
     fbindirwrite(fileout(nf),coe110(nv,nt,nl,:,:))

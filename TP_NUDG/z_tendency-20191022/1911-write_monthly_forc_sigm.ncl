@@ -39,13 +39,13 @@ end if
 if(.not.(obs_option)) then 
 if(ntime.gt.10) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-EA.dat"
 end if
 if(ntime.eq.4) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon47.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
-if(ntime.eq.4) then 
+if(ntime.eq.1) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_DJF_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
@@ -70,8 +70,8 @@ pi = atan(1.0)*4
 ;area: east Asia
 lats = 10  ;-90 ;
 latn = 90  ; 90 ;
-lonl = 0  ; 0  ;
-lonr = 360 ;360 ;
+lonl = 30  ; 0  ;
+lonr = 150 ;360 ;
 lev2 = (/1000,100/) ;hPa
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
 lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
@@ -301,7 +301,6 @@ coe110 = tofloat(1/(coslat*coslat*dlon*dlon)) ;111 means z,y,x
 coe101 = tofloat(1/dlat/dlat + tanlat/2/dlat)
 coe121 = tofloat(1/dlat/dlat - tanlat/2/dlat)
 f0    = tofloat(conform(forc_m,2*(2*pi/24.0/3600.0)*sin(lat),ilat))
-
 term1 = tofloat(center_finite_diff_n(1/sigm1,lev*100,cyclic,opt,ilev)/2/dlev4 )
 term2 = tofloat(1/sigm1/dlev4/dlev4) 
 coe211 = tofloat(f0*f0*a*a*(term2 + term1));
@@ -373,8 +372,8 @@ end do
 end do
 end do
 
-do nv = 0, 0,1;nvar-1, 1
-do nt = 0, 0,1;ntime-1, 1
+do nv = 0, 0,1 ;nvar-1, 1
+do nt = 0, 0,1 ;ntime-1, 1
 do nl = 0, nlev-1, 1
     fbindirwrite(fileout(nf),coe111(nv,nt,nl,:,:))
     fbindirwrite(fileout(nf),coe110(nv,nt,nl,:,:))

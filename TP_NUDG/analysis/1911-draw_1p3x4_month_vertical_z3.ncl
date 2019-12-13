@@ -26,7 +26,7 @@ draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy"/)  ;this is the variable used t
 unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s"/)    ;this can be used as right string 
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy"/)  ;this is the variable used to draw, can used as center string
 lev  = (/1000,925,850,700,600,500,400,300,200/)
-nv = 6
+nv = 3
 
 var_option = 3
 if(var_option.eq.0) then 
@@ -257,7 +257,7 @@ printVarSummary(var)
     res_line@cnLineColor      = "black"
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    res_line@cnLevelSpacingF       = 8        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "

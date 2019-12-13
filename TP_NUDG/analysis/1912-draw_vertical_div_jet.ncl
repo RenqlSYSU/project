@@ -8,10 +8,11 @@ begin
 path   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 vector = False
-draw_var = (/"Div"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Div","Vor"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"U","V","OMEGA"/)
-unit     = (/"10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
-diff = False;True
+unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
+diff = True
+dnv = 1
 
 ;months = (/"JF","MA","MJ","JA"/)
 months  = (/"May","Jun","Jul","Aug"/)
@@ -130,8 +131,17 @@ do nt = 0,nyear-1,1
     end if
 end do 
 end do
+
+if(dnv.eq.0) then 
 var0 = uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
 var0 = var0*10^6
+end if
+
+if(dnv.eq.1) then 
+var0 = uv2vr_cfd ( u, v, u&lat, u&lon, 2 )
+var0 = var0*10^6
+end if
+
 var0 := dim_avg_n_Wrap(var0,1)
 u := dim_avg_n_Wrap(u,1)
 v := dim_avg_n_Wrap(v,1)
@@ -144,9 +154,10 @@ w := dim_avg_n_Wrap(w,4)
 end if
 
 do nm = 0, nmonth-1, 1
-mons = nm + 5
-mone = nm + 5
-select_time1 := ind(time(select_time,1).ge.mons.and.time(select_time,1).le.mone)
+mons = nm + 5 ;2*nm + 1
+mone = nm + 5 ;2*nm + 2
+time1   = cd_calendar(f->time(select_time),0)
+select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
 var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
 u1(:,nm,:,:) = dim_avg_n_Wrap(u(:,select_time1,:,:),1)
 v1(:,nm,:,:) = dim_avg_n_Wrap(v(:,select_time1,:,:),1)
@@ -164,8 +175,10 @@ if(vector) then
 w1(1,:,:,:)= w1(1,:,:,:) - w1(0,:,:,:)   ;get the difference between CTRL and NUDG
 copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
 end if
+u1(0,:,:,:) = mask(u1(0,:,:,:), u1(0,:,:,:).lt.0.0 , False)
+else
+u1 = mask(u1, u1.lt.0.0 , False)
 end if
-;u1 = mask(u1, u1.lt.0 , False) 
 printVarSummary(var)
 copy_VarMeta(vars(:,:,0),var(0,0,:,:))
 copy_VarMeta(vars(:,:,0),u1(0,0,:,:))
@@ -266,7 +279,7 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res_line@gsnContourNegLineDashPattern = 5
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    res_line@cnLevelSpacingF       = 8        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
@@ -282,14 +295,16 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(diff) then 
+if(dnv.eq.0) then 
     minlvl = (/-7,-7/);
     maxlvl = (/ 7, 7/);
     spacig = (/ 1, 1/);
-else
-    minlvl = (/-7,-7/);
-    maxlvl = (/ 7, 7/);
-    spacig = (/ 1, 1/);
+end if
+
+if(dnv.eq.1) then 
+    minlvl = (/-21,-21/);
+    maxlvl = (/ 21, 21/);
+    spacig = (/ 3 , 3 /);
 end if
 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -306,14 +321,19 @@ do nc = 0, ncase-1,1
         np = nmonth*nc + nm
         ;np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(nm) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var + " (" + unit + ")"
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(dnv) + " (" + unit(dnv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
-        line(np) = gsn_csm_pres_hgt(wks,u(nc,nm,:,:),res_line)
+        if(diff.and.(nc.eq.1)) then
+        res_line@cnLevelSpacingF       = 2        ; set contour interval
+        else
+        res_line@cnLevelSpacingF       = 8        ; set contour interval
+        end if
+        line(np) = gsn_csm_pres_hgt(wks,u1(nc,nm,:,:),res_line)
         overlay(plot(np),line(np))
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))

@@ -14,7 +14,7 @@ program iteration
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 !NCEP1
     !integer, parameter :: nlat = 31 , nlon = 144 , ilog  = 10 , ifile = 12
     integer, parameter :: pr = 4 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 123, nlev = 19
-    integer, parameter :: nlat = 85 , nlon = 288 , ilog  = 10 , ifile = 12
+    integer, parameter :: nlat = 85 , nlon = 97 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
     character(len=200) :: logname, fileout, filename
@@ -41,7 +41,7 @@ program iteration
     
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
-    nc = 6
+    nc = 4
     if(nc.eq.1) then 
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month_djf.dat"     
@@ -61,17 +61,17 @@ program iteration
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_month.dat"     
         logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_djf_1-8.txt"
     else if(nc.eq.4) then
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/F2000-Clim_4f6c_month.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/F2000-Clim_dzdt_month.dat"     
-        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_1-8-F2000.txt"
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/F2000-Clim_4f6c_month-EA.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/F2000-Clim_dzdt_month-EA.dat"     
+        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_1-8-F2000-EA.txt"
     else if(nc.eq.5) then
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NGall-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NGall-Clim_dzdt_month.dat"     
         logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_1-8-NGall.txt"
     else 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_4f6c_month.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_dzdt_month.dat"     
-        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_1-8-NG58.txt"
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_4f6c_month-EA.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_dzdt_month-EA.dat"     
+        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_1-8-NG58-EA.txt"
     end if
     
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
@@ -148,9 +148,9 @@ program iteration
         end do
     
     !boundary conditions
-        dzdt(1   ,:,:,:,:) = dzdt(nlon   ,:,:,:,:) !Periodic boundary for x
-        !dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
-        !dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
+        !dzdt(1   ,:,:,:,:) = dzdt(nlon   ,:,:,:,:) !Periodic boundary for x
+        dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
+        dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
         
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
@@ -163,7 +163,7 @@ program iteration
         dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
         
         do nv = 1, nvar ,1 
-            write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,16,1,nv)
+            write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(51,29,10,1,nv)
         end do
         do nv = 1, nvar ,1 
             diff(nv) = maxval(abs(dzdt(:,:,:,:,nv)-dzdt0(:,:,:,:,nv)))
@@ -174,8 +174,8 @@ program iteration
             exit
         end if 
     end do
-    write(ilog,*) dzdt(130:150:4,30,16,1,1)
-    write(ilog,*) dzdt(130:150:4,30,10,1,1)
+    write(ilog,*) dzdt(61:81:4,29,10,1,1)
+    write(ilog,*) dzdt(61:81:4,29,11,1,1)
     
 !========================================================================
 !save the data

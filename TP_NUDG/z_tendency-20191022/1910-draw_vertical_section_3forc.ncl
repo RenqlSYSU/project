@@ -7,19 +7,20 @@ begin
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = False;True  ;20191205, control the draw of jet stream
+jet_option = True  ;20191205, control the draw of jet stream
 fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
-na = 1 ; "TP","EA","NH","CA"
 
 ;months  = (/"DJF"/)
-;months  = (/"JF","MA","MJ","JA"/)
+months  = (/"JF","MA","MJ","JA"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
-months  = (/"Apr","May","Jun","Jul"/)
+;months  = (/"Apr","May","Jun","Jul"/)
 nmonth = dimsizes(months)
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
-lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+lev    = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
+lev_u  = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
+;lev_u  = (/1000,925,850,700,600,500,400,300,200,100/)
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
 
 do na = 1,1,1
@@ -35,8 +36,8 @@ if(var_option.eq.1) then
 end if
 if(var_option.eq.2) then 
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
     nnv = 4  ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
@@ -111,6 +112,8 @@ if(case_option.eq.2) then
     nsample = 27
 end if
 
+;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 if(var_option.lt.2)
     if(month_option) then
     if(nmonth.eq.1) then 
@@ -169,7 +172,11 @@ else
     vars := f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 else
+    if((var_option.eq.2).and.(nnv.eq.5)) then 
+    vars := f->$var_name(1)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    else
     vars := f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
 end if
 if(.not.(month_option)) then 
     time = cd_calendar(f->time,0)
@@ -177,10 +184,13 @@ if(.not.(month_option)) then
     ntime = dimsizes(select_time)
     var   := new((/ncase,nvar,ntime ,nlev,nlat,nlon/),double)
 end if
+nlev2 = dimsizes(lev_u)
 var_m := new((/ncase,nvar,nmonth,nlev,nlat,nlon/),double)
+var_u := new((/ncase,nmonth,nlev2,nlat/),double)
 
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
+    line     = new((/nvar*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -195,17 +205,14 @@ var_m := new((/ncase,nvar,nmonth,nlev,nlat,nlon/),double)
 ;================================================================
 ;read data
 ;====================================================================
-if(jet_option) then
-    f = addfile(path + "mdata/" + case1 + "_Clim_2month_uwnd.nc","r")
-    u := f->month_ave(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    u := dim_avg_n_Wrap(u,3)
-    u = mask(u, u.lt.0 , False) 
-    printVarSummary(u)
-    copy_VarMeta(vars(:,:,0),u(0,:,:))
-end if
-
 if(month_option) then
 do nc = 0, ncase-1, 1
+    if(jet_option) then
+    f = addfile(jetfile(nc),"r")
+    u := f->month_ave(:,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var_u(nc,:,:,:) = dim_avg_n_Wrap(u,3)
+    end if
+
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
     if(nmonth.eq.1)
@@ -218,7 +225,13 @@ do nc = 0, ncase-1, 1
         end do
     end if
     else
+    if((var_option.eq.2).and.(nnv.eq.5)) then 
+        dudt = f->$var_name(1)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        dvdt = f->$var_name(4)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,0:(nvar-2),:,:,:,:) = uv2vr_cfd( dudt, dvdt, dudt&lat, dudt&lon, 2 )
+    else
         var_m(nc,0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
     end if
 end do
 else
@@ -243,6 +256,12 @@ var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
+if(jet_option) then 
+    var_u = mask(var_u,var_u.ge.0,True)
+    copy_VarMeta(u(0,:,:,0),var_u(0,0,:,:))
+    printVarSummary(var_u)
+end if
+
 if(var_option.eq.0) then 
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
 end if
@@ -264,8 +283,11 @@ end if
 if(nnv.eq.3) then
     var_m = var_m*10^12
 end if
-if(nnv.eq.3) then
+if(nnv.eq.4) then
     var_m = var_m*10^6
+end if
+if(nnv.eq.5) then
+    var_m = var_m*10^11
 end if
 end if
 
@@ -380,9 +402,14 @@ end if
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 3.0
     res_line@cnLineColor      = "black"
+    res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourNegLineDashPattern = 5
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    res_line@cnLevelSpacingF       = 8        ; set contour interval
+    res_line@gsnCenterString      = ""
+    res_line@gsnLeftString    = " "
+    res_line@gsnRightString   = " "
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -434,10 +461,15 @@ if(nnv.eq.3) then ;dbdt
     maxlvl = (/ 21, 21, 21, 21/);
     spacig = (/  3,  3,  3,  3/);
 end if
-if(nnv.eq.4) then ;dbdt
+if(nnv.eq.4) then ;dvdt
     minlvl = (/-21,-21,-21,-21/);
     maxlvl = (/ 21, 21, 21, 21/);
     spacig = (/  3,  3,  3,  3/);
+end if
+if(nnv.eq.5) then ;dVortdt
+    minlvl = (/-14,-14,-14,-14/);
+    maxlvl = (/ 14, 14, 14, 14/);
+    spacig = (/  2,  2,  2,  2/);
 end if
 end if
 
@@ -473,9 +505,9 @@ do nv = 0,nvar-1,1
     np = nm*nvar + nv
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.2) then 
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nnv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -487,8 +519,7 @@ do nv = 0,nvar-1,1
     print(min(var_m(fnc,nv,nm,:,:)))
     
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,u(nm,:,:),res_line)
-    ;line(np) = gsn_csm_contour(wks,u(nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
     overlay(plot(np),line(np))
     end if
 end do 

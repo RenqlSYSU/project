@@ -14,11 +14,11 @@
 begin
 path    = "/home/ys17-19/renql"
 obs_option = False
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
 ntime = 4
-nc = 2 
+nc = 1 
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -33,9 +33,9 @@ if(case_option.eq.2) then
 end if
 
 if(.not.(obs_option)) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon47.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon.nc"
 filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month_lon47.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month_lon_EA.nc"
 else
 if(ntime.eq.1) then 
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
@@ -61,8 +61,8 @@ print(pi)
 ;area: east Asia
 lats = 10 ;-20 ;-90 ;
 latn = 90  ; 90 ;
-lonl = 0  ; 0  ;
-lonr = 360 ;360 ;
+lonl = 30  ; 0  ;
+lonr = 150 ;360 ;
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
@@ -105,12 +105,12 @@ dlev(0) = dlev(1)
 dlev5  = conform(dzdt,dlev,ilev)
 
 opt    = 0     ;used by center_finite_diff_n, no meanging 
-loncyc = True ;used by center_finite_diff_n
+loncyc = False;True ;used by center_finite_diff_n
 cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, nc, 2 
+do nf = 0, nc, 1
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -125,9 +125,9 @@ do nz = 0, nlev-1, 1
 end do
 end do
 end do
-print(dzdt(0:(nvar-1),0,9,28,119))
-print(dzdt(0,0,9 ,28,99:139:4))
-print(dzdt(0,0,10,28,99:139:4))
+print(dzdt(0:(nvar-1),0,9,28,50))
+print(dzdt(0,0,9 ,28,60:80:4))
+print(dzdt(0,0,10,28,60:80:4))
 
 ;==========================================================
 ;define coefficient and calc dzdt

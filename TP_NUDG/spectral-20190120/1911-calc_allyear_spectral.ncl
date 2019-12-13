@@ -14,8 +14,10 @@ latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 0  ,70  ,107  ,115  /)
 lonr = (/360 ,105 ,130  ,130  /)
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nv = 1
+nv = 3
 na = 0
+month_s = 4
+month_e = 9
 area_option = False
 
 if(case_option.eq.0) then
@@ -41,32 +43,35 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
-do na = 3,3,1
-
+do na = 1,3,1
 if(na.eq.0) then
 lev  = (/850,500,400,300,200/) ;850,500,
 if(area_option) then 
-fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_stand_" + var_name(nv) + "-" + area(na) + "-area.nc"
+fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + "-area.nc"
 else
-fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_stand_" + var_name(nv) + "-" + area(na) + ".nc"
+fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 end if
 else
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-allyear_spec_stand_" + var_name(nv) + "-" + area(na) + ".nc"
+fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 end if
 
-f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.1.and.time(:,1).le.12)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime       = dimsizes(select_time)
 ncase = dimsizes(case)
 nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
+if(ntime.eq.365) then 
 altime = ntime*nyear
+else
+altime = ntime
+end if
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
@@ -119,7 +124,6 @@ u  = linmsg_n(u, -1, 3)
 u  = linmsg_n(u, -1, 2)
 var = uv2vr_cfd(u,v,vars&lat,vars&lon,2)
 delete([/u,v/])
-
 else
 files = systemfunc("ls "+filein(nc)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0, nyear-1 ,1
@@ -130,7 +134,6 @@ do nt = 0, nyear-1 ,1
     end if
     var(nt,:,:,:,:) = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do
-
 end if
 
 ;var = var - conform(var,dim_avg_n(var,0),1)  ;remove annual cycle
@@ -138,22 +141,38 @@ printVarSummary(var)
 var  = linmsg_n(var, -1, 4)
 var  = linmsg_n(var, -1, 3)
 var  = linmsg_n(var, -1, 2)
-var1 := reshape(var,(/altime,nlev,nlat,nlon/))
 printVarSummary(var)
-if (any(ismissing(var1))) then
-    print("var1 has missing values")
+if (any(ismissing(var))) then
+    print("var has missing values")
 end if
 ;var1 = dim_standardize_n_Wrap(var1,1,0)
 
-do nz = 0, nlev-1, 1
-do ny = 0, nlat-1, 1
-do nx = 0, nlon-1, 1
-; calculate spectrum
-    sdof = specx_anal(var1(:,nz,ny,nx),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    spcx(:,nz,ny,nx) = sdof@spcx 
-end do 
-end do 
-end do 
+if(ntime.eq.365) then 
+    var1 := reshape(var,(/altime,nlev,nlat,nlon/))
+    do nz = 0, nlev-1, 1
+    do ny = 0, nlat-1, 1
+    do nx = 0, nlon-1, 1
+        ; calculate spectrum
+        sdof = specx_anal(var1(:,nz,ny,nx),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spcx(:,nz,ny,nx) = sdof@spcx 
+    end do 
+    end do 
+    end do 
+else
+    spcx = 0.0
+    do nt = 0, nyear-1, 1
+    do nz = 0, nlev-1, 1
+    do ny = 0, nlat-1, 1
+    do nx = 0, nlon-1, 1
+        ; calculate spectrum
+        sdof = specx_anal(var(nt,:,nz,ny,nx),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spcx(:,nz,ny,nx) = spcx(:,nz,ny,nx) + sdof@spcx 
+    end do 
+    end do 
+    end do 
+    end do 
+    spcx = spcx/tofloat(nyear)
+end if
 print(sdof)
 printVarSummary(spcx)
 

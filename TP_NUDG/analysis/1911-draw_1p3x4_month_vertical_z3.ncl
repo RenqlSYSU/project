@@ -22,13 +22,16 @@ else
     nsample = 10
 end if
 
-draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s"/)    ;this can be used as right string 
-draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s","10~S~-5~N~m/s~S~2~N~"/)    ;this can be used as right string 
+draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
 lev  = (/1000,925,850,700,600,500,400,300,200/)
-nv = 3
+nv = 6
+diff = False
+jet_option = True
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
-var_option = 3
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -45,10 +48,12 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(
 end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"MJ","JA"/)
-imonth = ispan(0,1,1);(/4,5,6,7/)
-lev  := (/1000,925,850,700,600,500,400,300,200,100/)
-filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv) + ".nc"
+months   = (/"JF","MA","MJ","JA"/)
+;months   = (/"MJ","JA"/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
+lev  := (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
+;lev  := (/1000,925,850,700,600,500,400,300,200,100/)
+filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
 if(var_option.eq.3) then 
@@ -88,6 +93,7 @@ nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 nlev   = dimsizes(lev)
 var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
+var_u  = new((/ncase,nmonth,nlev,nlat/),float)
 
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
@@ -137,9 +143,22 @@ else
     f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
     var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end do
+    if(jet_option) then 
+    do nf = 0 ,ncase-1, 1
+    f = addfile(jetfile(nf),"r")
+    u := f->month_ave(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var_u(nf,:,:,:) = dim_avg_n_Wrap(u,3)
+    end do
+    end if
 end if
 printVarSummary(var)
 var := dim_avg_n_Wrap(var,4)
+
+if(jet_option) then 
+    var_u = mask(var_u,var_u.ge.0,True)
+   ; copy_VarMeta(vars(0,:,:,0),var_u(0,0,:,:))
+    printVarSummary(var_u)
+end if
 
 if(nv.eq.1) then
     var = var*9.8*10000 ;dzdt,transform unit from m/s to m2/s3
@@ -158,10 +177,15 @@ if(nv.eq.5) then
     var = -var*10^6 ;transform dTdy to -dTdy
 end if
 
+if(nv.eq.6) then
+    var = var*10^5 ;transform dTdy to -dTdy
+end if
+
+if(diff) then 
 do nf = 0 ,ncase-2,1
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
-
+end if
 printVarSummary(var)
 
 ;==============================================================
@@ -309,6 +333,12 @@ if(nv.eq.5) then
     spacig = (/ 4 , 0.3, 0.3/);
 end if
 
+if(nv.eq.6) then 
+    minlvl = (/-14,-14,-14/);
+    maxlvl = (/ 14, 14, 14/);
+    spacig = (/ 2 , 2 , 2 /);
+end if
+
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
@@ -323,15 +353,15 @@ do nc = 0, ncase-1,1
     ;    np = nmonth*nc + nm
         np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv); + " (" + unit(nv) + ")"
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) + " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
-        if(nv.eq.3) then 
-        line(np) = gsn_csm_pres_hgt(wks,u(0,nm,:,:),res_line)
+        if(jet_option) then 
+        line(np) = gsn_csm_pres_hgt(wks,var_u(nc,nm,:,:),res_line)
         overlay(plot(np),line(np))
         end if
         print(max(var(nc,nm,:,:)))

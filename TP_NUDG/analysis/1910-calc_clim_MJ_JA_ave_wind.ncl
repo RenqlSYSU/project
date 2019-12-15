@@ -13,8 +13,8 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-var_name = (/"U","V","T","Z3","Q","dzdt","Ahgt","dTdy"/) ;,"OMEGA","RELHUM"
-nv = 0
+var_name = (/"U","V","T","Z3","Q","dzdt","Ahgt","dTdy","dudt"/) ;,"OMEGA","RELHUM"
+nv = 1
 nmonth = 4
 month_s = 1
 month_e = 8
@@ -54,7 +54,7 @@ lev  = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 time1 = cd_calendar(f->time,0)
 select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
@@ -70,7 +70,7 @@ var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-;do nv = 0 ,3 ,1 
+do nv = 2 ,4 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -78,6 +78,13 @@ end if
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
+if(nv.eq.8) then 
+    var_name2 = (/"U","V","OMEGA"/)
+    u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+end if
+
 do nt = 0,nyear-1,1
 if((nv.eq.5).or.(nv.eq.6)) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(3)+".nc","r")
@@ -86,6 +93,20 @@ end if
 if(nv.eq.7) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(2)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+end if
+if(nv.eq.8) then
+    nv2 = 0
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    f      = addfile(files(nt),"r")
+    u(nt,:,:,:,:) = f->$var_name2(nv2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    nv2 = 1
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    f      = addfile(files(nt),"r")
+    v(nt,:,:,:,:) = f->$var_name2(nv2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    nv2 = 2
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    f      = addfile(files(nt),"r")
+    w(nt,:,:,:,:) = f->$var_name2(nv2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
 if(nv.lt.5) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
@@ -103,6 +124,32 @@ if(nv.eq.5) then ;calc dzdt
     var = center_finite_diff_n(var,24*3600,cyclic,opt,1)
     var@long_name = "geopotential tendencyi tendency"
     var@units     = "gpm/s" 
+end if
+
+if(nv.eq.8) then 
+    iyear = 0
+    itime = 1
+    ilev  = 2
+    ilat  = 3
+    ilon  = 4
+    pi = atan(1.0)*4
+    a  = 6378388 ;the radius of earth, m
+    lat  = vars&lat
+    lon  = vars&lon
+    lat  = lat*pi/180.0
+    lon  = lon*pi/180.0
+    coslat = conform(u,cos(lat),ilat)
+    opt    = 0     ;used by center_finite_diff_n, no meanging 
+    loncyc = True ;used by center_finite_diff_n
+    cyclic = False ;used by center_finite_diff_n
+    term = (u/a/coslat)*center_finite_diff_n(u,lon,loncyc,opt,ilon) + \
+           (v/a       )*center_finite_diff_n(u,lat,cyclic,opt,ilat) + \
+           w*center_finite_diff_n(u,lev*100,cyclic,opt,ilev) + \
+           center_finite_diff_n(u,24*3600,cyclic,opt,itime)
+    var = tofloat(term)
+    var@long_name = "dudt = dudt + u*dudx + v*dudy + w*dudz"
+    var@units     = "m*s^-2"
+    delete([/u,v,w,term,lat,lon,pi,coslat,a/])
 end if
 
 time = cd_calendar(f->time(select_time1),0)
@@ -175,6 +222,6 @@ ncdf->lon = (/vars&lon/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->month_vari  = (/month_vari/)
 end do
-;end do ;loop of variable
+end do ;loop of variable
 end
 

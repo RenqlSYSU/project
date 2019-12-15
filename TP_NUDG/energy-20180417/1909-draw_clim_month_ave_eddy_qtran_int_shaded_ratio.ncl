@@ -5,27 +5,31 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"climate","steady","transient"/) 
+draw_var = (/"Total","Steady","Transient"/) 
 var_name_u = (/"qu","ste_qu","edd_qu"/)
 var_name_v = (/"qv","ste_qv","edd_qv"/)
-vari_name  = (/"qu","qv","edd_qu","edd_qv"/) + "_vari"
-ave_name   = (/"qu","qv","edd_qu","edd_qv"/)
 unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
+
+months = (/"JF","MA","MJ","JA"/)
+;months  = (/"May","Jun","Jul","Aug"/)
+nmonth = dimsizes(months)
+month_s = 1
+month_e = 8
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_JJAave_qtran_int_rmvannual.nc"
+filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_qtran_int_rmvannual.nc"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_JJA_rmvannual"
+fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_rmvannual"
     case   = (/" CTRL"," NG6h-CTRL"," NG24h-CTRL"/)
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
 ;area: east Asia
 lats = (/15 ,-15/) ;-20
 latn = (/55 ,55 /) ;60
-lonl = (/70 ,30 /) ;20
+lonl = (/90 ,30 /) ;20
 lonr = (/150,150/) ;220
 siglvl = 0.05
 ntime  = 27
@@ -36,19 +40,23 @@ phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case)
 nvar   = dimsizes(draw_var)
-nvari  = dimsizes(vari_name)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
-var_u  = new((/ncase,nvar ,nlat,nlon/),float)
-var_v  = new((/ncase,nvar ,nlat,nlon/),float)
-ave    = new((/ncase,nvari,nlat,nlon/),float) ;store the average of q,u,v
-vari   = new((/ncase,nvari,nlat,nlon/),float)
+
+f      = addfile(filename(0),"r")
+time   = cd_calendar(f->time,0)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+ntime = dimsizes(select_time)
+u  = new((/ncase,nvar,ntime,nlat,nlon/),float)
+v  = new((/ncase,nvar,ntime,nlat,nlon/),float)
+var_u  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
+var_v  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/ncase*nvar/),graphic)
-    plotvc   = new((/ncase*nvar/),graphic)
-    line     = new((/ncase*nvar/),graphic)
-    gtop     = new((/ncase*nvar/),graphic)
+    plot     = new((/ncase*nmonth/),graphic)
+    plotvc   = new((/ncase*nmonth/),graphic)
+    line     = new((/ncase*nmonth/),graphic)
+    gtop     = new((/ncase*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -66,23 +74,23 @@ f = addfile(filename(nf),"r")
 do nv = 0,nvar-1,1
     print("read " + case(nf) + " " + var_name_u(nv))
     print("read " + case(nf) + " " + var_name_v(nv))
-    var_u(nf,nv,:,:)  = f->$var_name_u(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    var_v(nf,nv,:,:)  = f->$var_name_v(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-end do
-do nv = 0,nvari-1,1
-    print("read " + case(nf) + " " + vari_name(nv))
-    print("read " + case(nf) + " " + ave_name(nv))
-    vari(nf,nv,:,:)  = f->$vari_name(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-     ave(nf,nv,:,:)  = f->$ave_name(nv)$ ({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    u(nf,nv,:,:,:)  = f->$var_name_u(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    v(nf,nv,:,:,:)  = f->$var_name_v(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 end do
 
+do nm = 0, nmonth-1, 1
+mons = 2*nm + 1
+mone = 2*nm + 2
+time1  = cd_calendar(f->time(select_time),0)
+select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
+var_u(:,:,nm,:,:) = dim_avg_n_Wrap(u(:,:,select_time1,:,:),2)
+var_v(:,:,nm,:,:) = dim_avg_n_Wrap(v(:,:,select_time1,:,:),2)
+end do
+
 do nc = 1, ncase-1, 1
-    prob = ttest(ave(0,:,:,:),vari(0,:,:,:),ntime,ave(nc,:,:,:),vari(nc,:,:,:),ntime,True,False)
-    var_u(nc,:,:,:) =  var_u(nc,:,:,:) - var_u(0,:,:,:) 
-    var_v(nc,:,:,:) =  var_v(nc,:,:,:) - var_v(0,:,:,:) 
-    ;var_v(nc,(/0,2/),:,:) = mask(var_v(nc,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
-    ;var_u(nc,(/0,2/),:,:) = mask(var_u(nc,(/0,2/),:,:),((prob((/0,2/),:,:).lt.siglvl).or.(prob((/1,3/),:,:).lt.siglvl)),True)
+    var_u(nc,:,:,:,:) =  var_u(nc,:,:,:,:) - var_u(0,:,:,:,:) 
+    var_v(nc,:,:,:,:) =  var_v(nc,:,:,:,:) - var_v(0,:,:,:,:) 
 end do
 var  = sqrt(var_u^2 + var_v^2)
 copy_VarMeta(var_u,var)
@@ -259,7 +267,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref  = (/(/200,200,20/),(/40,40,5/),(/40,40,5/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/200,200,20/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
 
     ;minlvl = (/(/15 ,45 , 0/),(/-80,-16,-16/),(/-80,-16,-16/)/) ;used for East Asian Shaded ration
     ;maxlvl = (/(/615,120,30/),(/ 80, 16, 16/),(/ 80, 16, 16/)/)
@@ -267,15 +275,17 @@ wks = gsn_open_wks(fig_out,fig_name)
 
 if(na.eq.1) then
     minlvl = (/(/15 ,15 , 0/),(/ 0, 0, 0/),(/ 0, 0, 0/)/) ;used for East Asian moist transiation
-    maxlvl = (/(/615,615,30/),(/45,45,15/),(/45,45,15/)/)
-    spacig = (/(/40 ,40 , 2/),(/ 3, 3, 1/),(/ 3, 3, 1/)/)
+    maxlvl = (/(/615,615,75/),(/45,45,45/),(/45,45,45/)/)
+    spacig = (/(/40 ,40 , 5/),(/ 3, 3, 3/),(/ 3, 3, 3/)/)
 else
-    minlvl = (/(/30 ,30 , 0/),(/20,20,2   /),(/20,20,2   /)/) ;used for East Asian moist transiation
-    maxlvl = (/(/180,180,30/),(/95,95,10.5/),(/95,95,10.5/)/)
-    spacig = (/(/10 ,10 , 2/),(/ 5, 5,0.5 /),(/ 5, 5,0.5 /)/)
+    minlvl = (/(/30 ,30 , 0/),(/20,20,0 /),(/20,20,0 /)/) ;used for East Asian moist transiation
+    maxlvl = (/(/180,180,45/),(/95,95,30/),(/95,95,30/)/)
+    spacig = (/(/10 ,10 , 3/),(/ 5, 5,2 /),(/ 5, 5,2 /)/)
 end if
 
+do nv = 0 ,nvar-1,1
 do nc = 0, ncase-1,1
+do nm = 0, nmonth-1,1
 ;if(nc.eq.0) then
     res@cnFillPalette = "precip3_16lev"
 ;    ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -283,10 +293,8 @@ do nc = 0, ncase-1,1
 ;    res@cnFillPalette = "BlueDarkRed18"
 ;    ;blue and red, has 18 colors,2-10 is blue
 ;end if 
-    do nv = 0 ,nvar-1,1
-        nn = nv +1
-        np = nvar*nc + nv
-        res@gsnLeftString   = pre_case(np) + ")" + case(nc)
+        np = nmonth*nc + nm
+        res@gsnLeftString   = pre_case(np) + ")" + months(nm) + " " + case(nc)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
@@ -294,16 +302,17 @@ do nc = 0, ncase-1,1
         res@cnMinLevelValF       := minlvl(nc,nv)       ; set min contour level
         resvc@vcRefMagnitudeF   = vcref(nc,nv)                ; define vector ref mag
         resvc@vcRefAnnoString2  = vcref(nc,nv) + " " + unit
-        plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,nv,:,:),res) 
-        plotvc(np) = gsn_csm_vector(wks,var_u(nc,nv,:,:),var_v(nc,nv,:,:),resvc)
+        plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,nv,nm,:,:),res) 
+        plotvc(np) = gsn_csm_vector(wks,var_u(nc,nv,nm,:,:),var_v(nc,nv,nm,:,:),resvc)
         gtop(np)   = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),plotvc(np))
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        print(max(var_u(nc,nv,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        print(min(var_u(nc,nv,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(max(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(min(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do 
-    gsn_panel(wks,plot,(/ncase,nvar/),resp)
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+end do
 end
 

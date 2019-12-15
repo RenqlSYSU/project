@@ -10,8 +10,11 @@ begin
 path    = "/home/ys17-19/renql/project/TP_NUDG/spectral-20190120"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 diff = True
+var_name = (/"U","V","T","vort"/)
+nv = 3 ;"U","V","T","vort"
 na = 2 ;"EA","TP","SEA","NEA"
-nv = 1 ;"U","V","T","vort"
+month_s = 4
+month_e = 9
 
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/) ;,"NUDG24h"
@@ -41,9 +44,8 @@ latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 30 ,70  ,107  ,115  /)
 lonr = (/150 ,105 ,130  ,130  /)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-var_name = (/"U","V","T","vort"/)
-filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
-fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + var_name(nv) + "-" + area(na)
+filein    = path + "/mdata/" + case1    + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
+fig_name  = path + "/fig/"   + case1(0) + "-" + month_s + month_e + "_spec_" + var_name(nv) + "_lev_frq"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
@@ -59,7 +61,7 @@ plot = new((/ncase*3/),graphic)
 np = 0
 wks = gsn_open_wks(fig_out,fig_name)  
 do na = 1,3,1
-filein   = path + "/mdata/" + case1 + "-allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
+filein    = path + "/mdata/" + case1 + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 do nc = 0, ncase-1, 1
     f    = addfile(filein(nc),"r")
     var(nc,:,:) = f->spcx
@@ -75,6 +77,9 @@ if(diff) then
     var(2,:,:) = var(1,:,:)/var(0,:,:)-1.0
 end if
 
+if(nfrq.gt.100) then
+print(frq(0:1000:100))
+print(var(0,0:1000:100,5))
 nfrq2 = 100
 nspc  = toint(nfrq/nfrq2)
 nsta  = nfrq - nspc*nfrq2
@@ -82,7 +87,6 @@ print("nfrq = " + nfrq2 + ", spacing = " + nspc + ", start point = " + nsta)
 var2 = new((/ncase,nfrq2,nlev/),float)
 frq2 = new((/nfrq2/),float)
 calc_option = 1
-
 if(calc_option.eq.0) then
     opt = 0 ;Reserved for future use. It is currently not used, but set it to 0
     cyclic = False ;indicate whether the dim-th dimension of data is cyclic
@@ -99,13 +103,14 @@ else
     var2!1   = "frq"
     var2&frq = frq2
 end if
+else
+var2 = var
+frq2 = frq
+end if
 var2!0 = "case"
-
 printVarSummary(var2)
 print(frq2(0:20))
-print(frq(0:1000:100))
 print(var2(0,0:20,5))
-print(var(0,0:1000:100,5))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)

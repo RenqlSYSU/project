@@ -38,7 +38,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 4  ;used to read dzdt induced by different forcing
+    nnv = 5  ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -131,7 +131,7 @@ if(var_option.eq.2)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon58.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"

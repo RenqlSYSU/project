@@ -7,19 +7,20 @@
 begin
 path   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-vector = False
+vector = True ;False
 draw_var = (/"Div","Vor"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"U","V","OMEGA"/)
 unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
-diff = True
-dnv = 1
+diff = False;True
+dnv = 0
 
-;months = (/"JF","MA","MJ","JA"/)
-months  = (/"May","Jun","Jul","Aug"/)
+months = (/"JF","MA","MJ","JA"/)
+;months  = (/"May","Jun","Jul","Aug"/)
 nmonth = dimsizes(months)
-month_s = 5
+month_s = 1
 month_e = 8
-lev  = (/1000,925,850,700,600,500,400,300,200,100/)
+lev = (/1000,850,700,600,500,400,300,250,200,150,100/)
+;lev  = (/1000,925,850,700,600,500,400,300,200,100/)
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
@@ -154,8 +155,8 @@ w := dim_avg_n_Wrap(w,4)
 end if
 
 do nm = 0, nmonth-1, 1
-mons = nm + 5 ;2*nm + 1
-mone = nm + 5 ;2*nm + 2
+mons =  2*nm + 1
+mone =  2*nm + 2
 time1   = cd_calendar(f->time(select_time),0)
 select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
 var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
@@ -172,14 +173,15 @@ var(1,:,:,:)= var(1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and
 u1(1,:,:,:)= u1(1,:,:,:) - u1(0,:,:,:)   ;get the difference between CTRL and NUDG
 v1(1,:,:,:)= v1(1,:,:,:) - v1(0,:,:,:)   ;get the difference between CTRL and NUDG
 if(vector) then 
-w1(1,:,:,:)= w1(1,:,:,:) - w1(0,:,:,:)   ;get the difference between CTRL and NUDG
-copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
+    w1(1,:,:,:)= w1(1,:,:,:) - w1(0,:,:,:)   ;get the difference between CTRL and NUDG
+    copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
 end if
 u1(0,:,:,:) = mask(u1(0,:,:,:), u1(0,:,:,:).lt.0.0 , False)
 else
 u1 = mask(u1, u1.lt.0.0 , False)
 end if
 printVarSummary(var)
+w1 = - w1*100
 copy_VarMeta(vars(:,:,0),var(0,0,:,:))
 copy_VarMeta(vars(:,:,0),u1(0,0,:,:))
 copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
@@ -284,6 +286,38 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
+;----------set the attribute of the vector-------------------
+    resvc                  = res
+    resvc@cnFillOn         = False
+    resvc@cnLinesOn        = False
+    resvc@cnLineLabelsOn   = False
+    resvc@cnInfoLabelOn    = False
+    resvc@gsnPresHgtHeightLabelOn = False
+    resvc@tiYAxisOn = False
+    resvc@tmYRLabelsOn = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMinDistanceF             = 0.01
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = -0.85           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.25            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    resvc@vcRefAnnoString2           = "10(m/s,10~S~-2~N~hPa/s)"
+    resvc@vcRefMagnitudeF            = 10.0             ; define vector ref mag
+    resvc@vcLineArrowHeadMinSizeF   = 0.01
+    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
+
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
@@ -329,14 +363,20 @@ do nc = 0, ncase-1,1
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
         if(diff.and.(nc.eq.1)) then
-        res_line@cnLevelSpacingF       = 2        ; set contour interval
+        res_line@cnLevelSpacingF       = 8        ; set contour interval
         else
         res_line@cnLevelSpacingF       = 8        ; set contour interval
         end if
         line(np) = gsn_csm_pres_hgt(wks,u1(nc,nm,:,:),res_line)
         overlay(plot(np),line(np))
+        vect(np) = gsn_csm_pres_hgt_vector(wks,var(nc,nm,:,:),v1(nc,nm,:,:),w1(nc,nm,:,:),resvc)
+        overlay(plot(np),vect(np))
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
+        print(max(v1(nc,nm,:,:)))
+        print(min(v1(nc,nm,:,:)))
+        print(max(w1(nc,nm,:,:)))
+        print(min(w1(nc,nm,:,:)))
     end do 
 end do ;for the month 
 

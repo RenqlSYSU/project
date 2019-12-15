@@ -21,12 +21,14 @@ fig_out    ="pdf"       ;"x11"
 
 ;area:   TP , east Asia
 lats = (/25 , 20/)  ;-20
-latn = (/40 , 45/)  ;60
+latn = (/40 , 55/)  ;60
 lonl = (/70 ,110/)  ;20
 lonr = (/105,122/)  ;130 ;220
 lev  = (/1000,925,850,700,600,500,400,300/)
 lat_spacing = 5
 na = 1
+month_s = 1
+month_e = 8
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -44,7 +46,7 @@ na = 1
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.5.and.time(:,1).le.8)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 ntime = dimsizes(select_time)
@@ -102,7 +104,7 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.25
+    res@vpHeightF        = 0.2
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
@@ -112,8 +114,10 @@ printVarSummary(var)
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),20)
-    res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    res@tmXBValues      = ispan(0,(ntime-1),30)
+    res@tmXBLabels      = (/"1 Jan","31 Jan","2 Mar","1 Apr","1 May","31 May","30 Jun","30 Jul","29 Aug"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),20)
+    ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)
@@ -203,8 +207,8 @@ printVarSummary(var)
     ;resp@txFontHeightF = title_font 
     ;resp@txFontThicknessF = title_thick
 
-    minlvl = (/10,-8,-8/) ;used for East Asian moist transiation
-    maxlvl = (/58, 8, 8/) ;used for CTRL-NUDG
+    minlvl = (/ 2,-8,-8/) ;used for East Asian moist transiation
+    maxlvl = (/50, 8, 8/) ;used for CTRL-NUDG
     spacig = (/3 , 1, 1/)
     
     do nc = 0, ncase-1,1

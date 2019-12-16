@@ -7,8 +7,8 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 path    = "/home/ys17-19/renql"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-month_s = 4
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+month_s = 1
 month_e = 8
 
 if(case_option.eq.0) then
@@ -137,8 +137,10 @@ printVarSummary(var)
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),60)
-    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    res@tmXBValues      = ispan(0,(ntime-1),30)
+    res@tmXBLabels      = (/"1 Jan","31 Jan","2 Mar","1 Apr","1 May","31 May","30 Jun","30 Jul","29 Aug"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),60)
+    ;res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
     ;res@tmXBValues      = ispan(0,(ntime-1),30)
     ;res@tmXBLabels      = (/"1 Mar","30 Mar","29 Apr","29 May","28 Jun","28 Jul","27 Aug"/)
     ;res@tmXBValues      = ispan(0,(ntime-1),20)
@@ -216,7 +218,7 @@ printVarSummary(var)
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"e"   
+    res@gsnRightString  = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
 
     resp  = True    
     resp@gsnMaximize   = True

@@ -11,7 +11,7 @@ path1   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
+    case2   = (/"CTRL","NG6h","NG24h"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -27,7 +27,7 @@ unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
 lev  = (/1000,925,850,700,600,500,400,300,200/)
 nv = 6
-diff = False
+diff = True;False
 jet_option = True
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
@@ -183,6 +183,7 @@ end if
 
 if(diff) then 
 do nf = 0 ,ncase-2,1
+case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 end if
@@ -334,14 +335,20 @@ if(nv.eq.5) then
 end if
 
 if(nv.eq.6) then 
-    minlvl = (/-14,-14,-14/);
-    maxlvl = (/ 14, 14, 14/);
-    spacig = (/ 2 , 2 , 2 /);
+if(diff) then
+    minlvl = (/-21,-7,-7/);
+    maxlvl = (/ 21, 7, 7/);
+    spacig = (/ 3 , 1, 1/);
+else
+    minlvl = (/-21,-21,-21/);
+    maxlvl = (/ 21, 21, 21/);
+    spacig = (/ 3 , 3 , 3 /);
+end if
 end if
 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
+do nm = 0,nmonth-1,1
 ;if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
 ;    res@cnFillPalette = "BlueDarkRed18"
 ;   ;blue and red, has 18 colors,2-10 is blue
@@ -350,8 +357,8 @@ do nc = 0, ncase-1,1
 ;   ;blue and yellow and red, has 17 colors,2-18,2 is white
 ;end if 
     ;do nm = 0,nmonth-1,1
-    ;    np = nmonth*nc + nm
-        np = ncase*nm + nc
+        np = nmonth*nc + nm
+    ;    np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
         res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) + " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
@@ -369,7 +376,8 @@ do nc = 0, ncase-1,1
     end do 
 end do ;for the month 
 
-    gsn_panel(wks,plot,(/nmonth,ncase/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 ;end do
 end
 

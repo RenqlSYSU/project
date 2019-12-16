@@ -53,10 +53,10 @@ var_u  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
 var_v  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/ncase*nmonth/),graphic)
-    plotvc   = new((/ncase*nmonth/),graphic)
-    line     = new((/ncase*nmonth/),graphic)
-    gtop     = new((/ncase*nmonth/),graphic)
+    plot     = new((/ncase*nvar/),graphic)
+    plotvc   = new((/ncase*nvar/),graphic)
+    line     = new((/ncase*nvar/),graphic)
+    gtop     = new((/ncase*nvar/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -283,9 +283,9 @@ else
     spacig = (/(/10 ,10 , 3/),(/ 5, 5,2 /),(/ 5, 5,2 /)/)
 end if
 
-do nv = 0 ,nvar-1,1
-do nc = 0, ncase-1,1
 do nm = 0, nmonth-1,1
+do nc = 0, ncase-1,1
+do nv = 0 ,nvar-1,1
 ;if(nc.eq.0) then
     res@cnFillPalette = "precip3_16lev"
 ;    ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -293,7 +293,8 @@ do nm = 0, nmonth-1,1
 ;    res@cnFillPalette = "BlueDarkRed18"
 ;    ;blue and red, has 18 colors,2-10 is blue
 ;end if 
-        np = nmonth*nc + nm
+        np = nvar*nc + nv
+        ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ")" + months(nm) + " " + case(nc)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -312,7 +313,8 @@ do nm = 0, nmonth-1,1
         print(min(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do 
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/ncase,nvar/),resp)
+    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end do
 end
 

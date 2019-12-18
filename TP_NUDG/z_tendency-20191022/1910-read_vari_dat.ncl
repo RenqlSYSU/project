@@ -14,10 +14,10 @@
 begin
 path    = "/home/ys17-19/renql"
 obs_option = False
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
-ntime = 4
+ntime = 5
 nc = 1 
 
 if(case_option.eq.0) then
@@ -29,13 +29,16 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NGall","NG58"/)
+    case    = (/"F2000","NG58","NGall"/)
 end if
 
 if(.not.(obs_option)) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month_lon_EA.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month-EA.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily5.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon.nc"
+;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
+;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month_lon_EA.nc"
 else
 if(ntime.eq.1) then 
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
@@ -61,8 +64,8 @@ print(pi)
 ;area: east Asia
 lats = 10 ;-20 ;-90 ;
 latn = 90  ; 90 ;
-lonl = 30  ; 0  ;
-lonr = 150 ;360 ;
+lonl =  0  ;30  ;
+lonr = 360 ;150 ;
 ;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
 ;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 ;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 

@@ -4,15 +4,16 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = True  ;20191205, control the draw of jet stream
+jet_option = False  ;20191205, control the draw of jet stream
 fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
-months  = (/"JF","MA","MJ","JA"/)
+months  = (/"1","2","3","4","5"/) ;+ " May"
+;months  = (/"JF","MA","MJ","JA"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 ;months  = (/"Apr","May","Jun","Jul"/)
@@ -38,7 +39,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 5  ;used to read dzdt induced by different forcing
+    nnv = 1  ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -130,8 +131,12 @@ if(var_option.eq.2)
     if(month_option) then
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
-    else
+    end if
+    if(nmonth.eq.4) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
+    end if
+    if(nmonth.gt.4) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_daily5.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"

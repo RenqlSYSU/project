@@ -9,6 +9,7 @@ draw_var = (/"Total","Steady","Transient"/)
 var_name_u = (/"qu","ste_qu","edd_qu"/)
 var_name_v = (/"qv","ste_qv","edd_qv"/)
 unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
+div_option = True
 
 months = (/"JF","MA","MJ","JA"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
@@ -92,7 +93,11 @@ do nc = 1, ncase-1, 1
     var_u(nc,:,:,:,:) =  var_u(nc,:,:,:,:) - var_u(0,:,:,:,:) 
     var_v(nc,:,:,:,:) =  var_v(nc,:,:,:,:) - var_v(0,:,:,:,:) 
 end do
-var  = sqrt(var_u^2 + var_v^2)
+if(div_option) then 
+var = -uv2dv_cfd ( var_u, var_v, var_u&lat, var_v&lon, 2)*100000
+else
+var = sqrt(var_u^2 + var_v^2)
+end if
 copy_VarMeta(var_u,var)
 
 printVarSummary(var_u)
@@ -110,7 +115,7 @@ printVarSummary(var)
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    mp_thick       = 3.0
-   vc_thick       = 2.5
+   vc_thick       = 3.0
    font_index     = 22
 
 wks = gsn_open_wks(fig_out,fig_name)
@@ -208,7 +213,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMinDistanceF             = 0.035
+    resvc@vcMinDistanceF             = 0.05
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -222,8 +227,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcRefAnnoString1On         = False
     resvc@vcRefAnnoString2On         = True
     ;resvc@vcRefAnnoString2           = "30m/s"
-    resvc@vcLineArrowHeadMinSizeF   = 0.01
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+    resvc@vcLineArrowHeadMinSizeF   = 0.02
+    resvc@vcLineArrowHeadMaxSizeF   = 0.02
 
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
@@ -272,22 +277,30 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;minlvl = (/(/15 ,45 , 0/),(/-80,-16,-16/),(/-80,-16,-16/)/) ;used for East Asian Shaded ration
     ;maxlvl = (/(/615,120,30/),(/ 80, 16, 16/),(/ 80, 16, 16/)/)
     ;spacig = (/(/40 ,5  , 2/),(/ 10, 2 , 2 /),(/ 10, 2 , 2 /)/)
-
-if(na.eq.1) then
+if(div_option) then 
+    res@cnFillPalette = "BlueDarkRed18"
+    res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/) ; If the color indexes are derived from cnFillPalette the first color comes from element 0
+    maxlvl = (/(/ 7, 7, 7/),(/ 7, 7, 7/),(/ 7, 7, 7/)/) ;used for East Asian moist transiation
+    minlvl = (/(/-7,-7,-7/),(/-7,-7,-7/),(/-7,-7,-7/)/) ;used for CTRL-NUDG
+    spacig = (/(/ 1, 1, 1/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
+else
+    res@cnFillPalette = "precip3_16lev"
+    if(na.eq.1) then
     minlvl = (/(/15 ,15 , 0/),(/ 0, 0, 0/),(/ 0, 0, 0/)/) ;used for East Asian moist transiation
     maxlvl = (/(/615,615,75/),(/45,45,45/),(/45,45,45/)/)
     spacig = (/(/40 ,40 , 5/),(/ 3, 3, 3/),(/ 3, 3, 3/)/)
-else
+    else
     minlvl = (/(/30 ,30 , 0/),(/20,20,0 /),(/20,20,0 /)/) ;used for East Asian moist transiation
     maxlvl = (/(/180,180,45/),(/95,95,30/),(/95,95,30/)/)
     spacig = (/(/10 ,10 , 3/),(/ 5, 5,2 /),(/ 5, 5,2 /)/)
+    end if
 end if
 
 do nm = 0, nmonth-1,1
 do nc = 0, ncase-1,1
 do nv = 0 ,nvar-1,1
 ;if(nc.eq.0) then
-    res@cnFillPalette = "precip3_16lev"
+;    res@cnFillPalette = "precip3_16lev"
 ;    ;blue and yellow and red, has 17 colors,2-18,2 is white
 ;else
 ;    res@cnFillPalette = "BlueDarkRed18"

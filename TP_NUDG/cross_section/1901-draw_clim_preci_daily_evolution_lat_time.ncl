@@ -7,9 +7,9 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
 month_s = 1
-month_e = 8
+month_e = 12
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG6h-CTRL"/)
@@ -20,7 +20,7 @@ end if
 
 if(case_option.eq.1) then 
     ;remove TP experiment, sample number is ten years 
-    case    = (/"TP_CTRL","TP_CR","TP_CTRL-TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    case    = (/"TP_CTRL","TP_CR","TP_CR-TP_CTRL"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
 end if
@@ -39,7 +39,6 @@ if(case_option.eq.3) then
     years    = ispan(1,29,1)   ;the calculate time
 end if
 
-
 var_name = (/"PRECC","PRECL"/)
 fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-_clim_preci_daily_evolution_lat_time"
 fig_out    ="pdf"       ;"x11"
@@ -48,7 +47,7 @@ draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center s
 
 ;area:   TP , east Asia
 lats = (/25 , 20/)  ;-20
-latn = (/40 , 45/)  ;60
+latn = (/40 , 60/)  ;60
 lonl = (/70 ,110/)  ;20
 lonr = (/105,122/)  ;130 ;220
 lat_spacing = 5
@@ -85,11 +84,19 @@ plot  = new((/ncase/),graphic)
 ;--------------------------------------------------------------
 var = 0
 do nc = 0 , ncase-2,1
+if((case_option.eq.1).and.(nc.eq.1))
+    years   = ispan(41,50,1)   ;the calculate time
+end if
 do nv = 0,nvar-1,1 
 files := systemfunc("ls "+filein(nc)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0,nyear-1,1
+    if(case_option.eq.1) then
+    print(" handle with " + years(nt))
+    f  = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    else
     print(" handle with " + files(nt))
     f  = addfile(files(nt),"r")
+    end if
     temp := f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
     temp := dim_avg_n_Wrap(temp,2)
     var(nc,nt,:,:) = var(nc,nt,:,:) + temp({lat|:},{time|:})
@@ -137,10 +144,10 @@ printVarSummary(var)
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),30)
-    res@tmXBLabels      = (/"1 Jan","31 Jan","2 Mar","1 Apr","1 May","31 May","30 Jun","30 Jul","29 Aug"/)
-    ;res@tmXBValues      = ispan(0,(ntime-1),60)
-    ;res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),30)
+    ;res@tmXBLabels      = (/"1 Jan","31 Jan","2 Mar","1 Apr","1 May","31 May","30 Jun","30 Jul","29 Aug"/)
+    res@tmXBValues      = ispan(0,(ntime-1),60)
+    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
     ;res@tmXBValues      = ispan(0,(ntime-1),30)
     ;res@tmXBLabels      = (/"1 Mar","30 Mar","29 Apr","29 May","28 Jun","28 Jul","27 Aug"/)
     ;res@tmXBValues      = ispan(0,(ntime-1),20)
@@ -234,9 +241,9 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    minlvl = (/0 ,0 ,-4 /) ;used for East Asian moist transiation
-    maxlvl = (/16,16, 4 /) ;used for CTRL-NUDG
-    spacig = (/1 ,1 ,0.5/)
+    minlvl = (/0 ,0 ,-8/) ;-4  used for East Asian moist transiation
+    maxlvl = (/16,16, 8/) ; 4  used for CTRL-NUDG
+    spacig = (/1 ,1 , 1/) ;0.5
     
 ;    do nt = 0, nyear-1,1
     do nc = 0, ncase-1,1

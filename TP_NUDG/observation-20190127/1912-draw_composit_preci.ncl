@@ -11,6 +11,7 @@ path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/rain_daily/rain.daily.interim."; + years(nt) + ".nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 var_name  = (/"r"/)
+selecmod = 1
 
 fig_name  = path2 + "fig/Obs_composit_preci"
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -47,22 +48,43 @@ na = 0
 ;============================================================
 f  = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r")
 time = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.5.and.time(:,1).le.6)
+select_time = ind(time(:,1).ge.5.and.time(:,1).le.5)
 
-ts = dim_avg_n(f->EKEts(0:(nyear-1),select_time),1)
-ts = dim_standardize_n(ts,1,0)
-pslc_year = ind(ts.ge.1.5)
-nslc_year = ind(ts.le.-1.5)
-pnyear = dimsizes(pslc_year)
-nnyear = dimsizes(nslc_year)
-print("the year of more EKE is " + pnyear)
-do ny = 0, pnyear-1, 1
-    print("More year " + ny + ": " + years(pslc_year(ny)))
-end do
-print("the year of less EKE is " + nnyear)
-do ny = 0, nnyear-1, 1
-    print("Less year " + ny + ": " + years(nslc_year(ny)))
-end do
+if(selecmod.eq.0) then 
+    ts = dim_avg_n(f->EKEts(0:(nyear-1),select_time),1)
+    ts = dim_standardize_n(ts,1,0)
+    pslc_year = ind(ts.ge.1.5)
+    nslc_year = ind(ts.le.-1.5)
+    pnyear = dimsizes(pslc_year)
+    nnyear = dimsizes(nslc_year)
+    print("the year of more EKE is " + pnyear)
+    do ny = 0, pnyear-1, 1
+        print("More year " + ny + ": " + years(pslc_year(ny)))
+    end do  
+    print("the year of less EKE is " + nnyear)
+    do ny = 0, nnyear-1, 1
+        print("Less year " + ny + ": " + years(nslc_year(ny)))
+    end do
+else
+    ts2 = f->EKEts(0:(nyear-1),select_time)
+    ;ts2 = dim_standardize_n(ts2,1,0)
+    ts = ndtooned(ts2)
+    ts = dim_standardize(ts,1)
+    ts2d = dimsizes(ts2)
+    pslc_year = ind_resolve(ind(ts.ge.2) ,ts2d)
+    nslc_year = ind_resolve(ind(ts.le.-1.3),ts2d)
+    pnyear = dimsizes(pslc_year(:,0))
+    nnyear = dimsizes(nslc_year(:,0))
+    ;print(nslc_year)
+    print("the day of more EKE is " + pnyear)
+    do ny = 0, pnyear-1, 1
+        print("More day " + ny + ": " + years(pslc_year(ny,0)) + time(select_time(pslc_year(ny,1)),1) + time(select_time(pslc_year(ny,1)),2))
+    end do  
+    print("the day of less EKE is " + nnyear)
+    do ny = 0, nnyear-1, 1
+        print("Less year " + ny + ": " + years(nslc_year(ny,0)) + time(select_time(nslc_year(ny,1)),1) + time(select_time(nslc_year(ny,1)),2))
+    end do
+end if
 
 f    = addfile(path4 + years(0) + ".nc", "r")
 vars = f->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -89,11 +111,19 @@ else
     select = select_time
 end if 
     var(nt,:,:,:) = f->$var_name$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
-end do   ;the loop of 3 cases 
-var := dim_avg_n(var,1)
-var1(2,:,:) = dim_avg_n(var,0) ;get var(ncase,nlat,ntime)
-var1(0,:,:) = dim_avg_n(var(pslc_year,:,:),0) ;get var(ncase,nlat,ntime)
-var1(1,:,:) = dim_avg_n(var(nslc_year,:,:),0) ;get var(ncase,nlat,ntime)
+end do   ;the loop of 3 cases
+
+if(selecmod.eq.0) then 
+    var := dim_avg_n(var,1)
+    var1(2,:,:) = dim_avg_n(var,0) ;get var(ncase,nlat,ntime)
+    var1(0,:,:) = dim_avg_n(var(pslc_year,:,:),0) ;get var(ncase,nlat,ntime)
+    var1(1,:,:) = dim_avg_n(var(nslc_year,:,:),0) ;get var(ncase,nlat,ntime)
+else
+    var1(2,:,:) = dim_avg_n(var,(/0,1/)) ;get var(ncase,nlat,ntime)
+    var1(0,:,:) = dim_avg_n(var(pslc_year(:,0),pslc_year(:,1),:,:),(/0,1/)) ;get var(ncase,nlat,ntime)
+    var1(1,:,:) = dim_avg_n(var(nslc_year(:,0),nslc_year(:,1),:,:),(/0,1/)) ;get var(ncase,nlat,ntime)
+end if
+
 var1(0,:,:) = var1(0,:,:) - var1(2,:,:)
 var1(1,:,:) = var1(1,:,:) - var1(2,:,:)
 var1(2,:,:) = var1(1,:,:) - var1(0,:,:)

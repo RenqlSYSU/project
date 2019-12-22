@@ -12,7 +12,7 @@ path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc" ;in order to select TP area
 var_name = (/"uwnd","vwnd"/)
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-na = 0
+na = 1
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
@@ -23,11 +23,11 @@ years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area of index, India,Tibet,Philippines,Maritime_continent
-area = (/"TP"/)
-lats = (/25 /)
-latn = (/40 /)
-lonl = (/70 /)
-lonr = (/105/)
+area = (/"TP","SEA","NEA"/)
+lats = (/25  ,22   ,30 /)
+latn = (/40  ,30   ,45 /)
+lonl = (/70  ,107  ,107/)
+lonr = (/105 ,130  ,130/)
 lev  = (/1000,925,850,700,600, 500,400,350,300, 250,200,175,150, 125,100/)
 ;lev  = (/1000,975,950,925,900, 875,850,825,800,775, 750,700,650,600,550, 500,450,400,350,300, 250,225,200,175,150, 125,100/)
 

@@ -24,7 +24,7 @@ else
     fileout  = path2 + "mdata/ERA-Interim_corr_intEKE-" + cb + "-" + ca + "day_preci.nc"
 end if
 g  = 9.8 ;m/(s*s)
-years    = ispan(1979,2005,1)
+years    = ispan(1979,2010,1)
 years@calendar = "standard"
 
 ;area of index, India,Tibet,Philippines,Maritime_continent
@@ -36,7 +36,7 @@ lonr = (/105/)
 lev  = (/1000,925,850,700,600,500,400,300,200/)
 
 ;area of field variables,larger then the plan
-flats = -15  ;-90 ;
+flats = 0  ;-90 ;
 flatn = 55   ; 90 ;
 flonl = 30   ; 0  ;
 flonr = 150  ;360 ;

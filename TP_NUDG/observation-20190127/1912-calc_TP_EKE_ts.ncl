@@ -11,8 +11,8 @@ path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc" ;in order to select TP area
 var_name = (/"uwnd","vwnd"/)
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-na = 1
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+na = 0
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
@@ -110,6 +110,7 @@ if(option.eq.1) then
     filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
     filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
     var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+    delete([/filt_u,filt_v,dp,u,v/])
 else
     edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
     edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
@@ -117,7 +118,7 @@ else
     var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
     delete([/edd_u,edd_v,dp/])
 end if
-var = mask(var,phis.gt.1500,True) 
+;var = mask(var,phis.gt.1500,True) 
 ts  = wgt_areaave_Wrap(var,1.0,1.0,0)
 ts@long_name = "Climatology daily TP area average vertically integrated EKE"
 ts@units     = "J" 

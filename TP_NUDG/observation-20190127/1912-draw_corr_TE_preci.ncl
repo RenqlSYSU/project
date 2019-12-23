@@ -13,25 +13,28 @@ gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 var_name  = (/"r"/)
 selecmod = 1
 
-fig_name  = path2 + "fig/Obs_composit_preci"
+fig_name  = path2 + "fig/Obs_corr_TE_preci"
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 fig_out   ="pdf"       ;"x11"
 unit      = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 case1 = "ERA-Interim"
-case2 = (/"More","Less","Less-More"/)
 
 years    = ispan(1979,2010,1)
 years@calendar = "standard"
 nyear = dimsizes(years)
 
 ;area:    east Asia
-lats = (/ 0 /)  ;-20
+lats = (/ 15/)  ;-20
 latn = (/ 55/)  ;60
-lonl = (/30 /)  ;20
+lonl = (/70 /)  ;20
 lonr = (/150/)  ;130 ;220
 lat_spacing = 15
 na = 0
+nm_s = 1
+nm_e = 12
+siglvl = 0.05
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -46,55 +49,22 @@ na = 0
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f  = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts-2.5-10day.nc","r")
+f  = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r") ;-2.5-10day
 time = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.8.and.time(:,1).le.8)
-
-if(selecmod.eq.0) then 
-    ts = dim_avg_n(f->EKEts(0:(nyear-1),select_time),1)
-    ts = dim_standardize_n(ts,1,0)
-    pslc_year = ind(ts.ge.1.5)
-    nslc_year = ind(ts.le.-1.5)
-    pnyear = dimsizes(pslc_year)
-    nnyear = dimsizes(nslc_year)
-    print("the year of more EKE is " + pnyear)
-    do ny = 0, pnyear-1, 1
-        print("More year " + ny + ": " + years(pslc_year(ny)))
-    end do  
-    print("the year of less EKE is " + nnyear)
-    do ny = 0, nnyear-1, 1
-        print("Less year " + ny + ": " + years(nslc_year(ny)))
-    end do
-else
-    ts2 = f->EKEts(0:(nyear-1),select_time)
-    ;ts2 = dim_standardize_n(ts2,1,0)
-    ts = ndtooned(ts2)
-    ts = dim_standardize(ts,1)
-    ts2d = dimsizes(ts2)
-    pslc_year = ind_resolve(ind(ts.ge.3) ,ts2d)
-    nslc_year = ind_resolve(ind(ts.le.-1.4),ts2d)
-    pnyear = dimsizes(pslc_year(:,0))
-    nnyear = dimsizes(nslc_year(:,0))
-    ;print(nslc_year)
-    print("the day of more EKE is " + pnyear)
-    do ny = 0, pnyear-1, 1
-        print("More day " + ny + ": " + years(pslc_year(ny,0)) + time(select_time(pslc_year(ny,1)),1) + time(select_time(pslc_year(ny,1)),2))
-    end do  
-    print("the day of less EKE is " + nnyear)
-    do ny = 0, nnyear-1, 1
-        print("Less year " + ny + ": " + years(nslc_year(ny,0)) + time(select_time(nslc_year(ny,1)),1) + time(select_time(nslc_year(ny,1)),2))
-    end do
-end if
+select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
+ts2 = f->EKEts(0:(nyear-1),select_time)
 
 f    = addfile(path4 + years(0) + ".nc", "r")
 vars = f->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 ntime = dimsizes(select_time)
-var   = new((/nyear,ntime,nlat,nlon/),float)
-var1  = new((/3    ,nlat,nlon/),float)
-plot  = new((/ 3 /),graphic)
-gtop  = new((/ 3 /),graphic)
+rain  = new((/nyear,ntime,nlat,nlon/),float)
+var1  = new((/12,nlat,nlon/),float)
+prob  = new((/12,nlat,nlon/),float)
+plot  = new((/12/),graphic)
+plot2 = new((/12/),graphic)
+gtop  = new((/12/),graphic)
 
 f = addfile(gtopfile,"r")
 phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
@@ -106,29 +76,37 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 do nt = 0,nyear-1,1
     f     = addfile(path4 + years(nt) + ".nc","r")
 if(isleapyear(years(nt))) then ;leap year,366 day
-    select = select_time + 1
+    select = select_time
+    select(59:364) = select_time(59:364) + 1
 else
     select = select_time
 end if 
-    var(nt,:,:,:) = f->$var_name$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    rain(nt,:,:,:) = f->$var_name$(select,{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do   ;the loop of 3 cases
+nday  = dimsizes(select_time)
+nsample = nyear*nday
+ts  := ndtooned(ts2)
+var := reshape(rain,(/nsample,nlat,nlon/))
+var2  = escorc_n(var,ts,0,0)
+prob2 = rtest(var2,nsample,0)
+prob2 = mask(prob2,prob2.lt.siglvl,True)
+copy_VarMeta(vars,var2 )
+copy_VarMeta(vars,prob2)
 
-if(selecmod.eq.0) then 
-    var := dim_avg_n(var,1)
-    var1(2,:,:) = dim_avg_n(var,0) ;get var(ncase,nlat,ntime)
-    var1(0,:,:) = dim_avg_n(var(pslc_year,:,:),0) ;get var(ncase,nlat,ntime)
-    var1(1,:,:) = dim_avg_n(var(nslc_year,:,:),0) ;get var(ncase,nlat,ntime)
-else
-    var1(2,:,:) = dim_avg_n(var,(/0,1/)) ;get var(ncase,nlat,ntime)
-    var1(0,:,:) = dim_avg_n(var(pslc_year(:,0),pslc_year(:,1),:,:),(/0,1/)) ;get var(ncase,nlat,ntime)
-    var1(1,:,:) = dim_avg_n(var(nslc_year(:,0),nslc_year(:,1),:,:),(/0,1/)) ;get var(ncase,nlat,ntime)
-end if
-
-var1(0,:,:) = var1(0,:,:) - var1(2,:,:)
-var1(1,:,:) = var1(1,:,:) - var1(2,:,:)
-var1(2,:,:) = var1(1,:,:) - var1(0,:,:)
-
+do nm = 0, 11, 1
+    nm2 = nm + 1
+    select2 := ind(time(:,1).eq.nm2)
+    nday  = dimsizes(select2)
+    nsample = nyear*nday
+    var  := reshape(rain(:,select2,:,:),(/nsample,nlat,nlon/))
+    ts   := ndtooned(ts2(:,select2))
+    var1(nm,:,:) = escorc_n(var,ts,0,0)
+    prob(nm,:,:) = rtest(var1(nm,:,:),nsample,0)
+    print("sample number is " + nyear*nday)
+end do
+prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(vars,var1(0,:,:))
+copy_VarMeta(vars,prob(0,:,:))
 printVarSummary(var1)
 
 ;==============================================================
@@ -208,9 +186,9 @@ printVarSummary(var1)
     ;res@cnLevels             = ispan(0,60,10)
 ;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -4          ; set min contour level
-    res@cnMaxLevelValF        =  4;32        ; set max contour level
-    res@cnLevelSpacingF       = 0.5        ; set contour interval
+    res@cnMinLevelValF        = -0.16          ; set min contour level
+    res@cnMaxLevelValF        =  0.16;32        ; set max contour level
+    res@cnLevelSpacingF       = 0.02        ; set contour interval
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -222,6 +200,35 @@ printVarSummary(var1)
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-2
+
+;----------Set res sig-----------
+    res_sig                  = True
+    res_sig@gsnDraw          = False
+    res_sig@gsnFrame         = False
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnInfoLabelOn    = False
+    ;res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.05
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/0.01/)
+    ;res_sig@cnFillPattern        = "GMT_gray"
+    ;res_sig@cnFillColors         = (/"grey30","grey50"/) ;
+    
+    res_sig@gsnCenterString      = ""
+    res_sig@gsnRightStringFontHeightF = subtitle_font
+    res_sig@gsnLeftStringFontHeightF  = subtitle_font
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
 
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
@@ -248,7 +255,7 @@ printVarSummary(var1)
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = draw_var + " (" + unit +") "
+    res@gsnRightString  = draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -261,14 +268,22 @@ printVarSummary(var1)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-do np = 0,2,1
-    res@gsnLeftString   = pre_case(np) + ") " + case2(np)
-    plot(np)  = gsn_csm_contour_map_ce(wks,var1(np,:,:),res)
-    gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
-    overlay(plot(np),gtop(np))
-    print(max(var1(np,:,:)))
-    print(min(var1(np,:,:)))
-end do 
-    gsn_panel(wks,plot,(/3,1/),resp)
+do nm = 0, 11, 1
+    res@gsnLeftString  = pre_case(nm) + ") " + months(nm)
+    plot(nm)  = gsn_csm_contour_map_ce(wks,var1(nm,:,:),res)
+    plot2(nm) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
+    gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(nm),plot2(nm))
+    overlay(plot(nm),gtop(nm))
+    print(max(var1(nm,:,:)))
+    print(min(var1(nm,:,:)))
+end do
+    nm = 11
+    plot(nm)  = gsn_csm_contour_map_ce(wks,var2,res)
+    plot2(nm) = gsn_csm_contour(wks,prob2,res_sig)
+    gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(nm),plot2(nm))
+    overlay(plot(nm),gtop(nm))
+    gsn_panel(wks,plot,(/4,3/),resp)
 end
 

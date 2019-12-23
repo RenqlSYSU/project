@@ -27,7 +27,7 @@ stand = True
 years = ispan(1979,2010,1)
 nv = 0
 
-filename = path + "mdata/" + case + "_intEKE_TP_ts.nc"
+filename = path + "mdata/" + case + "_intEKE_TP_ts-2.5-10day.nc"
 if(stand) then 
 fig_name = path + "fig/EKE_TP_ts-stand"
 else
@@ -36,8 +36,8 @@ end if
 fig_out  = "pdf"
 ;fig_title= "Time series of TP area at " ; + season + lev
 
-nday = 28
-ms = 1 ;start month
+nday = 30
+ms = 5 ;start month
 nyear = dimsizes(years)
 var = new((/4,nyear*nday/),float)
 plot  = new((/4/),graphic)

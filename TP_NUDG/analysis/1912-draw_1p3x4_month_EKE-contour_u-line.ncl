@@ -11,8 +11,9 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"EKE"        ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"10~S~4~N~ J","m/s","m" /)  ;this can be used as right string 
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+draw_var = (/"EKE"        ,"U"  /)  ;this is the variable used to draw, can used as center string
+unit     = (/"10~S~4~N~J","m/s"/)  ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -21,31 +22,31 @@ lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 0
 imonth = ispan(0,11,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-;case1   = (/"TP_CTRL","TP_CR"/)
-;case2   = (/"CTRL","noTP-CTRL"/)
-;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
-;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
-;nsample = 10
-case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-nsample = 27
+if(case_option.eq.1) then
+    case1   = (/"TP_CTRL","TP_CR"/)
+    case2   = (/"CTRL","noTP-CTRL"/)
+    gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+    ;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    nsample = 10
+end if
+if(case_option.eq.0) then
+    case1   = (/"CTRL","NUDG6h"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
+end if
 ;
-filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(1) + ".nc"
-zfilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(2) + ".nc"
-fig_name = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "_" + draw_var(1) + "_" + draw_var(2)
+fig_name = path + "/analysis/fig/1p3x4_" + draw_var(nv) + "_" + var_name(0) + "_" + draw_var(1)
 fig_title  = "Climate " + draw_var(nv) + " (" + unit(nv) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;20 ;-20
+lats = 10 ;20 ;-20
 latn = 55  ;55 ;60
 lonl = 30  ;30 ;20
 lonr = 150 ;150;220
@@ -54,24 +55,23 @@ siglvl = 0.05
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats:latn},{lonl:lonr})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-ncase  = dimsizes(case2)
+ncase  = dimsizes(case1)
 nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 u    = new((/ncase  ,nmonth,nlat,nlon/),float)
-z    = new((/ncase  ,nmonth,nlat,nlon/),float)
 var  = new((/ncase  ,nmonth,nlat,nlon/),float)
 vari = new((/ncase  ,nmonth,nlat,nlon/),float)
 prob = new((/ncase-1,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/ncase*nmonth/),graphic)
-    plot2    = new((/ncase*nmonth/),graphic)
-    plot3    = new((/ncase*nmonth/),graphic)
-    gtop     = new((/ncase*nmonth/),graphic)
-    line    = new((/ncase*nmonth/),graphic)
-    axis    = new((/ncase*nmonth/),graphic)
-    plot_sig = new((/(ncase-1)*nmonth/),graphic)
+    plot     = new((/nmonth/),graphic)
+    plot2    = new((/nmonth/),graphic)
+    plot3    = new((/nmonth/),graphic)
+    gtop     = new((/nmonth/),graphic)
+    line     = new((/nmonth/),graphic)
+    axis     = new((/nmonth/),graphic)
+    plot_sig = new((/nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -99,14 +99,11 @@ axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
 print(lat1)
 do nf = 0 ,ncase-1, 1
-    z_f = addfile(zfilename(nf),"r")
-    z(nf,:,:,:)  = z_f->$var_name(0)$(imonth,{lev(1)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
-    
     u_f = addfile(ufilename(nf),"r")
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(2)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{20:50},inln))+18; + ind(lat1.eq.20)
+        lat_ind = maxind(u(nf,nm,{10:55},inln)); + ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
     end do
@@ -124,13 +121,11 @@ end do
 
 var = var/10000
 
-;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
 var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
 printVarSummary(u)
-printVarSummary(z)
 printVarSummary(prob)
 
 ;==============================================================
@@ -159,7 +154,7 @@ printVarSummary(prob)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 10
+    res@gsnMajorLatSpacing = 15
     res@gsnMajorLonSpacing = 30
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
@@ -168,6 +163,11 @@ printVarSummary(prob)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
+    ;res@tmXBLabelsOn         = False              ; do not draw bottom labels
+    ;res@tmXBOn               = False              ; no bottom tickmarks
+    ;res@tmYRLabelsOn         = False              ; no right labels
+    ;res@tmYROn               = False              ; no right tickmarks
+    
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
     res@tmYLLabelFont   = font_index
@@ -213,7 +213,7 @@ printVarSummary(prob)
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -308,9 +308,9 @@ printVarSummary(prob)
     res_hgt@cnMonoLineColor  = True ;False
     res_hgt@cnLineColor      = "dimgray"
     res_hgt@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res_hgt@cnMinLevelValF        = 5000  ;4          ; set min contour level
-    res_hgt@cnMaxLevelValF        = 5800 ;60 ;32        ; set max contour level
-    res_hgt@cnLevelSpacingF       = 50 ;        ; set contour interval
+;    res_hgt@cnMinLevelValF        = 5000  ;4          ; set min contour level
+;    res_hgt@cnMaxLevelValF        = 5800 ;60 ;32        ; set max contour level
+    res_hgt@cnLevelSpacingF       = 5 ;        ; set contour interval
     res_hgt@gsnCenterString      = ""
     res_hgt@gsnLeftString    = " "
     res_hgt@gsnRightString   = " "
@@ -328,11 +328,11 @@ printVarSummary(prob)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05
+    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -342,7 +342,7 @@ if(nv.eq.0) then ;EKE
     spacig = (/ 3 , 2 , 2 /);1 ,1 ,1 ,1 
 end if
 
-do nc = 0, ncase-1,1
+do nc = 0, 1, 1
 if(nc.eq.0) then
    res@cnFillPalette = "precip3_16lev"
    ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -351,11 +351,9 @@ else
    ;blue and red, has 18 colors,2-10 is blue
 end if 
     do nm = 0,nmonth-1,1
-        nn = nm +1
-        np = nmonth*nc + nm
-        np2= nmonth*(nc-1) + nm
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(nv) + " (" + unit(nv) + ")" 
+        np = nm
+        res@gsnLeftString   = pre_case(np) + ") " + months(imonth(nm))
+        res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         if(nv.gt.10) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
@@ -367,27 +365,21 @@ end if
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        plot3(np)   = gsn_csm_contour(wks,z(nc,nm,:,:),res_hgt)
-        overlay(plot(np),plot3(np))
+        ;plot3(np)   = gsn_csm_contour(wks,var(1,nm,:,:),res_hgt)
+        ;overlay(plot(np),plot3(np))
         overlay(plot(np),plot2(np))
-        ;if(nc.gt.0)
-        ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-        ;    overlay(plot(np),plot_sig(np2))
-        ;end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
-        ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
+        line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(max(u(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(u(nc,nm,{lats:latn},{lonl:lonr})))
-        print(max(z(nc,nm,{lats:latn},{lonl:lonr})))
-        print(min(z(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
-end do ;for the month 
 
     resp@txString      = fig_title
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/3,4/),resp)
+end do
 end
 

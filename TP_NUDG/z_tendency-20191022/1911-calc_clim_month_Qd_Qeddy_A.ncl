@@ -16,7 +16,7 @@ begin
 path    = "/home/ys17-19/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment ; 2 means F2000
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-nmonth = 4
+nmonth = 12
 geo = True ;False ;if true, only can calc 10N 
 
 ;parameter for bw_bandpass_filter
@@ -49,13 +49,13 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NGall","NG58"/)
+    case    = (/"F2000","NUDG","NG58"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,29,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon47.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon12.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -116,7 +116,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1,1,2
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -124,8 +124,8 @@ end if
 ;read the data
 ;============================================================
 do nm = 0, nmonth-1, 1
-month_s = nm + 4
-month_e = nm + 4
+month_s = nm + 1
+month_e = nm + 1
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
 lev := lev2

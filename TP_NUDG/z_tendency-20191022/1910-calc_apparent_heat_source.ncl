@@ -10,7 +10,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NUDG24h","NUDG6h"/)

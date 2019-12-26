@@ -21,12 +21,23 @@ if(case_option.eq.0) then
     fileout = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/); + "Q1.nc"
-else
+end if
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
     fileout = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+end if
+if(case_option.eq.2) then
+    case    = (/"F2000","NUDG","NG58"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+    years   = ispan(1,30,1)   ;the calculate time
+    fileout = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
 end if
 
 var_name= (/"U","V","T","OMEGA"/)
@@ -39,18 +50,18 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -90 ;
+lats = -20 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
 month_s = 1 
 month_e = 12
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
@@ -67,11 +78,11 @@ iday  = 0
 ilev  = 1
 ilat  = 2
 ilon  = 3
-lat  = f->lat
-lon  = f->lon
+lat  = vars&lat
+lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
-coslat = conform(u,cos(lat*pi/180.0),ilat)
+coslat = conform(u, cos(lat),ilat)
 lev4d  = conform(u, lev*100, ilev)
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
@@ -79,7 +90,7 @@ loncyc = True  ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1,1,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -90,19 +101,27 @@ print("handle with " + case(nf) + " " + years(nt))
 ;read the data and calc apparent heat source Q1
 ;============================================================
 nv = 0
-f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 t  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 3
-f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 w  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 printVarSummary(w)
 

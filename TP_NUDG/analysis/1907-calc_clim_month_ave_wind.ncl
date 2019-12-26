@@ -36,7 +36,7 @@ if(case_option.eq.2) then
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 end if
 
-var_name = (/"U","V","T","Z3","Q"/) ;,"OMEGA","RELHUM"
+var_name = (/"U","V","T","Z3","Q1"/) ;,"OMEGA","RELHUM"
 
 ;area: east Asia
 lats = 0 ;-90 ;
@@ -64,7 +64,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,3,1; ,nvar-1 ,1 
+do nv = 4,4,1; ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -76,7 +76,7 @@ files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
 do nt = 0,nyear-1,1
     f  = addfile(files(nt),"r")
 ;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    var(nt,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
 end do 
 
 time = cd_calendar(f->time,0)

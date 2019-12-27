@@ -11,7 +11,7 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 draw_var = (/"EKE"        ,"U"  /)  ;this is the variable used to draw, can used as center string
 unit     = (/"10~S~4~N~J","m/s"/)  ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
@@ -37,6 +37,11 @@ if(case_option.eq.0) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
+if(case_option.eq.2) then
+    case1   = (/"F2000","NUDG"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
+end if
 ;
 filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(1) + ".nc"
@@ -48,8 +53,8 @@ fig_out    ="pdf";"x11"
 ;area: east Asia
 lats = 10 ;20 ;-20
 latn = 55  ;55 ;60
-lonl = 30  ;30 ;20
-lonr = 150 ;150;220
+lonl = 50  ;30 ;20
+lonr = 220 ;150;220
 siglvl = 0.05
 
 f = addfile(gtopfile,"r")
@@ -163,10 +168,14 @@ printVarSummary(prob)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
-    ;res@tmXBLabelsOn         = False              ; do not draw bottom labels
+    res@tmXBLabelsOn         = False              ; do not draw bottom labels
     ;res@tmXBOn               = False              ; no bottom tickmarks
-    ;res@tmYRLabelsOn         = False              ; no right labels
+    res@tmYRLabelsOn         = False              ; no right labels
     ;res@tmYROn               = False              ; no right tickmarks
+    ;res@tmXTLabelsOn         = False              ; do not draw bottom labels
+    ;res@tmXTOn               = False              ; no bottom tickmarks
+    ;res@tmYLLabelsOn         = False              ; no right labels
+    ;res@tmYLOn               = False              ; no right tickmarks
     
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
@@ -322,6 +331,7 @@ printVarSummary(prob)
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
+    res@gsnRightString   = "" 
     res@gsnStringFont         = font_index
     res@gsnStringFontHeightF = subtitle_font
 
@@ -351,9 +361,32 @@ else
    ;blue and red, has 18 colors,2-10 is blue
 end if 
     do nm = 0,nmonth-1,1
+        ;if((nm.eq.0).or.(nm.eq.4)) then 
+        if((nm.eq.0).or.(nm.eq.3).or.(nm.eq.6)) then 
+            res@tmXBLabelsOn         = False              ; do not draw bottom labels
+            ;res@tmXBOn               = False              ; no bottom tickmarks
+            res@tmYLLabelsOn         = True              ; no right labels
+            ;res@tmYLOn               = False              ; no right tickmarks
+        else
+            res@tmXBLabelsOn         = False              ; do not draw bottom labels
+            ;res@tmXBOn               = False              ; no bottom tickmarks
+            res@tmYLLabelsOn         = False              ; no right labels
+            ;res@tmYLOn               = False              ; no right tickmarks
+        end if
+        if(nm.eq.9) then 
+            res@tmXBLabelsOn         = True              ; do not draw bottom labels
+            ;res@tmXBOn               = False              ; no bottom tickmarks
+            res@tmYLLabelsOn         = True              ; no right labels
+            ;res@tmYLOn               = False              ; no right tickmarks
+        end if
+        if(nm.ge.10) then 
+            res@tmXBLabelsOn         = True              ; do not draw bottom labels
+           ;res@tmXBOn               = False              ; no bottom tickmarks
+            res@tmYLLabelsOn         = False              ; no right labels
+            ;res@tmYLOn               = False              ; no right tickmarks
+        end if
         np = nm
-        res@gsnLeftString   = pre_case(np) + ") " + months(imonth(nm))
-        res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
+        res@gsnLeftString   = pre_case(np) + ") " + months(imonth(nm)) + " " + draw_var(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         if(nv.gt.10) then
         res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
@@ -377,9 +410,21 @@ end if
         print(max(u(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(u(nc,nm,{lats:latn},{lonl:lonr})))
     end do 
+    
+    res1 = True
+    res2 = True
+    res1@gsnMaximize = True
+    ;attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
+    ;attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
+    ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
+    attach1 = gsn_attach_plots(plot(0),plot(1:2),res1,res2)
+    attach2 = gsn_attach_plots(plot(3),plot(4:5),res1,res2)
+    attach3 = gsn_attach_plots(plot(6),plot(7:8),res1,res2)
+    attach4 = gsn_attach_plots(plot(9),plot(10:11),res1,res2)
 
     resp@txString      = fig_title
-    gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot(0:9:3),(/4,1/),resp)
+    ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 end do
 end
 

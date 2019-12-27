@@ -28,12 +28,12 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NG6h","NG58"/)
+    case    = (/"F2000","NUDG","NG58"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_preci.nc"
-    years    = ispan(1,22,1)   ;the calculate time
+    years    = ispan(1,30,1)   ;the calculate time
 end if
 
 ;var_name = (/"SHFLX","LHFLX"/)
@@ -67,7 +67,7 @@ season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 printVarSummary(vars)
 
-do nf = 2 , ncase-1,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

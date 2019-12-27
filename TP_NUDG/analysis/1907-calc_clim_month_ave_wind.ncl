@@ -43,7 +43,9 @@ lats = 0 ;-90 ;
 latn = 90  ;90  ;
 lonl = 0  ;0   ;
 lonr = 360 ;360 ;
-lev  = (/850,500,200/)
+;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
+;lev  = (/850,500,200/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -64,7 +66,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 4,4,1; ,nvar-1 ,1 
+do nv = 0,0,1; ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time

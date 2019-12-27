@@ -22,7 +22,9 @@ year_option = False;True
 csa = False 
 ave_sigm = False;True 
 nc = 1
-ntime = 5
+ntime = 12
+month_s = 1
+month_e = 8
 
 if(case_option.eq.0) then
     case   = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -33,16 +35,16 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NG58","NGall"/)
+    case    = (/"F2000","NUDG","NG58"/)
 end if
 
 if(.not.(obs_option)) then 
-if(ntime.gt.4) then 
+if(ntime.gt.12) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-EA.dat"
 end if
-if(ntime.eq.4) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon.nc"
+if(ntime.eq.12) then 
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon12.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.1) then 
@@ -74,9 +76,7 @@ lonl = 0   ; 30  ; 0  ;
 lonr = 360 ;150 ;360 ;
 lev2 = (/1000,100/) ;hPa
 ;lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,175,150,125,100/)
-lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-month_s = 1
-month_e = 8
+lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/) ;19levels, hpa
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -134,7 +134,7 @@ if(ntime.eq.1) then
     forc_m(nv,0,:,:,:) = f->$var_name(nv)$({lev},{lats:latn},{lonl:lonr})
 else
     if(ntype.eq.0) then 
-    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(0:4,{lev},{lats:latn},{lonl:lonr})
+    forc_m(nv,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
     else
     forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
     end if
@@ -150,7 +150,7 @@ if(ntime.eq.1) then
     q3_m(nv,0,:,:,:)  = f->$var_name2(nv)$({lev2},{lats:latn},{lonl:lonr})
 else
     if(ntype.eq.0) then 
-    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(0:4,{lev2},{lats:latn},{lonl:lonr})
+    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
     else
     q3_m(nv,:,:,:,:)  = tofloat(f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr}))
     end if
@@ -166,11 +166,11 @@ if(ntime.eq.1) then
 sigm1 := f->sigm1({lev},{lats:latn},{lonl:lonr})
 sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
 end if
-if(ntime.eq.4) then 
+if(ntime.eq.12) then 
 sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
 sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
 end if
-if(ntime.gt.4) then 
+if(ntime.gt.12) then 
 if(ntype.eq.0) then 
 sigm1 := tofloat(dim_avg_n_Wrap(f->sigm1(0:4,{lev},{lats:latn},{lonl:lonr}),0))
 else
@@ -371,8 +371,8 @@ end do
 end do
 end do
 
-do nv = 0, 0,1 ;nvar-1, 1
-do nt = 0, 0,1 ;ntime-1, 1
+do nv = 0,nvar-1, 1  ; 0,1 ;
+do nt = 0,ntime-1, 1 ; 0,1 ;
 do nl = 0, nlev-1, 1
     fbindirwrite(fileout(nf),coe111(nv,nt,nl,:,:))
     fbindirwrite(fileout(nf),coe110(nv,nt,nl,:,:))

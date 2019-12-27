@@ -6,23 +6,22 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = False  ;20191205, control the draw of jet stream
+var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = True  ;20191205, control the draw of jet stream
 fnc  = 1   ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
-months  = (/"1","2","3","4","5"/) ;+ " May"
+;months  = (/"1","2","3","4","5"/) ;+ " May"
 ;months  = (/"JF","MA","MJ","JA"/)
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 ;months  = (/"Apr","May","Jun","Jul"/)
 nmonth = dimsizes(months)
-;lev  = (/1000,975,950,925,900,875,850,825,800,775,750,700,650,600,550,500,450,400,350,300,250,225,200,175,150,125,100/)
-lev    = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
-lev_u  = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
-;lev_u  = (/1000,925,850,700,600,500,400,300,200,100/)
-;lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
+month_s = 1
+month_e = 12
+lev    = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/)
+lev_u  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa
 
 do na = 1,1,1
 if(var_option.eq.0) then 
@@ -80,8 +79,6 @@ lats = (/15  , 15 , 10 , 10 /);15 ;-210
 latn = (/55  , 55 , 89 , 89 /) ;55 ;60
 lonl = (/70  ,110 , 1  , 0  /) ;30 ;20
 lonr = (/105 ,130 ,359 , 70 /) ;150;220
-month_s = 1
-month_e = 8
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -103,24 +100,24 @@ if(case_option.eq.1) then
     nsample = 10
 end if
 if(case_option.eq.2) then
-    case1   = (/"F2000","NG58"/)
+    case1   = (/"F2000","NUDG"/)
     if(diff) then 
-    case2   = (/"F2000","NG58-F2000"/)
+    case2   = (/"F2000","NUDG-F2000"/)
     else
-    case2   = (/"F2000","NG58"/)
+    case2   = (/"F2000","NUDG"/)
     end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
 
 ;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 if(var_option.lt.2)
     if(month_option) then
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon12.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -171,11 +168,11 @@ ncase  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
 if(var_option.le.1)
-if(nmonth.eq.1) then
+    if(nmonth.eq.1) then
     vars := f->$var_name(0)$({lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-else
+    else
     vars := f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-end if
+    end if
 else
     if((var_option.eq.2).and.(nnv.eq.5)) then 
     vars := f->$var_name(1)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -373,7 +370,7 @@ end if
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -411,7 +408,7 @@ end if
     res_line@gsnContourNegLineDashPattern = 5
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 8        ; set contour interval
+    res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
@@ -419,11 +416,11 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05
+    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -505,9 +502,10 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nm = 0,nmonth-1,1
 do nv = 0,nvar-1,1
-    np = nm*nvar + nv
+do nm = 0,nmonth-1,1
+    ;np = nm*nvar + nv
+    np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.2) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
@@ -524,14 +522,15 @@ do nv = 0,nvar-1,1
     print(min(var_m(fnc,nv,nm,:,:)))
     
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
     overlay(plot(np),line(np))
     end if
 end do 
-end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+    gsn_panel(wks,plot,(/3,4/),resp)
+end do 
 end do 
 end
 

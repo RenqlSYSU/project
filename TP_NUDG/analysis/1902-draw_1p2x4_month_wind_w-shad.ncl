@@ -7,28 +7,35 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
-else
+end if
+if(case_option.eq.0) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
 end if
+if(case_option.eq.2) then
+    case1   = (/"F2000","NUDG"/)
+    case2   = (/"F2000","NUDG-F2000"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
+end if
 
-draw_var = (/"Q1"  ,"preci" ,"OMEGA"          ,"Z3" /)  ;this is the variable used to draw, can used as center string
-unit     = (/"W/kg","mm/day","10~S~-2~N~ Pa/s","gpm"/)    ;this can be used as right string 
-draw_varname = (/"Q1","preci","omega","Z3"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Q1"  ,"preci" ,"OMEGA"          ,"Z3" ,"q1"  /)  ;this is the variable used to draw, can used as center string
+unit     = (/"W/kg","mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
+draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,500,200/)
-nl = 1
-nv = 3
+nl = 2
+nv = 1
 
-var_option = 2
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -39,7 +46,7 @@ end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -55,9 +62,9 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/0  ,0  ,0  ,-70,-70,-70,-15,-70/);-20
+lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70/);-20
 latn = (/70 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
-lonl = (/30 ,150,270,30 ,150,270,30 ,0  /);20
+lonl = (/30 ,150,270,30 ,150,270,90 ,0  /);20
 lonr = (/150,270,390,150,270,390,150,360/);220
 siglvl = 0.05
 lat_spacing = 15
@@ -116,7 +123,7 @@ var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.le.1) then
+if(nv.le.1.or.nv.eq.4) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -137,6 +144,11 @@ end do
 
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
+end if
+
+if(nv.eq.4) then
+    cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
+    var(:,2,:,:,:) = var(:,2,:,:,:)*cp ;Q1,transform unit from K/S to W/kg
 end if
 
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
@@ -234,7 +246,7 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -335,11 +347,11 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05
+    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -347,6 +359,11 @@ end if
                       (/7 ,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4,4/)/)   ;the level of 200hpa    ctrl,nudg,diff
 if(nv.eq.0) 
+    minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
+    maxlvl = (/300, 160, 160/)      ; 80, 80
+    spacig = (/20 ,  20,  20/)      ; 10, 10
+end if
+if(nv.eq.4) 
     minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
     maxlvl = (/300, 160, 160/)      ; 80, 80
     spacig = (/20 ,  20,  20/)      ; 10, 10
@@ -391,7 +408,8 @@ else
    ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
     do nm = 0,nmonth-1,1
-        np = nmonth*nc + nm
+        np = nm
+        ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
         res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +   
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
@@ -413,10 +431,18 @@ end if
         print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
-end do ;for the month 
+;end do ;for the month 
 
+    res1 = True
+    res2 = True
+    res1@gsnMaximize = True
+    attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
+    attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
+    attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
+    gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-;end do
+    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/3,4/),resp)
+end do
 end
 

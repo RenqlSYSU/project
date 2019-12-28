@@ -6,9 +6,9 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
-fnc  = 1   ;chose which case to draw
+fnc  = 1    ;chose which case to draw
 diff = True ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
@@ -129,10 +129,10 @@ if(var_option.eq.2)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     end if
-    if(nmonth.eq.4) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
+    if(nmonth.eq.12) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon12.nc"
     end if
-    if(nmonth.gt.4) then 
+    if(nmonth.gt.12) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_daily5.nc"
     end if
     else

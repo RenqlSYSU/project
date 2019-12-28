@@ -7,14 +7,14 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
-if(case_option.eq.0) then
+if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
@@ -63,13 +63,13 @@ fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
 lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70/);-20
-latn = (/70 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
-lonl = (/30 ,150,270,30 ,150,270,90 ,0  /);20
-lonr = (/150,270,390,150,270,390,150,360/);220
+latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
+lonl = (/0  ,150,270,30 ,150,270,30 ,0  /);20
+lonr = (/360,270,390,150,270,390,150,360/);220
 siglvl = 0.05
-lat_spacing = 15
-lon_spacing = 30
-na = 6
+lat_spacing = 20
+lon_spacing = 40
+na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -86,6 +86,7 @@ prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
     wind   = new((/ncase*nmonth/),graphic)
+    wind2  = new((/ncase*nmonth/),graphic)
     gtop   = new((/ncase*nmonth/),graphic)
     line   = new((/ncase*nmonth/),graphic)
 
@@ -98,6 +99,18 @@ lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
 latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 
 ;define the thickness and height of the title,tick and label
+if(na.eq.0) then 
+   tick_font      = 0.01
+   subtitle_font  = 0.01
+   title_font     = 0.01
+   vcref_font     = 0.01
+   tick_thick     = 8.0
+   subtitle_thick = 8.0  ;not have this attribute
+   title_thick    = 5.0
+   vc_thick       = 2.5
+   mp_thick       = 1.5
+   font_index     = 22
+else
    tick_font      = 0.03
    subtitle_font  = 0.03
    title_font     = 0.03
@@ -105,9 +118,10 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 2.5
+   vc_thick       = 2.0
    mp_thick       = 2.5
    font_index     = 22
+end if
 
 ;================================================================
 ;read data
@@ -151,11 +165,15 @@ if(nv.eq.4) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*cp ;Q1,transform unit from K/S to W/kg
 end if
 
+uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
+vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
+copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
+copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
 printVarSummary(var)
 printVarSummary(prob)
 
@@ -177,7 +195,7 @@ print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na
     res@gsnDraw          = False
     res@gsnMaximize      = True
     res@gsnAddCyclic     = True;False
-    res@gsnPaperOrientation = "portrait"
+    res@gsnPaperOrientation = "landscape" ;"portrait"
     ;res@vpHeightF        = 0.25
     ;res@vpWidthF         = 0.8
 
@@ -246,7 +264,7 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = False;True   ; the label bar
+    res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -266,9 +284,18 @@ end if
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
-    resvc@vcMinDistanceF             = 0.032
-    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+if(na.eq.0) then 
+    resvc@vcMinDistanceF             = 0.02
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = 0.01
+    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+else
+    resvc@vcMinDistanceF             = 0.02
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = 0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015
+end if
+    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
@@ -280,11 +307,12 @@ end if
     resvc@vcRefAnnoString1On         = False
     resvc@vcRefAnnoString2On         = True
     ;resvc@vcRefAnnoString2           = "30m/s"
-    resvc@vcLineArrowHeadMinSizeF   = 0.015
-    resvc@vcLineArrowHeadMaxSizeF   = 0.015
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
+
+    resvc2 = resvc
+    resvc2@vcLineArrowColor           = "grey"
 
 ;----------Set res line-----------
     res_line                  = True
@@ -355,9 +383,9 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    vcref         = (/(/7 ,2,2/), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/7 ,3,3/), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/15,4,4/)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/20,10,10/)/)   ;the level of 200hpa    ctrl,nudg,diff
 if(nv.eq.0) 
     minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
     maxlvl = (/300, 160, 160/)      ; 80, 80
@@ -399,7 +427,7 @@ if(nl.eq.2) then
 end if
 end if
 
-do nc = 0, ncase-1,1
+do nc = 1, 1,1;ncase-1,1
 if(nc.gt.0.or.nv.eq.2) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
@@ -420,7 +448,13 @@ end if
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
+        resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
+        resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
+        if(nc.gt.0)
+        wind2(np)   = gsn_csm_vector(wks,uvar(nc-1,nm,:,:),vvar(nc-1,nm,:,:),resvc2)
+        overlay(plot(np),wind2(np))
+        end if
         wind(np)    = gsn_csm_vector(wks,var(nc,0,nm,:,:),var(nc,1,nm,:,:),resvc)
         overlay(plot(np),wind(np))
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
@@ -430,19 +464,21 @@ end if
         end if
         print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        frame(wks)
+        draw(wks)
     end do 
 ;end do ;for the month 
 
-    res1 = True
-    res2 = True
-    res1@gsnMaximize = True
-    attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
-    attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
-    attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
-    gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
+    ;res1 = True
+    ;res2 = True
+    ;res1@gsnMaximize = True
+    ;attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
+    ;attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
+    ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
+    ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    ;gsn_panel(wks,plot,(/3,4/),resp)
+    ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
 end
 

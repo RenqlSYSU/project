@@ -41,10 +41,10 @@ var_name = (/"PRECC","PRECL"/)
 choice   = 0 ;1 means to calc T change due to Heat Flux ; 0 means to calc precipitation
 
 ;area: east Asia
-lats = -20 ;-90 ;
-latn = 60  ; 90 ;
-lonl = 20  ; 0  ;
-lonr = 220 ;360 ;
+lats = -90 ;-90 ;
+latn = 90  ; 90 ;
+lonl = 0   ; 0  ;
+lonr = 360 ;360 ;
 ;lev  = (/850,500,200/)
 
 ;==========================================================

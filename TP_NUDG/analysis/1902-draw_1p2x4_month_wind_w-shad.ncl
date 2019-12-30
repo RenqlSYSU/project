@@ -35,7 +35,7 @@ lev = (/850,500,200/)
 nl = 2
 nv = 1
 
-var_option = 1
+var_option = 0;1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -46,7 +46,9 @@ end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-imonth = ispan(0,11,1);(/4,5,6,7/)
+;imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(8,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -64,12 +66,12 @@ fig_out    = "pdf";"x11""eps";
 ;area: east Asia
 lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70/);-20
 latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
-lonl = (/0  ,150,270,30 ,150,270,30 ,0  /);20
+lonl = (/0  ,150,270,30 ,150,270,90 ,0  /);20
 lonr = (/360,270,390,150,270,390,150,360/);220
 siglvl = 0.05
-lat_spacing = 20
-lon_spacing = 40
-na = 0
+lat_spacing = 15
+lon_spacing = 20
+na = 6
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -264,7 +266,7 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -285,12 +287,12 @@ end if
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
-    resvc@vcMinDistanceF             = 0.02
+    resvc@vcMinDistanceF             = 0.01
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
-    resvc@vcLineArrowHeadMinSizeF   = 0.01
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+    resvc@vcLineArrowHeadMinSizeF   = 0.005
+    resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF             = 0.02
+    resvc@vcMinDistanceF             = 0.025
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.015
@@ -383,9 +385,16 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(na.eq.0) then 
     vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/20,10,10/)/)   ;the level of 200hpa    ctrl,nudg,diff
+else
+    vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+end if
+
 if(nv.eq.0) 
     minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
     maxlvl = (/300, 160, 160/)      ; 80, 80
@@ -427,7 +436,7 @@ if(nl.eq.2) then
 end if
 end if
 
-do nc = 1, 1,1;ncase-1,1
+do nc = 0, 1,1;ncase-1,1
 if(nc.gt.0.or.nv.eq.2) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
@@ -464,8 +473,8 @@ end if
         end if
         print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        frame(wks)
-        draw(wks)
+        ;draw(plot(np))
+        ;frame(wks)
     end do 
 ;end do ;for the month 
 
@@ -478,6 +487,7 @@ end if
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
 end

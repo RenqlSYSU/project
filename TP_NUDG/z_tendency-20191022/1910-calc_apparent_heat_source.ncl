@@ -50,7 +50,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -20 ;
+lats = -90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;

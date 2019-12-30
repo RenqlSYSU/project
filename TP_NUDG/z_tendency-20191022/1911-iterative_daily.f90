@@ -13,7 +13,7 @@ program iteration
     !integer, parameter :: nlat = 54 , nlon = 240 , ilog  = 10 , ifile = 12
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 !NCEP1
     !integer, parameter :: nlat = 31 , nlon = 144 , ilog  = 10 , ifile = 12
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 5, nlev = 19
+    integer, parameter :: pr = 4 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 123, nlev = 19
     integer, parameter :: nlat = 85 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -69,9 +69,9 @@ program iteration
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NGall-Clim_dzdt_month.dat"     
         logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_NGall.txt"
     else 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_4f6c_month-EA.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_dzdt_month-EA.dat"     
-        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_NG58-EA.txt"
+        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_4f6c_month.dat"
+        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NG58-Clim_dzdt_month.dat"     
+        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor_1-8-NG58.txt"
     end if
     
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
@@ -148,9 +148,9 @@ program iteration
         end do
     
     !boundary conditions
-        !dzdt(1   ,:,:,:,:) = dzdt(nlon   ,:,:,:,:) !Periodic boundary for x
-        dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
-        dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
+        dzdt(1   ,:,:,:,:) = dzdt(nlon   ,:,:,:,:) !Periodic boundary for x
+        !dzdt(1   ,:,:,:,:) = dzdt(2     ,:,:,:,:)
+        !dzdt(nlon,:,:,:,:) = dzdt(nlon-1,:,:,:,:)
         
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)

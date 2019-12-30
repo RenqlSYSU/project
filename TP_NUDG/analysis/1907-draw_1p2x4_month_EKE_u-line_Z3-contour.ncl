@@ -13,15 +13,15 @@
 begin
 draw_var = (/"EKE"        ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"10~S~4~N~ J","m/s","m" /)  ;this can be used as right string 
-;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-;months   = (/"DJF","MAM","JJA","SON"/)
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 0
-imonth = ispan(0,11,1);(/4,5,6,7/)
-;imonth = ispan(0,3,1);(/4,5,6,7/)
+;imonth = ispan(0,11,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
 
 ;the path of the file
@@ -31,12 +31,12 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
 ;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
 ;nsample = 10
-case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-case2   = (/" CTRL"," NG6h-CTRL", " NG24h-CTRL"/)
+case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h" 
+case2   = (/" CTRL"," NG6h-CTRL"/) ;, " NG24h-CTRL"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 nsample = 27
 ;
-filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(nv) + ".nc"
+filename  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_int" + draw_var(nv) + ".nc"
 ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(1) + ".nc"
 zfilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" + draw_var(2) + ".nc"
 fig_name = path + "/analysis/fig/1p2x4_" + draw_var(nv) + "_" + var_name(0) + "_" + draw_var(1) + "_" + draw_var(2)
@@ -45,7 +45,7 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
-lats = -15 ;20 ;-20
+lats = 10 ;20 ;-20
 latn = 55  ;55 ;60
 lonl = 30  ;30 ;20
 lonr = 150 ;150;220
@@ -88,7 +88,7 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5
+   mp_thick       = 2.5
    font_index     = 22
 
 ;================================================================
@@ -106,7 +106,7 @@ do nf = 0 ,ncase-1, 1
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(2)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{20:50},inln))+18; + ind(lat1.eq.20)
+        lat_ind = maxind(u(nf,nm,{10:50},inln));+18 + ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
     end do
@@ -159,7 +159,7 @@ printVarSummary(prob)
     res@mpMinLatF        = lats
     res@mpMaxLonF        = lonr
     res@mpMinLonF        = lonl
-    res@gsnMajorLatSpacing = 10
+    res@gsnMajorLatSpacing = 15
     res@gsnMajorLonSpacing = 30
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
@@ -221,7 +221,7 @@ printVarSummary(prob)
     res@lbBoxLineThicknessF  = mp_thick-1
 
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.15
+    res@pmLabelBarOrthogonalPosF     = 0.1
     res@pmLabelBarParallelPosF       = 0.5
 
 ;----------Set res line-----------
@@ -233,7 +233,7 @@ printVarSummary(prob)
     res_line@cnLinesOn        = True      ; turn off contour lines
     res_line@cnLineLabelsOn   = False      ; turn off contour line labels
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 2.5
+    res_line@cnLineThicknessF = mp_thick + 1.5
     res_line@cnMonoLineColor  = True ;False
     res_line@cnLineColor      = "black"
     res_line@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
@@ -247,14 +247,14 @@ printVarSummary(prob)
     lnres                      = True
     lnres@gsLineColor          = "black"
     lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = 2.0
+    lnres@gsLineThicknessF     = mp_thick + 0.5
     ;lnres@gsLineLabelString    = "TP"
 
 ;--------set the attribute of polygon to draw axis--------------
     lnres2                      = True
     lnres2@gsLineColor          = "black"
     lnres2@gsLineDashPattern    = 1
-    lnres2@gsLineThicknessF     = 3.5
+    lnres2@gsLineThicknessF     = mp_thick + 2
 
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
@@ -342,6 +342,7 @@ if(nv.eq.0) then ;EKE
     spacig = (/ 3 , 2 , 2 /);1 ,1 ,1 ,1 
 end if
 
+do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
 if(nc.eq.0) then
    res@cnFillPalette = "precip3_16lev"
@@ -350,10 +351,9 @@ else
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
 end if 
-    do nm = 0,nmonth-1,1
-        nn = nm +1
-        np = nmonth*nc + nm
-        np2= nmonth*(nc-1) + nm
+        ;np = nmonth*nc + nm
+        ;np2= nmonth*(nc-1) + nm
+        np = nm*ncase + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
         res@gsnRightString  = months(imonth(nm)) + " " +  draw_var(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
@@ -367,8 +367,8 @@ end if
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
-        plot3(np)   = gsn_csm_contour(wks,z(nc,nm,:,:),res_hgt)
-        overlay(plot(np),plot3(np))
+        ;plot3(np)   = gsn_csm_contour(wks,z(nc,nm,:,:),res_hgt)
+        ;overlay(plot(np),plot3(np))
         overlay(plot(np),plot2(np))
         ;if(nc.gt.0)
         ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
@@ -376,7 +376,7 @@ end if
         ;end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
-        ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
+        line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), lnres2 )
         print(max(var(nc,nm,{lats:latn},{lonl:lonr})))
         print(min(var(nc,nm,{lats:latn},{lonl:lonr})))
@@ -388,6 +388,7 @@ end if
 end do ;for the month 
 
     resp@txString      = fig_title
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/nmonth,ncase/),resp)
+    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end
 

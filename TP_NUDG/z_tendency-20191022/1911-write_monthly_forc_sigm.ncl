@@ -14,15 +14,15 @@
 begin
 path    = "/home/ys17-19/renql"
 data_type = (/"double","float"/)
-ntype = 0
+ntype = 1
 
 obs_option = False ;True
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 year_option = False;True
 csa = False 
 ave_sigm = False;True 
-nc = 1
-ntime = 12
+nc = 2
+ntime = 123
 month_s = 1
 month_e = 8
 
@@ -41,7 +41,7 @@ end if
 if(.not.(obs_option)) then 
 if(ntime.gt.12) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month-EA.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.12) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon12.nc"
@@ -118,7 +118,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, nc, 1
+do nf = 2, nc, 1
 ;==========================================================
 ;read the data
 ;============================================================
@@ -162,22 +162,22 @@ if(year_option) then
 sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
 sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
 else
-if(ntime.eq.1) then 
-sigm1 := f->sigm1({lev},{lats:latn},{lonl:lonr})
-sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
-end if
-if(ntime.eq.12) then 
-sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
-sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
-end if
-if(ntime.gt.12) then 
-if(ntype.eq.0) then 
-sigm1 := tofloat(dim_avg_n_Wrap(f->sigm1(0:4,{lev},{lats:latn},{lonl:lonr}),0))
-else
-sigm1 := dim_avg_n_Wrap(f->sigm1(0:4,{lev},{lats:latn},{lonl:lonr}),0)
-end if
-sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
-end if
+    if(ntime.eq.1) then 
+    sigm1 := f->sigm1({lev},{lats:latn},{lonl:lonr})
+    sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
+    end if
+    if(ntime.eq.12) then 
+    sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
+    sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
+    end if
+    if(ntime.gt.12) then 
+        if(ntype.eq.0) then 
+        sigm1 := dim_avg_n_Wrap(f->sigm1(0:4,{lev},{lats:latn},{lonl:lonr}),0)
+        else
+        sigm1 := tofloat(dim_avg_n_Wrap(f->sigm1(0:4,{lev},{lats:latn},{lonl:lonr}),0))
+        end if
+    sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
+    end if
 end if
 
 if(ave_sigm) then
@@ -371,8 +371,8 @@ end do
 end do
 end do
 
-do nv = 0,nvar-1, 1  ; 0,1 ;
-do nt = 0,ntime-1, 1 ; 0,1 ;
+do nv = 0, 0, 1 ;nvar-1, 1  ;
+do nt = 0, 0, 1 ;ntime-1, 1 ;
 do nl = 0, nlev-1, 1
     fbindirwrite(fileout(nf),coe111(nv,nt,nl,:,:))
     fbindirwrite(fileout(nf),coe110(nv,nt,nl,:,:))

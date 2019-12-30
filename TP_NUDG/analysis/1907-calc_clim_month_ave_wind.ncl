@@ -12,7 +12,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -39,12 +39,12 @@ end if
 var_name = (/"U","V","T","Z3","Q1"/) ;,"OMEGA","RELHUM"
 
 ;area: east Asia
-lats = -90 ;-90 ;
+lats = 0 ;-90 ;
 latn = 90  ;90  ;
 lonl = 0   ;0   ;
 lonr = 360 ;360 ;
-lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa
-;lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
+;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa
+lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
 ;lev  = (/850,500,200/)
 
 ;==========================================================
@@ -58,6 +58,7 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
+ntime = 365
 var        = new((/nyear,365,nlev,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
@@ -66,7 +67,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,0,1; ,nvar-1 ,1 
+do nv = 4,4,1; ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -75,18 +76,18 @@ end if
 ;read the data
 ;--------------------------------------------------------------
 files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+if(nv.le.3) then 
 do nt = 0,nyear-1,1
+    print("handle with " + years(nt))
     f  = addfile(files(nt),"r")
 ;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
 end do 
-
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
     var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
 end do
-
 ;----------calculate the season average-----------------------
 mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
 do ns = 0,3,1
@@ -101,6 +102,55 @@ do ns = 0,3,1
                                var_month(:,nm+1,:,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
     end if
 end do
+
+else
+var        := new((/nyear,365,nlat,nlon/),float)
+var_month  := new((/nyear,12 ,nlat,nlon/),float)
+var_season := new((/nyear,4  ,nlat,nlon/),float)
+month_ave  := new((/      12 ,nlat,nlon/),float)
+month_vari := new((/      12 ,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
+season_ave := new((/       4 ,nlat,nlon/),float)
+season_vari:= new((/       4 ,nlat,nlon/),float)
+files2 := systemfunc("ls "+filein(nf)+"*.daily.PS.nc" )
+q1    = new((/nyear,ntime,nlev,nlat,nlon/),float)
+dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
+ps    = new((/nyear,ntime,nlat,nlon/),float)
+do nt = 0,nyear-1,1
+    print("handle with " + years(nt))
+    f  = addfile(files(nt),"r")
+    q1(nt,:,:,:,:)  = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
+    f  = addfile(files2(nt),"r")
+    ps(nt,:,:,:)   = f->PS(:,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
+    dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),10000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
+end do
+print(q1(10,10,2,10:20,30))
+g  = 9.8 ;m/(s*s)
+var = dim_sum_n(q1*dp,2)/g
+delete([/q1,ps,dp,g/])
+var@long_name = "Integrated Apparent Heat Source calc from temperature equation"
+var@units     = "W/kg" 
+
+time = cd_calendar(f->time,0)
+do nm = 0,11,1
+    select_time := ind(time(:,1).eq.nm+1)
+    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+end do
+;----------calculate the season average-----------------------
+mdays    = (/31,28,31,30,31,30,31,31,30,31,30,31/)
+do ns = 0,3,1
+    nm = ns*3 ;nm = 0,3,6,9
+    if(nm.eq.0) then
+    var_season(:,ns,:,:) = ( var_month(:,11  ,:,:)*mdays(11)   + \
+                             var_month(:,nm  ,:,:)*mdays(nm)   + \
+                             var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
+    else
+    var_season(:,ns,:,:) = ( var_month(:,nm-1,:,:)*mdays(nm-1) + \
+                             var_month(:,nm  ,:,:)*mdays(nm)   + \
+                             var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
+    end if
+end do
+end if
+
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
@@ -133,10 +183,17 @@ filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
+if(nv.le.3) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_ave",typeof(season_ave),(/"season","lev","lat","lon"/))
 filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lev","lat","lon"/))
+else
+filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"season_ave",typeof(season_ave),(/"season","lat","lon"/))
+filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
+end if
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lev",vars&level)

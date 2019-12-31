@@ -25,13 +25,14 @@ end if
 draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s","10~S~-5~N~m/s~S~2~N~"/)    ;this can be used as right string 
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
-lev  = (/1000,925,850,700,600,500,400,300,200/)
+lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lev_u = (/1000,925,850,700,600,500,400,300,200,100/)
 nv = 6
 diff = True;False
 jet_option = True
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 
-var_option = 2
+var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -67,7 +68,7 @@ filein  = path1+(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 lev  := (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-;lev  := (/1000,925,850,700,600,500,400,300,200,100/)
+lev_u:= (/1000,925,850,700,600,500,400,300,200,100/)
 years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
@@ -92,8 +93,9 @@ nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 nlev   = dimsizes(lev)
-var    = new((/ncase,nmonth,nlev,nlat,nlon/),float)
-var_u  = new((/ncase,nmonth,nlev,nlat/),float)
+nlev2  = dimsizes(lev_u)
+var    = new((/ncase,nmonth,nlev ,nlat,nlon/),float)
+var_u  = new((/ncase,nmonth,nlev2,nlat/),float)
 
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
@@ -146,7 +148,7 @@ else
     if(jet_option) then 
     do nf = 0 ,ncase-1, 1
     f = addfile(jetfile(nf),"r")
-    u := f->month_ave(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->season_ave(:,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
     var_u(nf,:,:,:) = dim_avg_n_Wrap(u,3)
     end do
     end if
@@ -178,7 +180,7 @@ if(nv.eq.5) then
 end if
 
 if(nv.eq.6) then
-    var = var*10^5 ;transform dTdy to -dTdy
+    var = var*10^5 ;dudt
 end if
 
 if(diff) then 
@@ -246,7 +248,7 @@ printVarSummary(var)
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = True;False   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -282,7 +284,7 @@ printVarSummary(var)
     res_line@cnLineColor      = "black"
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 8        ; set contour interval
+    res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
@@ -291,9 +293,9 @@ printVarSummary(var)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
+    ;resp@pmLabelBarWidthF  = 0.8
+    ;resp@pmLabelBarHeightF = 0.04
+    ;resp@lbLabelFontHeightF = 0.015
     ;resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick

@@ -60,7 +60,8 @@ filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv
 fig_name = path + "/analysis/fig/" + case1(0) + "-MJ_JA_" + lev(nl) + "wind_" + draw_var(nv)
 end if
 
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
+;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
@@ -487,7 +488,7 @@ end if
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,4/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
 end

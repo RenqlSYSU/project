@@ -14,12 +14,17 @@ unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~"/)    ;this can be used 
 diff = False;True
 dnv = 0
 
+season = True
+if(season) then 
+months   = (/"DJF","MAM","JJA","SON"/)
+else
 months = (/"JF","MA","MJ","JA"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
+end if
 nmonth = dimsizes(months)
 month_s = 1
-month_e = 8
-lev = (/1000,850,700,600,500,400,300,250,200,150,100/)
+month_e = 12
+lev = (/1000,850,700,600,500, 400,300,250,200,150,100/)
 ;lev  = (/1000,925,850,700,600,500,400,300,200,100/)
 
 ;area: east Asia
@@ -70,8 +75,8 @@ if(case_option.eq.2) then
     years   = ispan(1,29,1)   ;the calculate time
 end if
 fig_name = path + "/project/TP_NUDG/analysis/fig/" + case1(0) + "_vertical_div_jet"
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11""eps";
+pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+fig_out  = "pdf";"x11""eps";
 
 files := systemfunc("ls "+filein(0)+"*.daily.U.nc" )
 f      = addfile(files(0),"r")
@@ -107,7 +112,7 @@ end if
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 1.8
+   vc_thick       = 2.0
    mp_thick       = 3.0
    font_index     = 22
 
@@ -154,11 +159,17 @@ w := dim_avg_n_Wrap(w,1)
 w := dim_avg_n_Wrap(w,4)
 end if
 
+time1 = cd_calendar(f->time(select_time),0)
 do nm = 0, nmonth-1, 1
-mons =  2*nm + 1
-mone =  2*nm + 2
-time1   = cd_calendar(f->time(select_time),0)
+if(nm.eq.0.and.season) then 
+mons = 12  
+mone = 2
+select_time1 := ind(time1(:,1).eq.12.or.time1(:,1).le.2)
+else
+mons = 3*nm  
+mone = 3*nm + 2
 select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
+end if
 var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
 u1(:,nm,:,:) = dim_avg_n_Wrap(u(:,select_time1,:,:),1)
 v1(:,nm,:,:) = dim_avg_n_Wrap(v(:,select_time1,:,:),1)
@@ -243,7 +254,7 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False ;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -264,6 +275,7 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res@gsnPresHgtHeightLabelOn = False
     res@tiYAxisOn = False
     res@tmYRLabelsOn = False
+    ;res@tmYLLabelsOn = False
     res@tmXBMode = "Manual"
     res@tmXBTickSpacingF   = 10
     res@tmXBTickStartF     = lats(na)
@@ -279,9 +291,12 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res_line@cnLineColor      = "black"
     res_line@gsnContourZeroLineThicknessF = 0
     res_line@gsnContourNegLineDashPattern = 5
+    res_line@gsnPresHgtHeightLabelOn = False
+    res_line@tiYAxisOn = False
+    res_line@tmYLLabelsOn = False
    
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 8        ; set contour interval
+    res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
@@ -294,11 +309,14 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     resvc@cnInfoLabelOn    = False
     resvc@gsnPresHgtHeightLabelOn = False
     resvc@tiYAxisOn = False
-    resvc@tmYRLabelsOn = False
+    resvc@tmYLLabelsOn = False
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMinDistanceF             = 0.01
+    resvc@vcMinDistanceF             = 0.02
+    resvc@vcLineArrowHeadMinSizeF   = 0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015
+    resvc@vcRefAnnoOn                = False
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
@@ -310,10 +328,8 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     resvc@vcRefAnnoFontHeightF       = vcref_font
     resvc@vcRefAnnoString1On         = False
     resvc@vcRefAnnoString2On         = True
-    resvc@vcRefAnnoString2           = "10(m/s,10~S~-2~N~hPa/s)"
-    resvc@vcRefMagnitudeF            = 10.0             ; define vector ref mag
-    resvc@vcLineArrowHeadMinSizeF   = 0.01
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01
+    resvc@vcRefAnnoString2           = "8(m/s,10~S~-2~N~hPa/s)"
+    resvc@vcRefMagnitudeF            = 8.0             ; define vector ref mag
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
@@ -321,11 +337,11 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.04
+    resp@lbLabelFontHeightF = 0.015
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 

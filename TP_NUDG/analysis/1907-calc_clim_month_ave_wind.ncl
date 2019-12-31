@@ -36,16 +36,17 @@ if(case_option.eq.2) then
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 end if
 
-var_name = (/"U","V","T","Z3","Q1"/) ;,"OMEGA","RELHUM"
+var_name = (/"U","V","T","Z3","Q1","dudt"/) ;,"OMEGA","RELHUM"
 
 ;area: east Asia
-lats = 0 ;-90 ;
+lats = 0   ;-90 ;
 latn = 90  ;90  ;
 lonl = 0   ;0   ;
 lonr = 360 ;360 ;
-;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa
-lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
-;lev  = (/850,500,200/)
+lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa dudt
+;lev  = (/1000,925,850,700,600, 500,400,300,250,200, 150,100/) ;hPa Q1
+;lev  = (/850,500,200/) ;v,
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -67,7 +68,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 4,4,1; ,nvar-1 ,1 
+do nv = 0,0,1; ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -75,14 +76,60 @@ end if
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-if(nv.le.3) then 
-do nt = 0,nyear-1,1
+if((nv.le.3).or.(nv.eq.5)) then 
+if(nv.eq.5) then 
+    var_name2 = (/"U","V","OMEGA"/)
+    u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    
+    do nt = 0,nyear-1,1
+    nv2 = 0
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    f      = addfile(files(nt),"r")
+    u(nt,:,:,:,:) = f->$var_name2(nv2)$(:,{lev},{lats:latn},{lonl:lonr})
+    nv2 = 1
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    f      = addfile(files(nt),"r")
+    v(nt,:,:,:,:) = f->$var_name2(nv2)$(:,{lev},{lats:latn},{lonl:lonr})
+    nv2 = 2
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    f      = addfile(files(nt),"r")
+    w(nt,:,:,:,:) = f->$var_name2(nv2)$(:,{lev},{lats:latn},{lonl:lonr})
+    end do
+
+    iyear = 0
+    itime = 1
+    ilev  = 2
+    ilat  = 3
+    ilon  = 4
+    pi = atan(1.0)*4
+    a  = 6378388 ;the radius of earth, m
+    lat  = vars&lat
+    lon  = vars&lon
+    lat  = lat*pi/180.0
+    lon  = lon*pi/180.0
+    coslat = conform(u,cos(lat),ilat)
+    opt    = 0     ;used by center_finite_diff_n, no meanging 
+    loncyc = True ;used by center_finite_diff_n
+    cyclic = False ;used by center_finite_diff_n
+    term = (u/a/coslat)*center_finite_diff_n(u,lon,loncyc,opt,ilon) + \
+           (v/a       )*center_finite_diff_n(u,lat,cyclic,opt,ilat) + \
+           w*center_finite_diff_n(u,lev*100,cyclic,opt,ilev) + \
+           center_finite_diff_n(u,24*3600,cyclic,opt,itime)
+    var = tofloat(term)
+    var@long_name = "dudt = dudt + u*dudx + v*dudy + w*dudz"
+    var@units     = "m*s^-2"
+    delete([/u,v,w,term,lat,lon,pi,coslat,a/])
+else
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    do nt = 0,nyear-1,1
     print("handle with " + years(nt))
     f  = addfile(files(nt),"r")
 ;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
-end do 
+    end do 
+end if
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
     select_time := ind(time(:,1).eq.nm+1)
@@ -102,8 +149,9 @@ do ns = 0,3,1
                                var_month(:,nm+1,:,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
     end if
 end do
+end if
 
-else
+if(nv.eq.4) then 
 var        := new((/nyear,365,nlat,nlon/),float)
 var_month  := new((/nyear,12 ,nlat,nlon/),float)
 var_season := new((/nyear,4  ,nlat,nlon/),float)
@@ -117,6 +165,7 @@ dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 ps    = new((/nyear,ntime,nlat,nlon/),float)
 do nt = 0,nyear-1,1
     print("handle with " + years(nt))
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     f  = addfile(files(nt),"r")
     q1(nt,:,:,:,:)  = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
     f  = addfile(files2(nt),"r")
@@ -183,7 +232,7 @@ filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-if(nv.le.3) then 
+if((nv.le.3).or.(nv.eq.5)) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_ave",typeof(season_ave),(/"season","lev","lat","lon"/))
 filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))

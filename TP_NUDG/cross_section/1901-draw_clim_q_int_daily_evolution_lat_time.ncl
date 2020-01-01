@@ -21,18 +21,18 @@ fig_out    ="pdf"       ;"x11"
 
 ;area:   TP , east Asia
 lats = (/25 , 20/)  ;-20
-latn = (/40 , 55/)  ;60
+latn = (/40 , 45/)  ;60
 lonl = (/70 ,110/)  ;20
-lonr = (/105,122/)  ;130 ;220
+lonr = (/105,130/)  ;130 ;220
 lev  = (/1000,925,850,700,600,500,400,300/)
-lat_spacing = 5
+lat_spacing = 10
 na = 1
 month_s = 1
-month_e = 8
+month_e = 12
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.025
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -81,7 +81,7 @@ printVarSummary(temp&time)
 do nc = 1,2
     var(nc,:,:) = var(nc,:,:) - var(0,:,:) 
     ;prob((nc-1),:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-    case   = (/"(g) CTRL","(h) NG6h-CTRL","(c) NG24h-CTRL"/)
+    case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
 end do
 
 copy_VarMeta(temp(0,:),var(0,:,0))
@@ -104,7 +104,7 @@ printVarSummary(var)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.2
+    res@vpHeightF        = 0.25
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
@@ -114,8 +114,10 @@ printVarSummary(var)
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),30)
-    res@tmXBLabels      = (/"1 Jan","31 Jan","2 Mar","1 Apr","1 May","31 May","30 Jun","30 Jul","29 Aug"/)
+    res@tmXBValues      = ispan(0,(ntime-1),60)
+    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),30)
+    ;res@tmXBLabels      = (/"1 Jan","31 Jan","2 Mar","1 Apr","1 May","31 May","30 Jun","30 Jul","29 Aug"/)
     ;res@tmXBValues      = ispan(0,(ntime-1),20)
     ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 

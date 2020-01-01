@@ -8,7 +8,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 
 begin
 path    = "/home/ys17-19/renql"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 na = 1
 month_s = 1
 month_e = 12
@@ -52,13 +52,13 @@ fig_out    ="pdf"       ;"x11"
 lats = (/25 , 20/)  ;-20
 latn = (/50 , 55/)  ;60
 lonl = (/70 ,110/)  ;20
-lonr = (/105,122/)  ;130 ;220
+lonr = (/105,130/)  ;130 ;220
 lev  = (/200/)
-lat_spacing = 5
+lat_spacing = 10
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.025
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -300,8 +300,8 @@ end do
         res@cnMaxLevelValF       := maxlvl ;32    ; set max contour level
         res@cnMinLevelValF       := minlvl       ; set min contour level
         plot(nc)   = gsn_csm_lat_time(wks,diff(1,:,:),res)
-        plot2(nc)  = gsn_csm_contour(wks,var(nc,:,:),res_line)
-        overlay(plot(nc),plot2(nc))
+        ;plot2(nc)  = gsn_csm_contour(wks,var(nc,:,:),res_line)
+        ;overlay(plot(nc),plot2(nc))
         axis(nc)   = gsn_add_polyline( wks, plot(nc),ispan(0,(ntime-1),1) , axlat(nc,:), lnres2 )
         axis2(nc)  = gsn_add_polyline( wks, plot(nc),ispan(0,(ntime-1),1) , axlat(1,:), lnres)
         print(max(var(nc,:,:)))

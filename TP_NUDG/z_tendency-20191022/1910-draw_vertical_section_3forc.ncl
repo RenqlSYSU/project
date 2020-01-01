@@ -4,7 +4,7 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = 2  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
@@ -13,15 +13,16 @@ diff = True ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
-;months  = (/"JF","MA","MJ","JA"/)
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months  = (/"JF","MA","MJ","JA"/)
+;months   = (/"DJF","MAM","JJA","SON"/)
+;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 ;months  = (/"Apr","May","Jun","Jul"/)
 nmonth = dimsizes(months)
 month_s = 1
 month_e = 12
-lev    = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/)
-lev_u  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa
+lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/)
+lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 
 do na = 1,1,1
 if(var_option.eq.0) then 
@@ -111,13 +112,13 @@ if(case_option.eq.2) then
 end if
 
 ;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 if(var_option.lt.2)
     if(month_option) then
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon12.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lat.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -129,8 +130,8 @@ if(var_option.eq.2)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     end if
-    if(nmonth.eq.12) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon12.nc"
+    if(nmonth.eq.4) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
     end if
     if(nmonth.gt.12) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_daily5.nc"
@@ -418,8 +419,8 @@ end if
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
     resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05
-    resp@lbLabelFontHeightF = 0.015 
+    resp@pmLabelBarHeightF = 0.04
+    resp@lbLabelFontHeightF = 0.012 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
@@ -502,15 +503,18 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,nvar-1,1
+do nv = 0,2,1;nvar-1,1
+;do fnc = 0,ncase-1,1
 do nm = 0,nmonth-1,1
-    ;np = nm*nvar + nv
-    np = nm
+    ;np = fnc*nmonth + nm ;1 fnc, 2 month
+    np = nv*nmonth + nm ;1 var, 2 month
+    ;np = nm*nvar + nv   ;1 month,2 var
+    ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.2) then 
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv); + " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv); + " (" + unit(nv) + ")"
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -522,15 +526,17 @@ do nm = 0,nmonth-1,1
     print(min(var_m(fnc,nv,nm,:,:)))
     
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
     overlay(plot(np),line(np))
     end if
 end do 
 
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    gsn_panel(wks,plot,(/3,4/),resp)
 end do 
+    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end
 

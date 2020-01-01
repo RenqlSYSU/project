@@ -19,16 +19,16 @@ month_e = 8
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_qtran_int_rmvannual.nc"
+filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_qtran_int_rmvannual.nc" ;,"NUDG24h"
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_rmvannual"
-    case   = (/" CTRL"," NG6h-CTRL"," NG24h-CTRL"/)
+    case   = (/" CTRL"," NG6h-CTRL"/) ;," NG24h-CTRL"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
-fig_out    ="pdf";"x11"
-;fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
 
 ;area: east Asia
-lats = (/15 ,-15/) ;-20
+lats = (/10 ,-15/) ;-20
 latn = (/55 ,55 /) ;60
 lonl = (/90 ,30 /) ;20
 lonr = (/150,150/) ;220
@@ -54,10 +54,10 @@ var_u  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
 var_v  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot     = new((/ncase*nvar/),graphic)
-    plotvc   = new((/ncase*nvar/),graphic)
-    line     = new((/ncase*nvar/),graphic)
-    gtop     = new((/ncase*nvar/),graphic)
+    plot     = new((/ncase*nmonth/),graphic)
+    plotvc   = new((/ncase*nmonth/),graphic)
+    line     = new((/ncase*nmonth/),graphic)
+    gtop     = new((/ncase*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -127,7 +127,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
-    res@gsnMaximize      = True
+;    res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
     ;res@vpHeightF        = 0.25
@@ -141,7 +141,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@mpMinLonF        = lonl(na)
     res@gsnMajorLatSpacing = 15
     res@gsnMinorLatSpacing = 15
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLonSpacing = 20
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -149,6 +149,15 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@mpGeophysicalLineColor      = "black";"white"
 
 ;--------set the form of the coordinate-----------------
+    ;res@tmXBLabelsOn         = False              ; do not draw bottom labels
+    ;res@tmXBOn               = False              ; no bottom tickmarks
+    res@tmYLLabelsOn         = False              ; no right labels
+    ;res@tmYLOn               = False              ; no right tickmarks
+    ;res@tmXTLabelsOn         = False              ; do not draw bottom labels
+    ;res@tmXTOn               = False              ; no bottom tickmarks
+    ;res@tmYLLabelsOn         = False              ; no right labels
+    ;res@tmYLOn               = False              ; no right tickmarks
+    
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
     res@tmYLLabelFont   = font_index
@@ -197,7 +206,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -214,8 +223,11 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMinDistanceF             = 0.05
+    resvc@vcLineArrowHeadMinSizeF   = 0.02
+    resvc@vcLineArrowHeadMaxSizeF   = 0.02
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoOn                = False
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
@@ -227,8 +239,6 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcRefAnnoString1On         = False
     resvc@vcRefAnnoString2On         = True
     ;resvc@vcRefAnnoString2           = "30m/s"
-    resvc@vcLineArrowHeadMinSizeF   = 0.02
-    resvc@vcLineArrowHeadMaxSizeF   = 0.02
 
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
@@ -264,11 +274,11 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"  ;"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.04
+    resp@lbLabelFontHeightF = 0.012
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -296,9 +306,9 @@ else
     end if
 end if
 
-do nm = 0, nmonth-1,1
-do nc = 0, ncase-1,1
 do nv = 0 ,nvar-1,1
+do nc = 0, ncase-1,1
+do nm = 0, nmonth-1,1
 ;if(nc.eq.0) then
 ;    res@cnFillPalette = "precip3_16lev"
 ;    ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -306,10 +316,17 @@ do nv = 0 ,nvar-1,1
 ;    res@cnFillPalette = "BlueDarkRed18"
 ;    ;blue and red, has 18 colors,2-10 is blue
 ;end if 
-        np = nvar*nc + nv
-        ;np = nmonth*nc + nm
-        res@gsnLeftString   = pre_case(np) + ")" + months(nm) + " " + case(nc)
-        res@gsnRightString  = draw_var(nv)
+        ;np = nvar*nc + nv
+        np = nmonth*nc + nm
+        if(np.eq.0.or.np.eq.4.or.np.eq.8) then 
+            res@tmYLLabelsOn         = True              ; no right labels
+            res@tmYLOn               = True              ; no right tickmarks
+        else
+            res@tmYLLabelsOn         = False              ; no right labels
+            res@tmYLOn               = False              ; no right tickmarks
+        end if
+        res@gsnLeftString   = pre_case(np) + ")" + case(nc) + " " + months(nm) + " " + draw_var(nv)
+        ;res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
         res@cnMaxLevelValF       := maxlvl(nc,nv) ;32    ; set max contour level
@@ -326,8 +343,14 @@ do nv = 0 ,nvar-1,1
         print(min(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do 
-    gsn_panel(wks,plot,(/ncase,nvar/),resp)
+    res1 = True
+    res2 = True
+    res1@gsnMaximize = True
+    attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
+    attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
+    gsn_panel(wks,plot(0:7:4),(/ncase,1/),resp)
+    ;gsn_panel(wks,plot,(/ncase,nvar/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end do
-end
+end 
 

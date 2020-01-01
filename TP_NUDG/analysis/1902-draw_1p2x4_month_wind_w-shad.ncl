@@ -33,7 +33,7 @@ unit     = (/"W/kg","mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be us
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,500,200/)
 nl = 2
-nv = 1
+nv = 4
 
 var_option = 0;1
 if(var_option.eq.0) then 
@@ -60,8 +60,8 @@ filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv
 fig_name = path + "/analysis/fig/" + case1(0) + "-MJ_JA_" + lev(nl) + "wind_" + draw_var(nv)
 end if
 
-pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
@@ -449,7 +449,7 @@ end if
         np = nm
         ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +   
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv); + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +   
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -488,7 +488,7 @@ end if
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/1,4/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
 end

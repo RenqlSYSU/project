@@ -26,13 +26,13 @@ draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy","dudt"/)  ;this is the variable
 unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s","10~S~-5~N~m/s~S~2~N~"/)    ;this can be used as right string 
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
 lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
-lev_u = (/1000,925,850,700,600,500,400,300,200,100/)
+lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 nv = 6
 diff = True;False
 jet_option = True
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
-var_option = 0
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -43,7 +43,7 @@ end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
+imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -52,8 +52,6 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
-lev  := (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
-;lev  := (/1000,925,850,700,600,500,400,300,200,100/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -72,8 +70,9 @@ lev_u:= (/1000,925,850,700,600,500,400,300,200,100/)
 years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
+;pre_case   = (/"(m","(n","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11""eps";
+fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
@@ -148,7 +147,11 @@ else
     if(jet_option) then 
     do nf = 0 ,ncase-1, 1
     f = addfile(jetfile(nf),"r")
+    if(var_option.eq.0) then
     u := f->season_ave(:,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    else
+    u := f->month_ave(:,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
     var_u(nf,:,:,:) = dim_avg_n_Wrap(u,3)
     end do
     end if
@@ -166,10 +169,10 @@ if(nv.eq.1) then
     var = var*9.8*10000 ;dzdt,transform unit from m/s to m2/s3
 end if
 
-if(nv.eq.3) then
-    u = mask(var, var.lt.0 , False) 
-    copy_VarMeta(var,u)
-end if
+;if(nv.eq.3) then
+;    u = mask(var, var.lt.0 , False) 
+;    copy_VarMeta(var,u)
+;end if
 
 if(nv.eq.4) then
     var = var-273.15 ;T,transform unit from K to C
@@ -248,7 +251,7 @@ printVarSummary(var)
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = True;False   ; the label bar
+    res@lbLabelBarOn         = True; the label bar False ;
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -292,11 +295,11 @@ printVarSummary(var)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.8
-    ;resp@pmLabelBarHeightF = 0.04
-    ;resp@lbLabelFontHeightF = 0.015
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = False;True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.04
+    resp@lbLabelFontHeightF = 0.012
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -358,11 +361,11 @@ do nm = 0,nmonth-1,1
 ;   res@cnFillPalette = "precip3_16lev"
 ;   ;blue and yellow and red, has 17 colors,2-18,2 is white
 ;end if 
-    ;do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
+        ;np = nm
     ;    np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) + " (" + unit(nv) + ")"
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) ;+ " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -376,6 +379,7 @@ do nm = 0,nmonth-1,1
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
+    ;gsn_panel(wks,plot,(/1,4/),resp)
 end do ;for the month 
 
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)

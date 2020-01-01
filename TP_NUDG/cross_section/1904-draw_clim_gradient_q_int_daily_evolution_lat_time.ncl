@@ -10,7 +10,7 @@ filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
 gtopfile = path + "/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 var_name = (/"Q","PS"/)
 draw_var = (/"dq/dy"/)  ;this is the variable used to draw, can used as center string
-unit     = "x10 ~S~-6~N~ kg/m~S~3~N~"   ;this can be used as right string 
+unit     = "10~S~-6~N~ kg/m~S~3~N~"   ;this can be used as right string 
 years    = ispan(1979,2005,1)   ;the calculate time
 g  = 9.8 ;m/(s*s)
 
@@ -22,14 +22,16 @@ fig_out    ="pdf"       ;"x11"
 lats = (/25 , 20/)  ;-20
 latn = (/40 , 45/)  ;60
 lonl = (/70 ,110/)  ;20
-lonr = (/105,122/)  ;130 ;220
+lonr = (/105,130/)  ;130 ;220
 lev  = (/1000,925,850,700,600,500,400,300/)
-lat_spacing = 5
+lat_spacing = 10
 na = 1
+month_s = 1
+month_e = 12
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.025
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -43,7 +45,7 @@ na = 1
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
-select_time = ind(time(:,1).ge.5.and.time(:,1).le.8)
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -91,14 +93,12 @@ dqdy = center_finite_diff_n(var,dy,False,0,1)*1000000
 copy_VarMeta(temp(0,:),dqdy(0,:,0))
 printVarSummary(dqdy)
 
-;phis := conform(var, phis, (/1,2/))
-;var_x = mask(var_x, phis.gt.500, False) ;phis gt 1500 will be mask
-;var_y = mask(var_y, phis.gt.500, False) ;phis gt 1500 will be mask
-
 ;do nc = 1,2
-;    var(nc,:,:) = var(nc,:,:) - var(0,:,:) 
-;    ;prob((nc-1),:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
-;    case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
+    var(2,:,:) = var(1,:,:) - var(0,:,:) 
+    case   = (/"(a) CTRL","(b) NG6h","(c) NG6h-CTRL"/)
+    ;var(nc,:,:) = var(nc,:,:) - var(0,:,:) 
+    ;prob((nc-1),:,:) = ttest(var(nc,:,:),vari(nc,:,:),nyear,var(0,:,:),vari(0,:,:),nyear,False,False)
+    ;case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
 ;end do
 
 printVarSummary(var)
@@ -130,8 +130,10 @@ printVarSummary(var)
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),20)
-    res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    res@tmXBValues      = ispan(0,(ntime-1),60)
+    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),20)
+    ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)
@@ -221,9 +223,9 @@ printVarSummary(var)
     ;resp@txFontHeightF = title_font 
     ;resp@txFontThicknessF = title_thick
 
-    minlvl = (/-32,-32,-32/) ;used for East Asian moist transiation
-    maxlvl = (/ 32, 32, 32/) ;used for CTRL-NUDG
-    spacig = (/ 4 , 4 , 4 /)
+    minlvl = (/-32,-32,-8/) ;used for East Asian moist transiation
+    maxlvl = (/ 32, 32, 8/) ;used for CTRL-NUDG
+    spacig = (/ 4 , 4 , 1/)
     
     do nc = 0, ncase-1,1
 if(nc.lt.-1) then

@@ -11,10 +11,10 @@ vector = True ;False
 draw_var = (/"Div","Vor"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"U","V","OMEGA"/)
 unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
-diff = False;True
+diff = True ;False ;
 dnv = 0
 
-season = True
+season = False;True
 if(season) then 
 months   = (/"DJF","MAM","JJA","SON"/)
 else
@@ -23,7 +23,7 @@ months = (/"JF","MA","MJ","JA"/)
 end if
 nmonth = dimsizes(months)
 month_s = 1
-month_e = 12
+month_e = 8
 lev = (/1000,850,700,600,500, 400,300,250,200,150,100/)
 ;lev  = (/1000,925,850,700,600,500,400,300,200,100/)
 
@@ -76,7 +76,8 @@ if(case_option.eq.2) then
 end if
 fig_name = path + "/project/TP_NUDG/analysis/fig/" + case1(0) + "_vertical_div_jet"
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out  = "pdf";"x11""eps";
+fig_out  = "eps";
+;fig_out  = "pdf";"x11""eps";
 
 files := systemfunc("ls "+filein(0)+"*.daily.U.nc" )
 f      = addfile(files(0),"r")
@@ -139,7 +140,7 @@ end do
 end do
 
 if(dnv.eq.0) then 
-var0 = uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
+var0 = -uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
 var0 = var0*10^6
 end if
 
@@ -166,8 +167,8 @@ mons = 12
 mone = 2
 select_time1 := ind(time1(:,1).eq.12.or.time1(:,1).le.2)
 else
-mons = 3*nm  
-mone = 3*nm + 2
+mons = 2*nm + 1 
+mone = 2*nm + 2
 select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
 end if
 var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
@@ -181,18 +182,19 @@ printVarSummary(var)
 
 if(diff) then 
 var(1,:,:,:)= var(1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
-u1(1,:,:,:)= u1(1,:,:,:) - u1(0,:,:,:)   ;get the difference between CTRL and NUDG
+;u1(1,:,:,:)= u1(1,:,:,:) - u1(0,:,:,:)   ;get the difference between CTRL and NUDG
+;u1(0,:,:,:) = mask(u1(0,:,:,:), u1(0,:,:,:).lt.0.0 , False)
 v1(1,:,:,:)= v1(1,:,:,:) - v1(0,:,:,:)   ;get the difference between CTRL and NUDG
 if(vector) then 
     w1(1,:,:,:)= w1(1,:,:,:) - w1(0,:,:,:)   ;get the difference between CTRL and NUDG
     copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
+    w1 = - w1*100
 end if
-u1(0,:,:,:) = mask(u1(0,:,:,:), u1(0,:,:,:).lt.0.0 , False)
+u1 = mask(u1, u1.lt.0.0 , False)
 else
 u1 = mask(u1, u1.lt.0.0 , False)
 end if
 printVarSummary(var)
-w1 = - w1*100
 copy_VarMeta(vars(:,:,0),var(0,0,:,:))
 copy_VarMeta(vars(:,:,0),u1(0,0,:,:))
 copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
@@ -254,7 +256,7 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = False ;True   ; the label bar
+    res@lbLabelBarOn         = True   ;False ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -337,7 +339,7 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    resp@gsnPanelLabelBar = True
+    resp@gsnPanelLabelBar = False ;True
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.04
     resp@lbLabelFontHeightF = 0.015
@@ -346,9 +348,9 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     resp@txFontThicknessF = title_thick
 
 if(dnv.eq.0) then 
-    minlvl = (/-7,-7/);
-    maxlvl = (/ 7, 7/);
-    spacig = (/ 1, 1/);
+    minlvl = (/-7,-3.5/);
+    maxlvl = (/ 7, 3.5/);
+    spacig = (/ 1, 0.5/);
 end if
 
 if(dnv.eq.1) then 
@@ -371,7 +373,7 @@ do nc = 0, ncase-1,1
         np = nmonth*nc + nm
         ;np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(nm) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(dnv) + " (" + unit(dnv) + ")"
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(dnv) ;+ " (" + unit(dnv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -379,9 +381,11 @@ do nc = 0, ncase-1,1
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
         if(diff.and.(nc.eq.1)) then
-        res_line@cnLevelSpacingF       = 8        ; set contour interval
+        res_line@cnLevelSpacingF       = 10        ; set contour interval
+        resvc@vcRefMagnitudeF          = 4.0             ; define vector ref mag
         else
-        res_line@cnLevelSpacingF       = 8        ; set contour interval
+        res_line@cnLevelSpacingF       = 10       ; set contour interval
+        resvc@vcRefMagnitudeF          = 8.0             ; define vector ref mag
         end if
         line(np) = gsn_csm_pres_hgt(wks,u1(nc,nm,:,:),res_line)
         overlay(plot(np),line(np))

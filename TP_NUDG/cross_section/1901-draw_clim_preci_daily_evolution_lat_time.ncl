@@ -7,7 +7,7 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 path    = "/home/ys17-19/renql"
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_s = 1
 month_e = 12
 
@@ -41,21 +41,24 @@ end if
 
 var_name = (/"PRECC","PRECL"/)
 fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-_clim_preci_daily_evolution_lat_time"
-fig_out    ="pdf"       ;"x11"
+fig_out    ="eps"       ;"x11"
+;fig_out    ="pdf"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
+pre_case = (/"(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+;pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 
 ;area:   TP , east Asia
 lats = (/25 , 20/)  ;-20
-latn = (/40 , 60/)  ;60
+latn = (/40 , 45/)  ;60
 lonl = (/70 ,110/)  ;20
-lonr = (/105,122/)  ;130 ;220
-lat_spacing = 5
+lonr = (/105,130/)  ;130 ;220
+lat_spacing = 10
 na = 1
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.025
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -241,9 +244,9 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    minlvl = (/0 ,0 ,-8/) ;-4  used for East Asian moist transiation
-    maxlvl = (/16,16, 8/) ; 4  used for CTRL-NUDG
-    spacig = (/1 ,1 , 1/) ;0.5
+    minlvl = (/0 ,0 ,-4 /) ;-8 used for East Asian moist transiation
+    maxlvl = (/16,16, 4 /) ; 8 used for CTRL-NUDG
+    spacig = (/1 ,1 ,0.5/) ; 1
     
 ;    do nt = 0, nyear-1,1
     do nc = 0, ncase-1,1
@@ -254,7 +257,7 @@ else
     res@cnFillPalette := "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
 end if 
-        res@gsnLeftString   = case(nc)
+        res@gsnLeftString   = pre_case(nc) + ") " + case(nc)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level

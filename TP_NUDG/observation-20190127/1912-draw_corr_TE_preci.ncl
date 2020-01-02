@@ -7,11 +7,31 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
-path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-path4   = "/home/ys17-19/data-observation/ERA-interim/surface/rain_daily/rain.daily.interim."; + years(nt) + ".nc"
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-var_name  = (/"r"/)
+data_option = 1 ;0 ERA, 1 CPC
 selecmod = 1
+allyear = False
+;area:    east Asia
+lats = (/ 20/)  ;-20
+latn = (/ 55/)  ;60
+lonl = (/70 /)  ;20
+lonr = (/130/)  ;130 ;220
+lat_spacing = 15
+lon_spacing = 20
+na = 0
+nm_s = 4
+nm_e = 6
+siglvl = 0.05
+
+gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
+case1 = "ERA-Interim"
+if(data_option.eq.0) then 
+path4   = "/home/ys17-19/data-observation/ERA-interim/surface/rain_daily/rain.daily.interim."; + years(nt) + ".nc"
+var_name  = (/"r"/)
+else
+path4   = "/home/ys17-19/data-observation/CPC_daily_precip/precip."; + years(nt) + ".nc"
+var_name  = (/"precip"/)
+end if
 
 fig_name  = path2 + "fig/Obs_corr_TE_preci"
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -19,22 +39,10 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 fig_out   ="pdf"       ;"x11"
 unit      = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
-case1 = "ERA-Interim"
 
-years    = ispan(1979,2010,1)
+years    = ispan(1979,2016,1)
 years@calendar = "standard"
 nyear = dimsizes(years)
-
-;area:    east Asia
-lats = (/ 15/)  ;-20
-latn = (/ 55/)  ;60
-lonl = (/70 /)  ;20
-lonr = (/150/)  ;130 ;220
-lat_spacing = 15
-na = 0
-nm_s = 1
-nm_e = 12
-siglvl = 0.05
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.02
@@ -49,10 +57,10 @@ siglvl = 0.05
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f  = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r") ;-2.5-10day
-time = cd_calendar(f->time,0)
+f1  = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r") ;-2.5-10day
+time = cd_calendar(f1->time,0)
 select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
-ts2 = f->EKEts(0:(nyear-1),select_time)
+ts2 = f1->EKEts(0:(nyear-1),select_time)
 
 f    = addfile(path4 + years(0) + ".nc", "r")
 vars = f->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -76,13 +84,15 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 do nt = 0,nyear-1,1
     f     = addfile(path4 + years(nt) + ".nc","r")
 if(isleapyear(years(nt))) then ;leap year,366 day
-    select = select_time
-    select(59:364) = select_time(59:364) + 1
+    select = select_time+1
+    ;select(59:364) = select_time(59:364) + 1
 else
     select = select_time
 end if 
     rain(nt,:,:,:) = f->$var_name$(select,{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do   ;the loop of 3 cases
+
+if(allyear) then 
 nday  = dimsizes(select_time)
 nsample = nyear*nday
 ts  := ndtooned(ts2)
@@ -92,10 +102,12 @@ prob2 = rtest(var2,nsample,0)
 prob2 = mask(prob2,prob2.lt.siglvl,True)
 copy_VarMeta(vars,var2 )
 copy_VarMeta(vars,prob2)
+end if
 
-do nm = 0, 11, 1
-    nm2 = nm + 1
-    select2 := ind(time(:,1).eq.nm2)
+time1 = cd_calendar(f1->time(select_time),0)
+do nm = 0, (nm_e-nm_s), 1
+    nm2 = nm + nm_s
+    select2 := ind(time1(:,1).eq.nm2)
     nday  = dimsizes(select2)
     nsample = nyear*nday
     var  := reshape(rain(:,select2,:,:),(/nsample,nlat,nlon/))
@@ -105,6 +117,7 @@ do nm = 0, 11, 1
     print("sample number is " + nyear*nday)
 end do
 prob = mask(prob,prob.lt.siglvl,True)
+prob = mask(prob,var1.eq.0,False)
 copy_VarMeta(vars,var1(0,:,:))
 copy_VarMeta(vars,prob(0,:,:))
 printVarSummary(var1)
@@ -133,8 +146,8 @@ printVarSummary(var1)
     res@mpMinLatF        = lats(na)
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
-    res@gsnMajorLatSpacing = 15
-    res@gsnMajorLonSpacing = 30
+    res@gsnMajorLatSpacing = lat_spacing
+    res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -194,7 +207,7 @@ printVarSummary(var1)
     res@gsnSpreadColorStart  = 2                ; start at color 17
     res@gsnSpreadColorEnd    = 21                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False ;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -255,21 +268,21 @@ printVarSummary(var1)
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
+    res@gsnRightString  = "corr";draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
 
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.04
+    resp@lbLabelFontHeightF = 0.015
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-do nm = 0, 11, 1
-    res@gsnLeftString  = pre_case(nm) + ") " + months(nm)
+do nm = 0, (nm_e-nm_s), 1
+    res@gsnLeftString  = pre_case(nm) + ") " + months((nm+nm_s-1))
     plot(nm)  = gsn_csm_contour_map_ce(wks,var1(nm,:,:),res)
     plot2(nm) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
@@ -278,12 +291,15 @@ do nm = 0, 11, 1
     print(max(var1(nm,:,:)))
     print(min(var1(nm,:,:)))
 end do
+
+if(allyear) then 
     nm = 11
     plot(nm)  = gsn_csm_contour_map_ce(wks,var2,res)
     plot2(nm) = gsn_csm_contour(wks,prob2,res_sig)
     gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(nm),plot2(nm))
     overlay(plot(nm),gtop(nm))
-    gsn_panel(wks,plot,(/4,3/),resp)
+end if
+    gsn_panel(wks,plot,(/1,3/),resp)
 end
 

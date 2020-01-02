@@ -18,7 +18,7 @@ draw_var = (/"200hPa U"/)  ;this is the variable used to draw, can used as cente
 unit     = "m/s"   ;this can be used as right string 
 
 if(case_option.eq.0) then
-    case    = (/"CTRL","NG6h","NG6h-CTRL"/)
+    case    = (/"NG6h-CTRL","NG6h-CTRL","NG6h-CTRL"/)
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years    = ispan(1979,2005,1)   ;the calculate time
@@ -45,7 +45,7 @@ if(case_option.eq.3) then
     years    = ispan(1,29,1)   ;the calculate time
 end if
 fig_name   = path + "/project/TP_NUDG/cross_section/fig/" + case(0) + "-clim_200U_daily_evolution_lat_time"
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
+pre_case   = (/"(c","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf"       ;"x11"
 
 ;area:   TP , east Asia
@@ -112,7 +112,6 @@ end do   ;the loop of 3 cases
 var := dim_avg_n(var,1) ;get var(ncase,nlat,ntime)
 printVarSummary(temp&time)
 copy_VarMeta(temp(0,:),var(0,:,0))
-copy_VarMeta(temp(0,:),diff(0,:,0))
 printVarSummary(var)
 
 lat1 = var&lat
@@ -124,6 +123,7 @@ do nc = 0,ncase-1,1
     diff(nc,:,:) = var(nc,:,:) - var(0,:,:)
     ;case   = (/"(a) CTRL","(b) NG6h-CTRL","(c) NG24h-CTRL"/)
 end do
+copy_VarMeta(temp(0,:),diff(0,:,0))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -265,8 +265,7 @@ end do
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = "";draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
-    res@gsnLeftString   = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
+    res@gsnRightString  = draw_var + " (" + unit +") "+ lonl(na)+" - "+lonr(na)+"E"   
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -294,7 +293,7 @@ end do
 ;    res@cnFillPalette := "BlueDarkRed18"
 ;    ;blue and red, has 18 colors,2-10 is blue
 ;end if 
-        ;res@gsnLeftString   = case(nc)
+        res@gsnLeftString   = pre_case(nc) + ") " + case(nc)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig        ; set contour interval
         res@cnMaxLevelValF       := maxlvl ;32    ; set max contour level

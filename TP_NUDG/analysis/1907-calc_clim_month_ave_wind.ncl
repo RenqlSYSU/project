@@ -35,7 +35,6 @@ if(case_option.eq.2) then
     years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 end if
-
 var_name = (/"U","V","T","Z3","Q1","dudt"/) ;,"OMEGA","RELHUM"
 
 ;area: east Asia

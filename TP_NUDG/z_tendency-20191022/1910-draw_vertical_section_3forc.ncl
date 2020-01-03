@@ -112,7 +112,7 @@ if(case_option.eq.2) then
 end if
 
 ;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-clim_2month_ave_u.nc"
 if(var_option.lt.2)
     if(month_option) then
     if(nmonth.eq.1) then 

@@ -20,6 +20,7 @@ months   = (/"DJF","MAM","JJA","SON"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 0
+percent = True
 ;imonth = ispan(0,11,1);(/4,5,6,7/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
@@ -31,8 +32,13 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
 ;gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
 ;nsample = 10
-case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h" 
-case2   = (/" CTRL"," NG6h-CTRL"/) ;, " NG24h-CTRL"
+if(percent) then 
+case1   = (/"CTRL","NUDG6h","NUDG6h"/) 
+case2   = (/" CTRL"," NG6h-CTRL", " diff/CTRL"/) ;
+else
+case1   = (/"CTRL","NUDG6h"/) 
+case2   = (/" CTRL"," NG6h-CTRL"/) ;
+end if
 gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 nsample = 27
 ;
@@ -121,11 +127,14 @@ do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(nf+1,:,:,:),vari(nf+1,:,:,:),nsample,True,False)
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 end do
-
 var = var/10000
 
-;var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
-var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
+if(percent) then 
+var(2,:,:,:)  = (var(1,:,:,:)/var(0,:,:,:))*100
+end if
+
+var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
+;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
@@ -221,7 +230,7 @@ printVarSummary(prob)
     res@lbBoxLineThicknessF  = mp_thick-1
 
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.1
+    res@pmLabelBarOrthogonalPosF     = 0.25
     res@pmLabelBarParallelPosF       = 0.5
 
 ;----------Set res line-----------
@@ -337,9 +346,9 @@ printVarSummary(prob)
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then ;EKE
-    minlvl = (/ 2 ,-16,-16/);-8,-8,-8,-8
-    maxlvl = (/50 , 16, 16/);8 ,8 ,8 ,8 
-    spacig = (/ 3 , 2 , 2 /);1 ,1 ,1 ,1 
+    minlvl = (/ 2 ,-16,-80/);-8,-8,-8,-8
+    maxlvl = (/50 , 16, 80/);8 ,8 ,8 ,8 
+    spacig = (/ 3 , 2 , 10/);1 ,1 ,1 ,1 
 end if
 
 do nm = 0,nmonth-1,1

@@ -15,15 +15,20 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+nmonth = 4
+season = False 
+geo = True ;False ;if true, only can calc 10N 
 
 if(case_option.eq.0) then
-    case    = (/"CTRL","NG24h","NG6h"/)
+    case    = (/"CTRL","NG6h","NG24h"/)
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_advect.nc"
-else
+end if
+
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
@@ -31,7 +36,16 @@ else
     fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect.nc"
 end if
 
-var_name= (/"U","V","T"/)
+if(case_option.eq.2) then
+    case    = (/"F2000","NUDG","NG58"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+    years   = ispan(1,30,1)   ;the calculate time
+    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect.nc"
+end if
+
+var_name= (/"U","V","T","Z3"/)
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -41,11 +55,14 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = -2 ;-90 ;
+lats =  10 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+zlev = (/1000,925,850/) ;hPa ,700,600,500,400
+lev2 = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels,hPa
+lev3 = fspan(1000,100,19)
+lev = lev2
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -59,7 +76,9 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-nmonth=4
+nzlev = dimsizes(zlev)
+lev := lev3
+nlev  = dimsizes(lev)
 b1_m  = new((/nmonth,nlev,nlat,nlon/),float)
 b2_m  = new((/nmonth,nlev,nlat,nlon/),float)
 b3_m  = new((/nmonth,nlev,nlat,nlon/),float)
@@ -88,14 +107,24 @@ end if
 ;read the data
 ;============================================================
 do nm = 0,nmonth-1, 1
+if(nm.eq.0.and.season) then 
+month_s = 12  
+month_e = 2
+select_time := ind(time(:,1).eq.12.or.time(:,1).le.2)
+else
 month_s = 2*nm + 1
 month_e = 2*nm + 2
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+end if
 ntime = dimsizes(select_time)
-print("month from " + month_s + " - " + month_e + ", ntime = " + ntime)
-u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
-t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
+lev := lev2
+nlev  = dimsizes(lev)
+print("===================================================================")
+print("month from " + month_s + " to " + month_e + ", ntime = " + ntime)
+u     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+v     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+t     := new((/nyear,ntime,nlev ,nlat,nlon/),float)
+z     := new((/nyear,ntime,nzlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
@@ -110,6 +139,10 @@ v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 nv = 2
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+
+;nv = 3
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+;z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
 clm_u = dim_avg_n(u,0)
 clm_v = dim_avg_n(v,0)
@@ -122,6 +155,18 @@ clm_t = linmsg_n(clm_t,-1,ilon)
 print(clm_u(1,9,10,20:30))
 print(clm_v(1,9,10,20:30))
 print(clm_t(1,9,10,20:30))
+
+lev := lev3
+nlev = dimsizes(lev)
+b1 := new((/ntime,nlev,nlat,nlon/),double)
+
+linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
+p_in   = conform(clm_u,lev2,ilev)
+p_out  = conform(b1,lev3,ilev)
+clm_u := int2p_n(p_in,clm_u,p_out,linlog,ilev)
+clm_v := int2p_n(p_in,clm_v,p_out,linlog,ilev)
+clm_t := int2p_n(p_in,clm_t,p_out,linlog,ilev)
+delete([/p_in,p_out,linlog/])
 
 ;==========================================================
 ;calc advection forcing 
@@ -146,6 +191,7 @@ b2 = - 2*(2.0*pi/24.0/3600.0)*coslat*clm_v/a
 b2_m(nm,:,:,:) = tofloat(dim_avg_n(b2,0))
 delete(b2)
 
+sigm0 = conform(clm_u,wgt_areaave(sigm0,1.0,1.0,0),(/itime,ilev/))
 f0   = conform(clm_u,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
 advT = (clm_u/a/coslat)*center_finite_diff_n(clm_t,lon,loncyc,opt,ilon) + \
        (clm_v/a       )*center_finite_diff_n(clm_t,lat,cyclic,opt,ilat)
@@ -207,8 +253,7 @@ filevarattdef(ncdf,"b1",b1_m)
 filevarattdef(ncdf,"b2",b2_m)
 filevarattdef(ncdf,"b3",b3_m)
 
-ncdf->time = (/12,34,56,78/) 
-ncdf->lev  = (/lev/)
+ncdf->lev  = (/toint(lev)/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->sigm0 = (/sigm0_m/)

@@ -6,14 +6,14 @@
 ;*********************************************************************************
 begin
 var_option   = 2
-month_option = True;False
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+month_option = False
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 nl = 4 ;(/925,850,700,500,200/)
-fnc  = 0    ;chose which case to draw
+fnc  = 1    ;chose which case to draw
 diff = True;False ;whether draw the difference
-na = 2 ;"TP","EA","NH"
-month_s = 1
-month_e = 12
+na = 1 ;"TP","EA","NH"
+month_s = 5
+month_e = 8
 lev = (/925,850,700,500,200/)
 
 if(var_option.eq.0) then 
@@ -45,31 +45,48 @@ if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL"/);, "NG24h-CTRL"/)
     nsample = 27
-else
+end if
+
+if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
     nsample = 10
 end if
 
+if(case_option.eq.2) then
+    case1   = (/"F2000","NUDG"/)
+    case2   = (/"F2000","NUDG-F2000"/)
+    nsample = 30
+end if
+
+if(case_option.eq.2) then
+    case1   = (/"F2000","NG58"/)
+    case2   = (/"F2000","NG58-F2000"/)
+    nsample = 30
+end if
+
 if((var_option.lt.2).or.(var_option.eq.3))
     if(month_option) then
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A12.nc"
-    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_u.nc"
+    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+    u_name = "month_ave"
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
-    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_day_evolution_u.nc"
+    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_day_evolution_U.nc"
+    u_name = "var_day"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + var_name(0) + "-" + lev(nl)  
 else
     if(month_option) then
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
-    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_u.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon12.nc"
+    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+    u_name = "month_ave"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
-    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_day_evolution_u.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_daily.nc"
+    jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_day_evolution_U.nc"
+    u_name = "var_day"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + var_name(nnv) + "-" + lev(nl)  
 end if
+fig_name = path + "/z_tendency-20191022/fig/" + case1(0) + "_clim_lat_time_" + var_name(nnv) + "-" + lev(nl)  
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
 
@@ -77,15 +94,11 @@ fig_out    ="pdf";"x11"
 area = (/"TP","EA","NH"/)
 lats = (/15  ,10   , 10  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,30  , 10 /) ;30 ;20
-lonr = (/105 ,150 ,350 /) ;150;220
+lonl = (/70  ,110  , 10 /) ;30 ;20
+lonr = (/105 ,130 ,350 /) ;150;220
 
-f = addfile(filename(0),"r")
-if(var_option.le.1) then 
-vars  = f->$var_name(nv)$(0,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-else
-vars = f->$var_name(nnv)$(select,0,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-end if
+f = addfile(jetfile(0),"r")
+vars  = f->$u_name$(0,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 nlat   = dimsizes(vars&lat)
 nlon   = dimsizes(vars&lon)
 nlev   = dimsizes(lev)
@@ -134,17 +147,17 @@ do nc = 0, ncase-1, 1
         var(nc,0:2,:,:,:) = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     f = addfile(jetfile(nc),"r")
-    u(nc,:,:,:) = f->var_day(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u(nc,:,:,:) = f->month_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do 
 else
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
     if((var_option.lt.2).or.(var_option.eq.3))
         do nv = 0, nvar-2,1
-        var(nc,nv,:,:,:)  = f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var(nc,nv,:,:,:)  = f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     else
-        var(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     f = addfile(jetfile(nc),"r")
     u(nc,:,:,:) = f->var_day(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -154,19 +167,27 @@ end if
 var(:,nvar-1,:,:,:) = dim_sum_n(var(:,0:(nvar-2),:,:,:),1)
 var_temp = dim_avg_n_Wrap(var,4)
 u_temp   = dim_avg_n_Wrap(u  ,3)
+printVarSummary(var_temp)
+printVarSummary(u_temp)
 var_temp!0 = "case"
 var_temp!1 = "var"
 var_temp!2 = "time"
 var_temp!3 = "lat"
+var_temp&case = ispan(1,ncase,1)
+var_temp&var  = ispan(1,nvar,1)
+var_temp&time = ispan(1,ntime,1)
 u_temp!0 = "case"
 u_temp!1 = "time"
-u_temp!2 = "lat"
+u_temp&case = ispan(1,ncase,1)
+u_temp&time = ispan(1,ntime,1)
+printVarSummary(var_temp)
 var_m = var_temp({case|:},{var|:},{lat|:},{time|:})
 u_m = u_temp({case|:},{lat|:},{time|:})
 printVarSummary(var_m)
 printVarSummary(u_m)
 
 lat1 = var&lat
+axlat = new((/ncase,ntime/),double)
 do nc = 0,ncase-1,1
     do nt = 0,ntime-1,1
         lat_ind = maxind(u_m(nc,:,nt))
@@ -235,12 +256,13 @@ end if
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),60)
-    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
-    ;res@tmXBValues      = ispan(15,(ntime-1),30) 
-    ;res@tmXBLabels      = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"/) 
-    ;res@tmXBValues      = ispan(0,(ntime-1),20)
-    ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    if(month_option) then 
+    res@tmXBValues      = ispan(1,(ntime),2)
+    res@tmXBLabels      = (/"Jan","Mar","May","Jul","Sep","Nov"/)
+    else
+    res@tmXBValues      = ispan(1,(ntime),30)
+    res@tmXBLabels      = (/"1 Mar","30 Mar","29 Apr","29 May","28 Jun","28 Jul","27 Aug"/)
+    end if
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)
@@ -292,7 +314,7 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False ;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -354,9 +376,9 @@ if(nnv.eq.0) then   ;dzdt
     spacig = (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-21,-21,-21,-21/);-8,-8,-8,-8,
-    maxlvl = (/ 21, 21, 21, 21/); 8, 8, 8, 8,
-    spacig = (/ 3 , 3 , 3 , 3 /); 1, 1, 1, 1,
+    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
@@ -396,7 +418,7 @@ end if
 do nv = 0,nvar-1,1
     np = nv
    ; np = nv*nmonth + nm
-    res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm)
+    res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) 
     if(var_option.eq.2) then 
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
@@ -407,13 +429,13 @@ do nv = 0,nvar-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np) = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,:,:),res)
-    line1(np)   = gsn_add_polyline( wks, plot(np),ispan(0,(ntime-1),1) , axlat(0,:), lnres2) ;black
-    line2(np)  = gsn_add_polyline( wks, plot(np),ispan(0,(ntime-1),1) , axlat(1,:), lnres)  ;red
+    plot(np) = gsn_csm_lat_time(wks,var_m(fnc,nv,:,:),res)
+    line1(np)   = gsn_add_polyline( wks, plot(np),ispan(1,(ntime),1) , axlat(0,:), lnres2) ;black
+    line2(np)  = gsn_add_polyline( wks, plot(np),ispan(1,(ntime),1) , axlat(1,:), lnres)  ;red
     print(max(var_m(fnc,nv,:,:)))
     print(min(var_m(fnc,nv,:,:)))
 end do 
 
-    gsn_panel(wks,plot,(/nvar/),resp)
+    gsn_panel(wks,plot,(/nvar,1/),resp)
 end
 

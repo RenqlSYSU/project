@@ -12,7 +12,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -29,11 +29,12 @@ if(case_option.eq.1) then
     years   = ispan(21,30,1)   ;the calculate time
 end if
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    case    = (/"F2000","NUDG","NG58"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+    years   = ispan(1,29,1)   ;the calculate time
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_day_evolution_"
 end if
 var_name = (/"U","V","T","Z3","Q1","dudt"/) ;,"OMEGA","RELHUM"
 
@@ -61,7 +62,7 @@ var        = new((/nyear,365,nlev,nlat,nlon/),float)
 var_day    = new((/      365,nlev,nlat,nlon/),float)
 
 do nv = 0,0,1; ,nvar-1 ,1 
-do nf = 0 , ncase-1,1
+do nf = 2 , ncase-1,2
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

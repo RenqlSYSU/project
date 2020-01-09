@@ -8,10 +8,10 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
 na = 1
-month_s = 1
-month_e = 12
+month_s = 5
+month_e = 8
 
 var_name = (/"U"/)
 draw_var = (/"200hPa U"/)  ;this is the variable used to draw, can used as center string
@@ -32,14 +32,14 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NG6h","NG6h-F2000"/)
+    case    = (/"NG6h-F2000","NG6h-F2000","NG6h-F2000"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
 if(case_option.eq.3) then
-    case    = (/"F2000","NG58","NG58-F2000"/)
+    case    = (/"NG58-F2000","NG58-F2000","NG58-F2000"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
     years    = ispan(1,29,1)   ;the calculate time
@@ -150,12 +150,12 @@ copy_VarMeta(temp(0,:),diff(0,:,0))
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    res@tmXBValues      = ispan(0,(ntime-1),60)
-    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),60)
+    ;res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
     ;res@tmXBValues      = ispan(15,(ntime-1),30) 
     ;res@tmXBLabels      = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"/) 
-    ;res@tmXBValues      = ispan(0,(ntime-1),20)
-    ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    res@tmXBValues      = ispan(0,(ntime-1),20)
+    res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)

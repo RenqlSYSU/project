@@ -10,8 +10,8 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 path1   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/"CTRL","NG6h","NG24h"/)
+    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG6h"/) ;,"NG24h"
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 else
@@ -22,17 +22,18 @@ else
     nsample = 10
 end if
 
-draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s","10~S~-5~N~m/s~S~2~N~"/)    ;this can be used as right string 
-draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt"/)  ;this is the variable used to draw, can used as center string
-lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+draw_var = (/"Z3" ,"dzdt" ,"Ahgt","U","T","dTdy","dudt","4q1","V"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s","10~S~-5~N~m/s~S~2~N~","K/day","m/s"/)    ;this can be used as right string 
+draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt","4q1","V"/)  ;this is the variable used to draw, can used as center string
+;lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
-nv = 6
+nv = 8
 diff = True;False
 jet_option = True
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
-var_option = 2
+var_option = 3
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -65,21 +66,21 @@ filein  = path1+(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                   "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-lev  := (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-lev_u:= (/1000,925,850,700,600,500,400,300,200,100/)
+;lev  := (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;hPa
 years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
 ;pre_case   = (/"(m","(n","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11"
+;fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
 lats = (/15  ,15  , 0  /);20 ;-20
 latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,110 , 10 /) ;30 ;20
-lonr = (/105 ,130 ,350 /) ;150;220
+lonl = (/70  ,108 , 10 /) ;30 ;20
+lonr = (/105 ,120 ,350 /) ;150;220
 lat_spacing = 15
 lon_spacing = 30
 na = 1
@@ -93,7 +94,11 @@ nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 nlev   = dimsizes(lev)
 nlev2  = dimsizes(lev_u)
+if(nv.eq.7) then 
+var    = new((/ncase,4,nmonth,nlev ,nlat,nlon/),float)
+else
 var    = new((/ncase,nmonth,nlev ,nlat,nlon/),float)
+end if
 var_u  = new((/ncase,nmonth,nlev2,nlat/),float)
 
 ;the number of the panel plot
@@ -138,13 +143,27 @@ if(var_option.eq.3) then
     select_time1 := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
     var(:,nm,:,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:,:),1)
     end do
+    var := dim_avg_n_Wrap(var,4)
 else
-    do nf = 0 ,ncase-1, 1
-    print(filename(nf) + draw_var(nv) + ".nc")
-    f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-    var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    end do
-    if(jet_option) then 
+    if(nv.eq.7) then 
+        do nf = 0 ,ncase-1, 1
+        print(filename(nf) + draw_var(nv) + ".nc")
+        f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
+        var(nf,:,:,:,:,:)  = f->$var_name(0)$(:,imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end do
+        var := dim_avg_n_Wrap(var,5)
+    else
+        do nf = 0 ,ncase-1, 1
+        print(filename(nf) + draw_var(nv) + ".nc")
+        f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
+        var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end do
+        var := dim_avg_n_Wrap(var,4)
+    end if
+end if
+printVarSummary(var)
+
+if(jet_option) then 
     do nf = 0 ,ncase-1, 1
     f = addfile(jetfile(nf),"r")
     if(var_option.eq.0) then
@@ -154,10 +173,7 @@ else
     end if
     var_u(nf,:,:,:) = dim_avg_n_Wrap(u,3)
     end do
-    end if
 end if
-printVarSummary(var)
-var := dim_avg_n_Wrap(var,4)
 
 if(jet_option) then 
     var_u = mask(var_u,var_u.ge.0,True)
@@ -186,10 +202,18 @@ if(nv.eq.6) then
     var = var*10^5 ;dudt
 end if
 
+if(nv.eq.7) then
+    var = var*3600*24 ;4q1,k/s to k/day
+end if
+
 if(diff) then 
+case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
 do nf = 0 ,ncase-2,1
-case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
+if(nv.eq.7) then 
+var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
+else
 var(nf+1,:,:,:)= var(nf+1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
+end if
 end do
 end if
 printVarSummary(var)
@@ -293,9 +317,9 @@ printVarSummary(var)
     res_line@gsnRightString   = " "
 
     resp  = True    
-    resp@gsnMaximize   = True
+    resp@gsnMaximize   = False;True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    resp@gsnPanelLabelBar = False;True
+    resp@gsnPanelLabelBar = True
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.04
     resp@lbLabelFontHeightF = 0.012
@@ -351,7 +375,49 @@ else
 end if
 end if
 
+if(nv.eq.7) then 
+    minlvl = (/-2.1,-2.1,-2.1/);-0.7,-0.7
+    maxlvl = (/ 2.1, 2.1, 2.1/); 0.7, 0.7
+    spacig = (/ 0.3, 0.3, 0.3/); 0.1, 0.1
+end if
+
+if(nv.eq.8) then 
+    minlvl = (/-4 ,-0.8,-0.8/);
+    maxlvl = (/ 4 , 0.8, 0.8/);
+    spacig = (/0.5, 0.1, 0.1/);
+end if
+
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+if(nv.eq.7) then
+draw_varname2 = (/"QRL","QRS","DTCOND","DTV","total"/) 
+do nv2 = 0,4,1
+do nc = 0, ncase-1,1
+do nm = 0,nmonth-1,1
+        np = nm
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
+        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname2(nv2) + " (" + unit(nv) + ")"
+        res@gsnSpreadColors       = False              ; turn of the full color map
+        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
+        if(nv2.eq.4) then 
+        plot(np) = gsn_csm_pres_hgt(wks,dim_sum_n_Wrap(var(nc,:,nm,:,:),0),res)
+        else
+        plot(np) = gsn_csm_pres_hgt(wks,var(nc,nv2,nm,:,:),res)
+        print(max(var(nc,nv2,nm,:,:)))
+        print(min(var(nc,nv2,nm,:,:)))
+        end if
+        if(jet_option) then 
+        line(np) = gsn_csm_pres_hgt(wks,var_u(nc,nm,:,:),res_line)
+        overlay(plot(np),line(np))
+        end if
+    end do 
+    gsn_panel(wks,plot,(/3,4/),resp)
+end do ;for the month 
+end do ;for the month 
+
+else
 do nc = 0, ncase-1,1
 do nm = 0,nmonth-1,1
 ;if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
@@ -379,11 +445,11 @@ do nm = 0,nmonth-1,1
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
-    ;gsn_panel(wks,plot,(/1,4/),resp)
+    ;gsn_panel(wks,plot,(/3,4/),resp)
 end do ;for the month 
-
+    
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-;end do
+end if
 end
 

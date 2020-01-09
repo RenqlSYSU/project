@@ -1062,7 +1062,7 @@ variables:
             cell_methods	: 	time: mean
 
     Variable: DTV
-    Type: float
+    type: float
     Total Size: 1658880 values
                 6635520 bytes
     Number of Dimensions: 4

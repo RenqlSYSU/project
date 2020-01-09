@@ -39,7 +39,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 1  ;used to read dzdt induced by different forcing
+    nnv = 4  ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -78,8 +78,8 @@ end if
 area = (/"TP","EA","NH","CA"/)
 lats = (/15  , 15 , 10 , 10 /);15 ;-210
 latn = (/55  , 55 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,110 , 1  , 0  /) ;30 ;20
-lonr = (/105 ,130 ,359 , 70 /) ;150;220
+lonl = (/70  ,108 , 1  , 0  /) ;30 ;20
+lonr = (/105 ,120 ,359 , 70 /) ;150;220
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -112,7 +112,7 @@ if(case_option.eq.2) then
 end if
 
 ;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-jetfile  = path + "/analysis/mdata/" + case1 + "-clim_2month_ave_u.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 if(var_option.lt.2)
     if(month_option) then
     if(nmonth.eq.1) then 
@@ -503,7 +503,7 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,2,1;nvar-1,1
+do nv = 0,nvar-1,1
 ;do fnc = 0,ncase-1,1
 do nm = 0,nmonth-1,1
     ;np = fnc*nmonth + nm ;1 fnc, 2 month

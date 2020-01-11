@@ -12,13 +12,13 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_MJ_JA_ave_Q1.nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_2month_ave_Q1.nc"
     years    = ispan(1979,2005,1)   ;the calculate time
 end if  
 if(case_option.eq.1) then
@@ -44,11 +44,11 @@ lats =  0  ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
-;lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+;lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
+lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 month_s = 1
-month_e = 12
-nmonth = 12
+month_e = 8
+nmonth = 4
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -104,8 +104,8 @@ var@units     = "W/kg"
 
 time = cd_calendar(f->time(select_time1),0)
 do nm = 0, nmonth-1, 1
-mons = nm + 1
-mone = nm + 1
+mons = 2*nm + 1
+mone = 2*nm + 2
 select_time := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
 var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
 end do
@@ -147,12 +147,10 @@ filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"month_ave",var_month)
 filevarattdef(ncdf,"month_vari",var_month)
 
-ncdf->month  = ispan(1,12,1) ;(/56,78/)
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->month_vari  = (/month_vari/)
 end do
-;end do ;loop of variable
 end
 

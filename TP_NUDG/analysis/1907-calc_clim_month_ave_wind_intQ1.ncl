@@ -1,9 +1,9 @@
 ;***************************************************************************
 ;filename:      calc_clim_month_ave_wind.ncl
 ;output_file:   Clim_month_ave_wind.nc 
-;read the 27 years variable(TLLL) of one case at East AsiaI(15S£­55N£¬30-150E) 
-;and then calculate the month average to get an array of (nmonth,nlat,nlon),
-;then calculate the season average (nseason,nlat,nlon).
+;1.read the 27 years variable(TLLL) of one case 
+;2.calculate the month average to get an array of (nmonth,nlat,nlon),
+;3.calculate the season average (nseason,nlat,nlon).
 ;
 ;Modification:
 ;20190712: add the case of noTP
@@ -35,7 +35,8 @@ if(case_option.eq.2) then
     years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 end if
-var_name = (/"U","V","T","Z3","Q1","dudt"/) ;,"OMEGA","RELHUM"
+var_name = (/"U","V","T","Z3","Q1","dudt"/) ;,"OMEGA","RELHUM" 
+;Q1 is vertically integrated 
 
 ;area: east Asia
 lats = 0   ;-90 ;
@@ -150,7 +151,8 @@ do ns = 0,3,1
 end do
 end if
 
-if(nv.eq.4) then 
+if(nv.eq.4) then
+var_name(nv) = "Q1"
 var        := new((/nyear,365,nlat,nlon/),float)
 var_month  := new((/nyear,12 ,nlat,nlon/),float)
 var_season := new((/nyear,4  ,nlat,nlon/),float)
@@ -197,6 +199,8 @@ do ns = 0,3,1
                              var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
     end if
 end do
+
+var_name(nv) = "intQ1"
 end if
 
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)

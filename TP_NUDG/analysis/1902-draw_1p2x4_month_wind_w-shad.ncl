@@ -28,14 +28,15 @@ if(case_option.eq.2) then
     nsample = 30
 end if
 
-draw_var = (/"Q1"  ,"preci" ,"OMEGA"          ,"Z3" ,"q1"  /)  ;this is the variable used to draw, can used as center string
-unit     = (/"W/kg","mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
+;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
+draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,500,200/)
 nl = 2
 nv = 4
 
-var_option = 0;1
+var_option = 2;1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -54,10 +55,10 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-" + lev(nl) + "wind_" + draw_v
 end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"MJ","JA"/)
-imonth = ispan(0,1,1);(/4,5,6,7/)
-filename = path + "/analysis/mdata/" + case1 + "-Clim_MJ_JA_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-MJ_JA_" + lev(nl) + "wind_" + draw_var(nv)
+months   = (/"JF","MA","MJ","JA"/)
+imonth = ispan(2,3,1);(/4,5,6,7/)
+filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
+fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "wind_" + draw_var(nv)
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
@@ -154,10 +155,6 @@ do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 end do
-
-;if(nv.eq.0) then
-;    var(:,2,:,:,:) = var(:,2,:,:,:)*1000 ;Q1,transform unit from K/S to W/kg
-;end if
 
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
@@ -267,12 +264,14 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = False;True   ; the label bar
+    res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
+    ;res@pmLabelBarWidthF  = 0.65
+    ;res@pmLabelBarHeightF = 0.08
 
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.15
@@ -378,7 +377,7 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait"
-    resp@gsnPanelLabelBar = True
+    resp@gsnPanelLabelBar = False; True
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.05
     resp@lbLabelFontHeightF = 0.015 
@@ -437,7 +436,7 @@ if(nl.eq.2) then
 end if
 end if
 
-do nc = 0, 1,1;ncase-1,1
+do nc = 0, ncase-1,1
 if(nc.gt.0.or.nv.eq.2) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
@@ -446,8 +445,8 @@ else
    ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
     do nm = 0,nmonth-1,1
-        np = nm
-        ;np = nmonth*nc + nm
+        ;np = nm
+        np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
         res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv); + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +   
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
@@ -487,9 +486,9 @@ end if
     ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+    ;gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end
 

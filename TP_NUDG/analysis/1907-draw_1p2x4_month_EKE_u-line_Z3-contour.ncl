@@ -13,17 +13,17 @@
 begin
 draw_var = (/"EKE"        ,"U"  ,"Z3"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"10~S~4~N~ J","m/s","m" /)  ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
 nv = 0
-percent = True
+percent = False;True
 ;imonth = ispan(0,11,1);(/4,5,6,7/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
+imonth = ispan(4,7,1);(/4,5,6,7/)
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -131,10 +131,11 @@ var = var/10000
 
 if(percent) then 
 var(2,:,:,:)  = (var(1,:,:,:)/var(0,:,:,:))*100
+var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
+else
+var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
 end if
 
-var(1:2,:,:,:) = mask(var(1:2,:,:,:),prob.lt.siglvl,True)
-;var(1,:,:,:) = mask(var(1,:,:,:),prob(0,:,:,:).lt.siglvl,True)
 prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,:,:),prob(0,0,:,:))
 printVarSummary(var)
@@ -376,13 +377,15 @@ end if
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
         plot2(np)   = gsn_csm_contour(wks,u(nc,nm,:,:),res_line)
+        overlay(plot(np),plot2(np))
+        
         ;plot3(np)   = gsn_csm_contour(wks,z(nc,nm,:,:),res_hgt)
         ;overlay(plot(np),plot3(np))
-        overlay(plot(np),plot2(np))
         ;if(nc.gt.0)
         ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
         ;    overlay(plot(np),plot_sig(np2))
         ;end if
+        
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )

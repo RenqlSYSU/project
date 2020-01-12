@@ -39,7 +39,7 @@ if(var_option.eq.2) then
     draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 4  ;used to read dzdt induced by different forcing
+    nnv = 1  ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
@@ -78,8 +78,8 @@ end if
 area = (/"TP","EA","NH","CA"/)
 lats = (/15  , 15 , 10 , 10 /);15 ;-210
 latn = (/55  , 55 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,108 , 1  , 0  /) ;30 ;20
-lonr = (/105 ,120 ,359 , 70 /) ;150;220
+lonl = (/70  ,110 , 1  , 0  /) ;30 ;20
+lonr = (/105 ,130 ,359 , 70 /) ;150;220
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -118,7 +118,7 @@ if(var_option.lt.2)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lat.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -403,7 +403,7 @@ end if
     res_line@cnLinesOn        = True
     res_line@cnLineLabelsOn   = True
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 3.0
+    res_line@cnLineThicknessF = 4.0  ;3.0
     res_line@cnLineColor      = "black"
     res_line@gsnContourZeroLineThicknessF = 0
     res_line@gsnContourNegLineDashPattern = 5
@@ -418,9 +418,11 @@ end if
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.04
-    resp@lbLabelFontHeightF = 0.012 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.8
+    resp@lbLabelFont        = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
@@ -503,11 +505,12 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,nvar-1,1
+do nv = 0,2,1;nvar-1,1
 ;do fnc = 0,ncase-1,1
-do nm = 0,nmonth-1,1
+do nm = 2,nmonth-1,1
+    np = nv*2 + nm - 2;1 fnc, 2 month
     ;np = fnc*nmonth + nm ;1 fnc, 2 month
-    np = nv*nmonth + nm ;1 var, 2 month
+    ;np = nv*nmonth + nm ;1 var, 2 month
     ;np = nm*nvar + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
@@ -534,8 +537,9 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
+    gsn_panel(wks,plot,(/3,2/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end

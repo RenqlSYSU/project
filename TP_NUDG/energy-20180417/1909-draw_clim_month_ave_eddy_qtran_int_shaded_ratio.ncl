@@ -11,10 +11,11 @@ var_name_v = (/"qv","ste_qv","edd_qv"/)
 unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
 div_option = True
 
-months = (/"JF","MA","MJ","JA"/)
+months = (/"MJ","JA"/)
+;months = (/"JF","MA","MJ","JA"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 nmonth = dimsizes(months)
-month_s = 1
+month_s = 5
 month_e = 8
 
 ;the path of the file
@@ -24,8 +25,8 @@ gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_rmvannual"
     case   = (/" CTRL"," NG6h-CTRL"/) ;," NG24h-CTRL"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
-;fig_out    ="pdf";"x11"
-fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
 
 ;area: east Asia
 lats = (/10 ,-15/) ;-20
@@ -80,10 +81,10 @@ do nv = 0,nvar-1,1
 end do
 end do
 
-do nm = 0, nmonth-1, 1
-mons = 2*nm + 1
-mone = 2*nm + 2
 time1  = cd_calendar(f->time(select_time),0)
+do nm = 0, nmonth-1, 1
+mons = 2*nm + month_s
+mone = 2*nm + month_s + 1
 select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
 var_u(:,:,nm,:,:) = dim_avg_n_Wrap(u(:,:,select_time1,:,:),2)
 var_v(:,:,nm,:,:) = dim_avg_n_Wrap(v(:,:,select_time1,:,:),2)
@@ -151,7 +152,7 @@ wks = gsn_open_wks(fig_out,fig_name)
 ;--------set the form of the coordinate-----------------
     ;res@tmXBLabelsOn         = False              ; do not draw bottom labels
     ;res@tmXBOn               = False              ; no bottom tickmarks
-    res@tmYLLabelsOn         = False              ; no right labels
+    ;res@tmYLLabelsOn         = False              ; no right labels
     ;res@tmYLOn               = False              ; no right tickmarks
     ;res@tmXTLabelsOn         = False              ; do not draw bottom labels
     ;res@tmXTOn               = False              ; no bottom tickmarks
@@ -276,8 +277,9 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@gsnPaperOrientation = "landscape"  ;"portrait"
     resp@gsnPanelLabelBar = True
     resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.04
-    resp@lbLabelFontHeightF = 0.012
+    resp@pmLabelBarHeightF = 0.05
+    resp@lbLabelFont        = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF = 0.015
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
@@ -318,15 +320,15 @@ do nm = 0, nmonth-1,1
 ;end if 
         ;np = nvar*nc + nv
         np = nmonth*nc + nm
-        if(np.eq.0.or.np.eq.4.or.np.eq.8) then 
-            res@tmYLLabelsOn         = True              ; no right labels
-            res@tmYLOn               = True              ; no right tickmarks
-        else
-            res@tmYLLabelsOn         = False              ; no right labels
-            res@tmYLOn               = False              ; no right tickmarks
-        end if
-        res@gsnLeftString   = pre_case(np) + ")" + case(nc) + " " + months(nm) + " " + draw_var(nv)
-        ;res@gsnRightString  = draw_var(nv)
+        ;if(np.eq.0.or.np.eq.4.or.np.eq.8) then 
+        ;    res@tmYLLabelsOn         = True              ; no right labels
+        ;    res@tmYLOn               = True              ; no right tickmarks
+        ;else
+        ;    res@tmYLLabelsOn         = False              ; no right labels
+        ;    res@tmYLOn               = False              ; no right tickmarks
+        ;end if
+        res@gsnLeftString   = pre_case(np) + ")" + case(nc) + " " + months(nm) ;+ " " + draw_var(nv)
+        res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
         res@cnMaxLevelValF       := maxlvl(nc,nv) ;32    ; set max contour level
@@ -343,14 +345,14 @@ do nm = 0, nmonth-1,1
         print(min(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do 
-    res1 = True
-    res2 = True
-    res1@gsnMaximize = True
-    attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
-    attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
-    gsn_panel(wks,plot(0:7:4),(/ncase,1/),resp)
+    ;res1 = True
+    ;res2 = True
+    ;res1@gsnMaximize = True
+    ;attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
+    ;attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
+    ;gsn_panel(wks,plot(0:7:4),(/ncase,1/),resp)
     ;gsn_panel(wks,plot,(/ncase,nvar/),resp)
-    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end do
 end 
 

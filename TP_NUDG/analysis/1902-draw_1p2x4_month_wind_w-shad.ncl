@@ -33,8 +33,8 @@ draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the va
 unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,500,200/)
-nl = 2
-nv = 4
+nl = 0
+nv = 1
 
 var_option = 2;1
 if(var_option.eq.0) then 

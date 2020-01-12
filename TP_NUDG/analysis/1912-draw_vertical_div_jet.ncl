@@ -8,21 +8,23 @@ begin
 path   = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 vector = True ;False
-draw_var = (/"Div","Vor"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"Div","Vor","dudt"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"U","V","OMEGA"/)
-unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
+unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~","10~S~-5~N~m/s~S~2~N~"/)    ;this can be used as right string 
 diff = True ;False ;
-dnv = 0
+dnv = 2
+contour_div = True
 
 season = False;True
 if(season) then 
 months   = (/"DJF","MAM","JJA","SON"/)
 else
 months = (/"JF","MA","MJ","JA"/)
+imonth = ispan(2,3,1)
 ;months  = (/"May","Jun","Jul","Aug"/)
 end if
-nmonth = dimsizes(months)
-month_s = 1
+nmonth = dimsizes(imonth)
+month_s = 5
 month_e = 8
 lev = (/1000,850,700,600,500, 400,300,250,200,150,100/)
 ;lev  = (/1000,925,850,700,600,500,400,300,200,100/)
@@ -38,11 +40,11 @@ lon_spacing = 30
 na = 1
 
 if(case_option.eq.0) then
-    case1 = (/"CTRL","NG6h"/)
+    case1 = (/"CTRL","NUDG6h"/)
     if(diff) then
     case2 = (/"CTRL","NG6h-CTRL"/)
     else
-    case2 = case1
+    case2 = (/"CTRL","NG6h"/)
     end if
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
@@ -76,8 +78,8 @@ if(case_option.eq.2) then
 end if
 fig_name = path + "/project/TP_NUDG/analysis/fig/" + case1(0) + "_vertical_div_jet"
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out  = "eps";
-;fig_out  = "pdf";"x11""eps";
+;fig_out  = "eps";
+fig_out  = "pdf";"x11""eps";
 
 files := systemfunc("ls "+filein(0)+"*.daily.U.nc" )
 f      = addfile(files(0),"r")
@@ -140,19 +142,44 @@ end do
 end do
 
 if(dnv.eq.0) then 
-var0 = -uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
+u2 = linmsg_n(u,-1,5)
+v2 = linmsg_n(v,-1,5)
+var0 = -uv2dv_cfd ( u2, v2, u&lat, u&lon, 2 )
 var0 = var0*10^6
+var0 := dim_avg_n_Wrap(var0,1)
+var0 := dim_avg_n_Wrap(var0,4)
 end if
 
 if(dnv.eq.1) then 
 var0 = uv2vr_cfd ( u, v, u&lat, u&lon, 2 )
 var0 = var0*10^6
+var0 := dim_avg_n_Wrap(var0,1)
+var0 := dim_avg_n_Wrap(var0,4)
 end if
 
-var0 := dim_avg_n_Wrap(var0,1)
+if(dnv.eq.2) then
+var0 = new((/ncase,nmonth,nlev,nlat,nlon/),float)
+do nf = 0, ncase-1, 1
+    f1 = addfile("/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + case1(nf) + "-Clim_2month_ave_" + draw_var(dnv) + ".nc" ,"r")
+    var0(nf,:,:,:,:) = f1->month_ave(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon) 
+end do
+var = dim_avg_n_Wrap(var0,4)
+var = var*10^5 ;dudt
+end if
+
+if(contour_div) then 
+u2 = linmsg_n(u,-1,5)
+v2 = linmsg_n(v,-1,5)
+divl = new((/ncase*nmonth/),graphic)
+div  = new((/ncase,nmonth,nlev,nlat/),float)
+div1 = -uv2dv_cfd ( u2, v2, u&lat, u&lon, 2 )
+div1 = div1*10^6
+div1 := dim_avg_n_Wrap(div1,1)
+div1 := dim_avg_n_Wrap(div1,4)
+end if
+
 u := dim_avg_n_Wrap(u,1)
 v := dim_avg_n_Wrap(v,1)
-var0 := dim_avg_n_Wrap(var0,4)
 u := dim_avg_n_Wrap(u,4)
 v := dim_avg_n_Wrap(v,4)
 if(vector) then 
@@ -167,24 +194,34 @@ mons = 12
 mone = 2
 select_time1 := ind(time1(:,1).eq.12.or.time1(:,1).le.2)
 else
-mons = 2*nm + 1 
-mone = 2*nm + 2
+mons = 2*nm + 5 
+mone = 2*nm + 6
 select_time1 := ind(time1(:,1).ge.mons.and.time1(:,1).le.mone)
 end if
-var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
+if(dnv.le.1) then 
+    var(:,nm,:,:) = dim_avg_n_Wrap(var0(:,select_time1,:,:),1)
+end if
+if(contour_div) then 
+    div(:,nm,:,:) = dim_avg_n_Wrap(div1(:,select_time1,:,:),1)
+end if
 u1(:,nm,:,:) = dim_avg_n_Wrap(u(:,select_time1,:,:),1)
 v1(:,nm,:,:) = dim_avg_n_Wrap(v(:,select_time1,:,:),1)
 if(vector) then 
-w1(:,nm,:,:) = dim_avg_n_Wrap(w(:,select_time1,:,:),1)
+    w1(:,nm,:,:) = dim_avg_n_Wrap(w(:,select_time1,:,:),1)
 end if
 end do
 printVarSummary(var)
-
+    
 if(diff) then 
 var(1,:,:,:)= var(1,:,:,:) - var(0,:,:,:)   ;get the difference between CTRL and NUDG
 ;u1(1,:,:,:)= u1(1,:,:,:) - u1(0,:,:,:)   ;get the difference between CTRL and NUDG
 ;u1(0,:,:,:) = mask(u1(0,:,:,:), u1(0,:,:,:).lt.0.0 , False)
 v1(1,:,:,:)= v1(1,:,:,:) - v1(0,:,:,:)   ;get the difference between CTRL and NUDG
+if(contour_div) then 
+    div(1,:,:,:)= div(1,:,:,:) - div(0,:,:,:) ;get the difference between CTRL and NUDG
+    copy_VarMeta(vars(:,:,0),div(0,0,:,:))
+    printVarSummary(div)
+end if
 if(vector) then 
     w1(1,:,:,:)= w1(1,:,:,:) - w1(0,:,:,:)   ;get the difference between CTRL and NUDG
     copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
@@ -198,6 +235,7 @@ printVarSummary(var)
 copy_VarMeta(vars(:,:,0),var(0,0,:,:))
 copy_VarMeta(vars(:,:,0),u1(0,0,:,:))
 copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
+delete([/u,v,vars,time1,time/])
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -289,7 +327,7 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res_line@cnLinesOn        = True
     res_line@cnLineLabelsOn   = True
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 3.0
+    res_line@cnLineThicknessF = 4.0
     res_line@cnLineColor      = "black"
     res_line@gsnContourZeroLineThicknessF = 0
     res_line@gsnContourNegLineDashPattern = 5
@@ -302,6 +340,28 @@ copy_VarMeta(vars(:,:,0),v1(0,0,:,:))
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
+
+;---------set the attribute of the contour-----------------
+    div_line = True
+    div_line@gsnFrame         = False
+    div_line@gsnDraw          = False
+    div_line@cnFillOn         = False
+    div_line@cnLinesOn        = True
+    div_line@cnLineLabelsOn   = True
+    div_line@cnInfoLabelOn    = False
+    div_line@cnLineThicknessF = 3.5
+    div_line@cnLineColor      = "gray40"
+    div_line@gsnContourZeroLineThicknessF = 0
+    div_line@gsnContourNegLineDashPattern = 2
+    div_line@gsnContourPosLineDashPattern = 0
+    ;div_line@gsnPresHgtHeightLabelOn = False
+    div_line@tiYAxisOn = False
+    div_line@tmYLLabelsOn = False
+   
+    div_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    div_line@cnLevelSpacingF       = 1.0       ; set contour interval
+    div_line@gsnCenterString      = ""
+    div_line@gsnLeftString    = " "
 
 ;----------set the attribute of the vector-------------------
     resvc                  = res
@@ -359,6 +419,12 @@ if(dnv.eq.1) then
     spacig = (/ 3 , 3 /);
 end if
 
+if(dnv.eq.2) then 
+    minlvl = (/-21,-7,-7/);
+    maxlvl = (/ 21, 7, 7/);
+    spacig = (/ 3 , 1, 1/);
+end if
+
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 ;do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
@@ -372,7 +438,7 @@ do nc = 0, ncase-1,1
     do nm = 0,nmonth-1,1
         np = nmonth*nc + nm
         ;np = ncase*nm + nc
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(nm) 
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
         res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(dnv) ;+ " (" + unit(dnv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -380,6 +446,12 @@ do nc = 0, ncase-1,1
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
+        if(contour_div) then 
+        divl(np) = gsn_csm_contour(wks,div(nc,nm,:,:),div_line)
+        overlay(plot(np),divl(np))
+        print(max(div(nc,nm,:,:)))
+        print(min(div(nc,nm,:,:)))
+        end if
         if(diff.and.(nc.eq.1)) then
         res_line@cnLevelSpacingF       = 10        ; set contour interval
         resvc@vcRefMagnitudeF          = 4.0             ; define vector ref mag

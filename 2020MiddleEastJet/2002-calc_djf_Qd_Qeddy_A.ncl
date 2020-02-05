@@ -11,20 +11,11 @@ path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 
-option   = 0 ;0 means remove seasonal mean, 1 means bandpass filter
 year_option = True;False ;
 geo = True ;False ;if true, only can calc 10N 
 
-;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5 
-
-if(option.eq.0) then
-    fileout  = path2 + "ERA-Interim_DJF_Qd_Qeddy_A.nc"
-    ;fileout  = path2 + "NCEP1_DJF_Qd_Qeddy_A_1206.nc"
-else                                     
-    fileout  = path2 + "ERA-Interim_DJF_Qd_Qeddy_A-" + cb + "-" + ca + "day.nc"
-end if
+fileout  = path2 + "ERA-Interim_DJF_Qd_Qeddy_A-year.nc"
+;fileout  = path2 + "NCEP1_DJF_Qd_Qeddy_A_1206.nc"
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -313,9 +304,9 @@ fileatt@discription   = "DJF mean three forcing factors, Qd, Qeddy, A, fixed f0,
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"year","lev","lat","lon"/);
-dimSizes = (/nyear ,nlev ,nlat ,nlon/) ;
-dimUnlim = (/False ,False,False,False/);
+dimNames = (/"year" ,"lev","lat","lon"/);
+dimSizes = (/nyear-1,nlev ,nlat ,nlon/) ;
+dimUnlim = (/False  ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)

@@ -6,13 +6,13 @@
 ;******************************************************************************
 begin
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
-;path1   = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
+;path1  = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
-fileout  = path2 + "ERA-Interim_DJF_high_low_eddy_force.nc"
+fileout  = path2 + "ERA-Interim_DJF_Qeddy_A_freq-year.nc"
 
-year_option = False ;True;
+year_option = True;False 
 geo = True ;False ;if true, only can calc 10N 
 
 ;parameter for bw_bandpass_filter
@@ -25,7 +25,7 @@ R  = 287.0  ; J/(kg*K) for dry air
 a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 print(pi)
-years    = ispan(1979,1980,1)
+years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
@@ -118,6 +118,22 @@ else   ;non-leap year, 365 day
 end if
 end do
 
+if (any(ismissing(u))) then
+    print("uwnd has missing")
+end if
+if (any(ismissing(v))) then
+    print("vwnd has missing")
+end if
+if (any(ismissing(w))) then
+    print("omega has missing")
+end if
+if (any(ismissing(t))) then
+    print("air has missing")
+end if
+if (any(ismissing(z))) then
+    print("hgt has missing")
+end if
+z = linmsg_n(z,-1,ilon)
 ;--------------------------------------
 ;The underlying wind field is replaced by quasi-geostrophic relations
 ;---------------------------------------------------
@@ -148,6 +164,13 @@ end do
 delete([/coslat,f0,dlev,u1,v1,z1,t1,z/])
 end if
 printVarSummary(u)
+
+if (any(ismissing(u))) then
+    print("uwnd has missing")
+end if
+if (any(ismissing(v))) then
+    print("vwnd has missing")
+end if
 
 ;--------------------------------------
 ;DJF
@@ -204,6 +227,7 @@ low_u = ezfftb_n(term,0,itime+1)
 term = cf 
 term(:,:,low_cf,:,:,:) = 0.0  
 hgh_u = ezfftb_n(term,0,itime+1)
+printVarSummary(hgh_u)
 
 cf = ezfftf_n(v,itime)
 term = cf 
@@ -212,6 +236,7 @@ low_v = ezfftb_n(term,0,itime+1)
 term = cf 
 term(:,:,low_cf,:,:,:) = 0.0  
 hgh_v = ezfftb_n(term,0,itime+1)
+printVarSummary(hgh_v)
 
 cf = ezfftf_n(t,itime)
 term = cf 
@@ -220,6 +245,7 @@ low_t = ezfftb_n(term,0,itime+1)
 term = cf 
 term(:,:,low_cf,:,:,:) = 0.0  
 hgh_t = ezfftb_n(term,0,itime+1)
+printVarSummary(hgh_t)
 
 cf = ezfftf_n(w,itime)
 term = cf 
@@ -228,6 +254,7 @@ low_w = ezfftb_n(term,0,itime+1)
 term = cf 
 term(:,:,low_cf,:,:,:) = 0.0  
 hgh_w = ezfftb_n(term,0,itime+1)
+printVarSummary(hgh_w)
 delete([/cf,term,fcf,fca,hgh_cf,low_cf/])
 
 clm_t = dim_avg_n(t,itime) 
@@ -350,9 +377,9 @@ fileatt@discription   = "DJF mean four forces, Qeddh, Ah ,Qeddl, Al"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"year","lev","lat","lon"/);
-dimSizes = (/nyear ,nlev ,nlat ,nlon/) ;
-dimUnlim = (/False ,False,False,False/);
+dimNames = (/"year" ,"lev","lat","lon"/);
+dimSizes = (/nyear-1,nlev ,nlat ,nlon/) ;
+dimUnlim = (/False  ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)

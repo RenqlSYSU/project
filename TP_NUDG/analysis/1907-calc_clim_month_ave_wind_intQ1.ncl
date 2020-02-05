@@ -12,7 +12,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -39,13 +39,13 @@ var_name = (/"U","V","T","Z3","Q1","dudt"/) ;,"OMEGA","RELHUM"
 ;Q1 is vertically integrated 
 
 ;area: east Asia
-lats = 0   ;-90 ;
+lats = -90 ;-90 ;
 latn = 90  ;90  ;
 lonl = 0   ;0   ;
 lonr = 360 ;360 ;
-lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 ;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa dudt
-;lev  = (/1000,925,850,700,600, 500,400,300,250,200, 150,100/) ;hPa Q1
+lev  = (/1000,925,850,700,600, 500,400,300,200/) ;hPa Q1
 ;lev  = (/850,500,200/) ;v,
 
 ;==========================================================
@@ -68,7 +68,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,0,1; ,nvar-1 ,1 
+do nv = 1,1,1; ,nvar-1 ,1 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -122,11 +122,11 @@ if(nv.eq.5) then
     var@units     = "m*s^-2"
     delete([/u,v,w,term,lat,lon,pi,coslat,a/])
 else
-    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     do nt = 0,nyear-1,1
     print("handle with " + years(nt))
-    f  = addfile(files(nt),"r")
-;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
+;    f  = addfile(files(nt),"r")
+    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
     end do 
 end if

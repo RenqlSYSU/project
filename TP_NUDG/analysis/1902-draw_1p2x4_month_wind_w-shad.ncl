@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
@@ -32,11 +32,12 @@ end if
 draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
-lev = (/850,500,200/)
-nl = 0
-nv = 1
+lev = (/850,700,500,200/)
+nl = 1
+nv = 3
+diff = False;True
 
-var_option = 2;1
+var_option = 0;2;1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -66,14 +67,14 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70/);-20
-latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 /);60
-lonl = (/0  ,150,270,30 ,150,270,90 ,0  /);20
-lonr = (/360,270,390,150,270,390,150,360/);220
+lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70, 0/);-20
+latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,50 /);60
+lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
+lonr = (/360,270,390,150,270,390,150,360,130/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 20
-na = 6
+na = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -150,11 +151,13 @@ vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl
 end if
 end do
 
+if(diff) then 
 vari = where(abs(vari).le.0.000001,0.1,vari)
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 end do
+end if
 
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
@@ -165,17 +168,19 @@ if(nv.eq.4) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*cp ;Q1,transform unit from K/S to W/kg
 end if
 
+if(diff) then 
 uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
-var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+;var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
-printVarSummary(var)
 printVarSummary(prob)
+end if
+printVarSummary(var)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -387,12 +392,14 @@ end if
 
 if(na.eq.0) then 
     vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/10,5 ,5 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/20,10,10/)/)   ;the level of 200hpa    ctrl,nudg,diff
 else
-    vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/7 ,7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/7 ,7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+                      (/7 ,7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/15,15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
 if(nv.eq.0) 
@@ -420,35 +427,41 @@ end if
 
 if(nv.eq.3) ;Z3
 if(nl.eq.0) then 
-    minlvl = (/1410,-16,-16/)  ;850,500,200hpa
-    maxlvl = (/1560, 16, 16/)
-    spacig = (/ 10 , 2 , 2 /) 
+    minlvl = (/1300,1300,-40,-40/) 
+    maxlvl = (/1620,1620, 40, 40/)
+    spacig = (/ 20 , 20 , 5 , 5 /) 
 end if
 if(nl.eq.1) then 
-    minlvl = (/5730,-16,-16/)  ;850,500,200hpa
+    minlvl = (/2660,2660,-40,-40/) 
+    maxlvl = (/3140,3140, 40, 40/)
+    spacig = (/ 30 , 30 , 5 , 5 /) 
+end if
+if(nl.eq.2) then 
+    minlvl = (/5730,-16,-16/)
     maxlvl = (/5880, 16, 16/)
     spacig = (/  10, 2 , 2 /) 
 end if
-if(nl.eq.2) then 
-    minlvl = (/12063,-40,-40/)  ;850,500,200hpa
+if(nl.eq.3) then 
+    minlvl = (/12063,-40,-40/) 
     maxlvl = (/12558, 40, 40/)
     spacig = (/  33 , 5 , 5 /) 
 end if
 end if
 
+do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
-if(nc.gt.0.or.nv.eq.2) then
+if(nc.gt.2.or.nv.eq.2) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
 else
    res@cnFillPalette = "precip3_16lev"
    ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
-    do nm = 0,nmonth-1,1
-        ;np = nm
-        np = nmonth*nc + nm
+    ;do nm = 0,nmonth-1,1
+        np = nc
+        ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv); + " (" + unit(nv) + ")"  ;lev(nl) + "hPa " +   
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ") " + lev(nl) + "hPa"
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -460,7 +473,7 @@ end if
         resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
-        if(nc.gt.0)
+        if(diff.and.nc.gt.0)
         wind2(np)   = gsn_csm_vector(wks,uvar(nc-1,nm,:,:),vvar(nc-1,nm,:,:),resvc2)
         overlay(plot(np),wind2(np))
         end if
@@ -476,6 +489,7 @@ end if
         ;draw(plot(np))
         ;frame(wks)
     end do 
+    gsn_panel(wks,plot,(/ncase,1/),resp)
 ;end do ;for the month 
 
     ;res1 = True
@@ -489,6 +503,6 @@ end if
     ;gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+;    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end
 

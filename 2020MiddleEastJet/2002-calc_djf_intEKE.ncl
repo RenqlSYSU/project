@@ -104,6 +104,32 @@ printVarSummary(u)
 ;--------------------------------------
 ;Calculate seasonal averages and anomalies based on seasonal averages
 ;---------------------------------------------------
+itime = 1
+ca = 10.0
+fca = 1.0/ca
+fcf = fspan(0, 0.5, ntime/2) 
+hgh_cf = ind(fcf.ge.fca)
+low_cf = ind(fcf.lt.fca)
+
+cf = ezfftf_n(u,itime)
+term = cf 
+term(:,:,hgh_cf,:,:,:) = 0.0  
+low_u = ezfftb_n(term,0,itime+1)
+term = cf 
+term(:,:,low_cf,:,:,:) = 0.0  
+hgh_u = ezfftb_n(term,0,itime+1)
+printVarSummary(hgh_u)
+
+cf = ezfftf_n(v,itime)
+term = cf 
+term(:,:,hgh_cf,:,:,:) = 0.0  
+low_v = ezfftb_n(term,0,itime+1)
+term = cf 
+term(:,:,low_cf,:,:,:) = 0.0  
+hgh_v = ezfftb_n(term,0,itime+1)
+printVarSummary(hgh_v)
+delete([/cf,term,fcf,fca,hgh_cf,low_cf/])
+
 clm_u = dim_avg_n(u,1)
 clm_v = dim_avg_n(v,1) 
 edd_u = u - conform(u, clm_u, (/0,2,3,4/))
@@ -117,6 +143,15 @@ EKE = dim_avg_n(var,1)
 EKE@long_name = "DJF Integrated transient eddies kinetic energy"
 EKE@units     = "J" 
 
+var    = dim_sum_n((hgh_v*hgh_v + hgh_u*hgh_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+hghEKE = dim_avg_n(var,1) 
+hghEKE@long_name = "DJF Integrated high frequency transient eddies kinetic energy"
+hghEKE@units     = "J" 
+
+var    = dim_sum_n((low_v*low_v + low_u*low_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+lowEKE = dim_avg_n(var,1) 
+lowEKE@long_name = "DJF Integrated low frequecy transient eddies kinetic energy"
+lowEKE@units     = "J" 
 ;========================================================================
 ;save the data
 ;=======================================================================
@@ -141,14 +176,20 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"intEKE",typeof(EKE),(/"year","lat","lon"/))
+filevardef(ncdf,"hghEKE",typeof(hghEKE),(/"year","lat","lon"/))
+filevardef(ncdf,"lowEKE",typeof(lowEKE),(/"year","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"intEKE",EKE)
+filevarattdef(ncdf,"hghEKE",hghEKE)
+filevarattdef(ncdf,"lowEKE",lowEKE)
 
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->intEKE = (/EKE/)
+ncdf->hghEKE = (/hghEKE/)
+ncdf->lowEKE = (/lowEKE/)
 end
 

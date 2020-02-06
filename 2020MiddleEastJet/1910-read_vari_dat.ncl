@@ -17,9 +17,11 @@ data_type = (/"double","float"/)
 ntype = 0
 ntime = 37 
 
+case   = "ERA-Interim"
+;case   = "NCEP1"
 filein  = path + case + "_DJF_Qd_Qeddy_A-year.nc"
 filedat = path + case + "_DJF_dzdt.dat"
-fileout = path + case + "_DJF_dzdt.nc"
+fileout = path + case + "_DJF_dzdt-year.nc"
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 
 g  = 9.8 ;m/(s*s)
@@ -39,7 +41,7 @@ lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(nc),"r")
+f    = addfile(filein,"r")
 vars:= f->Qd(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -138,26 +140,24 @@ fileatt@discription   = "DJF"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"var","time","lev","lat","lon"/);
+dimNames = (/"var","year","lev","lat","lon"/);
 dimSizes = (/nvar ,ntime ,nlev ,nlat ,nlon/) ;
 dimUnlim = (/False,False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"nvar","integer",(/"var"/))
-filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
 filevardef(ncdf,"lev" ,typeof(vars&lev),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"dzdt",typeof(dzdt),(/"var","time","lev","lat","lon"/))
-filevardef(ncdf,"dudt",typeof(dudt),(/"var","time","lev","lat","lon"/))
-filevardef(ncdf,"dvdt",typeof(dvdt),(/"var","time","lev","lat","lon"/))
-filevardef(ncdf,"dTdt",typeof(dTdt),(/"var","time","lev","lat","lon"/))
-filevardef(ncdf,"dbdt",typeof(dbdt),(/"var","time","lev","lat","lon"/))
+filevardef(ncdf,"dzdt",typeof(dzdt),(/"var","year","lev","lat","lon"/))
+filevardef(ncdf,"dudt",typeof(dudt),(/"var","year","lev","lat","lon"/))
+filevardef(ncdf,"dvdt",typeof(dvdt),(/"var","year","lev","lat","lon"/))
+filevardef(ncdf,"dTdt",typeof(dTdt),(/"var","year","lev","lat","lon"/))
+filevardef(ncdf,"dbdt",typeof(dbdt),(/"var","year","lev","lat","lon"/))
 
 
 ;define var attribute
-filevarattdef(ncdf,"time",vars&time)
 filevarattdef(ncdf,"lev",vars&lev)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
@@ -167,7 +167,6 @@ filevarattdef(ncdf,"dvdt",dvdt)
 filevarattdef(ncdf,"dTdt",dTdt)
 filevarattdef(ncdf,"dbdt",dbdt)
 
-ncdf->time = (/vars&time/)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
@@ -176,7 +175,6 @@ ncdf->dudt = (/dudt/)
 ncdf->dvdt = (/dvdt/)
 ncdf->dTdt = (/dTdt/)
 ncdf->dbdt = (/dbdt/)
-end do
 end
 
 

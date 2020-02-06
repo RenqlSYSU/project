@@ -19,7 +19,7 @@ ntype = 0
 year_option = True ;False ;True means yearly
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nyear = 37
-freq = False;True
+freq = True ;False;
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"

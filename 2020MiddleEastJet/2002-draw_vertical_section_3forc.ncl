@@ -5,8 +5,9 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
+stream_option = True
 months = (/"DJF"/)
 lev    = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 case   = "ERA-Interim"
@@ -44,20 +45,20 @@ if(var_option.eq.2) then
     var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
-    select = (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select = (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
     draw_var = (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
-    select = (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select = (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/)
 lats = (/ 10 , 10 , 10 /);10 ;-20
-latn = (/ 89 , 89 , 89 /) ;55 ;60
+latn = (/ 60 , 60 , 60 /) ;55 ;60
 lonl = (/ 0  ,105 , 250/) ;30 ;20
 lonr = (/ 70 ,175 , 320/) ;150;220
 na = 0
@@ -67,7 +68,7 @@ g = 9.8 ;m2/s2
 ;the path of the file
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 if(var_option.le.-2)
-    filename = path + "data/" + case + "_DJF_high_low_eddy_force-year.nc"
+    filename = path + "data/" + case + "_DJF_Qeddy_A_freq-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
@@ -75,16 +76,12 @@ if(var_option.le.0.and.var_option.ge.-1)
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.eq.1)
-    if(year_option) then
-    filename = path + "mdata/" + case + "_Clim_dzdt_month.nc"
-    else
-    filename = path + "mdata/" + case + "_Clim_daily_dzdt.nc"
-    end if
+    filename = path + "data/" + case + "_DJF_dzdt-year.nc"
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv)
 end if
 if(var_option.ge.2)
-    filename = path + "mdata/" + case + "_Clim_month_eddy_flux_density1.nc"
-    fig_name = path + "fig/1p2x3_height_lat_eddy_flux_" + var_name(nnv) + area(na)
+    filename = path + "data/" + case + "_DJF_dzdt_freq-year.nc"
+    fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv)
 end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -105,6 +102,7 @@ var_m  = new((/narea,nvar,nlev,nlat/),double)
 ;the number of the panel plot
     plot     = new((/nvar*narea/),graphic)
     line     = new((/nvar*narea/),graphic)
+    msfp     = new((/nvar*narea/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.035
@@ -119,9 +117,10 @@ var_m  = new((/narea,nvar,nlev,nlat/),double)
 ;================================================================
 ;read data
 ;====================================================================
-if(jet_option) then
 ulev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 unlev = dimsizes(ulev)
+
+if(jet_option) then
 u_m   = new((/narea,unlev,nlat/),float)
 f = addfile(path + "data/" + case + "_DJF_uwnd-year.nc","r")
 do na = 0,narea-1,1
@@ -129,9 +128,25 @@ do na = 0,narea-1,1
     u := dim_avg_n_Wrap(u,3)
     u_m(na,:,:) = dim_avg_n_Wrap(u,0)
 end do
-u_m = mask(u_m, u_m.lt.0 , False) 
+u_m = mask(u_m, u_m.lt.10 , False) 
 printVarSummary(u_m)
 ;copy_VarMeta(vars(:,:,0),u(0,:,:))
+end if
+
+if(stream_option) then
+msf_m   = new((/narea,unlev,nlat/),float)
+f  = addfile(path + "data/" + case + "_DJF_vwnd-year.nc","r")
+f2 = addfile(path + "data/" + case + "_DJF_ps-year.nc","r")
+do na = 0,narea-1,1
+    v   := dim_avg_n_Wrap(f->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    ps  := dim_avg_n_Wrap(f2->season_ave(:, {lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    msf := zonal_mpsi_Wrap(v(::-1,:,:),v&lat,ulev(::-1)*100,ps)
+    msf_m(na,:,:) = msf(::-1,:) 
+end do
+msf_m = msf_m/10^11
+printVarSummary(msf_m)
+print(max(msf_m))
+print(min(msf_m))
 end if
 
 f = addfile(filename,"r")
@@ -149,7 +164,7 @@ if(var_option.lt.0)
 else
     do na = 0, narea-1,1
     if(year_option) then 
-    var  := dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var  := dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     else
     var  := f->$var_name(nnv)$(select,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
@@ -242,8 +257,12 @@ printVarSummary(var_m)
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
-    
+   
+    if(var_option.ge.1) then
+    res@lbLabelBarOn         = False   ; the label bar
+    else
     res@lbLabelBarOn         = True   ; the label bar
+    end if
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -272,6 +291,29 @@ printVarSummary(var_m)
     res@tmXBTickEndF       = latn(0)
 
 ;---------set the attribute of the contour-----------------
+    res_msf = True
+    res_msf@gsnDraw          = False
+    res_msf@gsnFrame         = False
+    res_msf@cnFillOn         = False
+    res_msf@cnLinesOn        = True
+    res_msf@cnLineLabelsOn   = True ;False
+    res_msf@cnInfoLabelOn    = False
+    res_msf@cnLineThicknessF = 3.0
+    res_msf@cnLineColor      = "blueviolet";"gray40"
+    res_msf@gsnContourZeroLineThicknessF = 0
+    res_msf@gsnContourNegLineDashPattern = 2
+    res_msf@gsnContourPosLineDashPattern = 0
+    
+    res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_msf@cnLevelSpacingF       = 1.0        ; set contour interval
+    res_msf@gsnPresHgtHeightLabelOn = False
+    res_msf@tiYAxisOn = False
+    res_msf@lbLabelBarOn     = False   ; the label bar
+    res_msf@gsnCenterString  = ""
+    res_msf@gsnLeftString    = " "
+    res_msf@gsnRightString   = " "
+
+;---------set the attribute of the contour-----------------
     res_line = True
     res_line@gsnDraw          = False
     res_line@gsnFrame         = False
@@ -281,8 +323,8 @@ printVarSummary(var_m)
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 4.0
     res_line@cnLineColor      = "black"
-    res_line@gsnContourZeroLineThicknessF = 0
-    res_line@gsnContourNegLineDashPattern = 5
+    ;res_line@gsnContourZeroLineThicknessF = 0
+    ;res_line@gsnContourNegLineDashPattern = 5
     
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     res_line@cnLevelSpacingF       = 10        ; set contour interval
@@ -296,11 +338,16 @@ printVarSummary(var_m)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    if(var_option.ge.1) then
+    resp@gsnPanelLabelBar = True
+    else
+    resp@gsnPanelLabelBar = False
+    end if
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.06
+    resp@lbLabelFont        = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -369,6 +416,11 @@ do nv = 0, nvar-1,1
     if(jet_option) then 
     line(np) = gsn_csm_pres_hgt(wks,u_m(na,:,:),res_line)
     overlay(plot(np),line(np))
+    end if
+    
+    if(stream_option) then 
+    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,:,:),res_msf)
+    overlay(plot(np),msfp(np))
     end if
 end do 
 end do 

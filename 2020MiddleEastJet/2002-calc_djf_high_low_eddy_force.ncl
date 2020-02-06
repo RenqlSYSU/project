@@ -293,7 +293,7 @@ Ah:= -(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(hgh_u
      +(1.0   /a/a/coslat       )*center_finite_diff_n(center_finite_diff_n(hgh_u*hgh_u              ,lat    ,cyclic,opt,ilat),lon    ,loncyc,opt,ilon)\
      +(1.0   /a/a/coslat/coslat)*center_finite_diff_n(center_finite_diff_n(hgh_u*hgh_v*coslat*coslat,lat    ,cyclic,opt,ilat),lat    ,cyclic,opt,ilat)\
      +(tanlat/a/a/coslat/coslat)*                     center_finite_diff_n(hgh_u*hgh_v*coslat*coslat,lat    ,cyclic,opt,ilat)                         \
-     +(1.0   /a                )*center_finite_diff_n(center_finite_diff_n(hgh_u*hgh_w              ,lat    ,cyclic,opt,ilat),lev*100,cyclic,opt,ilev)\
+     
      -(tanlat/a                )*                     center_finite_diff_n(hgh_u*hgh_w              ,lev*100,cyclic,opt,ilev)
 Ah := dim_avg_n(Ah,itime)
 printVarSummary(Ah)

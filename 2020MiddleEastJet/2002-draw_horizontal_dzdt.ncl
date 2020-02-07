@@ -5,9 +5,9 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = -5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
-nl = 4 ;(/925,850,700,500,200/)
+nl = 1  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 
 months = (/"DJF"/)
@@ -15,6 +15,11 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
+if(var_option.eq.-5) then 
+    draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dTdy"/)  ;use to read variables
+    unit     = (/"10~S~-5~N~K/m"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-4) then 
     draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
@@ -75,7 +80,7 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
-if(var_option.eq.-4)
+if(var_option.le.-4)
     filename = path + "data/" + case + "_DJF_intEKE-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
@@ -133,8 +138,27 @@ if(jet_option) then
     printVarSummary(u_m)
 end if
 
+if(var_option.eq.-5) then
+    f = addfile(path + "data/" + case + "_DJF_air-year.nc","r")
+    t = dim_avg_n_Wrap(f->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    
+    opt    = 0     ;used by center_finite_diff_n, no meanging 
+    loncyc = True ;used by center_finite_diff_n
+    cyclic = False ;used by center_finite_diff_n
+    ;means NOT treated as cyclic in differenced coordinates
+    ;the end values will use a one-sided difference scheme for the end points. 
+    a  = 6378388 ;the radius of earth, m
+    pi = atan(1.0)*4
+    lat = t&lat
+    lat = lat*pi/180.0
+    coslat = conform(var_m(0,:,:),cos(lat),0)
+    var_m(0,:,:) = tofloat(center_finite_diff_n(t*coslat,lat,cyclic,opt,0)/a/coslat)
+    var_m = var_m*100000
+    copy_VarMeta(t,var_m(0,:,:))
+end if
+
+if(var_option.le.0.and.var_option.ge.-4)
 f = addfile(filename,"r")
-if(var_option.lt.0)
 if(var_option.eq.-4) then 
     do nv = 0, nvar-1,1
     if(year_option) then 
@@ -152,7 +176,9 @@ else
     end if
     end do
 end if
-else
+end if
+if(var_option.ge.1)
+f = addfile(filename,"r")
     if(year_option) then 
     var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     else
@@ -343,6 +369,11 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(var_option.eq.-5) then
+    minlvl = (/-7 /)
+    maxlvl = (/ 7 /)
+    spacig = (/ 1 /)
+end if
 if(var_option.eq.-4) then
     minlvl = (/2  ,2  ,2  /);-8,-8,-8,-8,
     maxlvl = (/130,130,130/); 8, 8, 8, 8,

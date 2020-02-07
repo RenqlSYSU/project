@@ -16,13 +16,21 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 data_type = (/"double","float"/)
 ntype = 0
 ntime = 37 
+freq = True ;False;
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
+if(freq) then 
+filein  = path + case + "_DJF_Qeddy_A_freq-year.nc"
+filedat = path + case + "_DJF_dzdt_freq.dat"
+fileout = path + case + "_DJF_dzdt_freq-year.nc"
+var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  
+else
 filein  = path + case + "_DJF_Qd_Qeddy_A-year.nc"
 filedat = path + case + "_DJF_dzdt.dat"
 fileout = path + case + "_DJF_dzdt-year.nc"
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+end if
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -42,7 +50,7 @@ lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein,"r")
-vars:= f->Qd(0,{lev},{lats:latn},{lonl:lonr})
+vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)

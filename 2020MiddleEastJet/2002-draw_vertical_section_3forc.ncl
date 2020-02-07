@@ -103,14 +103,17 @@ var_m  = new((/narea,nvar,nlev,nlat/),double)
     plot     = new((/nvar*narea/),graphic)
     line     = new((/nvar*narea/),graphic)
     msfp     = new((/nvar*narea/),graphic)
+    vect     = new((/nvar*narea/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.035
    subtitle_font  = 0.035
    title_font     = 0.03
+   vcref_font     = 0.02
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
+   vc_thick       = 2.0
    mp_thick       = 3.0
    font_index     = 22
 
@@ -134,17 +137,25 @@ printVarSummary(u_m)
 end if
 
 if(stream_option) then
-msf_m   = new((/narea,unlev,nlat/),float)
+msf_m = new((/narea,unlev,nlat/),float)
+v_m   = new((/narea,unlev,nlat/),float)
+w_m   = new((/narea,unlev,nlat/),float)
 f  = addfile(path + "data/" + case + "_DJF_vwnd-year.nc","r")
+f3 = addfile(path + "data/" + case + "_DJF_omega-year.nc","r")
 f2 = addfile(path + "data/" + case + "_DJF_ps-year.nc","r")
 do na = 0,narea-1,1
-    v   := dim_avg_n_Wrap(f->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    v   := dim_avg_n_Wrap(f ->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    w   := dim_avg_n_Wrap(f3->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     ps  := dim_avg_n_Wrap(f2->season_ave(:, {lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     msf := zonal_mpsi_Wrap(v(::-1,:,:),v&lat,ulev(::-1)*100,ps)
     msf_m(na,:,:) = msf(::-1,:) 
+    v_m(na,:,:) = dim_avg_n_Wrap(v,2)
+    w_m(na,:,:) = dim_avg_n_Wrap(w,2)
 end do
+w_m = -w_m*100
 msf_m = msf_m/10^11
 printVarSummary(msf_m)
+printVarSummary(w_m)
 print(max(msf_m))
 print(min(msf_m))
 end if
@@ -335,6 +346,39 @@ printVarSummary(var_m)
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
+;----------set the attribute of the vector-------------------
+    resvc                  = res
+    resvc@cnFillOn         = False
+    resvc@cnLinesOn        = False
+    resvc@cnLineLabelsOn   = False
+    resvc@cnInfoLabelOn    = False
+    ;resvc@gsnPresHgtHeightLabelOn = False
+    resvc@tiYAxisOn = False
+    resvc@tmYLLabelsOn = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMinDistanceF             = 0.02
+    resvc@vcLineArrowHeadMinSizeF   = 0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015
+    resvc@vcRefAnnoOn                = False
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = -0.85           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.25            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    resvc@vcRefAnnoString2           = "8(m/s,10~S~-2~N~hPa/s)"
+    resvc@vcRefMagnitudeF            = 8.0             ; define vector ref mag
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
+    
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
@@ -421,6 +465,9 @@ do nv = 0, nvar-1,1
     if(stream_option) then 
     msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,:,:),res_msf)
     overlay(plot(np),msfp(np))
+    ;vect(np) = gsn_csm_vector(wks,v_m(na,:,:),w_m(na,:,:),resvc)
+    ;vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
+    ;overlay(plot(np),vect(np))
     end if
 end do 
 end do 

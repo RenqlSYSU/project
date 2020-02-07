@@ -41,7 +41,7 @@ ntime = dimsizes(select_time)
 select_time1 = select_time
 select_time1(58:89) = select_time(58:89) + 1
 
-do nv = 5,5,1
+do nv = 4,4,1
 year_option = True;False ;
 fileout  = path2 + "ERA-Interim_DJF_" + var_name(nv) + "-year.nc"
 ;==========================================================

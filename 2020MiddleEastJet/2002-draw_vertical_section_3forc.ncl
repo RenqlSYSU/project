@@ -5,14 +5,20 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = True  ;20191205, control the draw of jet stream
+var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = False  ;20191205, control the draw of jet stream
 stream_option = True
 months = (/"DJF"/)
-lev    = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
+;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
+if(var_option.eq.-4) then 
+    draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"season_ave"/)  ;use to read variables
+    unit     = (/"m/s"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-3) then 
     draw_var = (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qeddh","Ah"/)  ;use to read variables
@@ -56,18 +62,23 @@ if(var_option.eq.3) then
 end if
 
 ;area: east Asia
-area = (/"ME","EA","NA"/)
-lats = (/ 10 , 10 , 10 /);10 ;-20
-latn = (/ 60 , 60 , 60 /) ;55 ;60
-lonl = (/ 0  ,105 , 250/) ;30 ;20
-lonr = (/ 70 ,175 , 320/) ;150;220
+area = (/"ME","EA","NA","GB"/)
+lats = (/-90 ,-90 ,-90 ,-90 /);10 ;-20
+latn = (/ 90 , 90 , 90 , 90 /) ;55 ;60
+lonl = (/ 0  ,105 , 250, 0  /) ;30 ;20
+lonr = (/ 70 ,175 , 320, 360/) ;150;220
+lat_spacing = 30
 na = 0
 density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-if(var_option.le.-2)
+if(var_option.eq.-4)
+    filename = path + "data/" + case + "_DJF_uwnd-year.nc"
+    fig_name = path + "fig/1p2x3_height_lat_sf"
+end if
+if(var_option.le.-2.and.var_option.ge.-3)
     filename = path + "data/" + case + "_DJF_Qeddy_A_freq-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
@@ -137,25 +148,40 @@ printVarSummary(u_m)
 end if
 
 if(stream_option) then
+g  = 9.8 ;m/(s*s)
+a  = 6378388 ;the radius of earth, m
+pi = atan(1.0)*4
+lat  = vars&lat
+ptop = 0
+iopt = 0
+
 msf_m = new((/narea,unlev,nlat/),float)
 v_m   = new((/narea,unlev,nlat/),float)
-w_m   = new((/narea,unlev,nlat/),float)
 f  = addfile(path + "data/" + case + "_DJF_vwnd-year.nc","r")
-f3 = addfile(path + "data/" + case + "_DJF_omega-year.nc","r")
+;w_m   = new((/narea,unlev,nlat/),float)
+;f3 = addfile(path + "data/" + case + "_DJF_omega-year.nc","r")
 f2 = addfile(path + "data/" + case + "_DJF_ps-year.nc","r")
 do na = 0,narea-1,1
     v   := dim_avg_n_Wrap(f ->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
-    w   := dim_avg_n_Wrap(f3->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     ps  := dim_avg_n_Wrap(f2->season_ave(:, {lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     msf := zonal_mpsi_Wrap(v(::-1,:,:),v&lat,ulev(::-1)*100,ps)
     msf_m(na,:,:) = msf(::-1,:) 
     v_m(na,:,:) = dim_avg_n_Wrap(v,2)
-    w_m(na,:,:) = dim_avg_n_Wrap(w,2)
+    ;w   := dim_avg_n_Wrap(f3->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    ;w_m(na,:,:) = dim_avg_n_Wrap(w,2)
+    
+    ;dp  := dpres_plevel(ulev*100,ps,ptop,iopt)
+    ;dpm = dim_avg_n(dp,2)
+    ;do inl = 0, unlev-1, 1
+    ;    msf_m(na,inl,:) = dim_sum_n(v_m(na,inl:unlev-1,:)*dpm(inl:unlev-1,:),0)
+    ;    msf_m(na,inl,:) = msf_m(na,inl,:)*2*pi*cos(lat*pi/180.0)*a/g
+    ;end do
 end do
-w_m = -w_m*100
-msf_m = msf_m/10^11
+;w_m = -w_m*100
+;printVarSummary(w_m)
+msf_m = msf_m/10^10
 printVarSummary(msf_m)
-printVarSummary(w_m)
+copy_VarMeta(vars(:,:,0),msf_m(0,:,:))
 print(max(msf_m))
 print(min(msf_m))
 end if
@@ -185,7 +211,7 @@ end if
 copy_VarMeta(vars(:,:,0),var_m(0,0,:,:))
 printVarSummary(var_m)
 
-if(var_option.lt.-1) then 
+if(var_option.lt.-1.and.var_option.ge.-3) then 
     var_m(:,1,:,:) = var_m(:,1,:,:)*10^11
     var_m(:,0,:,:) = var_m(:,0,:,:)*24*3600
 end if
@@ -232,7 +258,7 @@ printVarSummary(var_m)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.6
+    res@vpHeightF        = 0.3
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
@@ -269,11 +295,7 @@ printVarSummary(var_m)
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
    
-    if(var_option.ge.1) then
-    res@lbLabelBarOn         = False   ; the label bar
-    else
-    res@lbLabelBarOn         = True   ; the label bar
-    end if
+    ;res@lbLabelBarOn         = False   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -297,7 +319,7 @@ printVarSummary(var_m)
     res@tiYAxisOn = False
     res@tmYRLabelsOn = False
     res@tmXBMode = "Manual"
-    res@tmXBTickSpacingF   = 10
+    res@tmXBTickSpacingF   = lat_spacing
     res@tmXBTickStartF     = lats(0)
     res@tmXBTickEndF       = latn(0)
 
@@ -316,7 +338,7 @@ printVarSummary(var_m)
     res_msf@gsnContourPosLineDashPattern = 0
     
     res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_msf@cnLevelSpacingF       = 1.0        ; set contour interval
+    res_msf@cnLevelSpacingF       = 2.0        ; set contour interval
     res_msf@gsnPresHgtHeightLabelOn = False
     res_msf@tiYAxisOn = False
     res_msf@lbLabelBarOn     = False   ; the label bar
@@ -382,9 +404,11 @@ printVarSummary(var_m)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    if(var_option.ge.1) then
+    if(var_option.ge.1.or.var_option.eq.-4) then
+    res@lbLabelBarOn      = False   ; the label bar
     resp@gsnPanelLabelBar = True
     else
+    res@lbLabelBarOn      = True   ; the label bar
     resp@gsnPanelLabelBar = False
     end if
     resp@pmLabelBarWidthF  = 0.8
@@ -395,7 +419,13 @@ printVarSummary(var_m)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.lt.-1) then
+if(var_option.eq.-4) then
+    minlvl = (/-70/);-8,-8,-8,-8,
+    maxlvl = (/ 70/); 8, 8, 8, 8,
+    spacig = (/ 10/); 1, 1, 1, 1,
+end if
+    
+if(var_option.lt.-1.and.var_option.ge.-3) then
     minlvl = (/-2.1,-14/);-8,-8,-8,-8,
     maxlvl = (/ 2.1, 14/); 8, 8, 8, 8,
     spacig = (/ 0.3, 2 /); 1, 1, 1, 1,
@@ -454,8 +484,8 @@ do nv = 0, nvar-1,1
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,:,:),res)
-    print(max(var_m(nv,na,:,:)))
-    print(min(var_m(nv,na,:,:)))
+    print(max(var_m(na,nv,:,:)))
+    print(min(var_m(na,nv,:,:)))
 
     if(jet_option) then 
     line(np) = gsn_csm_pres_hgt(wks,u_m(na,:,:),res_line)
@@ -473,6 +503,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/narea,nvar/),resp)
+    ;gsn_panel(wks,plot,(/narea,nvar/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end
 

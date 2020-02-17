@@ -5,8 +5,8 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = False  ;20191205, control the draw of jet stream
+var_option = 4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = True;False  ;20191205, control the draw of jet stream
 stream_option = True
 months = (/"DJF"/)
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
@@ -60,14 +60,21 @@ if(var_option.eq.3) then
     nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.4) then 
+    draw_var = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    nnv = 1 ;used to read dzdt induced by different forcing
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 
 ;area: east Asia
-area = (/"ME","EA","NA","GB"/)
-lats = (/-90 ,-90 ,-90 ,-90 /);10 ;-20
-latn = (/ 90 , 90 , 90 , 90 /) ;55 ;60
-lonl = (/ 0  ,105 , 250, 0  /) ;30 ;20
-lonr = (/ 70 ,175 , 320, 360/) ;150;220
-lat_spacing = 30
+area = (/"ME","EA","NA"/);,"GB"
+lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
+latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
+lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 70 ,175 , 320/);, 360 ;150;220
+lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
@@ -90,9 +97,13 @@ if(var_option.eq.1)
     filename = path + "data/" + case + "_DJF_dzdt-year.nc"
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv)
 end if
-if(var_option.ge.2)
+if(var_option.ge.2.and.var_option.le.3)
     filename = path + "data/" + case + "_DJF_dzdt_freq-year.nc"
     fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv)
+end if
+if(var_option.eq.4)
+    filename = path + "data/" + case + "_DJF_dzdt_advect-year.nc"
+    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv)
 end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -142,7 +153,7 @@ do na = 0,narea-1,1
     u := dim_avg_n_Wrap(u,3)
     u_m(na,:,:) = dim_avg_n_Wrap(u,0)
 end do
-u_m = mask(u_m, u_m.lt.10 , False) 
+u_m = mask(u_m, u_m.lt.-10 , False) 
 printVarSummary(u_m)
 ;copy_VarMeta(vars(:,:,0),u(0,:,:))
 end if
@@ -157,12 +168,13 @@ iopt = 0
 
 msf_m = new((/narea,unlev,nlat/),float)
 v_m   = new((/narea,unlev,nlat/),float)
-f  = addfile(path + "data/" + case + "_DJF_vwnd-year.nc","r")
+f  = addfile(path + "data/" + case + "_DJF_sfvp-year.nc","r")
+;f  = addfile(path + "data/" + case + "_DJF_vwnd-year.nc","r")
 ;w_m   = new((/narea,unlev,nlat/),float)
 ;f3 = addfile(path + "data/" + case + "_DJF_omega-year.nc","r")
 f2 = addfile(path + "data/" + case + "_DJF_ps-year.nc","r")
 do na = 0,narea-1,1
-    v   := dim_avg_n_Wrap(f ->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    v   := dim_avg_n_Wrap(f ->vd(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     ps  := dim_avg_n_Wrap(f2->season_ave(:, {lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     msf := zonal_mpsi_Wrap(v(::-1,:,:),v&lat,ulev(::-1)*100,ps)
     msf_m(na,:,:) = msf(::-1,:) 
@@ -258,7 +270,7 @@ printVarSummary(var_m)
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
     res@gsnPaperOrientation = "portrait"
-    res@vpHeightF        = 0.3
+    res@vpHeightF        = 0.6
     res@vpWidthF         = 0.8
 
 ;--------set the form of the coordinate-----------------
@@ -338,7 +350,7 @@ printVarSummary(var_m)
     res_msf@gsnContourPosLineDashPattern = 0
     
     res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_msf@cnLevelSpacingF       = 2.0        ; set contour interval
+    res_msf@cnLevelSpacingF      = 5.0        ; set contour interval
     res_msf@gsnPresHgtHeightLabelOn = False
     res_msf@tiYAxisOn = False
     res_msf@lbLabelBarOn     = False   ; the label bar
@@ -356,11 +368,18 @@ printVarSummary(var_m)
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 4.0
     res_line@cnLineColor      = "black"
-    ;res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourZeroLineThicknessF = 8
     ;res_line@gsnContourNegLineDashPattern = 5
     
-    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    levels = new((/10/),integer)
+    levels(0) = 0
+    levels(1:9) = ispan(5,85,10)
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             = levels       ; set contour interval
+    ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSpacingF      = 10        ; set contour interval
+    ;res_line@cnMinLevelValF       = 5        ; set contour interval
+    ;res_line@cnMaxLevelValF       = 85        ; set contour interval
     res_line@gsnPresHgtHeightLabelOn = False
     res_line@tiYAxisOn = False
     res_line@lbLabelBarOn     = False   ; the label bar
@@ -503,7 +522,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/narea,nvar/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/narea,nvar/),resp)
+    ;gsn_panel(wks,plot,(/2,2/),resp)
 end
 

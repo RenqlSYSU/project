@@ -5,67 +5,73 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = 4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = -3  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True;False  ;20191205, control the draw of jet stream
-stream_option = True
+stream_option = False;True
 months = (/"DJF"/)
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-if(var_option.eq.-4) then 
+do var_option = 1,3,1
+if(var_option.eq.-5) then 
     draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"season_ave"/)  ;use to read variables
     unit     = (/"m/s"/)  ;this can be used as right string 
 end if
+if(var_option.eq.-4) then 
+    draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+    unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-3) then 
-    draw_var = (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qeddh","Ah"/)  ;use to read variables
-    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qeddh","Ah"/)  ;use to read variables
+    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-2) then 
-    draw_var = (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qeddl","Al"/)  ;use to read variables
-    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qeddl","Al"/)  ;use to read variables
+    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-1) then 
-    draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
-    unit     = (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
+    unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
-    unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
+    draw_var := (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qd"   ,"Qeddy"/)  ;use to read variables
+    unit     := (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
-    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
-    draw_var = (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
-    select = (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var = (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
-    select = (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.4) then 
-    draw_var = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
     nnv = 1 ;used to read dzdt induced by different forcing
-    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 
 ;area: east Asia
@@ -81,29 +87,33 @@ g = 9.8 ;m2/s2
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-if(var_option.eq.-4)
+if(var_option.eq.-5)
     filename = path + "data/" + case + "_DJF_uwnd-year.nc"
     fig_name = path + "fig/1p2x3_height_lat_sf"
 end if
+if(var_option.eq.-4)
+    filename = path + "data/" + case + "_DJF_forc_in-year.nc"
+    fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
+end if
 if(var_option.le.-2.and.var_option.ge.-3)
-    filename = path + "data/" + case + "_DJF_Qeddy_A_freq-year.nc"
+    filename = path + "data/" + case + "_DJF_forc_te-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
-    filename = path + "data/" + case + "_DJF_Qd_Qeddy_A-year.nc"
+    filename = path + "data/" + case + "_DJF_forc_ex-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.eq.1)
-    filename = path + "data/" + case + "_DJF_dzdt-year.nc"
-    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv)
+    filename = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
+    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.ge.2.and.var_option.le.3)
-    filename = path + "data/" + case + "_DJF_dzdt_freq-year.nc"
-    fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv)
+    filename = path + "data/" + case + "_DJF_dzdt_te-year.nc"
+    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.4)
-    filename = path + "data/" + case + "_DJF_dzdt_advect-year.nc"
-    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv)
+    filename = path + "data/" + case + "_DJF_dzdt_in-year.nc"
+    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -119,13 +129,13 @@ nlat   = dimsizes(vars&lat)
 nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
 narea  = dimsizes(area)
-var_m  = new((/narea,nvar,nlev,nlat/),double)
+var_m  := new((/narea,nvar,nlev,nlat/),double)
 
 ;the number of the panel plot
-    plot     = new((/nvar*narea/),graphic)
-    line     = new((/nvar*narea/),graphic)
-    msfp     = new((/nvar*narea/),graphic)
-    vect     = new((/nvar*narea/),graphic)
+    plot     := new((/nvar*narea/),graphic)
+    line     := new((/nvar*narea/),graphic)
+    msfp     := new((/nvar*narea/),graphic)
+    vect     := new((/nvar*narea/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.035
@@ -199,7 +209,7 @@ print(min(msf_m))
 end if
 
 f = addfile(filename,"r")
-if(var_option.lt.0)
+if(var_option.le.0)
     do nv = 0, nvar-1,1
     do na = 0, narea-1,1
     if(year_option) then 
@@ -222,6 +232,10 @@ else
 end if
 copy_VarMeta(vars(:,:,0),var_m(0,0,:,:))
 printVarSummary(var_m)
+
+if(var_option.eq.-4) then 
+    var_m = var_m*10^11
+end if
 
 if(var_option.lt.-1.and.var_option.ge.-3) then 
     var_m(:,1,:,:) = var_m(:,1,:,:)*10^11
@@ -423,7 +437,7 @@ printVarSummary(var_m)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    if(var_option.ge.1.or.var_option.eq.-4) then
+    if(var_option.ge.1.or.var_option.le.-4) then
     res@lbLabelBarOn      = False   ; the label bar
     resp@gsnPanelLabelBar = True
     else
@@ -438,10 +452,16 @@ printVarSummary(var_m)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.eq.-4) then
+if(var_option.eq.-5) then
     minlvl = (/-70/);-8,-8,-8,-8,
     maxlvl = (/ 70/); 8, 8, 8, 8,
     spacig = (/ 10/); 1, 1, 1, 1,
+end if
+    
+if(var_option.eq.-4) then
+    minlvl = (/-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.lt.-1.and.var_option.ge.-3) then
@@ -524,5 +544,6 @@ end do
 ;    resp@txString      = fig_title
     gsn_panel(wks,plot,(/narea,nvar/),resp)
     ;gsn_panel(wks,plot,(/2,2/),resp)
+end do 
 end
 

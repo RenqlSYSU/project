@@ -85,19 +85,19 @@ if(var_option.le.-4)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
-    filename = path + "data/" + case + "_DJF_Qeddy_A_freq-year.nc"
+    filename = path + "data/" + case + "_DJF_forc_te-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
-    filename = path + "data/" + case + "_DJF_Qd_Qeddy_A-year.nc"
+    filename = path + "data/" + case + "_DJF_forc_ex-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.1)
-    filename = path + "data/" + case + "_DJF_dzdt-year.nc"
+    filename = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
     fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv)
 end if
 if(var_option.ge.2)
-    filename = path + "data/" + case + "_DJF_dzdt_freq-year.nc"
+    filename = path + "data/" + case + "_DJF_dzdt_te-year.nc"
     fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv)
 end if
 

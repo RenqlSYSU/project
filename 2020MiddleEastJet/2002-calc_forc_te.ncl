@@ -10,14 +10,10 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
-fileout  = path2 + "ERA-Interim_DJF_Qeddy_A_freq-year.nc"
+fileout  = path2 + "ERA-Interim_DJF_forc_te-year.nc"
 
 year_option = True;False 
 geo = True ;False ;if true, only can calc 10N 
-
-;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5 
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -134,6 +130,7 @@ if (any(ismissing(z))) then
     print("hgt has missing")
 end if
 z = linmsg_n(z,-1,ilon)
+
 ;--------------------------------------
 ;The underlying wind field is replaced by quasi-geostrophic relations
 ;---------------------------------------------------
@@ -215,6 +212,7 @@ delete([/p_in,p_out,linlog/])
 ;--------------------------------------
 ;Calculate seasonal averages and anomalies based on seasonal averages
 ;---------------------------------------------------
+ca = 10.0 ;day
 fca = 1.0/ca
 fcf = fspan(0, 0.5, ntime/2) 
 hgh_cf = ind(fcf.ge.fca)

@@ -14,7 +14,7 @@ var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 year_option = True;False ;
 geo = True ;False ;if true, only can calc 10N 
 
-fileout  = path2 + "ERA-Interim_DJF_Qd_Qeddy_A-year.nc"
+fileout  = path2 + "ERA-Interim_DJF_forc_ex-year.nc"
 ;fileout  = path2 + "NCEP1_DJF_Qd_Qeddy_A_1206.nc"
 
 g  = 9.8 ;m/(s*s)

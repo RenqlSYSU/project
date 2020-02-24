@@ -252,8 +252,6 @@ end if
     res@gsnMajorLatSpacing = 20
     res@gsnMajorLonSpacing = 30
     res@mpFillOn         = False
-    ;res@mpLandFillColor = "gray"
-    ;res@mpFillDrawOrder = "PreDraw"
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
 

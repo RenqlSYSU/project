@@ -174,7 +174,7 @@ a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 lat  = vars&lat
 ptop = 0
-iopt = 0
+iopt = 0 ;Set to zero. Currently not used.
 
 msf_m = new((/narea,unlev,nlat/),float)
 v_m   = new((/narea,unlev,nlat/),float)

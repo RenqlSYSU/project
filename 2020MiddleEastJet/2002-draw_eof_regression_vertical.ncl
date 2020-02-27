@@ -62,6 +62,8 @@ sigl   = new((/18/),graphic)
     res@gsnDraw          = False
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
+    res@vpWidthF  = 0.8
+    res@vpHeightF = 0.6
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
@@ -78,6 +80,10 @@ sigl   = new((/18/),graphic)
     res@tmYLMajorThicknessF     = mp_thick
     res@tmXBMinorThicknessF     = mp_thick
     res@tmYLMinorThicknessF     = mp_thick
+    res@gsnPresHgtHeightLabelOn = False
+    res@tiYAxisOn = False
+    res@tmYRLabelsOn = False
+    res@tmXBMode = "Manual"
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
@@ -96,19 +102,6 @@ sigl   = new((/18/),graphic)
     res@pmLabelBarParallelPosF       = 0.5
     ;res@pmLabelBarWidthF  = 0.7
     ;res@pmLabelBarHeightF = 0.1
-
-do na = 0, narea-1,1
-;-------set the attribute of the map-------------------
-    res@mpCenterLonF     = 180.
-    res@mpMaxLatF        = latn(na) 
-    res@mpMinLatF        = lats(na)
-    res@mpMaxLonF        = lonr(na)
-    res@mpMinLonF        = lonl(na)
-    res@gsnMajorLatSpacing = lat_spacing 
-    res@gsnMajorLonSpacing = lon_spacing
-    res@mpFillOn         = False
-    res@mpGeophysicalLineThicknessF = mp_thick
-    res@mpGeophysicalLineColor      = "black";"white"
 
 ;---------set the attribute of the contour-----------------
     res_line = True
@@ -132,6 +125,8 @@ do na = 0, narea-1,1
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
+    res_line@gsnPresHgtHeightLabelOn = False
+    res_line@tiYAxisOn = False
 
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
@@ -155,6 +150,8 @@ do na = 0, narea-1,1
     ;res_sig@cnLevels             = (/3000,1000/)
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
+    res_sig@gsnPresHgtHeightLabelOn = False
+    res_sig@tiYAxisOn = False
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -175,12 +172,9 @@ if(nv.eq.0) then
     spacig = (/ 1 /)
 end if
 
+do na = 0, narea-1,1
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
-nyear = dimsizes(ts&year)
-sig  = new((/6,neval/),logical)
-eval  = new((/6,neval/),float)
-pcvar = new((/6,neval/),float)
 eof0 := f->eof0
 eof1 := f->eof1
 eof2 := f->eof2
@@ -188,40 +182,42 @@ eof3 := f->eof3
 eof4 := f->eof4
 eof5 := f->eof5
 do ne = 0, neval-1, 1
-    sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
-    sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
-    sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)
-    sig(3,:)  = eofunc_north(eof3@pcvar,nyear,False)
-    sig(4,:)  = eofunc_north(eof4@pcvar,nyear,False)
-    sig(5,:)  = eofunc_north(eof5@pcvar,nyear,False)
-    eval(0,:) = eof0@eval
-    eval(1,:) = eof1@eval
-    eval(2,:) = eof2@eval
-    eval(3,:) = eof3@eval
-    eval(4,:) = eof4@eval
-    eval(5,:) = eof5@eval
-    pcvar(0,:) = eof0@pcvar
-    pcvar(1,:) = eof1@pcvar
-    pcvar(2,:) = eof2@pcvar
-    pcvar(3,:) = eof3@pcvar
-    pcvar(4,:) = eof4@pcvar
-    pcvar(5,:) = eof5@pcvar
+    ts(0,ne,:) = ts(0,ne,:)/sqrt(eof0@eval(ne))
+    ts(1,ne,:) = ts(1,ne,:)/sqrt(eof1@eval(ne))
+    ts(2,ne,:) = ts(2,ne,:)/sqrt(eof2@eval(ne))
+    ts(3,ne,:) = ts(3,ne,:)/sqrt(eof3@eval(ne))
+    ts(4,ne,:) = ts(4,ne,:)/sqrt(eof4@eval(ne))
+    ts(5,ne,:) = ts(5,ne,:)/sqrt(eof5@eval(ne))
 end do
-ts = ts/conform(ts,sqrt(eval),(/0,1/))
-subtitle_color = where(sig,"red","black") 
 
 ;f2 = addfile(path + "/data/ERA-Interim_DJF_" + draw_var(nv) + "-year.nc","r")
 f2 = addfile(path + "/data/ERA-Interim_DJF_uwnd-year.nc","r")
-vars := f2->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+vars := f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
 u := dim_avg_n_Wrap(vars,0)
 nlat = dimsizes(vars&lat)
 nlon = dimsizes(vars&lon)
 
-var := regCoef_n(ts,vars,2,0)
+if(lat_option) then 
+    res@tmXBTickSpacingF   = lat_spacing 
+    res@tmXBTickStartF     = lats(na)
+    res@tmXBTickEndF       = latn(na)
+    vars := dim_avg_n_Wrap(vars,3)
+    u    := dim_avg_n_Wrap(u,2)
+    var  := regCoef_n(ts,vars,2,0)
+    tval  := onedtond(var@tval ,(/6,neval,nlat/))
+    df    := onedtond(var@nptxy,(/6,neval,nlat/))
+else
+    res@tmXBTickSpacingF   = lon_spacing 
+    res@tmXBTickStartF     = lonl(na)
+    res@tmXBTickEndF       = lonr(na)
+    vars := dim_avg_n_Wrap(vars,2)
+    u    := dim_avg_n_Wrap(u,1)
+    var  := regCoef_n(ts,vars,2,0)
+    tval  := onedtond(var@tval ,(/6,neval,nlon/))
+    df    := onedtond(var@nptxy,(/6,neval,nlon/))
+end if
 copy_VarCoords(vars(0,:,:), var(0,0,:,:))
 printVarSummary(var)
-tval  := onedtond(var@tval ,(/6,neval,nlat,nlon/))
-df    := onedtond(var@nptxy,(/6,neval,nlat,nlon/))
 b = tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
@@ -235,12 +231,11 @@ print(min(df))
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 5, 1
 do ne = 0, neval-2, 1
+    nn  = nk + 1
     nev = ne + 1
     np = nk*(neval-1) + ne 
-    res@gsnLeftString   = pre_case(np) + ") " + nk + " EOF" + nev
-    ;res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
-    res@gsnRightStringFontColor   = subtitle_color(nk,ne)
-    res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnLeftString   = pre_case(np) + ") " + nn + " EOF" + nev
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
     if(nv.gt.10) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
     else
@@ -249,10 +244,10 @@ do ne = 0, neval-2, 1
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl       ; set min contour level
     end if
-    plot(np)    = gsn_csm_contour_map_ce(wks,var(nk,ne,:,:),res)
-    sigl(np)    = gsn_csm_contour(wks,prob(nk,ne,:,:),res_sig)
+    plot(np) = gsn_csm_pres_hgt(wks, var(nk,ne,:,:),res)
+    sigl(np) = gsn_csm_pres_hgt(wks,prob(nk,ne,:,:),res_sig)
     overlay(plot(np),sigl(np))
-    line(np)    = gsn_csm_contour(wks,u,res_line)
+    line(np) = gsn_csm_pres_hgt(wks,u,res_line)
     overlay(plot(np),line(np))
     print(max(var(nk,ne,:,:)))
     print(min(var(nk,ne,:,:)))

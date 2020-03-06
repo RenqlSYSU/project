@@ -6,7 +6,7 @@
 begin
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 6 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
+var_option = 2 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
 jet_option = True  ;20191205, control the draw of jet stream
 fnc  = 1    ;chose which case to draw
 diff = True ;whether draw the difference ;False;
@@ -269,7 +269,7 @@ copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
 if(jet_option) then 
-    var_u = mask(var_u,var_u.ge.0,True)
+    var_u = mask(var_u,var_u.ge.-10,True)
     copy_VarMeta(u(0,:,:,0),var_u(0,0,:,:))
     printVarSummary(var_u)
 end if
@@ -414,11 +414,16 @@ end if
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 4.0  ;3.0
     res_line@cnLineColor      = "black"
-    res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourZeroLineThicknessF = 8
     res_line@gsnContourNegLineDashPattern = 5
    
-    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    levels = new((/10/),integer)
+    levels(0) = 0
+    levels(1:9) = ispan(5,85,10)
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             = levels       ; set contour interval
+    ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "

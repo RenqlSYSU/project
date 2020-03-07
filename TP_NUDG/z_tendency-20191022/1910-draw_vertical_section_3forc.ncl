@@ -26,17 +26,17 @@ lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,15
 
 do na = 1,1,1
 if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"Qd"   ,"Qte"  ,"total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"fQd" ,"fQeddy","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.2) then 
-    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"fQd" ,"fQeddy","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
     nnv = 1  ;used to read dzdt induced by different forcing
@@ -91,7 +91,7 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"
     if(diff) then 
-    case2   = (/"CTRL","NG6h-CTRL"/);,"NG24h-CTRL"
+    case2   = (/"CTRL","NG6h","NG6h-CTRL"/);,"NG24h-CTRL"
     else
     case2   = (/"CTRL","NG6h"/);,"NG24h-CTRL"
     end if
@@ -174,7 +174,8 @@ nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
-ncase  = dimsizes(case1)
+ncase  = dimsizes(case2)
+nfile  = dimsizes(case1)
 
 f = addfile(filename(0),"r")
 if(var_option.le.1.or.var_option.eq.6)
@@ -218,7 +219,7 @@ var_u := new((/ncase,nmonth,nlev2,nlat/),double)
 ;read data
 ;====================================================================
 if(month_option) then
-do nc = 0, ncase-1, 1
+do nc = 0, nfile-1, 1
     if(jet_option) then
     f = addfile(jetfile(nc),"r")
     u := f->month_ave(:,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -247,7 +248,7 @@ do nc = 0, ncase-1, 1
     end if
 end do
 else
-do nc = 0, ncase-1, 1
+do nc = 0, nfile-1, 1
     f = addfile(filename(nc),"r")
     if(var_option.le.1)
         do nv = 0, nvar-2,1
@@ -269,7 +270,7 @@ copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
 if(jet_option) then 
-    var_u = mask(var_u,var_u.ge.-10,True)
+    ;var_u = mask(var_u,var_u.ge.-10,True)
     copy_VarMeta(u(0,:,:,0),var_u(0,0,:,:))
     printVarSummary(var_u)
 end if
@@ -321,9 +322,8 @@ end if
 printVarSummary(var_m)
 
 if(diff) then 
-do nc = 1, ncase-1, 1
-    var_m(nc,:,:,:,:) = var_m(nc,:,:,:,:) - var_m(0,:,:,:,:)
-end do 
+    var_m(2,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
+    var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 end if
 
 ;==============================================================
@@ -415,11 +415,12 @@ end if
     res_line@cnLineThicknessF = 4.0  ;3.0
     res_line@cnLineColor      = "black"
     res_line@gsnContourZeroLineThicknessF = 8
-    res_line@gsnContourNegLineDashPattern = 5
+    res_line@gsnContourNegLineDashPattern = 2
+    res_line@gsnContourPosLineDashPattern = 0
    
     levels = new((/10/),integer)
     levels(0) = 0
-    levels(1:9) = ispan(5,85,10)
+    levels(1:9) = ispan(10,90,10)
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
@@ -432,9 +433,9 @@ end if
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Vertical"
-    resp@pmLabelBarWidthF  = 0.05
-    resp@pmLabelBarHeightF = 0.8
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8  ;0.05 ;
+    resp@pmLabelBarHeightF = 0.05 ;0.8  ;
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -519,12 +520,11 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do fnc = 0,ncase-1,1
 do nv = 0,nvar-1,1
 do nm = 0,nmonth-1,1
-    ;np = nv*2 + nm - 2;1 fnc, 2 month
-    ;np = fnc*nmonth + nm ;1 fnc, 2 month
-    np = nv*nmonth + nm ;1 var, 2 month
+do fnc = 0,ncase-1,1
+    np = fnc*nmonth + nm ;1 fnc, 2 month
+    ;np = nv*nmonth + nm ;1 var, 2 month
     ;np = nm*nvar + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
@@ -543,7 +543,14 @@ do nm = 0,nmonth-1,1
     print(min(var_m(fnc,nv,nm,:,:)))
     
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
+    if(fnc.eq.2) then 
+    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_line@cnLevelSpacingF       = 2       ; set contour interval
+    else
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             = levels       ; set contour interval
+    end if
+    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
     overlay(plot(np),line(np))
     end if
 end do 
@@ -552,8 +559,8 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
     ;gsn_panel(wks,plot,(/3,2/),resp)
-    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 

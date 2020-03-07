@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
@@ -33,11 +33,11 @@ draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the va
 unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,700,500,200/)
-nl = 1
-nv = 3
-diff = False;True
+nl = 3
+nv = 0
+diff = True
 
-var_option = 0;2;1
+var_option = 2;1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -74,7 +74,7 @@ lonr = (/360,270,390,150,270,390,150,360,130/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 20
-na = 8
+na = 6
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -90,6 +90,7 @@ prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
+    plot2  = new((/ncase*nmonth/),graphic)
     wind   = new((/ncase*nmonth/),graphic)
     wind2  = new((/ncase*nmonth/),graphic)
     gtop   = new((/ncase*nmonth/),graphic)
@@ -334,7 +335,7 @@ end if
     res_line@cnMonoLineColor  = True ;False
     res_line@cnLineColor      = "black"
     res_line@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_line@cnLevels         = (/20/)
+    res_line@cnLevels         = (/0/)
     res_line@lbLabelBarOn         = False   ; the label bar
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
@@ -448,18 +449,18 @@ if(nl.eq.3) then
 end if
 end if
 
-do nm = 0,nmonth-1,1
 do nc = 0, ncase-1,1
-if(nc.gt.2.or.nv.eq.2) then
+;do nm = 0,nmonth-1,1
+if(nc.gt.0.or.nv.eq.2) then
     res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
 else
    res@cnFillPalette = "precip3_16lev"
    ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
-    ;do nm = 0,nmonth-1,1
-        np = nc
-        ;np = nmonth*nc + nm
+    do nm = 0,nmonth-1,1
+        ;np = nc
+        np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
         res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ") " + lev(nl) + "hPa"
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
@@ -481,6 +482,8 @@ end if
         overlay(plot(np),wind(np))
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
+        plot2(np)   = gsn_csm_contour(wks,var(nc,1,nm,:,:),res_line)
+        overlay(plot(np),plot2(np))
         if(na.eq.0.or.na.eq.6) then
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         end if
@@ -489,7 +492,7 @@ end if
         ;draw(plot(np))
         ;frame(wks)
     end do 
-    gsn_panel(wks,plot,(/ncase,1/),resp)
+    ;gsn_panel(wks,plot,(/ncase,1/),resp)
 ;end do ;for the month 
 
     ;res1 = True
@@ -503,6 +506,6 @@ end if
     ;gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
-;    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end
 

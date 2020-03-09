@@ -420,7 +420,8 @@ end if
    
     levels = new((/10/),integer)
     levels(0) = 0
-    levels(1:9) = ispan(10,90,10)
+    levels(1) = 5
+    levels(2:9) = ispan(10,80,10)
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels

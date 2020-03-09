@@ -14,11 +14,11 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-nmonth = 12
-month_s = 1
-month_e = 12
+nmonth = 4
+month_s = 1 
+month_e = 8
 
 ;parameter for bw_bandpass_filter
 ca = 7.0 ;day
@@ -31,7 +31,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_eddy_flux.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_eddy_flux4.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_eddy_flux_" + cb + "-" + ca + "day.nc"
     end if  
@@ -121,12 +121,12 @@ end if
 ;read the data
 ;============================================================
 do nm = 0, nmonth-1, 1
-month1_s = nm + 1
-month1_e = nm + 1
+month1_s = nm*2 + 1
+month1_e = nm*2 + 2
 select_time := ind(time(:,1).ge.month1_s.and.time(:,1).le.month1_e)
 ntime = dimsizes(select_time)
 print("===================================================================")
-print("month from " + month_s + " to " + month_e + ", ntime = " + ntime)
+print("month from " + month1_s + " to " + month1_e + ", ntime = " + ntime)
 u    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 t    = new((/nyear,ntime,nlev,nlat,nlon/),float)

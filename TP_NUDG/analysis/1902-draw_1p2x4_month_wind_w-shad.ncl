@@ -33,8 +33,8 @@ draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the va
 unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,700,500,200/)
-nl = 3
-nv = 0
+nl = 0
+nv = 1
 diff = True
 
 var_option = 2;1
@@ -63,7 +63,7 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "wind_" +
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(a","(c","(c","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
@@ -174,7 +174,7 @@ uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:
 vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
-;var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
@@ -397,10 +397,10 @@ if(na.eq.0) then
                       (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/20,10,10/)/)   ;the level of 200hpa    ctrl,nudg,diff
 else
-    vcref         = (/(/7 ,7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/7 ,7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
-                      (/7 ,7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/15,15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+                      (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
 if(nv.eq.0) 
@@ -462,7 +462,7 @@ end if
         ;np = nc
         np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) + " (" + unit(nv) + ") " + lev(nl) + "hPa"
+        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) ;+ " (" + unit(nv) + ") " + lev(nl) + "hPa"
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -482,8 +482,8 @@ end if
         overlay(plot(np),wind(np))
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
-        plot2(np)   = gsn_csm_contour(wks,var(nc,1,nm,:,:),res_line)
-        overlay(plot(np),plot2(np))
+        ;plot2(np)   = gsn_csm_contour(wks,var(nc,1,nm,:,:),res_line)
+        ;overlay(plot(np),plot2(np))
         if(na.eq.0.or.na.eq.6) then
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         end if

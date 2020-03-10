@@ -1,4 +1,4 @@
-;*********************************************************************
+*********************************************************************
 ;Draw the vertical section of monthly EKE (shaded)
 ;                                                     by Ql Ren
 ;                                                    2019/08/12
@@ -43,15 +43,29 @@ if(var_option.eq.2) then
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then
-    var_name = (/"Qeddy","A"/)  ;
-    unit     = (/"K/Day","10~S~-10~N~s~S~-2~N~"/)
-    nnv = 1 ;used to read dzdt induced by different forcing
+    var_name = (/"Qeddy","A"                   ,"Sflux"                ,"Mflux"             ,"Tflux"/)  ;
+    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s~S~-2~N~","m~S~2~N~*s~S~-2~N~","K*m/s"/)
+    nnv = 3 ;used to read dzdt induced by different forcing
+    lev := (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa
     if(nnv.eq.0) then 
-        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "wT", "Qeddy"/)  ;this is the variable used to draw, can used as center string
-        select   = (/0,1,2,3/)
-    else
-        draw_var = (/"-duVdx", "-dvVdy", "A"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "Qeddy"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+    if(nnv.eq.1) then 
+        draw_var = (/"-duSdx", "-dvSdy", "A"/)  ;this is the variable used to draw, can used as center string
         select   = (/0,1/)
+    end if
+    if(nnv.eq.2) then 
+        draw_var = (/"uS", "vS", "wS", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+    if(nnv.eq.3) then 
+        draw_var = (/"uv", "uw", "wv", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
+    end if
+    if(nnv.eq.4) then 
+        draw_var = (/"uT", "vT", "wT", "total"/)  ;this is the variable used to draw, can used as center string
+        select   = (/0,1,2/)
     end if
 end if
 if(var_option.eq.4) then 
@@ -61,22 +75,10 @@ if(var_option.eq.4) then
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
-if(var_option.eq.5) then
-    var_name = (/"Qeddy","A"/)  ;
-    unit     = (/"K*m/s","m/s~S~2~N~"/)
-    nnv = 1 ;used to read dzdt induced by different forcing
-    if(nnv.eq.0) then 
-        draw_var = (/"uT", "vT", "wT", "total"/)  ;this is the variable used to draw, can used as center string
-        select   = (/0,1,2/)
-    else
-        draw_var = (/"uS", "vS", "wS", "total"/)  ;this is the variable used to draw, can used as center string
-        select   = (/0,1,2/)    
-    end if
-end if
 if(var_option.eq.6) then 
-    draw_var = (/"b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
-    unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
+    unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-1~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 
 ;area: east Asia
@@ -91,9 +93,9 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"
     if(diff) then 
-    case2   = (/"CTRL","NG6h","NG6h-CTRL"/);,"NG24h-CTRL"
+    case2   = (/"CTRL","NG6h-CTRL","NG6h-CTRL"/);,"NG24h-CTRL"
     else
-    case2   = (/"CTRL","NG6h"/);,"NG24h-CTRL"
+    case2   = (/"CTRL","NG6h","NG6h-CTRL"/);,"NG24h-CTRL"
     end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
@@ -147,16 +149,12 @@ if(var_option.eq.2)
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.3)
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux4.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_eddy_flux_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.4)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly_advection.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_advect_" + var_name(nnv) + area(na)
-end if
-if(var_option.eq.5)
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux2.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_eddy_flux2_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.6)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_advect.nc"
@@ -281,6 +279,7 @@ end if
 
 if(var_option.eq.1.or.var_option.eq.6) then 
     var_m = var_m*10^11
+    var_m(:,3,:,:,:) = var_m(:,3,:,:,:)/10^5
 end if
 
 if((var_option.eq.2).or.(var_option.eq.4)) then
@@ -305,23 +304,20 @@ end if
 end if
 
 if(var_option.eq.3) then
-if(nnv.eq.0) then
+if(nnv.eq.0) then  ;Qeddy
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
+end if
+if(nnv.eq.1) then ;A
+    var_m = var_m*10^11
+end if
+if(nnv.eq.2) then ;Sflux
+    var_m = var_m*10^5
+end if
+end if
+
+if(diff) then
+    var_m(1,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
 else
-    var_m = var_m*10^10
-end if
-end if
-
-;if(var_option.eq.5) then
-;if(nnv.eq.0) then
-;    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
-;else
-;    var_m = var_m*10^10
-;end if
-;end if
-printVarSummary(var_m)
-
-if(diff) then 
     var_m(2,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
     var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 end if
@@ -450,9 +446,9 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.eq.1.or.var_option.eq.6) then
-    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
+    minlvl = (/-14,-14,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 14, 14, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 2 , 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
     
 if((var_option.eq.2).or.(var_option.eq.4)) then
@@ -495,22 +491,38 @@ end if
 end if
 
 if(var_option.eq.3) then 
-if(nnv.eq.0) then
-    minlvl = (/-1.6,-1.6,-1.6,-1.6,-1.6/);-2.4,-2.4,-2.4,-2.4,-2.4/);-0.8,-0.8,-0.8,-0.8,-0.8/);
-    maxlvl = (/ 1.6, 1.6, 1.6, 1.6, 1.6/); 2.4, 2.4, 2.4, 2.4, 2.4/); 0.8, 0.8, 0.8, 0.8, 0.8/);
-    spacig = (/ 0.2, 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3, 0.3/); 0.1, 0.1, 0.1, 0.1, 0.1/);
-else
-    minlvl = (/-0.8,-0.8,-0.8/);
-    maxlvl = (/ 0.8, 0.8, 0.8/);
-    spacig = (/ 0.1, 0.1, 0.1/);
+if(nnv.eq.0) then  ;Qeddy
+    minlvl = (/-1.4,-1.4,-1.4,-1.4/);-2.4,-2.4,-2.4,-2.4,-2.4/);-0.8,-0.8,-0.8,-0.8,-0.8/);
+    maxlvl = (/ 1.4, 1.4, 1.4, 1.4/); 2.4, 2.4, 2.4, 2.4, 2.4/); 0.8, 0.8, 0.8, 0.8, 0.8/);
+    spacig = (/ 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3, 0.3/); 0.1, 0.1, 0.1, 0.1, 0.1/);
+end if
+if(nnv.eq.1) then ;A
+    minlvl = (/-7,-7,-7/);
+    maxlvl = (/ 7, 7, 7/);
+    spacig = (/ 1, 1, 1/);
+end if
+if(nnv.eq.2) then ;Sflux
+    minlvl = (/-14,-14,-14,-14/);
+    maxlvl = (/ 14, 14, 14, 14/);
+    spacig = (/  2,  2,  2,  2/);
+end if
+if(nnv.eq.3) then ;Mflux
+    minlvl = (/-35,-35,-35,-35/);
+    maxlvl = (/ 35, 35, 35, 35/);
+    spacig = (/  5,  5,  5,  5/);
+end if
+if(nnv.eq.4) then ;Tflux
+    minlvl = (/-21,-21,-21,-21/);
+    maxlvl = (/ 21, 21, 21, 21/);
+    spacig = (/  3,  3,  3,  3/);
 end if
 end if
 
 if(var_option.eq.5) then 
 if(nnv.eq.0) then
-    minlvl = (/-24,-8,-0.16,-24/);
-    maxlvl = (/ 24, 8, 0.16, 24/);
-    spacig = (/  3, 1, 0.02,  3/);
+    minlvl = (/-24,-8,-0.16,-8,-24/);
+    maxlvl = (/ 24, 8, 0.16, 8, 24/);
+    spacig = (/  3, 1, 0.02, 1,  3/);
 else
     minlvl = (/-0.8,-0.8,-0.8,-0.8/);
     maxlvl = (/ 0.8, 0.8, 0.8, 0.8/);
@@ -522,17 +534,18 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nv = 0,nvar-1,1
-do nm = 0,nmonth-1,1
-do fnc = 0,ncase-1,1
-    np = fnc*nmonth + nm ;1 fnc, 2 month
+do nm = 2,nmonth-1,1
+do fnc = 0,ncase-2,1
+    np = fnc*2 + nm - 2 ;1 fnc, 2 month
+    ;np = fnc*nmonth + nm ;1 fnc, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
     ;np = nm*nvar + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.2.and.var_option.le.5) then 
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nv) + ")"
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -559,8 +572,8 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    ;gsn_panel(wks,plot,(/3,2/),resp)
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
+    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 

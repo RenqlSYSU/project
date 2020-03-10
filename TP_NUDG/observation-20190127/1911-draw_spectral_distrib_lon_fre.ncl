@@ -31,7 +31,7 @@ else
 filein   = path + "/mdata/" + case + "_allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 fig_name = path + "/fig/" + case + "_allyear_spec_" + var_name(nv) + "-" + area(na)
 end if
-pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case  = (/"(c","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_title = "Power Spectrum"
 fig_out   ="pdf";"x11"
 
@@ -228,21 +228,22 @@ print(var(0:1000:100,5))
 
 ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
 
+plot = new((/6/),graphic)
     res@cnFillPalette := "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
-    res@gsnLeftString   = case
+    res@gsnLeftString   = pre_case(0) + ") " + case
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF      := spacig        ; set contour interval
     res@cnMaxLevelValF       := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF       := minlvl       ; set min contour level
     ;plot  = gsn_csm_hov(wks,var(ip,:),res)
-    plot  = gsn_csm_hov(wks,var2,res)
+    plot(0)  = gsn_csm_hov(wks,var2,res)
     print(max(var2))
     
-    resp@txString      = fig_title
+    ;resp@txString      = fig_title
     resp@txFont        = font_index
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    gsn_panel(wks,plot,(/1,1/),resp)
+    gsn_panel(wks,plot,(/2,3/),resp)
 end
 

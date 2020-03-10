@@ -33,8 +33,8 @@ draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the va
 unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
 draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,700,500,200/)
-nl = 0
-nv = 1
+nl = 3
+nv = 0
 diff = True
 
 var_option = 2;1
@@ -63,7 +63,7 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "wind_" +
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(a","(a","(c","(c","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(b","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia

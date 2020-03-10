@@ -17,6 +17,8 @@ lon_spcing = 45
 lev  = (/300,200/) ;500,400,300,
 var_name = (/"U","V","T","vort"/)
 stand = (/"","stand_"/)
+month_s = 1
+month_e = 12
 
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 stand_option = 0
@@ -46,9 +48,9 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
-filein   = path + "/mdata/" + case1 + "-allyear_spec_" + stand(stand_option) + var_name(nv) + "-" + area(na) + "-area.nc"
-fig_name = path + "/fig/" + case1(0) + "-allyear_spec_" + stand(stand_option) + var_name(nv) + "-" + lats(na) + "N"
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+filein   = path + "/mdata/" + case1 + "-" + month_s + month_e + "_spec_" + stand(stand_option) + var_name(nv) + "-" + area(na) + ".nc"
+fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + "_spec_" + stand(stand_option) + var_name(nv) + "-" + lats(na) + "N"
+pre_case   = (/"(d","(e","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0),"r")
@@ -263,7 +265,7 @@ if((nc.eq.2).and.diff) then
     ;blue and red, has 18 colors,2-10 is blue
 end if 
     res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+" - "+latn(na)+"N)"   
+    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)" ;+" - "+latn(na)  
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level

@@ -430,9 +430,9 @@ end if
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Horizontal" ;"Vertical"
-    resp@pmLabelBarWidthF  = 0.8  ;0.05 ;
-    resp@pmLabelBarHeightF = 0.05 ;0.8  ;
+    resp@lbOrientation     = "Vertical" ;"Horizontal" ;
+    resp@pmLabelBarWidthF  = 0.05 ;0.8  ;
+    resp@pmLabelBarHeightF = 0.8  ;0.05 ;
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -533,11 +533,12 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,nvar-1,1
+do nv = 0,nvar-2,1
 do nm = 2,nmonth-1,1
-do fnc = 0,ncase-2,1
-    np = fnc*2 + nm - 2 ;1 fnc, 2 month
+;do fnc = 0,ncase-2,1
+    ;np = fnc*2 + nm - 2 ;1 fnc, 2 month
     ;np = fnc*nmonth + nm ;1 fnc, 2 month
+    np = nv*2 + nm - 2 ;1 var, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
     ;np = nm*nvar + nv   ;1 month,2 var
     ;np = nm
@@ -564,7 +565,7 @@ do fnc = 0,ncase-2,1
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     end if
-    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
     overlay(plot(np),line(np))
     end if
 end do 
@@ -572,11 +573,11 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/3,2/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
-end do 
+;end do 
 end do 
 end
 

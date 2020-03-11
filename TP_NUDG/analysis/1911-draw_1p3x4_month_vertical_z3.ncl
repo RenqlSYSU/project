@@ -176,7 +176,7 @@ if(jet_option) then
 end if
 
 if(jet_option) then 
-    var_u = mask(var_u,var_u.ge.0,True)
+   ; var_u = mask(var_u,var_u.ge.0,True)
    ; copy_VarMeta(vars(0,:,:,0),var_u(0,0,:,:))
     printVarSummary(var_u)
 end if
@@ -307,11 +307,20 @@ printVarSummary(var)
     res_line@cnLinesOn        = True
     res_line@cnLineLabelsOn   = True
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 3.0
+    res_line@cnLineThicknessF = 4.0
     res_line@cnLineColor      = "black"
+    res_line@gsnContourZeroLineThicknessF = 8
+    res_line@gsnContourNegLineDashPattern = 2
+    res_line@gsnContourPosLineDashPattern = 0
    
-    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    levels = new((/10/),integer)
+    levels(0) = 0
+    levels(1) = 5
+    levels(2:9) = ispan(10,80,10)
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             = levels       ; set contour interval
+    ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "

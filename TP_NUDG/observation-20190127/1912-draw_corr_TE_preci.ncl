@@ -9,11 +9,11 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 begin
 data_option = 1 ;0 ERA, 1 CPC
 selecmod = 1
-allyear = False
+allyear  = False
 ;area:    east Asia
 lats = (/ 20/)  ;-20
-latn = (/ 55/)  ;60
-lonl = (/70 /)  ;20
+latn = (/ 50/)  ;60
+lonl = (/80 /)  ;20
 lonr = (/130/)  ;130 ;220
 lat_spacing = 15
 lon_spacing = 20
@@ -23,7 +23,7 @@ nm_e = 6
 siglvl = 0.05
 
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
+path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 case1 = "ERA-Interim"
 if(data_option.eq.0) then 
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/rain_daily/rain.daily.interim."; + years(nt) + ".nc"
@@ -57,7 +57,7 @@ nyear = dimsizes(years)
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f1  = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r") ;-2.5-10day
+f1   = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r") ;-2.5-10day
 time = cd_calendar(f1->time,0)
 select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
 ts2 = f1->EKEts(0:(nyear-1),select_time)
@@ -108,14 +108,24 @@ time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, (nm_e-nm_s), 1
     nm2 = nm + nm_s
     select2 := ind(time1(:,1).eq.nm2)
-    nday  = dimsizes(select2)
-    nsample = nyear*nday
+    nday     = dimsizes(select2)
+    nsample  = nyear*nday
     var  := reshape(rain(:,select2,:,:),(/nsample,nlat,nlon/))
     ts   := ndtooned(ts2(:,select2))
-    var1(nm,:,:) = escorc_n(var,ts,0,0)
-    prob(nm,:,:) = rtest(var1(nm,:,:),nsample,0)
+
+    term := regCoef_n(ts,var,0,0)
+    tval := onedtond(term@tval ,(/nlat,nlon/))
+    df   := onedtond(term@nptxy,(/nlat,nlon/))
+    b = tval 
+    b = 0.5
+    var1(nm,:,:) = term 
+    prob(nm,:,:) = betainc( df/(df+tval^2), df/2.0, b )
+
+    ;var1(nm,:,:) = escorc_n(var,ts,0,0)
+    ;prob(nm,:,:) = rtest(var1(nm,:,:),nsample,0)
     print("sample number is " + nyear*nday)
 end do
+var1 = var1*100000
 prob = mask(prob,prob.lt.siglvl,True)
 prob = mask(prob,var1.eq.0,False)
 copy_VarMeta(vars,var1(0,:,:))
@@ -199,9 +209,9 @@ printVarSummary(var1)
     ;res@cnLevels             = ispan(0,60,10)
 ;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -0.16          ; set min contour level
-    res@cnMaxLevelValF        =  0.16;32        ; set max contour level
-    res@cnLevelSpacingF       = 0.02        ; set contour interval
+    res@cnMinLevelValF        = -0.8          ; set min contour level
+    res@cnMaxLevelValF        =  0.8;32        ; set max contour level
+    res@cnLevelSpacingF       = 0.1        ; set contour interval
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -268,7 +278,7 @@ printVarSummary(var1)
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  = "corr";draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
+    res@gsnRightString  =  "mm/day/10~S~5~N~J" ;"corr";draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
 
     resp  = True    
     resp@gsnMaximize   = True

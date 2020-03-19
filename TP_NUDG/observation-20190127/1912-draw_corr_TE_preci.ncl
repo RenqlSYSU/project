@@ -13,12 +13,12 @@ allyear  = False
 ;area:    east Asia
 lats = (/ 20/)  ;-20
 latn = (/ 50/)  ;60
-lonl = (/80 /)  ;20
+lonl = (/90 /)  ;20
 lonr = (/130/)  ;130 ;220
 lat_spacing = 15
 lon_spacing = 20
 na = 0
-nm_s = 4
+nm_s = 5
 nm_e = 6
 siglvl = 0.05
 
@@ -45,9 +45,9 @@ years@calendar = "standard"
 nyear = dimsizes(years)
 
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.02
-   subtitle_font  = 0.02
-   title_font     = 0.03
+   tick_font      = 0.01
+   subtitle_font  = 0.015
+   title_font     = 0.02
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
@@ -106,8 +106,9 @@ end if
 
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, (nm_e-nm_s), 1
-    nm2 = nm + nm_s
-    select2 := ind(time1(:,1).eq.nm2)
+    nm2_s = nm + nm_s
+    nm2_e = nm + nm_s 
+    select2 := ind(time1(:,1).ge.nm2_s.and.time1(:,1).le.nm2_e)
     nday     = dimsizes(select2)
     nsample  = nyear*nday
     var  := reshape(rain(:,select2,:,:),(/nsample,nlat,nlon/))
@@ -286,7 +287,7 @@ printVarSummary(var1)
     resp@gsnPanelLabelBar = True
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.04
-    resp@lbLabelFontHeightF = 0.015
+    resp@lbLabelFontHeightF = 0.02
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
@@ -310,6 +311,6 @@ if(allyear) then
     overlay(plot(nm),plot2(nm))
     overlay(plot(nm),gtop(nm))
 end if
-    gsn_panel(wks,plot,(/1,3/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 end
 

@@ -14,10 +14,10 @@ var_name = (/"series","ave"/)
 nv = 2;3;1
 
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
+path     = "/home/ys17-19/renql/project/TP_NUDG"
 filename = path + "/concept_map/mdata/" + (/"CTRL","NUDG6h"/) + "-" + draw_var(nv) + "_TP_annual_series.nc"
 fig_name   = path + "/concept_map/fig/1p1x2_intro_sketch_ts" + draw_var(nv)
-fig_out    ="eps";"pdf";"x11"
+fig_out    ="pdf";"x11" ;"eps";
 
 ;area of TP 
 lats = 25 
@@ -25,7 +25,7 @@ latn = 40
 lonl = 70
 lonr = 105
 lev  = (/850,500,200/)
-nl   = 0
+nl   = 2
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.015
@@ -81,8 +81,8 @@ wks = gsn_open_wks(fig_out,fig_name)
     ;has 64 colors blue green yellow,red
 
     resxy     = True
-    resxy@vpWidthF  = 0.45
-    resxy@vpHeightF = 0.25
+    resxy@vpWidthF  = 0.6
+    resxy@vpHeightF = 0.2
     resxy@gsnFrame      = False
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True

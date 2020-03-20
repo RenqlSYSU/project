@@ -227,9 +227,9 @@ if(vector) then
     copy_VarMeta(vars(:,:,0),w1(0,0,:,:))
     w1 = - w1*100
 end if
-u1 = mask(u1, u1.lt.0.0 , False)
+u1 = mask(u1, u1.lt.-10.0 , False)
 else
-u1 = mask(u1, u1.lt.0.0 , False)
+u1 = mask(u1, u1.lt.-10.0 , False)
 end if
 printVarSummary(var)
 copy_VarMeta(vars(:,:,0),var(0,0,:,:))
@@ -329,14 +329,20 @@ delete([/u,v,vars,time1,time/])
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 4.0
     res_line@cnLineColor      = "black"
-    res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourZeroLineThicknessF = 8
     res_line@gsnContourNegLineDashPattern = 5
     res_line@gsnPresHgtHeightLabelOn = False
     res_line@tiYAxisOn = False
     res_line@tmYLLabelsOn = False
    
-    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 10        ; set contour interval
+    levels = new((/10/),integer)
+    ;levels(0) = 0
+    ;levels(1) = 5
+    levels(0:9) = ispan(10,100,10)
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             = levels       ; set contour interval
+    ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@gsnCenterString      = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
@@ -360,8 +366,9 @@ delete([/u,v,vars,time1,time/])
    
     div_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     div_line@cnLevelSpacingF       = 1.0       ; set contour interval
-    div_line@gsnCenterString      = ""
-    div_line@gsnLeftString    = " "
+    div_line@gsnCenterString   = ""
+    div_line@gsnLeftString     = " "
+    div_line@gsnRightString    = " "
 
 ;----------set the attribute of the vector-------------------
     resvc                  = res
@@ -453,10 +460,8 @@ do nc = 0, ncase-1,1
         print(min(div(nc,nm,:,:)))
         end if
         if(diff.and.(nc.eq.1)) then
-        res_line@cnLevelSpacingF       = 10        ; set contour interval
         resvc@vcRefMagnitudeF          = 4.0             ; define vector ref mag
         else
-        res_line@cnLevelSpacingF       = 10       ; set contour interval
         resvc@vcRefMagnitudeF          = 8.0             ; define vector ref mag
         end if
         line(np) = gsn_csm_pres_hgt(wks,u1(nc,nm,:,:),res_line)

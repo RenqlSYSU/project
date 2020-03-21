@@ -15,7 +15,7 @@ latn = (/ 40 ,40  , 30  , 45  /)
 lonl = (/ 0  ,70  ,107  ,115  /)
 lonr = (/360 ,105 ,130  ,130  /)
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nv = 3
+nv = 1
 na = 0
 area_option = True
 

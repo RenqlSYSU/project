@@ -12,9 +12,9 @@ area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,E
 lats = (/ 35 ,25  , 22  , 30  /)
 latn = (/ 35 ,40  , 30  , 45  /)
 lonl = (/ 0  ,70  ,107  ,115  /)
-lonr = (/180 ,105 ,130  ,130  /)
+lonr = (/360 ,105 ,130  ,130  /)
 lon_spcing = 45
-lev  = (/850,500,400,300,200/)
+lev  = (/500,400,300,200/)
 var_name = (/"U","V","T","vort"/)
 
 area_option = True
@@ -45,7 +45,16 @@ frq  = f->frq
 nfrq = dimsizes(spcx&frq)
 nlon = dimsizes(spcx&lon)
 var  = new((/nfrq ,nlon/),float)
+plot = new((/6/),graphic)
 
+   wks = gsn_open_wks(fig_out,fig_name)  
+  setvalues NhlGetWorkspaceObjectId()
+      "wsMaximumSize" : 300000000
+  end setvalues
+    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+
+do nl=0,3,1
 f    = addfile(filein,"r")
 if(area_option) then 
 var = f->spcx(:,{lev(nl)},{lats(na)},{lonl(na):lonr(na)})
@@ -81,7 +90,6 @@ else
     var2!0   = "frq"
     var2&frq = frq2
 end if
-
 printVarSummary(var2)
 print(frq2(0:20))
 print(frq(0:1000:100))
@@ -101,11 +109,6 @@ print(var(0:1000:100,5))
    mp_thick       = 5.0
    font_index     = 22
    
-   wks = gsn_open_wks(fig_out,fig_name)  
-  setvalues NhlGetWorkspaceObjectId()
-      "wsMaximumSize" : 300000000
-  end setvalues
-
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
@@ -221,15 +224,19 @@ print(var(0:1000:100,5))
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+var2 = var2/conform(var2,dim_avg_n(var2,1),0)-1
+res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+    minlvl := (/-0.7/) ;used for East Asian moist transiation
+    maxlvl := (/ 0.7/) ;used for CTRL-NUDG
+    spacig := (/ 0.1/)
     
-    minlvl := (/10 /) ;used for East Asian moist transiation
-    maxlvl := (/490/) ;used for CTRL-NUDG
-    spacig := (/30 /)
+    ;minlvl := (/10 /) ;used for East Asian moist transiation
+    ;maxlvl := (/490/) ;used for CTRL-NUDG
+    ;spacig := (/30 /)
 
 ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
 
-plot = new((/6/),graphic)
-    res@cnFillPalette := "precip3_16lev"
+    ;res@cnFillPalette := "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@gsnLeftString   = pre_case(0) + ") " + case
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -237,13 +244,13 @@ plot = new((/6/),graphic)
     res@cnMaxLevelValF       := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF       := minlvl       ; set min contour level
     ;plot  = gsn_csm_hov(wks,var(ip,:),res)
-    plot(0)  = gsn_csm_hov(wks,var2,res)
+    plot(nl)  = gsn_csm_hov(wks,var2,res)
     print(max(var2))
-    
+end do    
     ;resp@txString      = fig_title
     resp@txFont        = font_index
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    gsn_panel(wks,plot,(/2,3/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end
 

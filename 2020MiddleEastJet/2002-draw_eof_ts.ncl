@@ -112,7 +112,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@pmLegendHeightF  = 0.3
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = 0.05   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.5    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = 0.6    ; move ref vector along X-axis
     
     resxy@gsnStringFont         = font_index
     resxy@gsnStringFontHeightF   = subtitle_font

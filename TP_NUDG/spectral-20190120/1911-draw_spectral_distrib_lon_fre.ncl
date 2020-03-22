@@ -141,8 +141,8 @@ wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
     res@tiYAxisOn       = True
     res@tiXAxisFont     = font_index 
     res@tiYAxisFont     = font_index 
-    res@tiYAxisString   = "Frequency"
-    res@tiXAxisString   = "Longitude(E)"
+    res@tiYAxisString   = "Frequency (1/day)"
+    res@tiXAxisString   = "Longitude (E)"
 
     res@tmYLMode        = "Explicit"
     res@tmYLValues      = fspan(0.0,0.5,6)

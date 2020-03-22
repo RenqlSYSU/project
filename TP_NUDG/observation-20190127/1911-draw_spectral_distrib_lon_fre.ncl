@@ -12,21 +12,21 @@ area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,E
 lats = (/ 35 ,25  , 22  , 30  /)
 latn = (/ 35 ,40  , 30  , 45  /)
 lonl = (/ 0  ,70  ,107  ,115  /)
-lonr = (/360 ,105 ,130  ,130  /)
+lonr = (/180 ,105 ,130  ,130  /)
 lon_spcing = 45
 lev  = (/500,400,300,200/)
-var_name = (/"U","V","T","vort"/)
+var_name = (/"uwnd","vwnd","air","vort"/)
 
 area_option = True
 diff = True
 na = 0 ;"EA","TP","SEA","NEA"
 nv = 3 ;"U","V","T","vort"
-nl = 3 ;850,500,400,300,200
+nl = 2 ;500,400,300,200
 case = "ERA-Interim"
 
 if(area_option) then
 filein   = path + "/mdata/" + case + "_allyear_spec_" + var_name(nv) + "-" + area(na) + "-area.nc"
-fig_name = path + "/fig/" + case + "_allyear_spec_" + var_name(nv) + "-" + lats(na) + "N_" + lev(nl)
+fig_name = path + "/fig/" + case + "_allyear_spec_" + var_name(nv) + "-" + lats(na) + "N"
 else
 filein   = path + "/mdata/" + case + "_allyear_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 fig_name = path + "/fig/" + case + "_allyear_spec_" + var_name(nv) + "-" + area(na)
@@ -51,10 +51,10 @@ plot = new((/6/),graphic)
   setvalues NhlGetWorkspaceObjectId()
       "wsMaximumSize" : 300000000
   end setvalues
-    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
 
-do nl=0,3,1
+do nl=2,2,1
 f    = addfile(filein,"r")
 if(area_option) then 
 var = f->spcx(:,{lev(nl)},{lats(na)},{lonl(na):lonr(na)})
@@ -123,8 +123,8 @@ print(var(0:1000:100,5))
     res@tiYAxisOn       = True
     res@tiXAxisFont     = font_index 
     res@tiYAxisFont     = font_index 
-    res@tiYAxisString   = "Frequency"
-    res@tiXAxisString   = "Longitude(E)"
+    res@tiYAxisString   = "Frequency (1/day)"
+    res@tiXAxisString   = "Longitude (E)"
 
     res@tmYLMode        = "Explicit"
     res@tmYLValues      = fspan(0.0,0.5,6)
@@ -224,19 +224,19 @@ print(var(0:1000:100,5))
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-var2 = var2/conform(var2,dim_avg_n(var2,1),0)-1
-res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-    minlvl := (/-0.7/) ;used for East Asian moist transiation
-    maxlvl := (/ 0.7/) ;used for CTRL-NUDG
-    spacig := (/ 0.1/)
+;var2 = var2/conform(var2,dim_avg_n(var2,1),0)-1
+;res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+;    minlvl := (/-0.7/) ;used for East Asian moist transiation
+;    maxlvl := (/ 0.7/) ;used for CTRL-NUDG
+;    spacig := (/ 0.1/)
     
-    ;minlvl := (/10 /) ;used for East Asian moist transiation
-    ;maxlvl := (/490/) ;used for CTRL-NUDG
-    ;spacig := (/30 /)
+    minlvl := (/10 /) ;used for East Asian moist transiation
+    maxlvl := (/490/) ;used for CTRL-NUDG
+    spacig := (/30 /)
 
 ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
 
-    ;res@cnFillPalette := "precip3_16lev"
+    res@cnFillPalette := "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@gsnLeftString   = pre_case(0) + ") " + case
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -251,6 +251,6 @@ end do
     resp@txFont        = font_index
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,3/),resp)
 end
 

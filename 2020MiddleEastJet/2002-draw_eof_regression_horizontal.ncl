@@ -11,8 +11,8 @@
 ;******************************************************************************
 begin
 draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"season_ave"/)  ;use to read variables
 unit     = (/"m/s"/)  ;this can be used as right string
+var_name = (/"season_ave"/)  ;use to read variables
 nv = 0
 lev  = (/850,500,200,100/)
 nl = 2
@@ -178,7 +178,7 @@ end if
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
 nyear = dimsizes(ts&year)
-sig  = new((/6,neval/),logical)
+sig   = new((/6,neval/),logical)
 eval  = new((/6,neval/),float)
 pcvar = new((/6,neval/),float)
 eof0 := f->eof0

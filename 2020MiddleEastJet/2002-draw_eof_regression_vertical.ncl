@@ -11,11 +11,12 @@
 ;******************************************************************************
 begin
 draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
-var_name = (/"season_ave"/)  ;use to read variables
 unit     = (/"m/s"/)  ;this can be used as right string
+var_name = (/"season_ave"/)  ;use to read variables
 nv = 0
 lev  = (/850,500,200,100/)
 nl = 2
+lat_option = True
 
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
@@ -175,6 +176,10 @@ end if
 do na = 0, narea-1,1
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
+nyear = dimsizes(ts&year)
+sig   = new((/6,neval/),logical)
+eval  = new((/6,neval/),float)
+pcvar = new((/6,neval/),float)
 eof0 := f->eof0
 eof1 := f->eof1
 eof2 := f->eof2
@@ -182,39 +187,53 @@ eof3 := f->eof3
 eof4 := f->eof4
 eof5 := f->eof5
 do ne = 0, neval-1, 1
-    ts(0,ne,:) = ts(0,ne,:)/sqrt(eof0@eval(ne))
-    ts(1,ne,:) = ts(1,ne,:)/sqrt(eof1@eval(ne))
-    ts(2,ne,:) = ts(2,ne,:)/sqrt(eof2@eval(ne))
-    ts(3,ne,:) = ts(3,ne,:)/sqrt(eof3@eval(ne))
-    ts(4,ne,:) = ts(4,ne,:)/sqrt(eof4@eval(ne))
-    ts(5,ne,:) = ts(5,ne,:)/sqrt(eof5@eval(ne))
+    sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
+    sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
+    sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)
+    sig(3,:)  = eofunc_north(eof3@pcvar,nyear,False)
+    sig(4,:)  = eofunc_north(eof4@pcvar,nyear,False)
+    sig(5,:)  = eofunc_north(eof5@pcvar,nyear,False)
+    eval(0,:) = eof0@eval
+    eval(1,:) = eof1@eval
+    eval(2,:) = eof2@eval
+    eval(3,:) = eof3@eval
+    eval(4,:) = eof4@eval
+    eval(5,:) = eof5@eval
+    pcvar(0,:) = eof0@pcvar
+    pcvar(1,:) = eof1@pcvar
+    pcvar(2,:) = eof2@pcvar
+    pcvar(3,:) = eof3@pcvar
+    pcvar(4,:) = eof4@pcvar
+    pcvar(5,:) = eof5@pcvar
 end do
+ts = ts/conform(ts,sqrt(eval),(/0,1/))
+subtitle_color = where(sig,"red","black") 
 
 ;f2 = addfile(path + "/data/ERA-Interim_DJF_" + draw_var(nv) + "-year.nc","r")
 f2 = addfile(path + "/data/ERA-Interim_DJF_uwnd-year.nc","r")
 vars := f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
-u := dim_avg_n_Wrap(vars,0)
 nlat = dimsizes(vars&lat)
 nlon = dimsizes(vars&lon)
+nlev = dimsizes(vars&lev)
 
 if(lat_option) then 
     res@tmXBTickSpacingF   = lat_spacing 
     res@tmXBTickStartF     = lats(na)
     res@tmXBTickEndF       = latn(na)
     vars := dim_avg_n_Wrap(vars,3)
-    u    := dim_avg_n_Wrap(u,2)
+    u    := dim_avg_n_Wrap(vars,0)
     var  := regCoef_n(ts,vars,2,0)
-    tval  := onedtond(var@tval ,(/6,neval,nlat/))
-    df    := onedtond(var@nptxy,(/6,neval,nlat/))
+    tval := onedtond(var@tval ,(/6,neval,nlev,nlat/))
+    df   := onedtond(var@nptxy,(/6,neval,nlev,nlat/))
 else
     res@tmXBTickSpacingF   = lon_spacing 
     res@tmXBTickStartF     = lonl(na)
     res@tmXBTickEndF       = lonr(na)
     vars := dim_avg_n_Wrap(vars,2)
-    u    := dim_avg_n_Wrap(u,1)
+    u    := dim_avg_n_Wrap(vars,0)
     var  := regCoef_n(ts,vars,2,0)
-    tval  := onedtond(var@tval ,(/6,neval,nlon/))
-    df    := onedtond(var@nptxy,(/6,neval,nlon/))
+    tval := onedtond(var@tval ,(/6,neval,nlev,nlon/))
+    df   := onedtond(var@nptxy,(/6,neval,nlev,nlon/))
 end if
 copy_VarCoords(vars(0,:,:), var(0,0,:,:))
 printVarSummary(var)
@@ -231,11 +250,11 @@ print(min(df))
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 5, 1
 do ne = 0, neval-2, 1
-    nn  = nk + 1
     nev = ne + 1
     np = nk*(neval-1) + ne 
-    res@gsnLeftString   = pre_case(np) + ") " + nn + " EOF" + nev
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
+    res@gsnLeftString   = pre_case(np) + ") " + nk + " EOF" + nev
+    res@gsnRightStringFontColor   = subtitle_color(nk,ne)
+    res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     if(nv.gt.10) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
     else

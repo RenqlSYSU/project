@@ -13,8 +13,8 @@ begin
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 40 , 45 , 50 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 70 ,175 , 320/);, 360 ;150;220
+lonl = (/ 20 ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 60 ,175 , 320/);, 360 ;150;220
 narea = dimsizes(area)
 neval = 4
 years = ispan(1979,2015,1)
@@ -127,6 +127,25 @@ wks = gsn_open_wks(fig_out,fig_name)
 do na = 0, narea-1, 1
     f = addfile(filename(na),"r")
     var = f->eof_ts
+    print(var@ts_mean)
+eval  = new((/6,neval/),float)
+eof0 := f->eof0
+eof1 := f->eof1
+eof2 := f->eof2
+eof3 := f->eof3
+eof4 := f->eof4
+eof5 := f->eof5
+do ne = 0, neval-1, 1
+    eval(0,:) = eof0@eval
+    eval(1,:) = eof1@eval
+    eval(2,:) = eof2@eval
+    eval(3,:) = eof3@eval
+    eval(4,:) = eof4@eval
+    eval(5,:) = eof5@eval
+end do
+var = dim_standardize_n(var,1,2)
+;var = var/conform(var,sqrt(eval),(/0,1/))
+    
     resxy@trYMinF = floor(min(var)); -0.4;
     resxy@trYMaxF = ceil(max(var)) ; 0.2 ;
     do ne = 0, neval-2, 1

@@ -18,8 +18,8 @@ lev  = (/850,500,200,100/)
 nl = 2
 
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
-latn = (/ 40 , 45 , 50 /);, 60  ;90 , 90 , 90 , 90 
+lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
+latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
 lonr = (/ 70 ,175 , 320/);, 360 ;150;220
 lon_spacing = 20
@@ -158,7 +158,7 @@ do na = 0, narea-1,1
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape";"portrait" ;
+    resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@gsnPanelLabelBar = True
     resp@lbOrientation    = "Vertical" ;"Horizontal"
     resp@pmLabelBarWidthF  = 0.06
@@ -170,9 +170,9 @@ do na = 0, narea-1,1
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then
-    minlvl = (/-7 /)
-    maxlvl = (/ 7 /)
-    spacig = (/ 1 /)
+    minlvl = (/-3.5 /)
+    maxlvl = (/ 3.5 /)
+    spacig = (/ 0.5 /)
 end if
 
 f  = addfile(filename(na),"r")
@@ -187,7 +187,6 @@ eof2 := f->eof2
 eof3 := f->eof3
 eof4 := f->eof4
 eof5 := f->eof5
-do ne = 0, neval-1, 1
     sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
     sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
     sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)
@@ -206,7 +205,6 @@ do ne = 0, neval-1, 1
     pcvar(3,:) = eof3@pcvar
     pcvar(4,:) = eof4@pcvar
     pcvar(5,:) = eof5@pcvar
-end do
 ts = ts/conform(ts,sqrt(eval),(/0,1/))
 subtitle_color = where(sig,"red","black") 
 

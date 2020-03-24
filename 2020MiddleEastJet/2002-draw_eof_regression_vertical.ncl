@@ -19,10 +19,10 @@ nl = 2
 lat_option = True
 
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
-latn = (/ 40 , 45 , 50 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 70 ,175 , 320/);, 360 ;150;220
+lats = (/ 0 , 0 , 0 /);, 10  ;-90 ,-90 ,-90 ,-90 
+latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
+lonl = (/ 20 ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 60 ,175 , 320/);, 360 ;150;220
 lon_spacing = 20
 lat_spacing = 10
 narea = dimsizes(area)
@@ -32,7 +32,7 @@ years = ispan(1979,2015,1)
 
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
 filename   = path + "/data/eof_u_6kinds-" + area + ".nc"
-fig_name   = path + "/fig/eof_regression_hor-" + draw_var(nv)
+fig_name   = path + "/fig/eof_regression_ver-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
 plot   = new((/18/),graphic)
@@ -156,7 +156,7 @@ sigl   = new((/18/),graphic)
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape";"portrait" ;
+    resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@gsnPanelLabelBar = True
     resp@lbOrientation    = "Vertical" ;"Horizontal"
     resp@pmLabelBarWidthF  = 0.06
@@ -168,9 +168,9 @@ sigl   = new((/18/),graphic)
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then
-    minlvl = (/-7 /)
-    maxlvl = (/ 7 /)
-    spacig = (/ 1 /)
+    minlvl = (/-3.5 /)
+    maxlvl = (/ 3.5 /)
+    spacig = (/ 0.5 /)
 end if
 
 do na = 0, narea-1,1

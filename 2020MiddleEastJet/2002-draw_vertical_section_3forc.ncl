@@ -7,14 +7,14 @@ begin
 year_option = True ;calc yearly DJF 
 var_option = -3  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True;False  ;20191205, control the draw of jet stream
-stream_option = False;True
+stream_option = True ; False;
 months = (/"DJF"/)
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 1,3,1
+do var_option = 1,4,1
 if(var_option.eq.-5) then 
     draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"season_ave"/)  ;use to read variables
@@ -45,41 +45,34 @@ if(var_option.eq.0) then
     var_name := (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     := (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
+if(var_option.ge.1) then
+var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-7~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
     draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
     draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
     select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
     draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 70 ,175 , 320/);, 360 ;150;220
+lonl = (/ 20 ,120 , 260/);, 0   ;30 ;20
+lonr = (/ 60 ,180 , 320/);, 360 ;150;220
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
@@ -363,8 +356,13 @@ printVarSummary(var_m)
     res_msf@gsnContourNegLineDashPattern = 2
     res_msf@gsnContourPosLineDashPattern = 0
     
-    res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_msf@cnLevelSpacingF      = 5.0        ; set contour interval
+    levels2 = new((/20/),integer)
+    levels2(10:19) = ispan(5,50,5)
+    levels2(0:9) = ispan(-20,-2,2)
+    res_msf@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_msf@cnLevels             = levels2       ; set contour interval
+    ;res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_msf@cnLevelSpacingF      = 5.0        ; set contour interval
     res_msf@gsnPresHgtHeightLabelOn = False
     res_msf@tiYAxisOn = False
     res_msf@lbLabelBarOn     = False   ; the label bar
@@ -465,15 +463,15 @@ if(var_option.eq.-4) then
 end if
     
 if(var_option.lt.-1.and.var_option.ge.-3) then
-    minlvl = (/-2.1,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 2 /); 1, 1, 1, 1,
+    minlvl := (/-2.1,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 2.1, 14/); 8, 8, 8, 8,
+    spacig := (/ 0.3, 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.-1) then
-    minlvl = (/-2.1,-2.1,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
+    minlvl := (/-2.1,-2.1,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
+    spacig := (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.0) then 
@@ -484,9 +482,9 @@ end if
 
 if(var_option.ge.1) then
 if(nnv.eq.0) then   ;dzdt
-    minlvl = (/-3.5,-3.5,-3.5,-3.5/);
-    maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
-    spacig = (/ 0.5, 0.5, 0.5, 0.5/);
+    minlvl := (/-3.5,-3.5,-3.5,-3.5/);
+    maxlvl := (/ 3.5, 3.5, 3.5, 3.5/);
+    spacig := (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
     minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,

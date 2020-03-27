@@ -11,7 +11,7 @@
 ;******************************************************************************
 begin
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = 1,1,1
+do var_option = 1,4,3
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string

@@ -8,16 +8,23 @@ year_option = True ;calc yearly DJF
 var_option = -3  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True;False  ;20191205, control the draw of jet stream
 stream_option = True ; False;
-months = (/"DJF"/)
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
+DJF_option = False
 
-do var_option = 1,4,1
+if(DJF_option) then
+months = (/"DJF"/)
+else
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+end if
+ntime = dimsizes(months)
+
+do var_option = -5,-5,1
 if(var_option.eq.-5) then 
     draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"season_ave"/)  ;use to read variables
+    var_name = (/"month_ave"/)  ;use to read variables
     unit     = (/"m/s"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-4) then 
@@ -71,8 +78,8 @@ end if
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 20 ,120 , 260/);, 0   ;30 ;20
-lonr = (/ 60 ,180 , 320/);, 360 ;150;220
+lonl = (/ 20 ,150 , 260/);, 0   ;30 ;20
+lonr = (/ 60 ,210 , 320/);, 360 ;150;220
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
@@ -81,7 +88,11 @@ g = 9.8 ;m2/s2
 ;the path of the file
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 if(var_option.eq.-5)
+if(DJF_option) then
     filename = path + "data/" + case + "_DJF_uwnd-year.nc"
+else
+    filename = path + "data/" + case + "_uwnd-year.nc"
+end if
     fig_name = path + "fig/1p2x3_height_lat_sf"
 end if
 if(var_option.eq.-4)
@@ -113,16 +124,20 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m",
 fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
+if(DJF_option) then
 if(var_option.le.0)
     vars := f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
     vars := f->$var_name(nnv)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
+else
+vars := f->$var_name(0)$(0,0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
 nlat   = dimsizes(vars&lat)
 nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
 narea  = dimsizes(area)
-var_m  := new((/narea,nvar,nlev,nlat/),double)
+var_m  := new((/narea,nvar,ntime,nlev,nlat/),double)
 
 ;the number of the panel plot
     plot     := new((/nvar*narea/),graphic)
@@ -168,9 +183,10 @@ pi = atan(1.0)*4
 lat  = vars&lat
 ptop = 0
 iopt = 0 ;Set to zero. Currently not used.
+msf_m = new((/narea,ntime,unlev,nlat/),float)
+v_m   = new((/narea,ntime,unlev,nlat/),float)
 
-msf_m = new((/narea,unlev,nlat/),float)
-v_m   = new((/narea,unlev,nlat/),float)
+if(DJF_option) then
 f  = addfile(path + "data/" + case + "_DJF_sfvp-year.nc","r")
 ;f  = addfile(path + "data/" + case + "_DJF_vwnd-year.nc","r")
 ;w_m   = new((/narea,unlev,nlat/),float)
@@ -180,8 +196,8 @@ do na = 0,narea-1,1
     v   := dim_avg_n_Wrap(f ->vd(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     ps  := dim_avg_n_Wrap(f2->season_ave(:, {lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     msf := zonal_mpsi_Wrap(v(::-1,:,:),v&lat,ulev(::-1)*100,ps)
-    msf_m(na,:,:) = msf(::-1,:) 
-    v_m(na,:,:) = dim_avg_n_Wrap(v,2)
+    msf_m(na,0,:,:) = msf(::-1,:) 
+    v_m(na,0,:,:) = dim_avg_n_Wrap(v,2)
     ;w   := dim_avg_n_Wrap(f3->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     ;w_m(na,:,:) = dim_avg_n_Wrap(w,2)
     
@@ -194,9 +210,20 @@ do na = 0,narea-1,1
 end do
 ;w_m = -w_m*100
 ;printVarSummary(w_m)
+else
+f  = addfile(path + "data/" + case + "_sfvp-year.nc","r")
+f2 = addfile(path + "data/" + case + "_ps-year.nc","r")
+do na = 0,narea-1,1
+    v   := dim_avg_n_Wrap(f ->vd_m(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    ps  := dim_avg_n_Wrap(f2->month_ave(:,:, {lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    msf := zonal_mpsi_Wrap(v(:,::-1,:,:),v&lat,ulev(::-1)*100,ps)
+    msf_m(na,:,:,:) = msf(:,::-1,:) 
+end do
+end if
+
+copy_VarMeta(vars(:,:,0),msf_m(0,0,:,:))
 msf_m = msf_m/10^10
 printVarSummary(msf_m)
-copy_VarMeta(vars(:,:,0),msf_m(0,:,:))
 print(max(msf_m))
 print(min(msf_m))
 end if
@@ -205,12 +232,13 @@ f = addfile(filename,"r")
 if(var_option.le.0)
     do nv = 0, nvar-1,1
     do na = 0, narea-1,1
-    if(year_option) then 
-    var  := dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    if(DJF_option) then 
+    var  := dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(na,nv,:,:,:) = dim_avg_n_Wrap(var,3)
     else
-    var  := f->$var_name(nv)$({lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var  := dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(na,nv,0,:,:) = dim_avg_n_Wrap(var,2)
     end if
-    var_m(na,nv,:,:) = dim_avg_n_Wrap(var,2)
     end do
     end do
 else
@@ -220,10 +248,10 @@ else
     else
     var  := f->$var_name(nnv)$(select,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
-    var_m(na,:,:,:) = dim_avg_n_Wrap(var,3)
+    var_m(na,0,:,:,:) = dim_avg_n_Wrap(var,3)
     end do
 end if
-copy_VarMeta(vars(:,:,0),var_m(0,0,:,:))
+copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
 if(var_option.eq.-4) then 
@@ -506,10 +534,11 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+do nt = 0, ntime-1,1
 do na = 0, narea-1,1
 do nv = 0, nvar-1,1
     np = na*nvar + nv
-    res@gsnLeftString   = pre_case(np) + ") " + area(na) 
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " " + months(nt) 
     if(var_option.ge.1) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
@@ -520,17 +549,17 @@ do nv = 0, nvar-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,:,:),res)
-    print(max(var_m(na,nv,:,:)))
-    print(min(var_m(na,nv,:,:)))
+    plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
+    print(max(var_m(na,nv,nt,:,:)))
+    print(min(var_m(na,nv,nt,:,:)))
 
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,u_m(na,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,u_m(na,nt,:,:),res_line)
     overlay(plot(np),line(np))
     end if
     
     if(stream_option) then 
-    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,:,:),res_msf)
+    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res_msf)
     overlay(plot(np),msfp(np))
     ;vect(np) = gsn_csm_vector(wks,v_m(na,:,:),w_m(na,:,:),resvc)
     ;vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
@@ -542,6 +571,7 @@ end do
 ;    resp@txString      = fig_title
     gsn_panel(wks,plot,(/narea,nvar/),resp)
     ;gsn_panel(wks,plot,(/2,2/),resp)
+end do 
 end do 
 end
 

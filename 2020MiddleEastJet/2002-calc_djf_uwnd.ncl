@@ -13,9 +13,10 @@ var_name = (/"uwnd","vwnd","omega","air","hgt","ps"/)
 
 years    = ispan(1979,2016,1)
 years@calendar = "standard"
+DJF_option = False
 
 ;area: east Asia
-lats = -90 ;-20
+lats =  0 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -35,15 +36,29 @@ nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nlev  = dimsizes(lev)
 nyear = dimsizes(years)
+mdays = (/31,28,31,30,31,30,31,31,30,31,30,31/)
 
+if(DJF_option) then
 select_time  = ind(time(:,1).eq.12.or.time(:,1).le.2)
 ntime = dimsizes(select_time)
 select_time1 = select_time
 select_time1(58:89) = select_time(58:89) + 1
+else
+ntime = 365
+select_time1  = new((/ntime/),integer)
+select_time   = new((/ntime/),integer)
+select_time1(0:58)   = ispan(0,58,1)
+select_time1(59:364) = ispan(60,365,1)
+select_time          = ispan(0,364,1)
+end if
 
 do nv = 5,5,1
 year_option = True;False ;
+if(DJF_option) then 
 fileout  = path2 + "ERA-Interim_DJF_" + var_name(nv) + "-year.nc"
+else
+fileout  = path2 + "ERA-Interim_" + var_name(nv) + "-year.nc"
+end if
 ;==========================================================
 ;read the data
 ;============================================================
@@ -62,6 +77,7 @@ if(nv.eq.5) then
         index1 = select_time + start
         var(nt,:,:,:)   = f->sp(index1,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
     end if
+    start = start + space
     end do
 else
     var   := new((/nyear,ntime,nlev,nlat,nlon/),float)
@@ -80,6 +96,7 @@ end if
 ;--------------------------------------
 ;DJF
 ;---------------------------------------------------
+if(DJF_option) then 
 if(nv.eq.5) then 
     u2     := new((/nyear-1,ntime,nlat,nlon/),float)
     do ny = 0,nyear-2,1
@@ -94,9 +111,53 @@ else
     end do
 end if
 var := u2
-printVarSummary(var)
 var1 = dim_avg_n_Wrap(var,1)
-printVarSummary(var1)
+
+else
+
+if(nv.eq.5) then 
+var_month  := new((/nyear,12 ,nlat,nlon/),float)
+var_season := new((/nyear,4  ,nlat,nlon/),float)
+do nm = 0,11,1
+    select_time2 := ind(time(:,1).eq.nm+1)
+    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time2,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+end do
+;----------calculate the season average-----------------------
+do ns = 0,3,1
+    nm = ns*3 ;nm = 0,3,6,9
+    if(nm.eq.0) then
+    var_season(:,ns,:,:) = ( var_month(:,11  ,:,:)*mdays(11)   + \
+                               var_month(:,nm  ,:,:)*mdays(nm)   + \
+                               var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
+    else
+    var_season(:,ns,:,:) = ( var_month(:,nm-1,:,:)*mdays(nm-1) + \
+                               var_month(:,nm  ,:,:)*mdays(nm)   + \
+                               var_month(:,nm+1,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
+    end if
+end do
+else
+var_month  := new((/nyear,12 ,nlev,nlat,nlon/),float)
+var_season := new((/nyear,4  ,nlev,nlat,nlon/),float)
+do nm = 0,11,1
+    select_time2 := ind(time(:,1).eq.nm+1)
+    var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time2,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+end do
+delete(var)
+;----------calculate the season average-----------------------
+do ns = 0,3,1
+    nm = ns*3 ;nm = 0,3,6,9
+    if(nm.eq.0) then
+    var_season(:,ns,:,:,:) = ( var_month(:,11  ,:,:,:)*mdays(11)   + \
+                               var_month(:,nm  ,:,:,:)*mdays(nm)   + \
+                               var_month(:,nm+1,:,:,:)*mdays(nm+1))/(mdays(11) + mdays(nm)+ mdays(nm+1))
+    else
+    var_season(:,ns,:,:,:) = ( var_month(:,nm-1,:,:,:)*mdays(nm-1) + \
+                               var_month(:,nm  ,:,:,:)*mdays(nm)   + \
+                               var_month(:,nm+1,:,:,:)*mdays(nm+1))/(mdays(nm-1) + mdays(nm)+ mdays(nm+1))
+    end if
+end do
+end if
+end if
 
 ;========================================================================
 ;save the data
@@ -113,6 +174,7 @@ fileatt@discription   = "DJF mean"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
+if(DJF_option) then
 dimNames = (/"year" ,"lev","lat","lon"/);
 dimSizes = (/nyear-1,nlev ,nlat ,nlon/) ;
 dimUnlim = (/False  ,False,False,False/);
@@ -138,6 +200,38 @@ ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->season_ave  = (/var1/)
+else
+
+dimNames = (/"year","month","season","lev","lat","lon"/)
+dimSizes = (/nyear ,  12   ,  4     ,nlev ,nlat ,nlon/)
+dimUnlim = (/False ,False  ,False   ,False,False,False/)
+filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
+
+;define var_names, type(string) and dims_names(string)
+filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
+filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
+filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
+if(nv.eq.5) then 
+filevardef(ncdf,"month_ave" ,typeof(var_month) ,(/"year","month" ,"lat","lon"/))
+filevardef(ncdf,"season_ave",typeof(var_season),(/"year","season","lat","lon"/))
+else
+filevardef(ncdf,"month_ave" ,typeof(var_month) ,(/"year","month" ,"lev","lat","lon"/))
+filevardef(ncdf,"season_ave",typeof(var_season),(/"year","season","lev","lat","lon"/))
+end if
+
+;define var attribute
+filevarattdef(ncdf,"lev",vars&level)
+filevarattdef(ncdf,"lat",vars&lat)
+filevarattdef(ncdf,"lon",vars&lon)
+filevarattdef(ncdf,"month_ave",vars)
+filevarattdef(ncdf,"season_ave",vars)
+
+ncdf->lev  = (/lev/)
+ncdf->lat  = (/vars&lat/)
+ncdf->lon  = (/vars&lon/)
+ncdf->month_ave   = (/var_month/)
+ncdf->season_ave  = (/var_season/)
+end if
 end do
 end
 

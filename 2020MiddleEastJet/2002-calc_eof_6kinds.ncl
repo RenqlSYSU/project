@@ -17,6 +17,7 @@ nv = 0
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
 neval = 4
+filter = True
 
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
@@ -45,6 +46,20 @@ nlon = dimsizes(vars&lon)
 remove_mean = True
 return_info = True
 var := dtrend_msg_n(years,vars,remove_mean,return_info,0)
+
+if(filter) then
+ca = 9.0 ;year
+fca = 1.0/ca
+fcf = fspan(0, 0.5, nyear/2) 
+low_cf = ind(fcf.lt.fca)
+
+cf = ezfftf_n(var,0)
+term = cf 
+term(:,low_cf,:,:,:) = 0.0  
+var = ezfftb_n(term,0,1)
+delete([/term,cf/])
+end if
+
 print(area(na) + " : " + lonl(na) + "-" + lonr(na) + "E " + lats(na) + "-" + latn(na) + "N ")
 print("max slope is " + max(var@slope))
 print("min slope is " + min(var@slope))

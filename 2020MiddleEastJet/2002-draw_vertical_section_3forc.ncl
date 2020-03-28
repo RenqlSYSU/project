@@ -5,8 +5,8 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -3  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = True;False  ;20191205, control the draw of jet stream
+var_option = -5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+jet_option = False  ;True ;control the draw of jet stream
 stream_option = True ; False;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
@@ -76,8 +76,8 @@ end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
-latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
+lats = (/  0 ,  0 ,0   /);, 10  ;-90 ,-90 ,-90 ,-90 10 , 10 , 10
+latn = (/90  , 90 , 90 /);, 60  ;90  , 90 , 90 , 90  60 , 60 , 60
 lonl = (/ 20 ,150 , 260/);, 0   ;30 ;20
 lonr = (/ 60 ,210 , 320/);, 360 ;150;220
 lat_spacing = 10
@@ -140,10 +140,10 @@ narea  = dimsizes(area)
 var_m  := new((/narea,nvar,ntime,nlev,nlat/),double)
 
 ;the number of the panel plot
-    plot     := new((/nvar*narea/),graphic)
-    line     := new((/nvar*narea/),graphic)
-    msfp     := new((/nvar*narea/),graphic)
-    vect     := new((/nvar*narea/),graphic)
+    plot     := new((/12/),graphic)
+    line     := new((/12/),graphic)
+    msfp     := new((/12/),graphic)
+    vect     := new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.035
@@ -233,11 +233,11 @@ if(var_option.le.0)
     do nv = 0, nvar-1,1
     do na = 0, narea-1,1
     if(DJF_option) then 
-    var  := dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-    var_m(na,nv,:,:,:) = dim_avg_n_Wrap(var,3)
-    else
     var  := dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     var_m(na,nv,0,:,:) = dim_avg_n_Wrap(var,2)
+    else
+    var  := dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(na,nv,:,:,:) = dim_avg_n_Wrap(var,3)
     end if
     end do
     end do
@@ -534,10 +534,11 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nt = 0, ntime-1,1
 do na = 0, narea-1,1
+do nt = 0, ntime-1,1
 do nv = 0, nvar-1,1
-    np = na*nvar + nv
+    ;np = na*nvar + nv
+    np = nt 
     res@gsnLeftString   = pre_case(np) + ") " + area(na) + " " + months(nt) 
     if(var_option.ge.1) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
@@ -569,8 +570,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/narea,nvar/),resp)
-    ;gsn_panel(wks,plot,(/2,2/),resp)
+    ;gsn_panel(wks,plot,(/narea,nvar/),resp)
+    gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 
 end

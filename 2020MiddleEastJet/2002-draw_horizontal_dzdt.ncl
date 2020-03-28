@@ -5,13 +5,21 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = -6  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA 
 nl = 4  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
+DJF_option = False
 
-months = (/"DJF"/)
+if(DJF_option) then
+months  = (/"DJF_"/)
+months2 = (/"DJF"/)
+else
+months  = (/""/)
+months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+end if
+ntime = dimsizes(months2)
 lev    = (/925,850,700,500,200/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
@@ -89,31 +97,31 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.le.-5)
-    filename = path + "data/" + case + "_"+months+"_intEKE-year.nc"
+    filename = path + "data/" + case + "_" + months + "intEKE-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-4)
-    filename = path + "data/" + case + "_"+months+"_forc_in-year.nc"
+    filename = path + "data/" + case + "_" + months + "forc_in-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
-    filename = path + "data/" + case + "_"+months+"_forc_te-year.nc"
+    filename = path + "data/" + case + "_"+months+"forc_te-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
-    filename = path + "data/" + case + "_"+months+"_forc_ex-year.nc"
+    filename = path + "data/" + case + "_"+months+"forc_ex-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.1)
-    filename = path + "data/" + case + "_"+months+"_dzdt_ex-year.nc"
+    filename = path + "data/" + case + "_"+months+"dzdt_ex-year.nc"
     fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.ge.2.and.var_option.le.3)
-    filename = path + "data/" + case + "_"+months+"_dzdt_te-year.nc"
+    filename = path + "data/" + case + "_"+months+"dzdt_te-year.nc"
     fig_name = path + "fig/1p2x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.4)
-    filename = path + "data/" + case + "_"+months+"_dzdt_in-year.nc"
+    filename = path + "data/" + case + "_"+months+"dzdt_in-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
@@ -126,15 +134,15 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nlat   = dimsizes(phis&latitude )  ;
 nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
-var_m  = new((/nvar,nlat,nlon/),double)
+var_m  = new((/nvar,ntime,nlat,nlon/),double)
 
 ;the number of the panel plot
-    plot     = new((/nvar/),graphic)
-    line     = new((/nvar/),graphic)
-    line1    = new((/nvar/),graphic)
-    line2    = new((/nvar/),graphic)
-    line3    = new((/nvar/),graphic)
-    gtop     = new((/nvar/),graphic)
+    plot     = new((/12/),graphic)
+    line     = new((/12/),graphic)
+    line1    = new((/12/),graphic)
+    line2    = new((/12/),graphic)
+    line3    = new((/12/),graphic)
+    gtop     = new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
@@ -150,16 +158,25 @@ var_m  = new((/nvar,nlat,nlon/),double)
 ;read data
 ;====================================================================
 if(jet_option) then
-    f = addfile(path + "data/" + case + "_DJF_uwnd-year.nc","r")
-    u = f->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    u_m = dim_avg_n_Wrap(u,0)
+    f = addfile(path + "data/" + case + "_" + months + "uwnd-year.nc","r")
+    u_m = new((/ntime,nlat,nlon/),float)
+    if(DJF_option) then
+    u_m(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    else
+    u_m = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    end if
     u_m = mask(u_m, u_m.lt.20 , False) 
     printVarSummary(u_m)
 end if
 
 if(var_option.eq.-6) then
-    f = addfile(path + "data/" + case + "_DJF_air-year.nc","r")
-    t = dim_avg_n_Wrap(f->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    f = addfile(path + "data/" + case + "_" + months + "air-year.nc","r")
+    t = new((/ntime,nlat,nlon/),float)
+    if(DJF_option) then
+    t(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    else
+    t = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    end if
     
     opt    = 0     ;used by center_finite_diff_n, no meanging 
     loncyc = True ;used by center_finite_diff_n
@@ -170,10 +187,10 @@ if(var_option.eq.-6) then
     pi = atan(1.0)*4
     lat = t&lat
     lat = lat*pi/180.0
-    coslat = conform(var_m(0,:,:),cos(lat),0)
-    var_m(0,:,:) = tofloat(center_finite_diff_n(t*coslat,lat,cyclic,opt,0)/a/coslat)
+    coslat = conform(var_m(0,:,:,:),cos(lat),1)
+    var_m(0,:,:,:) = tofloat(center_finite_diff_n(t*coslat,lat,cyclic,opt,1)/a/coslat)
     var_m = var_m*100000
-    copy_VarMeta(t,var_m(0,:,:))
+    copy_VarMeta(t,var_m(0,:,:,:))
 end if
 
 if(var_option.le.0.and.var_option.ge.-5)
@@ -461,8 +478,11 @@ end if
     if(var_option.gt.-4) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
+;do nt = 0, ntime-1,1
 do nv = 0, nvar-1,1
-    np = nv
+do ni = 0, 3, 1
+do np = 0, 2, 1 
+    nt = ni*3 + np
     if(var_option.gt.0) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
@@ -471,23 +491,23 @@ do nv = 0, nvar-1,1
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
     res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
     end if
-    if(var_option.eq.-4) then 
-    res@gsnLeftString   = pre_case(np) + ") 200hPa uwnd"
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
+    if(var_option.eq.-6) then 
+    res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
+    res@gsnRightString  = lev(nl) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
     ;res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,:,:),res)
+    plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
-    print(max(var_m(nv,:,:)))
-    print(min(var_m(nv,:,:)))
+    print(max(var_m(nv,nt,:,:)))
+    print(min(var_m(nv,nt,:,:)))
 
     if(jet_option) then 
-    line(np) = gsn_csm_contour(wks,u_m,res_line)
+    line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
     overlay(plot(np),line(np))
     end if
     if(region_line) then 
@@ -496,8 +516,11 @@ do nv = 0, nvar-1,1
         line3(np) = gsn_add_polyline( wks, plot(np), lonx(:,3), latx(:,3), lnres3 )
     end if
 end do 
+    gsn_panel(wks,plot,(/3,1/),resp)
+end do 
+end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/nvar,1/),resp)
+;    gsn_panel(wks,plot,(/nvar,1/),resp)
 end
 

@@ -175,7 +175,7 @@ delete([/u_month,v_month/])
 ;vr2uvf(vort_s,ur_s,vr_s)    ;calculate the rotational wind components via spherical harmonics
 ;dv2uvf(divg_s,ud_s,vd_s)    ;calculate the divergent wind components via spherical harmonics
 ;delete([/u_season,v_season/])
-printVarSummary(ur_s)
+;printVarSummary(ur_s)
 end if
 
 ;========================================================================

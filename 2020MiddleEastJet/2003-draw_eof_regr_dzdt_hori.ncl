@@ -13,7 +13,7 @@ begin
 lev  = (/850,500,200,100/)
 nl = 2
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = 1,4,1
+do var_option = 1,1,1
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -64,11 +64,11 @@ nvar = dimsizes(draw_var)
 
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
-latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 70 ,175 , 320/);, 360 ;150;220
-lon_spacing = 20
-lat_spacing = 10
+latn = (/ 90 , 90 , 90 /);, 60  ;90 , 90 , 90 , 90 
+lonl = (/ 0  , 0  ,0   /);, 0   ;30 ;20  0  ,105 , 250
+lonr = (/ 360,360 ,360 /);, 360 ;150;220 70 ,175 , 320
+lon_spacing = 30
+lat_spacing = 20
 narea = dimsizes(area)
 neval = 4
 siglvl = 0.05
@@ -116,9 +116,9 @@ sigl   = new((/18/),graphic)
 ;draw the figure
 ;=============================================
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
+   tick_font      = 0.01
+   subtitle_font  = 0.01
+   title_font     = 0.01
    label_font     = 0.015
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -196,11 +196,8 @@ sigl   = new((/18/),graphic)
     res_line@cnLineThicknessF = 5.0
     res_line@cnLineColor      = "blueviolet";"green4";"black"
     res_line@gsnContourZeroLineThicknessF = 8
-    levels = new((/10/),integer)
-    levels(0) = 0
-    levels(1:9) = ispan(5,85,10)
-    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
-    res_line@cnLevels             = levels       ; set contour interval
+    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_line@cnLevelSpacingF       = 10        ; set contour interval
     res_line@lbLabelBarOn     = False   ; the label bar
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
@@ -213,7 +210,7 @@ sigl   = new((/18/),graphic)
     reg_line@gsnContourNegLineDashPattern = 2
     reg_line@gsnContourPosLineDashPattern = 0
     reg_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    reg_line@cnLevelSpacingF       = 0.5     ; set contour interval
+    reg_line@cnLevelSpacingF      := 0.5     ; set contour interval
 
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
@@ -242,11 +239,11 @@ sigl   = new((/18/),graphic)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait" ;
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation    = "Vertical" ;"Horizontal"
-    resp@pmLabelBarWidthF  = 0.06
-    resp@pmLabelBarHeightF = 0.8
+    resp@lbOrientation    = "Horizontal" ;"Vertical" ;
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05
     resp@lbLabelFont        = font_index              ; make labels smaller
-    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontHeightF = 0.01 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
@@ -364,6 +361,7 @@ udf   := onedtond(ureg@nptxy,(/6,neval,nlat,nlon/))
 u    := dim_avg_n_Wrap(u   ,0)
 copy_VarCoords(vars(0,0,:,:), var(0,0,0,:,:))
 copy_VarCoords(u, ureg(0,0,:,:))
+u = mask(u, u.lt.20 , False) 
 printVarSummary(var)
 
 b := tval 
@@ -419,7 +417,8 @@ do nk = 0, 0, 1
 do ne = 0, 2, 1 ;neval-2, 1
 do nv = 0, nvar-1,1
     nev = ne + 1
-    np  = ne*nvar + nv ;1 var ;2 area
+    np  = nv ;1 var ;2 area
+    ;np  = ne*nvar + nv ;1 var ;2 area
     ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
     res@mpMaxLatF        = latn(na) 
     res@mpMinLatF        = lats(na)
@@ -450,10 +449,12 @@ do nv = 0, nvar-1,1
     print(max(var(nk,ne,nv,:,:)))
     print(min(var(nk,ne,nv,:,:)))
 end do 
-end do 
     resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+    gsn_panel(wks,plot,(/nvar,1/),resp)
+end do 
+;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-    gsn_panel(wks,plot,(/3,nvar/),resp)
+;    gsn_panel(wks,plot,(/3,nvar/),resp)
 end do ;area 
 end do ;area 
 end do ;area 

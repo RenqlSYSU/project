@@ -8,9 +8,9 @@ year_option = True ;calc yearly DJF
 var_option = -6  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA 
-nl = 4  ;(/925,850,700,500,200/)
+nl = 0  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
-DJF_option = False
+DJF_option = True;False
 
 if(DJF_option) then
 months  = (/"DJF_"/)
@@ -27,7 +27,7 @@ case   = "ERA-Interim"
 if(var_option.eq.-6) then 
     draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dTdy"/)  ;use to read variables
-    unit     = (/"10~S~-5~N~K/m"/)  ;this can be used as right string 
+    unit     = (/"10~S~-6~N~K/m"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-5) then 
     draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
@@ -175,7 +175,7 @@ if(var_option.eq.-6) then
     if(DJF_option) then
     t(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     else
-    t = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    t = dim_avg_n_Wrap(f->month_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if
     
     opt    = 0     ;used by center_finite_diff_n, no meanging 
@@ -188,8 +188,9 @@ if(var_option.eq.-6) then
     lat = t&lat
     lat = lat*pi/180.0
     coslat = conform(var_m(0,:,:,:),cos(lat),1)
-    var_m(0,:,:,:) = tofloat(center_finite_diff_n(t*coslat,lat,cyclic,opt,1)/a/coslat)
-    var_m = var_m*100000
+;    var_m(0,:,:,:) = tofloat(center_finite_diff_n(t*coslat,lat,cyclic,opt,1)/a/coslat)
+    var_m(0,:,:,:) = tofloat(center_finite_diff_n(t,lat,cyclic,opt,1)/a)
+    var_m = var_m*1000000
     copy_VarMeta(t,var_m(0,:,:,:))
 end if
 
@@ -418,9 +419,9 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.-6) then
-    minlvl = (/-7 /)
-    maxlvl = (/ 7 /)
-    spacig = (/ 1 /)
+    minlvl = (/-14 /)
+    maxlvl = (/ 14 /)
+    spacig = (/ 2 /)
 end if
 if(var_option.eq.-5) then
     minlvl = (/2  ,2  ,2  /);-8,-8,-8,-8,
@@ -478,11 +479,12 @@ end if
     if(var_option.gt.-4) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
-;do nt = 0, ntime-1,1
+do nt = 0, ntime-1,1
 do nv = 0, nvar-1,1
-do ni = 0, 3, 1
-do np = 0, 2, 1 
-    nt = ni*3 + np
+;do ni = 0, 3, 1
+;do np = 0, 2, 1 
+    ;nt = ni*3 + np
+    np = nv
     if(var_option.gt.0) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
@@ -516,11 +518,11 @@ do np = 0, 2, 1
         line3(np) = gsn_add_polyline( wks, plot(np), lonx(:,3), latx(:,3), lnres3 )
     end if
 end do 
-    gsn_panel(wks,plot,(/3,1/),resp)
+;    gsn_panel(wks,plot,(/3,1/),resp)
 end do 
-end do 
+;end do 
 
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/nvar,1/),resp)
+    gsn_panel(wks,plot,(/nvar,1/),resp)
 end
 

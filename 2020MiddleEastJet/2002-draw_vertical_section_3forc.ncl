@@ -6,13 +6,13 @@
 begin
 year_option = True ;calc yearly DJF 
 var_option = -5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = False  ;True ;control the draw of jet stream
+jet_option = True ;False  ;control the draw of jet stream
 stream_option = True ; False;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
-DJF_option = False
+DJF_option = True ;False  ;
 
 if(DJF_option) then
 months = (/"DJF"/)
@@ -21,7 +21,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -5,-5,1
+do var_option = -1,-4,1
 if(var_option.eq.-5) then 
     draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"month_ave"/)  ;use to read variables
@@ -76,10 +76,10 @@ end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/  0 ,  0 ,0   /);, 10  ;-90 ,-90 ,-90 ,-90 10 , 10 , 10
-latn = (/90  , 90 , 90 /);, 60  ;90  , 90 , 90 , 90  60 , 60 , 60
-lonl = (/ 20 ,150 , 260/);, 0   ;30 ;20
-lonr = (/ 60 ,210 , 320/);, 360 ;150;220
+lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10    0 ,  0 ,0   
+latn = (/ 60 , 60 , 60 /);, 60  ;90  , 90 , 90 , 90  60 , 60 , 60 90  , 90 , 90 
+lonl = (/ 0  ,110 , 250/);, 0   ;30 ;20   20 ,150 , 260
+lonr = (/ 70 ,180 , 320/);, 360 ;150;220  60 ,210 , 320
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
@@ -243,12 +243,10 @@ if(var_option.le.0)
     end do
 else
     do na = 0, narea-1,1
-    if(year_option) then 
+    if(DJF_option) then 
     var  := dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
-    else
-    var  := f->$var_name(nnv)$(select,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(na,:,0,:,:) = dim_avg_n_Wrap(var,3)
     end if
-    var_m(na,0,:,:,:) = dim_avg_n_Wrap(var,3)
     end do
 end if
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
@@ -259,13 +257,13 @@ if(var_option.eq.-4) then
 end if
 
 if(var_option.lt.-1.and.var_option.ge.-3) then 
-    var_m(:,1,:,:) = var_m(:,1,:,:)*10^11
-    var_m(:,0,:,:) = var_m(:,0,:,:)*24*3600
+    var_m(:,1,:,:,:) = var_m(:,1,:,:,:)*10^11
+    var_m(:,0,:,:,:) = var_m(:,0,:,:,:)*24*3600
 end if
 
 if(var_option.eq.-1) then 
-    var_m(:,2,:,:) = var_m(:,2,:,:)*10^11
-    var_m(:,0:1,:,:) = var_m(:,0:1,:,:)*24*3600
+    var_m(:,2,:,:,:) = var_m(:,2,:,:,:)*10^11
+    var_m(:,0:1,:,:,:) = var_m(:,0:1,:,:,:)*24*3600
 end if
 
 if(var_option.eq.0) then 
@@ -534,12 +532,12 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do na = 0, narea-1,1
 do nt = 0, ntime-1,1
+do na = 0, narea-1,1
 do nv = 0, nvar-1,1
-    ;np = na*nvar + nv
-    np = nt 
-    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " " + months(nt) 
+    np = na*nvar + nv
+    ;np = nt 
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) ;+ " " + months(nt) 
     if(var_option.ge.1) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
@@ -555,7 +553,7 @@ do nv = 0, nvar-1,1
     print(min(var_m(na,nv,nt,:,:)))
 
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,u_m(na,nt,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,u_m(na,:,:),res_line)
     overlay(plot(np),line(np))
     end if
     
@@ -570,8 +568,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/narea,nvar/),resp)
-    gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot,(/narea,nvar/),resp)
+;    gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 
 end

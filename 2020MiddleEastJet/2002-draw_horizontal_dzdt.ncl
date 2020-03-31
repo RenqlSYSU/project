@@ -5,10 +5,10 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -6  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA 
-nl = 0  ;(/925,850,700,500,200/)
+nl = 4  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False
 
@@ -24,6 +24,7 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
+do var_option = -2,-3,1
 if(var_option.eq.-6) then 
     draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dTdy"/)  ;use to read variables
@@ -198,28 +199,28 @@ if(var_option.le.0.and.var_option.ge.-5)
 f = addfile(filename,"r")
 if(var_option.eq.-5) then 
     do nv = 0, nvar-1,1
-    if(year_option) then 
-    var_m(nv,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    if(DJF_option) then
+    var_m(nv,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     else
-    var_m(nv,:,:)  = f->$var_name(nv)$({lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(nv,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     end do
 else
     do nv = 0, nvar-1,1
-    if(year_option) then 
-    var_m(nv,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    if(DJF_option) then
+    var_m(nv,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     else
-    var_m(nv,:,:)  = f->$var_name(nv)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(nv,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     end do
 end if
 end if
 if(var_option.ge.1)
 f = addfile(filename,"r")
-    if(year_option) then 
-    var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    if(DJF_option) then
+    var_m(:,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     else
-    var_m  = f->$var_name(nnv)$(select,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end if
 printVarSummary(var_m)
@@ -233,13 +234,13 @@ if(var_option.eq.-4) then
 end if
 
 if(var_option.le.-2.and.var_option.ge.-3)
-    var_m(1,:,:) = var_m(1,:,:)*10^11
-    var_m(0,:,:) = var_m(0,:,:)*24*3600
+    var_m(1,:,:,:) = var_m(1,:,:,:)*10^11
+    var_m(0,:,:,:) = var_m(0,:,:,:)*24*3600
 end if
 
 if(var_option.eq.-1) then 
-    var_m(2,:,:)   = var_m(2,:,:)*10^11
-    var_m(0:1,:,:) = var_m(0:1,:,:)*24*3600
+    var_m(2,:,:,:)   = var_m(2,:,:,:)*10^11
+    var_m(0:1,:,:,:) = var_m(0:1,:,:,:)*24*3600
 end if
 
 if(var_option.eq.0) then 
@@ -330,7 +331,7 @@ end if
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    if(var_option.ge.1) then
+    if(var_option.ge.1.or.var_option.eq.-4) then
     res@lbLabelBarOn         = False   ; the label bar
     else
     res@lbLabelBarOn         = True   ; the label bar
@@ -405,7 +406,7 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait" ;
-    if(var_option.ge.1) then
+    if(var_option.ge.1.or.var_option.eq.-4) then
     resp@gsnPanelLabelBar = True
     else
     resp@gsnPanelLabelBar = False
@@ -524,5 +525,6 @@ end do
 
 ;    resp@txString      = fig_title
     gsn_panel(wks,plot,(/nvar,1/),resp)
+end do 
 end
 

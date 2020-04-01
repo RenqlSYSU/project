@@ -12,8 +12,9 @@
 begin
 lev  = (/850,500,200,100/)
 nl = 2
+global = True
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = 1,1,1
+do var_option = 1,4,1
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -118,7 +119,7 @@ sigl   = new((/18/),graphic)
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
    subtitle_font  = 0.01
-   title_font     = 0.01
+   title_font     = 0.02
    label_font     = 0.015
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -135,7 +136,6 @@ sigl   = new((/18/),graphic)
     res@gsnFrame         = False
     res@gsnDraw          = False
     res@gsnMaximize      = True
-    res@gsnAddCyclic     = False
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
@@ -172,7 +172,17 @@ sigl   = new((/18/),graphic)
     ;res@pmLabelBarHeightF = 0.1
 
 ;-------set the attribute of the map-------------------
+    if(global) then 
+    res@gsnAddCyclic     = True 
+    res@mpCenterLonF     = 150.
+    res@mpMaxLatF        = latn(0) 
+    res@mpMinLatF        = lats(0)
+    res@mpMaxLonF        = 330 ;lonr(na)
+    res@mpMinLonF        = -30 ;lonl(na)
+    else
+    res@gsnAddCyclic     = False
     res@mpCenterLonF     = 180.
+    end if
     ;res@mpMaxLatF        = latn(na) 
     ;res@mpMinLatF        = lats(na)
     ;res@mpMaxLonF        = lonr(na)
@@ -187,11 +197,15 @@ sigl   = new((/18/),graphic)
     res_line = True
     res_line@gsnDraw          = False
     res_line@gsnFrame         = False
+    if(global) then 
+    res_line@gsnAddCyclic     = True
+    else
     res_line@gsnAddCyclic     = False
+    end if
     res_line@cnFillOn         = False
     res_line@cnLinesOn        = True
-    res_line@cnLineLabelsOn   = True ;False
-    res_line@cnLineLabelFontHeightF = 0.015
+    res_line@cnLineLabelsOn   = False ;True ;
+    res_line@cnLineLabelFontHeightF = 0.01
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 5.0
     res_line@cnLineColor      = "blueviolet";"green4";"black"
@@ -234,6 +248,11 @@ sigl   = new((/18/),graphic)
     ;res_sig@cnLevels             = (/3000,1000/)
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
+    if(global) then 
+    res_sig@gsnAddCyclic     = True
+    else
+    res_sig@gsnAddCyclic     = False
+    end if
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -420,16 +439,18 @@ do nv = 0, nvar-1,1
     np  = nv ;1 var ;2 area
     ;np  = ne*nvar + nv ;1 var ;2 area
     ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
+    if(.not.(global)) then 
     res@mpMaxLatF        = latn(na) 
     res@mpMinLatF        = lats(na)
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
+    end if
     res@gsnLeftString   = pre_case(np) + ") " + nk + " EOF" + nev ;area(na) + " " + lonl(na) + "-" + lonr(na) + "E"
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
     if(var_option.ge.1) then 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nnv) + ") "; + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nnv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     else
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     end if
     if(nv.gt.10) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels

@@ -21,7 +21,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -1,-4,1
+do var_option = -1,-1,1
 if(var_option.eq.-5) then 
     draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"month_ave"/)  ;use to read variables
@@ -78,8 +78,8 @@ end if
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10    0 ,  0 ,0   
 latn = (/ 60 , 60 , 60 /);, 60  ;90  , 90 , 90 , 90  60 , 60 , 60 90  , 90 , 90 
-lonl = (/ 0  ,110 , 250/);, 0   ;30 ;20   20 ,150 , 260
-lonr = (/ 70 ,180 , 320/);, 360 ;150;220  60 ,210 , 320
+lonl = (/ 105,140 , 180/);, 0   ;30 ;20   20 ,150 , 260
+lonr = (/ 140,180 , 220/);, 360 ;150;220  60 ,210 , 320
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3

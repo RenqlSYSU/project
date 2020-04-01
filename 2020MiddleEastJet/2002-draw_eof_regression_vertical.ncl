@@ -17,21 +17,34 @@ nv = 0
 lev  = (/850,500,200,100/)
 nl = 2
 lat_option = True
+DJF_option = False
+
+if(DJF_option) then
+years = ispan(1979,2015,1)
+months  = (/"DJF_"/)
+months2 = (/"DJF"/)
+nt = 0
+else
+years = ispan(1979,2016,1)
+months  = (/""/)
+months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+nt = 0
+end if
+case   = "ERA-Interim"
 
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ 0 , 0 , 0 /);, 10  ;-90 ,-90 ,-90 ,-90 
+lats = (/ 0  , 0 , 0 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 10 ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 60 ,175 , 320/);, 360 ;150;220
+lonl = (/ 20 ,110 , 250/);, 0   ;30 ;20
+lonr = (/ 60 ,180 , 320/);, 360 ;150;220
 lon_spacing = 20
 lat_spacing = 10
 narea = dimsizes(area)
 neval = 4
 siglvl = 0.05
-years = ispan(1979,2015,1)
 
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
-filename   = path + "/data/eof_u_6kinds-" + area + ".nc"
+filename   = path + "/data/eof_u_6kinds-" + months2(nt) + "_" + area + ".nc"
 fig_name   = path + "/fig/eof_regression_ver-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
@@ -210,8 +223,12 @@ ts = ts/conform(ts,sqrt(eval),(/0,1/))
 subtitle_color = where(sig,"red","black") 
 
 ;f2 = addfile(path + "/data/ERA-Interim_DJF_" + draw_var(nv) + "-year.nc","r")
-f2 = addfile(path + "/data/ERA-Interim_DJF_uwnd-year.nc","r")
-vars := f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+f2 = addfile(path + "/data/ERA-Interim_" + months + "uwnd-year.nc","r")
+if(DJF_option) then
+vars:= f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+else
+vars:= f2->month_ave(:,nt,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
 nlat = dimsizes(vars&lat)
 nlon = dimsizes(vars&lon)
 nlev = dimsizes(vars&lev)

@@ -8,9 +8,9 @@ year_option = True ;calc yearly DJF
 var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA 
-nl = 0  ;(/925,850,700,500,200/)
+nl = 4  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
-DJF_option = False ;True;
+DJF_option = True;False ;
 
 if(DJF_option) then
 months  = (/"DJF_"/)
@@ -24,16 +24,21 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -6,-6,1
-if(var_option.eq.-6) then 
+do var_option = 5,5,1
+if(var_option.eq.-11) then 
     draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dTdy"/)  ;use to read variables
     unit     = (/"10~S~-6~N~K/m"/)  ;this can be used as right string 
 end if
-if(var_option.eq.-5) then 
+if(var_option.eq.-10) then 
     draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
     unit     = (/"10~S~4~N~J","10~S~4~N~J","10~S~4~N~J"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-5) then 
+    draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -80,6 +85,10 @@ if(var_option.eq.4) then
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.5) then 
+    draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    select := (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 end if
 
 ;area: east Asia
@@ -97,8 +106,12 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
-if(var_option.le.-5)
+if(var_option.le.-10)
     filename = path + "data/" + case + "_" + months + "intEKE-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
+if(var_option.eq.-5)
+    filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-4)
@@ -123,6 +136,10 @@ if(var_option.ge.2.and.var_option.le.3)
 end if
 if(var_option.eq.4)
     filename = path + "data/" + case + "_"+months+"dzdt_in-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
+end if
+if(var_option.eq.5)
+    filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
@@ -170,7 +187,7 @@ if(jet_option) then
     printVarSummary(u_m)
 end if
 
-if(var_option.eq.-6) then
+if(var_option.eq.-11) then
     f = addfile(path + "data/" + case + "_" + months + "air-year.nc","r")
     t = new((/ntime,nlat,nlon/),float)
     if(DJF_option) then
@@ -195,9 +212,9 @@ if(var_option.eq.-6) then
     copy_VarMeta(t,var_m(0,:,:,:))
 end if
 
-if(var_option.le.0.and.var_option.ge.-5)
+if(var_option.le.0.and.var_option.ge.-10)
 f = addfile(filename,"r")
-if(var_option.eq.-5) then 
+if(var_option.eq.-10) then 
     do nv = 0, nvar-1,1
     if(DJF_option) then
     var_m(nv,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
@@ -225,11 +242,11 @@ f = addfile(filename,"r")
 end if
 printVarSummary(var_m)
 
-if(var_option.eq.-5) then 
+if(var_option.eq.-10) then 
     var_m = var_m/10000
 end if
 
-if(var_option.eq.-4) then 
+if(var_option.eq.-4.or.var_option.eq.-5) then 
     var_m = var_m*10^11
 end if
 
@@ -266,7 +283,7 @@ end if
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    if(var_option.eq.-5) then 
+    if(var_option.eq.-10) then 
     gsn_define_colormap(wks,"precip3_16lev")
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     else
@@ -419,17 +436,17 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.eq.-6) then
+if(var_option.eq.-11) then
     minlvl = (/-14 /)
     maxlvl = (/ 14 /)
     spacig = (/ 2 /)
 end if
-if(var_option.eq.-5) then
+if(var_option.eq.-10) then
     minlvl = (/2  ,2  ,2  /);-8,-8,-8,-8,
     maxlvl = (/130,130,130/); 8, 8, 8, 8,
     spacig = (/8  ,8  ,8  /); 1, 1, 1, 1,
 end if
-if(var_option.eq.-4) then
+if(var_option.eq.-4.or.var_option.eq.-5) then 
     minlvl = (/-14,-14,-14/);-8,-8,-8,-8,
     maxlvl = (/ 14, 14, 14/); 8, 8, 8, 8,
     spacig = (/ 2 , 2 , 2 /); 1, 1, 1, 1,
@@ -480,12 +497,12 @@ end if
     if(var_option.gt.-4) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
-;do nt = 0, ntime-1,1
+do nt = 0, ntime-1,1
 do nv = 0, nvar-1,1
-do ni = 0, 3, 1
-do np = 0, 2, 1 
-    nt = ni*3 + np
-    ;np = nv
+;do ni = 0, 3, 1
+;do np = 0, 2, 1 
+    ;nt = ni*3 + np
+    np = nv
     if(var_option.gt.0) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
@@ -494,7 +511,7 @@ do np = 0, 2, 1
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
     res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
     end if
-    if(var_option.eq.-6) then 
+    if(var_option.eq.-11) then 
     res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
     res@gsnRightString  = lev(nl) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
@@ -519,12 +536,11 @@ do np = 0, 2, 1
         line3(np) = gsn_add_polyline( wks, plot(np), lonx(:,3), latx(:,3), lnres3 )
     end if
 end do 
-    gsn_panel(wks,plot,(/3,1/),resp)
-end do 
+   ; gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/nvar,1/),resp)
+    gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end
 

@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False  ;control the draw of jet stream
 stream_option = True ; False;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
@@ -21,11 +21,16 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -1,-1,1
-if(var_option.eq.-5) then 
+do var_option = 5,5,1
+if(var_option.eq.-10) then 
     draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"month_ave"/)  ;use to read variables
     unit     = (/"m/s"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-5) then 
+    draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -72,14 +77,18 @@ if(var_option.eq.4) then
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.5) then 
+    draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    select := (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10    0 ,  0 ,0   
 latn = (/ 60 , 60 , 60 /);, 60  ;90  , 90 , 90 , 90  60 , 60 , 60 90  , 90 , 90 
-lonl = (/ 105,140 , 180/);, 0   ;30 ;20   20 ,150 , 260
-lonr = (/ 140,180 , 220/);, 360 ;150;220  60 ,210 , 320
+lonl = (/  0 ,105 , 250/);, 0   ;30 ;20    105,140 , 180
+lonr = (/ 70 ,175 , 320/);, 360 ;150;220   140,180 , 220
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
@@ -87,13 +96,17 @@ g = 9.8 ;m2/s2
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-if(var_option.eq.-5)
+if(var_option.eq.-10)
 if(DJF_option) then
     filename = path + "data/" + case + "_DJF_uwnd-year.nc"
 else
     filename = path + "data/" + case + "_uwnd-year.nc"
 end if
     fig_name = path + "fig/1p2x3_height_lat_sf"
+end if
+if(var_option.eq.-5)
+    filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
+    fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.eq.-4)
     filename = path + "data/" + case + "_DJF_forc_in-year.nc"
@@ -117,6 +130,10 @@ if(var_option.ge.2.and.var_option.le.3)
 end if
 if(var_option.eq.4)
     filename = path + "data/" + case + "_DJF_dzdt_in-year.nc"
+    fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
+end if
+if(var_option.eq.5)
+    filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
@@ -252,7 +269,7 @@ end if
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
-if(var_option.eq.-4) then 
+if(var_option.eq.-4.or.var_option.eq.-5) then 
     var_m = var_m*10^11
 end if
 
@@ -476,13 +493,13 @@ printVarSummary(var_m)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.eq.-5) then
+if(var_option.eq.-10) then
     minlvl = (/-70/);-8,-8,-8,-8,
     maxlvl = (/ 70/); 8, 8, 8, 8,
     spacig = (/ 10/); 1, 1, 1, 1,
 end if
     
-if(var_option.eq.-4) then
+if(var_option.eq.-4.or.var_option.eq.-5) then 
     minlvl = (/-14,-14,-14/);-8,-8,-8,-8,
     maxlvl = (/ 14, 14, 14/); 8, 8, 8, 8,
     spacig = (/ 2 , 2 , 2 /); 1, 1, 1, 1,

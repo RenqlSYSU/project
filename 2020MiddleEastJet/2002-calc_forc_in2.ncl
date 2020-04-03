@@ -13,7 +13,7 @@ var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 
 year_option = True;False ;
 geo = True ;False ;if true, only can calc 10N 
-fileout  = path2 + "ERA-Interim_DJF_2_advect-year.nc"
+fileout  = path2 + "ERA-Interim_DJF_advect_xy-year.nc"
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -188,29 +188,32 @@ delete(lev4d)
 
 ;vort = (1/a/coslat)*(center_finite_diff_n(clm_v,lon,loncyc,opt,ilon) - center_finite_diff_n(clm_u*coslat,lat,cyclic,opt,ilat))
 vort = uv2vr_cfd(clm_u,clm_v,vars&lat,vars&lon,3) 
-b11 = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) 
-b12 = - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)
+b1x = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) 
+b1y = - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)
 print(vort(0,9,10,20:30))
-print(b1(0,9,10,20:30))
+print(b1x(0,9,10,20:30))
 
 sigm0 = conform(clm_u,wgt_areaave(sigm0,1.0,1.0,0),(/iyear,ilev/))
 f0   = conform(clm_u,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
-advT = (clm_u/a/coslat)*center_finite_diff_n(clm_t,lon,loncyc,opt,ilon) + \
-       (clm_v/a       )*center_finite_diff_n(clm_t,lat,cyclic,opt,ilat)
+t3x = (clm_u/a/coslat)*center_finite_diff_n(clm_t,lon,loncyc,opt,ilon)
+t3y = (clm_v/a       )*center_finite_diff_n(clm_t,lat,cyclic,opt,ilat)
+b3x = f0 * center_finite_diff_n(t3x/sigm0,lev*100,cyclic,opt,ilev)
+b3y = f0 * center_finite_diff_n(t3y/sigm0,lev*100,cyclic,opt,ilev)
 delete([/clm_u,clm_v,clm_t,coslat/])
-b3 = f0 * center_finite_diff_n(advT/sigm0,lev*100,cyclic,opt,ilev)
-delete([/advT,f0/])
+delete([/f0/])
 
-sigm0@long_name = "one kind of static stability measured by temperature"
-sigm0@units     = "K/Pa" 
-vort@long_name = "one kind of static stability measured by temperature"
-vort@units     = "K/Pa" 
-b1@long_name = "Horizontal advection of relative vorticity"
-b1@units     = "s^-2" 
-b2@long_name = "Horizontal advection of absolute vorticity"
-b2@units     = "s^-2" 
-b3@long_name = "Vertical gradient of temperature horizontal advection"
-b3@units     = "s^-2" 
+b1x@long_name = "x Horizontal advection of relative vorticity"
+b1x@units     = "s^-2" 
+b3x@long_name = "Vertical gradient of x temperature horizontal advection"
+b3x@units     = "s^-2" 
+t3x@long_name = "x temperature horizontal advection"
+t3x@units     = "K/s" 
+b1y@long_name = "y Horizontal advection of relative vorticity"
+b1y@units     = "s^-2" 
+b3y@long_name = "Vertical gradient of y temperature horizontal advection"
+b3y@units     = "s^-2" 
+t3y@long_name = "y temperature horizontal advection"
+t3y@units     = "K/s"
 
 ;========================================================================
 ;save the data
@@ -236,30 +239,32 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"sigm0",typeof(sigm0),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"vort" ,typeof(vort) ,(/"year","lev","lat","lon"/))
-filevardef(ncdf,"b1",typeof(b1),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"b2",typeof(b2),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"b3",typeof(b3),(/"year","lev","lat","lon"/))
-
+filevardef(ncdf,"b1x",typeof(b1x),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"b1y",typeof(b1y),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"b3x",typeof(b3x),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"b3y",typeof(b3y),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"t3x",typeof(t3x),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"t3y",typeof(t3y),(/"year","lev","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"lev",vars&level)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"sigm0",sigm0)
-filevarattdef(ncdf,"vort" ,vort)
-filevarattdef(ncdf,"b1",b1)
-filevarattdef(ncdf,"b2",b2)
-filevarattdef(ncdf,"b3",b3)
+filevarattdef(ncdf,"b1x",b1x)
+filevarattdef(ncdf,"b1y",b1y)
+filevarattdef(ncdf,"b3x",b3x)
+filevarattdef(ncdf,"b3y",b3y)
+filevarattdef(ncdf,"t3x",t3x)
+filevarattdef(ncdf,"t3y",t3y)
 
 ncdf->lev  = (/toint(lev)/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
-ncdf->sigm0 = (/sigm0/)
-ncdf->vort  = (/vort/)
-ncdf->b1 = (/b1/)
-ncdf->b2 = (/b2/)
-ncdf->b3 = (/b3/)
+ncdf->b1x = (/b1x/)
+ncdf->b1y = (/b1y/)
+ncdf->b3x = (/b3x/)
+ncdf->b3y = (/b3y/)
+ncdf->t3x = (/t3x/)
+ncdf->t3y = (/t3y/)
 end
 

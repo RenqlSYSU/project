@@ -19,14 +19,20 @@ ntype = 0
 year_option = True ;False ;True means yearly
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nyear = 37
-freq = True ;False;
+decomp = True ;False;
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-filein  = path + case + "_DJF_3_advect-year.nc"
+if(.not.(decomp)) then 
+filein  = path + case + "_DJF_forc_in-year.nc"
 fileout = path + case + "_DJF_3b6c.dat"
 var_name  = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+else
+filein  = path + case + "_DJF_forc_in2-year.nc"
+fileout = path + case + "_DJF_3b6c.dat"
+var_name  = (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+end if
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -83,10 +89,11 @@ else
 end if
 end do
 
+f11 = addfile(path + case + "_DJF_forc_in-year.nc","r")
 if(ntype.eq.0) then 
-    sigm0 := dim_avg_n_Wrap(f->sigm0(:,{lev},{lats:latn},{lonl:lonr}),0)
+    sigm0 := dim_avg_n_Wrap(f11->sigm0(:,{lev},{lats:latn},{lonl:lonr}),0)
 else
-    sigm0 := tofloat(dim_avg_n_Wrap(f->sigm0(:,{lev},{lats:latn},{lonl:lonr}),0))
+    sigm0 := tofloat(dim_avg_n_Wrap(f11->sigm0(:,{lev},{lats:latn},{lonl:lonr}),0))
 end if
 sigm0 := conform(forc_m,wgt_areaave(sigm0, 1.0, 1.0, 0),(/ilev/))
 sigm1 = sigm0*R/conform(forc_m,lev*100,ilev)

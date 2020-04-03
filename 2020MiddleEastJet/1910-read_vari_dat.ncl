@@ -16,7 +16,7 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 data_type = (/"double","float"/)
 ntype = 0
 ntime = 37 
-freq = 2 
+freq = 3 
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
@@ -33,10 +33,16 @@ fileout = path + case + "_DJF_dzdt-year.nc"
 var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 end if
 if(freq.eq.2) then 
-filein  = path + case + "_DJF_3_advect-year.nc"
+filein  = path + case + "_DJF_forc_in-year.nc"
 filedat = path + case + "_DJF_dzdt_advect.dat"
 fileout = path + case + "_DJF_dzdt_advect-year.nc"
 var_name= (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+end if
+if(freq.eq.3) then 
+filein  = path + case + "_DJF_forc_in2-year.nc"
+filedat = path + case + "_DJF_dzdt_advect_xy.dat"
+fileout = path + case + "_DJF_dzdt_in2-year.nc"
+var_name= (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
 end if
 
 g  = 9.8 ;m/(s*s)

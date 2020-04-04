@@ -7,7 +7,8 @@ begin
 year_option = True ;calc yearly DJF 
 var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
-region_line = True ; draw the line for ME, EA, NA 
+region_line = True ; draw the line for ME, EA, NA
+vect_option = True
 nl = 4  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
@@ -24,7 +25,12 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 5,5,1
+do var_option = -12,-12,1
+if(var_option.eq.-12) then 
+    draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"vort"/)  ;use to read variables
+    unit     = (/"10~S~-6~N~ s~S~-1~N~"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-11) then 
     draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dTdy"/)  ;use to read variables
@@ -114,7 +120,7 @@ if(var_option.eq.-5)
     filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
-if(var_option.eq.-4)
+if(var_option.eq.-4.or.var_option.eq.-12)
     filename = path + "data/" + case + "_" + months + "forc_in-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
@@ -157,6 +163,7 @@ var_m  = new((/nvar,ntime,nlat,nlon/),double)
 ;the number of the panel plot
     plot     = new((/12/),graphic)
     line     = new((/12/),graphic)
+    vect     = new((/12/),graphic)
     line1    = new((/12/),graphic)
     line2    = new((/12/),graphic)
     line3    = new((/12/),graphic)
@@ -166,9 +173,11 @@ var_m  = new((/nvar,ntime,nlat,nlon/),double)
    tick_font      = 0.01
    subtitle_font  = 0.01
    title_font     = 0.01
+   vcref_font     = 0.005
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
+   vc_thick       = 2.5
    mp_thick       = 3.0
    font_index     = 22
 
@@ -185,6 +194,20 @@ if(jet_option) then
     end if
     u_m = mask(u_m, u_m.lt.20 , False) 
     printVarSummary(u_m)
+end if
+
+if(vect_option) then
+    u  = new((/ntime,nlat,nlon/),float)
+    v  = new((/ntime,nlat,nlon/),float)
+    f1 = addfile(path + "data/" + case + "_" + months + "uwnd-year.nc","r")
+    f2 = addfile(path + "data/" + case + "_" + months + "vwnd-year.nc","r")
+    if(DJF_option) then
+    u(0,:,:) = dim_avg_n_Wrap(f1->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    v(0,:,:) = dim_avg_n_Wrap(f2->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    else
+    u = dim_avg_n_Wrap(f1->month_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    v = dim_avg_n_Wrap(f2->month_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    end if
 end if
 
 if(var_option.eq.-11) then
@@ -212,7 +235,7 @@ if(var_option.eq.-11) then
     copy_VarMeta(t,var_m(0,:,:,:))
 end if
 
-if(var_option.le.0.and.var_option.ge.-10)
+if((var_option.le.0.and.var_option.ge.-10).or.var_option.eq.-12)
 f = addfile(filename,"r")
 if(var_option.eq.-10) then 
     do nv = 0, nvar-1,1
@@ -241,6 +264,10 @@ f = addfile(filename,"r")
     end if
 end if
 printVarSummary(var_m)
+
+if(var_option.eq.-12) then 
+    var_m = var_m*1000000
+end if
 
 if(var_option.eq.-10) then 
     var_m = var_m/10000
@@ -388,6 +415,35 @@ end if
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
 
+;--------set the attribute of vector--------------
+    resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMonoLineArrowColor       = True
+    resvc@vcLineArrowColor           = "gray20"
+    resvc@vcMinDistanceF             = 0.015
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = 0.005
+    resvc@vcLineArrowHeadMaxSizeF   = 0.005
+    resvc@vcRefMagnitudeF            = 40.0             ; define vector ref mag
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    resvc@vcRefAnnoString2           = "40m/s"
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
+
 ;---------set the attribute of the contour-----------------
     res_line = True
     res_line@gsnDraw          = False
@@ -436,6 +492,11 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(var_option.eq.-12) then
+    minlvl = (/-35 /)
+    maxlvl = (/ 35 /)
+    spacig = (/ 5  /)
+end if
 if(var_option.eq.-11) then
     minlvl = (/-14 /)
     maxlvl = (/ 14 /)
@@ -447,9 +508,9 @@ if(var_option.eq.-10) then
     spacig = (/8  ,8  ,8  /); 1, 1, 1, 1,
 end if
 if(var_option.eq.-4.or.var_option.eq.-5) then 
-    minlvl = (/-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 2 , 2 , 2 /); 1, 1, 1, 1,
+    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
     minlvl = (/-2.1,-14/);-8,-8,-8,-8,
@@ -494,6 +555,7 @@ end if
 
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
+    
     if(var_option.gt.-4) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
@@ -523,6 +585,10 @@ do nv = 0, nvar-1,1
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
+    if(vect_option) then 
+    vect(np) = gsn_csm_vector(wks,u(nt,:,:),v(nt,:,:),resvc)
+    overlay(plot(np),vect(np))
+    end if
     print(max(var_m(nv,nt,:,:)))
     print(min(var_m(nv,nt,:,:)))
 

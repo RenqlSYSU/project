@@ -1,4 +1,4 @@
-*********************************************************************
+;*********************************************************************
 ;Draw the vertical section of monthly EKE (shaded)
 ;                                                     by Ql Ren
 ;                                                    2019/08/12
@@ -6,10 +6,10 @@
 begin
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 2 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
+var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
 jet_option = True  ;20191205, control the draw of jet stream
 fnc  = 1    ;chose which case to draw
-diff = True ;whether draw the difference ;False;
+diff =  True ;False ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
@@ -93,7 +93,7 @@ path    = "/home/ys17-19/renql/project/TP_NUDG"
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"
     if(diff) then 
-    case2   = (/"CTRL","NG6h-CTRL","NG6h-CTRL"/);,"NG24h-CTRL"
+    case2   = (/"CTRL","NG6h-CTRL"/);,"NG24h-CTRL"
     else
     case2   = (/"CTRL","NG6h","NG6h-CTRL"/);,"NG24h-CTRL"
     end if
@@ -202,6 +202,7 @@ var_u := new((/ncase,nmonth,nlev2,nlat/),double)
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
     line     = new((/nvar*nmonth/),graphic)
+    core     = new((/nvar*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -271,6 +272,19 @@ if(jet_option) then
     ;var_u = mask(var_u,var_u.ge.-10,True)
     copy_VarMeta(u(0,:,:,0),var_u(0,0,:,:))
     printVarSummary(var_u)
+    corez = new((/nfile,nmonth/),float)
+    corey = new((/nfile,nmonth/),float)
+    do nc = 0, nfile-1, 1
+    do nt = 0, nmonth-1, 1
+        term = ndtooned(var_u(nc,nt,:,:))
+        indices = ind_resolve(maxind(term),(/nlev2,nlat/))
+        corez(nc,nt) = tofloat(var_u&lev(indices(0,0)))
+        corey(nc,nt) = tofloat(var_u&lat(indices(0,1)))
+    end do 
+    end do 
+    printVarSummary(indices)
+    print(corez)
+    print(corey)
 end if
 
 if(var_option.eq.0) then 
@@ -426,13 +440,19 @@ end if
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
+    polyres                   = True
+    polyres@gsMarkerIndex     = 5        ; polymarker style
+    polyres@gsMarkerSizeF     = 8.          ; polymarker size 
+    polyres@gsMarkerColor     = "black"
+    polyres@gsMarkerThicknessF  = 5.0 
+
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Vertical" ;"Horizontal" ;
-    resp@pmLabelBarWidthF  = 0.05 ;0.8  ;
-    resp@pmLabelBarHeightF = 0.8  ;0.05 ;
+    resp@lbOrientation     = "Horizontal" ;"Vertical" ;
+    resp@pmLabelBarWidthF  = 0.8  ;0.05 ;
+    resp@pmLabelBarHeightF = 0.05 ;0.8  ;
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -535,10 +555,10 @@ end if
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nv = 0,nvar-2,1
 do nm = 2,nmonth-1,1
-;do fnc = 0,ncase-2,1
-    ;np = fnc*2 + nm - 2 ;1 fnc, 2 month
+do fnc = 0,ncase-1,1
+    np = fnc*2 + nm - 2 ;1 fnc, 2 month
     ;np = fnc*nmonth + nm ;1 fnc, 2 month
-    np = nv*2 + nm - 2 ;1 var, 2 month
+    ;np = nv*2 + nm - 2 ;1 var, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
     ;np = nm*nvar + nv   ;1 month,2 var
     ;np = nm
@@ -565,19 +585,22 @@ do nm = 2,nmonth-1,1
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     end if
-    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
     overlay(plot(np),line(np))
+    if(.not.(.not.(diff).and.fnc.eq.2)) then
+    core(np) = gsn_add_polymarker(wks,plot(np),corey(fnc,nm),corez(fnc,nm),polyres)
+    end if
     end if
 end do 
 
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    gsn_panel(wks,plot,(/3,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
-;end do 
+end do 
 end do 
 end
 

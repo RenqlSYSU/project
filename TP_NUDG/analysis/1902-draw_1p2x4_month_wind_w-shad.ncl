@@ -37,7 +37,7 @@ nl = 3
 nv = 0
 diff = True
 
-var_option = 2;1
+var_option = 0;2;1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -57,7 +57,7 @@ end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
-imonth = ispan(2,3,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "wind_" + draw_var(nv)
 end if
@@ -67,14 +67,14 @@ pre_case   = (/"(b","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70, 0/);-20
-latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,50 /);60
+lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
+latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
 lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
-lonr = (/360,270,390,150,270,390,150,360,130/);220
+lonr = (/360,270,390,150,270,390,150,360,150/);220
 siglvl = 0.05
 lat_spacing = 15
-lon_spacing = 20
-na = 6
+lon_spacing = 30
+na = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -293,15 +293,15 @@ end if
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
-    resvc@vcMinDistanceF             = 0.01
-    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcMinDistanceF            = 0.01
+    resvc@vcRefLengthF              = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF             = 0.025
-    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
-    resvc@vcLineArrowHeadMinSizeF   = 0.015
-    resvc@vcLineArrowHeadMaxSizeF   = 0.015
+    resvc@vcMinDistanceF            = 0.015 ;0.025
+    resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
 end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -382,7 +382,7 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "portrait"
+    resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.05
@@ -459,8 +459,8 @@ else
    ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
     do nm = 0,nmonth-1,1
-        ;np = nc
-        np = nmonth*nc + nm
+        np = nm
+        ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
         res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) ;+ " (" + unit(nv) + ") " + lev(nl) + "hPa"
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
@@ -503,9 +503,9 @@ end if
     ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end
 

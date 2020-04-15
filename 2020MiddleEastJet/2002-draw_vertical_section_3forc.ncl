@@ -21,11 +21,21 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = 5,5,1
+do var_option = -14,-13,1
+if(var_option.eq.-14) then 
+    draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
+    var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
+    unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-13) then 
+    draw_var := (/"fva","adv","A"/)  ; this is the variable used to draw, can used as center string
+    var_name := (/"fva","adv","A"/)  ; use to read variables
+    unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-10) then 
-    draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"month_ave"/)  ;use to read variables
-    unit     = (/"m/s"/)  ;this can be used as right string 
+    draw_var := (/"uwnd"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"month_ave"/)  ;use to read variables
+    unit     := (/"m/s"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-5) then 
     draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
@@ -96,6 +106,10 @@ g = 9.8 ;m2/s2
 
 ;the path of the file
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
+if(var_option.eq.-13.or.var_option.eq.-14)
+    filename = path + "data/" + case + "_" + months + "_zonal_momentum-year.nc"
+    fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
+end if
 if(var_option.eq.-10)
 if(DJF_option) then
     filename = path + "data/" + case + "_DJF_uwnd-year.nc"
@@ -268,6 +282,10 @@ else
 end if
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
+
+if(var_option.le.-13) then 
+    var_m = var_m*100000
+end if
 
 if(var_option.eq.-4.or.var_option.eq.-5) then 
     var_m = var_m*10^11
@@ -478,7 +496,7 @@ printVarSummary(var_m)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    if(var_option.ge.1.or.var_option.le.-4) then
+    if(var_option.ge.1.or.(var_option.le.-4.and.var_option.gt.-11)) then
     res@lbLabelBarOn      = False   ; the label bar
     resp@gsnPanelLabelBar = True
     else
@@ -493,16 +511,27 @@ printVarSummary(var_m)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(var_option.eq.-14) then
+    minlvl := (/-7,-7/);-8,-8,-8,-8,
+    maxlvl := (/ 7, 7/); 8, 8, 8, 8,
+    spacig := (/ 1, 1/); 1, 1, 1, 1,
+end if
+if(var_option.eq.-13) then
+    minlvl := (/-70,-70,-14,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 70, 70, 14, 14/); 8, 8, 8, 8,
+    spacig := (/ 10, 10, 2 , 2 /); 1, 1, 1, 1,
+end if
+
 if(var_option.eq.-10) then
-    minlvl = (/-70/);-8,-8,-8,-8,
-    maxlvl = (/ 70/); 8, 8, 8, 8,
-    spacig = (/ 10/); 1, 1, 1, 1,
+    minlvl := (/-70/);-8,-8,-8,-8,
+    maxlvl := (/ 70/); 8, 8, 8, 8,
+    spacig := (/ 10/); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.-4.or.var_option.eq.-5) then 
-    minlvl = (/-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 2 , 2 , 2 /); 1, 1, 1, 1,
+    minlvl := (/-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 14, 14, 14/); 8, 8, 8, 8,
+    spacig := (/ 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.lt.-1.and.var_option.ge.-3) then

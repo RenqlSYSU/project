@@ -8,7 +8,7 @@ year_option = True ;calc yearly DJF
 var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
-vect_option = True
+vect_option = False;True
 nl = 4  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
@@ -25,7 +25,18 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -12,-12,1
+do var_option = -13,-14,1
+do nnv = 0,0,1
+if(var_option.eq.-14) then 
+    draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
+    var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
+    unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-13) then 
+    draw_var := (/"fva","adv","A","cur"/)  ; this is the variable used to draw, can used as center string
+    var_name := (/"fva","adv","A","cur"/)  ; use to read variables
+    unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-12) then 
     draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"vort"/)  ;use to read variables
@@ -71,7 +82,7 @@ if(var_option.eq.0) then
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
-if(var_option.ge.1) then
+if(var_option.ge.1.and.var_option.le.5) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 nnv = 1 ;used to read dzdt induced by different forcing
@@ -96,6 +107,27 @@ if(var_option.eq.5) then
     select := (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
+if(var_option.eq.6) then
+    var_name = (/"fva","adv","A","Ah","Al","cur"/)  ; use to read variables
+    unit     = "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+;    nnv = 3 ;used to read dzdt induced by different forcing
+    if(nnv.eq.0) then 
+        draw_var := (/"fv","-fvg","fva"/)
+        select   := (/0,1/)
+    end if
+    if(nnv.eq.1) then 
+        draw_var := (/"-ududx","-vdudy","-wdudz","adv"/)  ;this is the variable used to draw, can used as center string
+        select   := (/0,1,2/)
+    end if
+    if(nnv.ge.2.and.nnv.le.4) then 
+        draw_var := (/"-duudx","-duvdy","-duwdz","A"/)  ;,"uv/a","-uw/a" this is the variable used to draw, can used as center string
+        select   := (/0,1,2/)
+    end if
+    if(nnv.eq.5) then 
+        draw_var := (/"uv","uw","cur"/)  ;this is the variable used to draw, can used as center string
+        select   := (/0,1/)
+    end if
+end if
 
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
@@ -112,7 +144,11 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
-if(var_option.le.-10)
+if(var_option.eq.-13.or.var_option.eq.-14)
+    filename = path + "data/" + case + "_" + months + "zonal_momentum-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
+if(var_option.eq.-10)
     filename = path + "data/" + case + "_" + months + "intEKE-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
@@ -148,6 +184,10 @@ if(var_option.eq.5)
     filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
+if(var_option.eq.6)
+    filename = path + "data/" + case + "_" + months + "zonal_momentum_flux-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
+end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    ="pdf";"x11"
@@ -158,7 +198,7 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nlat   = dimsizes(phis&latitude )  ;
 nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
-var_m  = new((/nvar,ntime,nlat,nlon/),double)
+var_m  := new((/nvar,ntime,nlat,nlon/),double)
 
 ;the number of the panel plot
     plot     = new((/12/),graphic)
@@ -235,7 +275,7 @@ if(var_option.eq.-11) then
     copy_VarMeta(t,var_m(0,:,:,:))
 end if
 
-if((var_option.le.0.and.var_option.ge.-10).or.var_option.eq.-12)
+if((var_option.le.0.and.var_option.ge.-10).or.var_option.le.-12)
 f = addfile(filename,"r")
 if(var_option.eq.-10) then 
     do nv = 0, nvar-1,1
@@ -255,7 +295,7 @@ else
     end do
 end if
 end if
-if(var_option.ge.1)
+if(var_option.ge.1.and.var_option.le.5)
 f = addfile(filename,"r")
     if(DJF_option) then
     var_m(:,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
@@ -263,7 +303,20 @@ f = addfile(filename,"r")
     var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end if
+if(var_option.eq.6)
+f = addfile(filename,"r")
+    if(DJF_option) then
+    var_m(0:nvar-2,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(:,select,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
+    else
+    var_m(0:nvar-2,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(:,select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
+    end if
+    var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
+end if
 printVarSummary(var_m)
+
+if(var_option.le.-13.or.var_option.eq.6) then 
+    var_m = var_m*100000
+end if
 
 if(var_option.eq.-12) then 
     var_m = var_m*1000000
@@ -291,7 +344,7 @@ if(var_option.eq.0) then
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
 end if
 
-if(var_option.ge.1) then
+if(var_option.ge.1.and.var_option.le.5) then
 if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
@@ -484,79 +537,79 @@ end if
     else
     resp@gsnPanelLabelBar = False
     end if
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.06
+    resp@lbOrientation     = "Horizontal" ;"Vertical" ;
+    resp@pmLabelBarWidthF  = 0.8          ;0.05       ;
+    resp@pmLabelBarHeightF = 0.06         ;0.8        ;
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(var_option.eq.-14) then
+    minlvl := (/-14,-14/);-7,-7
+    maxlvl := (/ 14, 14/); 7, 7
+    spacig := (/ 2 , 2 /); 1, 1
+end if
+if(var_option.eq.-13) then
+    minlvl := (/-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl := (/ 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig := (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+end if
 if(var_option.eq.-12) then
-    minlvl = (/-35 /)
-    maxlvl = (/ 35 /)
-    spacig = (/ 5  /)
+    minlvl := (/-35 /)
+    maxlvl := (/ 35 /)
+    spacig := (/ 5  /)
 end if
 if(var_option.eq.-11) then
-    minlvl = (/-14 /)
-    maxlvl = (/ 14 /)
-    spacig = (/ 2 /)
+    minlvl := (/-14 /)
+    maxlvl := (/ 14 /)
+    spacig := (/ 2 /)
 end if
 if(var_option.eq.-10) then
-    minlvl = (/2  ,2  ,2  /);-8,-8,-8,-8,
-    maxlvl = (/130,130,130/); 8, 8, 8, 8,
-    spacig = (/8  ,8  ,8  /); 1, 1, 1, 1,
+    minlvl := (/2  ,2  ,2  /);-8,-8,-8,-8,
+    maxlvl := (/130,130,130/); 8, 8, 8, 8,
+    spacig := (/8  ,8  ,8  /); 1, 1, 1, 1,
 end if
 if(var_option.eq.-4.or.var_option.eq.-5) then 
-    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
+    minlvl := (/-14,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 14, 14, 14, 14/); 8, 8, 8, 8,
+    spacig := (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
-    minlvl = (/-2.1,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 2 /); 1, 1, 1, 1,
+    minlvl := (/-2.1,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 2.1, 14/); 8, 8, 8, 8,
+    spacig := (/ 0.3, 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.-1) then
-    minlvl = (/-2.1,-2.1,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
+    minlvl := (/-2.1,-2.1,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
+    spacig := (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.0) then 
-    minlvl = (/-2.1,-2.1,-2.1/);
-    maxlvl = (/ 2.1, 2.1, 2.1/);
-    spacig = (/ 0.3, 0.3, 0.3/);
+    minlvl := (/-2.1,-2.1,-2.1/);
+    maxlvl := (/ 2.1, 2.1, 2.1/);
+    spacig := (/ 0.3, 0.3, 0.3/);
 end if
 
-if(var_option.ge.1) then
-if(nnv.eq.0) then   ;dzdt
-    minlvl = (/-3.5,-3.5,-3.5,-3.5/);
-    maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
-    spacig = (/ 0.5, 0.5, 0.5, 0.5/);
+if(var_option.ge.1.and.var_option.le.5) then
+    minlvl = (/-3.5,-35,-16,-24/);
+    maxlvl = (/ 3.5, 35, 16, 24/);
+    spacig = (/ 0.5,  5,  2,  3/);
 end if
-if(nnv.eq.1) then ;dudt
-    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
-    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
-    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
-end if
-if(nnv.eq.2) then ;dTdt
-    minlvl = (/-16,-16,-16,-16/);
-    maxlvl = (/ 16, 16, 16, 16/);
-    spacig = (/  2,  2,  2,  2/);
-end if
-if(nnv.eq.3) then ;dbdt
-    minlvl = (/-24,-24,-24,-24/);
-    maxlvl = (/ 24, 24, 24, 24/);
-    spacig = (/  3,  3,  3,  3/);
-end if
+
+if(var_option.eq.6) then ;dbdt
+    minlvl = (/-70,-70,-14,-7,-7,-7/);-8,-8,-8,-8,
+    maxlvl = (/ 70, 70, 14, 7, 7, 7/); 8, 8, 8, 8,
+    spacig = (/ 10, 10, 2 , 1, 1, 1/); 1, 1, 1, 1,
 end if
 
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(var_option.gt.-4) then 
+    if(var_option.gt.-10.or.var_option.lt.-10) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
@@ -579,9 +632,15 @@ do nv = 0, nvar-1,1
     end if
     ;res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    if(var_option.ge.1)
+    res@cnLevelSpacingF       := spacig(nnv)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(nnv) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(nnv)       ; set min contour level
+    else
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
+    end if
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
@@ -607,6 +666,7 @@ end do
 
 ;    resp@txString      = fig_title
     gsn_panel(wks,plot,(/nvar,1/),resp)
+end do 
 end do 
 end
 

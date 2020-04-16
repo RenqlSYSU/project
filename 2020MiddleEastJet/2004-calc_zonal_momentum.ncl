@@ -170,14 +170,14 @@ coslat = conform(hgh_u,cos(lat),ilat)
 tanlat = conform(hgh_u,tan(lat),ilat)
 
 Al = dim_avg_n_Wrap(-center_finite_diff_n(low_u*low_u              ,lon,loncyc,opt,ilon)/a/coslat       ,itime) + \
-     dim_avg_n_Wrap(-center_finite_diff_n(low_v*low_u*coslat*coslat,lat,cyclic,opt,ilat)/a/coslat*coslat,itime) + \
+     dim_avg_n_Wrap(-center_finite_diff_n(low_v*low_u*coslat*coslat,lat,cyclic,opt,ilat)/a/coslat/coslat,itime) + \
      dim_avg_n_Wrap(-center_finite_diff_n(low_w*low_u,lev*100,cyclic,opt,ilev),itime); + dim_avg_n_Wrap(low_u*low_v*tanlat/a,itime)
 ;Al  = dim_avg_n_Wrap(-(low_u/a/coslat)*center_finite_diff_n(low_u,lon,loncyc,opt,ilon),itime) + \
 ;      dim_avg_n_Wrap(-(low_v/a       )*center_finite_diff_n(low_u,lat,cyclic,opt,ilat),itime) + \
 ;      dim_avg_n_Wrap(-(low_w         )*center_finite_diff_n(low_u,lev*100,cyclic,opt,ilev),itime)
 delete([/low_u,low_v,low_w/])
 Ah = dim_avg_n_Wrap(-center_finite_diff_n(hgh_u*hgh_u              ,lon,loncyc,opt,ilon)/a/coslat       ,itime) + \
-     dim_avg_n_Wrap(-center_finite_diff_n(hgh_v*hgh_u*coslat*coslat,lat,cyclic,opt,ilat)/a/coslat*coslat,itime) + \
+     dim_avg_n_Wrap(-center_finite_diff_n(hgh_v*hgh_u*coslat*coslat,lat,cyclic,opt,ilat)/a/coslat/coslat,itime) + \
      dim_avg_n_Wrap(-center_finite_diff_n(hgh_w*hgh_u,lev*100,cyclic,opt,ilev),itime); + dim_avg_n_Wrap(hgh_u*hgh_v*tanlat/a,itime)
 ;Ah  = dim_avg_n_Wrap(-(hgh_u/a/coslat)*center_finite_diff_n(hgh_u,lon,loncyc,opt,ilon),itime) + \
 ;      dim_avg_n_Wrap(-(hgh_v/a       )*center_finite_diff_n(hgh_u,lat,cyclic,opt,ilat),itime) + \
@@ -204,7 +204,7 @@ delete([/u,v,z,w/])
 ;     dim_avg_n_Wrap(-(edd_v/a       )*center_finite_diff_n(edd_u,lat,cyclic,opt,ilat),itime) + \
 ;     dim_avg_n_Wrap(-(edd_w         )*center_finite_diff_n(edd_u,lev*100,cyclic,opt,ilev),itime)
 A  = dim_avg_n_Wrap(-center_finite_diff_n(edd_u*edd_u              ,lon,loncyc,opt,ilon)/a/coslat       ,itime) + \
-     dim_avg_n_Wrap(-center_finite_diff_n(edd_v*edd_u*coslat*coslat,lat,cyclic,opt,ilat)/a/coslat*coslat,itime) + \
+     dim_avg_n_Wrap(-center_finite_diff_n(edd_v*edd_u*coslat*coslat,lat,cyclic,opt,ilat)/a/coslat/coslat,itime) + \
      dim_avg_n_Wrap(-center_finite_diff_n(edd_w*edd_u,lev*100,cyclic,opt,ilev),itime); + dim_avg_n_Wrap(edd_u*edd_v*tanlat/a,itime)
 printVarSummary(A)
 print(A(0,5,30,30))

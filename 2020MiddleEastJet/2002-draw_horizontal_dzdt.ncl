@@ -25,8 +25,8 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -13,-14,1
-do nnv = 0,0,1
+do var_option = 6,6,1
+do nnv = 2,4,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -85,9 +85,9 @@ end if
 if(var_option.ge.1.and.var_option.le.5) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-nnv = 1 ;used to read dzdt induced by different forcing
+nnv = 0 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
-    draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd","Qeddy","A"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
@@ -313,6 +313,8 @@ f = addfile(filename,"r")
     var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
 end if
 printVarSummary(var_m)
+
+;var_m(0,:,:,:) = dim_sum_n_Wrap(var_m(1:2,:,:,:),0)
 
 if(var_option.le.-13.or.var_option.eq.6) then 
     var_m = var_m*100000
@@ -547,14 +549,14 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.-14) then
-    minlvl := (/-14,-14/);-7,-7
-    maxlvl := (/ 14, 14/); 7, 7
-    spacig := (/ 2 , 2 /); 1, 1
+    minlvl := (/-7,-7/);
+    maxlvl := (/ 7, 7/);
+    spacig := (/ 1, 1/);
 end if
 if(var_option.eq.-13) then
-    minlvl := (/-35,-35,-35,-35/);-8,-8,-8,-8,
-    maxlvl := (/ 35, 35, 35, 35/); 8, 8, 8, 8,
-    spacig := (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+    minlvl := (/-35,-35,-14,-14/);-8,-8,-8,-8,
+    maxlvl := (/ 35, 35, 14, 14/); 8, 8, 8, 8,
+    spacig := (/ 5 , 5 , 2 , 2 /); 1, 1, 1, 1,
 end if
 if(var_option.eq.-12) then
     minlvl := (/-35 /)

@@ -11,10 +11,15 @@
 ;******************************************************************************
 begin
 lev  = (/850,500,200,100/)
-nl = 2
+nl = 0
 global = True
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = 1,4,1
+do var_option = -10,-10,1
+if(var_option.eq.-10) then 
+    draw_var := (/"uwnd"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"season_ave"/)  ;this is the variable used to draw, can used as center string
+    unit     := (/"m/s"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -78,9 +83,9 @@ years = ispan(1979,2015,1)
 case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 filename0  = path + "data/eof_u_6kinds-" + area + ".nc"
-if(var_option.eq.-5)
-    filename = path + "data/" + case + "_DJF_" + draw_var(nv) + "-year.nc"
-    fig_name   = path + "fig/eof_regression_hor-" + draw_var(nv)
+if(var_option.eq.-10)
+    filename = path + "data/" + case + "_DJF_" + draw_var(0) + "-year.nc"
+    fig_name   = path + "fig/eof_regression_hor-" + draw_var(0)
 end if
 if(var_option.eq.-4)
     filename = path + "data/" + case + "_DJF_forc_in-year.nc"
@@ -267,12 +272,10 @@ sigl   = new((/18/),graphic)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.eq.-5) then
-if(nv.eq.0) then
-    minlvl = (/-7 /)
-    maxlvl = (/ 7 /)
-    spacig = (/ 1 /)
-end if
+if(var_option.eq.-10) then
+    minlvl = (/-3.5/)
+    maxlvl = (/ 3.5/)
+    spacig = (/ 0.5/)
 end if
     
 if(var_option.eq.-4) then
@@ -358,12 +361,12 @@ eof5 := f->eof5
 ts = ts/conform(ts,sqrt(eval),(/0,1/))
 subtitle_color = where(sig,"red","black") 
 
-u := f2->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+u := f2->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)})
 nlat = dimsizes(u&lat)
 nlon = dimsizes(u&lon)
 vars := new((/nvar,nyear,nlat,nlon/),double)
 
-if(var_option.le.0.and.var_option.ge.-4)
+if(var_option.le.0.and.var_option.ge.-10)
     do nv = 0, nvar-1,1
     vars(nv,:,:,:) = f3->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     end do
@@ -386,8 +389,8 @@ printVarSummary(var)
 b := tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
-;prob  = mask(prob,prob.lt.siglvl,True)
-var   = mask(var,prob.lt.siglvl,True)
+prob  = mask(prob,prob.lt.siglvl,True)
+;var   = mask(var,prob.lt.siglvl,True)
 copy_VarCoords(vars(0,0,:,:), prob(0,0,0,:,:))
 b := utval 
 b = 0.5
@@ -436,7 +439,7 @@ do nk = 0, 0, 1
 do ne = 0, 2, 1 ;neval-2, 1
 do nv = 0, nvar-1,1
     nev = ne + 1
-    np  = nv ;1 var ;2 area
+    np  = ne ;1 var ;2 area
     ;np  = ne*nvar + nv ;1 var ;2 area
     ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
     if(.not.(global)) then 
@@ -461,23 +464,23 @@ do nv = 0, nvar-1,1
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     end if
     plot(np) = gsn_csm_contour_map_ce(wks, var(nk,ne,nv,:,:),res)
-    ;sigl(np) = gsn_csm_contour(wks,prob(nk,ne,nv,:,:),res_sig)
-    ;overlay(plot(np),sigl(np))
-    regl(np) = gsn_csm_contour(wks,ureg(nk,ne,:,:),reg_line)
-    overlay(plot(np),regl(np))
+    sigl(np) = gsn_csm_contour(wks,prob(nk,ne,nv,:,:),res_sig)
+    overlay(plot(np),sigl(np))
+    ;regl(np) = gsn_csm_contour(wks,ureg(nk,ne,:,:),reg_line)
+    ;overlay(plot(np),regl(np))
     line(np) = gsn_csm_contour(wks,u,res_line)
     overlay(plot(np),line(np))
     print(max(var(nk,ne,nv,:,:)))
     print(min(var(nk,ne,nv,:,:)))
 end do 
-    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
-    gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
+    resp@txString = lev(nl) + "hPa " + draw_var + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+    gsn_panel(wks,plot,(/3,1/),resp)
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
 ;    gsn_panel(wks,plot,(/3,nvar/),resp)
+end do ;EOF kinds
 end do ;area 
-end do ;area 
-end do ;area 
+end do ;var_option
 end
 

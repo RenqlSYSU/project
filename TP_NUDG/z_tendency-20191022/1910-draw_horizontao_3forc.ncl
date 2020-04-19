@@ -8,7 +8,7 @@ begin
 var_option   = 2
 month_option = True;False
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl = 4 ;(/925,850,700,500,200/)
+nl = 1 ;(/925,850,700,500,200/)
 fnc  = 0    ;chose which case to draw
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"

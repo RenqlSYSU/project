@@ -14,14 +14,14 @@
 begin
 path    = "/home/ys17-19/renql"
 obs_option = False
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 1
-ntime = 123
-nc = 2
+ntime = 4
+nc = 1
 
 if(case_option.eq.0) then
-    case   = (/"CTRL","NUDG6h","NUDG24h"/)
+    case   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
 end if
 
 if(case_option.eq.1) then
@@ -33,9 +33,12 @@ if(case_option.eq.2) then
 end if
 
 if(.not.(obs_option)) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
-filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect.nc"
+filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_advetc_dzdt_month.dat"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_advect_dzdt_month.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
+;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.dat"
+;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month_lon_season.nc"
@@ -51,8 +54,8 @@ fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim
 end if
 end if
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+;var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -78,7 +81,7 @@ month_e = 8
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(nc),"r")
-vars:= f->Qd(:,{lev},{lats:latn},{lonl:lonr})
+vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 ;time = cd_calendar(f->time,0)
 ;select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ;ntime = dimsizes(select_time)
@@ -113,7 +116,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0, nc, 2
+do nf = 1, nc, 1
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data
@@ -188,7 +191,7 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"nvar","integer",(/"var"/))
-filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
+;filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
 filevardef(ncdf,"lev" ,typeof(vars&lev),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
@@ -200,7 +203,7 @@ filevardef(ncdf,"dbdt",typeof(dbdt),(/"var","time","lev","lat","lon"/))
 
 
 ;define var attribute
-filevarattdef(ncdf,"time",vars&time)
+;filevarattdef(ncdf,"time",vars&time)
 filevarattdef(ncdf,"lev",vars&lev)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
@@ -210,7 +213,7 @@ filevarattdef(ncdf,"dvdt",dvdt)
 filevarattdef(ncdf,"dTdt",dTdt)
 filevarattdef(ncdf,"dbdt",dbdt)
 
-ncdf->time = (/vars&time/)
+;ncdf->time = (/vars&time/)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)

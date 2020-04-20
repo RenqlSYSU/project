@@ -5,11 +5,11 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 2
+var_option   = 4
 month_option = True;False
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl = 1 ;(/925,850,700,500,200/)
-fnc  = 0    ;chose which case to draw
+vect_option  = True ;False
+case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+nl   = 4 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 
@@ -17,28 +17,42 @@ na = 2 ;"TP","EA","NH"
 months   = (/"JF","MA","MJ","JA"/)
 nmonth = dimsizes(months)
 lev = (/925,850,700,500,200/)
+area = (/"TP","EA","NH"/)
+lats = (/15  ,10  , 10 /);20 ;-20
+latn = (/55  ,60  , 89 /) ;55 ;60
+lonl = (/70  ,30  , 0  /) ;30 ;20
+lonr = (/105 ,150 ,360 /) ;150;220
+month_s = 1
+month_e = 8
 
 if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
+    draw_var = (/"Qd"   ,"Qte","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd"   ,"Qte"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"fQd" ,"fQte","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
     unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.2) then 
-    draw_var = (/"fQd" ,"fQeddy","A","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dzdt","dudt","dTdt"/)  ;
-    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-    nnv = 1;0 ;used to read dzdt induced by different forcing
+    draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
     draw_var = (/"sigm1"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"sigm1"/)  ;use to read variables
     unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
+end if
+if(var_option.eq.4) then 
+    draw_var = (/"b1" ,"b2","b3","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    nnv = 0 ;used to read dzdt induced by different forcing
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 
 ;the path of the file
@@ -72,25 +86,20 @@ else
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     else
+    if(var_option.eq.4) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect_month.nc"
+    else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
+    end if
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + var_name(nnv) + "-" + lev(nl)  
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + draw_var(0) + "_" + var_name(nnv) + "-" + lev(nl)  
 end if
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
-
-;area: east Asia
-area = (/"TP","EA","NH"/)
-lats = (/15  ,10   , 10  /);20 ;-20
-latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,30  , 10 /) ;30 ;20
-lonr = (/105 ,150 ,350 /) ;150;220
-month_s = 1
-month_e = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -111,10 +120,16 @@ var   = new((/ncase,nvar,ntime ,nlat,nlon/),double)
 end if
 var_m = new((/ncase,nvar,nmonth,nlat,nlon/),double)
 
+if(vect_option) then 
+uvar = new((/ncase,nvar,nmonth,nlat,nlon/),double)
+vvar = new((/ncase,nvar,nmonth,nlat,nlon/),double)
+end if
+
 ;the number of the panel plot
     plot     = new((/nvar*nmonth/),graphic)
     gtop     = new((/nvar*nmonth/),graphic)
     line     = new((/nvar*nmonth/),graphic)
+    vect     = new((/nvar*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -123,16 +138,6 @@ maxlat = 40
 minlat = 25
 lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
 latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
-
-;define the thickness and height of the title,tick and label
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
-   tick_thick     = 8.0
-   subtitle_thick = 8.0  ;not have this attribute
-   title_thick    = 5.0
-   mp_thick       = 3.0
-   font_index     = 22
 
 ;================================================================
 ;read data
@@ -150,7 +155,11 @@ do nc = 0, ncase-1, 1
         end if
         end do
     else
-        var_m(nc,0:2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,0:nvar-2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        if(vect_option) then 
+        uvar(nc,0:nvar-2,:,:,:)  = f->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vvar(nc,0:nvar-2,:,:,:)  = f->dvdt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end if 
     end if
 end do 
 else
@@ -173,6 +182,12 @@ printVarSummary(var_m)
 end if
 
 var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
+if(vect_option) then 
+uvar(:,nvar-1,:,:,:) = dim_sum_n(uvar(:,0:(nvar-2),:,:,:),1)
+vvar(:,nvar-1,:,:,:) = dim_sum_n(vvar(:,0:(nvar-2),:,:,:),1)
+uvar = uvar*100000
+vvar = vvar*100000
+end if
 
 if(var_option.eq.0) then 
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
@@ -182,11 +197,11 @@ if(var_option.eq.1) then
     var_m = var_m*10^10
 end if
 
-if(var_option.eq.2) then 
+if(var_option.eq.2.or.var_option.eq.4) then 
 if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
-if(nnv.eq.1) then
+if(nnv.eq.1.or.nnv.eq.4) then
     var_m = var_m*10^6
 end if
 if(nnv.eq.2) then
@@ -205,6 +220,10 @@ printVarSummary(var_m)
 if(diff) then 
 do nc = 1, ncase-1, 1
     var_m(nc,:,:,:,:) = var_m(nc,:,:,:,:) - var_m(0,:,:,:,:)
+    if(vect_option) then 
+    uvar(nc,:,:,:,:) = uvar(nc,:,:,:,:) - uvar(0,:,:,:,:)
+    vvar(nc,:,:,:,:) = vvar(nc,:,:,:,:) - vvar(0,:,:,:,:)
+    end if
 end do 
 end if
 
@@ -218,6 +237,35 @@ end if
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
+
+;define the thickness and height of the title,tick and label
+if(na.eq.2) then 
+   tick_font      = 0.01
+   subtitle_font  = 0.01
+   title_font     = 0.01
+   vcref_font     = 0.007
+   tick_thick     = 8.0
+   subtitle_thick = 8.0  ;not have this attribute
+   title_thick    = 5.0
+   vc_thick       = 2.5
+   mp_thick       = 1.5
+   font_index     = 22
+   vc_distance  = 0.01
+   vc_head_size = 0.005
+else
+   tick_font      = 0.03
+   subtitle_font  = 0.03
+   title_font     = 0.03
+   vcref_font     = 0.015
+   tick_thick     = 8.0
+   subtitle_thick = 8.0  ;not have this attribute
+   title_thick    = 5.0
+   vc_thick       = 2.5
+   mp_thick       = 3.0
+   font_index     = 22
+   vc_distance  = 0.02
+   vc_head_size = 0.01
+end if
 
     res                  = True
     res@gsnFrame         = False
@@ -288,7 +336,11 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
+    if(var_option.ge.1) then
+    res@lbLabelBarOn         = False   ; the label bar
+    else
     res@lbLabelBarOn         = True   ; the label bar
+    end if
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -299,27 +351,34 @@ end if
     res@pmLabelBarOrthogonalPosF     = 0.15
     res@pmLabelBarParallelPosF       = 0.5
 
-;----------Set res sig-----------
-    res_sig                  = True
-    res_sig@gsnDraw          = False
-    res_sig@gsnFrame         = False
-    res_sig@cnFillOn         = True       ; Fill contours
-    res_sig@cnLinesOn        = False;True      ; turn off contour lines
-    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_sig@cnInfoLabelOn    = False
-    ;res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
-    res_sig@cnMonoFillPattern= True;False
-    res_sig@cnFillPattern    = 11
-    res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 0.5
-    res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "grey0"
-    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
-    
-    res_sig@gsnCenterString      = ""
-    res_sig@gsnLeftString    = " "
-    res_sig@gsnRightString   = " "
+;--------set the attribute of vector--------------
+    resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMonoLineArrowColor       = True
+    resvc@vcLineArrowColor           = "gray20"
+    resvc@vcMinDistanceF             = vc_distance
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = vc_head_size
+    resvc@vcLineArrowHeadMaxSizeF   = vc_head_size
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    ;resvc@vcRefMagnitudeF            = 10.0             ; define vector ref mag
+    ;resvc@vcRefAnnoString2           = "10m/s"
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -356,14 +415,26 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    if(var_option.ge.1) then
+    resp@gsnPanelLabelBar = True
+    else
+    resp@gsnPanelLabelBar = False
+    end if
+    resp@lbOrientation     = "Vertical" ;"Horizontal" ;
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.8
+    resp@lbLabelFont        = font_index              ; make labels smaller
+    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+
+vcref         = (/(/5 ,2 ,2 /), \  ;the level of 925hpa    ctrl,nudg,diff
+                  (/10,4 ,4 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                  (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+                  (/7 ,2 ,2 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                  (/10,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 
 if(var_option.eq.0) then ;Q
     minlvl = (/-2.1,-2.1,-2.1/);
@@ -377,16 +448,16 @@ if(var_option.eq.1) then ;forc
     spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
     
-if(var_option.eq.2) then ;dzdt
+if(var_option.eq.2.or.var_option.eq.4) then ;dzdt
 if(nnv.eq.0) then   ;dzdt
     minlvl = (/-3.5,-3.5,-3.5,-3.5/);
     maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
     spacig = (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-21,-21,-21,-21/);-8,-8,-8,-8,
-    maxlvl = (/ 21, 21, 21, 21/); 8, 8, 8, 8,
-    spacig = (/ 3 , 3 , 3 , 3 /); 1, 1, 1, 1,
+    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
@@ -410,6 +481,11 @@ else
     spacig = (/  3,  3,  3,  3/);
 end if
 end if
+if(nnv.eq.4) then ;dvdt
+    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+end if
 end if
 
 if(var_option.eq.3) then ;forc
@@ -423,9 +499,11 @@ end if
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+do fnc = 0,1,1
+do nv = 0,nvar-2,1
 do nm = 0,nmonth-1,1
-do nv = 0,nvar-1,1
-    np = nm*nvar + nv
+    np = nm
+   ; np = nm*3 + nv
    ; np = nv*nmonth + nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm)
     if(var_option.eq.2) then 
@@ -441,19 +519,27 @@ do nv = 0,nvar-1,1
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,nm,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
+    if(vect_option) then 
+    resvc@vcRefMagnitudeF      = vcref(nl,fnc)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nl,fnc)+"x10~S~-5~N~m/s~S~2~N~"
+    vect(np) = gsn_csm_vector(wks,uvar(fnc,nv,nm,:,:),vvar(fnc,nv,nm,:,:),resvc)
+    overlay(plot(np),vect(np))
+    end if
     if(case_option.eq.0) then 
     line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
     end if 
     print(max(var_m(fnc,nv,nm,:,:)))
     print(min(var_m(fnc,nv,nm,:,:)))
 end do 
+    gsn_panel(wks,plot,(/nmonth,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-    if(nmonth.eq.1) then
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
-    else
-    gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    end if
+;    if(nmonth.eq.1) then
+;    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+;    else
+;    gsn_panel(wks,plot,(/nmonth,3/),resp)
+;    end if
+end do
 end
 

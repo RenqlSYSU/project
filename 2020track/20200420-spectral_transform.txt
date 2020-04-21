@@ -1,0 +1,179 @@
+Script started on Mon 20 Apr 2020 08:32:25 AM CST
+]0;ys17-19@localhost:~/renql/TRACK-1.5.2[?1034h[ys17-19@localhost TRACK-1.5.2]$ ./bin/track.linux 
+***INFORMATION***, data file:-                              
+                   /home/ys17-19//renql/TRACK-1.5.2/indat/linux                                       
+                   exists and will be opened for data input.
+
+do you want to load a country map, 'y' or 'n'
+n
+do you want to use an existing initialization, '0' for no, '1' for yes
+1
+Which initialization file is required
+^C
+]0;ys17-19@localhost:~/renql/TRACK-1.5.2[ys17-19@localhost TRACK-1.5.2]$ ./bin/track.linux 
+***INFORMATION***, data file:-                              
+                   /home/ys17-19//renql/TRACK-1.5.2/indat/linux                                       
+                   exists and will be opened for data input.
+
+do you want to load a country map, 'y' or 'n'
+n
+do you want to use an existing initialization, '0' for no, '1' for yes
+0
+
+File /home/ys17-19//renql/TRACK-1.5.2/outdat/initial.linux 
+ opened for 'w'
+
+what format is the data
+Input '0' for UNIX binary format       
+Input '1' for standard ASCII format.   
+Input '2' for UTF format.              
+Input '3' for Met. Office PP format.   
+Input '4' for NETCDF.                  
+
+4
+Print file summary information, 'y' or 'n'
+
+n
+Use netcdf id's or variable names and dimension values, input '0' or '1'
+
+1
+Is the data organized according to the COARDS convention, 'y' or 'n'
+
+n
+Available fields are:-   
+
+Field Id. 0 is sp Surface pressure Pa
+
+
+****INFORMATION*****, field sp chosen.
+
+****WARNING*****, assuming variable dimension 1 is time.
+
+the current grid dimensions are 240 * 121 
+
+do you want to translate the grid 'y' or 'n'?
+
+n
+****WARNING****, grid is not periodic.
+
+****WARNING****, grid is inverted to expected ordering
+                 grid will be corrected.              
+
+****WARNING****, data contains the equator, do you want to retain it, 'y' or 'n'
+
+y
+***WARNING***, data contains a SH pole, do you want to retain it, 'y' or 'n'
+
+y
+***WARNING***, data contains a NH pole, do you want to retain it, 'y' or 'n'
+
+y
+****INFORMATION****, data has missing values,     
+                     missing value is -3.276700e+04.            
+
+The current grid is global but not periodic, do you
+want to make the grid periodic, 'y' or 'n'.        
+This is required for tracking on a global domain,  
+but is not required for spectral filtering.        
+
+y
+****WARNING*****, translating grid by 0.000000
+
+ the NEW grid dimensions are 241 * 121
+
+what distance norm is required, input 'e' for euclidean,
+input 'g' for geodesic norm (if working on a sphere)
+g
+***WARNING***,if the data is defined on a lat-long grid,       
+              a Plate Caree projection is used by default. 
+
+Is a different projection required, 'y' or 'n'
+
+Use this if data are already on a projection different from Plate Caree.
+
+n
+ the maximum possible search area is
+ X= 0.000000 to 360.000000 
+ Y= -90.000000 to 90.000000 
+
+
+define a search area in terms of the grid numbering
+X grid numbers =
+100
+200
+****INFORMATION****, chosen search area is inconsistent with data 
+                      hierachy, but will be padded out to continue
+
+ X= 148.500000 to 298.500000
+
+Y grid numbers =
+70
+100
+****INFORMATION****, chosen search area is inconsistent with data 
+                      hierachy, but will be padded out to continue
+
+ Y= 13.500000 to 58.500000
+
+do you want to combine existing sets of track data and display them,    
+or display exsisting sets of combined tracks,                           
+and/or perform statistical analysis and display,                        
+or compute time series analyses, e.g. mean, varience,                   
+filtered varience, filtered fields, or                                  
+combine weighted statistics from time series analysis,                  
+or perform spatial spectral filtering of fields,                        
+or convert data to binary format,                                       
+or extract fields from a file at a chosen sampling,                     
+or compute vorticity from wind fields,                                  
+or interpolate to a new grid.                                           
+y or n.                                                                 
+
+y
+do you want to use any of the analysis routines
+Input  '0' to exit
+Input  '1' to combine track data sets, analyse and display.          
+Input  '2' to display only existing statistical analyses             
+Input  '3' to compute time average, varience and                     
+           filtered varience fields, note this can also              
+           be done as part of the feature identification.            
+Input  '4' to perform spectral filtering of fields by,               
+           spherical harmonic decomposition.                         
+Input  '5' to perform a time domain filtering of fields using        
+           a Lanczos filter.                                         
+Input  '6' to perform a spectral domain (time) filtering of fields.  
+Input  '7' to convert data to standard binary format with            
+           header.                                                   
+Input  '8' to extract fields from a file at chosen sampling,         
+           fill missing data holes by simple interpolation,          
+           apply mathematical transformation and convert to          
+           binary format.                                            
+Input  '9' to perform field smoothing using B-splines.               
+Input '10' to combine weighted time analysis fields from option '3'  
+           seperate files for each period.                           
+Input '11' to combine weighted time analysis fields from option '3'  
+           single file for all periods.                              
+Input '12' to compute vorticty, EKE or wind speed from wind fields.  
+Input '13' to compute gradient fields and thermal front parameter.   
+Input '14' to interpolate data to a new grid using B-splines.        
+
+4
+What start, rate and end frames are required, fs, fr, fe
+
+1
+1
+100
+Use least squares, '0', fast spectral transform, '1' or limited area dct, '2' 
+
+0 1
+****WARNING****, data must be global.
+
+****WARNING****, data must currentely be defined on a global domain          
+                 with no wrap-round included and have no missing data values.
+
+****WARNING****, there are possible missing values in the data.
+
+****ERROR****, currently only gaussian grids are supported.
+
+]0;ys17-19@localhost:~/renql/TRACK-1.5.2[ys17-19@localhost TRACK-1.5.2]$ exit[K[K[K[Kexit
+exit
+
+Script done on Mon 20 Apr 2020 08:38:11 AM CST

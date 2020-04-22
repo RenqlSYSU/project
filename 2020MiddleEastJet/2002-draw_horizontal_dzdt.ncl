@@ -25,15 +25,15 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 6,6,1
-do nnv = 2,4,1
+do var_option = 4,4,1
+do nnv = 1,1,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
     unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-13) then 
-    draw_var := (/"fva","adv","A","cur"/)  ; this is the variable used to draw, can used as center string
+    draw_var := (/"-fua","adv","A","cur"/)  ; this is the variable used to draw, can used as center string
     var_name := (/"fva","adv","A","cur"/)  ; use to read variables
     unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
 end if
@@ -85,7 +85,7 @@ end if
 if(var_option.ge.1.and.var_option.le.5) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-nnv = 0 ;used to read dzdt induced by different forcing
+;nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
     draw_var := (/"Qd","Qeddy","A"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
@@ -99,7 +99,7 @@ if(var_option.eq.3) then
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.4) then 
-    draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"b1","b2","b3"/)  ;,"total" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.5) then 
@@ -128,6 +128,27 @@ if(var_option.eq.6) then
         select   := (/0,1/)
     end if
 end if
+if(var_option.eq.7) then
+    var_name = (/"fva","adv","A","Ah","Al","cur"/)  ; use to read variables
+    unit     = "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+;    nnv = 3 ;used to read dzdt induced by different forcing
+    if(nnv.eq.0) then 
+        draw_var := (/"-fu","fug","-fua"/)
+        select   := (/0,1/)
+    end if
+    if(nnv.eq.1) then 
+        draw_var := (/"-udvdx","-vdvdy","-wdvdz","adv"/)  ;this is the variable used to draw, can used as center string
+        select   := (/0,1,2/)
+    end if
+    if(nnv.ge.2.and.nnv.le.4) then 
+        draw_var := (/"-duvdx","-dvvdy","-dvwdz","-uu/a","-vw/a","A"/)  ; this is the variable used to draw, can used as center string
+        select   := (/0,1,2,3,4/)
+    end if
+    if(nnv.eq.5) then 
+        draw_var := (/"uu","vw","cur"/)  ;this is the variable used to draw, can used as center string
+        select   := (/0,1/)
+    end if
+end if
 
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
@@ -145,7 +166,8 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.eq.-13.or.var_option.eq.-14)
-    filename = path + "data/" + case + "_" + months + "zonal_momentum-year.nc"
+    filename = path + "data/" + case + "_" + months + "meridional_momentum-year.nc"
+    ;filename = path + "data/" + case + "_" + months + "zonal_momentum-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-10)
@@ -186,6 +208,10 @@ if(var_option.eq.5)
 end if
 if(var_option.eq.6)
     filename = path + "data/" + case + "_" + months + "zonal_momentum_flux-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
+end if
+if(var_option.eq.7)
+    filename = path + "data/" + case + "_" + months + "meridional_momentum_flux-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
@@ -303,7 +329,7 @@ f = addfile(filename,"r")
     var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end if
-if(var_option.eq.6)
+if(var_option.ge.6)
 f = addfile(filename,"r")
     if(DJF_option) then
     var_m(0:nvar-2,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(:,select,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
@@ -314,9 +340,9 @@ f = addfile(filename,"r")
 end if
 printVarSummary(var_m)
 
-;var_m(0,:,:,:) = dim_sum_n_Wrap(var_m(1:2,:,:,:),0)
+;var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
-if(var_option.le.-13.or.var_option.eq.6) then 
+if(var_option.le.-13.or.var_option.ge.6) then 
     var_m = var_m*100000
 end if
 
@@ -597,15 +623,15 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.ge.1.and.var_option.le.5) then
-    minlvl = (/-3.5,-35,-16,-24/);
-    maxlvl = (/ 3.5, 35, 16, 24/);
-    spacig = (/ 0.5,  5,  2,  3/);
+    minlvl = (/-3.5,-70,-16,-24/);-35,
+    maxlvl = (/ 3.5, 70, 16, 24/); 35,
+    spacig = (/ 0.5, 10,  2,  3/);  5,
 end if
 
-if(var_option.eq.6) then ;dbdt
-    minlvl = (/-70,-70,-14,-7,-7,-7/);-8,-8,-8,-8,
-    maxlvl = (/ 70, 70, 14, 7, 7, 7/); 8, 8, 8, 8,
-    spacig = (/ 10, 10, 2 , 1, 1, 1/); 1, 1, 1, 1,
+if(var_option.ge.6) then ;dbdt
+    minlvl = (/-70,-35,-14,-7,-7,-7/);-8,-8,-8,-8,
+    maxlvl = (/ 70, 35, 14, 7, 7, 7/); 8, 8, 8, 8,
+    spacig = (/ 10, 5 , 2 , 1, 1, 1/); 1, 1, 1, 1,
 end if
 
     ;res@cnFillPalette = "BlueDarkRed18"

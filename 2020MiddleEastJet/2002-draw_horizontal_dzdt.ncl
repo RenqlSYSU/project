@@ -8,8 +8,8 @@ year_option = True ;calc yearly DJF
 var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
-vect_option = False;True
-nl = 4  ;(/925,850,700,500,200/)
+vect_option = False ;True ;
+nl = 1  ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -25,8 +25,13 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 4,4,1
+do var_option = -6,-6,1
 do nnv = 1,1,1
+if(var_option.eq.-15) then 
+    draw_var = (/"T"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"season_ave"/)  ;use to read variables
+    unit     = (/"~S~o~N~C"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -51,6 +56,11 @@ if(var_option.eq.-10) then
     draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
     unit     = (/"10~S~4~N~J","10~S~4~N~J","10~S~4~N~J"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-6) then 
+    draw_var := (/"T3x","Tadvect"/)  ;
+    var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
+    unit     := (/"K/day","k/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-5) then 
     draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
@@ -153,7 +163,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
 lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 60 , 89 , 89 , 89 /) ;55 ;60
+latn = (/ 90 , 89 , 89 , 89 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
 lonr = (/360 , 70 ,175 , 320/) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -165,6 +175,10 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
+if(var_option.eq.-15)
+    filename = path + "data/" + case + "_" + months + "air-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
 if(var_option.eq.-13.or.var_option.eq.-14)
     filename = path + "data/" + case + "_" + months + "meridional_momentum-year.nc"
     ;filename = path + "data/" + case + "_" + months + "zonal_momentum-year.nc"
@@ -174,7 +188,7 @@ if(var_option.eq.-10)
     filename = path + "data/" + case + "_" + months + "intEKE-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
-if(var_option.eq.-5)
+if(var_option.eq.-5.or.var_option.eq.-6)
     filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
@@ -340,9 +354,13 @@ f = addfile(filename,"r")
 end if
 printVarSummary(var_m)
 
-;var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
-if(var_option.le.-13.or.var_option.ge.6) then 
+if(var_option.eq.-15) then 
+    var_m = var_m-273.15
+end if
+
+if((var_option.le.-13.and.var_option.ge.-14).or.var_option.ge.6) then 
     var_m = var_m*100000
 end if
 
@@ -352,6 +370,10 @@ end if
 
 if(var_option.eq.-10) then 
     var_m = var_m/10000
+end if
+
+if(var_option.eq.-6) then 
+    var_m = var_m*3600*24
 end if
 
 if(var_option.eq.-4.or.var_option.eq.-5) then 
@@ -391,7 +413,7 @@ end if
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    if(var_option.eq.-10) then 
+    if(var_option.eq.-10.or.var_option.eq.-15) then 
     gsn_define_colormap(wks,"precip3_16lev")
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     else
@@ -505,11 +527,12 @@ end if
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
-    resvc@vcMinDistanceF             = 0.015
+    resvc@vcMinDistanceF             = 0.012
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
-    resvc@vcRefMagnitudeF            = 40.0             ; define vector ref mag
+    ;resvc@vcRefMagnitudeF            = 40.0             ; define vector ref mag
+    ;resvc@vcRefAnnoString2           = "40m/s"
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
@@ -520,7 +543,6 @@ end if
     resvc@vcRefAnnoFontHeightF       = vcref_font
     resvc@vcRefAnnoString1On         = False
     resvc@vcRefAnnoString2On         = True
-    resvc@vcRefAnnoString2           = "40m/s"
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
@@ -574,6 +596,20 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
+
+if(var_option.eq.-15) then ;T
+if(nl.eq.1) then 
+    minlvl := (/-16/);
+    maxlvl := (/ 16/);
+    spacig := (/ 2 /);
+end if
+if(nl.eq.4) then 
+    minlvl := (/-64/);
+    maxlvl := (/-48/);
+    spacig := (/ 1 /);
+end if
+end if
 if(var_option.eq.-14) then
     minlvl := (/-7,-7/);
     maxlvl := (/ 7, 7/);
@@ -610,7 +646,7 @@ if(var_option.le.-2.and.var_option.ge.-3)
     spacig := (/ 0.3, 2 /); 1, 1, 1, 1,
 end if
     
-if(var_option.eq.-1) then
+if(var_option.eq.-1.or.var_option.eq.-6) then
     minlvl := (/-2.1,-2.1,-14/);-8,-8,-8,-8,
     maxlvl := (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
     spacig := (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
@@ -637,7 +673,7 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(var_option.gt.-10.or.var_option.lt.-10) then 
+    if(var_option.gt.-10.or.(var_option.ge.-14.and.var_option.lt.-10)) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
@@ -673,6 +709,8 @@ do nv = 0, nvar-1,1
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
     if(vect_option) then 
+    resvc@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
     vect(np) = gsn_csm_vector(wks,u(nt,:,:),v(nt,:,:),resvc)
     overlay(plot(np),vect(np))
     end if

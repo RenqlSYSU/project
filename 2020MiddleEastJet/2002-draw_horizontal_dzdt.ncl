@@ -9,7 +9,7 @@ var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
-nl = 1  ;(/925,850,700,500,200/)
+nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -25,7 +25,7 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -6,-6,1
+do var_option = -5,-5,1
 do nnv = 1,1,1
 if(var_option.eq.-15) then 
     draw_var = (/"T"/)  ;this is the variable used to draw, can used as center string
@@ -58,13 +58,13 @@ if(var_option.eq.-10) then
     unit     = (/"10~S~4~N~J","10~S~4~N~J","10~S~4~N~J"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-6) then 
-    draw_var := (/"T3x","Tadvect"/)  ;
+    draw_var := (/"T3x","Tadvect"/)  ;Tadvect
     var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
     unit     := (/"K/day","k/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-5) then 
-    draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+    var_name := (/"b1x","b1y","b3x"/)  ;,"b3y" use to read variables
     unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-4) then 
@@ -113,11 +113,11 @@ if(var_option.eq.4) then
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.5) then 
-    draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
-    select := (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    draw_var := (/"vort_x","vort_y","vortx"/)  ;,"b3y" this is the variable used to draw, can used as center string
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
-if(var_option.eq.6) then
+if(var_option.eq.13) then
     var_name = (/"fva","adv","A","Ah","Al","cur"/)  ; use to read variables
     unit     = "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
 ;    nnv = 3 ;used to read dzdt induced by different forcing
@@ -138,7 +138,7 @@ if(var_option.eq.6) then
         select   := (/0,1/)
     end if
 end if
-if(var_option.eq.7) then
+if(var_option.eq.14) then
     var_name = (/"fva","adv","A","Ah","Al","cur"/)  ; use to read variables
     unit     = "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
 ;    nnv = 3 ;used to read dzdt induced by different forcing
@@ -220,11 +220,11 @@ if(var_option.eq.5)
     filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
-if(var_option.eq.6)
+if(var_option.eq.13)
     filename = path + "data/" + case + "_" + months + "zonal_momentum_flux-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
-if(var_option.eq.7)
+if(var_option.eq.14)
     filename = path + "data/" + case + "_" + months + "meridional_momentum_flux-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
@@ -343,7 +343,7 @@ f = addfile(filename,"r")
     var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end if
-if(var_option.ge.6)
+if(var_option.ge.13)
 f = addfile(filename,"r")
     if(DJF_option) then
     var_m(0:nvar-2,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(:,select,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
@@ -354,7 +354,17 @@ f = addfile(filename,"r")
 end if
 printVarSummary(var_m)
 
-var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+if(var_option.eq.-5) then
+fbv = addfile(path + "data/" + case + "_" + months + "forc_in-year.nc","r")
+var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+end if
+if(var_option.eq.5) then
+fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
+var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+end if
+;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
 if(var_option.eq.-15) then 
     var_m = var_m-273.15
@@ -373,7 +383,7 @@ if(var_option.eq.-10) then
 end if
 
 if(var_option.eq.-6) then 
-    var_m = var_m*3600*24
+    var_m = - var_m*3600*24
 end if
 
 if(var_option.eq.-4.or.var_option.eq.-5) then 
@@ -635,6 +645,11 @@ if(var_option.eq.-10) then
     maxlvl := (/130,130,130/); 8, 8, 8, 8,
     spacig := (/8  ,8  ,8  /); 1, 1, 1, 1,
 end if
+if(var_option.eq.-6) then
+    minlvl := (/-7,-7,-7/);-8,-8,-8,-8,
+    maxlvl := (/ 7, 7, 7/); 8, 8, 8, 8,
+    spacig := (/ 1, 1, 1/); 1, 1, 1, 1,
+end if
 if(var_option.eq.-4.or.var_option.eq.-5) then 
     minlvl := (/-14,-14,-14,-14/);-8,-8,-8,-8,
     maxlvl := (/ 14, 14, 14, 14/); 8, 8, 8, 8,
@@ -646,7 +661,7 @@ if(var_option.le.-2.and.var_option.ge.-3)
     spacig := (/ 0.3, 2 /); 1, 1, 1, 1,
 end if
     
-if(var_option.eq.-1.or.var_option.eq.-6) then
+if(var_option.eq.-1) then
     minlvl := (/-2.1,-2.1,-14/);-8,-8,-8,-8,
     maxlvl := (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
     spacig := (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
@@ -664,7 +679,7 @@ if(var_option.ge.1.and.var_option.le.5) then
     spacig = (/ 0.5, 10,  2,  3/);  5,
 end if
 
-if(var_option.ge.6) then ;dbdt
+if(var_option.ge.13) then ;dbdt
     minlvl = (/-70,-35,-14,-7,-7,-7/);-8,-8,-8,-8,
     maxlvl = (/ 70, 35, 14, 7, 7, 7/); 8, 8, 8, 8,
     spacig = (/ 10, 5 , 2 , 1, 1, 1/); 1, 1, 1, 1,

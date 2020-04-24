@@ -21,7 +21,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -14,-13,1
+do var_option = 4,4,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -36,6 +36,11 @@ if(var_option.eq.-10) then
     draw_var := (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"month_ave"/)  ;use to read variables
     unit     := (/"m/s"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-6) then 
+    draw_var := (/"T3x","Tadvect"/)  ;Tadvect
+    var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
+    unit     := (/"K/day","k/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-5) then 
     draw_var := (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
@@ -69,7 +74,7 @@ if(var_option.eq.0) then
 end if
 if(var_option.ge.1) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-7~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
     draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
@@ -118,7 +123,7 @@ else
 end if
     fig_name = path + "fig/1p2x3_height_lat_sf"
 end if
-if(var_option.eq.-5)
+if(var_option.eq.-5.or.var_option.eq.-6)
     filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
@@ -283,8 +288,14 @@ end if
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
+var_m(:,2,:,:,:) = dim_sum_n_Wrap(var_m(:,0:1,:,:,:),1)
+
 if(var_option.le.-13) then 
     var_m = var_m*100000
+end if
+
+if(var_option.eq.-6) then 
+    var_m = -var_m*3600*24
 end if
 
 if(var_option.eq.-4.or.var_option.eq.-5) then 
@@ -528,6 +539,12 @@ if(var_option.eq.-10) then
     spacig := (/ 10/); 1, 1, 1, 1,
 end if
     
+if(var_option.eq.-6) then
+    minlvl := (/-3.5,-3.5,-3.5/);-8,-8,-8,-8,
+    maxlvl := (/ 3.5, 3.5, 3.5/); 8, 8, 8, 8,
+    spacig := (/ 0.5, 0.5, 0.5/); 1, 1, 1, 1,
+end if
+
 if(var_option.eq.-4.or.var_option.eq.-5) then 
     minlvl := (/-14,-14,-14/);-8,-8,-8,-8,
     maxlvl := (/ 14, 14, 14/); 8, 8, 8, 8,

@@ -25,7 +25,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_advect.nc"
+    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_advect2.nc"
 end if
 
 if(case_option.eq.1) then
@@ -99,7 +99,7 @@ loncyc = True ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,2,2
+do nf = 1,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if
@@ -178,18 +178,15 @@ delete(lev4d)
 
 ;vort = (1/a/coslat)*(center_finite_diff_n(clm_v,lon,loncyc,opt,ilon) - center_finite_diff_n(clm_u*coslat,lat,cyclic,opt,ilat))
 vort = uv2vr_cfd(clm_u,clm_v,vars&lat,vars&lon,3) 
-b1 = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) \
-     - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)
+b1 = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) 
+b2 = - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)-2*(2.0*pi/24.0/3600.0)*coslat*clm_v/a
 print(vort(1,9,10,20:30))
 print(b1(1,9,10,20:30))
 vort_m(nm,:,:,:)  = tofloat(dim_avg_n(vort,0))
 b1_m(nm,:,:,:)    = tofloat(dim_avg_n(b1,0))
+b2_m(nm,:,:,:)    = tofloat(dim_avg_n(b2,0))
 sigm0_m(nm,:,:,:) = tofloat(dim_avg_n(sigm0,0))
-delete([/vort,b1/])
-
-b2 = - 2*(2.0*pi/24.0/3600.0)*coslat*clm_v/a
-b2_m(nm,:,:,:) = tofloat(dim_avg_n(b2,0))
-delete(b2)
+delete([/vort,b1,b2/])
 
 sigm0 = conform(clm_u,wgt_areaave(sigm0,1.0,1.0,0),(/itime,ilev/))
 f0   = conform(clm_u,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
@@ -205,9 +202,9 @@ sigm0_m@long_name = "one kind of static stability measured by temperature"
 sigm0_m@units     = "K/Pa" 
 vort_m@long_name = "one kind of static stability measured by temperature"
 vort_m@units     = "K/Pa" 
-b1_m@long_name = "Horizontal advection of relative vorticity"
+b1_m@long_name = "x transport of Absolute vorticity"
 b1_m@units     = "s^-2" 
-b2_m@long_name = "Horizontal advection of absolute vorticity"
+b2_m@long_name = "y transport of Absolute vorticity"
 b2_m@units     = "s^-2" 
 b3_m@long_name = "Vertical gradient of temperature horizontal advection"
 b3_m@units     = "s^-2" 

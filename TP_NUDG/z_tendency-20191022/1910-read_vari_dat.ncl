@@ -35,7 +35,7 @@ end if
 if(.not.(obs_option)) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect.nc"
 filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_advetc_dzdt_month.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_advect_dzdt_month.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_advect2_month.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.nc"
@@ -116,7 +116,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1, nc, 1
+do nf = 0, nc, 1
 print("handle with " + case(nf))
 ;==========================================================
 ;read the data

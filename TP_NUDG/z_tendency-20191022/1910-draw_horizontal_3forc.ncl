@@ -5,9 +5,10 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 4
+var_option   = 3
 month_option = True;False
-vect_option  = True ;False
+uv_option    = False ;True ;
+duvdt_option = True ;False ;
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nl   = 4 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
@@ -25,34 +26,41 @@ lonr = (/105 ,150 ,360 /) ;150;220
 month_s = 1
 month_e = 8
 
+if(var_option.eq.-6) then 
+    draw_var = (/"sigm1"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"sigm1"/)  ;use to read variables
+    unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
+end if
+if(var_option.eq.-1) then 
+    draw_var = (/"fQd" ,"fQte","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
+    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qte"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"fQd" ,"fQte","Fte","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
-    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    nnv = 1 ;used to read dzdt induced by different forcing
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
-    draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"b1" ,"b2","b3","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var = (/"sigm1"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"sigm1"/)  ;use to read variables
-    unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
-end if
-if(var_option.eq.4) then 
-    draw_var = (/"b1" ,"b2","b3","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"vort_x" ,"vort_y","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     nnv = 0 ;used to read dzdt induced by different forcing
-    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select = (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 
 ;the path of the file
@@ -70,7 +78,7 @@ else
     nsample = 10
 end if
 
-if((var_option.lt.2).or.(var_option.eq.3))
+if((var_option.le.0))
     if(month_option) then
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
@@ -84,13 +92,17 @@ if((var_option.lt.2).or.(var_option.eq.3))
 else
     if(month_option) then
     if(nmonth.eq.1) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     else
-    if(var_option.eq.4) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect_month.nc"
-    else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
-    end if
+        if(var_option.eq.1) then 
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
+        end if
+        if(var_option.eq.2) then 
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect_month.nc"
+        end if
+        if(var_option.eq.3) then 
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect2_month.nc"
+        end if
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
@@ -120,7 +132,13 @@ var   = new((/ncase,nvar,ntime ,nlat,nlon/),double)
 end if
 var_m = new((/ncase,nvar,nmonth,nlat,nlon/),double)
 
-if(vect_option) then 
+if(uv_option) then 
+uvar = new((/ncase,nmonth,nlat,nlon/),float)
+vvar = new((/ncase,nmonth,nlat,nlon/),float)
+uvari = new((/ncase,nmonth,nlat,nlon/),float)
+vvari = new((/ncase,nmonth,nlat,nlon/),float)
+end if
+if(duvdt_option) then 
 uvar = new((/ncase,nvar,nmonth,nlat,nlon/),double)
 vvar = new((/ncase,nvar,nmonth,nlat,nlon/),double)
 end if
@@ -130,6 +148,7 @@ end if
     gtop     = new((/nvar*nmonth/),graphic)
     line     = new((/nvar*nmonth/),graphic)
     vect     = new((/nvar*nmonth/),graphic)
+    wind2    = new((/nvar*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -142,11 +161,22 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;================================================================
 ;read data
 ;====================================================================
+if(uv_option) then
+do nc = 0, ncase-1, 1
+fu = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_2month_ave_U.nc","r")
+fv = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_2month_ave_V.nc","r")
+uvar(nc,:,:,:) = fu->month_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vvar(nc,:,:,:) = fv->month_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+uvari(nc,:,:,:) = fu->month_vari(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vvari(nc,:,:,:) = fv->month_vari(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end do
+end if
+
 if(month_option) then
 do nc = 0, ncase-1, 1
     print(filename(nc))
     f = addfile(filename(nc),"r")
-    if((var_option.lt.2).or.(var_option.eq.3))
+    if(var_option.le.0) then
         do nv = 0, nvar-2,1
         if(nmonth.eq.1) then 
         var_m(nc,nv,0,:,:)  = f->$var_name(nv)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -156,7 +186,7 @@ do nc = 0, ncase-1, 1
         end do
     else
         var_m(nc,0:nvar-2,:,:,:)  = f->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-        if(vect_option) then 
+        if(duvdt_option) then 
         uvar(nc,0:nvar-2,:,:,:)  = f->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         vvar(nc,0:nvar-2,:,:,:)  = f->dvdt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if 
@@ -165,7 +195,7 @@ end do
 else
 do nc = 0, ncase-1, 1
     f = addfile(filename(nc),"r")
-    if((var_option.lt.2).or.(var_option.eq.3))
+    if(var_option.le.0) then
         do nv = 0, nvar-2,1
         var(nc,nv,:,:,:)  = f->$var_name(nv)$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
@@ -182,22 +212,26 @@ printVarSummary(var_m)
 end if
 
 var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
-if(vect_option) then 
+if(duvdt_option) then 
 uvar(:,nvar-1,:,:,:) = dim_sum_n(uvar(:,0:(nvar-2),:,:,:),1)
 vvar(:,nvar-1,:,:,:) = dim_sum_n(vvar(:,0:(nvar-2),:,:,:),1)
 uvar = uvar*100000
 vvar = vvar*100000
 end if
 
+if(var_option.eq.-6) then 
+    var_m = var_m*10^5
+end if
+
+if(var_option.eq.-1) then 
+    var_m = var_m*10^10
+end if
+
 if(var_option.eq.0) then 
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
 end if
 
-if(var_option.eq.1) then 
-    var_m = var_m*10^10
-end if
-
-if(var_option.eq.2.or.var_option.eq.4) then 
+if(var_option.ge.1) then 
 if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
@@ -211,16 +245,30 @@ if(nnv.eq.3) then
     var_m = var_m*10^12
 end if
 end if
-
-if(var_option.eq.3) then 
-    var_m = var_m*10^5
-end if
 printVarSummary(var_m)
 
 if(diff) then 
 do nc = 1, ncase-1, 1
     var_m(nc,:,:,:,:) = var_m(nc,:,:,:,:) - var_m(0,:,:,:,:)
-    if(vect_option) then 
+    if(uv_option) then 
+    uvari = where(abs(uvari).le.0.000001,0.1,uvari)
+    vvari = where(abs(vvari).le.0.000001,0.1,vvari)
+    uprob = ttest(uvar(0,:,:,:),uvari(0,:,:,:),nsample,uvar(1,:,:,:),uvari(1,:,:,:),nsample,True,False)
+    vprob = ttest(vvar(0,:,:,:),vvari(0,:,:,:),nsample,vvar(1,:,:,:),vvari(1,:,:,:),nsample,True,False)
+    print(uprob(0,20:25,40:45))
+    
+    uvar(nc,:,:,:) = uvar(nc,:,:,:) - uvar(0,:,:,:)
+    vvar(nc,:,:,:) = vvar(nc,:,:,:) - vvar(0,:,:,:)
+    
+    siglvl = 0.05
+    ules = mask(uvar(1,:,:,:),((uprob.lt.siglvl).or.(vprob.lt.siglvl)),False)  ;Keep less significant values 
+    vles = mask(vvar(1,:,:,:),((uprob.lt.siglvl).or.(vprob.lt.siglvl)),False)
+    uvar(1,:,:,:) = mask(uvar(1,:,:,:),((uprob.lt.siglvl).or.(vprob.lt.siglvl)),True) ;Keep significant values 
+    vvar(1,:,:,:) = mask(vvar(1,:,:,:),((uprob.lt.siglvl).or.(vprob.lt.siglvl)),True)
+    copy_VarMeta(uvar(0,:,:,:),ules)
+    copy_VarMeta(uvar(0,:,:,:),vles)
+    end if
+    if(duvdt_option) then 
     uvar(nc,:,:,:,:) = uvar(nc,:,:,:,:) - uvar(0,:,:,:,:)
     vvar(nc,:,:,:,:) = vvar(nc,:,:,:,:) - vvar(0,:,:,:,:)
     end if
@@ -250,7 +298,7 @@ if(na.eq.2) then
    vc_thick       = 2.5
    mp_thick       = 1.5
    font_index     = 22
-   vc_distance  = 0.01
+   vc_distance  = 0.012
    vc_head_size = 0.005
 else
    tick_font      = 0.03
@@ -380,6 +428,9 @@ end if
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
 
+    resvc2 = resvc
+    resvc2@vcLineArrowColor           = "grey"
+
 ;--------set the attribute of polygon--------------
     lnres                      = True
     lnres@gsLineColor          = "black"
@@ -430,25 +481,41 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(duvdt_option) then 
 vcref         = (/(/5 ,2 ,2 /), \  ;the level of 925hpa    ctrl,nudg,diff
                   (/10,4 ,4 /), \  ;the level of 850hpa    ctrl,nudg,diff
                   (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                   (/7 ,2 ,2 /), \  ;the level of 500hpa    ctrl,nudg,diff
                   (/10,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+end if
+
+if(uv_option) then 
+vcref         = (/(/10,5 ,5 /), \  ;the level of 925hpa    ctrl,nudg,diff
+                  (/20,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                  (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+                  (/7 ,2 ,2 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                  (/40,10,10/)/)   ;the level of 200hpa    ctrl,nudg,diff
+end if
+
+if(var_option.eq.-6) then ;forc
+    minlvl = (/-0.4/);-4 
+    maxlvl = (/ 0.4/); 4 
+    spacig = (/0.05/);0.5
+end if
+
+if(var_option.eq.-1) then ;forc
+    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
+end if
 
 if(var_option.eq.0) then ;Q
     minlvl = (/-2.1,-2.1,-2.1/);
     maxlvl = (/ 2.1, 2.1, 2.1/);
     spacig = (/ 0.3, 0.3, 0.3/);
 end if
-
-if(var_option.eq.1) then ;forc
-    minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
-end if
     
-if(var_option.eq.2.or.var_option.eq.4) then ;dzdt
+if(var_option.ge.1) then ;dzdt
 if(nnv.eq.0) then   ;dzdt
     minlvl = (/-3.5,-3.5,-3.5,-3.5/);
     maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
@@ -487,12 +554,6 @@ if(nnv.eq.4) then ;dvdt
     spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
 end if
 end if
-
-if(var_option.eq.3) then ;forc
-    minlvl = (/-0.4/);-4 
-    maxlvl = (/ 0.4/); 4 
-    spacig = (/0.05/);0.5
-end if
     
     ;res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
@@ -500,14 +561,14 @@ end if
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,1,1
-do nv = 0,nvar-2,1
+do nv = 0,nvar-1,1
 do nm = 0,nmonth-1,1
     np = nm
    ; np = nm*3 + nv
    ; np = nv*nmonth + nm
-    res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm)
-    if(var_option.eq.2) then 
-    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nnv) + ")"
+    res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
+    if(var_option.ge.1) then 
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")"
     else
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
@@ -519,7 +580,19 @@ do nm = 0,nmonth-1,1
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,nm,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
-    if(vect_option) then 
+    if(uv_option) then 
+    resvc@vcRefMagnitudeF      = vcref(nl,fnc)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nl,fnc)+"m/s"
+    vect(np) = gsn_csm_vector(wks,uvar(fnc,nm,:,:),vvar(fnc,nm,:,:),resvc)
+    overlay(plot(np),vect(np))
+        if(diff.and.fnc.gt.0)
+        resvc2@vcRefMagnitudeF      = vcref(nl,fnc)             ; define vector ref mag
+        resvc2@vcRefAnnoString2     = vcref(nl,fnc)+"m/s"
+        wind2(np)   = gsn_csm_vector(wks,ules(nm,:,:),vles(nm,:,:),resvc2)
+        overlay(plot(np),wind2(np))
+        end if
+    end if
+    if(duvdt_option) then 
     resvc@vcRefMagnitudeF      = vcref(nl,fnc)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nl,fnc)+"x10~S~-5~N~m/s~S~2~N~"
     vect(np) = gsn_csm_vector(wks,uvar(fnc,nv,nm,:,:),vvar(fnc,nv,nm,:,:),resvc)

@@ -221,13 +221,12 @@ pi = atan(1.0)*4
 lat  = vars&lat
 ptop = 0
 iopt = 0 ;Set to zero. Currently not used.
-msf_m = new((/ncase,ntime,unlev,nlat/),float)
+msf_m = new((/ncase,ntime,nlev2,nlat/),float)
 do nc = 0, nfile-1, 1
     f  = addfile(path + "/analysis/mdata/" + case(nc) + "-Clim_2month_ave_sfvp.nc","r")
     f2 = addfile(path + "/analysis/mdata/" + case(nc) + "-Clim_2month_ave_ps.nc","r")
     v     := f ->vd(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
-    ps    := f2->month_ave(:,:, {lats(na):latn(na)},{lonl(na):lonr(na)})
-    vlev   = v&lev
+    ps    := f2->month_ave(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
     msf   := zonal_mpsi_Wrap(v(:,::-1,:,:),v&lat,ulev(::-1)*100,ps)
     msf_m(nc,:,:,:) = msf(:,::-1,:)
 end do
@@ -437,6 +436,34 @@ end if
     res@tmXBTickEndF       = latn(na)
 
 ;---------set the attribute of the contour-----------------
+    res_msf = True
+    res_msf@gsnDraw          = False
+    res_msf@gsnFrame         = False
+    res_msf@cnFillOn         = False
+    res_msf@cnLinesOn        = True
+    res_msf@cnLineLabelsOn   = True ;False
+    res_msf@cnInfoLabelOn    = False
+    res_msf@cnLineThicknessF = 3.0
+    res_msf@cnLineColor      = "blueviolet";"gray40"
+    res_msf@gsnContourZeroLineThicknessF = 0
+    res_msf@gsnContourNegLineDashPattern = 2
+    res_msf@gsnContourPosLineDashPattern = 0
+    
+    levels2 = new((/20/),integer)
+    levels2(10:19) = ispan(5,50,5)
+    levels2(0:9) = ispan(-20,-2,2)
+    res_msf@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_msf@cnLevels             = levels2       ; set contour interval
+    ;res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_msf@cnLevelSpacingF      = 5.0        ; set contour interval
+    res_msf@gsnPresHgtHeightLabelOn = False
+    res_msf@tiYAxisOn = False
+    res_msf@lbLabelBarOn     = False   ; the label bar
+    res_msf@gsnCenterString  = ""
+    res_msf@gsnLeftString    = " "
+    res_msf@gsnRightString   = " "
+
+;---------set the attribute of the contour-----------------
     res_line = res
     res_line@cnFillOn         = False
     res_line@cnLinesOn        = True
@@ -598,6 +625,14 @@ do fnc = 0,ncase-1,1
     if(.not.(.not.(diff).and.fnc.eq.2)) then
     core(np) = gsn_add_polymarker(wks,plot(np),corey(fnc,nm),corez(fnc,nm),polyres)
     end if
+    end if
+    
+    if(stream_option) then 
+    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res_msf)
+    overlay(plot(np),msfp(np))
+    ;vect(np) = gsn_csm_vector(wks,v_m(na,:,:),w_m(na,:,:),resvc)
+    ;vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
+    ;overlay(plot(np),vect(np))
     end if
 end do 
 

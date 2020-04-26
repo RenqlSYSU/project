@@ -86,6 +86,13 @@ if(nv.eq.8) then
     w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
 end if
 
+if(nv.eq.9) then 
+var        := new((/nyear,ntime ,nlat,nlon/),float)
+var_month  := new((/nyear,nmonth,nlat,nlon/),float)
+month_ave  := new((/      nmonth,nlat,nlon/),float)
+month_vari := new((/      nmonth,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
+end if
+
 do nt = 0,nyear-1,1
 if((nv.eq.5).or.(nv.eq.6)) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(3)+".nc","r")
@@ -113,6 +120,11 @@ if(nv.lt.5) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     f      = addfile(files(nt),"r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+end if
+if(nv.eq.9) then
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f      = addfile(files(nt),"r")
+    var(nt,:,:,:) = f->$var_name(nv)$(select_time1,{lats:latn},{lonl:lonr})
 end if
 end do
 
@@ -158,7 +170,11 @@ do nm = 0, nmonth-1, 1
     month_s = 2*nm + 1
     month_e = 2*nm + 2
     select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+    if(nv.lt.9) then 
     var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+    else
+    var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+    end if
 end do
 
 if(nv.eq.6) then ;calc dzdt
@@ -180,7 +196,6 @@ end if
 
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-copy_VarMeta(var(0,0,:,:,:),var_month(0,0,:,:,:))
 printVarSummary(month_ave)
 
 ;====================================================================
@@ -207,8 +222,13 @@ filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
+if(nv.lt.9) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"month_vari",typeof(month_vari),(/"month" ,"lev","lat","lon"/))
+else
+filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"month_vari",typeof(month_vari),(/"month" ,"lat","lon"/))
+end if
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lev",vars&level)

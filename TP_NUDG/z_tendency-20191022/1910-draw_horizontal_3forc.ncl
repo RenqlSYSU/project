@@ -6,9 +6,11 @@
 ;*********************************************************************************
 begin
 var_option   = 3
+nnv = 1 ;used to read dzdt induced by different forcing
+
 month_option = True;False
-uv_option    = False ;True ;
-duvdt_option = True ;False ;
+uv_option    = True ;False ;
+duvdt_option = False ;True ;
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nl   = 4 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
@@ -45,22 +47,19 @@ if(var_option.eq.1) then
     draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 1 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
     draw_var = (/"b1" ,"b2","b3","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var = (/"vort_x" ,"vort_y","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"vort_x" ,"vort_y","b3","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
-    select = (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 
 ;the path of the file

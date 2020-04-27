@@ -7,6 +7,8 @@ begin
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
+nnv = 1  ;used to read dzdt induced by different forcing
+
 jet_option = True  ;20191205, control the draw of jet stream
 stream_option = True ; False;
 fnc  = 1    ;chose which case to draw
@@ -45,20 +47,17 @@ if(var_option.eq.1) then
     draw_var = (/"fQd" ,"fQeddy","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 1  ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
     draw_var = (/"b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
-    nnv = 0 ;used to read dzdt induced by different forcing
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.5) then
     var_name = (/"Qeddy","A"                   ,"Sflux"                ,"Mflux"             ,"Tflux"/)  ;
     unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s~S~-2~N~","m~S~2~N~*s~S~-2~N~","K*m/s"/)
-    nnv = 3 ;used to read dzdt induced by different forcing
     lev := (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa
     if(nnv.eq.0) then 
         draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "Qeddy"/)  ;this is the variable used to draw, can used as center string
@@ -200,6 +199,7 @@ var_u := new((/ncase,nmonth,nlev2,nlat/),double)
     plot     = new((/nvar*nmonth/),graphic)
     line     = new((/nvar*nmonth/),graphic)
     core     = new((/nvar*nmonth/),graphic)
+    msfp     = new((/nvar*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -221,16 +221,16 @@ pi = atan(1.0)*4
 lat  = vars&lat
 ptop = 0
 iopt = 0 ;Set to zero. Currently not used.
-msf_m = new((/ncase,ntime,nlev2,nlat/),float)
+msf_m = new((/ncase,nmonth,nlev2,nlat/),float)
 do nc = 0, nfile-1, 1
-    f  = addfile(path + "/analysis/mdata/" + case(nc) + "-Clim_2month_ave_sfvp.nc","r")
-    f2 = addfile(path + "/analysis/mdata/" + case(nc) + "-Clim_2month_ave_ps.nc","r")
+    f  = addfile(path + "/analysis/mdata/" + case1(nc) + "-Clim_2month_ave_sfvp.nc","r")
+    f2 = addfile(path + "/analysis/mdata/" + case1(nc) + "-Clim_2month_ave_PS.nc","r")
     v     := f ->vd(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
     ps    := f2->month_ave(:,{lats(na):latn(na)},{lonl(na):lonr(na)})
-    msf   := zonal_mpsi_Wrap(v(:,::-1,:,:),v&lat,ulev(::-1)*100,ps)
+    msf   := zonal_mpsi_Wrap(v(:,::-1,:,:),v&lat,lev_u(::-1)*100,ps)
     msf_m(nc,:,:,:) = msf(:,::-1,:)
 end do
-copy_VarMeta(vars(:,:,0),msf_m(0,0,:,:))
+copy_VarMeta(v(0,:,:,0),msf_m(0,0,:,:))
 msf_m = msf_m/10^10
 printVarSummary(msf_m)
 print(max(msf_m))
@@ -588,14 +588,14 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,nvar-2,1
-do nm = 2,nmonth-1,1
 do fnc = 0,ncase-1,1
-    np = fnc*2 + nm - 2 ;1 fnc, 2 month
+do nm = 0, nmonth-1,1
+do nv = 0, nvar-2,1
+    ;np = fnc*2 + nm - 2 ;1 fnc, 2 month
     ;np = fnc*nmonth + nm ;1 fnc, 2 month
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
-    ;np = nm*nvar + nv   ;1 month,2 var
+    np = nm*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.1.and.var_option.le.4) then 
@@ -628,7 +628,7 @@ do fnc = 0,ncase-1,1
     end if
     
     if(stream_option) then 
-    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res_msf)
+    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(fnc,nm,:,:),res_msf)
     overlay(plot(np),msfp(np))
     ;vect(np) = gsn_csm_vector(wks,v_m(na,:,:),w_m(na,:,:),resvc)
     ;vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
@@ -639,9 +639,9 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    gsn_panel(wks,plot,(/2,2/),resp)
+    ;gsn_panel(wks,plot,(/2,2/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 

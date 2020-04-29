@@ -21,7 +21,7 @@ if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_MJ_JA_ave_preci.nc"
+    fileout = path + "/project/TP_NUDG/rainfall-202004/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-rainfall_frequency.nc"
     years    = ispan(1979,2005,1)   ;the calculate time
 else
     ;remove TP experiment, sample number is ten years 
@@ -52,10 +52,11 @@ nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
+ntype = 5
 var        = new((/nyear,ntime ,nlat,nlon/),float)
-var_month  = new((/nyear,nmonth,nlat,nlon/),float)
-month_ave  = new((/      nmonth,nlat,nlon/),float)
-month_vari = new((/      nmonth,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
+var_month  = new((/nyear,ntype,nmonth,nlat,nlon/),float)
+month_ave  = new((/      ntype,nmonth,nlat,nlon/),float)
+month_vari = new((/      ntype,nmonth,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
 do nf = 0 , ncase-1,1
 if((case_option.eq.1).and.(nf.eq.1))
@@ -78,12 +79,39 @@ do nm = 0, nmonth-1, 1
 mons = 2*nm + 1
 mone = 2*nm + 2
 select_time := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
-var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+nday = dimsizes(select_time)
+print("===================================================================")
+print("month from " + mons + " to " + mone + ", ntime = " + nday)
+
+term := where(var(:,select_time,:,:).lt.0.1,1.0,0.0) ;no rain
+var_month(:,0,nm,:,:) = dim_sum_n_Wrap(term,1)/tofloat(nday) 
+print("no rain")
+print(max(var_month(:,0,nm,:,:)))
+print(min(var_month(:,0,nm,:,:)))
+term := where(var(:,select_time,:,:).lt.10.0.and.var(:,select_time,:,:).ge.0.1,1.0,0.0) ;small rain
+var_month(:,1,nm,:,:) = dim_sum_n_Wrap(term,1)/tofloat(nday) 
+print("small rain")
+print(max(var_month(:,1,nm,:,:)))
+print(min(var_month(:,1,nm,:,:)))
+term := where(var(:,select_time,:,:).lt.25.0.and.var(:,select_time,:,:).ge.10.0,1.0,0.0) ;medium rain
+var_month(:,2,nm,:,:) = dim_sum_n_Wrap(term,1)/tofloat(nday) 
+print("medium rain")
+print(max(var_month(:,2,nm,:,:)))
+print(min(var_month(:,2,nm,:,:)))
+term := where(var(:,select_time,:,:).lt.50.0.and.var(:,select_time,:,:).ge.25.0,1.0,0.0) ;large rain
+var_month(:,3,nm,:,:) = dim_sum_n_Wrap(term,1)/tofloat(nday) 
+print("large rain")
+print(max(var_month(:,3,nm,:,:)))
+print(min(var_month(:,3,nm,:,:)))
+term := where(var(:,select_time,:,:).ge.50.0,1.0,0.0) ;storm
+var_month(:,4,nm,:,:) = dim_sum_n_Wrap(term,1)/tofloat(nday) 
+print("storm")
+print(max(var_month(:,4,nm,:,:)))
+print(min(var_month(:,4,nm,:,:)))
 end do
 
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-copy_VarMeta(var(0,0,:,:),var_month(0,0,:,:))
 printVarSummary(month_ave)
 
 ;====================================================================
@@ -96,27 +124,27 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "ealy(56) and late(78) stage of the summer"
+fileAtt@discription   = "winter(1,2), spring(3,4), ealy(56) and late(78) stage of the summer" +\
+                        "norain, smallrain, mediumrain, largerain, storm"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate
-dimNames = (/"month","lat","lon"/)
-dimSizes = (/nmonth ,nlat ,nlon/)
-dimUnlim = (/False  ,False,False/)
+dimNames = (/"type","month","lat","lon"/)
+dimSizes = (/ntype ,nmonth ,nlat ,nlon/)
+dimUnlim = (/False ,False  ,False,False/)
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;Define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lat","lon"/))
-filevardef(ncdf,"month_vari",typeof(month_vari),(/"month" ,"lat","lon"/))
+filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"type","month","lat","lon"/))
+filevardef(ncdf,"month_vari",typeof(month_vari),(/"type","month","lat","lon"/))
 
 ;Define the attribute of the variables
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"month_ave",var_month)
-filevarattdef(ncdf,"month_vari",var_month)
+filevarattdef(ncdf,"month_ave",var)
+filevarattdef(ncdf,"month_vari",var)
 
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)

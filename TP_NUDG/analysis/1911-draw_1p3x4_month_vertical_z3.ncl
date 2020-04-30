@@ -31,7 +31,7 @@ lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,15
 nv = 3
 diff = True;False
 jet_option = True
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
 var_option = 2
 if(var_option.eq.0) then 
@@ -104,6 +104,7 @@ var_u  = new((/ncase,nmonth,nlev2,nlat/),float)
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
     line   = new((/ncase*nmonth/),graphic)
+    core   = new((/ncase*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -173,12 +174,22 @@ if(jet_option) then
     end if
     var_u(nf,:,:,:) = dim_avg_n_Wrap(u,3)
     end do
-end if
-
-if(jet_option) then 
-   ; var_u = mask(var_u,var_u.ge.0,True)
-   ; copy_VarMeta(vars(0,:,:,0),var_u(0,0,:,:))
+    
+    copy_VarMeta(u(0,:,:,0),var_u(0,0,:,:))
     printVarSummary(var_u)
+    corez = new((/ncase,nmonth/),float)
+    corey = new((/ncase,nmonth/),float)
+    do nc = 0, ncase-1, 1
+    do nt = 0, nmonth-1, 1
+        term = ndtooned(var_u(nc,nt,:,:))
+        indices = ind_resolve(maxind(term),(/nlev2,nlat/))
+        corez(nc,nt) = tofloat(var_u&lev(indices(0,0)))
+        corey(nc,nt) = tofloat(var_u&lat(indices(0,1)))
+    end do 
+    end do 
+    printVarSummary(indices)
+    print(corez)
+    print(corey)
 end if
 
 if(nv.eq.1) then
@@ -325,13 +336,19 @@ printVarSummary(var)
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
+    polyres                   = True
+    polyres@gsMarkerIndex     = 5        ; polymarker style
+    polyres@gsMarkerSizeF     = 8.          ; polymarker size 
+    polyres@gsMarkerColor     = "black"
+    polyres@gsMarkerThicknessF  = 5.0 
+
     resp  = True    
     resp@gsnMaximize   = False;True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Vertical"
-    resp@pmLabelBarWidthF  = 0.05
-    resp@pmLabelBarHeightF = 0.3
+    resp@lbOrientation     = "Horizontal";"Vertical" ;
+    resp@pmLabelBarWidthF  = 0.5  ;0.05 ;
+    resp@pmLabelBarHeightF = 0.05 ;0.8  ;
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015
     resp@lbLabelFontThicknessF = tick_thick
@@ -450,8 +467,9 @@ do nm = 0,nmonth-1,1
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
         if(jet_option) then 
-        line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
+        line(np) = gsn_csm_pres_hgt(wks,var_u(1,nm,:,:),res_line)
         overlay(plot(np),line(np))
+        core(np) = gsn_add_polymarker(wks,plot(np),corey(1,nm),corez(1,nm),polyres)
         end if
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
@@ -461,7 +479,7 @@ end do ;for the month
     
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/1,nmonth/),resp)
+    gsn_panel(wks,plot,(/nmonth,1/),resp)
 end if
 end
 

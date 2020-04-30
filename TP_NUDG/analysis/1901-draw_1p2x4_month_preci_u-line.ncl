@@ -10,19 +10,19 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"preci" ,"EKE"        ,"q1"  ,"U"  ,"uv"               /)  ;this is the variable used to draw, can used as center string
+draw_var = (/"preci" ,"intEKE"     ,"q1"  ,"U"  ,"uv"               /)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day","10~S~4~N~ J","W/kg","m/s","10~S~4~N~ m~S~2~N~s~S~-2~N~"/)  ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 lev = (/850,500,200/)
 nl = 2 ;used to read westerly jet
-nv = 0
+nv = 1
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-u_option = False ;True means draw the line of upper westerly jet
-;imonth = ispan(4,7,1);(/4,5,6,7/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
+u_option = True ;False ; means draw the line of upper westerly jet
+imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
 
 ;parameter for bw_bandpass_filter
@@ -66,7 +66,7 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 
 ;area: east Asia
-lats = -15 ; -90 ;20 ;-20
+lats = 10 ; -90 ;20 ;-20
 latn = 55  ;  90 ;55 ;60 
 lonl = 30  ;  0  ;30 ;20 
 lonr = 150 ; 360 ;150;220
@@ -132,16 +132,17 @@ lat1 = phis&lat
 do nf = 0 ,ncase-1, 1
 if(u_option) then
     ufilename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-    ;u_f = addfile(ufilename(nf),"r")
-    ;u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
-    ;print(nf)
-    ;do nm = 0, nmonth-1,1
-    ;do inln = 0, nlon-1,1
-    ;    lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
-    ;    axlat(nf,nm,inln) = lat1(lat_ind)
-    ;end do
-    ;end do
-    ;printVarSummary(axlat)
+    u_f = addfile(ufilename(nf),"r")
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{lev(nl)},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    print(nf)
+    do nm = 0, nmonth-1,1
+    do inln = 0, nlon-1,1
+        lat_ind = maxind(u(nf,nm,{10:48},inln))
+        ;lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
+        axlat(nf,nm,inln) = lat1(lat_ind)
+    end do
+    end do
+    printVarSummary(axlat)
 end if
 
     f = addfile(filename(nf),"r")
@@ -160,8 +161,8 @@ print("read data have done")
 printVarSummary(var)
 printVarSummary(vari)
 
-print(var(1,1,10:50,80))
-print(vari(1,1,10:50,80))
+print(var(1,1,10:15,80))
+print(vari(1,1,10:15,80))
 
 ;------calc the area average q1 and print---------------
 if(nv.eq.2) then
@@ -301,7 +302,7 @@ printVarSummary(u)
     res@lbBoxLineThicknessF  = mp_thick-1
 
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.15
+    res@pmLabelBarOrthogonalPosF     = 0.2
     res@pmLabelBarParallelPosF       = 0.5
 
 ;----------Set res line-----------
@@ -419,9 +420,9 @@ if(nv.eq.0) then ;preci
 end if
 
 if(nv.eq.1) then ;EKE
-    minlvl = (/ 1 ,-4.0,-4.0/);-8,-8,-8,-8-16,-16
-    maxlvl = (/17 ,4.0 ,4.0 /);8 ,8 ,8 ,8  16, 16
-    spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1  2 , 2 
+    minlvl = (/ 2 ,-16 ,-16/);-8,-8,-8,-8-16,-16
+    maxlvl = (/50 , 16 , 16/);8 ,8 ,8 ,8  16, 16
+    spacig = (/ 3 , 2  , 2 /);1 ,1 ,1 ,1  2 , 2 
 end if
 
 if(nv.eq.2) then ;q1
@@ -468,10 +469,10 @@ end if
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,nm,:,:),res)
-        if(nc.gt.0)
-            plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
-            overlay(plot(np),plot_sig(np2))
-        end if
+        ;if(nc.gt.0)
+        ;    plot_sig(np2)    = gsn_csm_contour(wks,prob(nc-1,nm,:,:),res_sig)
+        ;    overlay(plot(np),plot_sig(np2))
+        ;end if
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )

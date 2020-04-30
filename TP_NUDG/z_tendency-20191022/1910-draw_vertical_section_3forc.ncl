@@ -10,7 +10,7 @@ var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means d
 nnv = 1  ;used to read dzdt induced by different forcing
 
 jet_option = True  ;20191205, control the draw of jet stream
-stream_option = True ; False;
+stream_option = False;True ; 
 fnc  = 1    ;chose which case to draw
 diff =  True ;False ;whether draw the difference ;False;
 
@@ -34,7 +34,7 @@ if(var_option.eq.-2) then
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-1~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-1) then 
-    draw_var = (/"fQd" ,"fQeddy","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"fQd" ,"fQte","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
@@ -44,7 +44,7 @@ if(var_option.eq.0) then
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
-    draw_var = (/"fQd" ,"fQeddy","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt","dVordt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
@@ -497,7 +497,7 @@ end if
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Horizontal" ;"Vertical" ;
+    resp@lbOrientation     = "Horizontal";"Vertical" ;
     resp@pmLabelBarWidthF  = 0.8  ;0.05 ;
     resp@pmLabelBarHeightF = 0.05 ;0.8  ;
     resp@lbLabelFont        = font_index              ; make labels smaller
@@ -589,13 +589,13 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nm = 0, nmonth-1,1
+do nm = 2, nmonth-1,1
 do nv = 0, nvar-2,1
     ;np = fnc*2 + nm - 2 ;1 fnc, 2 month
     ;np = fnc*nmonth + nm ;1 fnc, 2 month
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
-    np = nm*(nvar-1) + nv   ;1 month,2 var
+    np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.1.and.var_option.le.4) then 
@@ -620,10 +620,10 @@ do nv = 0, nvar-2,1
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     end if
-    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
     overlay(plot(np),line(np))
     if(.not.(.not.(diff).and.fnc.eq.2)) then
-    core(np) = gsn_add_polymarker(wks,plot(np),corey(fnc,nm),corez(fnc,nm),polyres)
+    core(np) = gsn_add_polymarker(wks,plot(np),corey(0,nm),corez(0,nm),polyres)
     end if
     end if
     
@@ -639,9 +639,9 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    ;gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,3/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 

@@ -207,14 +207,16 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = False   ; the label bar
+    res@lbLabelBarOn         = True ;False   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-2
-    res@pmLabelBarOrthogonalPosF = 0.2
+    res@pmLabelBarOrthogonalPosF = 0.15
     res@pmLabelBarParallelPosF   = 0.5
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.08
 
 ;----------set the attribute of the vector-------------------
     resvc                  = True
@@ -275,7 +277,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"  ;"portrait"
-    resp@gsnPanelLabelBar = True
+    resp@gsnPanelLabelBar = False 
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.05
     resp@lbLabelFont        = font_index              ; make labels smaller

@@ -5,14 +5,14 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 3
-nnv = 1 ;used to read dzdt induced by different forcing
+var_option   = 1
+nnv = 0 ;used to read dzdt induced by different forcing
 
 month_option = True;False
 uv_option    = True ;False ;
 duvdt_option = False ;True ;
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl   = 4 ;(/925,850,700,500,200/)
+nl   = 1 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 

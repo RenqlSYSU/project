@@ -99,7 +99,7 @@ loncyc = True ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 1,1,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years  = ispan(41,50,1)   ;the calculate time
 end if

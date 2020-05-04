@@ -7,10 +7,10 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h","NUDG24h"/)
-    case2   = (/"CTRL","NG6h-CTRL","NG24h-CTRL"/)
+    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
@@ -29,15 +29,20 @@ if(case_option.eq.2) then
 end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
-draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg"/)    ;this can be used as right string 
-draw_varname = (/"Q1","preci","omega","Z3","q1"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1","T"  /)  ;this is the variable used to draw, can used as center string
+unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg" ,"~S~o~N~C"/)    ;this can be used as right string 
+draw_varname = (/"Q1","preci","omega","Z3","q1","T"/)  ;this is the variable used to draw, can used as center string
 lev = (/850,700,500,200/)
-nl = 0
-nv = 1
+nl = 3
+nv = 3
 diff = True
+vect_option = True ;False;
+cont_option = False;True ;
+cont_var  = (/"Z3" /)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm"/)    ;this can be used as right string 
+nvc = 0
 
-var_option = 0;2;1
+var_option = 2;1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -59,7 +64,11 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
+if(cont_option) then 
+fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
+else
 fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "wind_" + draw_var(nv)
+end if
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
@@ -74,7 +83,7 @@ lonr = (/360,270,390,150,270,390,150,360,150/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
-na = 8
+na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -83,7 +92,7 @@ ncase  = dimsizes(case1)
 nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
-nvar = 3
+nvar = 4
 var    = new((/ncase  ,nvar,nmonth,nlat,nlon/),float)
 vari   = new((/ncase  ,nvar,nmonth,nlat,nlon/),float)
 prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
@@ -150,15 +159,11 @@ else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
+inv = 3
+f = addfile(filename(nf)+cont_var(nvc) + ".nc","r")
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
-
-if(diff) then 
-vari = where(abs(vari).le.0.000001,0.1,vari)
-do nf = 0 ,ncase-2,1
-prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
-var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
-end do
-end if
 
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
@@ -169,12 +174,23 @@ if(nv.eq.4) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*cp ;Q1,transform unit from K/S to W/kg
 end if
 
+if(nv.eq.5) then
+    var(:,2,:,:,:) = var(:,2,:,:,:)-273.15 ;transform unit from K to c
+end if
+
 if(diff) then 
+vari = where(abs(vari).le.0.000001,0.1,vari)
+do nf = 0 ,ncase-2,1
+prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
+var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
+end do
+
 uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+;var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
 ;prob = mask(prob,prob.lt.siglvl,True)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
@@ -187,12 +203,13 @@ printVarSummary(var)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    ;gsn_define_colormap(wks,"BlueDarkRed18")
-    ;blue and red, has 18 colors,2-10 is blue
-    ;gsn_define_colormap(wks,"GMT_polar") 
-    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    ;gsn_define_colormap(wks,"matlab_jet") 
-    ;has 64 colors blue green yellow,red
+;if(nc.gt.0.or.nv.eq.2) then
+;    gsn_define_colormap(wks,"BlueDarkRed18")
+;    ;blue and red, has 18 colors,2-10 is blue
+;else
+;    gsn_define_colormap(wks,"precip3_16lev")
+;    ;blue and yellow and red, has 17 colors,2-18,2 is white
+;end if
 
 ;do na = 0, 5, 1
 print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na) + ", lonr = " + lonr(na))
@@ -269,8 +286,12 @@ end if
     res@gsnSpreadColors      = False  ;True              ; turn of the full color map
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
-    
+   
+    if(na.eq.0) then 
+    res@lbLabelBarOn         = False   ; the label bar
+    else
     res@lbLabelBarOn         = True   ; the label bar
+    end if
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -331,13 +352,17 @@ end if
     res_line@cnLinesOn        = True      ; turn off contour lines
     res_line@cnLineLabelsOn   = False      ; turn off contour line labels
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 2.5
+    res_line@cnLineThicknessF = 3.0
     res_line@cnMonoLineColor  = True ;False
     res_line@cnLineColor      = "black"
-    res_line@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_line@cnLevels         = (/0/)
-    res_line@lbLabelBarOn         = False   ; the label bar
-    res_line@gsnCenterString      = ""
+    res_line@gsnContourZeroLineThicknessF = 0
+    res_line@gsnContourNegLineDashPattern = 2
+    res_line@gsnContourPosLineDashPattern = 0
+    res_line@cnLevelSelectionMode  = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ;res_line@cnLevelSpacingF       = 20 ;        ; set contour interval
+    res_line@lbLabelBarOn     = False   ; the label bar
+    res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
@@ -382,10 +407,18 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
+    if(na.eq.0) then 
+    resp@gsnPaperOrientation = "portrait"
+    resp@gsnPanelLabelBar = True
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.8
+    else
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.05
+    end if
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
@@ -401,6 +434,15 @@ else
                       (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+end if
+
+if(nvc.eq.0) then ;Z3
+if(nl.eq.0) then ;850hPa
+    cont_spacing = (/20,10/)
+end if
+if(nl.eq.3) then ;200hPa
+    cont_spacing = (/80,10/)
+end if
 end if
 
 if(nv.eq.0) 
@@ -427,63 +469,85 @@ if(nv.eq.2)
 end if
 
 if(nv.eq.3) ;Z3
-if(nl.eq.0) then 
-    minlvl = (/1300,1300,-40,-40/) 
-    maxlvl = (/1620,1620, 40, 40/)
-    spacig = (/ 20 , 20 , 5 , 5 /) 
+if(nl.eq.0) then ;850 
+    minlvl = (/1300,-35,-35/); -24,-24
+    maxlvl = (/1525, 35, 35/);  24, 24
+    spacig = (/ 15 , 5 , 5 /);   3,  3
 end if
-if(nl.eq.1) then 
-    minlvl = (/2660,2660,-40,-40/) 
-    maxlvl = (/3140,3140, 40, 40/)
-    spacig = (/ 30 , 30 , 5 , 5 /) 
+if(nl.eq.3) then  ;200
+    minlvl = (/10900,-70,-70/) 
+    maxlvl = (/12400, 70, 70/)
+    spacig = (/  100, 10, 10/) 
 end if
-if(nl.eq.2) then 
-    minlvl = (/5730,-16,-16/)
-    maxlvl = (/5880, 16, 16/)
-    spacig = (/  10, 2 , 2 /) 
 end if
-if(nl.eq.3) then 
-    minlvl = (/12063,-40,-40/) 
-    maxlvl = (/12558, 40, 40/)
-    spacig = (/  33 , 5 , 5 /) 
+
+if(nv.eq.5) ;T
+if(nl.eq.0) then ;850 
+    minlvl = (/-15,-3.5,-3.5/); -24,-24
+    maxlvl = (/ 15, 3.5, 3.5/);  24, 24
+    spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
+end if
+if(nl.eq.3) then  ;200
+    minlvl = (/-68,-3.5,-3.5/); -24,-24
+    maxlvl = (/-50, 3.5, 3.5/);  24, 24
+    spacig = (/1.2,0.5 ,0.5 /);   3,  3
 end if
 end if
 
 do nc = 0, ncase-1,1
 ;do nm = 0,nmonth-1,1
 if(nc.gt.0.or.nv.eq.2) then
-    res@cnFillPalette = "BlueDarkRed18"
+    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+   ; res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
+   res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 else
-   res@cnFillPalette = "precip3_16lev"
-   ;blue and yellow and red, has 17 colors,2-18,2 is white
+    gsn_define_colormap(wks,"precip3_16lev")
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;res@cnFillPalette = "precip3_16lev"
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+   res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
 end if 
     do nm = 0,nmonth-1,1
         np = nm
         ;np = nmonth*nc + nm
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-        res@gsnRightString  = months(imonth(nm)) + " " +  draw_varname(nv) ;+ " (" + unit(nv) + ") " + lev(nl) + "hPa"
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
+        if(cont_option) then 
+        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ")"
+        else
+        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") "
         ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
+        end if
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
+        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
+        
+        if(vect_option) then 
         resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
         resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
-        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
         if(diff.and.nc.gt.0)
         wind2(np)   = gsn_csm_vector(wks,uvar(nc-1,nm,:,:),vvar(nc-1,nm,:,:),resvc2)
         overlay(plot(np),wind2(np))
         end if
         wind(np)    = gsn_csm_vector(wks,var(nc,0,nm,:,:),var(nc,1,nm,:,:),resvc)
         overlay(plot(np),wind(np))
+        end if
+        
         gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
-        ;plot2(np)   = gsn_csm_contour(wks,var(nc,1,nm,:,:),res_line)
-        ;overlay(plot(np),plot2(np))
+        
+        if(cont_option)
+        res_line@cnLevelSpacingF    = cont_spacing(nc) 
+        plot2(np)   = gsn_csm_contour(wks,var(nc,3,nm,:,:),res_line)
+        overlay(plot(np),plot2(np))
+        end if
+
         if(na.eq.0.or.na.eq.6) then
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         end if
@@ -503,8 +567,8 @@ end if
     ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
-    ;gsn_panel(wks,plot,(/4,1/),resp)
+    ;gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
 end do
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end

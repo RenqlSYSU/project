@@ -29,15 +29,20 @@ if(case_option.eq.2) then
 end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
-draw_var = (/"intQ1","preci" ,"OMEGA"          ,"Z3" ,"intq1","T"  /)  ;this is the variable used to draw, can used as center string
-unit     = (/"W/kg" ,"mm/day","10~S~-2~N~ Pa/s","gpm","W/kg" ,"~S~o~N~C"/)    ;this can be used as right string 
-draw_varname = (/"Q1","preci","omega","Z3","q1","T"/)  ;this is the variable used to draw, can used as center string
+draw_var = (/"intQ1"      ,"preci"       ,"OMEGA"          ,"Z3"        ,"intq1"     , \
+             "T"          ,"intEKE"      /) 
+unit     = (/"W/kg"       ,"mm/day"      ,"10~s~-2~n~ pa/s","gpm"       ,"W/kg"      , \
+             "~S~o~N~C"   ,"10~S~4~N~J"  /)   
+draw_varname = (/"Q1"     ,"preci"       ,"omega"          ,"Z3"        ,"q1"        , \
+                 "T"      ,"intEKE"      /) 
 lev = (/850,700,500,200/)
 nl = 3
 nv = 3
 diff = True
 vect_option = True ;False;
 cont_option = False;True ;
+jet_option  = False
+sig_option  = False;only work on shading 
 cont_var  = (/"Z3" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm"/)    ;this can be used as right string 
 nvc = 0
@@ -104,6 +109,9 @@ prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
     wind2  = new((/ncase*nmonth/),graphic)
     gtop   = new((/ncase*nmonth/),graphic)
     line   = new((/ncase*nmonth/),graphic)
+    axis   = new((/ncase*nmonth/),graphic)
+    jetl   = new((/ncase*nmonth/),graphic)
+    sig    = new((/ncase*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -141,7 +149,29 @@ end if
 ;================================================================
 ;read data
 ;====================================================================
+if(jet_option) then 
+axlon = phis&lon
+axlat = new((/ncase,nmonth,nlon/),double)
+lat1 = phis&lat
+;print(lat1)
+;print(ind(lat1.eq.20))
+u    = new((/ncase  ,nmonth,nlat,nlon/),float)
 do nf = 0 ,ncase-1, 1
+    u_f = addfile(filename(nf)+"U.nc","r")
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    do nm = 0, nmonth-1,1
+    do inln = 0, nlon-1,1
+        lat_ind = maxind(u(nf,nm,{10:48},inln))
+        ;lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
+        axlat(nf,nm,inln) = lat1(lat_ind)
+    end do
+    end do
+    printVarSummary(axlat)
+end do
+end if
+
+do nf = 0 ,ncase-1, 1
+if(vect_option) then 
 inv = 0
 f = addfile(filename(nf)+"U.nc","r")
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -150,19 +180,29 @@ inv = 1
 f = addfile(filename(nf)+"V.nc","r")
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
+
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.le.1.or.nv.eq.4) then
+if(nv.le.1.or.nv.eq.4.or.nv.eq.6) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
+
+if(cont_option) then
 inv = 3
 f = addfile(filename(nf)+cont_var(nvc) + ".nc","r")
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
+end do
+
+vari = where(abs(vari).le.0.000001,0.1,vari)
+do nf = 0 ,ncase-2,1
+prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 end do
 
 if(nv.eq.2) then
@@ -178,20 +218,29 @@ if(nv.eq.5) then
     var(:,2,:,:,:) = var(:,2,:,:,:)-273.15 ;transform unit from K to c
 end if
 
+if(nv.eq.6) then ;intEKE
+    var(:,2,:,:,:) = var(:,2,:,:,:)/10000.0 ;transform unit from K to c
+end if
+
 if(diff) then 
-vari = where(abs(vari).le.0.000001,0.1,vari)
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 end do
 
+if(vect_option) then 
 uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+end if
+if(sig_option) then 
+prob(:,2,:,:,:) = mask(prob(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+else
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+end if
+if(cont_option) then 
 ;var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
-;prob = mask(prob,prob.lt.siglvl,True)
+end if
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
@@ -203,13 +252,6 @@ printVarSummary(var)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-;if(nc.gt.0.or.nv.eq.2) then
-;    gsn_define_colormap(wks,"BlueDarkRed18")
-;    ;blue and red, has 18 colors,2-10 is blue
-;else
-;    gsn_define_colormap(wks,"precip3_16lev")
-;    ;blue and yellow and red, has 17 colors,2-18,2 is white
-;end if
 
 ;do na = 0, 5, 1
 print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na) + ", lonr = " + lonr(na))
@@ -343,7 +385,7 @@ end if
     resvc2 = resvc
     resvc2@vcLineArrowColor           = "grey"
 
-;----------Set res line-----------
+;----------Set res line for contour-----------
     res_line                  = True
     res_line@gsnDraw          = False
     res_line@gsnFrame         = False
@@ -354,7 +396,11 @@ end if
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 3.0
     res_line@cnMonoLineColor  = True ;False
+    if(jet_option) then
+    res_line@cnLineColor      = "dimgray"
+    else
     res_line@cnLineColor      = "black"
+    end if
     res_line@gsnContourZeroLineThicknessF = 0
     res_line@gsnContourNegLineDashPattern = 2
     res_line@gsnContourPosLineDashPattern = 0
@@ -366,6 +412,25 @@ end if
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
+;----------Set res line-----------
+    res_jet                  = True
+    res_jet@gsnDraw          = False
+    res_jet@gsnFrame         = False
+    res_jet@gsnAddCyclic     = False
+    res_jet@cnFillOn         = False       ; Fill contours
+    res_jet@cnLinesOn        = True      ; turn off contour lines
+    res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_jet@cnInfoLabelOn    = False
+    res_jet@cnLineThicknessF = 2.5
+    res_jet@cnMonoLineColor  = True ;False
+    res_jet@cnLineColor      = "black"
+    res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_jet@cnLevels         = (/20/)
+    res_jet@lbLabelBarOn         = False   ; the label bar
+    res_jet@gsnCenterString      = ""
+    res_jet@gsnLeftString    = " "
+    res_jet@gsnRightString   = " "
+
 ;--------set the attribute of polygon--------------
     lnres                      = True
     lnres@gsLineColor          = "black"
@@ -373,11 +438,11 @@ end if
     lnres@gsLineThicknessF     = 2.0
     ;lnres@gsLineLabelString    = "TP"
 
-    lnres2                      = True
-    lnres2@gsLineColor          = "black"
-    lnres2@gsLineDashPattern    = 1
-    lnres2@gsLineThicknessF     = 3.5
-    ;lnres@gsLineLabelString    = "Westly"
+    res_axis                      = True
+    res_axis@gsLineColor          = "black"
+    res_axis@gsLineDashPattern    = 1
+    res_axis@gsLineThicknessF     = 3.5
+    ;res_axis@gsLineLabelString    = "Westly"
 
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
@@ -394,6 +459,29 @@ end if
     res_gtop@gsnCenterString      = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
+
+;----------Set res sig-----------
+    res_sig                  = True       ; use plot options
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@gsnFrame         = False
+    res_sig@gsnDraw          = False
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
+    res_sig@cnInfoLabelOn    = False
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/3000,1000/)
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -494,6 +582,12 @@ if(nl.eq.3) then  ;200
 end if
 end if
 
+if(nv.eq.6) then 
+    minlvl = (/ 2 ,-16,-80/);-8,-8,-8,-8
+    maxlvl = (/50 , 16, 80/);8 ,8 ,8 ,8 
+    spacig = (/ 3 , 2 , 10/);1 ,1 ,1 ,1 
+end if
+
 do nc = 0, ncase-1,1
 ;do nm = 0,nmonth-1,1
 if(nc.gt.0.or.nv.eq.2) then
@@ -525,7 +619,11 @@ end if
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
-        
+        if(sig_option.and.nc.gt.0) then 
+        sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nm,:,:),res_sig)
+        overlay(plot(np),sig(np))
+        end if
+
         if(vect_option) then 
         resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
@@ -550,6 +648,12 @@ end if
 
         if(na.eq.0.or.na.eq.6) then
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
+        end if
+        
+        if(jet_option) then 
+        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), res_axis )
+        jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
+        overlay(plot(np),jetl(np))
         end if
         print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))

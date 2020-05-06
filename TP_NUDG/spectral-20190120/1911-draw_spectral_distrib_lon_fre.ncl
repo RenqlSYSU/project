@@ -14,11 +14,11 @@ latn = (/ 35 ,40  , 30  , 45  /)
 lonl = (/ 0  , 0  ,107  ,115  /)
 lonr = (/180 ,180 ,130  ,130  /)
 lon_spcing = 45
-lev  = (/300,200/) ;500,400,300,
+lev  = (/850,500,200/) ;500,400,300,
 var_name = (/"U","V","T","vort"/)
 stand = (/"","stand_"/)
-month_s = 1
-month_e = 12
+month_s = 10
+month_e = 3
 
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 stand_option = 0
@@ -50,7 +50,7 @@ end if
 
 filein   = path + "/mdata/" + case1 + "-" + month_s + month_e + "_spec_" + stand(stand_option) + var_name(nv) + "-" + area(na) + ".nc"
 fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + "_spec_" + stand(stand_option) + var_name(nv) + "-" + lats(na) + "N"
-pre_case   = (/"(d","(e","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0),"r")
@@ -70,7 +70,7 @@ do nc = 0, ncase-1, 1
 end do
 printVarSummary(var)
 var := dim_avg_n_Wrap(var,3)
-print(var(0,0:1000:100,0,5))
+print(var(0,0:50:10,0,5))
 
 if(stand_option.eq.0) then
 if(nv.eq.3) then 
@@ -82,6 +82,7 @@ if(diff) then
     var(2,:,:,:) = var(1,:,:,:)/var(0,:,:,:)-1.0
 end if
 
+if(nfrq.gt.100) then 
 nfrq2 = 100
 nspc  = toint(nfrq/nfrq2)
 nsta  = nfrq - nspc*nfrq2
@@ -89,7 +90,6 @@ print("nfrq = " + nfrq2 + ", spacing = " + nspc + ", start point = " + nsta)
 var2 = new((/ncase,nfrq2,nlev,nlon/),float)
 frq2 = new((/nfrq2/),float)
 calc_option = 1
-
 if(calc_option.eq.0) then 
     frq2 = fspan(0.001,0.5,nfrq2)
     var2 = linint1_n_Wrap(frq,var,False,frq2,0,1)
@@ -104,12 +104,14 @@ else
     var2!1   = "frq"
     var2&frq = frq2
 end if
-
 printVarSummary(var2)
 print(frq2(0:20))
 print(frq(0:1000:100))
 print(var2(0,0:20,0,5))
 print(var(0,0:1000:100,0,5))
+else
+var2 = var
+end if
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -265,7 +267,11 @@ if((nc.eq.2).and.diff) then
     ;blue and red, has 18 colors,2-10 is blue
 end if 
     res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)" ;+" - "+latn(na)  
+if(lats(na).eq.latn(na)) then 
+    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)" ;+" - "+latn(na) 
+else
+    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"-"+latn(na) +"N)" 
+end if
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level

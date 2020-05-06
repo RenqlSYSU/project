@@ -8,16 +8,16 @@
 begin
 path    = "/home/ys17-19/renql"
 var_name = (/"U","V","T","vort"/)
-area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 25 ,25  , 22  , 30  /)
-latn = (/ 40 ,40  , 30  , 45  /)
-lonl = (/ 0  ,70  ,107  ,115  /)
-lonr = (/360 ,105 ,130  ,130  /)
+area = (/"EA","TP","SEA","NEA","SNP","NNP","CNP"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/ 25 ,25  , 22  , 30  , 25  , 55  , 40  /)
+latn = (/ 40 ,40  , 30  , 45  , 45  , 75  , 60  /)
+lonl = (/ 0  ,70  ,107  ,115  ,140  ,140  ,140  /)
+lonr = (/360 ,105 ,130  ,130  ,180  ,180  ,180  /)
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nv = 3
 na = 0
-month_s = 1
-month_e = 12
+month_s = 10
+month_e = 3
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -42,19 +42,23 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
-do na = 0,0,1
+do na = 4,6,1
 if(na.eq.0) then
     lev  = (/850,500,400,300,200/) ;850,500,
 else
-    lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
-    ;lev  = (/850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+    ;lev = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
+    lev = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels,hPa
 end if
 fileout  = path + "/project/TP_NUDG/spectral-20190120/mdata/" + case + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 
 f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 time        = cd_calendar(f->time,0)
+if(month_s.gt.month_e) then 
+select_time = ind(time(:,1).ge.month_s.or.time(:,1).le.month_e)
+else
 select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+end if
 ntime       = dimsizes(select_time)
 ncase = dimsizes(case)
 nlev  = dimsizes(lev)

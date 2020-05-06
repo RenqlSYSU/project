@@ -10,11 +10,11 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 7.0 ;day
-cb = 2.5 
+ca = 10.0 ;day
+cb = 2.5
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG24h","NG6h"/)
@@ -45,11 +45,11 @@ ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
-lats = -90 ;-20
+lats =  0  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600,500,400,300,200/)
+lev  = (/925,850,700,500,300,200/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -65,8 +65,6 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlev,nlat,nlon/),float)
@@ -74,13 +72,15 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nf = 2,2,1 
+do nf = 0,2,2
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
 ;==========================================================
 ;read the data
 ;============================================================
+u  := new((/nyear,ntime,nlev,nlat,nlon/),float)
+v  := new((/nyear,ntime,nlev,nlat,nlon/),float)
 do nt = 0,nyear-1,1
 nv = 0
 f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
@@ -99,7 +99,6 @@ if(option.eq.1) then
     filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
     filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
     var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
-    print(filt_u(10,180,2,150,10:20))
     delete(filt_u)
     delete(filt_v)  
 else
@@ -115,8 +114,8 @@ EKE@units     = "J"
 
 time = cd_calendar(f->time,0)
 do nm = 0,11,1
-    select_time := ind(time(:,1).eq.nm+1)
-    var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
+    select_time1 := ind(time(:,1).eq.nm+1)
+    var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time1,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
 end do
 
 ;----------calculate the season average-----------------------

@@ -29,51 +29,57 @@ if(case_option.eq.2) then
 end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
-draw_var = (/"intQ1"      ,"preci"       ,"OMEGA"          ,"Z3"        ,"intq1"     , \
-             "T"          ,"intEKE"      /) 
-unit     = (/"W/kg"       ,"mm/day"      ,"10~s~-2~n~ pa/s","gpm"       ,"W/kg"      , \
-             "~S~o~N~C"   ,"10~S~4~N~J"  /)   
-draw_varname = (/"Q1"     ,"preci"       ,"omega"          ,"Z3"        ,"q1"        , \
-                 "T"      ,"intEKE"      /) 
+draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
+             "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
+             "EKE-2.5-10day","EKE-10-90day"/) 
+unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
+             "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
+             "J"            ,"J"           /)   
+draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
+                 "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
+                 "EKEhgh"   ,"EKElow"      /) 
 lev = (/850,700,500,200/)
-nl = 3
-nv = 3
+nl = 0
+nv = 7
 diff = True
-vect_option = True ;False;
+perc = True ;False;
+vect_option = False;True ;
 cont_option = False;True ;
-jet_option  = False
-sig_option  = False;only work on shading 
+jet_option  = True ;False
+sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm"/)    ;this can be used as right string 
 nvc = 0
 
-var_option = 2;1
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
 imonth = ispan(0,3,1)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
-imonth = ispan(8,11,1);(/4,5,6,7/)
+;imonth = ispan(8,11,1);(/4,5,6,7/)
+imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-" + lev(nl) + "wind_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
-if(cont_option) then 
-fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
-else
+end if
+
+fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "_" + draw_var(nv)
+if(vect_option) then 
 fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + "wind_" + draw_var(nv)
 end if
+if(cont_option) then 
+fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
@@ -81,7 +87,7 @@ pre_case   = (/"(b","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
+lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
 latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
 lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
 lonr = (/360,270,390,150,270,390,150,360,150/);220
@@ -158,7 +164,7 @@ lat1 = phis&lat
 u    = new((/ncase  ,nmonth,nlat,nlon/),float)
 do nf = 0 ,ncase-1, 1
     u_f = addfile(filename(nf)+"U.nc","r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
         lat_ind = maxind(u(nf,nm,{10:48},inln))
@@ -184,7 +190,7 @@ end if
 
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.le.1.or.nv.eq.4.or.nv.eq.6) then
+if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8)) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -218,13 +224,17 @@ if(nv.eq.5) then
     var(:,2,:,:,:) = var(:,2,:,:,:)-273.15 ;transform unit from K to c
 end if
 
-if(nv.eq.6) then ;intEKE
+if(nv.ge.6.and.nv.le.8) then ;intEKE
     var(:,2,:,:,:) = var(:,2,:,:,:)/10000.0 ;transform unit from K to c
 end if
 
 if(diff) then 
 do nf = 0 ,ncase-2,1
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
+if(perc) then 
+var(0,:,:,:,:) = where(abs(var(0,:,:,:,:)).le.0.000001,0.1,var(0,:,:,:,:))
+var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:)*100.0/var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
+end if
 end do
 
 if(vect_option) then 
@@ -232,6 +242,8 @@ uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:
 vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
 var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
 var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
+copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
 end if
 if(sig_option) then 
 prob(:,2,:,:,:) = mask(prob(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
@@ -242,8 +254,6 @@ if(cont_option) then
 ;var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
 end if
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
-copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
-copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
 printVarSummary(prob)
 end if
 printVarSummary(var)
@@ -329,11 +339,11 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
    
-    if(na.eq.0) then 
-    res@lbLabelBarOn         = False   ; the label bar
-    else
-    res@lbLabelBarOn         = True   ; the label bar
-    end if
+    ;if(na.eq.0) then 
+    ;res@lbLabelBarOn         = False   ; the label bar
+    ;else
+    ;res@lbLabelBarOn         = True   ; the label bar
+    ;end if
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -495,15 +505,18 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    if(na.eq.0) then 
+    if(na.eq.0) then; .and.nmonth.eq.4
+    res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "portrait"
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Vertical"
-    resp@pmLabelBarWidthF  = 0.05
-    resp@pmLabelBarHeightF = 0.8
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarHeightF = 0.05;0.8
     else
+    res@lbLabelBarOn         = True   ; the label bar
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
+    resp@lbOrientation     = "Horizontal"
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.05
     end if
@@ -582,10 +595,16 @@ if(nl.eq.3) then  ;200
 end if
 end if
 
-if(nv.eq.6) then 
-    minlvl = (/ 2 ,-16,-80/);-8,-8,-8,-8
-    maxlvl = (/50 , 16, 80/);8 ,8 ,8 ,8 
-    spacig = (/ 3 , 2 , 10/);1 ,1 ,1 ,1 
+if(nv.ge.6.and.nv.le.11) then ;intEKE
+if(perc) then 
+    minlvl = (/5  ,-70,-70/);-8,-8,-8,-8
+    maxlvl = (/80 , 70, 70/);8 ,8 ,8 ,8 
+    spacig = (/ 5 , 10, 10/);1 ,1 ,1 ,1 
+else
+    minlvl = (/5  ,-14,-14/);-8,-8,-8,-8
+    maxlvl = (/80 , 14, 14/);8 ,8 ,8 ,8 
+    spacig = (/ 5 , 2 , 2 /);1 ,1 ,1 ,1 
+end if
 end if
 
 do nc = 0, ncase-1,1
@@ -608,10 +627,13 @@ end if
         ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
         if(cont_option) then 
-        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ")"
+        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
+        else
+        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8)) then
+        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         else
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") "
-        ;res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
+        end if
         end if
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -663,16 +685,28 @@ end if
     ;gsn_panel(wks,plot,(/ncase,1/),resp)
 ;end do ;for the month 
 
-    ;res1 = True
-    ;res2 = True
-    ;res1@gsnMaximize = True
+    res1 = True
+    res2 = True
+    res1@gsnMaximize = True
     ;attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
     ;attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
     ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
     ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
+    ;attach1 = gsn_attach_plots(plot(0),plot(1:2),res1,res2)
+    ;attach2 = gsn_attach_plots(plot(3),plot(4:5),res1,res2)
+    ;attach3 = gsn_attach_plots(plot(6),plot(7:8),res1,res2)
+    ;attach4 = gsn_attach_plots(plot(9),plot(10:11),res1,res2)
+    ;gsn_panel(wks,plot(0:9:3),(/4,1/),resp)
+    attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
+    attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
+    attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
+    attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
+    attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
+    attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
+    gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
-    gsn_panel(wks,plot,(/4,1/),resp)
+    ;gsn_panel(wks,plot,(/4,1/),resp)
 end do
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end

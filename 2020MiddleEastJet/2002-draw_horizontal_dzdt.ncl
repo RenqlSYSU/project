@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -4  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
@@ -25,7 +25,7 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -5,-5,1
+do var_option = 5,5,1
 do nnv = 1,1,1
 if(var_option.eq.-15) then 
     draw_var = (/"T"/)  ;this is the variable used to draw, can used as center string
@@ -109,11 +109,11 @@ if(var_option.eq.3) then
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.4) then 
-    draw_var := (/"b1","b2","b3"/)  ;,"total" this is the variable used to draw, can used as center string
+    draw_var := (/"b1","b2","Tadvect"/)  ;,"total" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.5) then 
-    draw_var := (/"vort_x","vort_y","vortx"/)  ;,"b3y" this is the variable used to draw, can used as center string
+    draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
@@ -163,7 +163,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
 lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 /) ;55 ;60
+latn = (/ 60 , 89 , 89 , 89 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
 lonr = (/360 , 70 ,175 , 320/) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)

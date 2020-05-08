@@ -11,8 +11,13 @@ path    = "/home/ys17-19/renql/project/TP_NUDG/spectral-20190120"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 diff = True
 var_name = (/"U","V","T","vort"/)
+area = (/"EA","TP","SEA","NEA","SNP","CNP","NNP"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
+lats = (/ 25 ,25  , 22  , 30  , 25  , 40  , 55  /)
+latn = (/ 40 ,40  , 30  , 45  , 45  , 60  , 75  /)
+lonl = (/ 0  ,70  ,107  ,115  ,140  ,140  ,140  /)
+lonr = (/360 ,105 ,130  ,130  ,180  ,180  ,180  /)
 nv = 3 ;"U","V","T","vort"
-na = 2 ;"EA","TP","SEA","NEA"
+na = 4
 month_s = 4
 month_e = 9
 
@@ -38,11 +43,6 @@ if(case_option.eq.2) then
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
-area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 25 ,25  , 22  , 30  /)
-latn = (/ 40 ,40  , 30  , 45  /)
-lonl = (/ 30 ,70  ,107  ,115  /)
-lonr = (/150 ,105 ,130  ,130  /)
 lev  = (/1000,925,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/) ;hPa
 filein    = path + "/mdata/" + case1    + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 fig_name  = path + "/fig/"   + case1(0) + "-" + month_s + month_e + "_spec_" + var_name(nv) + "_lev_frq"
@@ -60,7 +60,8 @@ plot = new((/ncase*3/),graphic)
 
 np = 0
 wks = gsn_open_wks(fig_out,fig_name)  
-do na = 1,3,1
+
+do na = 4,6,1
 filein    = path + "/mdata/" + case1 + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 do nc = 0, ncase-1, 1
     f    = addfile(filein(nc),"r")
@@ -77,7 +78,7 @@ if(diff) then
     var(2,:,:) = var(1,:,:)/var(0,:,:)-1.0
 end if
 
-if(nfrq.gt.100) then
+if(nfrq.gt.200) then
 print(frq(0:1000:100))
 print(var(0,0:1000:100,5))
 nfrq2 = 100
@@ -207,7 +208,7 @@ print(var2(0,0:20,5))
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-2
     res@pmLabelBarWidthF  = 0.1
-    res@pmLabelBarHeightF = 0.8
+    res@pmLabelBarHeightF = 0.6
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles

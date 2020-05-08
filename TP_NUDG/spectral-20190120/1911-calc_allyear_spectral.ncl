@@ -16,8 +16,9 @@ lonr = (/360 ,105 ,130  ,130  ,180  ,180  ,180  /)
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nv = 3
 na = 0
-month_s = 10
-month_e = 3
+month_s = 4
+month_e = 9
+dayb = 366
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NUDG6h","NUDG24h"/)
@@ -65,7 +66,7 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
-if(ntime.eq.365) then 
+if(ntime.eq.dayb) then 
 altime = ntime*nyear
 else
 altime = ntime
@@ -145,7 +146,7 @@ if (any(ismissing(var))) then
 end if
 ;var1 = dim_standardize_n_Wrap(var1,1,0)
 
-if(ntime.eq.365) then 
+if(ntime.eq.dayb) then 
     var1 := reshape(var,(/altime,nlev,nlat,nlon/))
     do nz = 0, nlev-1, 1
     do ny = 0, nlat-1, 1

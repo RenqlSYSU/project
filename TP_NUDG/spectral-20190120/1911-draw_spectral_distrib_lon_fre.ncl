@@ -12,12 +12,12 @@ area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,E
 lats = (/ 35 ,20  , 22  , 30  /)
 latn = (/ 35 ,40  , 30  , 45  /)
 lonl = (/ 0  , 0  ,107  ,115  /)
-lonr = (/180 ,180 ,130  ,130  /)
+lonr = (/270 ,180 ,130  ,130  /)
 lon_spcing = 45
 lev  = (/850,500,200/) ;500,400,300,
 var_name = (/"U","V","T","vort"/)
 stand = (/"","stand_"/)
-month_s = 10
+month_s = 10 
 month_e = 3
 
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
@@ -82,7 +82,7 @@ if(diff) then
     var(2,:,:,:) = var(1,:,:,:)/var(0,:,:,:)-1.0
 end if
 
-if(nfrq.gt.100) then 
+if(nfrq.gt.200) then 
 nfrq2 = 100
 nspc  = toint(nfrq/nfrq2)
 nsta  = nfrq - nspc*nfrq2
@@ -106,11 +106,12 @@ else
 end if
 printVarSummary(var2)
 print(frq2(0:20))
-print(frq(0:1000:100))
+print(frq(0:100:10))
 print(var2(0,0:20,0,5))
-print(var(0,0:1000:100,0,5))
+print(var(0,0:100:10,0,5))
 else
 var2 = var
+frq2 = frq
 end if
 
 ;==============================================================

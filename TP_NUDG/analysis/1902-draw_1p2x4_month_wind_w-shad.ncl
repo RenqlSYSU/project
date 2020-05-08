@@ -30,7 +30,7 @@ end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
+             "T"            ,"intEKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day"/) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -39,19 +39,19 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      /) 
 lev = (/850,700,500,200/)
-nl = 0
-nv = 7
+nl = 3
+nv = 1
 diff = True
-perc = True ;False;
+perc = False;True ;
 vect_option = False;True ;
-cont_option = False;True ;
-jet_option  = True ;False
+cont_option = True ;False;
+jet_option  = False;True ;
 sig_option  = True ;False;only work on shading 
-cont_var  = (/"Z3" /)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm"/)    ;this can be used as right string 
-nvc = 0
+cont_var  = (/"Z3" ,"intQ1"/)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/kg" /)    ;this can be used as right string 
+nvc = 1
 
-var_option = 1
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -201,8 +201,13 @@ end if
 if(cont_option) then
 inv = 3
 f = addfile(filename(nf)+cont_var(nvc) + ".nc","r")
+if(nvc.eq.1) then
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
 end if
 end do
 
@@ -546,6 +551,10 @@ if(nl.eq.3) then ;200hPa
 end if
 end if
 
+if(nvc.eq.1) then ;Z3
+    cont_spacing = (/20,10/)
+end if
+
 if(nv.eq.0) 
     minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
     maxlvl = (/300, 160, 160/)      ; 80, 80
@@ -697,16 +706,16 @@ end if
     ;attach3 = gsn_attach_plots(plot(6),plot(7:8),res1,res2)
     ;attach4 = gsn_attach_plots(plot(9),plot(10:11),res1,res2)
     ;gsn_panel(wks,plot(0:9:3),(/4,1/),resp)
-    attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
-    attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
-    attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
-    attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
-    attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
-    attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
-    gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
+    ;attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
+    ;attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
+    ;attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
+    ;attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
+    ;attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
+    ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
+    ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
-    ;gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
 end do
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end

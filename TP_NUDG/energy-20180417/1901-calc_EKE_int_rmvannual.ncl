@@ -13,8 +13,8 @@ case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5 ;10.0 ;
+ca = 90.0 ;day
+cb = 10.0 ;2.5 ;
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -131,7 +131,7 @@ fcb = 1.0/cb
 ;filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 
 fcf = fspan(0, 0.5, ntime/2) 
-filt_cf = ind(fcf.ge.fca.and.fcf.le.fcb)
+filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
 cf = ezfftf_n(u,1)
 cf(:,:,filt_cf,:,:,:) = 0.0  
 filt_u = ezfftb_n(cf,0,2)

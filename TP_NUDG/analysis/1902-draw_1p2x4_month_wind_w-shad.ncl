@@ -44,14 +44,14 @@ nv = 1
 diff = True
 perc = False;True ;
 vect_option = False;True ;
-cont_option = True ;False;
+cont_option = False;True ;
 jet_option  = False;True ;
 sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" /)    ;this can be used as right string 
 nvc = 1
 
-var_option = 2
+var_option = 2 
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -256,7 +256,7 @@ else
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 end if
 if(cont_option) then 
-;var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
+var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
 end if
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(prob)
@@ -551,13 +551,13 @@ if(nl.eq.3) then ;200hPa
 end if
 end if
 
-if(nvc.eq.1) then ;Z3
-    cont_spacing = (/20,10/)
+if(nvc.eq.1) then ;intQ1
+    cont_spacing = (/20,15/)
 end if
 
 if(nv.eq.0) 
-    minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
-    maxlvl = (/300, 160, 160/)      ; 80, 80
+    minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
+    maxlvl = (/300, 140, 140/)      ; 80, 80
     spacig = (/20 ,  20,  20/)      ; 10, 10
 end if
 if(nv.eq.4) 
@@ -567,9 +567,9 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-4.0,-4.0/);-8,-8,-8,-8
-    maxlvl = (/16 ,4.0 ,4.0 /);8 ,8 ,8 ,8 
-    spacig = (/ 1 ,0.5 ,0.5 /);1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-3.5,-3.5/);-8,-8,-8,-8
+    maxlvl = (/16 , 3.5, 3.5/);8 ,8 ,8 ,8 
+    spacig = (/ 1 , 0.5, 0.5/);1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.2) 
@@ -706,13 +706,13 @@ end if
     ;attach3 = gsn_attach_plots(plot(6),plot(7:8),res1,res2)
     ;attach4 = gsn_attach_plots(plot(9),plot(10:11),res1,res2)
     ;gsn_panel(wks,plot(0:9:3),(/4,1/),resp)
-    ;attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
-    ;attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
-    ;attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
-    ;attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
-    ;attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
-    ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
-    ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
+   ; attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
+   ; attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
+   ; attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
+   ; attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
+   ; attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
+   ; attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
+   ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
     gsn_panel(wks,plot,(/4,1/),resp)

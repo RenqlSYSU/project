@@ -5,14 +5,14 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 1
+var_option   = -1
 nnv = 0 ;used to read dzdt induced by different forcing
 
 month_option = True;False
 uv_option    = True ;False ;
 duvdt_option = False ;True ;
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl   = 1 ;(/925,850,700,500,200/)
+nl   = 4 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 
@@ -33,14 +33,19 @@ if(var_option.eq.-6) then
     var_name = (/"sigm1"/)  ;use to read variables
     unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
 end if
-if(var_option.eq.-1) then 
-    draw_var = (/"fQd" ,"fQte","Fte","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
+if(var_option.eq.-3) then 
+    draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
     unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-1) then 
+    draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd","Qeddy","A","total"/)  ;use to read variables
+    unit     = (/"K/Day","K/Day","10~S~-11~N~ s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qte","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qte"/)  ;use to read variables
+    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
@@ -56,7 +61,7 @@ if(var_option.eq.2) then
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var = (/"vort_x" ,"vort_y","b3","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
@@ -82,7 +87,12 @@ if((var_option.le.0))
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A.nc"
+    if(var_option.ge.-1) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon.nc"
+    end if
+    if(var_option.eq.-3) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_advect2.nc"
+    end if
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
@@ -222,8 +232,13 @@ if(var_option.eq.-6) then
     var_m = var_m*10^5
 end if
 
+if(var_option.eq.-3) then 
+    var_m = var_m*10^11
+end if
+
 if(var_option.eq.-1) then 
-    var_m = var_m*10^10
+    var_m(:,0:1,:,:,:) = var_m(:,0:1,:,:,:)*24*3600 ;convert units of Q from K/s to K/Day 
+    var_m(:,2,:,:,:) = var_m(:,2,:,:,:)*10^11
 end if
 
 if(var_option.eq.0) then 
@@ -383,11 +398,6 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    if(var_option.ge.1) then
-    res@lbLabelBarOn         = False   ; the label bar
-    else
-    res@lbLabelBarOn         = True   ; the label bar
-    end if
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -466,10 +476,12 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape" ;"portrait"
-    if(var_option.ge.1) then
+    if(var_option.ge.-7) then
     resp@gsnPanelLabelBar = True
+    res@lbLabelBarOn      = False   ; the label bar
     else
     resp@gsnPanelLabelBar = False
+    res@lbLabelBarOn      = True   ; the label bar
     end if
     resp@lbOrientation     = "Vertical" ;"Horizontal" ;
     resp@pmLabelBarWidthF  = 0.05
@@ -502,12 +514,18 @@ if(var_option.eq.-6) then ;forc
     spacig = (/0.05/);0.5
 end if
 
-if(var_option.eq.-1) then ;forc
+if(var_option.eq.-3) then ;forc
     minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
     maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
     spacig = (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
 end if
 
+if(var_option.eq.-1) then
+    minlvl = (/-2.1,-2.1,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 2.1, 2.1, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 0.3, 0.3, 2 , 2 /); 1, 1, 1, 1,
+end if
+    
 if(var_option.eq.0) then ;Q
     minlvl = (/-2.1,-2.1,-2.1/);
     maxlvl = (/ 2.1, 2.1, 2.1/);

@@ -6,13 +6,13 @@
 begin
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
-nnv = 1  ;used to read dzdt induced by different forcing
+var_option = 5 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
+nnv = 2  ;used to read dzdt induced by different forcing
 
-jet_option = True  ;20191205, control the draw of jet stream
+jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False;True ; 
 fnc  = 1    ;chose which case to draw
-diff =  True ;False ;whether draw the difference ;False;
+diff = False ; True ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
@@ -27,16 +27,21 @@ month_e = 12
 lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/)
 lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 
-do na = 1,1,1
+do na = 4,4,1 ;"TP","EA","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-1~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
+if(var_option.eq.-3) then 
+    draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
+    unit     = "10~S~-10~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-1) then 
-    draw_var = (/"fQd" ,"fQte","Fte","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"f_Qd","f_Qeddy","A","total"/)  ;use to read variables
-    unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var = (/"Qd" ,"Qte","Fte","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qd","Qeddy","A","total"/)  ;use to read variables
+    unit     = (/"K/Day","K/Day","10~S~-11~N~ s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qte"  ,"total"/)  ;this is the variable used to draw, can used as center string
@@ -55,6 +60,12 @@ if(var_option.eq.2) then
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~","10~S~-11~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.3) then 
+    draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 if(var_option.eq.5) then
     var_name = (/"Qeddy","A"                   ,"Sflux"                ,"Mflux"             ,"Tflux"/)  ;
     unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s~S~-2~N~","m~S~2~N~*s~S~-2~N~","K*m/s"/)
@@ -64,7 +75,7 @@ if(var_option.eq.5) then
         select   = (/0,1,2/)
     end if
     if(nnv.eq.1) then 
-        draw_var = (/"-duSdx", "-dvSdy", "A"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"-duSdx", "-dvSdy", "Fte"/)  ;this is the variable used to draw, can used as center string
         select   = (/0,1/)
     end if
     if(nnv.eq.2) then 
@@ -82,11 +93,11 @@ if(var_option.eq.5) then
 end if
 
 ;area: east Asia
-area = (/"TP","EA","NH","CA"/)
-lats = (/15  , 15 , 10 , 10 /);15 ;-210
-latn = (/55  , 55 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,110 , 1  , 0  /) ;30 ;20
-lonr = (/105 ,130 ,359 , 70 /) ;150;220
+area = (/"TP","EA","NH","CA","NP"/)
+lats = (/15  , 15 , 10 , 10 , 10 /);15 ;-210
+latn = (/55  , 55 , 89 , 89 , 89 /) ;55 ;60
+lonl = (/70  ,110 , 1  , 0  ,150 /) ;30 ;20
+lonr = (/105 ,130 ,359 , 70 ,210 /) ;150;220
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -307,12 +318,17 @@ if(jet_option) then
     print(corey)
 end if
 
-if(var_option.eq.0) then 
-    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
+if(var_option.eq.-2) then 
+    var_m = var_m*10^11
 end if
 
-if(var_option.le.-1) then 
-    var_m = var_m*10^11
+if(var_option.eq.-1) then 
+    var_m(:,0:1,:,:,:) = var_m(:,0:1,:,:,:)*24*3600 ;convert units of Q from K/s to K/Day 
+    var_m(:,2,:,:,:) = var_m(:,2,:,:,:)*10^11
+end if
+
+if(var_option.eq.0) then 
+    var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
 end if
 
 if(var_option.ge.1.and.var_option.le.4) then
@@ -409,7 +425,7 @@ end if
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = False;True   ; the label bar
+    ;res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -496,7 +512,13 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
+    if(var_option.eq.-1) then
+    resp@gsnPanelLabelBar = False
+    res@lbLabelBarOn      = True   ; the label bar
+    else
     resp@gsnPanelLabelBar = True
+    res@lbLabelBarOn      = False   ; the label bar
+    end if
     resp@lbOrientation     = "Horizontal";"Vertical" ;
     resp@pmLabelBarWidthF  = 0.8  ;0.05 ;
     resp@pmLabelBarHeightF = 0.05 ;0.8  ;
@@ -506,10 +528,16 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.le.-1) then
+if(var_option.eq.-2) then
     minlvl = (/-14,-14,-14,-14,-14/);-8,-8,-8,-8,
     maxlvl = (/ 14, 14, 14, 14, 14/); 8, 8, 8, 8,
     spacig = (/ 2 , 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
+end if
+    
+if(var_option.eq.-1) then
+    minlvl = (/-2.1,-2.1,-7,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 2.1, 2.1, 7, 14/); 8, 8, 8, 8,
+    spacig = (/ 0.3, 0.3, 1, 2 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.0) then 
@@ -589,19 +617,17 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nm = 2, nmonth-1,1
 do nv = 0, nvar-2,1
-    ;np = fnc*2 + nm - 2 ;1 fnc, 2 month
-    ;np = fnc*nmonth + nm ;1 fnc, 2 month
+do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
-    ;np = nv*nmonth + nm ;1 var, 2 month
-    np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
+    np = nv*nmonth + nm ;1 var, 2 month
+    ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.1.and.var_option.le.4) then 
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nnv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -620,10 +646,10 @@ do nv = 0, nvar-2,1
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     end if
-    line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
     overlay(plot(np),line(np))
     if(.not.(.not.(diff).and.fnc.eq.2)) then
-    core(np) = gsn_add_polymarker(wks,plot(np),corey(0,nm),corez(0,nm),polyres)
+    core(np) = gsn_add_polymarker(wks,plot(np),corey(fnc,nm),corez(fnc,nm),polyres)
     end if
     end if
     
@@ -639,7 +665,7 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    gsn_panel(wks,plot,(/2,3/),resp)
+    gsn_panel(wks,plot,(/3,4/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)

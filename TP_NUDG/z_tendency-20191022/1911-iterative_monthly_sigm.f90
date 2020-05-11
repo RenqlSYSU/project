@@ -13,7 +13,7 @@ program iteration
     !integer, parameter :: nlat = 54 , nlon = 240 , ilog  = 10 , ifile = 12
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 !NCEP1
     !integer, parameter :: nlat = 31 , nlon = 144 , ilog  = 10 , ifile = 12
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 19
+    integer, parameter :: pr = 8 , ncase = 3 , nvar = 4 ,nvar2 = 2, ntime = 4, nlev = 19
     integer, parameter :: nlat = 85 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -41,7 +41,7 @@ program iteration
     
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
-    nc = 1
+    nc = 2
     if(nc.eq.1) then 
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month.dat"     
@@ -74,7 +74,8 @@ program iteration
         logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor-NG58.txt"
     end if
     
-    var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
+    !var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
+    var_name  = (/"f_Qeddh","f_Qeddl","Ah     ","Al     "/)
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf
     write(ilog,*) "critical value is ", critical
@@ -96,7 +97,7 @@ program iteration
     end do
     end do
     
-    do nv = 1, nvar-1, 1
+    do nv = 1, nvar2, 1
     do nt = 1, ntime, 1
     do nz = 1, 2, 1
         read(ifile,rec=irec) ((q3(nx,ny,nz,nt,nv),nx=1,nlon),ny=1,nlat)
@@ -161,8 +162,8 @@ program iteration
         
         !dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
         !dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
-        dzdt(:,:,1   ,:,nvar) = dzdt(:,:,2     ,:,nvar)  !lower boundary for A
-        dzdt(:,:,nlev,:,nvar) = dzdt(:,:,nlev-1,:,nvar)  !upper boundary for A
+        dzdt(:,:,1   ,:,(nvar2+1):nvar) = dzdt(:,:,2     ,:,(nvar2+1):nvar)  !lower boundary for A
+        dzdt(:,:,nlev,:,(nvar2+1):nvar) = dzdt(:,:,nlev-1,:,(nvar2+1):nvar)  !upper boundary for A
         dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy
         dzdt(:,:,nlev,:,1:nvar2) = dzdt(:,:,nlev-1,:,1:nvar2) - (R*dlev(nlev)/lev(nlev)/100)*q3(:,:,2,:,:) !upper boundary for Qd, Qd_t,Qeddy
         

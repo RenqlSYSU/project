@@ -17,7 +17,7 @@ if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    years   = ispan(1979,2005,1)   ;the calculate time
+    years   = ispan(1979,1980,1)   ;the calculate time
 else
     ;remove TP experiment, sample number is ten years 
     case1   = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
@@ -33,7 +33,7 @@ lonl = 70
 lonr = 105
 lev  = (/850,500,200/)
 
-nv = 2
+nv = 0
 nl = 2
 nc = 0
 
@@ -50,7 +50,7 @@ nyear = dimsizes(years)
 
 ;define array to calc the average of 27 years
 var  = new((/nyear,ntime/),float)
-ts   = new((/5,ntime/),float)
+ts   = new((/7,ntime/),float)
 ;plot = new((/ncase*nlev/),graphic)
 
 ;---------------------------------------------------------------
@@ -62,7 +62,7 @@ do nt = 0, nyear-1 ,1
     var(nt,:) = wgt_areaave_Wrap(var1,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
 end do
 
-snt = 14
+snt = 1
 ts(0,:) = var(snt,:)
 ts(1,:) = dim_avg_n(var,0)
 
@@ -71,29 +71,39 @@ cf(:,4:) = 0
 ts(2,:) = ezfftb(cf,cf@xbar)
 printVarSummary(cf)
 
-ca1  = 7
-ca2  = 20
+ca1  = 2.5
+ca2  = 10
+ca3  = 90
 fca1 = 1.0/ca1
 fca2 = 1.0/ca2
+fca3 = 1.0/ca3
 cf2  = ezfftf(ts(0,:))
 fcf  = fspan(0, 0.5, ntime/2) 
 
-ifcf = ind(fcf.ge.fca1)
+ifcf := ind(fcf.gt.fca1.or.fcf.lt.fca2)
 term = cf2 
 term(:,ifcf) = 0.0  
-ts(3,:) = ezfftb(term,cf2@xbar)
+;ts(3,:) = ezfftb(term,cf2@xbar)
+ts(3,:) = ezfftb(term,0)
 
-ifcf := ind(fcf.ge.fca2)
+ifcf := ind(fcf.gt.fca2.or.fcf.lt.fca3)
 term = cf2 
 term(:,ifcf) = 0.0  
-ts(4,:) = ezfftb(term,cf2@xbar)
+ts(4,:) = ezfftb(term,0)
+
+opt = False
+ts(5,:) = bw_bandpass_filter(ts(0,:),fca2,fca1,opt,0)
+ts(6,:) = bw_bandpass_filter(ts(0,:),fca3,fca2,opt,0)
 
 ts_label = (/tostring(years(snt)),"Clim","Filter_clim" \
-            ,tostring(ca1)+"days-",tostring(ca2)+"days-"/)
+            ,tostring(ca1)+"days-"+tostring(ca2)+"days_ez"\
+            ,tostring(ca2)+"days-"+tostring(ca3)+"days_ez"\
+            ,tostring(ca1)+"days-"+tostring(ca2)+"days_bw"\
+            ,tostring(ca2)+"days-"+tostring(ca3)+"days_bw"/)
 
-if(nv.eq.2)
-    ts = ts - 273.15
-end if
+;if(nv.eq.2)
+;    ts = ts - 273.15
+;end if
 
 ;************************************************
 ; plotting
@@ -119,10 +129,13 @@ wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
-    
-    resxy@xyDashPatterns    = (/0,0,1,0,1/)
-    resxy@xyLineThicknesses = (/2.5,2.5,2.5,2.5,2.5/)   ; make second line thicker
-    resxy@xyLineColors      = (/"black","red","red","blue","blue"/)
+   
+    resxy@xyDashPatterns    = (/0,1,0,1/)
+    resxy@xyLineThicknesses = (/2.5,2.5,2.5,2.5/)   ; make second line thicker
+    resxy@xyLineColors      = (/"red","red","blue","blue"/)
+    ;resxy@xyDashPatterns    = (/0,0/)
+    ;resxy@xyLineThicknesses = (/2.5,2.5/)   ; make second line thicker
+    ;resxy@xyLineColors      = (/"red","blue"/)
     resxy@tmYLAutoPrecision = False
     resxy@tmYLPrecision     = 2 
     ;resxy@tiXAxisOn = False
@@ -136,13 +149,18 @@ wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
     resxy@tmXBValues          = ispan(0,365,73)
     resxy@tmXBLabels          = ispan(0,365,73)
     
+    resxy@gsnYRefLine            = 0.0 
+    resxy@gsnYRefLineDashPatterns = (/0/) 
+    resxy@gsnYRefLineThicknesses  = (/3.0/)
+    resxy@gsnYRefLineColors       = (/"black"/)
+    
     ;legend
     resxy@pmLegendDisplayMode = "Always"
     resxy@lgOrientation       = "Vertical"
     resxy@lgPerimOn           = False
     resxy@lgPerimFill         = "SolidFill"
     resxy@lgPerimFillColor    = "white"
-    resxy@xyExplicitLegendLabels = ts_label
+    resxy@xyExplicitLegendLabels = ts_label(3:6)
     resxy@lgLabelFontColor       = "black"
     resxy@lgLabelFontThicknessF  = label_thick
     resxy@lgLabelFontHeightF     = label_font
@@ -185,7 +203,7 @@ wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
     resxy@gsnLeftString    = case(nc)
     resxy@gsnRightString   = var_name(nv) + " " + lev(nl) + "hPa" 
 
-   plot = gsn_csm_xy(wks,ispan(0,364,1),ts,resxy)     
+   plot = gsn_csm_xy(wks,ispan(0,364,1),ts(3:6,:),resxy)     
     
     resp  = True    
     resp@gsnMaximize   = True

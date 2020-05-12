@@ -5,14 +5,14 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = -1
+var_option   = 4
 nnv = 0 ;used to read dzdt induced by different forcing
 
 month_option = True;False
 uv_option    = True ;False ;
 duvdt_option = False ;True ;
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl   = 4 ;(/925,850,700,500,200/)
+nl   = 1 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 
@@ -32,6 +32,11 @@ if(var_option.eq.-6) then
     draw_var = (/"sigm1"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"sigm1"/)  ;use to read variables
     unit     = (/"10~S~-5~N~J/(Pa^2*Kg)"/)  ;this can be used as right string end if
+end if
+if(var_option.eq.-4) then 
+    draw_var = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    unit     = (/"K/Day","K/Day","10~S~-11~N~ s~S~-2~N~","10~S~-11~N~ s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-3) then 
     draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
@@ -66,6 +71,12 @@ if(var_option.eq.3) then
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.4) then 
+    draw_var = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    select = (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -93,6 +104,9 @@ if((var_option.le.0))
     if(var_option.eq.-3) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_advect2.nc"
     end if
+    if(var_option.eq.-4) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_forc_te.nc"
+    end if
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy_A.nc"
@@ -111,6 +125,9 @@ else
         end if
         if(var_option.eq.3) then 
         filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect2_month.nc"
+        end if
+        if(var_option.eq.4) then 
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month.nc"
         end if
     end if
     else
@@ -230,6 +247,11 @@ end if
 
 if(var_option.eq.-6) then 
     var_m = var_m*10^5
+end if
+
+if(var_option.eq.-4) then 
+    var_m(:,0:1,:,:,:) = var_m(:,0:1,:,:,:)*24*3600 ;convert units of Q from K/s to K/Day 
+    var_m(:,2:3,:,:,:) = var_m(:,2:3,:,:,:)*10^11
 end if
 
 if(var_option.eq.-3) then 
@@ -514,6 +536,12 @@ if(var_option.eq.-6) then ;forc
     spacig = (/0.05/);0.5
 end if
 
+if(var_option.eq.-4) then
+    minlvl = (/-2.1,-2.1,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 2.1, 2.1, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 0.3, 0.3, 2 , 2 , 2 /); 1, 1, 1, 1,
+end if
+    
 if(var_option.eq.-3) then ;forc
     minlvl = (/-14,-14,-14,-14/);-8,-8,-8,-8,
     maxlvl = (/ 14, 14, 14, 14/); 8, 8, 8, 8,
@@ -534,41 +562,41 @@ end if
     
 if(var_option.ge.1) then ;dzdt
 if(nnv.eq.0) then   ;dzdt
-    minlvl = (/-3.5,-3.5,-3.5,-3.5/);
-    maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
-    spacig = (/ 0.5, 0.5, 0.5, 0.5/);
+    minlvl = (/-3.5,-3.5,-3.5,-3.5,-3.5/);
+    maxlvl = (/ 3.5, 3.5, 3.5, 3.5, 3.5/);
+    spacig = (/ 0.5, 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
-    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
-    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+    minlvl = (/-35,-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl = (/ 35, 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig = (/ 5 , 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-32,-32,-32,-32/);
-    maxlvl = (/ 32, 32, 32, 32/);
-    spacig = (/ 4 , 4 , 4 , 4 /);
+    minlvl = (/-32,-32,-32,-32,-32/);
+    maxlvl = (/ 32, 32, 32, 32, 32/);
+    spacig = (/ 4 , 4 , 4 , 4 , 4 /);
 else
-    minlvl = (/-8,-8,-8,-8/);-16,-16,-16,-16
-    maxlvl = (/ 8, 8, 8, 8/); 16, 16, 16, 16
-    spacig = (/ 1, 1, 1, 1/); 2 , 2 , 2 , 2 
+    minlvl = (/-8,-8,-8,-8,-8/);-16,-16,-16,-16
+    maxlvl = (/ 8, 8, 8, 8, 8/); 16, 16, 16, 16
+    spacig = (/ 1, 1, 1, 1, 1/); 2 , 2 , 2 , 2 
 end if
 end if
 if(nnv.eq.3) then ;dbdt
 if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-24,-24,-24,-24/);
-    maxlvl = (/ 24, 24, 24, 24/);
-    spacig = (/  3,  3,  3,  3/);
+    minlvl = (/-24,-24,-24,-24,-24/);
+    maxlvl = (/ 24, 24, 24, 24, 24/);
+    spacig = (/  3,  3,  3,  3,  3/);
 else
-    minlvl = (/-24,-24,-24,-24/);
-    maxlvl = (/ 24, 24, 24, 24/);
-    spacig = (/  3,  3,  3,  3/);
+    minlvl = (/-24,-24,-24,-24,-24/);
+    maxlvl = (/ 24, 24, 24, 24, 24/);
+    spacig = (/  3,  3,  3,  3,  3/);
 end if
 end if
 if(nnv.eq.4) then ;dvdt
-    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
-    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
-    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+    minlvl = (/-35,-35,-35,-35,-35/);-8,-8,-8,-8,
+    maxlvl = (/ 35, 35, 35, 35, 35/); 8, 8, 8, 8,
+    spacig = (/ 5 , 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
 end if
 end if
     

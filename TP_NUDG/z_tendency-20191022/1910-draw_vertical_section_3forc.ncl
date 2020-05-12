@@ -6,8 +6,8 @@
 begin
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 5 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
-nnv = 2  ;used to read dzdt induced by different forcing
+var_option = 4 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
+nnv = 1  ;used to read dzdt induced by different forcing
 
 jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False;True ; 
@@ -32,6 +32,11 @@ if(var_option.eq.-2) then
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-1~N~","s~S~-2~N~"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-4) then 
+    draw_var = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    unit     = (/"K/Day","K/Day","10~S~-11~N~ s~S~-2~N~","10~S~-11~N~ s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-3) then 
     draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
@@ -65,6 +70,12 @@ if(var_option.eq.3) then
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
+if(var_option.eq.4) then 
+    draw_var = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    select = (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.5) then
     var_name = (/"Qeddy","A"                   ,"Sflux"                ,"Mflux"             ,"Tflux"/)  ;
@@ -131,6 +142,10 @@ end if
 
 ;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+if(var_option.eq.-4) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_forc_te.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
+end if
 if(var_option.eq.-2)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_advect.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
@@ -166,6 +181,10 @@ end if
 if(var_option.eq.2)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly_advection.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_advect_" + var_name(nnv) + area(na)
+end if
+if(var_option.eq.4) then 
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month.nc"
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_te_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.5)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux4.nc"
@@ -316,6 +335,15 @@ if(jet_option) then
     printVarSummary(indices)
     print(corez)
     print(corey)
+end if
+
+if(var_option.eq.-4) then 
+    var_m(:,0:1,:,:,:) = var_m(:,0:1,:,:,:)*24*3600 ;convert units of Q from K/s to K/Day 
+    var_m(:,2:3,:,:,:) = var_m(:,2:3,:,:,:)*10^11
+end if
+
+if(var_option.eq.-3) then 
+    var_m = var_m*10^11
 end if
 
 if(var_option.eq.-2) then 
@@ -512,7 +540,7 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    if(var_option.eq.-1) then
+    if(var_option.eq.-1.or.var_option.eq.-4) then
     resp@gsnPanelLabelBar = False
     res@lbLabelBarOn      = True   ; the label bar
     else
@@ -528,6 +556,12 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(var_option.eq.-4) then
+    minlvl = (/-2.1,-2.1,-14,-14,-14/);-8,-8,-8,-8,
+    maxlvl = (/ 2.1, 2.1, 14, 14, 14/); 8, 8, 8, 8,
+    spacig = (/ 0.3, 0.3, 2 , 2 , 2 /); 1, 1, 1, 1,
+end if
+    
 if(var_option.eq.-2) then
     minlvl = (/-14,-14,-14,-14,-14/);-8,-8,-8,-8,
     maxlvl = (/ 14, 14, 14, 14, 14/); 8, 8, 8, 8,
@@ -559,9 +593,9 @@ else
 end if
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
-    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
-    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+    minlvl = (/-8,-8,-8,-8/);-35,-35,-35,-35
+    maxlvl = (/ 8, 8, 8, 8/); 35, 35, 35, 35
+    spacig = (/ 1, 1, 1, 1/); 5 , 5 , 5 , 5 
 end if
 if(nnv.eq.2) then ;dTdt
     minlvl = (/-14,-14,-14,-14/);
@@ -665,9 +699,8 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    gsn_panel(wks,plot,(/3,4/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
+    gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 

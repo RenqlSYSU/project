@@ -38,18 +38,18 @@ unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      /) 
-lev = (/850,700,500,200/)
-nl = 3
-nv = 1
+lev = (/925,700,500,200/)
+nl = 0 
+nv = 5
 diff = True
 perc = False;True ;
 vect_option = False;True ;
-cont_option = False;True ;
+cont_option = True ;False;
 jet_option  = False;True ;
 sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" /)    ;this can be used as right string 
-nvc = 1
+nvc = 0 
 
 var_option = 2 
 if(var_option.eq.0) then 

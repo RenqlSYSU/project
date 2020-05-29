@@ -31,31 +31,31 @@ end if
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"intEKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
-             "EKE-2.5-10day","EKE-10-90day"/) 
+             "EKE-2.5-10day","EKE-10-90day","U"/) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
-             "J"            ,"J"           /)   
+             "J"            ,"J"           ,"m/s"/)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
-                 "EKEhgh"   ,"EKElow"      /) 
-lev = (/925,700,500,200/)
-nl = 0 
-nv = 5
+                 "EKEhgh"   ,"EKElow"      ,"U"/) 
+lev = (/925,700,300,200/)
+nl = 3
+nv = 11
 diff = True
 perc = False;True ;
 vect_option = False;True ;
-cont_option = True ;False;
-jet_option  = False;True ;
+cont_option = False;True ;
+jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 sig_option  = True ;False;only work on shading 
-cont_var  = (/"Z3" ,"intQ1"/)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm","W/kg" /)    ;this can be used as right string 
-nvc = 0 
+cont_var  = (/"Z3" ,"intQ1","U"  /)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/kg" ,"m/s"/)    ;this can be used as right string 
+nvc = 2 
 
-var_option = 2 
+var_option = 0 
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(0,3,1)
+imonth = ispan(0,2,2)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.1) then 
@@ -83,7 +83,7 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(b","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
@@ -155,7 +155,7 @@ end if
 ;================================================================
 ;read data
 ;====================================================================
-if(jet_option) then 
+if(jet_option.ge.1) then 
 axlon = phis&lon
 axlat = new((/ncase,nmonth,nlon/),double)
 lat1 = phis&lat
@@ -237,8 +237,8 @@ if(diff) then
 do nf = 0 ,ncase-2,1
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
 if(perc) then 
-var(0,:,:,:,:) = where(abs(var(0,:,:,:,:)).le.0.000001,0.1,var(0,:,:,:,:))
-var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:)*100.0/var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
+var(0,2,:,:,:) = where(abs(var(0,2,:,:,:)).le.0.000001,0.1,var(0,2,:,:,:))
+var(nf+1,2,:,:,:)= var(nf+1,2,:,:,:)*100.0/var(0,2,:,:,:)   ;get the difference between CTRL and NUDG
 end if
 end do
 
@@ -411,7 +411,7 @@ end if
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 3.0
     res_line@cnMonoLineColor  = True ;False
-    if(jet_option) then
+    if(jet_option.ge.1) then
     res_line@cnLineColor      = "dimgray"
     else
     res_line@cnLineColor      = "black"
@@ -436,11 +436,18 @@ end if
     res_jet@cnLinesOn        = True      ; turn off contour lines
     res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
     res_jet@cnInfoLabelOn    = False
-    res_jet@cnLineThicknessF = 2.5
+    res_jet@cnLineThicknessF = 4
     res_jet@cnMonoLineColor  = True ;False
     res_jet@cnLineColor      = "black"
+    if(jet_option.eq.1) then 
     res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_jet@cnLevels         = (/20/)
+    end if
+    if(jet_option.eq.2) then 
+    u = mask(u, u.lt.10 , False) 
+    res_jet@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_jet@cnLevelSpacingF      = 10        ; set contour interval
+    end if
     res_jet@lbLabelBarOn         = False   ; the label bar
     res_jet@gsnCenterString      = ""
     res_jet@gsnLeftString    = " "
@@ -488,10 +495,10 @@ end if
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnFillScaleF     = 1
     res_sig@cnMonoFillColor  = True
     res_sig@cnFillColor      = "darkslategray"
-    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@cnFillDotSizeF   = 0.5
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
     ;res_sig@cnLevels             = (/3000,1000/)
@@ -552,7 +559,12 @@ end if
 end if
 
 if(nvc.eq.1) then ;intQ1
-    cont_spacing = (/20,15/)
+    cont_spacing = (/20,1/)
+end if
+
+if(nvc.eq.2) then ;200U
+;    var(0,3,:,:,:) = mask(var(0,3,:,:,:),var(0,3,:,:,:).ge.20,True)
+    cont_spacing = (/10,10/)
 end if
 
 if(nv.eq.0) 
@@ -606,14 +618,20 @@ end if
 
 if(nv.ge.6.and.nv.le.11) then ;intEKE
 if(perc) then 
-    minlvl = (/5  ,-70,-70/);-8,-8,-8,-8
+    minlvl = (/ 5 ,-70,-70/);-8,-8,-8,-8
     maxlvl = (/80 , 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 5 , 10, 10/);1 ,1 ,1 ,1 
 else
-    minlvl = (/5  ,-14,-14/);-8,-8,-8,-8
-    maxlvl = (/80 , 14, 14/);8 ,8 ,8 ,8 
-    spacig = (/ 5 , 2 , 2 /);1 ,1 ,1 ,1 
+    minlvl = (/5  ,-35,-14/);-8,-8,-8,-8
+    maxlvl = (/80 , 35, 14/);8 ,8 ,8 ,8 
+    spacig = (/ 5 , 5 , 2 /);1 ,1 ,1 ,1 
 end if
+end if
+
+if(nv.eq.12) 
+    minlvl = (/ 0 ,-7 ,-7 /)  ;omega*100
+    maxlvl = (/ 75, 7 , 7 /)
+    spacig = (/ 5 , 1 , 1 /)
 end if
 
 do nc = 0, ncase-1,1
@@ -681,8 +699,10 @@ end if
         line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         end if
         
-        if(jet_option) then 
+        if(jet_option.ge.1) then 
+        if(jet_option.eq.1) then 
         axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), res_axis )
+        end if
         jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
         overlay(plot(np),jetl(np))
         end if
@@ -715,7 +735,7 @@ end if
    ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
-    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/2,1/),resp)
 end do
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end

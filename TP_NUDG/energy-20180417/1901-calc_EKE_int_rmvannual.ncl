@@ -10,7 +10,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 90.0 ;day
@@ -23,7 +23,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_intEKE.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_500EKE.nc"
         ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_intuv.nc"
     else
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_intEKE2-" + cb + "-" + ca + "day.nc"
@@ -150,9 +150,9 @@ else
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((edd_u*edd_v)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n( (edd_v(:,:,5:8,:,:)*edd_v(:,:,5:8,:,:) + edd_u(:,:,5:8,:,:)*edd_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
+var   = dim_sum_n( (edd_v(:,:,5:12,:,:)*edd_v(:,:,5:12,:,:) + edd_u(:,:,5:12,:,:)*edd_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 end if

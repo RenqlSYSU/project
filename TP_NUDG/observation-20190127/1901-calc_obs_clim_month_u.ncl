@@ -10,22 +10,23 @@ path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.
 var_name = (/"uwnd","vwnd","hgt"/)
 nv  = 0
 
-years   = ispan(1979,2005,1)
+years   = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats = -2
+lats = 0  
 latn = 90
 lonl =  0
 lonr = 360
-lev  = (/1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100/) 
+lev  = (/1000, 925, 850, 500, 200, 100/) 
 
-fileout  = path2 + "mdata/NCEP1_Clim_month_ave_" + var_name(nv) + ".nc"
+do nv = 0,2,2
+fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_" + var_name(nv) + ".nc"
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-;f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
-f    = addfile(path1+var_name(0)+"/"+var_name(0)+"."+years(0)+".nc", "r")
+f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
+;f    = addfile(path1+var_name(0)+"/"+var_name(0)+"."+years(0)+".nc", "r")
 vars = f->$var_name(0)$(0,0,{lats:latn},{lonl:lonr})
 printVarSummary(vars)
 print(vars(20:30,50:52))
@@ -54,12 +55,12 @@ index(59:364) = ispan(60,365,1)
 
 do nt = 0,nyear-1,1
 if(isleapyear(years(nt))) then ;leap year,366 day
-    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(index,{lev},{lats:latn},{lonl:lonr})
 else   ;non-leap year, 365 day
-    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    ;f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
@@ -140,5 +141,6 @@ ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
 ncdf->month_vari  = (/month_vari/)
 ncdf->season_vari = (/season_vari/)
+end do 
 end
 

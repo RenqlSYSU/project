@@ -30,26 +30,26 @@ end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"intEKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
-             "EKE-2.5-10day","EKE-10-90day","U"/) 
+             "T"            ,"500EKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
+             "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL" /) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
-             "J"            ,"J"           ,"m/s"/)   
+             "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa" /)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
-                 "EKEhgh"   ,"EKElow"      ,"U"/) 
-lev = (/925,700,300,200/)
-nl = 3
-nv = 11
-diff = True
+                 "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
+                 "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"/) 
+lev = (/925,500,200,300/)
+nl = 1
+nv = 5
+diff = False;True
 perc = False;True ;
 vect_option = False;True ;
-cont_option = False;True ;
-jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
-sig_option  = True ;False;only work on shading 
-cont_var  = (/"Z3" ,"intQ1","U"  /)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm","W/kg" ,"m/s"/)    ;this can be used as right string 
-nvc = 2 
+cont_option = True ;False;
+jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
+sig_option  = False;True ;only work on shading 
+cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
+nvc = 0 
 
 var_option = 0 
 if(var_option.eq.0) then 
@@ -109,15 +109,15 @@ vari   = new((/ncase  ,nvar,nmonth,nlat,nlon/),float)
 prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot   = new((/ncase*nmonth/),graphic)
-    plot2  = new((/ncase*nmonth/),graphic)
-    wind   = new((/ncase*nmonth/),graphic)
-    wind2  = new((/ncase*nmonth/),graphic)
-    gtop   = new((/ncase*nmonth/),graphic)
-    line   = new((/ncase*nmonth/),graphic)
-    axis   = new((/ncase*nmonth/),graphic)
-    jetl   = new((/ncase*nmonth/),graphic)
-    sig    = new((/ncase*nmonth/),graphic)
+    plot   = new((/12/),graphic)
+    plot2  = new((/12/),graphic)
+    wind   = new((/12/),graphic)
+    wind2  = new((/12/),graphic)
+    gtop   = new((/12/),graphic)
+    line   = new((/12/),graphic)
+    axis   = new((/12/),graphic)
+    jetl   = new((/12/),graphic)
+    sig    = new((/12/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -152,6 +152,9 @@ else
    font_index     = 22
 end if
 
+wks = gsn_open_wks(fig_out,fig_name)
+;do nl = 0,2,1
+;do nv = 10,11,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -190,7 +193,7 @@ end if
 
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8)) then
+if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.14)) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -201,7 +204,7 @@ end if
 if(cont_option) then
 inv = 3
 f = addfile(filename(nf)+cont_var(nvc) + ".nc","r")
-if(nvc.eq.1) then
+if(nvc.eq.1.or.nvc.eq.2) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -216,6 +219,10 @@ do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 end do
 
+if(nvc.eq.2) then
+    var(:,3,:,:,:) = var(:,3,:,:,:)/100 ;Pa -> hPa
+end if
+
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
 end if
@@ -225,12 +232,16 @@ if(nv.eq.4) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*cp ;Q1,transform unit from K/S to W/kg
 end if
 
-if(nv.eq.5) then
+if(nv.eq.5.or.nv.eq.13) then
     var(:,2,:,:,:) = var(:,2,:,:,:)-273.15 ;transform unit from K to c
 end if
 
 if(nv.ge.6.and.nv.le.8) then ;intEKE
     var(:,2,:,:,:) = var(:,2,:,:,:)/10000.0 ;transform unit from K to c
+end if
+
+if(nv.eq.14) then
+    var(:,2,:,:,:) = var(:,2,:,:,:)/100 ;Pa -> hPa
 end if
 
 if(diff) then 
@@ -256,7 +267,7 @@ else
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 end if
 if(cont_option) then 
-var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
+;var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
 end if
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(prob)
@@ -266,7 +277,7 @@ printVarSummary(var)
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
+;    wks = gsn_open_wks(fig_out,fig_name)
 
 ;do na = 0, 5, 1
 print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na) + ", lonr = " + lonr(na))
@@ -371,7 +382,7 @@ end if
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
-    resvc@vcMinDistanceF            = 0.01
+    resvc@vcMinDistanceF            = 0.0105
     resvc@vcRefLengthF              = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
@@ -409,10 +420,10 @@ end if
     res_line@cnLinesOn        = True      ; turn off contour lines
     res_line@cnLineLabelsOn   = False      ; turn off contour line labels
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 3.0
+    res_line@cnLineThicknessF = 4.0
     res_line@cnMonoLineColor  = True ;False
-    if(jet_option.ge.1) then
-    res_line@cnLineColor      = "dimgray"
+    if(jet_option.ge.1.or.vect_option) then
+    res_line@cnLineColor      = "blueviolet";"green4";"black"
     else
     res_line@cnLineColor      = "black"
     end if
@@ -436,7 +447,7 @@ end if
     res_jet@cnLinesOn        = True      ; turn off contour lines
     res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
     res_jet@cnInfoLabelOn    = False
-    res_jet@cnLineThicknessF = 4
+    res_jet@cnLineThicknessF = 2.5
     res_jet@cnMonoLineColor  = True ;False
     res_jet@cnLineColor      = "black"
     if(jet_option.eq.1) then 
@@ -495,10 +506,10 @@ end if
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
-    res_sig@cnFillScaleF     = 1
+    res_sig@cnFillScaleF     = 0.5
     res_sig@cnMonoFillColor  = True
     res_sig@cnFillColor      = "darkslategray"
-    res_sig@cnFillDotSizeF   = 0.5
+    res_sig@cnFillDotSizeF   = 0.25
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
     ;res_sig@cnLevels             = (/3000,1000/)
@@ -553,6 +564,9 @@ if(nvc.eq.0) then ;Z3
 if(nl.eq.0) then ;850hPa
     cont_spacing = (/20,10/)
 end if
+if(nl.eq.1) then ;200hPa
+    cont_spacing = (/50,50/)
+end if
 if(nl.eq.3) then ;200hPa
     cont_spacing = (/80,10/)
 end if
@@ -562,9 +576,8 @@ if(nvc.eq.1) then ;intQ1
     cont_spacing = (/20,1/)
 end if
 
-if(nvc.eq.2) then ;200U
-;    var(0,3,:,:,:) = mask(var(0,3,:,:,:),var(0,3,:,:,:).ge.20,True)
-    cont_spacing = (/10,10/)
+if(nvc.eq.2) then ;SLP
+    cont_spacing = (/5,2/)
 end if
 
 if(nv.eq.0) 
@@ -609,6 +622,11 @@ if(nl.eq.0) then ;850
     maxlvl = (/ 15, 3.5, 3.5/);  24, 24
     spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
 end if
+if(nl.eq.1) then ;500 
+    minlvl = (/-38,-38,-3.5/); -24,-24
+    maxlvl = (/-8 ,-8 , 3.5/);  24, 24
+    spacig = (/ 2 , 2 ,0.5 /);   3,  3
+end if
 if(nl.eq.3) then  ;200
     minlvl = (/-68,-3.5,-3.5/); -24,-24
     maxlvl = (/-50, 3.5, 3.5/);  24, 24
@@ -622,9 +640,9 @@ if(perc) then
     maxlvl = (/80 , 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 5 , 10, 10/);1 ,1 ,1 ,1 
 else
-    minlvl = (/5  ,-35,-14/);-8,-8,-8,-8
-    maxlvl = (/80 , 35, 14/);8 ,8 ,8 ,8 
-    spacig = (/ 5 , 5 , 2 /);1 ,1 ,1 ,1 
+    minlvl = (/10,-35/);-8,-8,-8,-8
+    maxlvl = (/85, 35/);8 ,8 ,8 ,8 
+    spacig = (/5 , 5 /);1 ,1 ,1 ,1 
 end if
 end if
 
@@ -634,9 +652,21 @@ if(nv.eq.12)
     spacig = (/ 5 , 1 , 1 /)
 end if
 
-do nc = 0, ncase-1,1
+if(nv.eq.13) 
+    minlvl = (/-45 ,-3.5 ,-7 /)  ;omega*100
+    maxlvl = (/ 30, 3.5 , 7 /)
+    spacig = (/ 5 , 0.5 , 1 /)
+end if
+
+if(nv.eq.14) 
+    minlvl = (/1000,-14,-7 /)  ;omega*100
+    maxlvl = (/1030, 14, 7 /)
+    spacig = (/ 2  , 2 , 1 /)
+end if
+
+do nc = 0,1,1
 ;do nm = 0,nmonth-1,1
-if(nc.gt.0.or.nv.eq.2) then
+if((diff.and.nc.gt.0).or.nv.eq.2) then
     gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
    ; res@cnFillPalette = "BlueDarkRed18"
@@ -650,14 +680,18 @@ else
    res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
 end if 
     do nm = 0,nmonth-1,1
+        ;np = 2*nl+(nv-10) 
         np = nm
-        ;np = nmonth*nc + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
+        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.nv.eq.13.or.nv.eq.14) then
+        if(cont_option) then 
+        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
+        else
+        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
+        end if
+        else
         if(cont_option) then 
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
-        else
-        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8)) then
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         else
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") "
         end if
@@ -737,6 +771,8 @@ end if
     ;gsn_panel(wks,plot,(/2,2/),resp)
     gsn_panel(wks,plot,(/2,1/),resp)
 end do
-    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+;end do
+;end do
+;    gsn_panel(wks,plot,(/3,2/),resp)
 end
 

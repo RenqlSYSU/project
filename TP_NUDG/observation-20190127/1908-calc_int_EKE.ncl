@@ -25,7 +25,7 @@ else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
 end if
 g  = 9.8 ;m/(s*s)
-years    = ispan(1979,2005,1)
+years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
@@ -33,8 +33,9 @@ lats =  0 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/500,400,350,300,250,200,150,100/) ;hPa
-;lev  = (/1000,925,850,700,600,500,400,350,300,250,200,150,100/) ;hPa
+lev  = (/1000,925,850,700,600,\
+         500 ,400,350,300,250,\
+         200 ,150,100/) ;hPa
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -116,7 +117,8 @@ edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((v*v + u*u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((edd_v(:,:,5:12,:,:)*edd_v(:,:,5:12,:,:) + edd_u(:,:,5:12,:,:)*edd_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 end if
 
 EKE   = dim_avg_n(var,0) 

@@ -36,7 +36,8 @@ if(case_option.eq.2) then
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 end if
 var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
-             "Q1" ,"preci","TMQ","TS" ,"PS"   /) ;,"OMEGA","RELHUM" 
+             "Q1" ,"preci","TMQ","TS" ,"PS"  , \
+             "PSL" /) ;,"OMEGA","RELHUM" 
 
 ;Q1 is vertically integrated 
 
@@ -70,7 +71,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 8,9,1; ,nvar-1 ,1 
+do nv = 3,3,1; ,nvar-1 ,1 
 do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time

@@ -40,16 +40,18 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"/) 
 lev = (/925,500,200,300/)
 nl = 1
-nv = 5
-diff = False;True
+nv = 0
+diff = True ;False;
 perc = False;True ;
-vect_option = False;True ;
-cont_option = True ;False;
+vect_option = True ;False;
+cont_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-sig_option  = False;True ;only work on shading 
+sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
-nvc = 0 
+nvc = 2 
+contsig  = True
+barshare = False
 
 var_option = 0 
 if(var_option.eq.0) then 
@@ -111,6 +113,7 @@ prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
 ;the number of the panel plot
     plot   = new((/12/),graphic)
     plot2  = new((/12/),graphic)
+    plot3  = new((/12/),graphic)
     wind   = new((/12/),graphic)
     wind2  = new((/12/),graphic)
     gtop   = new((/12/),graphic)
@@ -266,8 +269,8 @@ prob(:,2,:,:,:) = mask(prob(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 else
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 end if
-if(cont_option) then 
-;var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
+if(cont_option.and.contsig) then 
+var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
 end if
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(prob)
@@ -360,17 +363,17 @@ end if
     ;else
     ;res@lbLabelBarOn         = True   ; the label bar
     ;end if
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
+    ;res@lbOrientation        = "Horizontal"
+    ;res@lbLabelFontHeightF   = tick_font
+    ;res@lbLabelFont          = font_index              ; make labels smaller
+    ;res@lbLabelStride        = 1
+    ;res@lbBoxLineThicknessF  = mp_thick-1
     ;res@pmLabelBarWidthF  = 0.65
     ;res@pmLabelBarHeightF = 0.08
 
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.15
-    res@pmLabelBarParallelPosF       = 0.5
+    ;res@pmLabelBarZone               = 0
+    ;res@pmLabelBarOrthogonalPosF     = 0.15
+    ;res@pmLabelBarParallelPosF       = 0.5
 
 ;--------set the attribute of vector--------------
     resvc                  = True
@@ -447,9 +450,13 @@ end if
     res_jet@cnLinesOn        = True      ; turn off contour lines
     res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
     res_jet@cnInfoLabelOn    = False
-    res_jet@cnLineThicknessF = 2.5
+    res_jet@cnLineThicknessF = 4
     res_jet@cnMonoLineColor  = True ;False
+    if(vect_option) then
+    res_jet@cnLineColor      = "blueviolet";"green4";"black"
+    else
     res_jet@cnLineColor      = "black"
+    end if
     if(jet_option.eq.1) then 
     res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_jet@cnLevels         = (/20/)
@@ -528,7 +535,7 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    if(na.eq.0) then; .and.nmonth.eq.4
+    if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "portrait"
     resp@gsnPanelLabelBar = True
@@ -537,11 +544,18 @@ end if
     resp@pmLabelBarHeightF = 0.05;0.8
     else
     res@lbLabelBarOn         = True   ; the label bar
+    res@lbOrientation        = "Vertical";"Horizontal"
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarZone               = 0
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
-    resp@lbOrientation     = "Horizontal"
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05
     end if
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -550,13 +564,13 @@ end if
 
 if(na.eq.0) then 
     vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,5 ,5 /), \  ;the level of 700hpa    ctrl,nudg,diff
-                      (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/20,10,10/)/)   ;the level of 200hpa    ctrl,nudg,diff
+                      (/10,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
+                      (/20,10,10/)/)   ;the level of 300hpa    ctrl,nudg,diff
 else
     vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
-                      (/7 ,3 ,3 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
@@ -565,9 +579,9 @@ if(nl.eq.0) then ;850hPa
     cont_spacing = (/20,10/)
 end if
 if(nl.eq.1) then ;200hPa
-    cont_spacing = (/50,50/)
+    cont_spacing = (/80,10/)
 end if
-if(nl.eq.3) then ;200hPa
+if(nl.eq.2) then ;200hPa
     cont_spacing = (/80,10/)
 end if
 end if
@@ -581,9 +595,9 @@ if(nvc.eq.2) then ;SLP
 end if
 
 if(nv.eq.0) 
-    minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
-    maxlvl = (/300, 140, 140/)      ; 80, 80
-    spacig = (/20 ,  20,  20/)      ; 10, 10
+    minlvl = (/0  ,-70,-140/)  ;q1 ;-80,-80
+    maxlvl = (/300, 70, 140/)      ; 80, 80
+    spacig = (/20 , 10,  20/)      ; 10, 10
 end if
 if(nv.eq.4) 
     minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
@@ -592,9 +606,9 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-3.5,-3.5/);-8,-8,-8,-8
-    maxlvl = (/16 , 3.5, 3.5/);8 ,8 ,8 ,8 
-    spacig = (/ 1 , 0.5, 0.5/);1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-1.4,-3.5/);-8,-8,-8,-8
+    maxlvl = (/16 , 1.4, 3.5/);8 ,8 ,8 ,8 
+    spacig = (/ 1 , 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.2) 
@@ -609,7 +623,7 @@ if(nl.eq.0) then ;850
     maxlvl = (/1525, 35, 35/);  24, 24
     spacig = (/ 15 , 5 , 5 /);   3,  3
 end if
-if(nl.eq.3) then  ;200
+if(nl.eq.2) then  ;200
     minlvl = (/10900,-70,-70/) 
     maxlvl = (/12400, 70, 70/)
     spacig = (/  100, 10, 10/) 
@@ -623,11 +637,11 @@ if(nl.eq.0) then ;850
     spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
 end if
 if(nl.eq.1) then ;500 
-    minlvl = (/-38,-38,-3.5/); -24,-24
-    maxlvl = (/-8 ,-8 , 3.5/);  24, 24
-    spacig = (/ 2 , 2 ,0.5 /);   3,  3
+    minlvl = (/-38,-3.5/); -24,-24
+    maxlvl = (/-8 , 3.5/);  24, 24
+    spacig = (/ 2 ,0.5 /);   3,  3
 end if
-if(nl.eq.3) then  ;200
+if(nl.eq.2) then  ;200
     minlvl = (/-68,-3.5,-3.5/); -24,-24
     maxlvl = (/-50, 3.5, 3.5/);  24, 24
     spacig = (/1.2,0.5 ,0.5 /);   3,  3
@@ -725,8 +739,16 @@ end if
         
         if(cont_option)
         res_line@cnLevelSpacingF    = cont_spacing(nc) 
+        ;res_line@cnLineColor      = "blueviolet";"green4";"black"
         plot2(np)   = gsn_csm_contour(wks,var(nc,3,nm,:,:),res_line)
         overlay(plot(np),plot2(np))
+        ;if(nc.eq.1) then 
+        ;res_line2   = res_line
+        ;res_line2@cnLevelSpacingF  = cont_spacing(0)
+        ;res_line2@cnLineColor      = "black"
+        ;plot3(np)   = gsn_csm_contour(wks,var(0,3,nm,:,:),res_line2)
+        ;overlay(plot(np),plot3(np))
+        ;end if
         end if
 
         if(na.eq.0.or.na.eq.6) then

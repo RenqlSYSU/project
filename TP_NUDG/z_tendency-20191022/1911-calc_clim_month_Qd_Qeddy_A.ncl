@@ -17,7 +17,7 @@ path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment ; 2 means F2000
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 nmonth = 4
-season = False
+season = True ;False
 geo = True ;False ;if true, only can calc 10N 
 
 ;parameter for bw_bandpass_filter
@@ -31,7 +31,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_Qd_Qeddy_A_lon.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -130,8 +130,8 @@ month_s = 12
 month_e = 2
 select_time := ind(time(:,1).eq.12.or.time(:,1).le.2)
 else
-month_s = 2*nm + 1 
-month_e = 2*nm + 2
+month_s = 3*nm ;+ 1
+month_e = 3*nm + 2
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 end if
 ntime = dimsizes(select_time)

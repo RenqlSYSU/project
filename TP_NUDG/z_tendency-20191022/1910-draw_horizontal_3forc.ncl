@@ -5,19 +5,20 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 4
-nnv = 0 ;used to read dzdt induced by different forcing
+var_option   = 1
+nnv = 0 ;"dzdt","dudt","dTdt","dbdt","dvdt"
 
-month_option = True;False
-uv_option    = True ;False ;
-duvdt_option = False ;True ;
+month_option = True ;False
+uv_option    = False;True ;
+duvdt_option = False;True ;
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nl   = 1 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"
+barshare = False;True ;
 
-;months   = (/"DJF"/)
-months   = (/"JF","MA","MJ","JA"/)
+;months   = (/"DJF","MAM","JJA","SON"/)
+months = (/"JF","MA","MJ","JA"/)
 nmonth = dimsizes(months)
 lev = (/925,850,700,500,200/)
 area = (/"TP","EA","NH"/)
@@ -66,7 +67,7 @@ if(var_option.eq.2) then
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var = (/"vort_x" ,"vort_y","Tadv","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"vort_x" ,"vort_y","Tadv","vort"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
@@ -189,12 +190,12 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;====================================================================
 if(uv_option) then
 do nc = 0, ncase-1, 1
-fu = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_2month_ave_U.nc","r")
-fv = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_2month_ave_V.nc","r")
-uvar(nc,:,:,:) = fu->month_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vvar(nc,:,:,:) = fv->month_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-uvari(nc,:,:,:) = fu->month_vari(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vvari(nc,:,:,:) = fv->month_vari(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+fu = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_month_ave_U.nc","r")
+fv = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_month_ave_V.nc","r")
+uvar(nc,:,:,:) = fu->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nseason,nlat,nlon)
+vvar(nc,:,:,:) = fv->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nseason,nlat,nlon)
+uvari(nc,:,:,:) = fu->season_vari(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nseason,nlat,nlon)
+vvari(nc,:,:,:) = fv->season_vari(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nseason,nlat,nlon)
 end do
 end if
 
@@ -237,7 +238,11 @@ var_m(:,:,1,:,:) = dim_avg_n_Wrap(var(:,:,select_time,:,:),2)
 printVarSummary(var_m)
 end if
 
+if(var_option.eq.3) then 
+var_m(:,3,:,:,:) = dim_sum_n(var_m(:,0:1,:,:,:),1)
+else
 var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
+end if
 if(duvdt_option) then 
 uvar(:,nvar-1,:,:,:) = dim_sum_n(uvar(:,0:(nvar-2),:,:,:),1)
 vvar(:,nvar-1,:,:,:) = dim_sum_n(vvar(:,0:(nvar-2),:,:,:),1)
@@ -420,14 +425,15 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    res@lbOrientation        = "Vertical";"Horizontal"
+    res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
-
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.15
+    res@pmLabelBarOrthogonalPosF     = 0.01
     res@pmLabelBarParallelPosF       = 0.5
 
 ;--------set the attribute of vector--------------
@@ -498,7 +504,7 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape" ;"portrait"
-    if(var_option.ge.-7) then
+    if(barshare) then
     resp@gsnPanelLabelBar = True
     res@lbLabelBarOn      = False   ; the label bar
     else
@@ -514,6 +520,7 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+do fnc = 0,1,1
 if(duvdt_option) then 
 vcref         = (/(/5 ,2 ,2 /), \  ;the level of 925hpa    ctrl,nudg,diff
                   (/10,4 ,4 /), \  ;the level of 850hpa    ctrl,nudg,diff
@@ -573,12 +580,12 @@ if(nnv.eq.1) then ;dudt
 end if
 if(nnv.eq.2) then ;dTdt
 if((fnc.eq.0)) then  ;.and.diff 
-    minlvl = (/-32,-32,-32,-32,-32/);
-    maxlvl = (/ 32, 32, 32, 32, 32/);
+    minlvl = (/-28,-28,-28,-28,-28/);
+    maxlvl = (/ 28, 28, 28, 28, 28/);
     spacig = (/ 4 , 4 , 4 , 4 , 4 /);
 else
-    minlvl = (/-8,-8,-8,-8,-8/);-16,-16,-16,-16
-    maxlvl = (/ 8, 8, 8, 8, 8/); 16, 16, 16, 16
+    minlvl = (/-7,-7,-7,-7,-7/);-16,-16,-16,-16
+    maxlvl = (/ 7, 7, 7, 7, 7/); 16, 16, 16, 16
     spacig = (/ 1, 1, 1, 1, 1/); 2 , 2 , 2 , 2 
 end if
 end if
@@ -605,10 +612,9 @@ end if
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do fnc = 0,1,1
 do nv = 0,nvar-1,1
-do nm = 0,nmonth-1,1
-    np = nm
+do nm = 0,0,1
+    np = nv
    ; np = nm*3 + nv
    ; np = nv*nmonth + nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
@@ -649,12 +655,12 @@ do nm = 0,nmonth-1,1
     print(max(var_m(fnc,nv,nm,:,:)))
     print(min(var_m(fnc,nv,nm,:,:)))
 end do 
-    gsn_panel(wks,plot,(/nmonth,1/),resp)
+;    gsn_panel(wks,plot,(/nmonth,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
 ;    if(nmonth.eq.1) then
-;    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
 ;    else
 ;    gsn_panel(wks,plot,(/nmonth,3/),resp)
 ;    end if

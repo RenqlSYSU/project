@@ -49,7 +49,7 @@ lats =  0  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/925,850,700,500,300,200/)
+lev  = (/925,850,700,500,300,200,100,10/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -98,6 +98,16 @@ if(option.eq.1) then
     opt = False
     filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
     filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+
+;fcf = fspan(0, 0.5, ntime/2) 
+;filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
+;cf = ezfftf_n(u,1)
+;cf(:,:,filt_cf,:,:,:) = 0.0  
+;filt_u = ezfftb_n(cf,0,2)
+;cf = ezfftf_n(v,1)
+;cf(:,:,filt_cf,:,:,:) = 0.0  
+;filt_v = ezfftb_n(cf,0,2)
+
     var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
     delete(filt_u)
     delete(filt_v)  

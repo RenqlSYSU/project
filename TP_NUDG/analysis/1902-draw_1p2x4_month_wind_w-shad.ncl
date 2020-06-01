@@ -31,21 +31,24 @@ end if
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"500EKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
-             "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL" /) 
+             "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
+             "precs" /) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
-             "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa" /)   
+             "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
+             "mm/day" /)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
-                 "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"/) 
-lev = (/925,500,200,300/)
+                 "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
+                 "snow" /) 
+lev = (/850,500,200,100/)
 nl = 1
-nv = 0
+nv = 15
 diff = True ;False;
 perc = False;True ;
-vect_option = True ;False;
+vect_option = False;True ;
 cont_option = False;True ;
-jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
+jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
@@ -156,8 +159,8 @@ else
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-;do nl = 0,2,1
-;do nv = 10,11,1
+do nl = 0,3,1
+do nv = 10,11,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -196,7 +199,7 @@ end if
 
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.14)) then
+if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -678,6 +681,12 @@ if(nv.eq.14)
     spacig = (/ 2  , 2 , 1 /)
 end if
 
+if(nv.eq.15) then ;precs
+    minlvl = (/0.5,-1.4,-3.5/);-8,-8,-8,-8
+    maxlvl = (/ 8 , 1.4, 3.5/);8 ,8 ,8 ,8 
+    spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
+end if
+
 do nc = 0,1,1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.gt.0).or.nv.eq.2) then
@@ -697,7 +706,7 @@ end if
         ;np = 2*nl+(nv-10) 
         np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
-        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.nv.eq.13.or.nv.eq.14) then
+        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
         else
@@ -791,10 +800,10 @@ end if
    ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
-    gsn_panel(wks,plot,(/2,1/),resp)
+;    gsn_panel(wks,plot,(/2,1/),resp)
 end do
-;end do
-;end do
-;    gsn_panel(wks,plot,(/3,2/),resp)
+end do
+end do
+    gsn_panel(wks,plot,(/4,2/),resp)
 end
 

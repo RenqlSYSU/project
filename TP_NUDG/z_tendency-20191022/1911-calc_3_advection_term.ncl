@@ -16,7 +16,7 @@ begin
 path    = "/home/ys17-19/renql"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nmonth = 4
-season = False 
+season = True ;False 
 geo = True ;False ;if true, only can calc 10N 
 
 if(case_option.eq.0) then
@@ -25,7 +25,7 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
                       "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_advect2.nc"
+    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_advect2_season.nc"
 end if
 
 if(case_option.eq.1) then
@@ -112,8 +112,8 @@ month_s = 12
 month_e = 2
 select_time := ind(time(:,1).eq.12.or.time(:,1).le.2)
 else
-month_s = 2*nm + 1
-month_e = 2*nm + 2
+month_s = 3*nm
+month_e = 3*nm + 2
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 end if
 ntime = dimsizes(select_time)

@@ -41,14 +41,14 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
-lev = (/850,500,200,100/)
+lev = (/850,500,200,100,10/)
 nl = 1
 nv = 15
 diff = True ;False;
 perc = False;True ;
-vect_option = False;True ;
+vect_option = True ;False;
 cont_option = False;True ;
-jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
+jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
@@ -60,7 +60,7 @@ var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(0,2,2)
+imonth = ispan(0,3,1)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.1) then 
@@ -159,8 +159,8 @@ else
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-do nl = 0,3,1
-do nv = 10,11,1
+do nl = 0,4,1
+do nv = 5,5,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -569,11 +569,13 @@ if(na.eq.0) then
     vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/10,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
-                      (/20,10,10/)/)   ;the level of 300hpa    ctrl,nudg,diff
+                      (/50,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
+                      (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
 else
     vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/15,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
@@ -640,14 +642,24 @@ if(nl.eq.0) then ;850
     spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
 end if
 if(nl.eq.1) then ;500 
-    minlvl = (/-38,-3.5/); -24,-24
-    maxlvl = (/-8 , 3.5/);  24, 24
-    spacig = (/ 2 ,0.5 /);   3,  3
+    minlvl = (/-38,-3.5,-3.5/); -24,-24
+    maxlvl = (/-8 , 3.5, 3.5/);  24, 24
+    spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
 end if
 if(nl.eq.2) then  ;200
     minlvl = (/-68,-3.5,-3.5/); -24,-24
     maxlvl = (/-50, 3.5, 3.5/);  24, 24
     spacig = (/1.2,0.5 ,0.5 /);   3,  3
+end if
+if(nl.eq.3) then  ;100
+    minlvl = (/-75,-3.5,-3.5/); -24,-24
+    maxlvl = (/-60, 3.5, 3.5/);  24, 24
+    spacig = (/1  ,0.5 ,0.5 /);   3,  3
+end if
+if(nl.eq.4) then  ;10
+    minlvl = (/-65,-3.5,-3.5/); -24,-24
+    maxlvl = (/-50, 3.5, 3.5/);  24, 24
+    spacig = (/1  ,0.5 ,0.5 /);   3,  3
 end if
 end if
 
@@ -703,7 +715,7 @@ else
    res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
 end if 
     do nm = 0,nmonth-1,1
-        ;np = 2*nl+(nv-10) 
+        ;np = 2*(nl-2)+nc
         np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
@@ -801,9 +813,9 @@ end if
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
 end do
 end do
 end do
-    gsn_panel(wks,plot,(/4,2/),resp)
 end
 

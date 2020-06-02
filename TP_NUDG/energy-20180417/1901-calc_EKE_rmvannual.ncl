@@ -13,8 +13,8 @@ case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5
+ca = 90.0 ;day
+cb = 10.0
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG24h","NG6h"/)

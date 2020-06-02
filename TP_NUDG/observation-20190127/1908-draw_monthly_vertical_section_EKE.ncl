@@ -6,34 +6,35 @@
 begin
 draw_var = (/"EKE","uwnd"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"J"  ,"m/s" /)    ;this can be used as right string 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-;var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+;months   = (/"DJF","MAM","JJA","SON"/)
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 case = (/"NCEP1","ERA-Interim"/)
-zonal = True ; True means to calc anomaly based on zonal average
-na = 2  ; "TP","EA","NH","CA"
-nv = 1
-nc = 0
+zonal = False ; True means to calc anomaly based on zonal average
+na = 0  ; "TP","EA","NH","CA"
+nv = 0
+nc = 1
 
 ;parameter for bw_bandpass_filter
-ca = 7.0 ;day
+ca = 10.0 ;day
 cb = 2.5 
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
-lats = (/  0 , 15 , 0  , 15  /);20 ;-20
-latn = (/  89, 55 , 89 , 55 /) ;55 ;60
-lonl = (/90  ,110 , 1  ,0  /) ;30 ;20
-lonr = (/105 ,130 ,359 ,70 /) ;150;220
+lats = (/ 35 , 15 , 0  , 15 /);20 ;-20
+latn = (/ 35 , 55 , 89 , 55 /) ;55 ;60
+lonl = (/ 30 ,110 , 1  ,0   /) ;30 ;20
+lonr = (/150 ,130 ,359 ,70  /) ;150;220
+lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
 
-do na = 1,3,2
+do na = 0,0,1
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
-;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
-;gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
-filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
+gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
+;filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
 fig_name = path + "/fig/1p1x4_vertical_section_" + area(na) + draw_var(nv)
 ;fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
@@ -58,8 +59,9 @@ nmonth = dimsizes(months)
 ;read data
 ;====================================================================
 f = addfile(filename,"r")
-var := f->$var_name(0)$(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-var := dim_avg_n_Wrap(var,3)
+var := f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var := dim_avg_n_Wrap(var,2)
+printVarSummary(var)
 if(zonal) then 
 var_ave := f->$var_name(0)$(:,:,{lats(na):latn(na)},:) ;get an array (ncase,nmonth,nlat,nlon)
 var = var - dim_avg_n_Wrap(var_ave,3)
@@ -71,7 +73,9 @@ printVarSummary(var)
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"BlueDarkRed18")
+    gsn_define_colormap(wks,"precip3_16lev")
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
@@ -151,9 +155,9 @@ printVarSummary(var)
     res@tiYAxisOn = False
     res@tmYRLabelsOn = False
     res@tmXBMode = "Manual"
-    res@tmXBTickSpacingF   = 10
-    res@tmXBTickStartF     = lats(na)
-    res@tmXBTickEndF       = latn(na)
+    res@tmXBTickSpacingF   = 30       ;10
+    res@tmXBTickStartF     = lonl(na) ;lats(na)
+    res@tmXBTickEndF       = lonr(na) ;latn(na)
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -165,6 +169,12 @@ printVarSummary(var)
     ;resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+
+if(nv.eq.0) then
+    minlvl = (/ 3 /);
+    maxlvl = (/ 48/);
+    spacig = (/ 3 /);
+end if
 
 if(nv.eq.1) then
 if(zonal) then 
@@ -178,22 +188,23 @@ else
 end if
 end if
 
-    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nm = 0,nmonth-1,1
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig        ; set contour interval
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl       ; set min contour level
     res@gsnLeftString   = pre_case(nm) + ") " + case(nc) + " " + months(nm)
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    ;res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lats(na) + "-" + latn(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
     plot(nm) = gsn_csm_pres_hgt(wks,var(nm,:,:),res)
     print(max(var(nm,:,:)))
     print(min(var(nm,:,:)))
 end do 
 
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/3,4/),resp)
-    gsn_panel(wks,plot,(/1,4/),resp)
+    gsn_panel(wks,plot,(/3,4/),resp)
+;    gsn_panel(wks,plot,(/1,4/),resp)
 end do 
 end
 

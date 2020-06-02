@@ -27,15 +27,15 @@ else
 end if
 
 g  = 9.8 ;m/(s*s)
-years    = ispan(1979,2005,1)
+years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats = -90 ;-20
+lats =  10 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600,500,400,300,200/)
+lev  = (/1000,925,850,700,600,500,400,300,200,150,100,50,30,10,5/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -59,9 +59,7 @@ ps    = new((/nyear,ntime,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlev,nlat,nlon/),float)
-month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
-season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
 ;==========================================================
 ;read the data
@@ -110,7 +108,6 @@ printVarSummary(var)
 print(var(0,1,8,50,20:30))
 
 EKE   = dim_avg_n(var,0)  ;daily 
-;EKE_vari = dim_variance_n(var,0) 
 
 EKE@long_name = "Daily Integrated transient eddies kinetic energy"
 ;EKE@long_name = "Integrated all kinetic energy"
@@ -138,9 +135,7 @@ do ns = 0,3,1
     end if
 end do
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
-;month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
-;season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 printVarSummary(month_ave)
 printVarSummary(season_ave)
 
@@ -173,13 +168,9 @@ filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
 ;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
-;filevardef(ncdf,"SKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lev","lat","lon"/))
-;filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lev","lat","lon"/))
-;filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))
-;filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lev","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"time",t&time)
@@ -190,8 +181,6 @@ filevarattdef(ncdf,"EKE",EKE)
 ;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
-;filevarattdef(ncdf,"month_vari",EKE)
-;filevarattdef(ncdf,"season_vari",EKE)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
@@ -200,10 +189,7 @@ ncdf->lev  = (/lev/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
 ncdf->EKE  = (/EKE/)
-;ncdf->EKE_vari  = (/EKE_vari/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
-;ncdf->month_vari  = (/month_vari/)
-;ncdf->season_vari = (/season_vari/)
 end
 

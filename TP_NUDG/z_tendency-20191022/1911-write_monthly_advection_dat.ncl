@@ -44,7 +44,7 @@ filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_d
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.4) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect2.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect2_season.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_3b6c_month.dat"
 end if
 if(ntime.eq.1) then 

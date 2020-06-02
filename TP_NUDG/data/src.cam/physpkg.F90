@@ -1596,7 +1596,6 @@ subroutine tphysac (ztodt,   cam_in,  &
                 write(iulog,"(A30,F8.2,A5,F6.2,A5,F6.2,A15,F6.2,A15,F6.2,A5,F8.6,A15,F6.2,A15,F12.1)")  "L_Zealot MOD FLAG: Calday:",calday,&
                 "Lat:",stat_lat,"Lon:",stat_lon," urelax(lv13)=", urelax(ii,13,lchnk,timeframe)," vrelax(lv13)=", vrelax(ii,13,lchnk,timeframe),&
                 "G0=",G0,"udiff(lv13)=",urelax(ii,13,lchnk,timeframe)-state%u(ii,13),"vdiff(lv13)=",vrelax(ii,13,lchnk,timeframe)-state%v(ii,13)
-                exit
             end if
         end if
 

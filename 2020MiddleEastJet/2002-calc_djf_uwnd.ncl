@@ -10,7 +10,7 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt", \
-             "ps"  ,"EGR"/)
+             "ps"  ,"EGR2"/)
 
 years    = ispan(1979,2016,1)
 years@calendar = "standard"
@@ -100,36 +100,46 @@ end if
 if(nv.eq.6) then 
     var   := new((/nyear,ntime,nlev,nlat,nlon/),float)
     air   := new((/ntime,nlev,nlat,nlon/),float)
-    hgt   := new((/ntime,nlev,nlat,nlon/),float)
-    uwnd  := new((/ntime,nlev,nlat,nlon/),float)
     lat = conform(air,vars&lat,2) 
     lev_dim = 1
     opt = 0 ;opt=0, Return the Eady growth rate
 ;    opt=1, Return the Eady growth rate and the vertical gradient of the zonal wind (du/dz)
 ;    opt=2, Return the Eady growth rate and the vertical gradient of the zonal wind (du/dz) and the Brunt-Vaisala frequency
 
+    opt    = 0     ;used by center_finite_diff_n, no meanging 
+    cyclic = False ;used by center_finite_diff_n
+    pi = atan(1.0)*4
+    f0  = 2*(2*pi/24.0/3600.0)*sin(lat*pi/180.0)
+    
     do nt = 0,nyear-1,1
     print("read: " + years(nt))
     if(isleapyear(years(nt))) then ;leap year,366 day
-        f    = addfile(path1+var_name(nv)+"/air.interim."+years(nt)+".nc","r")
+        f    = addfile(path1+"air/air.interim."+years(nt)+".nc","r")
         air  = f->air(select_time1,{lev},{lats:latn},{lonl:lonr})
-        f    = addfile(path1+var_name(nv)+"/hgt.interim."+years(nt)+".nc","r")
+        f    = addfile(path1+"hgt/hgt.interim."+years(nt)+".nc","r")
         hgt  = f->hgt(select_time1,{lev},{lats:latn},{lonl:lonr})
-        f    = addfile(path1+var_name(nv)+"/uwnd.interim."+years(nt)+".nc","r")
+        f    = addfile(path1+"uwnd/uwnd.interim."+years(nt)+".nc","r")
         uwnd = f->uwnd(select_time1,{lev},{lats:latn},{lonl:lonr})
     else   ;non-leap year, 365 day
-        f    = addfile(path1+var_name(nv)+"/air.interim."+years(nt)+".nc","r")
+        f    = addfile(path1+"air/air.interim."+years(nt)+".nc","r")
         air  = f->air(select_time,{lev},{lats:latn},{lonl:lonr})
-        f    = addfile(path1+var_name(nv)+"/hgt.interim."+years(nt)+".nc","r")
+        f    = addfile(path1+"hgt/hgt.interim."+years(nt)+".nc","r")
         hgt  = f->hgt(select_time,{lev},{lats:latn},{lonl:lonr})
-        f    = addfile(path1+var_name(nv)+"/uwnd.interim."+years(nt)+".nc","r")
+        f    = addfile(path1+"uwnd/uwnd.interim."+years(nt)+".nc","r")
         uwnd = f->uwnd(select_time,{lev},{lats:latn},{lonl:lonr})
     end if
     hgt = hgt/9.8 ;convert unit from m2/s2 to m
-    th  = pot_temp(lev*100, air, lev_dim, False)
-    var(nt,:,:,:,:) = eady_growth_rate(th, uwnd, hgt, lat, opt, lev_dim)
+    
+    static = static_stability(lev*100, air, lev_dim, 0)
+    static = conform(air,dim_avg_n(static,0),(/1,2,3/))
+    static = where(abs(static).lt.0.0000000001, 0.000001, static)
+    var(nt,:,:,:,:)  = 0.3098*(f0/static)*center_finite_diff_n(uwnd, hgt, cyclic, opt, lev_dim)
+    
+    ;th  = pot_temp(lev*100, air, lev_dim, False)
+    ;var(nt,:,:,:,:) = eady_growth_rate(th, uwnd, hgt, lat, opt, lev_dim)
     end do
-    delete([/th,air,uwnd,hgt,lat/])
+    delete([/static,air,uwnd,hgt,lat/])
+    ;delete([/th,air,uwnd,hgt,lat/])
 end if
 
 ;------------------------------------------------------

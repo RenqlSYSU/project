@@ -6,9 +6,10 @@
 begin
 year_option = True ;calc yearly DJF 
 var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option = True  ;20191205, control the draw of jet stream
+jet_option  = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
+bar_share = True
 nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
@@ -25,8 +26,18 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 5,5,1
+do var_option = -17,-17,1
 do nnv = 1,1,1
+if(var_option.eq.-17) then 
+    draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
+    var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2"/)  ;this can be used as right string 
+end if
+if(var_option.eq.-16) then 
+    draw_var = (/"EGR2"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"season_ave"/)  ;use to read variables
+    unit     = (/"1/day"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-15) then 
     draw_var = (/"T"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"season_ave"/)  ;use to read variables
@@ -163,7 +174,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
 lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 60 , 89 , 89 , 89 /) ;55 ;60
+latn = (/ 89 , 89 , 89 , 89 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
 lonr = (/360 , 70 ,175 , 320/) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -175,6 +186,14 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
+if(var_option.eq.-17)
+    filename = path + "data/" + case + "_" + months + "e_vector-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
+if(var_option.eq.-16)
+    filename = path + "data/" + case + "_" + months + "EGR-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
 if(var_option.eq.-15)
     filename = path + "data/" + case + "_" + months + "air-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
@@ -272,7 +291,7 @@ if(jet_option) then
     else
     u_m = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if
-    u_m = mask(u_m, u_m.lt.20 , False) 
+    u_m = mask(u_m, u_m.lt.10 , False) 
     printVarSummary(u_m)
 end if
 
@@ -366,6 +385,16 @@ var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
+if(var_option.eq.-17) then 
+do nv = 0,2,1
+    var_m((3*nv+2),0,:,:)  = dim_avg_n_Wrap(f->$var_name(3*nv+2)$(:,{850},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+end do 
+end if
+
+if(var_option.eq.-16) then 
+    var_m = var_m*24*3600
+end if
+
 if(var_option.eq.-15) then 
     var_m = var_m-273.15
 end if
@@ -423,7 +452,7 @@ end if
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
     wks = gsn_open_wks(fig_out,fig_name)
-    if(var_option.eq.-10.or.var_option.eq.-15) then 
+    if(var_option.eq.-10.or.var_option.eq.-15.or.var_option.eq.-16) then 
     gsn_define_colormap(wks,"precip3_16lev")
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     else
@@ -488,11 +517,7 @@ end if
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    if(var_option.ge.1.or.var_option.eq.-4) then
-    res@lbLabelBarOn         = False   ; the label bar
-    else
-    res@lbLabelBarOn         = True   ; the label bar
-    end if
+    ;res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -579,6 +604,27 @@ end if
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
 
+    res_cont = True
+    res_cont@gsnDraw          = False
+    res_cont@gsnFrame         = False
+    res_cont@gsnAddCyclic     = True;False
+    res_cont@cnFillOn         = False
+    res_cont@cnLinesOn        = True
+    res_cont@cnLineLabelsOn   = False ;True ;
+    res_cont@cnLineLabelFontHeightF = 0.005
+    res_cont@cnInfoLabelOn    = False
+    res_cont@cnLineThicknessF = 5.0
+    res_cont@cnLineColor      = "green4";"black";"blueviolet";
+    res_cont@gsnContourZeroLineThicknessF = 0
+    res_cont@gsnContourNegLineDashPattern = 5
+    
+    res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_cont@cnLevelSpacingF       = 10        ; set contour interval
+    res_cont@lbLabelBarOn     = False   ; the label bar
+    res_cont@gsnCenterString  = ""
+    res_cont@gsnLeftString    = " "
+    res_cont@gsnRightString   = " "
+
 ;--------set the attribute of polygon--------------
     lnres1                      = True
     lnres1@gsLineColor          = "black"
@@ -592,9 +638,11 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait" ;
-    if(var_option.ge.1.or.var_option.eq.-4) then
+    if(bar_share) then
+    res@lbLabelBarOn      = False;True   ; the label bar
     resp@gsnPanelLabelBar = True
     else
+    res@lbLabelBarOn      = True   ; the label bar
     resp@gsnPanelLabelBar = False
     end if
     resp@lbOrientation     = "Horizontal" ;"Vertical" ;
@@ -608,6 +656,19 @@ end if
 
 vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
 
+if(var_option.eq.-17) then ;Eady growth rate
+    minlvl := (/-7,-7,-7/);
+    maxlvl := (/ 7, 7, 7/);
+    spacig := (/ 1, 1, 1/);
+    vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
+end if
+
+if(var_option.eq.-16) then ;Eady growth rate
+    minlvl := (/ 0 /);
+    maxlvl := (/1.6/);
+    spacig := (/0.1/);
+end if
+
 if(var_option.eq.-15) then ;T
 if(nl.eq.1) then 
     minlvl := (/-16/);
@@ -620,6 +681,7 @@ if(nl.eq.4) then
     spacig := (/ 1 /);
 end if
 end if
+
 if(var_option.eq.-14) then
     minlvl := (/-7,-7/);
     maxlvl := (/ 7, 7/);
@@ -688,11 +750,11 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(var_option.gt.-10.or.(var_option.ge.-14.and.var_option.lt.-10)) then 
+    if(.not.(var_option.eq.10)) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
-do nv = 0, nvar-1,1
+do nv = 0, 2,1;nvar-1,1
 ;do ni = 0, 3, 1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
@@ -720,22 +782,33 @@ do nv = 0, nvar-1,1
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     end if
+    if(var_option.eq.-17)
+    plot(np) = gsn_csm_contour_map_ce(wks,var_m((3*np+2),nt,:,:),res)
+    resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nv)+"m/s"
+    vect(np) = gsn_csm_vector(wks,var_m((3*np),nt,:,:),var_m((3*np+1),nt,:,:),resvc)
+    overlay(plot(np),vect(np))
+    else
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
+    end if
+    print(max(var_m(nv,nt,:,:)))
+    print(min(var_m(nv,nt,:,:)))
+
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
+    
     if(vect_option) then 
     resvc@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
     vect(np) = gsn_csm_vector(wks,u(nt,:,:),v(nt,:,:),resvc)
     overlay(plot(np),vect(np))
     end if
-    print(max(var_m(nv,nt,:,:)))
-    print(min(var_m(nv,nt,:,:)))
 
     if(jet_option) then 
     line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
     overlay(plot(np),line(np))
     end if
+    
     if(region_line) then 
         line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres1 )
         line2(np) = gsn_add_polyline( wks, plot(np), lonx(:,2), latx(:,2), lnres2 )
@@ -746,7 +819,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/nvar,1/),resp)
+    gsn_panel(wks,plot,(/3,1/),resp)
+    ;gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end do 
 end

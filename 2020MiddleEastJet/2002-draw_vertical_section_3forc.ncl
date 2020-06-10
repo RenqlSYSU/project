@@ -8,12 +8,13 @@ year_option = True ;calc yearly DJF
 var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False;;control the draw of jet stream
 stream_option = True ; False;
-vect_option = True ; False;
+egr_option = True  ; Eady growth rate 
+vect_option = False;True ;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
-DJF_option = False  ;True ;
+DJF_option = True ;False 
 
 if(DJF_option) then
 months = (/"DJF"/)
@@ -182,6 +183,7 @@ var_m  := new((/narea,nvar,ntime,nlev,nlat/),double)
     plot     := new((/12/),graphic)
     line     := new((/12/),graphic)
     msfp     := new((/12/),graphic)
+    egrp     := new((/12/),graphic)
     vect     := new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
@@ -207,19 +209,20 @@ u_m   = new((/narea,ntime,unlev,nlat/),float)
 f = addfile(path + "data/" + case + "_DJF_uwnd-year.nc","r")
 if(DJF_option) then
 do na = 0,narea-1,1
-    u := f->$var_name1$(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
     u := dim_avg_n_Wrap(u,3)
     u_m(na,0,:,:) = dim_avg_n_Wrap(u,0)
 end do
 else
 do na = 0,narea-1,1
-    u := f->$var_name1$(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->season_ave(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
     u := dim_avg_n_Wrap(u,4)
     u_m(na,:,:,:) = dim_avg_n_Wrap(u,0)
 end do
 end if
 u_m = mask(u_m, u_m.lt.-10 , False) 
 printVarSummary(u_m)
+delete([/f,u/])
 end if
 
 if(vect_option) then 
@@ -237,6 +240,7 @@ w_m = - w_m*100
 copy_VarMeta(vars(:,:,0),v_m(0,:,:))
 copy_VarMeta(vars(:,:,0),w_m(0,:,:))
 printVarSummary(w_m)
+delete([/f_v,f_w,v,w/])
 end if
 
 if(stream_option) then
@@ -268,11 +272,37 @@ do na = 0,narea-1,1
 end do
 end if
 
+delete([/f,f2,v,ps,msf/])
 copy_VarMeta(vars(:,:,0),msf_m(0,0,:,:))
 msf_m = msf_m/10^10
 printVarSummary(msf_m)
 print(max(msf_m))
 print(min(msf_m))
+end if
+
+if(egr_option) then
+egr_m = new((/narea,ntime,unlev,nlat/),float)
+if(DJF_option) then
+f2 = addfile(path + "data/" + case + "_DJF_EGR2-year.nc","r")
+do na = 0,narea-1,1
+    egr := dim_avg_n_Wrap(f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    egr_m(na,0,:,:) = dim_avg_n_Wrap(egr,2)
+end do
+else
+f2 = addfile(path + "data/" + case + "_EGR-year.nc","r")
+do na = 0,narea-1,1
+    egr := dim_avg_n_Wrap(f2->season_ave(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    egr_m(na,:,:,:) = dim_avg_n_Wrap(egr,3)
+end do
+end if
+lev_m = conform(egr_m,lev,2)
+;egr_m = mask(egr_m,lev_m.ge.850,True)
+delete([/f2,egr,lev_m/])
+egr_m = egr_m*24*3600 ; convert unit from 1/s to 1/day
+copy_VarMeta(vars(:,:,0),egr_m(0,0,:,:))
+printVarSummary(egr_m)
+print(max(egr_m))
+print(min(egr_m))
 end if
 
 f = addfile(filename,"r")
@@ -454,6 +484,31 @@ printVarSummary(var_m)
     res_msf@gsnRightString   = " "
 
 ;---------set the attribute of the contour-----------------
+    res_egr = True
+    res_egr@gsnDraw          = False
+    res_egr@gsnFrame         = False
+    res_egr@cnFillOn         = False
+    res_egr@cnLinesOn        = True
+    res_egr@cnLineLabelsOn   = True ;False
+    res_egr@cnInfoLabelOn    = False
+    res_egr@cnLineThicknessF = 4.0
+    res_egr@cnLineColor      = "blueviolet";"gray40"
+    res_egr@gsnContourZeroLineThicknessF = 0
+    res_egr@gsnContourNegLineDashPattern = 2
+    res_egr@gsnContourPosLineDashPattern = 0
+    
+    ;res_egr@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    ;res_egr@cnLevels             = levels2       ; set contour interval
+    res_egr@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_egr@cnLevelSpacingF      = 0.2        ; set contour interval
+    res_egr@gsnPresHgtHeightLabelOn = False
+    res_egr@tiYAxisOn = False
+    res_egr@lbLabelBarOn     = False   ; the label bar
+    res_egr@gsnCenterString  = ""
+    res_egr@gsnLeftString    = " "
+    res_egr@gsnRightString   = " "
+
+;---------set the attribute of the contour-----------------
     res_line = True
     res_line@gsnDraw          = False
     res_line@gsnFrame         = False
@@ -483,18 +538,22 @@ printVarSummary(var_m)
     res_line@gsnRightString   = " "
 
 ;----------set the attribute of the vector-------------------
-    resvc                  = res
+    resvc                  = True 
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
     resvc@cnFillOn         = False
     resvc@cnLinesOn        = False
     resvc@cnLineLabelsOn   = False
     resvc@cnInfoLabelOn    = False
-    ;resvc@gsnPresHgtHeightLabelOn = False
+    resvc@gsnPresHgtHeightLabelOn = False
     resvc@tiYAxisOn = False
     resvc@tmYLLabelsOn = False
+    resvc@tiYAxisOn = False
+    resvc@tmYRLabelsOn = False
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMinDistanceF             = 0.02
+    resvc@vcMinDistanceF            = 0.03
     resvc@vcLineArrowHeadMinSizeF   = 0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.015
     resvc@vcRefAnnoOn                = False
@@ -548,9 +607,9 @@ if(var_option.eq.-10) then
     ;minlvl := (/-70/);-8,-8,-8,-8,;u
     ;maxlvl := (/ 70/); 8, 8, 8, 8,
     ;spacig := (/ 10/); 1, 1, 1, 1,
-    minlvl := (/-14/);-8,-8,-8,-8, ;msf_m
-    maxlvl := (/ 14/); 8, 8, 8, 8,
-    spacig := (/ 2/); 1, 1, 1, 1,
+    minlvl := (/-35/);-8,-8,-8,-8, ;msf_m
+    maxlvl := (/ 35/); 8, 8, 8, 8,
+    spacig := (/ 5 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.-6) then
@@ -631,15 +690,20 @@ do nv = 0, nvar-1,1
     print(min(var_m(na,nv,nt,:,:)))
 
     if(jet_option) then 
-    line(np) = gsn_csm_pres_hgt(wks,u_m(na,:,:),res_line)
+    line(np) = gsn_csm_pres_hgt(wks,u_m(na,nt,:,:),res_line)
     overlay(plot(np),line(np))
     end if
     
-    if(stream_option) then 
-    msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res_msf)
-    overlay(plot(np),msfp(np))
-    end if
+    ;if(stream_option) then 
+    ;msfp(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res_msf)
+    ;overlay(plot(np),msfp(np))
+    ;end if
 
+    if(egr_option) then 
+    egrp(np) = gsn_csm_pres_hgt(wks,egr_m(na,nt,:,:),res_egr)
+    overlay(plot(np),egrp(np))
+    end if
+    
     if(vect_option) then 
     vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,nt,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
     overlay(plot(np),vect(np))

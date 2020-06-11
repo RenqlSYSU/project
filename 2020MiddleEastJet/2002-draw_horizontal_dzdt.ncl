@@ -10,7 +10,7 @@ jet_option  = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
 bar_share = True
-nl = 4 ;(/925,850,700,500,200/)
+nl = 4 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -22,7 +22,7 @@ months  = (/""/)
 months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 end if
 ntime = dimsizes(months2)
-lev    = (/925,850,700,500,200/) 
+lev    = (/925,850,700,500,250/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
@@ -187,7 +187,7 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.eq.-17)
-    filename = path + "data/" + case + "_" + months + "e_vector-year.nc"
+    filename = path + "data/" + case + "_" + months + "e_vector2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-16)
@@ -387,7 +387,7 @@ end if
 
 if(var_option.eq.-17) then 
 do nv = 0,2,1
-    var_m((3*nv+2),0,:,:)  = dim_avg_n_Wrap(f->$var_name(3*nv+2)$(:,{850},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m((3*nv+2),0,:,:)  = dim_avg_n_Wrap(f->$var_name(3*nv+2)$(:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
 end do 
 end if
 

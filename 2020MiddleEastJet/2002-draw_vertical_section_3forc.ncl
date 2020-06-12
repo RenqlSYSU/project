@@ -7,9 +7,10 @@ begin
 year_option = True ;calc yearly DJF 
 var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False;;control the draw of jet stream
-stream_option = True ; False;
-egr_option = True  ; Eady growth rate 
+stream_option =  False;True ;
+egr_option = False;True ; Eady growth rate 
 vect_option = False;True ;
+cont_option = True
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
@@ -23,7 +24,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -10,-10,1
+do var_option = -1,-1,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -58,16 +59,19 @@ if(var_option.eq.-3) then
     draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qeddh","Ah"/)  ;use to read variables
     unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-2) then 
     draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qeddl","Al"/)  ;use to read variables
     unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-1) then 
     draw_var := (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
     unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.0) then 
     draw_var := (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -101,11 +105,11 @@ end if
 end if
 
 ;area: east Asia
-area = (/"ME","EA","NA","EEA","WNP","ENP"/);,"GB"
-lats = (/ 0  ,  0 , 0  ,  0  ,   0 , 0   /);, 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
-latn = (/90  , 90 , 90 , 90  ,  90 , 90  /);, 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
-lonl = (/ 0  ,105 , 250, 105 , 140 , 180 /);, 0   ;30 ;20    105,140 , 180  0 ,105 , 250
-lonr = (/70  ,175 , 320, 140 , 180 , 220 /);, 360 ;150;220   140,180 , 220 70 ,175 , 320
+area = (/"ME","EA","NA"/);,"EEA","WNP","ENP","GB"
+lats = (/10  , 10 ,10  /);,  0  ,   0 , 0   , 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
+latn = (/60  , 60 , 60 /);, 90  ,  90 , 90  , 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
+lonl = (/ 0  ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
+lonr = (/70  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
@@ -129,6 +133,7 @@ end if
 end if
 if(var_option.eq.-5.or.var_option.eq.-6)
     filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
+    contname = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.eq.-4)
@@ -137,10 +142,12 @@ if(var_option.eq.-4)
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
     filename = path + "data/" + case + "_DJF_forc_te-year.nc"
+    contname = path + "data/" + case + "_DJF_dzdt_te-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
     filename = path + "data/" + case + "_DJF_forc_ex-year.nc"
+    contname = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
 end if
 if(var_option.eq.1)
@@ -178,6 +185,9 @@ nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
 narea  = dimsizes(area)
 var_m  := new((/narea,nvar,ntime,nlev,nlat/),double)
+if(cont_option) then
+var_c  := new((/narea,nvar,ntime,nlev,nlat/),double)
+end if
 
 ;the number of the panel plot
     plot     := new((/12/),graphic)
@@ -185,6 +195,7 @@ var_m  := new((/narea,nvar,ntime,nlev,nlat/),double)
     msfp     := new((/12/),graphic)
     egrp     := new((/12/),graphic)
     vect     := new((/12/),graphic)
+    cont     := new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.035
@@ -318,6 +329,15 @@ if(var_option.le.0)
     end if
     end do
     end do
+    if(cont_option) then 
+    fc = addfile(contname,"r")
+    do na = 0, narea-1,1
+    var  := dim_avg_n_Wrap(fc->dudt(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    var_c(na,:,0,:,:) = dim_avg_n_Wrap(var,3)
+    end do
+    var_c = var_c*10^6
+    copy_VarMeta(vars(:,:,0),var_c(0,0,0,:,:))
+    end if 
 else
     do na = 0, narea-1,1
     if(DJF_option) then 
@@ -491,16 +511,16 @@ printVarSummary(var_m)
     res_egr@cnLinesOn        = True
     res_egr@cnLineLabelsOn   = True ;False
     res_egr@cnInfoLabelOn    = False
-    res_egr@cnLineThicknessF = 4.0
+    res_egr@cnLineThicknessF = 5.0
     res_egr@cnLineColor      = "blueviolet";"gray40"
     res_egr@gsnContourZeroLineThicknessF = 0
-    res_egr@gsnContourNegLineDashPattern = 2
+    res_egr@gsnContourNegLineDashPattern = 14
     res_egr@gsnContourPosLineDashPattern = 0
     
     ;res_egr@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_egr@cnLevels             = levels2       ; set contour interval
     res_egr@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_egr@cnLevelSpacingF      = 0.2        ; set contour interval
+    res_egr@cnLevelSpacingF      = 5        ; set contour interval
     res_egr@gsnPresHgtHeightLabelOn = False
     res_egr@tiYAxisOn = False
     res_egr@lbLabelBarOn     = False   ; the label bar
@@ -684,8 +704,8 @@ do nv = 0, nvar-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    ;plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
-    plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
+    plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
+    ;plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
     print(max(var_m(na,nv,nt,:,:)))
     print(min(var_m(na,nv,nt,:,:)))
 
@@ -704,6 +724,11 @@ do nv = 0, nvar-1,1
     overlay(plot(np),egrp(np))
     end if
     
+    if(cont_option) then 
+    cont(np) = gsn_csm_pres_hgt(wks,var_c(na,nv,nt,:,:),res_egr)
+    overlay(plot(np),cont(np))
+    end if
+    
     if(vect_option) then 
     vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,nt,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
     overlay(plot(np),vect(np))
@@ -712,8 +737,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/narea,nvar/),resp)
-    gsn_panel(wks,plot,(/2,3/),resp)
+    gsn_panel(wks,plot,(/narea,nvar/),resp)
+;    gsn_panel(wks,plot,(/2,3/),resp)
 end do 
 end do 
 end

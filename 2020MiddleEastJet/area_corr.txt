@@ -1,0 +1,220 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+(0)	ME : 21-60E 15-39N 
+(0)	EA : 105-174E 21-45N 
+(0)	NA : 250.5-319.5E 25.5-49.5N 
+(0)	 
+(0)	 
+(0)	type0 correlation between ME EOF0 and EA EOF0 = -0.487032
+(0)	type0 correlation between ME EOF0 and EA EOF1 = 0.499975
+(0)	type0 correlation between ME EOF0 and EA EOF2 = 0.204533
+(0)	type0 correlation between ME EOF0 and NA EOF0 = 0.618321
+(0)	type0 correlation between ME EOF0 and NA EOF1 = 0.0979329
+(0)	type0 correlation between ME EOF0 and NA EOF2 = -0.0306892
+(0)	 
+(0)	type0 correlation between ME EOF1 and EA EOF0 = 0.0562484
+(0)	type0 correlation between ME EOF1 and EA EOF1 = -0.138534
+(0)	type0 correlation between ME EOF1 and EA EOF2 = 0.0202379
+(0)	type0 correlation between ME EOF1 and NA EOF0 = -0.00228339
+(0)	type0 correlation between ME EOF1 and NA EOF1 = 0.160605
+(0)	type0 correlation between ME EOF1 and NA EOF2 = 0.291384
+(0)	 
+(0)	type0 correlation between ME EOF2 and EA EOF0 = 0.134943
+(0)	type0 correlation between ME EOF2 and EA EOF1 = 0.165598
+(0)	type0 correlation between ME EOF2 and EA EOF2 = -0.428707
+(0)	type0 correlation between ME EOF2 and NA EOF0 = -0.223353
+(0)	type0 correlation between ME EOF2 and NA EOF1 = 0.23051
+(0)	type0 correlation between ME EOF2 and NA EOF2 = 0.0862431
+(0)	 
+(0)	type0 correlation between EA EOF0 and NA EOF0 = -0.437108
+(0)	type0 correlation between EA EOF0 and NA EOF1 = -0.091274
+(0)	type0 correlation between EA EOF0 and NA EOF2 = 0.211163
+(0)	 
+(0)	type0 correlation between EA EOF1 and NA EOF0 = 0.0927014
+(0)	type0 correlation between EA EOF1 and NA EOF1 = 0.00502331
+(0)	type0 correlation between EA EOF1 and NA EOF2 = -0.354922
+(0)	 
+(0)	type0 correlation between EA EOF2 and NA EOF0 = 0.507604
+(0)	type0 correlation between EA EOF2 and NA EOF1 = -0.17252
+(0)	type0 correlation between EA EOF2 and NA EOF2 = -0.306249
+(0)	 
+(0)	 
+(0)	 
+(0)	type1 correlation between ME EOF0 and EA EOF0 = -0.0193687
+(0)	type1 correlation between ME EOF0 and EA EOF1 = 0.159134
+(0)	type1 correlation between ME EOF0 and EA EOF2 = -0.722346
+(0)	type1 correlation between ME EOF0 and NA EOF0 = -0.46169
+(0)	type1 correlation between ME EOF0 and NA EOF1 = -0.000176098
+(0)	type1 correlation between ME EOF0 and NA EOF2 = 0.248713
+(0)	 
+(0)	type1 correlation between ME EOF1 and EA EOF0 = 0.120055
+(0)	type1 correlation between ME EOF1 and EA EOF1 = -0.215989
+(0)	type1 correlation between ME EOF1 and EA EOF2 = -0.0260928
+(0)	type1 correlation between ME EOF1 and NA EOF0 = 0.0733326
+(0)	type1 correlation between ME EOF1 and NA EOF1 = 0.421799
+(0)	type1 correlation between ME EOF1 and NA EOF2 = 0.0960723
+(0)	 
+(0)	type1 correlation between ME EOF2 and EA EOF0 = 0.0170316
+(0)	type1 correlation between ME EOF2 and EA EOF1 = -0.38233
+(0)	type1 correlation between ME EOF2 and EA EOF2 = -0.114366
+(0)	type1 correlation between ME EOF2 and NA EOF0 = -0.488413
+(0)	type1 correlation between ME EOF2 and NA EOF1 = 0.0896864
+(0)	type1 correlation between ME EOF2 and NA EOF2 = -0.146764
+(0)	 
+(0)	type1 correlation between EA EOF0 and NA EOF0 = 0.0234719
+(0)	type1 correlation between EA EOF0 and NA EOF1 = 0.186151
+(0)	type1 correlation between EA EOF0 and NA EOF2 = 0.219874
+(0)	 
+(0)	type1 correlation between EA EOF1 and NA EOF0 = 0.299342
+(0)	type1 correlation between EA EOF1 and NA EOF1 = -0.266885
+(0)	type1 correlation between EA EOF1 and NA EOF2 = 0.0168955
+(0)	 
+(0)	type1 correlation between EA EOF2 and NA EOF0 = 0.446387
+(0)	type1 correlation between EA EOF2 and NA EOF1 = -0.119996
+(0)	type1 correlation between EA EOF2 and NA EOF2 = -0.613594
+(0)	 
+(0)	 
+(0)	 
+(0)	type2 correlation between ME EOF0 and EA EOF0 = 0.277509
+(0)	type2 correlation between ME EOF0 and EA EOF1 = 0.0481156
+(0)	type2 correlation between ME EOF0 and EA EOF2 = -0.681827
+(0)	type2 correlation between ME EOF0 and NA EOF0 = 0.613149
+(0)	type2 correlation between ME EOF0 and NA EOF1 = 0.0261259
+(0)	type2 correlation between ME EOF0 and NA EOF2 = 0.28448
+(0)	 
+(0)	type2 correlation between ME EOF1 and EA EOF0 = 0.0567843
+(0)	type2 correlation between ME EOF1 and EA EOF1 = -0.167121
+(0)	type2 correlation between ME EOF1 and EA EOF2 = -0.0868665
+(0)	type2 correlation between ME EOF1 and NA EOF0 = 0.0596694
+(0)	type2 correlation between ME EOF1 and NA EOF1 = 0.34728
+(0)	type2 correlation between ME EOF1 and NA EOF2 = -0.246136
+(0)	 
+(0)	type2 correlation between ME EOF2 and EA EOF0 = 0.10164
+(0)	type2 correlation between ME EOF2 and EA EOF1 = -0.360297
+(0)	type2 correlation between ME EOF2 and EA EOF2 = 0.368171
+(0)	type2 correlation between ME EOF2 and NA EOF0 = -0.490386
+(0)	type2 correlation between ME EOF2 and NA EOF1 = 0.00283611
+(0)	type2 correlation between ME EOF2 and NA EOF2 = -0.0176822
+(0)	 
+(0)	type2 correlation between EA EOF0 and NA EOF0 = 0.200276
+(0)	type2 correlation between EA EOF0 and NA EOF1 = 0.19686
+(0)	type2 correlation between EA EOF0 and NA EOF2 = 0.447218
+(0)	 
+(0)	type2 correlation between EA EOF1 and NA EOF0 = 0.445488
+(0)	type2 correlation between EA EOF1 and NA EOF1 = -0.157956
+(0)	type2 correlation between EA EOF1 and NA EOF2 = 0.0699706
+(0)	 
+(0)	type2 correlation between EA EOF2 and NA EOF0 = -0.601967
+(0)	type2 correlation between EA EOF2 and NA EOF1 = -0.0196098
+(0)	type2 correlation between EA EOF2 and NA EOF2 = -0.317473
+(0)	 
+(0)	 
+(0)	 
+(0)	type3 correlation between ME EOF0 and EA EOF0 = 0.17837
+(0)	type3 correlation between ME EOF0 and EA EOF1 = -0.0800777
+(0)	type3 correlation between ME EOF0 and EA EOF2 = -0.689185
+(0)	type3 correlation between ME EOF0 and NA EOF0 = 0.490695
+(0)	type3 correlation between ME EOF0 and NA EOF1 = 0.0505956
+(0)	type3 correlation between ME EOF0 and NA EOF2 = -0.337563
+(0)	 
+(0)	type3 correlation between ME EOF1 and EA EOF0 = 0.132947
+(0)	type3 correlation between ME EOF1 and EA EOF1 = 0.253721
+(0)	type3 correlation between ME EOF1 and EA EOF2 = -0.149751
+(0)	type3 correlation between ME EOF1 and NA EOF0 = -0.00533362
+(0)	type3 correlation between ME EOF1 and NA EOF1 = -0.377911
+(0)	type3 correlation between ME EOF1 and NA EOF2 = 0.159945
+(0)	 
+(0)	type3 correlation between ME EOF2 and EA EOF0 = 0.0792211
+(0)	type3 correlation between ME EOF2 and EA EOF1 = 0.225331
+(0)	type3 correlation between ME EOF2 and EA EOF2 = 0.447638
+(0)	type3 correlation between ME EOF2 and NA EOF0 = -0.593864
+(0)	type3 correlation between ME EOF2 and NA EOF1 = 0.158181
+(0)	type3 correlation between ME EOF2 and NA EOF2 = -0.0121448
+(0)	 
+(0)	type3 correlation between EA EOF0 and NA EOF0 = 0.0445953
+(0)	type3 correlation between EA EOF0 and NA EOF1 = -0.200059
+(0)	type3 correlation between EA EOF0 and NA EOF2 = -0.333794
+(0)	 
+(0)	type3 correlation between EA EOF1 and NA EOF0 = -0.452133
+(0)	type3 correlation between EA EOF1 and NA EOF1 = -0.226581
+(0)	type3 correlation between EA EOF1 and NA EOF2 = 0.0799217
+(0)	 
+(0)	type3 correlation between EA EOF2 and NA EOF0 = -0.596216
+(0)	type3 correlation between EA EOF2 and NA EOF1 = 0.100138
+(0)	type3 correlation between EA EOF2 and NA EOF2 = 0.392112
+(0)	 
+(0)	 
+(0)	 
+(0)	type4 correlation between ME EOF0 and EA EOF0 = -0.348664
+(0)	type4 correlation between ME EOF0 and EA EOF1 = -0.325621
+(0)	type4 correlation between ME EOF0 and EA EOF2 = 0.0338642
+(0)	type4 correlation between ME EOF0 and NA EOF0 = 0.149816
+(0)	type4 correlation between ME EOF0 and NA EOF1 = -0.419964
+(0)	type4 correlation between ME EOF0 and NA EOF2 = -0.389976
+(0)	 
+(0)	type4 correlation between ME EOF1 and EA EOF0 = -0.370401
+(0)	type4 correlation between ME EOF1 and EA EOF1 = 0.274357
+(0)	type4 correlation between ME EOF1 and EA EOF2 = -0.0643452
+(0)	type4 correlation between ME EOF1 and NA EOF0 = -0.301815
+(0)	type4 correlation between ME EOF1 and NA EOF1 = 0.0897228
+(0)	type4 correlation between ME EOF1 and NA EOF2 = -0.120551
+(0)	 
+(0)	type4 correlation between ME EOF2 and EA EOF0 = 0.336516
+(0)	type4 correlation between ME EOF2 and EA EOF1 = -0.0749862
+(0)	type4 correlation between ME EOF2 and EA EOF2 = -0.530925
+(0)	type4 correlation between ME EOF2 and NA EOF0 = -0.544097
+(0)	type4 correlation between ME EOF2 and NA EOF1 = 0.158491
+(0)	type4 correlation between ME EOF2 and NA EOF2 = 0.0826629
+(0)	 
+(0)	type4 correlation between EA EOF0 and NA EOF0 = 0.0714965
+(0)	type4 correlation between EA EOF0 and NA EOF1 = 0.423365
+(0)	type4 correlation between EA EOF0 and NA EOF2 = 0.0723103
+(0)	 
+(0)	type4 correlation between EA EOF1 and NA EOF0 = -0.062068
+(0)	type4 correlation between EA EOF1 and NA EOF1 = 0.45864
+(0)	type4 correlation between EA EOF1 and NA EOF2 = 0.190831
+(0)	 
+(0)	type4 correlation between EA EOF2 and NA EOF0 = 0.414517
+(0)	type4 correlation between EA EOF2 and NA EOF1 = -0.159203
+(0)	type4 correlation between EA EOF2 and NA EOF2 = 0.328706
+(0)	 
+(0)	 
+(0)	 
+(0)	type5 correlation between ME EOF0 and EA EOF0 = 0.329864
+(0)	type5 correlation between ME EOF0 and EA EOF1 = 0.286504
+(0)	type5 correlation between ME EOF0 and EA EOF2 = -0.166519
+(0)	type5 correlation between ME EOF0 and NA EOF0 = 0.00745101
+(0)	type5 correlation between ME EOF0 and NA EOF1 = -0.468439
+(0)	type5 correlation between ME EOF0 and NA EOF2 = -0.0996616
+(0)	 
+(0)	type5 correlation between ME EOF1 and EA EOF0 = -0.362279
+(0)	type5 correlation between ME EOF1 and EA EOF1 = 0.338557
+(0)	type5 correlation between ME EOF1 and EA EOF2 = 0.109672
+(0)	type5 correlation between ME EOF1 and NA EOF0 = -0.310993
+(0)	type5 correlation between ME EOF1 and NA EOF1 = -0.0716205
+(0)	type5 correlation between ME EOF1 and NA EOF2 = 0.0337255
+(0)	 
+(0)	type5 correlation between ME EOF2 and EA EOF0 = -0.187174
+(0)	type5 correlation between ME EOF2 and EA EOF1 = -0.269259
+(0)	type5 correlation between ME EOF2 and EA EOF2 = 0.476222
+(0)	type5 correlation between ME EOF2 and NA EOF0 = -0.155556
+(0)	type5 correlation between ME EOF2 and NA EOF1 = 0.304255
+(0)	type5 correlation between ME EOF2 and NA EOF2 = -0.21558
+(0)	 
+(0)	type5 correlation between EA EOF0 and NA EOF0 = 0.178121
+(0)	type5 correlation between EA EOF0 and NA EOF1 = -0.459666
+(0)	type5 correlation between EA EOF0 and NA EOF2 = 0.0381854
+(0)	 
+(0)	type5 correlation between EA EOF1 and NA EOF0 = -0.067664
+(0)	type5 correlation between EA EOF1 and NA EOF1 = -0.447666
+(0)	type5 correlation between EA EOF1 and NA EOF2 = -0.311179
+(0)	 
+(0)	type5 correlation between EA EOF2 and NA EOF0 = -0.202295
+(0)	type5 correlation between EA EOF2 and NA EOF1 = -0.120548
+(0)	type5 correlation between EA EOF2 and NA EOF2 = -0.12172
+(0)	 
+(0)	 
+(0)	 

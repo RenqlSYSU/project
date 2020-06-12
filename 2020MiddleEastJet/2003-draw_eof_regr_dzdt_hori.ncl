@@ -11,29 +11,25 @@
 ;******************************************************************************
 begin
 lev  = (/850,500,200,100/)
-nl = 0
+nl = 2
 global = True
+bar_share  = False;True ;
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = -10,-10,1
+do var_option = -1,-3,1
 if(var_option.eq.-10) then 
     draw_var := (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"season_ave"/)  ;this is the variable used to draw, can used as center string
     unit     := (/"m/s"/)  ;this can be used as right string 
 end if
-if(var_option.eq.-4) then 
-    draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
-    unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
-end if
 if(var_option.eq.-3) then 
-    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"Qeddh","Ah"/)  ;use to read variables
-    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"vort","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
+    var_name := (/"b1x","b1y"/)  ;,"b3y" use to read variables
+    unit     := (/"10~S~-11~N~s~S~-2~N~","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-2) then 
-    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"Qeddl","Al"/)  ;use to read variables
-    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qeddl","Al","Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qeddl","Al","Qeddh","Ah"/)  ;use to read variables
+    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-1) then 
     draw_var := (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
@@ -47,22 +43,18 @@ if(var_option.eq.0) then
 end if
 if(var_option.ge.1) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-7~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
     draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
-    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
-    select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    draw_var := (/"Qeddl","Al","Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    select := (/1,3,0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
-    select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.4) then 
-    draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"vort","Tadvect","advect"/)  ;,"b3y" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
@@ -85,30 +77,30 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 filename0  = path + "data/eof_u_6kinds-" + area + ".nc"
 if(var_option.eq.-10)
     filename = path + "data/" + case + "_DJF_" + draw_var(0) + "-year.nc"
-    fig_name   = path + "fig/eof_regression_hor-" + draw_var(0)
+    fig_name   = path + "fig/eof_regression_hor-" + draw_var(0)+lev(nl)
 end if
-if(var_option.eq.-4)
-    filename = path + "data/" + case + "_DJF_forc_in-year.nc"
-    fig_name = path + "fig/eof_regression_hor-" + var_name(0)
+if(var_option.eq.-3)
+    filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
+    fig_name = path + "fig/eof_regression_hor-" + var_name(0)+lev(nl)
 end if
-if(var_option.le.-2.and.var_option.ge.-3)
+if(var_option.eq.-2)
     filename = path + "data/" + case + "_DJF_forc_te-year.nc"
-    fig_name = path + "fig/eof_regression_hor-" + var_name(0)
+    fig_name = path + "fig/eof_regression_hor-" + var_name(0)+lev(nl)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
     filename = path + "data/" + case + "_DJF_forc_ex-year.nc"
-    fig_name = path + "fig/eof_regression_hor-" + var_name(0)
+    fig_name = path + "fig/eof_regression_hor-" + var_name(0)+lev(nl)
 end if
 if(var_option.eq.1)
     filename = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
-if(var_option.ge.2.and.var_option.le.3)
+if(var_option.eq.2)
     filename = path + "data/" + case + "_DJF_dzdt_te-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
-if(var_option.eq.4)
-    filename = path + "data/" + case + "_DJF_dzdt_in-year.nc"
+if(var_option.eq.3)
+    filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
 fig_out    = "pdf" ;"eps";"x11"
@@ -164,17 +156,16 @@ sigl   = new((/18/),graphic)
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
 
-    res@lbLabelBarOn         = False   ; the label bar
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
+    res@lbOrientation        = "Vertical";"Horizontal"
+    res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.2
+    res@pmLabelBarOrthogonalPosF     = 0.01
     res@pmLabelBarParallelPosF       = 0.5
-    ;res@pmLabelBarWidthF  = 0.7
-    ;res@pmLabelBarHeightF = 0.1
 
 ;-------set the attribute of the map-------------------
     if(global) then 
@@ -212,7 +203,7 @@ sigl   = new((/18/),graphic)
     res_line@cnLineLabelsOn   = False ;True ;
     res_line@cnLineLabelFontHeightF = 0.01
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 5.0
+    res_line@cnLineThicknessF = 3.5
     res_line@cnLineColor      = "blueviolet";"green4";"black"
     res_line@gsnContourZeroLineThicknessF = 8
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
@@ -224,12 +215,12 @@ sigl   = new((/18/),graphic)
 
     reg_line = res_line
     reg_line@cnLineThicknessF = 3.5
-    reg_line@cnLineColor      = "black"
+    reg_line@cnLineColor      = "green4";"black"
     reg_line@gsnContourZeroLineThicknessF = 0
-    reg_line@gsnContourNegLineDashPattern = 2
+    reg_line@gsnContourNegLineDashPattern = 5
     reg_line@gsnContourPosLineDashPattern = 0
     reg_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    reg_line@cnLevelSpacingF      := 0.5     ; set contour interval
+    reg_line@cnLevelSpacingF      := 1     ; set contour interval
 
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
@@ -239,14 +230,13 @@ sigl   = new((/18/),graphic)
     res_sig@gsnDraw          = False
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
     res_sig@cnLineThicknessF = 2
-    ;res_sig@cnLineColor     = "black"
     res_sig@cnInfoLabelOn    = False
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
     res_sig@cnFillScaleF     = 0.5
     res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillColor      = "gray50";"darkslategray"
     res_sig@cnFillDotSizeF   = 0.1
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
@@ -262,7 +252,13 @@ sigl   = new((/18/),graphic)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait" ;
+    if(bar_share) then
+    res@lbLabelBarOn      = False;True   ; the label bar
     resp@gsnPanelLabelBar = True
+    else
+    res@lbLabelBarOn      = True   ; the label bar
+    resp@gsnPanelLabelBar = False
+    end if
     resp@lbOrientation    = "Horizontal" ;"Vertical" ;
     resp@pmLabelBarWidthF  = 0.8
     resp@pmLabelBarHeightF = 0.05
@@ -273,57 +269,65 @@ sigl   = new((/18/),graphic)
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.-10) then
-    minlvl = (/-3.5/)
-    maxlvl = (/ 3.5/)
-    spacig = (/ 0.5/)
+    minlvl := (/-3.5/)
+    maxlvl := (/ 3.5/)
+    spacig := (/ 0.5/)
 end if
     
-if(var_option.eq.-4) then
-    minlvl = (/-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 2 , 2 , 2 /); 1, 1, 1, 1,
+if(var_option.eq.-3) then 
+    minlvl := (/-7,-0.7/);-8,-8,-8,-8,
+    maxlvl := (/ 7, 0.7/); 8, 8, 8, 8,
+    spacig := (/ 1, 0.1/); 1, 1, 1, 1,
 end if
     
-if(var_option.lt.-1.and.var_option.ge.-3) then
-    minlvl = (/-2.1,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 2 /); 1, 1, 1, 1,
+if(var_option.eq.-2) then
+    minlvl := (/-0.7,-7,-0.7,-7/);-8,-8,-8,-8,
+    maxlvl := (/ 0.7, 7, 0.7, 7/); 8, 8, 8, 8,
+    spacig := (/ 0.1, 1, 0.1, 1/); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.-1) then
-    minlvl = (/-2.1,-2.1,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
+    minlvl := (/-0.7,-0.7,-7 /);-8,-8,-8,-8,
+    maxlvl := (/ 0.7, 0.7, 7 /); 8, 8, 8, 8,
+    spacig := (/ 0.1, 0.1, 1 /); 1, 1, 1, 1,
 end if
     
 if(var_option.eq.0) then 
-    minlvl = (/-2.1,-2.1,-2.1/);
-    maxlvl = (/ 2.1, 2.1, 2.1/);
-    spacig = (/ 0.3, 0.3, 0.3/);
+    minlvl := (/-2.1,-2.1,-2.1/);
+    maxlvl := (/ 2.1, 2.1, 2.1/);
+    spacig := (/ 0.3, 0.3, 0.3/);
 end if
 
 if(var_option.ge.1) then
 if(nnv.eq.0) then   ;dzdt
-    minlvl = (/-3.5,-3.5,-3.5,-3.5/);
-    maxlvl = (/ 3.5, 3.5, 3.5, 3.5/);
-    spacig = (/ 0.5, 0.5, 0.5, 0.5/);
+    minlvl := (/-3.5,-3.5,-3.5,-3.5/);
+    maxlvl := (/ 3.5, 3.5, 3.5, 3.5/);
+    spacig := (/ 0.5, 0.5, 0.5, 0.5/);
 end if
 if(nnv.eq.1) then ;dudt
-    minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8,
-    maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8,
-    spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1,
+if(var_option.eq.3) then 
+    minlvl := (/-21,-21,-21/);-8,-8,-8,-8,
+    maxlvl := (/ 21, 21, 21/); 8, 8, 8, 8,
+    spacig := (/ 3 , 3 , 3 /); 1, 1, 1, 1,
+else
+    minlvl := (/-3.5,-3.5,-3.5,-3.5/);-8,-8,-8,-8,
+    maxlvl := (/ 3.5, 3.5, 3.5, 3.5/); 8, 8, 8, 8,
+    spacig := (/ 0.5, 0.5, 0.5, 0.5/); 1, 1, 1, 1,
+end if
 end if
 if(nnv.eq.2) then ;dTdt
-    minlvl = (/-16,-16,-16,-16/);
-    maxlvl = (/ 16, 16, 16, 16/);
-    spacig = (/  2,  2,  2,  2/);
+    minlvl := (/-16,-16,-16,-16/);
+    maxlvl := (/ 16, 16, 16, 16/);
+    spacig := (/  2,  2,  2,  2/);
 end if
 if(nnv.eq.3) then ;dbdt
-    minlvl = (/-24,-24,-24,-24/);
-    maxlvl = (/ 24, 24, 24, 24/);
-    spacig = (/  3,  3,  3,  3/);
+    minlvl := (/-24,-24,-24,-24/);
+    maxlvl := (/ 24, 24, 24, 24/);
+    spacig := (/  3,  3,  3,  3/);
 end if
 end if
+
+lin_spc = (/1,1,1.5/)
 
 f2 = addfile(path + "/data/ERA-Interim_DJF_uwnd-year.nc","r")
 f3 = addfile(filename,"r")
@@ -373,6 +377,20 @@ if(var_option.le.0.and.var_option.ge.-10)
 else
     vars  = f3->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
 end if
+if(var_option.eq.-3) then
+fbv = addfile(path + "data/" + case + "_DJF_forc_in-year.nc","r")
+vars(0,0,:,:) = dim_sum_n_Wrap(vars(:,0,:,:),0) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+vars(1,0,:,:) = dim_avg_n_Wrap(f3->t3x(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) \
+               +dim_avg_n_Wrap(f3->t3y(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
+end if
+
+if(var_option.eq.3) then
+fbv = addfile(path + "data/" + case + "_DJF_dzdt_in-year.nc","r")
+vars(0,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+vars(1,0,:,:) = dim_avg_n_Wrap(fbv->$var_name(nnv)$(2,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
+vars(2,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0)
+end if
+;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
 var  := regCoef_n(ts,vars,2,1)
 ureg := regCoef_n(ts,u   ,2,0)
@@ -389,7 +407,9 @@ printVarSummary(var)
 b := tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
-prob  = mask(prob,prob.lt.siglvl,True)
+prob   = mask(prob,prob.lt.siglvl,True)
+lon_m := conform(prob,vars&lon,4)
+prob   = mask(prob,lon_m.eq.0,False)
 ;var   = mask(var,prob.lt.siglvl,True)
 copy_VarCoords(vars(0,0,:,:), prob(0,0,0,:,:))
 b := utval 
@@ -401,11 +421,18 @@ print(min(tval))
 print(max(df))
 print(min(df))
 
-if(var_option.eq.-4) then 
-    var = var*10^11
+if(var_option.eq.-6) then 
+    var = - var*3600*24
 end if
 
-if(var_option.lt.-1.and.var_option.ge.-3) then 
+if(var_option.eq.-3) then 
+    var(:,:,0,:,:) = var(:,:,0,:,:)*10^11
+    var(:,:,1,:,:) = var(:,:,1,:,:)*24*3600
+end if
+
+if(var_option.eq.-2) then 
+    var(:,:,3,:,:) = var(:,:,3,:,:)*10^11
+    var(:,:,2,:,:) = var(:,:,2,:,:)*24*3600
     var(:,:,1,:,:) = var(:,:,1,:,:)*10^11
     var(:,:,0,:,:) = var(:,:,0,:,:)*24*3600
 end if
@@ -424,7 +451,7 @@ if(nnv.eq.0) then
     var = var*10^3
 end if
 if(nnv.eq.1) then
-    var = var*10^7
+    var = var*10^6
 end if
 if(nnv.eq.2) then
     var = var*10^6
@@ -439,7 +466,7 @@ do nk = 0, 0, 1
 do ne = 0, 2, 1 ;neval-2, 1
 do nv = 0, nvar-1,1
     nev = ne + 1
-    np  = ne ;1 var ;2 area
+    np  = nv ;1 var ;2 area
     ;np  = ne*nvar + nv ;1 var ;2 area
     ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
     if(.not.(global)) then 
@@ -463,19 +490,23 @@ do nv = 0, nvar-1,1
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     end if
+    
     plot(np) = gsn_csm_contour_map_ce(wks, var(nk,ne,nv,:,:),res)
     sigl(np) = gsn_csm_contour(wks,prob(nk,ne,nv,:,:),res_sig)
     overlay(plot(np),sigl(np))
-    ;regl(np) = gsn_csm_contour(wks,ureg(nk,ne,:,:),reg_line)
-    ;overlay(plot(np),regl(np))
+   
+    reg_line@cnLevelSpacingF      := lin_spc(na)     ; set contour interval
+    regl(np) = gsn_csm_contour(wks,ureg(nk,ne,:,:),reg_line)
+    overlay(plot(np),regl(np))
+   
     line(np) = gsn_csm_contour(wks,u,res_line)
     overlay(plot(np),line(np))
-    print(max(var(nk,ne,nv,:,:)))
-    print(min(var(nk,ne,nv,:,:)))
+    printMinMax(var(nk,ne,nv,:,:),0)
 end do 
+    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+    gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
-    resp@txString = lev(nl) + "hPa " + draw_var + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
-    gsn_panel(wks,plot,(/3,1/),resp)
+    ;resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
 ;    gsn_panel(wks,plot,(/3,nvar/),resp)

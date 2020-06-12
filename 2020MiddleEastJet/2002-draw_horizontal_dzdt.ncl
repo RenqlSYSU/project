@@ -9,6 +9,7 @@ var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means 
 jet_option  = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
+cont_option = True
 bar_share = True
 nl = 4 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
@@ -26,7 +27,7 @@ lev    = (/925,850,700,500,250/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -17,-17,1
+do var_option = -5,-5,1
 do nnv = 1,1,1
 if(var_option.eq.-17) then 
     draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
@@ -77,6 +78,7 @@ if(var_option.eq.-5) then
     draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
     var_name := (/"b1x","b1y","b3x"/)  ;,"b3y" use to read variables
     unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-4) then 
     draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -87,16 +89,19 @@ if(var_option.eq.-3) then
     draw_var = (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qeddh","Ah"/)  ;use to read variables
     unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-2) then 
     draw_var = (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qeddl","Al"/)  ;use to read variables
     unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-1) then 
     draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
@@ -174,7 +179,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
 lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 89 , 89 , 89 , 89 /) ;55 ;60
+latn = (/ 60 , 89 , 89 , 89 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
 lonr = (/360 , 70 ,175 , 320/) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -208,19 +213,23 @@ if(var_option.eq.-10)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-5.or.var_option.eq.-6)
-    filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
+    filename = path + "data/" + case + "_"+months+"forc_in2-year.nc"
+    contname = path + "data/" + case + "_"+months+"dzdt_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-4.or.var_option.eq.-12)
-    filename = path + "data/" + case + "_" + months + "forc_in-year.nc"
+    filename = path + "data/" + case + "_"+months+"forc_in-year.nc"
+    contname = path + "data/" + case + "_"+months+"dzdt_in-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
     filename = path + "data/" + case + "_"+months+"forc_te-year.nc"
+    contname = path + "data/" + case + "_"+months+"dzdt_te-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.le.0.and.var_option.ge.-1)
     filename = path + "data/" + case + "_"+months+"forc_ex-year.nc"
+    contname = path + "data/" + case + "_"+months+"dzdt_ex-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.1)
@@ -258,6 +267,9 @@ nlat   = dimsizes(phis&latitude )  ;
 nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
 var_m  := new((/nvar,ntime,nlat,nlon/),double)
+if(cont_option) then
+var_c  := new((/nvar,ntime,nlat,nlon/),double)
+end if
 
 ;the number of the panel plot
     plot     = new((/12/),graphic)
@@ -267,6 +279,7 @@ var_m  := new((/nvar,ntime,nlat,nlon/),double)
     line2    = new((/12/),graphic)
     line3    = new((/12/),graphic)
     gtop     = new((/12/),graphic)
+    cont     = new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
@@ -352,6 +365,11 @@ else
     var_m(nv,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     end do
+    if(cont_option) then 
+    fc = addfile(contname,"r")
+    var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    var_c = var_c*10^6
+    end if 
 end if
 end if
 if(var_option.ge.1.and.var_option.le.5)
@@ -377,7 +395,13 @@ if(var_option.eq.-5) then
 fbv = addfile(path + "data/" + case + "_" + months + "forc_in-year.nc","r")
 var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+if(cont_option) then 
+    fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
+    var_c(1,0,:,:) = var_c(1,0,:,:) + dim_avg_n_Wrap(fbv->dudt(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    var_c(2,:,:,:) = dim_sum_n_Wrap(var_c(0:1,:,:,:),0)
 end if
+end if
+
 if(var_option.eq.5) then
 fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
 var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
@@ -613,13 +637,19 @@ end if
     res_cont@cnLineLabelsOn   = False ;True ;
     res_cont@cnLineLabelFontHeightF = 0.005
     res_cont@cnInfoLabelOn    = False
-    res_cont@cnLineThicknessF = 5.0
+    res_cont@cnLineThicknessF = 4.0
     res_cont@cnLineColor      = "green4";"black";"blueviolet";
     res_cont@gsnContourZeroLineThicknessF = 0
     res_cont@gsnContourNegLineDashPattern = 5
-    
-    res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_cont@cnLevelSpacingF       = 10        ; set contour interval
+    res_cont@gsnContourPosLineDashPattern = 0
+  
+    levels = new((/10/),integer)
+    levels(0:4) = (/-300,-250,-150,-80,-20/)
+    levels(5:9) = -levels(0:4:-1)
+    res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_cont@cnLevels             = levels       ; set contour interval
+    ;res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_cont@cnLevelSpacingF       = 50        ; set contour interval
     res_cont@lbLabelBarOn     = False   ; the label bar
     res_cont@gsnCenterString  = ""
     res_cont@gsnLeftString    = " "
@@ -771,6 +801,7 @@ do nv = 0, 2,1;nvar-1,1
     res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
     res@gsnRightString  = lev(nl) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
+    
     ;res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     if(var_option.ge.1)
@@ -804,15 +835,21 @@ do nv = 0, 2,1;nvar-1,1
     overlay(plot(np),vect(np))
     end if
 
-    if(jet_option) then 
-    line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
-    overlay(plot(np),line(np))
+    if(cont_option) then 
+    cont(np) = gsn_csm_contour(wks,var_c(nv,nt,:,:),res_cont)
+    overlay(plot(np),cont(np))
+    printMinMax(var_c(nv,nt,:,:),0)
     end if
     
     if(region_line) then 
         line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres1 )
         line2(np) = gsn_add_polyline( wks, plot(np), lonx(:,2), latx(:,2), lnres2 )
         line3(np) = gsn_add_polyline( wks, plot(np), lonx(:,3), latx(:,3), lnres3 )
+    end if
+    
+    if(jet_option) then 
+    line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
+    overlay(plot(np),line(np))
     end if
 end do 
    ; gsn_panel(wks,plot,(/3,1/),resp)

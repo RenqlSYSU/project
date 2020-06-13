@@ -14,15 +14,13 @@ draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center st
 unit     = (/"m/s"/)  ;this can be used as right string
 var_name = (/"season_ave"/)  ;use to read variables
 nv = 0
-lev  = (/850,500,200,100/)
-nl = 2
 lat_option = True
-DJF_option = False
+DJF_option = True ;False
 
 if(DJF_option) then
 years = ispan(1979,2015,1)
 months  = (/"DJF_"/)
-months2 = (/"DJF"/)
+months2 = (/""/)
 nt = 0
 else
 years = ispan(1979,2016,1)
@@ -33,10 +31,10 @@ end if
 case   = "ERA-Interim"
 
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ 0  , 0 , 0 /);, 10  ;-90 ,-90 ,-90 ,-90 
+lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 20 ,110 , 250/);, 0   ;30 ;20
-lonr = (/ 60 ,180 , 320/);, 360 ;150;220
+lonl = (/ 20 ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 60 ,175 , 320/);, 360 ;150;220
 lon_spacing = 20
 lat_spacing = 10
 narea = dimsizes(area)
@@ -44,7 +42,8 @@ neval = 4
 siglvl = 0.05
 
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
-filename   = path + "/data/eof_u_6kinds-" + months2(nt) + "_" + area + ".nc"
+filename   = path + "/data/eof_u_6kinds-" + area + ".nc"
+;filename   = path + "/data/eof_u_6kinds-" + months2(nt) + "_" + area + ".nc"
 fig_name   = path + "/fig/eof_regression_ver-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
@@ -265,11 +264,11 @@ print(max(df))
 print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nk = 0, 5, 1
-do ne = 0, neval-2, 1
+do nk = 0, 0, 1
+do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
-    np = nk*(neval-1) + ne 
-    res@gsnLeftString   = pre_case(np) + ") " + nk + " EOF" + nev
+    np = na*(neval-2) + ne 
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
     res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     if(nv.gt.10) then
@@ -289,8 +288,9 @@ do ne = 0, neval-2, 1
     print(min(var(nk,ne,:,:)))
 end do 
 end do 
-    resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
-    gsn_panel(wks,plot,(/6,3/),resp)
+    ;resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
+    ;gsn_panel(wks,plot,(/6,3/),resp)
 end do ;area 
+    gsn_panel(wks,plot,(/3,2/),resp)
 end
 

@@ -231,11 +231,11 @@ print(max(df))
 print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nk = 0, 5, 1
-do ne = 0, neval-2, 1
+do nk = 0, 0, 1
+do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
-    np = nk*(neval-1) + ne 
-    res@gsnLeftString   = pre_case(np) + ") " + nk + " EOF" + nev
+    np = na*(neval-2) + ne 
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
     ;res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
     res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
@@ -256,8 +256,9 @@ do ne = 0, neval-2, 1
     print(min(var(nk,ne,:,:)))
 end do 
 end do 
-    resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
-    gsn_panel(wks,plot,(/6,3/),resp)
+;    resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
+;    gsn_panel(wks,plot,(/6,3/),resp)
 end do ;area 
+    gsn_panel(wks,plot,(/3,2/),resp)
 end
 

@@ -9,8 +9,8 @@ var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means 
 jet_option  = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
-cont_option = True
-bar_share = True
+cont_option = False ;True
+bar_share = True ;False;
 nl = 4 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
@@ -23,16 +23,17 @@ months  = (/""/)
 months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 end if
 ntime = dimsizes(months2)
-lev    = (/925,850,700,500,250/) 
+lev    = (/925,850,700,500,200/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -5,-5,1
+do var_option = -17,-17,1
 do nnv = 1,1,1
 if(var_option.eq.-17) then 
     draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
     var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2"/)  ;this can be used as right string 
+    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"  ,"m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2"/)  ;this can be used as right string 
+    divg_option = False ;True
 end if
 if(var_option.eq.-16) then 
     draw_var = (/"EGR2"/)  ;this is the variable used to draw, can used as center string
@@ -86,25 +87,25 @@ if(var_option.eq.-4) then
     unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-3) then 
-    draw_var = (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qeddh","Ah"/)  ;use to read variables
-    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qeddh","Ah"/)  ;use to read variables
+    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-2) then 
-    draw_var = (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qeddl","Al"/)  ;use to read variables
-    unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qeddl","Al"/)  ;use to read variables
+    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
     select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-1) then 
-    draw_var = (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
-    unit     = (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+    draw_var := (/"Qd"   ,"Qte"  ,"Fte"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"Qd"   ,"Qeddy","A"  /)  ;use to read variables
+    unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qeddy","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"Qd"   ,"Qte","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
@@ -113,15 +114,15 @@ var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 ;nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
-    draw_var := (/"Qd","Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
-    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
     select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.4) then 
@@ -179,7 +180,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
 lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 60 , 89 , 89 , 89 /) ;55 ;60
+latn = (/ 90 , 89 , 89 , 89 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
 lonr = (/360 , 70 ,175 , 320/) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -411,7 +412,7 @@ end if
 
 if(var_option.eq.-17) then 
 do nv = 0,2,1
-    var_m((3*nv+2),0,:,:)  = dim_avg_n_Wrap(f->$var_name(3*nv+2)$(:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m((3*nv+2),0,:,:)  = - dim_avg_n_Wrap(f->$var_name(3*nv+2)$(:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
 end do 
 end if
 
@@ -646,10 +647,10 @@ end if
     levels = new((/10/),integer)
     levels(0:4) = (/-300,-250,-150,-80,-20/)
     levels(5:9) = -levels(0:4:-1)
-    res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
-    res_cont@cnLevels             = levels       ; set contour interval
-    ;res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res_cont@cnLevelSpacingF       = 50        ; set contour interval
+    ;res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    ;res_cont@cnLevels             = levels       ; set contour interval
+    res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_cont@cnLevelSpacingF       = 5        ; set contour interval
     res_cont@lbLabelBarOn     = False   ; the label bar
     res_cont@gsnCenterString  = ""
     res_cont@gsnLeftString    = " "
@@ -687,9 +688,18 @@ end if
 vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
 
 if(var_option.eq.-17) then ;Eady growth rate
-    minlvl := (/-7,-7,-7/);
-    maxlvl := (/ 7, 7, 7/);
-    spacig := (/ 1, 1, 1/);
+if(divg_option) then 
+do nv = 0,2,1
+    var_m((3*nv+2),0,:,:) = uv2dv_cfd( var_m((3*nv),0,:,:), var_m((3*nv+1),0,:,:),var_m&lat, var_m&lon, 3 )*10000
+end do
+    minlvl := (/-1.4,-1.4,-1.4/);-3.5,-3.5,-3.5-
+    maxlvl := (/ 1.4, 1.4, 1.4/); 3.5, 3.5, 3.5 
+    spacig := (/ 0.2, 0.2, 0.2/); 0.5, 0.5, 0.5 
+else
+    minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
+end if
     vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
 end if
 
@@ -766,9 +776,9 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.ge.1.and.var_option.le.5) then
-    minlvl = (/-3.5,-70,-16,-24/);-35,
-    maxlvl = (/ 3.5, 70, 16, 24/); 35,
-    spacig = (/ 0.5, 10,  2,  3/);  5,
+    minlvl = (/-3.5,-70,-16,-24/);-35,70
+    maxlvl = (/ 3.5, 70, 16, 24/); 35,70
+    spacig = (/ 0.5, 10,  2,  3/);  5,10
 end if
 
 if(var_option.ge.13) then ;dbdt
@@ -780,7 +790,7 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(.not.(var_option.eq.10)) then 
+    if(.not.(var_option.eq.-10)) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1

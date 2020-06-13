@@ -11,7 +11,7 @@
 ;******************************************************************************
 begin
 lev  = (/850,500,200,100/)
-nl = 2
+nl = 0
 global = True
 bar_share  = False;True ;
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
@@ -27,12 +27,12 @@ if(var_option.eq.-3) then
     unit     := (/"10~S~-11~N~s~S~-2~N~","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-2) then 
-    draw_var := (/"Qeddl","Al","Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_low","Fte_low","Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qeddl","Al","Qeddh","Ah"/)  ;use to read variables
     unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-1) then 
-    draw_var := (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
     unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
@@ -46,16 +46,16 @@ var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
-    draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
-    draw_var := (/"Qeddl","Al","Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_low","Fte_low","Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
     select := (/1,3,0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var := (/"vort","Tadvect","advect"/)  ;,"b3y" this is the variable used to draw, can used as center string
-    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    draw_var := (/"vort","Tadvect"/)  ;,"advect","b3y" this is the variable used to draw, can used as center string
+    select := (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
 nvar = dimsizes(draw_var)
@@ -65,6 +65,10 @@ lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90
 latn = (/ 90 , 90 , 90 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/ 0  , 0  ,0   /);, 0   ;30 ;20  0  ,105 , 250
 lonr = (/ 360,360 ,360 /);, 360 ;150;220 70 ,175 , 320
+lnld = (/ 0  ,105 , 250/) ;draw vertical line
+lnrd = (/ 70 ,175 , 320/) ;
+lonx = (/ lnld, lnrd, lnrd, lnld, lnld /)
+latx = (/ lats, lats, latn, latn, lats /)
 lon_spacing = 30
 lat_spacing = 20
 narea = dimsizes(area)
@@ -109,6 +113,7 @@ plot   = new((/18/),graphic)
 line   = new((/18/),graphic)
 regl   = new((/18/),graphic)
 sigl   = new((/18/),graphic)
+line1  = new((/12/),graphic)
 
 ;===============================================
 ;draw the figure
@@ -162,7 +167,7 @@ sigl   = new((/18/),graphic)
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
     res@pmLabelBarWidthF  = 0.03
-    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarHeightF = 0.15
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.01
     res@pmLabelBarParallelPosF       = 0.5
@@ -222,6 +227,11 @@ sigl   = new((/18/),graphic)
     reg_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     reg_line@cnLevelSpacingF      := 1     ; set contour interval
 
+    lnres1                      = True
+    lnres1@gsLineColor          = "black"
+    lnres1@gsLineDashPattern    = 0
+    lnres1@gsLineThicknessF     = 5.0
+
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
     res_sig@cnFillOn         = True       ; Fill contours
@@ -259,9 +269,9 @@ sigl   = new((/18/),graphic)
     res@lbLabelBarOn      = True   ; the label bar
     resp@gsnPanelLabelBar = False
     end if
-    resp@lbOrientation    = "Horizontal" ;"Vertical" ;
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05
+    resp@lbOrientation    = "Vertical" ;"Horizontal" ;
+    resp@pmLabelBarWidthF  = 0.03
+    resp@pmLabelBarHeightF = 0.4 ;0.27
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.01 
     resp@lbLabelFontThicknessF = tick_thick
@@ -388,7 +398,7 @@ if(var_option.eq.3) then
 fbv = addfile(path + "data/" + case + "_DJF_dzdt_in-year.nc","r")
 vars(0,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 vars(1,0,:,:) = dim_avg_n_Wrap(fbv->$var_name(nnv)$(2,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
-vars(2,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0)
+;vars(2,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
@@ -463,7 +473,7 @@ end if
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 0, 1
-do ne = 0, 2, 1 ;neval-2, 1
+do ne = 0, neval-2, 1
 do nv = 0, nvar-1,1
     nev = ne + 1
     np  = nv ;1 var ;2 area
@@ -475,10 +485,10 @@ do nv = 0, nvar-1,1
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
     end if
-    res@gsnLeftString   = pre_case(np) + ") " + nk + " EOF" + nev ;area(na) + " " + lonl(na) + "-" + lonr(na) + "E"
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev ;area(na) + " " + lonl(na) + "-" + lonr(na) + "E"
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
     if(var_option.ge.1) then 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nnv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightString  = draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     else
     res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     end if
@@ -502,6 +512,8 @@ do nv = 0, nvar-1,1
     line(np) = gsn_csm_contour(wks,u,res_line)
     overlay(plot(np),line(np))
     printMinMax(var(nk,ne,nv,:,:),0)
+        
+    line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,na), latx(:,na), lnres1 )
 end do 
     resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
     gsn_panel(wks,plot,(/nvar,1/),resp)

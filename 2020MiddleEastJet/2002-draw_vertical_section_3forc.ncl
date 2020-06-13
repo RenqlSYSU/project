@@ -56,19 +56,19 @@ if(var_option.eq.-4) then
     unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-3) then 
-    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qeddh","Ah"/)  ;use to read variables
     unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-2) then 
-    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qeddl","Al"/)  ;use to read variables
     unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
     select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.-1) then 
-    draw_var := (/"Qd"   ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd"   ,"Qte"  ,"Fte"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
     unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
@@ -83,15 +83,15 @@ var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 nnv = 1 ;used to read dzdt induced by different forcing
 if(var_option.eq.1) then 
-    draw_var := (/"Qd"  ,"Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.2) then 
-    draw_var := (/"Qeddl","Al"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
     select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var := (/"Qeddh","Ah"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
     select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.4) then 

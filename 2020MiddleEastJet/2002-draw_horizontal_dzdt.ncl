@@ -27,7 +27,7 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -17,-17,1
+do var_option = 6,6,1
 do nnv = 1,1,1
 if(var_option.eq.-17) then 
     draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
@@ -109,7 +109,7 @@ if(var_option.eq.0) then
     var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
-if(var_option.ge.1.and.var_option.le.5) then
+if(var_option.ge.1.and.var_option.le.6) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 ;nnv = 1 ;used to read dzdt induced by different forcing
@@ -132,6 +132,10 @@ end if
 if(var_option.eq.5) then 
     draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
+if(var_option.eq.6) then 
+    draw_var := (/"Qd","Qte","Fte","b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
+    select := (/0,1,2,0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
 if(var_option.eq.13) then
@@ -248,6 +252,11 @@ end if
 if(var_option.eq.5)
     filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
+end if
+if(var_option.eq.6)
+    filename  = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
+    filename1 = path + "data/" + case + "_DJF_dzdt_in-year.nc"
+    fig_name  = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.13)
     filename = path + "data/" + case + "_" + months + "zonal_momentum_flux-year.nc"
@@ -381,6 +390,14 @@ f = addfile(filename,"r")
     var_m  = dim_avg_n_Wrap(f->$var_name(nnv)$(select,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end if
+if(var_option.eq.6)
+    f = addfile(filename,"r")
+    var_m(0:2,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(0:2),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    f = addfile(filename1,"r")
+    var_m(3:5,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(3:5),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
+    copy_VarMeta(u_m(0,:,:),var_m(0,0,:,:))
+end if
 if(var_option.ge.13)
 f = addfile(filename,"r")
     if(DJF_option) then
@@ -424,7 +441,7 @@ if(var_option.eq.-15) then
     var_m = var_m-273.15
 end if
 
-if((var_option.le.-13.and.var_option.ge.-14).or.var_option.ge.6) then 
+if(var_option.le.-13.and.var_option.ge.-14) then 
     var_m = var_m*100000
 end if
 
@@ -458,7 +475,7 @@ if(var_option.eq.0) then
     var_m = var_m*24*3600 ;convert units of Q from K/s to K/Day 
 end if
 
-if(var_option.ge.1.and.var_option.le.5) then
+if(var_option.ge.1.and.var_option.le.6) then
 if(nnv.eq.0) then
     var_m = var_m*10^3
 end if
@@ -775,7 +792,7 @@ if(var_option.eq.0) then
     spacig := (/ 0.3, 0.3, 0.3/);
 end if
 
-if(var_option.ge.1.and.var_option.le.5) then
+if(var_option.ge.1.and.var_option.le.6) then
     minlvl = (/-3.5,-70,-16,-24/);-35,70
     maxlvl = (/ 3.5, 70, 16, 24/); 35,70
     spacig = (/ 0.5, 10,  2,  3/);  5,10
@@ -794,11 +811,11 @@ end if
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
-do nv = 0, 2,1;nvar-1,1
+do nv = 3,nvar-1,1
 ;do ni = 0, 3, 1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
-    np = nv
+    np = nv-3
     if(var_option.gt.0) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
@@ -832,8 +849,7 @@ do nv = 0, 2,1;nvar-1,1
     else
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
     end if
-    print(max(var_m(nv,nt,:,:)))
-    print(min(var_m(nv,nt,:,:)))
+    printMinMax(var_m(nv,nt,:,:),0)
 
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
@@ -866,7 +882,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
     ;gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end do 

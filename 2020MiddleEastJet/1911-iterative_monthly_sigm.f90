@@ -37,17 +37,24 @@ program iteration
     
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
-    nc = 0
+    nc = 2
     if(nc.eq.0) then 
         filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_4f6c_freq.dat"
         fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_freq.dat"     
         logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor-era_freq.txt"
-        var_name = (/"f_Qeddh","f_Qeddl","Ah     ","Al     "/) !,"f_Qd_t "
-    else 
+        !var_name = (/"f_Qeddh","f_Qeddl","Ah     ","Al     "/) !,"f_Qd_t "
+    end if
+    if(nc.eq.1) then 
         filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_4f6c.dat"
         fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt.dat"     
         logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor-era.txt"
         !var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
+    end if
+    if(nc.eq.2) then 
+        filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_3b6c.dat"
+        fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_advect_xy.dat"     
+        logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_advect-era.txt"
+        var_name  = (/"b3x","b3y","b1x","b1y"/)  !this is the variable used to draw, can used as center string
     end if
     
     open(unit=ilog,file=logname,form='formatted',status='replace')

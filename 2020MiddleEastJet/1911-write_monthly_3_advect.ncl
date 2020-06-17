@@ -31,7 +31,8 @@ var_name  = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as 
 else
 filein  = path + case + "_DJF_forc_in2-year.nc"
 fileout = path + case + "_DJF_3b6c.dat"
-var_name  = (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"b3x","b3y","b1x","b1y"/)  ;this is the variable used to draw, can used as center string
+var_name2 = (/"t3x","t3y"/)  
 end if
 
 g  = 9.8 ;m/(s*s)
@@ -46,6 +47,7 @@ latn = 90  ; 90 ;
 lonl = 0   ; 30  ; 0  ;
 lonr = 360 ;150 ;360 ;
 lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
+lev2 = (/1000,100/) ;hPa
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -88,6 +90,14 @@ else
     forc_m(nv,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
 end if
 end do
+
+if(nv.eq.4) then 
+q3_m    = new((/2   ,nyear,2   ,nlat,nlon/),double)
+do nv = 0, 1, 1
+    q3_m(nv,:,:,:,:)  = f->$var_name2(nv)$(:,{lev2},{lats:latn},{lonl:lonr})
+end do
+q3_m = -q3_m
+end if
 
 f11 = addfile(path + case + "_DJF_forc_in-year.nc","r")
 if(ntype.eq.0) then 
@@ -193,6 +203,16 @@ do nl = 0, nlev-1, 1
 end do
 end do
 end do
+
+if(nv.eq.4) then 
+do nv = 0, 1, 1
+do nt = 0, nyear-1, 1
+do nl = 0, 1, 1
+    fbindirwrite(fileout,q3_m(nv,nt,nl,:,:))
+end do
+end do
+end do
+end if
 
 do nv = 0, nvar-1, 1  ;
 do nt = 0, nyear-1, 1 ;

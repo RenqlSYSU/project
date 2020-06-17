@@ -8,10 +8,10 @@ year_option = True ;calc yearly DJF
 var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option  = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
-vect_option = False ;True ;
+vect_option = True ;False ;
 cont_option = False ;True
 bar_share = True ;False;
-nl = 4 ;(/925,850,700,500,300/)
+nl = 1 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -27,7 +27,7 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 6,6,1
+do var_option = -12,-12,1
 do nnv = 1,1,1
 if(var_option.eq.-17) then 
     draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
@@ -811,11 +811,11 @@ end if
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
-do nv = 3,nvar-1,1
+do nv = 0,nvar-1,1
 ;do ni = 0, 3, 1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
-    np = nv-3
+    np = nv
     if(var_option.gt.0) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
@@ -882,8 +882,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/4,1/),resp)
-    ;gsn_panel(wks,plot,(/nvar,1/),resp)
+;    gsn_panel(wks,plot,(/4,1/),resp)
+     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end do 
 end

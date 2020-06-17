@@ -18,7 +18,7 @@ fileout  = path2 + "ERA-Interim_DJF_3_advect-year.nc"
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
 R  = 287.0  ; J/(kg*K) for dry air
-a  = 6378388 ;the radius of earth, m
+a  = 6378388.0 ;the radius of earth, m
 pi = atan(1.0)*4
 print(pi)
 years    = ispan(1979,2016,1)
@@ -186,7 +186,7 @@ lev4d  = conform(clm_u, lev*100,ilev)
 sigm0  = (R/cp)*(clm_t/lev4d) - center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev)
 delete(lev4d)
 
-;vort = (1/a/coslat)*(center_finite_diff_n(clm_v,lon,loncyc,opt,ilon) - center_finite_diff_n(clm_u*coslat,lat,cyclic,opt,ilat))
+;vort = (1.0/a/coslat)*(center_finite_diff_n(clm_v,lon,loncyc,opt,ilon) - center_finite_diff_n(clm_u*coslat,lat,cyclic,opt,ilat))
 vort = uv2vr_cfd(clm_u,clm_v,vars&lat,vars&lon,3) 
 b1 = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) \
      - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)

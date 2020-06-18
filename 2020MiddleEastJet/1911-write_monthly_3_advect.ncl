@@ -19,15 +19,16 @@ ntype = 0
 year_option = True ;False ;True means yearly
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nyear = 37
-decomp = True ;False;
+decomp = False;True ;
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
 if(.not.(decomp)) then 
-filein  = path + case + "_DJF_forc_in-year.nc"
+filein  = path + case + "_DJF_forc_re-year.nc"
 fileout = path + case + "_DJF_3b6c.dat"
-var_name  = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"turn","b1z","b4"/)  ;this is the variable used to draw, can used as center string
+;var_name  = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
 else
 filein  = path + case + "_DJF_forc_in2-year.nc"
 fileout = path + case + "_DJF_3b6c.dat"

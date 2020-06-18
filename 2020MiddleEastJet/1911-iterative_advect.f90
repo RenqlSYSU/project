@@ -9,7 +9,7 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 8 ,  nvar = 4, ntime = 37, nlev = 21 !ERA 
+    integer, parameter :: pr = 8 ,  nvar = 3, ntime = 37, nlev = 21 !ERA 
     integer, parameter :: nlat = 54 , nlon = 240 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -36,10 +36,13 @@ program iteration
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
      filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_3b6c.dat"
-     fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_advect_xy.dat"     
-     logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_advect-era.txt"
+     fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_re.dat"     
+     logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_re-era.txt"
+     var_name  = (/"turn","b1z ","b4  "/)  
+     !fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_advect_xy.dat"     
+     !logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_advect-era.txt"
     ! var_name = (/"b1","b2","b3"/) !,"f_Qd_t "
-    var_name  = (/"b1x","b1y","b3x","b3y"/)  !this is the variable used to draw, can used as center string
+    !var_name  = (/"b1x","b1y","b3x","b3y"/)  !this is the variable used to draw, can used as center string
     
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf

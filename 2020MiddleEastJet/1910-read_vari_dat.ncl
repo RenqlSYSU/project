@@ -16,7 +16,7 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 data_type = (/"double","float"/)
 ntype = 0
 ntime = 37 
-freq = 3 
+freq = 4 
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
@@ -24,7 +24,7 @@ if(freq.eq.0) then
 filein  = path + case + "_DJF_Qeddy_A_freq-year.nc"
 filedat = path + case + "_DJF_dzdt_freq.dat"
 fileout = path + case + "_DJF_dzdt_freq-year.nc"
-var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  
+var_name= (/"f_Qeddh","f_Qeddl","Ah","Al"/)  
 end if
 if(freq.eq.1) then 
 filein  = path + case + "_DJF_Qd_Qeddy_A-year.nc"
@@ -41,8 +41,14 @@ end if
 if(freq.eq.3) then 
 filein  = path + case + "_DJF_forc_in2-year.nc"
 filedat = path + case + "_DJF_dzdt_advect_xy.dat"
-fileout = path + case + "_DJF_dzdt_in2-year.nc"
-var_name= (/"b1x","b1y","b3x","b3y"/)  ;this is the variable used to draw, can used as center string
+fileout = path + case + "_DJF_dzdt_in3-year.nc"
+var_name= (/"b3x","b3y","b1x","b1y"/)  ;this is the variable used to draw, can used as center string
+end if
+if(freq.eq.4) then 
+filein  = path + case + "_DJF_forc_re-year.nc"
+filedat = path + case + "_DJF_dzdt_re.dat"
+fileout = path + case + "_DJF_dzdt_re-year.nc"
+var_name= (/"turn","b1z","b4"/)  ;this is the variable used to draw, can used as center string
 end if
 
 g  = 9.8 ;m/(s*s)

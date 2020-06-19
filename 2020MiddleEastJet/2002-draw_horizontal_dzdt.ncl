@@ -8,10 +8,10 @@ year_option = True ;calc yearly DJF
 var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option  = True  ;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
-vect_option = True ;False ;
+vect_option = False ;True ;
 cont_option = False ;True
 bar_share = True ;False;
-nl = 1 ;(/925,850,700,500,300/)
+nl = 4 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -27,8 +27,8 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -12,-12,1
-do nnv = 1,1,1
+do var_option = 5,5,1 
+do nnv = 0,0,1
 if(var_option.eq.-17) then 
     draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
     var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
@@ -130,8 +130,10 @@ if(var_option.eq.4) then
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.5) then 
-    draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+    draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+    ;select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.6) then 
     draw_var := (/"Qd","Qte","Fte","b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
@@ -250,7 +252,7 @@ if(var_option.eq.4)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.5)
-    filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
+    filename = path + "data/" + case + "_DJF_dzdt_in3-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.6)
@@ -421,8 +423,8 @@ end if
 end if
 
 if(var_option.eq.5) then
-fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
-var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+;fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
+;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)

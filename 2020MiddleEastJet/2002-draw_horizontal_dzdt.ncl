@@ -6,7 +6,7 @@
 begin
 year_option = True ;calc yearly DJF 
 var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option  = True  ;20191205, control the draw of jet stream
+jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
 cont_option = False ;True
@@ -27,8 +27,8 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 5,5,1 
-do nnv = 0,0,1
+do var_option = 6,6,1 
+do nnv = 1,1,1
 if(var_option.eq.-17) then 
     draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
     var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
@@ -136,8 +136,8 @@ if(var_option.eq.5) then
     ;select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.6) then 
-    draw_var := (/"Qd","Qte","Fte","b1","b2","b3","total"/)  ;this is the variable used to draw, can used as center string
-    select := (/0,1,2,0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    draw_var := (/"Qd","Qte","Fte","b1","b2","b3x","b3y","turn","b1z","b4","total"/)  ;this is the variable used to draw, can used as center string
+    select := (/0,1,2,0,1,0,1,0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
 if(var_option.eq.13) then
@@ -258,6 +258,8 @@ end if
 if(var_option.eq.6)
     filename  = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
     filename1 = path + "data/" + case + "_DJF_dzdt_in-year.nc"
+    filename2 = path + "data/" + case + "_DJF_dzdt_in3-year.nc"
+    filename3 = path + "data/" + case + "_DJF_dzdt_re-year.nc"
     fig_name  = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.13)
@@ -396,7 +398,11 @@ if(var_option.eq.6)
     f = addfile(filename,"r")
     var_m(0:2,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(0:2),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     f = addfile(filename1,"r")
-    var_m(3:5,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(3:5),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(3:4,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(3:4),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    f = addfile(filename2,"r")
+    var_m(5:6,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(5:6),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    f = addfile(filename3,"r")
+    var_m(7:9,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(select(7:9),:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
     copy_VarMeta(u_m(0,:,:),var_m(0,0,:,:))
 end if
@@ -876,16 +882,16 @@ do nv = 0,nvar-1,1
     end if
     
     if(jet_option) then 
-    line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
-    overlay(plot(np),line(np))
+    ;line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
+    ;overlay(plot(np),line(np))
     end if
 end do 
    ; gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/4,1/),resp)
-     gsn_panel(wks,plot,(/nvar,1/),resp)
+    gsn_panel(wks,plot,(/6,2/),resp)
+;     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end do 
 end

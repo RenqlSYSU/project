@@ -29,9 +29,10 @@ if(case_option.eq.1) then
     years   = ispan(21,30,1)   ;the calculate time
 end if
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    case    = (/"F2000","NGTR"/) ;
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+                      ;"/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
 end if
@@ -71,7 +72,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,3,1; ,nvar-1 ,1 
+do nv = 0,2,1; ,nvar-1 ,1 
 do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time

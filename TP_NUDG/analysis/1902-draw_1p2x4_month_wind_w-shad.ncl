@@ -22,8 +22,8 @@ if(case_option.eq.1) then
     nsample = 10
 end if
 if(case_option.eq.2) then
-    case1   = (/"F2000","NUDG"/)
-    case2   = (/"F2000","NUDG-F2000"/)
+    case1   = (/"F2000","NGTR"/)
+    case2   = (/"F2000","NGTR-F2000"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if

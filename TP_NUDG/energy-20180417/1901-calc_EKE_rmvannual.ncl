@@ -9,8 +9,8 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 90.0 ;day
@@ -27,7 +27,8 @@ if(case_option.eq.0) then
     else
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
     end if  
-else
+end if  
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
@@ -35,6 +36,17 @@ else
     if(option.eq.0) then
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE.nc"
         ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uv.nc"
+    else
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+    end if  
+end if
+if(case_option.eq.2) then
+    case    = (/"F2000","NGTR"/) ;
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+    years   = ispan(1,30,1)   ;the calculate time
+    if(option.eq.0) then
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE.nc"
     else
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
     end if  
@@ -54,7 +66,7 @@ lev  = (/925,850,700,500,300,200,100,10/)
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 time = cd_calendar(f->time,0)
 select_time = ind(time(:,1).ge.1.and.time(:,1).le.12)
@@ -83,11 +95,17 @@ u  := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v  := new((/nyear,ntime,nlev,nlat,nlon/),float)
 do nt = 0,nyear-1,1
 nv = 0
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f  = addfile(files(nt),"r")
+print(" handle with " + files(nt))
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f  = addfile(files(nt),"r")
+print(" handle with " + files(nt))
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
 printVarSummary(u)

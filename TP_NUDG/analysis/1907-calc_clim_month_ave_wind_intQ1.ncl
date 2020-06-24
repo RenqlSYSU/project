@@ -12,7 +12,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -55,7 +55,7 @@ lev  = (/1000,925,850,700,600, 500,300,200,100,10/) ;hPa Q1
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -126,11 +126,11 @@ if(nv.eq.4) then
     var@units     = "m*s^-2"
     delete([/u,v,w,term,lat,lon,pi,coslat,a/])
 else
-;    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     do nt = 0,nyear-1,1
     print("handle with " + years(nt))
-;    f  = addfile(files(nt),"r")
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    f  = addfile(files(nt),"r")
+;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:,:) = tofloat(f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr}))
     end do 
 end if

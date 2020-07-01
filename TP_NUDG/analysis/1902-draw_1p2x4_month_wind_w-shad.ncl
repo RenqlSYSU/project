@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -42,8 +42,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,500,200,100,10/)
-nl = 1
-nv = 15
+nl = 0
+nv = 1
 diff = True ;False;
 perc = False;True ;
 vect_option = True ;False;
@@ -159,8 +159,8 @@ else
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-do nl = 0,4,1
-do nv = 5,5,1
+;do nl = 0,4,1
+;do nv = 5,5,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -611,9 +611,9 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-1.4,-3.5/);-8,-8,-8,-8
-    maxlvl = (/16 , 1.4, 3.5/);8 ,8 ,8 ,8 
-    spacig = (/ 1 , 0.2, 0.5/);1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-3.5,-1.4/);-8,-8,-8,-8
+    maxlvl = (/16 , 3.5, 1.4/);8 ,8 ,8 ,8 
+    spacig = (/ 1 , 0.5, 0.2/);1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.2) 
@@ -815,7 +815,7 @@ end if
 ;    gsn_panel(wks,plot,(/2,1/),resp)
     gsn_panel(wks,plot,(/4,1/),resp)
 end do
-end do
-end do
+;end do
+;end do
 end
 

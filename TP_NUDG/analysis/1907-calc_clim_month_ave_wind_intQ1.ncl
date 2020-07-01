@@ -72,7 +72,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,2,1; ,nvar-1 ,1 
+do nv = 6,6,1; ,nvar-1 ,1 
 do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -190,22 +190,26 @@ end if
 
 if(nv.eq.6) then
     var = 0.0
+    files1 := systemfunc("ls "+filein(nf)+"*.daily.PRECC.nc" )
+    files2 := systemfunc("ls "+filein(nf)+"*.daily.PRECL.nc" )
     do nt = 0,nyear-1,1
     print("handle with " + years(nt))
-    f  = addfile(filein(nf)+years(nt)+".daily.PRECC.nc","r")
+    f  = addfile(files1(nt),"r")
+;    f  = addfile(filein(nf)+years(nt)+".daily.PRECC.nc","r")
     var(nt,:,:,:) = var(nt,:,:,:) + f->PRECC(:,{lats:latn},{lonl:lonr})
-    f  = addfile(filein(nf)+years(nt)+".daily.PRECL.nc","r")
+    f  = addfile(files2(nt),"r")
+;    f  = addfile(filein(nf)+years(nt)+".daily.PRECL.nc","r")
     var(nt,:,:,:) = var(nt,:,:,:) + f->PRECL(:,{lats:latn},{lonl:lonr})
     end do 
     var  = var*1000*3600*24 ;convert m/s to mm/day
 end if
 
 if(nv.gt.6) then 
-;    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     do nt = 0,nyear-1,1
     print("handle with " + years(nt))
-;    f  = addfile(files(nt),"r")
-    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    f  = addfile(files(nt),"r")
+;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:) = tofloat(f->$var_name(nv)$(:,{lats:latn},{lonl:lonr}))
     end do 
 end if

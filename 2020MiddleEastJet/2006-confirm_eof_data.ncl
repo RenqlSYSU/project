@@ -1,14 +1,3 @@
-;***************************************************************************
-;Draw the first three EOF  principal components series 
-;   1.horizontal distribution of 200hPa level
-;   2.horizontal distribution of vertical average 
-;   3.vertical section of zonal mean 
-;   4.latitude distribution of vertical average and zonal mean
-;   5.vertical section of meridional mean 
-;   6.longtitude distribution of vertical average and meridional mean
-;                                            by Ql_Ren
-;                                           2020/06/12
-;******************************************************************************
 begin
 area = (/"ME","EA" ,"NA" /);,"GB"
 lats = (/15.0, 20.0, 25.0/);, 10  ;-90 ,-90 ,-90 ,-90 

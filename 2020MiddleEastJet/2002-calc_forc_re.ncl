@@ -190,6 +190,7 @@ delete([/p_in,p_out,linlog/])
 ;--------------------------------------
 ;Calculate seasonal averages and anomalies based on seasonal averages
 ;---------------------------------------------------
+dudt = (u(:,ntime-1,:,:,:)-u(:,0,:,:,:))/(ntime*24*3600)
 clm_u = dim_avg_n(u,itime)
 clm_v = dim_avg_n(v,itime) 
 clm_t = dim_avg_n(t,itime) 
@@ -221,8 +222,8 @@ b1y = - (clm_v/a         )*center_finite_diff_n(vort,lat,cyclic,opt,ilat-1)
 b1z = - (clm_w           )*center_finite_diff_n(vort,lev*100,cyclic,opt,ilev-1)
 b2  = - 2*(2.0*pi/24.0/3600.0)*coslat4d*clm_v/a
  
-turn = (1.0/a/coslat4d)*center_finite_diff_n(clm_w,lat,cyclic,opt,ilat-1)*center_finite_diff_n(clm_u,lev*100,cyclic,opt,ilev-1) \
-      -(1.0/a         )*center_finite_diff_n(clm_w,lon,loncyc,opt,ilon-1)*center_finite_diff_n(clm_v,lev*100,cyclic,opt,ilev-1)
+turn = (1.0/a         )*center_finite_diff_n(clm_w,lat,cyclic,opt,ilat-1)*center_finite_diff_n(clm_u,lev*100,cyclic,opt,ilev-1) \
+      -(1.0/a/coslat4d)*center_finite_diff_n(clm_w,lon,loncyc,opt,ilon-1)*center_finite_diff_n(clm_v,lev*100,cyclic,opt,ilev-1)
 delete(clm_w)
 
 b4 = -vort*((1.0/a/coslat4d)*center_finite_diff_n(clm_u         ,lon,loncyc,opt,ilon-1) \
@@ -358,6 +359,7 @@ filevardef(ncdf,"Tadvect",typeof(Tadvect),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"Qeddy",typeof(Qeddy),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"Qd"   ,typeof(Qd),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"dudt",typeof(dudt),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Qd",typeof(f_Qd),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Qeddy",typeof(f_Qeddy),(/"year","lev","lat","lon"/))
 filevardef(ncdf,"f_Tadvect",typeof(f_Tadvect),(/"year","lev","lat","lon"/))
@@ -406,5 +408,6 @@ ncdf->v_Qd    = (/v_Qd/)
 ncdf->f_Tadvect = (/f_Tadvect/)
 ncdf->f_Qeddy = (/f_Qeddy/)
 ncdf->f_Qd    = (/f_Qd/)
+ncdf->dudt    = (/dudt/)
 end
 

@@ -11,7 +11,7 @@ region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
 cont_option = False ;True
 bar_share = True ;False;
-nl = 4 ;(/925,850,700,500,300/)
+nl = 1 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -27,109 +27,109 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 6,6,1 
-do nnv = 1,1,1
-if(var_option.eq.-17) then 
-    draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
-    var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"  ,"m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2"/)  ;this can be used as right string 
-    divg_option = False ;True
-end if
-if(var_option.eq.-16) then 
-    draw_var = (/"EGR2"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"season_ave"/)  ;use to read variables
-    unit     = (/"1/day"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-15) then 
-    draw_var = (/"T"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"season_ave"/)  ;use to read variables
-    unit     = (/"~S~o~N~C"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-14) then 
-    draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
-    var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
-    unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-13) then 
-    draw_var := (/"-fua","adv","A","cur"/)  ; this is the variable used to draw, can used as center string
-    var_name := (/"fva","adv","A","cur"/)  ; use to read variables
-    unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-12) then 
-    draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"vort"/)  ;use to read variables
-    unit     = (/"10~S~-6~N~ s~S~-1~N~"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-11) then 
-    draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"dTdy"/)  ;use to read variables
-    unit     = (/"10~S~-6~N~K/m"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-10) then 
-    draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
-    unit     = (/"10~S~4~N~J","10~S~4~N~J","10~S~4~N~J"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-6) then 
-    draw_var := (/"T3x","Tadvect"/)  ;Tadvect
-    var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
-    unit     := (/"K/day","k/day"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-5) then 
-    draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
-    var_name := (/"b1x","b1y","b3x"/)  ;,"b3y" use to read variables
-    unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
-    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.-4) then 
-    draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
-    unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
-end if
-if(var_option.eq.-3) then 
-    draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"Qeddh","Ah"/)  ;use to read variables
-    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
-    select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.-2) then 
-    draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"Qeddl","Al"/)  ;use to read variables
-    unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
-    select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.-1) then 
-    draw_var := (/"Qd"   ,"Qte"  ,"Fte"/)  ;this is the variable used to draw, can used as center string
-    var_name := (/"Qd"   ,"Qeddy","A"  /)  ;use to read variables
-    unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
-    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.0) then 
-    draw_var = (/"Qd"   ,"Qte","total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
-    unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
-end if
-if(var_option.ge.1.and.var_option.le.6) then
-var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
-unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
-;nnv = 1 ;used to read dzdt induced by different forcing
-if(var_option.eq.1) then 
-    draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
-    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.2) then 
-    draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
-    select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.3) then 
-    draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
-    select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.4) then 
-    draw_var := (/"b1","b2","Tadvect"/)  ;,"total" this is the variable used to draw, can used as center string
-    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.5) then 
+do var_option = 5,5,1 
+do nnv = 0,0,1
+    if(var_option.eq.-17) then 
+        draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
+        var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
+        unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"  ,"m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2"/)  ;this can be used as right string 
+        divg_option = False ;True
+    end if
+    if(var_option.eq.-16) then 
+        draw_var = (/"EGR2"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"season_ave"/)  ;use to read variables
+        unit     = (/"1/day"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-15) then 
+        draw_var = (/"T"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"season_ave"/)  ;use to read variables
+        unit     = (/"~S~o~N~C"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-14) then 
+        draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
+        var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
+        unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-13) then 
+        draw_var := (/"-fua","adv","A","cur"/)  ; this is the variable used to draw, can used as center string
+        var_name := (/"fva","adv","A","cur"/)  ; use to read variables
+        unit     := "10~S~-5~N~" + (/"m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~","m*s~S~-2~N~"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-12) then 
+        draw_var = (/"vort"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"vort"/)  ;use to read variables
+        unit     = (/"10~S~-6~N~ s~S~-1~N~"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-11) then 
+        draw_var = (/"dTdy"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"dTdy"/)  ;use to read variables
+        unit     = (/"10~S~-6~N~K/m"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-10) then 
+        draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
+        unit     = (/"10~S~4~N~J","10~S~4~N~J","10~S~4~N~J"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-6) then 
+        draw_var := (/"T3x","Tadvect"/)  ;Tadvect
+        var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
+        unit     := (/"K/day","k/day"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-5) then 
+        draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        var_name := (/"b1x","b1y","b3x"/)  ;,"b3y" use to read variables
+        unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.-4) then 
+        draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+        var_name := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+        unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
+    end if
+    if(var_option.eq.-3) then 
+        draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
+        var_name := (/"Qeddh","Ah"/)  ;use to read variables
+        unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+        select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.-2) then 
+        draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
+        var_name := (/"Qeddl","Al"/)  ;use to read variables
+        unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+        select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.-1) then 
+        draw_var := (/"Qd"   ,"Qte"  ,"Fte"/)  ;this is the variable used to draw, can used as center string
+        var_name := (/"Qd"   ,"Qeddy","A"  /)  ;use to read variables
+        unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
+        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.0) then 
+        draw_var = (/"Qd"   ,"Qte","total"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
+        unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
+    end if
+    if(var_option.ge.1.and.var_option.le.6) then
+    var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
+    unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
+    ;nnv = 1 ;used to read dzdt induced by different forcing
+    if(var_option.eq.1) then 
+        draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
+        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.2) then 
+        draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
+        select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.3) then 
+        draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
+        select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.4) then 
+        draw_var := (/"b1","b2","Tadvect"/)  ;,"total" this is the variable used to draw, can used as center string
+        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    end if
+    if(var_option.eq.5) then 
     draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
@@ -186,7 +186,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
 lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 /) ;55 ;60
+latn = (/ 60 , 89 , 89 , 89 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
 lonr = (/360 , 70 ,175 , 320/) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -882,16 +882,16 @@ do nv = 0,nvar-1,1
     end if
     
     if(jet_option) then 
-    ;line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
-    ;overlay(plot(np),line(np))
+    line(np) = gsn_csm_contour(wks,u_m(nt,:,:),res_line)
+    overlay(plot(np),line(np))
     end if
 end do 
    ; gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/6,2/),resp)
-;     gsn_panel(wks,plot,(/nvar,1/),resp)
+;    gsn_panel(wks,plot,(/6,2/),resp)
+     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end do 
 end

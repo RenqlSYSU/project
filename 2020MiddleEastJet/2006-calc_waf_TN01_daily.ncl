@@ -9,8 +9,8 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 ;path1  = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-var_name = (/"uwnd","vwnd","air"/)
-fileout  = path2 + "ERA-Interim_DJF_e_vector2-year.nc"
+var_name = (/"uwnd","vwnd","air","hgt"/)
+fileout  = path2 + "ERA-Interim_DJF_TN01-year.nc"
 year_option = True;False 
 
 g  = 9.8 ;m/(s*s)
@@ -70,6 +70,7 @@ ntime = dimsizes(select_time)
 u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
+z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
@@ -83,6 +84,9 @@ if(isleapyear(years(nt))) then ;leap year,366 day
     nv = 2
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 else   ;non-leap year, 365 day
     nv = 0
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
@@ -93,9 +97,24 @@ else   ;non-leap year, 365 day
     nv = 2
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
-t  = pot_temp(lev*100, t, ilev, False)
+
+;the Brunt-Vaisala frequency of atmosphere
+theta = pot_temp(lev*100, t, ilev, False)
+delete(t)
+hgt   = hgt/9.8 ;convert unit from m2/s2 to m
+brunt = brunt_vaisala_atm(theta, hgt, opt, lev_dim)
+delete(theta)
+NN = where(abs(NN).lt.0.0000000001, 0.000001, NN)
+
+;stream function
+f0 = conform(z,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
+sf = z/f0
+delete([/z,f0/])
 
 if (any(ismissing(u))) then
     print("uwnd has missing")
@@ -103,45 +122,52 @@ end if
 if (any(ismissing(v))) then
     print("vwnd has missing")
 end if
-if (any(ismissing(t))) then
-    print("air has missing")
-end if
 
 ;--------------------------------------
 ;DJF
 ;---------------------------------------------------
-u2     := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
-v2     := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
-t2     := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+u2      := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+v2      := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+sf2     := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+NN2 := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
 do ny = 0,nyear-2,1
     u2(ny,0:30,:,:,:) = u(ny,59:89,:,:,:)
     v2(ny,0:30,:,:,:) = v(ny,59:89,:,:,:)
-    t2(ny,0:30,:,:,:) = t(ny,59:89,:,:,:)
+    sf2(ny,0:30,:,:,:) = sf(ny,59:89,:,:,:)
+    NN2(ny,0:30,:,:,:) = NN(ny,59:89,:,:,:)
     u2(ny,31:89,:,:,:) = u(ny+1,0:58,:,:,:)
     v2(ny,31:89,:,:,:) = v(ny+1,0:58,:,:,:)
-    t2(ny,31:89,:,:,:) = t(ny+1,0:58,:,:,:)
+    sf2(ny,31:89,:,:,:) = sf(ny+1,0:58,:,:,:)
+    NN2(ny,31:89,:,:,:) = NN(ny+1,0:58,:,:,:)
 end do
-u := u2
-v := v2
-t := t2
+u  := u2
+v  := v2
+sf := sf2    
+NN := NN2
 printVarSummary(u)
 
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
-clm_u = dim_avg_n(u,itime)
-clm_v = dim_avg_n(v,itime) 
-clm_t = dim_avg_n(t,itime) 
-edd_u = u - conform(u, clm_u, (/0,2,3,4/))
-edd_v = v - conform(v, clm_v, (/0,2,3,4/))   
-edd_t = t - conform(t, clm_t, (/0,2,3,4/))   
-delete([/clm_u,clm_v/])
-f0  = conform(clm_t, 2*(2*pi/24.0/3600.0)*sin(lat), ilat-1)
-coslat4d = conform(clm_t,cos(lat),ilat-1)
+f0     = conform(u, 2*(2*pi/24.0/3600.0)*sin(lat), ilat)
+coslat = conform(u,cos(lat),ilat)
+coef   = (coslat*lev/1000.0)/2.0/sqrt(u^2 + v^2)
+
+do neddy = 0,2,1
+if(neddy.eq.0) then
+    clm_sf = dim_avg_n(sf,itime)
+    edd_sf = sf - conform(sf, clm_sf, (/0,2,3,4/))
+    delete([/clm_sf/])
+end if
+if(neddy.eq.1) then
+    clm_sf = dim_avg_n(sf,itime)
+    edd_sf = sf - conform(sf, clm_sf, (/0,2,3,4/))
+    delete([/clm_sf/])
+end if
+
 ez_all  = coslat4d*f0*dim_avg_n(edd_v*edd_t,itime)/center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
 ey_all  = -coslat4d*dim_avg_n(edd_u*edd_v,itime)
 ex_all  = dim_avg_n(edd_v*edd_v-edd_u*edd_u,itime)
-delete([/edd_u,edd_v,edd_t/])
 
 ca = 10.0 ;day
 fca = 1.0/ca

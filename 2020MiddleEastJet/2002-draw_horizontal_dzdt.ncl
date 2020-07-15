@@ -6,12 +6,12 @@
 begin
 year_option = True ;calc yearly DJF 
 var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option  = False;True ;;20191205, control the draw of jet stream
+jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
 cont_option = False ;True
 bar_share = True ;False;
-nl = 1 ;(/925,850,700,500,300/)
+nl = 0 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -27,7 +27,7 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 6,6,1 
+do var_option = -16,-16,1 
 do nnv = 1,1,1
     if(var_option.eq.-17) then 
         draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
@@ -36,7 +36,7 @@ do nnv = 1,1,1
         divg_option = False ;True
     end if
     if(var_option.eq.-16) then 
-        draw_var = (/"EGR2"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
         unit     = (/"1/day"/)  ;this can be used as right string 
     end if
@@ -203,7 +203,7 @@ if(var_option.eq.-17)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-16)
-    filename = path + "data/" + case + "_" + months + "EGR-year.nc"
+    filename = path + "data/" + case + "_" + months + draw_var(0) + "-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-15)
@@ -818,7 +818,7 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(.not.(var_option.eq.-10)) then 
+    if(.not.(var_option.eq.-10.or.var_option.eq.-15.or.var_option.eq.-16)) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
@@ -893,8 +893,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/6,2/),resp)
-;     gsn_panel(wks,plot,(/nvar,1/),resp)
+;    gsn_panel(wks,plot,(/6,2/),resp)
+     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 end do 
 end

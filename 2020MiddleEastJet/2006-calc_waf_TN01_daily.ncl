@@ -17,13 +17,14 @@ g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
 R  = 287.0  ; J/(kg*K) for dry air
 a  = 6378388 ;the radius of earth, m
+sclhgt = 7991 ;m 
 pi = atan(1.0)*4
 print(pi)
 years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats =  0  ;-20
+lats =  5  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -106,14 +107,23 @@ end do
 ;the Brunt-Vaisala frequency of atmosphere
 theta = pot_temp(lev*100, t, ilev, False)
 delete(t)
-hgt   = hgt/9.8 ;convert unit from m2/s2 to m
-brunt = brunt_vaisala_atm(theta, hgt, opt, lev_dim)
-delete(theta)
+hgt = z/9.8 ;convert unit from m2/s2 to m
+NN  = brunt_vaisala_atm(theta, hgt, 0, ilev)
+delete([/theta,hgt/])
+NN = NN*abs(NN)
 NN = where(abs(NN).lt.0.0000000001, 0.000001, NN)
 
+;noz    = -sclhgt*log(lev/1000.0)
+
+if (any(ismissing(z))) then
+    print("hgt has missing")
+end if
+z = linmsg_n(z,-1,ilon)
+
 ;stream function
-f0 = conform(z,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
+f0 = conform(z,2.0*(2.0*pi/24.0/3600.0)*sin(lat),ilat)
 sf = z/f0
+NN = f0*f0/NN
 delete([/z,f0/])
 
 if (any(ismissing(u))) then
@@ -121,6 +131,9 @@ if (any(ismissing(u))) then
 end if
 if (any(ismissing(v))) then
     print("vwnd has missing")
+end if
+if (any(ismissing(sf))) then
+    print("stream function has missing")
 end if
 
 ;--------------------------------------
@@ -149,9 +162,15 @@ printVarSummary(u)
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
-f0     = conform(u, 2*(2*pi/24.0/3600.0)*sin(lat), ilat)
-coslat = conform(u,cos(lat),ilat)
-coef   = (coslat*lev/1000.0)/2.0/sqrt(u^2 + v^2)
+ca = 10.0 ;day
+fca = 1.0/ca
+fcf = fspan(0, 0.5, ntime/2) 
+hgh_cf = ind(fcf.ge.fca)
+low_cf = ind(fcf.lt.fca)
+
+wafx  := new((/3,nyear-1,nlev,nlat,nlon/),float)
+wafy  := new((/3,nyear-1,nlev,nlat,nlon/),float)
+wafz  := new((/3,nyear-1,nlev,nlat,nlon/),float)
 
 do neddy = 0,2,1
 if(neddy.eq.0) then
@@ -159,67 +178,47 @@ if(neddy.eq.0) then
     edd_sf = sf - conform(sf, clm_sf, (/0,2,3,4/))
     delete([/clm_sf/])
 end if
-if(neddy.eq.1) then
-    clm_sf = dim_avg_n(sf,itime)
-    edd_sf = sf - conform(sf, clm_sf, (/0,2,3,4/))
-    delete([/clm_sf/])
+if(neddy.eq.1) then ;low-frequency
+    cf = ezfftf_n(sf,itime)
+    cf(:,:,hgh_cf,:,:,:) = 0.0  
+    edd_sf = ezfftb_n(cf,0,itime+1)
+    delete([/cf/])
+end if
+if(neddy.eq.2) then ;hgh-frequency
+    cf = ezfftf_n(sf,itime)
+    cf(:,:,low_cf,:,:,:) = 0.0  
+    edd_sf = ezfftb_n(cf,0,itime+1)
+    delete([/cf/])
 end if
 
-ez_all  = coslat4d*f0*dim_avg_n(edd_v*edd_t,itime)/center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
-ey_all  = -coslat4d*dim_avg_n(edd_u*edd_v,itime)
-ex_all  = dim_avg_n(edd_v*edd_v-edd_u*edd_u,itime)
+dsfdx = center_finite_diff_n(edd_sf,lon,loncyc,opt,ilon)
+dsfdy = center_finite_diff_n(edd_sf,lat,cyclic,opt,ilat)
 
-ca = 10.0 ;day
-fca = 1.0/ca
-fcf = fspan(0, 0.5, ntime/2) 
-hgh_cf = ind(fcf.ge.fca)
-low_cf = ind(fcf.lt.fca)
+coslat = conform(u,cos(lat),ilat)
+coef   = (coslat*conform(u,lev,ilev)/1000.0)/2.0/sqrt(u^2 + v^2)
+fx  = coef*((u/a/a/coslat/coslat)*(dsfdx*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lon,loncyc,opt,ilon)) \
+           -(v/a/a/coslat       )*(dsfdy*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lat,cyclic,opt,ilat)))
+wafx(neddy,:,:,:,:) = dim_avg_n(fx,itime)
+delete(fx)
 
-cf = ezfftf_n(u,itime)
-term = cf 
-term(:,:,hgh_cf,:,:,:) = 0.0  
-low_u = ezfftb_n(term,0,itime+1)
-term = cf 
-term(:,:,low_cf,:,:,:) = 0.0  
-hgh_u = ezfftb_n(term,0,itime+1)
-printVarSummary(hgh_u)
+fy  = coef*((u/a/a/coslat)*(dsfdx*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lon,loncyc,opt,ilon)) \
+           -(v/a/a       )*(dsfdy*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lat,cyclic,opt,ilat)))
+wafy(neddy,:,:,:,:) = dim_avg_n(fy,itime)
+delete(fy)
 
-cf = ezfftf_n(v,itime)
-term = cf 
-term(:,:,hgh_cf,:,:,:) = 0.0  
-low_v = ezfftb_n(term,0,itime+1)
-term = cf 
-term(:,:,low_cf,:,:,:) = 0.0  
-hgh_v = ezfftb_n(term,0,itime+1)
-printVarSummary(hgh_v)
+dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev)
+fz  = coef*NN*((u/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lon,loncyc,opt,ilon)) \
+              -(v/a       )*(dsfdy*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lat,cyclic,opt,ilat)))
+wafz(neddy,:,:,:,:) = dim_avg_n(fz,itime)
+delete([/coslat,coef,dsfdx,dsfdy,dsfdz,fz/])
+end do
 
-cf = ezfftf_n(t,itime)
-term = cf 
-term(:,:,hgh_cf,:,:,:) = 0.0  
-low_t = ezfftb_n(term,0,itime+1)
-term = cf 
-term(:,:,low_cf,:,:,:) = 0.0  
-hgh_t = ezfftb_n(term,0,itime+1)
-printVarSummary(hgh_t)
-delete([/cf,term,fcf,fca,hgh_cf,low_cf/])
-delete([/u,v,t/])
-
-ez_low  = coslat4d*f0*dim_avg_n(low_v*low_t,itime)/center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
-ey_low  = -coslat4d*dim_avg_n(low_u*low_v,itime)
-ex_low  = dim_avg_n(low_v*low_v-low_u*low_u,itime)
-delete([/low_u,low_v,low_t/])
-
-ez_hgh  = coslat4d*f0*dim_avg_n(hgh_v*hgh_t,itime)/center_finite_diff_n(clm_t,lev*100,cyclic,opt,ilev-1)
-ey_hgh  = -coslat4d*dim_avg_n(hgh_u*hgh_v,itime)
-ex_hgh  = dim_avg_n(hgh_v*hgh_v-hgh_u*hgh_u,itime)
-delete([/hgh_u,hgh_v,hgh_t,f0,clm_t,coslat4d/])
-
-ex_all@long_name = "dim_avg_n(edd_v*edd_v-edd_u*edd_u,itime)"
-ex_all@units     = "m2/s2" 
-ey_all@long_name = "-dim_avg_n(edd_u*edd_v,itime)"
-ey_all@units     = "m2/s2" 
-ez_all@long_name = "f0*dim_avg_n(edd_v*edd_t,itime)/(dthdp)"
-ez_all@units     = "m*Pa/s2" 
+wafx@long_name = "x wave activity flux"
+wafx@units   = "m2/s2" 
+wafy@long_name = "y wave activity flux"
+wafy@units     = "m2/s2" 
+wafz@long_name = "z wave activity flux"
+wafz@units     = "m*Pa/s2" 
 
 ;========================================================================
 ;save the data
@@ -232,13 +231,13 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "DJF mean E vector for total, low-frequency and high-frequency"
+fileatt@discription   = "DJF mean wave activity flux based TN01 for total, low-frequency and high-frequency"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"year" ,"lev","lat","lon"/);
-dimSizes = (/nyear-1,nlev ,nlat ,nlon/) ;
-dimUnlim = (/False  ,False,False,False/);
+dimNames = (/"nvar","year" ,"lev","lat","lon"/);
+dimSizes = (/  3   ,nyear-1,nlev ,nlat ,nlon/) ;
+dimUnlim = (/False ,False  ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
@@ -246,46 +245,28 @@ filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 if(year_option) then 
-filevardef(ncdf,"ex_all",typeof(ex_all),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ey_all",typeof(ey_all),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ez_all",typeof(ez_all),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ex_low",typeof(ex_low),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ey_low",typeof(ey_low),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ez_low",typeof(ez_low),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ex_hgh",typeof(ex_hgh),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ey_hgh",typeof(ey_hgh),(/"year","lev","lat","lon"/))
-filevardef(ncdf,"ez_hgh",typeof(ez_hgh),(/"year","lev","lat","lon"/))
+filevardef(ncdf,"wafx",typeof(wafx),(/"nvar","year","lev","lat","lon"/))
+filevardef(ncdf,"wafy",typeof(wafy),(/"nvar","year","lev","lat","lon"/))
+filevardef(ncdf,"wafz",typeof(wafz),(/"nvar","year","lev","lat","lon"/))
 else
-filevardef(ncdf,"ex_all",typeof(ex_all),(/"lev","lat","lon"/))
-filevardef(ncdf,"ey_all",typeof(ey_all),(/"lev","lat","lon"/))
-filevardef(ncdf,"ez_all",typeof(ez_all),(/"lev","lat","lon"/))
-filevardef(ncdf,"ex_low",typeof(ex_low),(/"lev","lat","lon"/))
-filevardef(ncdf,"ey_low",typeof(ey_low),(/"lev","lat","lon"/))
-filevardef(ncdf,"ez_low",typeof(ez_low),(/"lev","lat","lon"/))
-filevardef(ncdf,"ex_hgh",typeof(ex_hgh),(/"lev","lat","lon"/))
-filevardef(ncdf,"ey_hgh",typeof(ey_hgh),(/"lev","lat","lon"/))
-filevardef(ncdf,"ez_hgh",typeof(ez_hgh),(/"lev","lat","lon"/))
+filevardef(ncdf,"wafx",typeof(wafx),(/"nvar","lev","lat","lon"/))
+filevardef(ncdf,"wafy",typeof(wafy),(/"nvar","lev","lat","lon"/))
+filevardef(ncdf,"wafz",typeof(wafz),(/"nvar","lev","lat","lon"/))
 end if
 
 ;define var attribute
 filevarattdef(ncdf,"lev",vars&level)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-filevarattdef(ncdf,"ex_all",ex_all)
-filevarattdef(ncdf,"ey_all",ey_all)
-filevarattdef(ncdf,"ez_all",ez_all)
+filevarattdef(ncdf,"wafx",wafx)
+filevarattdef(ncdf,"wafy",wafy)
+filevarattdef(ncdf,"wafz",wafz)
 
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
-ncdf->ex_all = (/ex_all/)
-ncdf->ey_all = (/ey_all/)
-ncdf->ez_all = (/ez_all/)
-ncdf->ex_low = (/ex_low/)
-ncdf->ey_low = (/ey_low/)
-ncdf->ez_low = (/ez_low/)
-ncdf->ex_hgh = (/ex_hgh/)
-ncdf->ey_hgh = (/ey_hgh/)
-ncdf->ez_hgh = (/ez_hgh/)
+ncdf->wafx = (/wafx/)
+ncdf->wafy = (/wafy/)
+ncdf->wafz = (/wafz/)
 end
 

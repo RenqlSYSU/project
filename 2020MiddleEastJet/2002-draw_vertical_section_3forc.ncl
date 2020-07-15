@@ -7,10 +7,10 @@ begin
 year_option = True ;calc yearly DJF 
 var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False;;control the draw of jet stream
-stream_option =  False;True ;
-egr_option = False;True ; Eady growth rate 
+stream_option =  True ;False;
+egr_option = True ;False; Eady growth rate 
 vect_option = False;True ;
-cont_option = True
+cont_option = False;True
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
@@ -24,7 +24,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -1,-1,1
+do var_option = -10,-10,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -106,8 +106,8 @@ end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"EEA","WNP","ENP","GB"
-lats = (/10  , 10 ,10  /);,  0  ,   0 , 0   , 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
-latn = (/60  , 60 , 60 /);, 90  ,  90 , 90  , 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
+lats = (/0  , 0 ,0  /);,  0  ,   0 , 0   , 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
+latn = (/90  , 90 , 90 /);60  , 60 , 60 , , 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
 lonl = (/ 0  ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
 lonr = (/70  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
 lat_spacing = 10
@@ -287,14 +287,13 @@ delete([/f,f2,v,ps,msf/])
 copy_VarMeta(vars(:,:,0),msf_m(0,0,:,:))
 msf_m = msf_m/10^10
 printVarSummary(msf_m)
-print(max(msf_m))
-print(min(msf_m))
+printMinMax(msf_m,True)
 end if
 
 if(egr_option) then
 egr_m = new((/narea,ntime,unlev,nlat/),float)
 if(DJF_option) then
-f2 = addfile(path + "data/" + case + "_DJF_EGR2-year.nc","r")
+f2 = addfile(path + "data/" + case + "_DJF_EGR4-year.nc","r")
 do na = 0,narea-1,1
     egr := dim_avg_n_Wrap(f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     egr_m(na,0,:,:) = dim_avg_n_Wrap(egr,2)
@@ -312,8 +311,7 @@ delete([/f2,egr,lev_m/])
 egr_m = egr_m*24*3600 ; convert unit from 1/s to 1/day
 copy_VarMeta(vars(:,:,0),egr_m(0,0,:,:))
 printVarSummary(egr_m)
-print(max(egr_m))
-print(min(egr_m))
+printMinMax(egr_m,True)
 end if
 
 f = addfile(filename,"r")
@@ -520,7 +518,7 @@ printVarSummary(var_m)
     ;res_egr@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_egr@cnLevels             = levels2       ; set contour interval
     res_egr@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_egr@cnLevelSpacingF      = 5        ; set contour interval
+    res_egr@cnLevelSpacingF      = 0.2        ; set contour interval
     res_egr@gsnPresHgtHeightLabelOn = False
     res_egr@tiYAxisOn = False
     res_egr@lbLabelBarOn     = False   ; the label bar
@@ -704,8 +702,8 @@ do nv = 0, nvar-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
-    ;plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
+    ;plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
+    plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
     print(max(var_m(na,nv,nt,:,:)))
     print(min(var_m(na,nv,nt,:,:)))
 
@@ -737,8 +735,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/narea,nvar/),resp)
-;    gsn_panel(wks,plot,(/2,3/),resp)
+;    gsn_panel(wks,plot,(/narea,nvar/),resp)
+    gsn_panel(wks,plot,(/1,3/),resp)
 end do 
 end do 
 end

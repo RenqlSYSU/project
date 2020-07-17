@@ -11,7 +11,7 @@ region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
 cont_option = False ;True
 bar_share = True ;False;
-nl = 0 ;(/925,850,700,500,300/)
+nl = 4 ;(/925,850,700,500,300/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -27,14 +27,8 @@ lev    = (/925,850,700,500,200/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -16,-16,1 
+do var_option = 21,21,1 
 do nnv = 1,1,1
-    if(var_option.eq.-17) then 
-        draw_var = (/"E_all" ,"E_hgh" ,"E_low"  ,"ey_all","ez_all", "ey_hgh","ez_hgh","ey_low","ez_low" /)  ;this is the variable used to draw, can used as center string
-        var_name = (/"ex_all","ey_all","ez_all" ,"ex_hgh","ey_hgh","ez_hgh" ,"ex_low","ey_low","ez_low" /)  ;
-        unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"  ,"m2/s2" ,"m2/s2" ,"Pa*m/s2","m2/s2" ,"m2/s2" ,"Pa*m/s2"/)  ;this can be used as right string 
-        divg_option = False ;True
-    end if
     if(var_option.eq.-16) then 
         draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -134,11 +128,11 @@ do nnv = 1,1,1
     select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
     ;select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
-if(var_option.eq.6) then 
+    end if
+    if(var_option.eq.6) then 
     draw_var := (/"Qd","Qte","Fte","b1","b2","b3x","b3y","turn","b1z","b4","total","dudt"/)  ;this is the variable used to draw, can used as center string
     select := (/0,1,2,0,1,0,1,0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-end if
+    end if
 end if
 if(var_option.eq.13) then
     var_name = (/"fva","adv","A","Ah","Al","cur"/)  ; use to read variables
@@ -182,6 +176,18 @@ if(var_option.eq.14) then
         select   := (/0,1/)
     end if
 end if
+if(var_option.eq.20) then 
+    draw_var = (/"E_all" ,"E_hgh" ,"E_low"  /)  ;this is the variable used to draw, can used as center string
+    var_name = (/"ex_all","ey_all","ez_all" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
+    divg_option = True
+end if
+if(var_option.eq.21) then 
+    draw_var = (/"W_all" ,"W_hgh" ,"W_low"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"wafx"  ,"wafy"  ,"wafz" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
+    divg_option = True
+end if
 
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
@@ -198,10 +204,6 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
-if(var_option.eq.-17)
-    filename = path + "data/" + case + "_" + months + "e_vector2-year.nc"
-    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
-end if
 if(var_option.eq.-16)
     filename = path + "data/" + case + "_" + months + draw_var(0) + "-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
@@ -271,6 +273,14 @@ if(var_option.eq.14)
     filename = path + "data/" + case + "_" + months + "meridional_momentum_flux-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
+if(var_option.eq.20)
+    filename = path + "data/" + case + "_" + months + "e_vector-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
+if(var_option.eq.21)
+    filename = path + "data/" + case + "_" + months + "TN01-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    ="pdf";"x11"
@@ -282,6 +292,9 @@ nlat   = dimsizes(phis&latitude )  ;
 nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
 var_m  := new((/nvar,ntime,nlat,nlon/),double)
+if(var_option.ge.20) then
+var_m  := new((/nvar,nvar,ntime,nlat,nlon/),double)
+end if
 if(cont_option) then
 var_c  := new((/nvar,ntime,nlat,nlon/),double)
 end if
@@ -409,7 +422,7 @@ if(var_option.eq.6)
     var_m(nvar-1,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     copy_VarMeta(phis,var_m(0,0,:,:))
 end if
-if(var_option.ge.13)
+if(var_option.ge.13.and.var_option.lt.20)
 f = addfile(filename,"r")
     if(DJF_option) then
     var_m(0:nvar-2,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nnv)$(:,select,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
@@ -418,7 +431,6 @@ f = addfile(filename,"r")
     end if
     var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
 end if
-printVarSummary(var_m)
 
 if(var_option.eq.-5) then
 fbv = addfile(path + "data/" + case + "_" + months + "forc_in-year.nc","r")
@@ -438,11 +450,31 @@ var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
-if(var_option.eq.-17) then 
-do nv = 0,2,1
-    var_m((3*nv+2),0,:,:)  = - dim_avg_n_Wrap(f->$var_name(3*nv+2)$(:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-end do 
+if(var_option.ge.20) then 
+f = addfile(filename,"r")
+do nv = 0, nvar-1,1
+    if(DJF_option) then
+    var_m(nv,:,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    else
+    var_m(nv,:,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
+end do
+if(divg_option) then 
+    var_m(2,:,:,:,:) = uv2dv_cfd( var_m(0,:,:,:,:), var_m(1,:,:,:,:),var_m&lat, var_m&lon, 3 )*100000
+    minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4
+    maxlvl := (/ 3.5, 3.5, 3.5/);  1.4, 1.4, 1.4
+    spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2
+else
+    var_m(2,:,0,:,:) = - dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
+;vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
+vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
+end if
+printVarSummary(var_m)
+printMinMax(var_m,True)
 
 if(var_option.eq.-16) then 
     var_m = var_m*24*3600
@@ -713,23 +745,7 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
-
-if(var_option.eq.-17) then ;Eady growth rate
-if(divg_option) then 
-do nv = 0,2,1
-    var_m((3*nv+2),0,:,:) = uv2dv_cfd( var_m((3*nv),0,:,:), var_m((3*nv+1),0,:,:),var_m&lat, var_m&lon, 3 )*10000
-end do
-    minlvl := (/-1.4,-1.4,-1.4/);-3.5,-3.5,-3.5-
-    maxlvl := (/ 1.4, 1.4, 1.4/); 3.5, 3.5, 3.5 
-    spacig := (/ 0.2, 0.2, 0.2/); 0.5, 0.5, 0.5 
-else
-    minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
-end if
-    vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
-end if
+;vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
 
 if(var_option.eq.-16) then ;Eady growth rate
     minlvl := (/ 0 /);
@@ -809,7 +825,7 @@ if(var_option.ge.1.and.var_option.le.6) then
     spacig = (/ 0.5, 10,  2,  3/);  5,10
 end if
 
-if(var_option.ge.13) then ;dbdt
+if(var_option.ge.13.and.var_option.lt.20) then ;dbdt
     minlvl = (/-70,-35,-14,-7,-7,-7/);-8,-8,-8,-8,
     maxlvl = (/ 70, 35, 14, 7, 7, 7/); 8, 8, 8, 8,
     spacig = (/ 10, 5 , 2 , 1, 1, 1/); 1, 1, 1, 1,
@@ -827,7 +843,15 @@ do nv = 0,nvar-1,1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
     np = nv
-    if(var_option.gt.0) then 
+    if(var_option.ge.20) then 
+    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
+    if(divg_option) then 
+    res@gsnRightString  = "divg (" + unit(nnv) + ")"
+    else
+    res@gsnRightString  = "wafz (" + unit(nnv) + ")"
+    end if
+    end if
+    if(var_option.gt.0.and.var_option.lt.20) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
     end if
@@ -851,16 +875,17 @@ do nv = 0,nvar-1,1
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     end if
-    if(var_option.eq.-17)
-    plot(np) = gsn_csm_contour_map_ce(wks,var_m((3*np+2),nt,:,:),res)
+    if(var_option.ge.20)
+    plot(np) = gsn_csm_contour_map_ce(wks,var_m(2,nv,nt,:,:),res)
     resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nv)+"m/s"
-    vect(np) = gsn_csm_vector(wks,var_m((3*np),nt,:,:),var_m((3*np+1),nt,:,:),resvc)
+    vect(np) = gsn_csm_vector(wks,var_m(0,nv,nt,:,:),var_m(1,nv,nt,:,:),resvc)
     overlay(plot(np),vect(np))
+    printMinMax(var_m(2,nv,nt,:,:),0)
     else
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
-    end if
     printMinMax(var_m(nv,nt,:,:),0)
+    end if
 
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))

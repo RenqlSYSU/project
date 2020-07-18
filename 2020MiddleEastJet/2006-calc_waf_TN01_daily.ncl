@@ -10,7 +10,7 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","air","hgt"/)
-fileout  = path2 + "ERA-Interim_DJF_TN01-year.nc"
+fileout  = path2 + "ERA-Interim_DJF_TN01_2-year.nc"
 year_option = True;False 
 
 g  = 9.8 ;m/(s*s)
@@ -20,11 +20,11 @@ a  = 6378388 ;the radius of earth, m
 sclhgt = 7991 ;m 
 pi = atan(1.0)*4
 print(pi)
-years    = ispan(1979,2016,1)
+years    = ispan(1979,1981,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats =  5  ;-20
+lats = -90  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -118,20 +118,24 @@ NN = where(abs(NN).lt.0.0000000001, 0.000001, NN)
 if (any(ismissing(z))) then
     print("hgt has missing")
 end if
-z = linmsg_n(z,-1,ilon)
-
-;stream function
-f0 = conform(z,2.0*(2.0*pi/24.0/3600.0)*sin(lat),ilat)
-sf = z/f0
-NN = f0*f0/NN
-delete([/z,f0/])
-
 if (any(ismissing(u))) then
     print("uwnd has missing")
 end if
 if (any(ismissing(v))) then
     print("vwnd has missing")
 end if
+z = linmsg_n(z,-1,ilon)
+
+;stream function
+f0 = conform(z,2.0*(2.0*pi/24.0/3600.0)*sin(lat),ilat)
+sf = u
+vp = v
+uv2sfvpf ( u, v, sf, vp )
+delete(vp)
+;sf = z/f0
+NN = f0*f0/NN
+delete([/z,f0/])
+
 if (any(ismissing(sf))) then
     print("stream function has missing")
 end if

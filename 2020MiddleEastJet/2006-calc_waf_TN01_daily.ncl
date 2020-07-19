@@ -10,7 +10,7 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","air","hgt"/)
-fileout  = path2 + "ERA-Interim_DJF_TN01_2-year.nc"
+fileout  = path2 + "ERA-Interim_DJF_TN01_3-year.nc"
 year_option = True;False 
 
 g  = 9.8 ;m/(s*s)
@@ -20,11 +20,11 @@ a  = 6378388 ;the radius of earth, m
 sclhgt = 7991 ;m 
 pi = atan(1.0)*4
 print(pi)
-years    = ispan(1979,1981,1)
+years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats = -90  ;-20
+lats =  5  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -125,14 +125,16 @@ if (any(ismissing(v))) then
     print("vwnd has missing")
 end if
 z = linmsg_n(z,-1,ilon)
+u = linmsg_n(u,-1,ilon)
+v = linmsg_n(v,-1,ilon)
 
 ;stream function
 f0 = conform(z,2.0*(2.0*pi/24.0/3600.0)*sin(lat),ilat)
-sf = u
-vp = v
-uv2sfvpf ( u, v, sf, vp )
-delete(vp)
-;sf = z/f0
+;sf = u
+;vp = v
+;uv2sfvpf ( u, v, sf, vp )
+;delete(vp)
+sf = z/f0
 NN = f0*f0/NN
 delete([/z,f0/])
 
@@ -163,6 +165,10 @@ sf := sf2
 NN := NN2
 printVarSummary(u)
 
+u  = conform(sf, dim_avg_n(u ,itime), (/0,2,3,4/))
+v  = conform(sf, dim_avg_n(v ,itime), (/0,2,3,4/))
+NN = conform(sf, dim_avg_n(NN,itime), (/0,2,3,4/))
+
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
@@ -177,6 +183,7 @@ wafy  := new((/3,nyear-1,nlev,nlat,nlon/),float)
 wafz  := new((/3,nyear-1,nlev,nlat,nlon/),float)
 
 do neddy = 0,2,1
+print("neddy= " + neddy)
 if(neddy.eq.0) then
     clm_sf = dim_avg_n(sf,itime)
     edd_sf = sf - conform(sf, clm_sf, (/0,2,3,4/))
@@ -199,22 +206,26 @@ dsfdx = center_finite_diff_n(edd_sf,lon,loncyc,opt,ilon)
 dsfdy = center_finite_diff_n(edd_sf,lat,cyclic,opt,ilat)
 
 coslat = conform(u,cos(lat),ilat)
-coef   = (coslat*conform(u,lev,ilev)/1000.0)/2.0/sqrt(u^2 + v^2)
+coef   = coslat/2.0/sqrt(u^2 + v^2)
+;coef   = (coslat*conform(u,lev,ilev)/1000.0)/2.0/sqrt(u^2 + v^2)
 fx  = coef*((u/a/a/coslat/coslat)*(dsfdx*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lon,loncyc,opt,ilon)) \
            -(v/a/a/coslat       )*(dsfdy*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lat,cyclic,opt,ilat)))
 wafx(neddy,:,:,:,:) = dim_avg_n(fx,itime)
 delete(fx)
+printMinMax(wafx(neddy,:,:,:,:),False)
 
 fy  = coef*((u/a/a/coslat)*(dsfdx*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lon,loncyc,opt,ilon)) \
            -(v/a/a       )*(dsfdy*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lat,cyclic,opt,ilat)))
 wafy(neddy,:,:,:,:) = dim_avg_n(fy,itime)
 delete(fy)
+printMinMax(wafy(neddy,:,:,:,:),False)
 
 dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev)
 fz  = coef*NN*((u/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lon,loncyc,opt,ilon)) \
               -(v/a       )*(dsfdy*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lat,cyclic,opt,ilat)))
 wafz(neddy,:,:,:,:) = dim_avg_n(fz,itime)
 delete([/coslat,coef,dsfdx,dsfdy,dsfdz,fz/])
+printMinMax(wafz(neddy,:,:,:,:),False)
 end do
 
 wafx@long_name = "x wave activity flux"

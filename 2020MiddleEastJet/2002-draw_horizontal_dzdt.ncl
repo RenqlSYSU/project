@@ -23,11 +23,11 @@ months  = (/""/)
 months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 end if
 ntime = dimsizes(months2)
-lev    = (/925,850,700,500,200/) 
+lev    = (/925,850,700,500,300/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 21,21,1 
+do var_option = 20,20,1 
 do nnv = 1,1,1
     if(var_option.eq.-16) then 
         draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
@@ -186,7 +186,7 @@ if(var_option.eq.21) then
     draw_var = (/"W_all" ,"W_hgh" ,"W_low"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"wafz" /)  ;
     unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
-    divg_option = True
+    divg_option = True ;False;
 end if
 
 ;area: east Asia
@@ -278,7 +278,7 @@ if(var_option.eq.20)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.21)
-    filename = path + "data/" + case + "_" + months + "TN01-year.nc"
+    filename = path + "data/" + case + "_" + months + "TN01_2-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 
@@ -465,7 +465,7 @@ if(divg_option) then
     maxlvl := (/ 3.5, 3.5, 3.5/);  1.4, 1.4, 1.4
     spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2
 else
-    var_m(2,:,0,:,:) = - dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(2,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
     maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
     spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6

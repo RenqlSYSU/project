@@ -11,7 +11,7 @@ region_line = True ; draw the line for ME, EA, NA
 vect_option = False ;True ;
 cont_option = False ;True
 bar_share = True ;False;
-nl = 4 ;(/925,850,700,500,300/)
+nl = 4 ;(/925,850,700,500,250/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
@@ -22,12 +22,12 @@ else
 months  = (/""/)
 months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 end if
-ntime = dimsizes(months2)
-lev    = (/925,850,700,500,300/) 
+ntime = dimsizes(months2) 
+lev    = (/925,850,700,500,250/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 20,20,1 
+do var_option = 21,21,1 
 do nnv = 1,1,1
     if(var_option.eq.-16) then 
         draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
@@ -183,10 +183,10 @@ if(var_option.eq.20) then
     divg_option = True
 end if
 if(var_option.eq.21) then 
-    draw_var = (/"W_all" ,"W_hgh" ,"W_low"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"W_all" ,"W_low" ,"W_hgh"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"wafz" /)  ;
     unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
-    divg_option = True ;False;
+    divg_option = False;True ;
 end if
 
 ;area: east Asia
@@ -278,7 +278,7 @@ if(var_option.eq.20)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.21)
-    filename = path + "data/" + case + "_" + months + "TN01_2-year.nc"
+    filename = path + "data/" + case + "_" + months + "TN01_3-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 
@@ -461,17 +461,17 @@ do nv = 0, nvar-1,1
 end do
 if(divg_option) then 
     var_m(2,:,:,:,:) = uv2dv_cfd( var_m(0,:,:,:,:), var_m(1,:,:,:,:),var_m&lat, var_m&lon, 3 )*100000
-    minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4
-    maxlvl := (/ 3.5, 3.5, 3.5/);  1.4, 1.4, 1.4
-    spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2
+    minlvl := (/-7,-7,-7/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5
+    maxlvl := (/ 7, 7, 7/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5
+    spacig := (/ 1, 1, 1/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5
 else
     var_m(2,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
     maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
     spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
-;vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
-vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
+vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
+;vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
 end if
 printVarSummary(var_m)
 printMinMax(var_m,True)

@@ -209,20 +209,20 @@ coslat = conform(u,cos(lat),ilat)
 coef   = coslat/2.0/sqrt(u^2 + v^2)
 ;coef   = (coslat*conform(u,lev,ilev)/1000.0)/2.0/sqrt(u^2 + v^2)
 fx  = coef*((u/a/a/coslat/coslat)*(dsfdx*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lon,loncyc,opt,ilon)) \
-           -(v/a/a/coslat       )*(dsfdy*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lat,cyclic,opt,ilat)))
+           +(v/a/a/coslat       )*(dsfdy*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lat,cyclic,opt,ilat)))
 wafx(neddy,:,:,:,:) = dim_avg_n(fx,itime)
 delete(fx)
 printMinMax(wafx(neddy,:,:,:,:),False)
 
 fy  = coef*((u/a/a/coslat)*(dsfdx*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lon,loncyc,opt,ilon)) \
-           -(v/a/a       )*(dsfdy*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lat,cyclic,opt,ilat)))
+           +(v/a/a       )*(dsfdy*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lat,cyclic,opt,ilat)))
 wafy(neddy,:,:,:,:) = dim_avg_n(fy,itime)
 delete(fy)
 printMinMax(wafy(neddy,:,:,:,:),False)
 
 dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev)
 fz  = coef*NN*((u/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lon,loncyc,opt,ilon)) \
-              -(v/a       )*(dsfdy*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lat,cyclic,opt,ilat)))
+              +(v/a       )*(dsfdy*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lat,cyclic,opt,ilat)))
 wafz(neddy,:,:,:,:) = dim_avg_n(fz,itime)
 delete([/coslat,coef,dsfdx,dsfdy,dsfdz,fz/])
 printMinMax(wafz(neddy,:,:,:,:),False)

@@ -27,7 +27,7 @@ lev    = (/925,850,700,500,250/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 21,21,1 
+do var_option = 22,22,1 
 do nnv = 1,1,1
     if(var_option.eq.-16) then 
         draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
@@ -188,6 +188,12 @@ if(var_option.eq.21) then
     unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
     divg_option = False;True ;
 end if
+if(var_option.eq.22) then 
+    draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
+    divg_option = False;True ;
+end if
 
 ;area: east Asia
 area = (/"NH","ME","EA","NA"/)
@@ -278,7 +284,11 @@ if(var_option.eq.20)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.21)
-    filename = path + "data/" + case + "_" + months + "TN01_3-year.nc"
+    filename = path + "data/" + case + "_" + months + "TN01-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+end if
+if(var_option.eq.22)
+    filename = path + "data/" + case + "_" + months + "steady_TN01-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 
@@ -293,7 +303,7 @@ nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
 var_m  := new((/nvar,ntime,nlat,nlon/),double)
 if(var_option.ge.20) then
-var_m  := new((/nvar,nvar,ntime,nlat,nlon/),double)
+var_m  := new((/3,nvar,ntime,nlat,nlon/),double)
 end if
 if(cont_option) then
 var_c  := new((/nvar,ntime,nlat,nlon/),double)
@@ -454,7 +464,11 @@ if(var_option.ge.20) then
 f = addfile(filename,"r")
 do nv = 0, nvar-1,1
     if(DJF_option) then
+    if(var_option.eq.22) then 
+    var_m(nv,0,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    else
     var_m(nv,:,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
     else
     var_m(nv,:,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
@@ -465,12 +479,17 @@ if(divg_option) then
     maxlvl := (/ 7, 7, 7/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5
     spacig := (/ 1, 1, 1/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5
 else
+    if(var_option.eq.22) then
+    var_m(2,0,0,:,:) = -10.0*dim_avg_n_Wrap(f->$var_name(2)$(:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    else
     var_m(2,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
     minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
     maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
     spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
-vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
+vcref  := (/900,150,150/) ;(/925,850,700,500,200/)
+;vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
 end if
 printVarSummary(var_m)

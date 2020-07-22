@@ -23,7 +23,7 @@ months  = (/""/)
 months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 end if
 ntime = dimsizes(months2) 
-lev    = (/925,850,700,500,250/) 
+lev    = (/925,850,700,500,300/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
@@ -191,7 +191,7 @@ end if
 if(var_option.eq.22) then 
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
+    unit     = (/"m2/s2" ,"m2/s2" ,"m~S~2~N~/s"/)  ;this can be used as right string 
     divg_option = False;True ;
 end if
 
@@ -462,7 +462,7 @@ end if
 
 if(var_option.ge.20) then 
 f = addfile(filename,"r")
-do nv = 0, nvar-1,1
+do nv = 0,2,1
     if(DJF_option) then
     if(var_option.eq.22) then 
     var_m(nv,0,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
@@ -475,20 +475,20 @@ do nv = 0, nvar-1,1
 end do
 if(divg_option) then 
     var_m(2,:,:,:,:) = uv2dv_cfd( var_m(0,:,:,:,:), var_m(1,:,:,:,:),var_m&lat, var_m&lon, 3 )*100000
-    minlvl := (/-7,-7,-7/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5
-    maxlvl := (/ 7, 7, 7/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5
-    spacig := (/ 1, 1, 1/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5
+    minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5-7,-7,-7
+    maxlvl := (/ 3.5, 3.5, 3.5/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5 7, 7, 7
+    spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5 1, 1, 1
 else
-    if(var_option.eq.22) then
-    var_m(2,0,0,:,:) = -10.0*dim_avg_n_Wrap(f->$var_name(2)$(:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    if(var_option.eq.22) then ;(1.0/1000000.0)*
+    var_m(2,0,0,:,:) = dim_avg_n_Wrap(f->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     else
     var_m(2,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
-    minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    minlvl := (/-21,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 21, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 3 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
-vcref  := (/900,150,150/) ;(/925,850,700,500,200/)
+vcref  := (/50,150,150/) ;(/925,850,700,500,200/)
 ;vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
 end if
@@ -863,11 +863,11 @@ do nv = 0,nvar-1,1
     ;nt = ni*3 + np
     np = nv
     if(var_option.ge.20) then 
-    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
+    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv) + " WAF (" + unit(0) + ")"
     if(divg_option) then 
-    res@gsnRightString  = "divg (" + unit(nnv) + ")"
+    res@gsnRightString  = "divg (" + unit(2) + ")"
     else
-    res@gsnRightString  = "wafz (" + unit(nnv) + ")"
+    res@gsnRightString  = var_name(2) + " (" + unit(2) + ")"
     end if
     end if
     if(var_option.gt.0.and.var_option.lt.20) then 
@@ -897,9 +897,11 @@ do nv = 0,nvar-1,1
     if(var_option.ge.20)
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(2,nv,nt,:,:),res)
     resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
-    resvc@vcRefAnnoString2     = vcref(nv)+"m/s"
+    resvc@vcRefAnnoString2     = vcref(nv)+"m~S~2~N~/s~S~2~N~"
     vect(np) = gsn_csm_vector(wks,var_m(0,nv,nt,:,:),var_m(1,nv,nt,:,:),resvc)
     overlay(plot(np),vect(np))
+    printMinMax(var_m(0,nv,nt,:,:),0)
+    printMinMax(var_m(1,nv,nt,:,:),0)
     printMinMax(var_m(2,nv,nt,:,:),0)
     else
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)

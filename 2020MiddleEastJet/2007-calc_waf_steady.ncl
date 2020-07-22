@@ -15,7 +15,7 @@ if(waf_option.eq.0) then
 fileout  = path2 + "ERA-Interim_DJF_steady_TN01-year.nc"
 end if
 if(waf_option.eq.1) then 
-fileout  = path2 + "ERA-Interim_DJF_steady_Pb85-year.nc"
+fileout  = path2 + "ERA-Interim_DJF_steady_Pb852-year.nc"
 end if
 if(waf_option.eq.2) then 
 fileout  = path2 + "ERA-Interim_DJF_steady_Pb85_2-year.nc"
@@ -154,7 +154,7 @@ if(waf_option.eq.2) then
 
 noz    = -sclhgt*log(lev/1000.0)
 area_t = wgt_areaave(t, a*cos(lat)*(lon(1)-lon(0)), 1.0, 0)
-static = center_finite_diff_n(area_t,noz,cyclic,opt,ilev-1) + 0.286* area_t/sclhgt
+static = center_finite_diff_n(area_t,noz,cyclic,opt,ilev-1) + 0.286*area_t/sclhgt
 static := conform(u, static, (/0,1/))
 delete([/area_t,noz/])
 
@@ -169,13 +169,15 @@ coef2  = conform(edd_u,2.0*(2.0*pi/24.0/3600.0)*sin(lat),ilat-1)/static
 coef3  = conform(edd_u,cos(lat),ilat-1)*conform(edd_u,lev/1000.0,ilev-1)
 delete(static)
 
-wafy = coef3*(-edd_v*edd_u + (1.0/coef1)*center_finite_diff_n(edd_u*edd_z,lon,loncyc,opt,ilon-1)) 
+wafy = coef3 * (-edd_v*edd_u/2.0 + (1.0/coef1)*center_finite_diff_n(edd_u*edd_z,lon,loncyc,opt,ilon-1)) 
 delete(edd_u)
-wafz = coef3*( edd_v*edd_t - (1.0/coef1)*center_finite_diff_n(edd_t*edd_z,lon,loncyc,opt,ilon-1))*coef2
+wafz = coef3 * ( edd_v*edd_t/2.0 - (1.0/coef1)*center_finite_diff_n(edd_t*edd_z,lon,loncyc,opt,ilon-1))*coef2
 delete([/edd_t,coef2/])
-wafx = coef3*( edd_v*edd_v - (1.0/coef1)*center_finite_diff_n(edd_v*edd_z,lon,loncyc,opt,ilon-1)) 
+wafx = coef3 * ( edd_v*edd_v/2.0 - (1.0/coef1)*center_finite_diff_n(edd_v*edd_z,lon,loncyc,opt,ilon-1)) 
 delete([/edd_v,edd_z,coef1,coef3/])
 printMinMax(wafx,False)
+printMinMax(wafy,False)
+printMinMax(wafz,False)
 
 else
 
@@ -186,7 +188,8 @@ hgt = z/9.8 ;convert unit from m2/s2 to m
 NN  = brunt_vaisala_atm(theta, hgt, 0, ilev-1)
 delete([/theta,hgt/])
 NN = NN*abs(NN)
-NN = where(abs(NN).lt.0.0000000001, 0.000001, NN)
+NN = conform(NN, wgt_areaave(NN, a*cos(lat)*(lon(1)-lon(0)), 1.0, 0), (/0,1/))
+;NN = where(abs(NN).lt.0.0000000001, 0.000001, NN)
 
 ;stream function
 f0 = conform(z,2.0*(2.0*pi/24.0/3600.0)*sin(lat),ilat-1)
@@ -237,14 +240,14 @@ end if
 
 if(waf_option.eq.1) then
 delete([/u,v/])
-NN = conform(sf, dim_avg_n(NN,ilon-1), (/0,1,2/))
+;NN = conform(sf, dim_avg_n(NN,ilon-1), (/0,1,2/))
 clm_sf = dim_avg_n(sf,ilon-1)
 edd_sf = sf - conform(sf, clm_sf, (/0,1,2/))
 delete([/clm_sf,sf/])
 
 coslat = conform(edd_sf,cos(lat),ilat-1)
-coef   = coslat/2.0
-;coef   = (coslat*conform(u,lev,ilev)/1000.0)/2.0
+;coef   = coslat/2.0
+coef   = (coslat*conform(edd_sf,lev,ilev-1)/1000.0)/2.0
 
 dsfdx = center_finite_diff_n(edd_sf,lon,loncyc,opt,ilon-1)
 wafx  = coef*(1.0/a/a/coslat/coslat)*(dsfdx*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lon,loncyc,opt,ilon-1))
@@ -255,7 +258,8 @@ wafy  = coef*(1.0/a/a/coslat)*(dsfdx*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lon
 printMinMax(wafy,False)
 delete(dsfdy)
 
-dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev-1)
+noz    = -sclhgt*log(lev/1000.0)
+dsfdz = center_finite_diff_n(edd_sf,noz,cyclic,opt,ilev-1)
 wafz  = coef*NN*(1.0/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lon,loncyc,opt,ilon-1))
 delete([/coslat,coef,dsfdx,dsfdz/])
 printMinMax(wafz,False)

@@ -27,7 +27,7 @@ lev    = (/925,850,700,500,300/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 22,22,1 
+do var_option = 20,20,1 
 do nnv = 1,1,1
     if(var_option.eq.-16) then 
         draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
@@ -177,16 +177,16 @@ if(var_option.eq.14) then
     end if
 end if
 if(var_option.eq.20) then 
-    draw_var = (/"E_all" ,"E_hgh" ,"E_low"  /)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"E_all" ,"E_low" ,"E_hgh"  /)  ;this is the variable used to draw, can used as center string
     var_name = (/"ex_all","ey_all","ez_all" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
-    divg_option = True
+    unit     = (/"m2/s2" ,"m2/s2" ,"10~S~-2~N~Pa*m/s~S~2~N~"/)  ;this can be used as right string 
+    divg_option = False ;True
 end if
 if(var_option.eq.21) then 
     draw_var = (/"W_all" ,"W_low" ,"W_hgh"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"wafz" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"m2/s2"/)  ;this can be used as right string 
-    divg_option = False;True ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"10~S~-5~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    divg_option = True ;False;
 end if
 if(var_option.eq.22) then 
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string

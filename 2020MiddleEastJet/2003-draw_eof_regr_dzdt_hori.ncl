@@ -11,11 +11,14 @@
 ;******************************************************************************
 begin
 lev  = (/850,500,200,100/)
-nl = 0
+nl = 2
 global = True
-bar_share  = False;True ;
+bar_share  = True ;False;
+jet_option = False
+regu_option = False;
+
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = -1,-3,1
+do var_option = 20,21,1 
 if(var_option.eq.-10) then 
     draw_var := (/"uwnd"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"season_ave"/)  ;this is the variable used to draw, can used as center string
@@ -41,7 +44,7 @@ if(var_option.eq.0) then
     var_name := (/"Qd"   ,"Qeddy"/)  ;use to read variables
     unit     := (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
-if(var_option.ge.1) then
+if(var_option.ge.1.and.var_option.lt.20) then
 var_name := (/"dzdt","dudt" ,"dTdt","dbdt"/)  ;
 unit     := (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)"/)  ;this can be used as right string 
 nnv = 1 ;used to read dzdt induced by different forcing
@@ -57,6 +60,24 @@ if(var_option.eq.3) then
     draw_var := (/"vort","Tadvect"/)  ;,"advect","b3y" this is the variable used to draw, can used as center string
     select := (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+end if
+if(var_option.eq.20) then 
+    draw_var = (/"E_all" ,"E_low" ,"E_hgh"  /)  ;this is the variable used to draw, can used as center string
+    var_name = (/"ex_all","ey_all","ez_all" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"10~S~-2~N~Pa*m/s~S~2~N~"/)  ;this can be used as right string 
+    divg_option = False ;True
+end if
+if(var_option.eq.21) then 
+    draw_var = (/"W_all" ,"W_low" ,"W_hgh"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"wafx"  ,"wafy"  ,"wafz" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"10~S~-5~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    divg_option = True ;False;
+end if
+if(var_option.eq.22) then 
+    draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
+    unit     = (/"m2/s2" ,"m2/s2" ,"m~S~2~N~/s"/)  ;this can be used as right string 
+    divg_option = False;True ;
 end if
 nvar = dimsizes(draw_var)
 
@@ -107,9 +128,23 @@ if(var_option.eq.3)
     filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
+if(var_option.eq.20)
+    filename = path + "data/" + case + "_DJF_e_vector-year.nc"
+    fig_name = path + "fig/eof_regression_hor-" + draw_var(0)
+end if
+if(var_option.eq.21)
+    filename = path + "data/" + case + "_DJF_TN01-year.nc"
+    fig_name = path + "fig/eof_regression_hor-" + draw_var(0)
+end if
+if(var_option.eq.22)
+    filename = path + "data/" + case + "_DJF_steady_Pb85-year.nc"
+    fig_name = path + "fig/eof_regression_hor-" + draw_var(0)
+end if
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
 plot   = new((/18/),graphic)
+vect   = new((/18/),graphic)
+vect2  = new((/18/),graphic)
 line   = new((/18/),graphic)
 regl   = new((/18/),graphic)
 sigl   = new((/18/),graphic)
@@ -122,11 +157,13 @@ line1  = new((/12/),graphic)
    tick_font      = 0.01
    subtitle_font  = 0.01
    title_font     = 0.02
+   vcref_font     = 0.005
    label_font     = 0.015
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
    label_thick    = 1.5
+   vc_thick       = 2.5
    mp_thick       = 3.0
    font_index     = 22
 
@@ -232,6 +269,38 @@ line1  = new((/12/),graphic)
     lnres1@gsLineDashPattern    = 0
     lnres1@gsLineThicknessF     = 5.0
 
+;--------set the attribute of vector--------------
+    resvc                  = True
+    resvc@gsnDraw          = False
+    resvc@gsnFrame         = False
+    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcVectorDrawOrder          = "PostDraw"
+    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcMonoLineArrowColor       = True
+    resvc@vcLineArrowColor           = "gray20";similar to "black";
+    resvc@vcMinDistanceF            = 0.0105
+    resvc@vcRefLengthF              = 0.05           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = 0.005
+    resvc@vcLineArrowHeadMaxSizeF   = 0.005
+    ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
+    resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    ;resvc@vcRefAnnoSide              = "Bottom"          
+    ;resvc@vcRefAnnoJust              = "TopRight"
+    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
+    resvc@vcRefAnnoPerimOn           = False         ;close the border
+    resvc@vcRefAnnoFont              = font_index
+    resvc@vcRefAnnoFontHeightF       = vcref_font
+    resvc@vcRefAnnoString1On         = False
+    resvc@vcRefAnnoString2On         = True
+    ;resvc@vcRefAnnoString2           = "30m/s"
+    resvc@gsnCenterString      = ""
+    resvc@gsnLeftString    = " "
+    resvc@gsnRightString   = " "
+
+    resvc2 = resvc
+    resvc2@vcLineArrowColor           = "grey"
+
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
     res_sig@cnFillOn         = True       ; Fill contours
@@ -308,7 +377,7 @@ if(var_option.eq.0) then
     spacig := (/ 0.3, 0.3, 0.3/);
 end if
 
-if(var_option.ge.1) then
+if(var_option.ge.1.and.var_option.lt.20) then
 if(nnv.eq.0) then   ;dzdt
     minlvl := (/-3.5,-3.5,-3.5,-3.5/);
     maxlvl := (/ 3.5, 3.5, 3.5, 3.5/);
@@ -379,14 +448,48 @@ u := f2->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)})
 nlat = dimsizes(u&lat)
 nlon = dimsizes(u&lon)
 vars := new((/nvar,nyear,nlat,nlon/),double)
+if(var_option.ge.20) then
+vars := new((/3,nvar,nyear,nlat,nlon/),double)
+end if
 
 if(var_option.le.0.and.var_option.ge.-10)
     do nv = 0, nvar-1,1
     vars(nv,:,:,:) = f3->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     end do
 else
+    if(var_option.ge.20) then 
+    do nv = 0,2,1
+        if(var_option.eq.22) then 
+        vars(nv,0,:,:,:)  = f3->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        else
+        vars(nv,:,:,:,:)  = f3->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end if
+    end do
+    if(divg_option) then 
+        vars(2,:,:,:,:) = uv2dv_cfd( vars(0,:,:,:,:), vars(1,:,:,:,:),vars&lat, vars&lon, 3 )*100000
+        minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5
+        maxlvl := (/ 3.5, 3.5, 3.5/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5
+        spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5
+    else
+        if(var_option.eq.22) then ;wafz or edd_sf 
+        vars(2,0,:,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
+        else
+        vars(2,:,:,:,:) = -100.0*f3->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end if
+        minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+        maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+        spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    end if
+    vcref  := (/20,20,20/) ;(/925,850,700,500,200/)
+    printMinMax(vars(0,:,:,:,:),0)
+    printMinMax(vars(1,:,:,:,:),0)
+    printMinMax(vars(2,:,:,:,:),0)
+    
+    else
     vars  = f3->$var_name(nnv)$(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
 end if
+
 if(var_option.eq.-3) then
 fbv = addfile(path + "data/" + case + "_DJF_forc_in-year.nc","r")
 vars(0,0,:,:) = dim_sum_n_Wrap(vars(:,0,:,:),0) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
@@ -400,36 +503,55 @@ vars(0,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0) + dim_avg_n_Wrap(fbv->$var_nam
 vars(1,0,:,:) = dim_avg_n_Wrap(fbv->$var_name(nnv)$(2,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
 ;vars(2,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0)
 end if
-;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 
+if(var_option.ge.20) then 
+var  := regCoef_n(ts,vars,2,2)
+tval := onedtond(var@tval ,(/6,neval,3,nvar,nlat,nlon/))
+df   := onedtond(var@nptxy,(/6,neval,3,nvar,nlat,nlon/))
+copy_VarCoords(vars(0,0,0,:,:), var(0,0,0,0,:,:))
+lon_m := conform(tval,vars&lon,5)
+printMinMax(var(:,:,0,:,:,:),0)
+printMinMax(var(:,:,1,:,:,:),0)
+printMinMax(var(:,:,2,:,:,:),0)
+else
 var  := regCoef_n(ts,vars,2,1)
-ureg := regCoef_n(ts,u   ,2,0)
 tval := onedtond(var@tval ,(/6,neval,nvar,nlat,nlon/))
 df   := onedtond(var@nptxy,(/6,neval,nvar,nlat,nlon/))
-utval := onedtond(ureg@tval ,(/6,neval,nlat,nlon/))
-udf   := onedtond(ureg@nptxy,(/6,neval,nlat,nlon/))
-u    := dim_avg_n_Wrap(u   ,0)
 copy_VarCoords(vars(0,0,:,:), var(0,0,0,:,:))
-copy_VarCoords(u, ureg(0,0,:,:))
-u = mask(u, u.lt.20 , False) 
-printVarSummary(var)
+lon_m := conform(tval,vars&lon,4)
+end if
 
 b := tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
-prob   = mask(prob,prob.lt.siglvl,True)
-lon_m := conform(prob,vars&lon,4)
 prob   = mask(prob,lon_m.eq.0,False)
-;var   = mask(var,prob.lt.siglvl,True)
+delete([/tval,df,lon_m/])
+if(var_option.ge.20) then
+svar   = var
+svar(:,:,0,:,:,:)   = mask(var(:,:,0,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),True) ;pass significance
+svar(:,:,1,:,:,:)   = mask(var(:,:,1,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),True) ;pass significance
+ var(:,:,0,:,:,:)   = mask(var(:,:,0,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),False) ;not pass significance
+ var(:,:,1,:,:,:)   = mask(var(:,:,1,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),False) ;not pass significance
+copy_VarCoords(vars(0,0,0,:,:), prob(0,0,0,0,:,:))
+copy_VarCoords(vars(0,0,0,:,:), svar(0,0,0,0,:,:))
+else
 copy_VarCoords(vars(0,0,:,:), prob(0,0,0,:,:))
+end if
+prob   = mask(prob,prob.lt.siglvl,True)
+
+ureg := regCoef_n(ts,u   ,2,0)
+utval := onedtond(ureg@tval ,(/6,neval,nlat,nlon/))
+udf   := onedtond(ureg@nptxy,(/6,neval,nlat,nlon/))
+u    := dim_avg_n_Wrap(u   ,0)
+copy_VarCoords(u, ureg(0,0,:,:))
+u = mask(u, u.lt.20 , False) 
+printVarSummary(var)
+
 b := utval 
 b = 0.5
 uprob  := betainc( udf/(udf+utval^2), udf/2.0, b )
 ;ureg   = mask(ureg,uprob.lt.siglvl,True)
-print(max(tval))
-print(min(tval))
-print(max(df))
-print(min(df))
+delete([/utval,udf/])
 
 if(var_option.eq.-6) then 
     var = - var*3600*24
@@ -456,7 +578,7 @@ if(var_option.eq.0) then
     var = var*24*3600 ;convert units of Q from K/s to K/Day 
 end if
 
-if(var_option.ge.1) then
+if(var_option.ge.1.and.var_option.lt.20) then
 if(nnv.eq.0) then
     var = var*10^3
 end if
@@ -485,13 +607,22 @@ do nv = 0, nvar-1,1
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
     end if
+    
     res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev ;area(na) + " " + lonl(na) + "-" + lonr(na) + "E"
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
-    if(var_option.ge.1) then 
-    res@gsnRightString  = draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    if(var_option.ge.20) then
+    if(divg_option) then 
+    res@gsnRightString  = draw_var(nv) + " WAF divg (" + unit(2) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     else
+    res@gsnRightString  = draw_var(nv) + " WAF " + var_name(2) + " (" + unit(2) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    end if
+    if(var_option.ge.1.and.var_option.lt.20) then 
+    res@gsnRightString  = draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    end if
+    if(var_option.le.0) then 
     res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     end if
+    
     if(nv.gt.10) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
     else
@@ -501,24 +632,46 @@ do nv = 0, nvar-1,1
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     end if
     
+    if(var_option.ge.20)
+    plot(np) = gsn_csm_contour_map_ce(wks,var(nk,ne,2,nv,:,:),res)
+    sigl(np) = gsn_csm_contour(wks,prob(nk,ne,2,nv,:,:),res_sig)
+    overlay(plot(np),sigl(np))
+    resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nv)+"m~S~2~N~/s~S~2~N~"
+    resvc2@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
+    resvc2@vcRefAnnoString2     = vcref(nv)+"m~S~2~N~/s~S~2~N~"
+    vect(np)  = gsn_csm_vector(wks,var(nk,ne,0,nv,:,:) ,var(nk,ne,1,nv,:,:) ,resvc2)
+    vect2(np) = gsn_csm_vector(wks,svar(nk,ne,0,nv,:,:),svar(nk,ne,1,nv,:,:),resvc) ;pass significance
+    overlay(plot(np),vect(np))
+    overlay(plot(np),vect2(np))
+    printMinMax(var(nk,ne,0,nv,:,:),0)
+    printMinMax(var(nk,ne,1,nv,:,:),0)
+    printMinMax(var(nk,ne,2,nv,:,:),0)
+    else
     plot(np) = gsn_csm_contour_map_ce(wks, var(nk,ne,nv,:,:),res)
     sigl(np) = gsn_csm_contour(wks,prob(nk,ne,nv,:,:),res_sig)
     overlay(plot(np),sigl(np))
-   
+    printMinMax(var(nk,ne,nv,:,:),0)
+    end if
+  
+    if(regu_option) then 
     reg_line@cnLevelSpacingF      := lin_spc(na)     ; set contour interval
     regl(np) = gsn_csm_contour(wks,ureg(nk,ne,:,:),reg_line)
     overlay(plot(np),regl(np))
-   
+    end if
+
+    if(jet_option) then 
     line(np) = gsn_csm_contour(wks,u,res_line)
     overlay(plot(np),line(np))
-    printMinMax(var(nk,ne,nv,:,:),0)
-        
+    end if
+
     line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,na), latx(:,na), lnres1 )
 end do 
     resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
-    ;resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
 ;    gsn_panel(wks,plot,(/3,nvar/),resp)

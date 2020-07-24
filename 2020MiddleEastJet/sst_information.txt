@@ -1,0 +1,120 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	HadISST_sst_18702018
+path:	/home/ys17-19/data-observation/SST/HadISST/HadISST_sst_18702018.nc
+   file global attributes:
+      Title : Monthly version of HadISST sea surface temperature component
+      description : HadISST 1.1 monthly average sea surface temperature
+      institution : Met Office Hadley Centre
+      source : HadISST
+      reference : Rayner, N. A., Parker, D. E., Horton, E. B., Folland, C. K., Alexander, L. V., Rowell, D. P., Kent, E. C., Kaplan, A.  Global analyses of sea surface temperature, sea ice, and night marine air temperature since the late nineteenth century J. Geophys. Res.Vol. 108, No. D14, 4407 10.1029/2002JD002670
+      Conventions : CF-1.0
+      history : 2/2/2018 converted to netcdf from pp format
+      supplementary_information : Updates and supplementary information will be available from http://www.metoffice.gov.uk/hadobs/hadisst
+      comment : Data restrictions: for academic research use only. Data are Crown copyright see (http://www.opsi.gov.uk/advice/crown-copyright/copyright-guidance/index.htm)
+   dimensions:
+      time = 1776  // unlimited
+      latitude = 180
+      longitude = 360
+      nv = 2
+   variables:
+      float time ( time )
+         units :	days since 1870-1-1 0:0:0
+         calendar :	gregorian
+         long_name :	Time
+         standard_name :	time
+
+      float time_bnds ( time, nv )
+
+      float latitude ( latitude )
+         units :	degrees_north
+         long_name :	Latitude
+         standard_name :	latitude
+
+      float longitude ( longitude )
+         units :	degrees_east
+         long_name :	Longitude
+         standard_name :	longitude
+
+      float sst ( time, latitude, longitude )
+         _FillValue :	-1e+30
+         standard_name :	sea_surface_temperature
+         long_name :	sst
+         units :	C
+         cell_methods :	time: lat: lon: mean
+         missing_value :	-1e+30
+
+ 
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	olr.mon.mean.197406-201701
+path:	/home/ys17-19/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc
+   file global attributes:
+      title : Monthly means of OLR from interpolated OLR dataset
+      history : Created from daily OLR files obtained at NCEP and further processed. Stored in netCDF in 1996. Last update 10/2003
+      description : Data is interpolated in time and space from NOAA twice-daily OLR values and averaged to once daily (from which means are calculated)
+      platform : Observation
+      Conventions : CF-1.2
+      References : https://www.esrl.noaa.gov/psd/data/gridded/data.interp_OLR.html
+      references : https://www.esrl.noaa.gov/psd/data/gridded/data.interp_OLR.html
+      Citation : Liebmann and Smith: June 2006: Description of a Complete (Interpolated) Outgoing Longwave Radiation Dataset. Bulletin of the American Meteorological Society, 77, 1275-1277
+      dataset_title : NOAA Interpolated Outgoing Longwave Radiation (OLR)
+   dimensions:
+      lon = 144
+      lat = 73
+      nmiss = 7
+      time = 512  // unlimited
+   variables:
+      float lon ( lon )
+         units :	degrees_east
+         long_name :	Longitude
+         actual_range :	(  0, 360 )
+         standard_name :	longitude
+         axis :	X
+
+      float lat ( lat )
+         units :	degrees_north
+         actual_range :	( 90, -90 )
+         long_name :	Latitude
+         standard_name :	latitude
+         axis :	Y
+
+      double time ( time )
+         units :	hours since 1800-01-01 00:00:0.0
+         long_name :	Time
+         actual_range :	( 1528872, 1902192 )
+         delta_t :	0000-01-00 00:00:00
+         avg_period :	0000-01-00 00:00:00
+         standard_name :	time
+         axis :	T
+
+      short olr ( time, lat, lon )
+         long_name :	OLR monthly means
+         unpacked_valid_range :	(  0, 500 )
+         actual_range :	( 83.92999, 330.16 )
+         units :	W/m^2
+         add_offset :	327.65
+         scale_factor :	0.01
+         missing_value :	32766
+         var_desc :	Outgoing Longwave Radiation
+         precision :	2
+         dataset :	NOAA Interpolated OLR
+         level_desc :	Other
+         statistic :	Mean
+         parent_stat :	Individual Obs
+         valid_range :	( -32765, 17235 )
+         _FillValue :	32766
+
+ 

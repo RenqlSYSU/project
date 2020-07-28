@@ -11,14 +11,15 @@
 ;******************************************************************************
 begin
 lev  = (/925,850,500,200,100/)
-nl = 0
+nl = 3
 global = True
 bar_share   = True ;False;
+bar_verti   = False;True ;
 jet_option  = True ;False
-regu_option = True ;False;
+regu_option = False;True ;
 
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = -11,-11,1 
+do var_option = -10,-10,1 
 if(var_option.eq.-22) then 
     draw_var := (/"OLR"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"olr"/)  ;this is the variable used to draw, can used as center string
@@ -187,7 +188,7 @@ line1  = new((/12/),graphic)
    title_thick    = 5.0
    label_thick    = 1.5
    vc_thick       = 2.5
-   mp_thick       = 3.0
+   mp_thick       = 2.5 
    font_index     = 22
 
     wks = gsn_open_wks(fig_out,fig_name)
@@ -268,7 +269,7 @@ line1  = new((/12/),graphic)
     res_line@cnLineLabelsOn   = False ;True ;
     res_line@cnLineLabelFontHeightF = 0.01
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 3.5
+    res_line@cnLineThicknessF = mp_thick + 0.5
     res_line@cnLineColor      = "blueviolet";"green4";"black"
     res_line@gsnContourZeroLineThicknessF = 8
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
@@ -279,7 +280,7 @@ line1  = new((/12/),graphic)
     res_line@gsnRightString   = " "
 
     reg_line = res_line
-    reg_line@cnLineThicknessF = 3.5
+    reg_line@cnLineThicknessF = mp_thick + 0.5
     reg_line@cnLineColor      = "green4";"black"
     reg_line@gsnContourZeroLineThicknessF = 0
     reg_line@gsnContourNegLineDashPattern = 5
@@ -290,7 +291,7 @@ line1  = new((/12/),graphic)
     lnres1                      = True
     lnres1@gsLineColor          = "black"
     lnres1@gsLineDashPattern    = 0
-    lnres1@gsLineThicknessF     = 5.0
+    lnres1@gsLineThicknessF     = mp_thick + 0.5
 
 ;--------set the attribute of vector--------------
     resvc                  = True
@@ -361,9 +362,15 @@ line1  = new((/12/),graphic)
     res@lbLabelBarOn      = True   ; the label bar
     resp@gsnPanelLabelBar = False
     end if
-    resp@lbOrientation    = "Vertical" ;"Horizontal" ;
+    if(bar_verti) then 
+    resp@lbOrientation    = "Vertical" ;
     resp@pmLabelBarWidthF  = 0.03
     resp@pmLabelBarHeightF = 0.4 ;0.27
+    else
+    resp@lbOrientation    = "Horizontal" ;"Vertical" ;
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05 ;
+    end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.01 
     resp@lbLabelFontThicknessF = tick_thick
@@ -703,11 +710,11 @@ end if
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 0, 1
-do ne = 0, neval-2, 1
+do ne = 0, neval-3, 1
 do nv = 0, nvar-1,1
 do nt = 0, ntime-1, 1
     nev = ne + 1
-    np  = ne ;1 var ;2 area
+    np  = 2*na + ne ;1 var ;2 area
     ;np = ne*nvar + nv ;1 var ;2 area
     ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
     if(.not.(global)) then 
@@ -795,9 +802,10 @@ end do
 ;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-    gsn_panel(wks,plot,(/3,nvar/),resp)
+;    gsn_panel(wks,plot,(/3,nvar/),resp)
 end do ;EOF kinds
 end do ;area 
+    gsn_panel(wks,plot,(/narea,2/),resp)
 end do ;var_option
 end
 

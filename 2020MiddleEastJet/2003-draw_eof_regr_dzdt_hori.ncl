@@ -16,10 +16,10 @@ global = True
 bar_share   = True ;False;
 bar_verti   = False;True ;
 jet_option  = True ;False
-regu_option = False;True ;
+regu_option = True ;False;
 
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = -10,-10,1 
+do var_option = 3,3,1 
 if(var_option.eq.-22) then 
     draw_var := (/"OLR"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"olr"/)  ;this is the variable used to draw, can used as center string
@@ -73,8 +73,8 @@ if(var_option.eq.2) then
     select := (/1,3,0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 if(var_option.eq.3) then 
-    draw_var := (/"vort","Tadvect"/)  ;,"advect","b3y" this is the variable used to draw, can used as center string
-    select := (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+    draw_var := (/"Qd","vort","Tadvect"/)  ;,"advect","b3y" this is the variable used to draw, can used as center string
+    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
 end if
 if(var_option.eq.20) then 
@@ -92,7 +92,7 @@ end if
 if(var_option.eq.22) then 
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"m~S~2~N~/s"/)  ;this can be used as right string 
+    unit     = (/"m2/s2" ,"m2/s2" ,"10~S~6~N~m~S~2~N~/s"/)  ;this can be used as right string 
     divg_option = False;True ;
 end if
 nvar = dimsizes(draw_var)
@@ -149,7 +149,7 @@ if(var_option.eq.2)
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.3)
-    filename = path + "data/" + case + "_DJF_dzdt_in2-year.nc"
+    filename = path + "data/" + case + "_DJF_dzdt_in-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.20)
@@ -188,7 +188,7 @@ line1  = new((/12/),graphic)
    title_thick    = 5.0
    label_thick    = 1.5
    vc_thick       = 2.5
-   mp_thick       = 2.5 
+   mp_thick       = 3.0 
    font_index     = 22
 
     wks = gsn_open_wks(fig_out,fig_name)
@@ -221,17 +221,25 @@ line1  = new((/12/),graphic)
     res@cnLinesOn        = False
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
-
-    res@lbOrientation        = "Vertical";"Horizontal"
+    
+    if(bar_verti) then 
+    res@lbOrientation     = "Vertical";"Horizontal"
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.15
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation     = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.03
+    res@pmLabelBarOrthogonalPosF     = 0.2
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
     res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
-    res@pmLabelBarWidthF  = 0.03
-    res@pmLabelBarHeightF = 0.15
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.01
-    res@pmLabelBarParallelPosF       = 0.5
 
 ;-------set the attribute of the map-------------------
     if(global) then 
@@ -280,7 +288,7 @@ line1  = new((/12/),graphic)
     res_line@gsnRightString   = " "
 
     reg_line = res_line
-    reg_line@cnLineThicknessF = mp_thick + 0.5
+    reg_line@cnLineThicknessF = mp_thick + 1.5
     reg_line@cnLineColor      = "green4";"black"
     reg_line@gsnContourZeroLineThicknessF = 0
     reg_line@gsnContourNegLineDashPattern = 5
@@ -369,7 +377,7 @@ line1  = new((/12/),graphic)
     else
     resp@lbOrientation    = "Horizontal" ;"Vertical" ;
     resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05 ;
+    resp@pmLabelBarHeightF = 0.03 ;
     end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.01 
@@ -421,13 +429,13 @@ if(nnv.eq.0) then   ;dzdt
 end if
 if(nnv.eq.1) then ;dudt
 if(var_option.eq.3) then 
-    minlvl := (/-21,-21,-21/);-8,-8,-8,-8,
-    maxlvl := (/ 21, 21, 21/); 8, 8, 8, 8,
-    spacig := (/ 3 , 3 , 3 /); 1, 1, 1, 1,
+    minlvl := (/-7,-7,-7/);-8,-8,-8,-8,-21,-14
+    maxlvl := (/ 7, 7, 7/); 8, 8, 8, 8, 21, 14
+    spacig := (/ 1, 1, 1/); 1, 1, 1, 1, 3 , 2 
 else
-    minlvl := (/-3.5,-3.5,-3.5,-3.5/);-8,-8,-8,-8,
-    maxlvl := (/ 3.5, 3.5, 3.5, 3.5/); 8, 8, 8, 8,
-    spacig := (/ 0.5, 0.5, 0.5, 0.5/); 1, 1, 1, 1,
+    minlvl := (/-7,-7,-7,-7/);-3.5,-3.5,-3.5,-3.5
+    maxlvl := (/ 7, 7, 7, 7/); 3.5, 3.5, 3.5, 3.5
+    spacig := (/ 1, 1, 1, 1/); 0.5, 0.5, 0.5, 0.5
 end if
 end if
 if(nnv.eq.2) then ;dTdt
@@ -585,7 +593,7 @@ if(var_option.ge.20) then
         maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
         spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
     end if
-    vcref  := (/20,20,20/) ;(/925,850,700,500,200/)
+    vcref  := (/10,20,20/) ;(/925,850,700,500,200/)
     printMinMax(vars(0,:,:,:,:),0)
     printMinMax(vars(1,:,:,:,:),0)
     printMinMax(vars(2,:,:,:,:),0)
@@ -597,15 +605,17 @@ end if
 
 if(var_option.eq.-3) then
 fbv = addfile(path + "data/" + case + "_DJF_forc_in-year.nc","r")
-vars(0,0,:,:) = dim_sum_n_Wrap(vars(:,0,:,:),0) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
-vars(1,0,:,:) = dim_avg_n_Wrap(f3->t3x(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) \
-               +dim_avg_n_Wrap(f3->t3y(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
+vars(0,:,:,:) = dim_sum_n_Wrap(vars(:,:,:,:),0) + fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+vars(1,:,:,:) = f3->t3x(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) \
+               +f3->t3y(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) 
 end if
 
 if(var_option.eq.3) then
-fbv = addfile(path + "data/" + case + "_DJF_dzdt_in-year.nc","r")
-vars(0,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
-vars(1,0,:,:) = dim_avg_n_Wrap(fbv->$var_name(nnv)$(2,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
+fbv = addfile(path + "data/" + case + "_DJF_dzdt_in3-year.nc","r")
+fex = addfile(path + "data/" + case + "_DJF_dzdt_ex-year.nc","r")
+vars(1,:,:,:) = dim_sum_n_Wrap(vars(0:1,:,:,:),0); + fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+vars(0,:,:,:) = fex->$var_name(nnv)$(0,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) 
+vars(2,:,:,:) = dim_sum_n_Wrap(fbv->$var_name(nnv)$(0:1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) 
 ;vars(2,0,:,:) = dim_sum_n_Wrap(vars(0:1,0,:,:),0)
 end if
 
@@ -714,7 +724,8 @@ do ne = 0, neval-3, 1
 do nv = 0, nvar-1,1
 do nt = 0, ntime-1, 1
     nev = ne + 1
-    np  = 2*na + ne ;1 var ;2 area
+    np = nv
+    ;np  = 2*na + ne ;1 var ;2 area
     ;np = ne*nvar + nv ;1 var ;2 area
     ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
     if(.not.(global)) then 
@@ -796,16 +807,16 @@ do nt = 0, ntime-1, 1
 end do 
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
-;    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-;    gsn_panel(wks,plot,(/3,nvar/),resp)
+;    gsn_panel(wks,plot,(/2,1/),resp)
 end do ;EOF kinds
 end do ;area 
-    gsn_panel(wks,plot,(/narea,2/),resp)
+;    gsn_panel(wks,plot,(/narea,2/),resp)
 end do ;var_option
 end
 

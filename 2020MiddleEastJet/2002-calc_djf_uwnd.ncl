@@ -17,7 +17,7 @@ years@calendar = "standard"
 DJF_option = True ;False
 
 ;area: east Asia
-lats =  0  ;-20
+lats =  -30;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
@@ -53,7 +53,7 @@ select_time1(59:364) = ispan(60,365,1)
 select_time          = ispan(0,364,1)
 end if
 
-do nv = 6,6,1
+do nv = 3,3,1
 year_option = True;False ;
 if(DJF_option) then 
 fileout  = path2 + "ERA-Interim_DJF_" + var_name(nv) + "-year.nc"

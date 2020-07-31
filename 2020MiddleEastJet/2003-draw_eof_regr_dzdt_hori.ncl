@@ -13,13 +13,18 @@ begin
 lev  = (/925,850,500,200,100/)
 nl = 3
 global = True
-bar_share   = False;True ;
+bar_share   = True ;False;
 bar_verti   = False;True ;
 jet_option  = True ;False
-regu_option = False;True ;
+regu_option = True ;False;
 
 var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = 3,3,1 
+do var_option = -23,-23,1 
+if(var_option.eq.-23) then 
+    draw_var := (/"preci"/)  ;this is the variable used to draw, can used as center string
+    var_name := (/"precip"/)  ;this is the variable used to draw, can used as center string
+    unit     := (/"mm/day"/)  ;this can be used as right string 
+end if
 if(var_option.eq.-22) then 
     draw_var := (/"OLR"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"olr"/)  ;this is the variable used to draw, can used as center string
@@ -112,7 +117,7 @@ end if
 nvar = dimsizes(draw_var)
 
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
+lats = (/ -10 , -10 , -10 /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90  60 , 60 , 60
 lonl = (/ 0  , 0  ,0   /);, 0   ;30 ;20  0  ,105 , 250
 lonr = (/ 360,360 ,360 /);, 360 ;150;220 70 ,175 , 320
@@ -130,6 +135,10 @@ years = ispan(1979,2015,1)
 case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 filename0  = path + "data/eof_u_6kinds-" + area + ".nc"
+if(var_option.eq.-23)
+    filename = "/home/ys17-19/data-observation/GPCP/precip.mon.mean.197901.201809.nc"
+    fig_name = path + "fig/eof_regression_hor-preci"
+end if
 if(var_option.eq.-22)
     filename = "/home/ys17-19/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc"
     fig_name = path + "fig/eof_regression_hor-olr"
@@ -526,38 +535,64 @@ if(var_option.ge.20) then
 vars := new((/3,nvar,nyear,nlat,nlon/),double)
 end if
 
-if(var_option.eq.-22) then 
+if(var_option.eq.-22.or.var_option.eq.-23) then 
     ntime = 1
     month = (/"DJF"/)
     ;month = (/"Sep","Oct","Nov","Dec","Jan","Feb"/)
+    if(var_option.eq.-22) then 
     temp  = short2flt(f3->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    minlvl := (/-7/);
+    maxlvl := (/ 7/);
+    spacig := (/ 1/);
+    else
+    temp  = f3->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    minlvl := (/-0.7/);
+    maxlvl := (/ 0.7/);
+    spacig := (/ 0.1/);
+    end if
     nlat1 = dimsizes(temp&lat)
     nlon1 = dimsizes(temp&lon)
     vars := new((/ntime,nyear,nlat1,nlon1/),float)
     time  = cd_calendar(f3->time,0)
     if(ntime.eq.1) then
     vars = 0
+    if(var_option.eq.-22) then 
     select_time   := ind(time(:,0).ge.1979.and.time(:,0).le.2015.and.time(:,1).eq.12)
     vars(0,:,:,:) = vars(0,:,:,:) + short2flt(f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}))
     select_time   := ind(time(:,0).ge.1980.and.time(:,0).le.2016.and.time(:,1).eq.1)
     vars(0,:,:,:) = vars(0,:,:,:) + short2flt(f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}))
     select_time   := ind(time(:,0).ge.1980.and.time(:,0).le.2016.and.time(:,1).eq.2)
     vars(0,:,:,:) = vars(0,:,:,:) + short2flt(f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    else
+    select_time   := ind(time(:,0).ge.1979.and.time(:,0).le.2015.and.time(:,1).eq.12)
+    vars(0,:,:,:) = vars(0,:,:,:) + f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    select_time   := ind(time(:,0).ge.1980.and.time(:,0).le.2016.and.time(:,1).eq.1)
+    vars(0,:,:,:) = vars(0,:,:,:) + f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    select_time   := ind(time(:,0).ge.1980.and.time(:,0).le.2016.and.time(:,1).eq.2)
+    vars(0,:,:,:) = vars(0,:,:,:) + f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
     vars = vars/3
     copy_VarMeta(temp,vars(0,0,:,:))
     else
     do nm = 0,3,1
+    if(var_option.eq.-22) then 
     select_time   := ind(time(:,0).ge.1979.and.time(:,0).le.2015.and.time(:,1).eq.(nm+9))
     vars(nm,:,:,:) = short2flt(f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    else
+    select_time   := ind(time(:,0).ge.1979.and.time(:,0).le.2015.and.time(:,1).eq.(nm+9))
+    vars(nm,:,:,:) = f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
     end do
     do nm = 4,5,1
+    if(var_option.eq.-22) then 
     select_time   := ind(time(:,0).ge.1980.and.time(:,0).le.2016.and.time(:,1).eq.(nm-3))
     vars(nm,:,:,:) = short2flt(f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    else
+    select_time   := ind(time(:,0).ge.1980.and.time(:,0).le.2016.and.time(:,1).eq.(nm-3))
+    vars(nm,:,:,:) = f3->$var_name(0)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
     end do
     end if
-    minlvl := (/-7/);
-    maxlvl := (/ 7/);
-    spacig := (/ 1/);
 end if
 
 if(var_option.eq.-21) then 
@@ -675,7 +710,7 @@ var  := regCoef_n(ts,vars,2,1)
 if(var_option.le.-21) then 
 tval := onedtond(var@tval ,(/6,neval,ntime,nlat1,nlon1/))
 df   := onedtond(var@nptxy,(/6,neval,ntime,nlat1,nlon1/))
-lon_m := conform(tval,vars&longitude,4);
+lon_m := conform(tval,vars&lon,4);gitude
 else
 tval := onedtond(var@tval ,(/6,neval,nvar,nlat,nlon/))
 df   := onedtond(var@nptxy,(/6,neval,nvar,nlat,nlon/))
@@ -766,7 +801,7 @@ do ne = 0, neval-3, 1
 do nv = 0, nvar-1,1
 do nt = 0, ntime-1, 1
     nev = ne + 1
-    np = nv
+    np = ne
     ;np = ne*2+(nv-1)
     ;np  = 2*na + ne ;1 var ;2 area
     ;np = ne*nvar + nv ;1 var ;2 area
@@ -850,13 +885,13 @@ do nt = 0, ntime-1, 1
 end do 
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
-    gsn_panel(wks,plot,(/nvar,1/),resp)
+;    gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-;    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/2,1/),resp)
 end do ;EOF kinds
 end do ;area 
 ;    gsn_panel(wks,plot,(/narea,2/),resp)

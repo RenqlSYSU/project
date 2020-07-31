@@ -10,7 +10,7 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt", \
-             "ps"  ,"EGR4"/)
+             "ps"  ,"EGR4","preci"/)
 
 years    = ispan(1979,2016,1)
 years@calendar = "standard"
@@ -53,7 +53,7 @@ select_time1(59:364) = ispan(60,365,1)
 select_time          = ispan(0,364,1)
 end if
 
-do nv = 3,3,1
+do nv = 7,7,1
 year_option = True;False ;
 if(DJF_option) then 
 fileout  = path2 + "ERA-Interim_DJF_" + var_name(nv) + "-year.nc"

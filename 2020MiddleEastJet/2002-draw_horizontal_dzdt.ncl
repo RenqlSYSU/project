@@ -6,13 +6,13 @@
 begin
 year_option = True ;calc yearly DJF 
 var_option = 5  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-jet_option  = True ;False;;20191205, control the draw of jet stream
-region_line = True ; draw the line for ME, EA, NA
-vect_option = False ;True ;
-cont_option = False ;True
+jet_option  = False;True ;;20191205, control the draw of jet stream
+region_line = False;True ; draw the line for ME, EA, NA
+vect_option = True ;False;
+cont_option = True ;False;
 bar_share = True ;False;
-nl = 4 ;(/925,850,700,500,250/)
-na = 0 ; "NH","ME","EA","NA"
+nl = 1 ;(/925,850,700,500,250/)
+na = 4 ; "NH","ME","EA","NA"
 DJF_option = True;False ;
 
 if(DJF_option) then
@@ -27,8 +27,13 @@ lev    = (/925,850,700,500,300/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 20,20,1 
+do var_option = -15,-15,1 
 do nnv = 1,1,1
+    if(var_option.eq.-17) then 
+        draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"season_ave"/)  ;use to read variables
+        unit     = (/"m"/)  ;this can be used as right string 
+    end if
     if(var_option.eq.-16) then 
         draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -196,13 +201,15 @@ if(var_option.eq.22) then
 end if
 
 ;area: east Asia
-area = (/"NH","ME","EA","NA"/)
-lats = (/ 10 , 0  ,  0 ,  0 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 /) ;55 ;60
-lonl = (/ 0  , 0  ,105 , 250/) ;30 ;20
-lonr = (/360 , 70 ,175 , 320/) ;150;220
+area = (/"NH","ME","EA","NA","TP"/)
+lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
+latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
+lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
+lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
 latx = (/ lats, lats, latn, latn, lats /)
+lat_spacing = 15
+lon_spacing = 20
 density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
@@ -210,12 +217,13 @@ g = 9.8 ;m2/s2
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
-if(var_option.eq.-16)
+if(var_option.le.-16)
     filename = path + "data/" + case + "_" + months + draw_var(0) + "-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-15)
     filename = path + "data/" + case + "_" + months + "air-year.nc"
+    contname = path + "data/" + case + "_"+months+"hgt-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-13.or.var_option.eq.-14)
@@ -331,6 +339,18 @@ end if
    mp_thick       = 3.0
    font_index     = 22
 
+    wks = gsn_open_wks(fig_out,fig_name)
+    if(var_option.eq.-10.or.var_option.eq.-15.or.var_option.eq.-16) then 
+    gsn_define_colormap(wks,"precip3_16lev")
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    else
+    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+    end if
+    ;gsn_define_colormap(wks,"GMT_polar") 
+    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
+
+;do nl = 1, 4, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -405,8 +425,13 @@ else
     end do
     if(cont_option) then 
     fc = addfile(contname,"r")
+    if(var_option.ge.-6) then 
     var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     var_c = var_c*10^6
+    else
+    var_c(0,0,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_c = var_c/9.8
+    end if 
     end if 
 end if
 end if
@@ -495,6 +520,10 @@ end if
 printVarSummary(var_m)
 printMinMax(var_m,True)
 
+if(var_option.eq.-17) then 
+    var_m = var_m/9.8
+end if
+
 if(var_option.eq.-16) then 
     var_m = var_m*24*3600
 end if
@@ -555,22 +584,11 @@ end if
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
-    if(var_option.eq.-10.or.var_option.eq.-15.or.var_option.eq.-16) then 
-    gsn_define_colormap(wks,"precip3_16lev")
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-    else
-    gsn_define_colormap(wks,"BlueDarkRed18")
-    ;blue and red, has 18 colors,2-10 is blue
-    end if
-    ;gsn_define_colormap(wks,"GMT_polar") 
-    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
     res@gsnMaximize      = True
-    res@gsnAddCyclic     = True;False
+;    res@gsnAddCyclic     = True;False
     res@gsnPaperOrientation = "portrait"
     ;res@vpHeightF        = 0.6
     ;res@vpWidthF         = 0.8
@@ -579,10 +597,17 @@ end if
     res@mpCenterLonF     = 150.
     res@mpMaxLatF        = latn(na) 
     res@mpMinLatF        = lats(na)
+    if(na.eq.0) then
+    res@gsnAddCyclic     = True;False
     res@mpMaxLonF        = 330 ;lonr(na)
     res@mpMinLonF        = -30 ;lonl(na)
-    res@gsnMajorLatSpacing = 20
-    res@gsnMajorLonSpacing = 30
+    else
+    res@gsnAddCyclic     = False;True;
+    res@mpMaxLonF        = lonr(na)
+    res@mpMinLonF        = lonl(na)
+    end if
+    res@gsnMajorLatSpacing = lat_spacing 
+    res@gsnMajorLonSpacing = lon_spacing
     res@mpFillOn         = False
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
@@ -718,7 +743,11 @@ end if
     res_cont@cnLineLabelFontHeightF = 0.005
     res_cont@cnInfoLabelOn    = False
     res_cont@cnLineThicknessF = 4.0
+    if(jet_option) then 
     res_cont@cnLineColor      = "green4";"black";"blueviolet";
+    else
+    res_cont@cnLineColor      = "blueviolet";"green4";"black";
+    end if
     res_cont@gsnContourZeroLineThicknessF = 0
     res_cont@gsnContourNegLineDashPattern = 5
     res_cont@gsnContourPosLineDashPattern = 0
@@ -729,11 +758,19 @@ end if
     ;res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_cont@cnLevels             = levels       ; set contour interval
     res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_cont@cnLevelSpacingF       = 5        ; set contour interval
+    res_cont@cnLevelSpacingF       = 20        ; set contour interval
     res_cont@lbLabelBarOn     = False   ; the label bar
     res_cont@gsnCenterString  = ""
     res_cont@gsnLeftString    = " "
     res_cont@gsnRightString   = " "
+
+    if(na.eq.0) then 
+    res_cont@gsnAddCyclic     = True;False
+    res_line@gsnAddCyclic     = True;False
+    else
+    res_cont@gsnAddCyclic     = False
+    res_line@gsnAddCyclic     = False
+    end if
 
 ;--------set the attribute of polygon--------------
     lnres1                      = True
@@ -764,7 +801,15 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-;vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
+if(var_option.le.-6) then 
+    vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
+end if
+
+if(var_option.eq.-17) then ;Eady growth rate
+    minlvl := (/2820/);
+    maxlvl := (/3140/);
+    spacig := (/20  /);
+end if
 
 if(var_option.eq.-16) then ;Eady growth rate
     minlvl := (/ 0 /);
@@ -772,16 +817,26 @@ if(var_option.eq.-16) then ;Eady growth rate
     spacig := (/0.1/);
 end if
 
-if(var_option.eq.-15) then ;T
+if(var_option.eq.-15) then ;T ;(/925,850,700,500,250/)
 if(nl.eq.1) then 
     minlvl := (/-16/);
     maxlvl := (/ 16/);
     spacig := (/ 2 /);
 end if
-if(nl.eq.4) then 
-    minlvl := (/-64/);
-    maxlvl := (/-48/);
+if(nl.eq.2) then 
+    minlvl := (/-16/);
+    maxlvl := (/ 16/);
+    spacig := (/ 2 /);
+end if
+if(nl.eq.3) then  ;500
+    minlvl := (/-21/);
+    maxlvl := (/-5 /);
     spacig := (/ 1 /);
+end if
+if(nl.eq.4) then ;300
+    minlvl := (/-55/);-64
+    maxlvl := (/-39/);-48
+    spacig := (/ 1 /); 1
 end if
 end if
 
@@ -853,7 +908,7 @@ end if
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(.not.(var_option.eq.-10.or.var_option.eq.-15.or.var_option.eq.-16)) then 
+    if(.not.(var_option.eq.-10.or.var_option.eq.-15.or.var_option.le.-16)) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     end if
 do nt = 0, ntime-1,1
@@ -861,7 +916,7 @@ do nv = 0,nvar-1,1
 ;do ni = 0, 3, 1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
-    np = nv
+    np = nl-1
     if(var_option.ge.20) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv) + " WAF (" + unit(0) + ")"
     if(divg_option) then 
@@ -940,7 +995,9 @@ end do
 
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/6,2/),resp)
-     gsn_panel(wks,plot,(/nvar,1/),resp)
+;     gsn_panel(wks,plot,(/nvar,1/),resp)
+;end do ;lev 
+;     gsn_panel(wks,plot,(/2,2/),resp)
 end do 
 end do 
 end

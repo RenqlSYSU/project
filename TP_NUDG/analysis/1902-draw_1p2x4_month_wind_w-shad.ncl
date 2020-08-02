@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -41,9 +41,9 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
-lev = (/850,500,200,100,10/)
+lev = (/700,500,200,100,10/)
 nl = 0
-nv = 1
+nv = 5
 diff = True ;False;
 perc = False;True ;
 vect_option = True ;False;

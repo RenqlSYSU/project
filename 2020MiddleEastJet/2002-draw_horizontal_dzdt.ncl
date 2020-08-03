@@ -11,16 +11,17 @@ region_line = False;True ; draw the line for ME, EA, NA
 vect_option = True ;False;
 cont_option = True ;False;
 bar_share = True ;False;
-nl = 1 ;(/925,850,700,500,250/)
+nl = 2 ;(/925,850,700,500,250/)
 na = 4 ; "NH","ME","EA","NA"
-DJF_option = True;False ;
+DJF_option = False ;True ;
 
 if(DJF_option) then
 months  = (/"DJF_"/)
 months2 = (/"DJF"/)
 else
 months  = (/""/)
-months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+;months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
 lev    = (/925,850,700,500,300/) 
@@ -375,8 +376,8 @@ if(vect_option) then
     u(0,:,:) = dim_avg_n_Wrap(f1->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     v(0,:,:) = dim_avg_n_Wrap(f2->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     else
-    u = dim_avg_n_Wrap(f1->month_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
-    v = dim_avg_n_Wrap(f2->month_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    u = dim_avg_n_Wrap(f1->season_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    v = dim_avg_n_Wrap(f2->season_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if
 end if
 
@@ -386,7 +387,7 @@ if(var_option.eq.-11) then
     if(DJF_option) then
     t(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     else
-    t = dim_avg_n_Wrap(f->month_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    t = dim_avg_n_Wrap(f->season_ave(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if
     
     opt    = 0     ;used by center_finite_diff_n, no meanging 
@@ -429,7 +430,11 @@ else
     var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     var_c = var_c*10^6
     else
+    if(DJF_option) then
     var_c(0,0,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    else
+    var_c(0,:,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
     var_c = var_c/9.8
     end if 
     end if 
@@ -916,7 +921,7 @@ do nv = 0,nvar-1,1
 ;do ni = 0, 3, 1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
-    np = nl-1
+    np = nt 
     if(var_option.ge.20) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv) + " WAF (" + unit(0) + ")"
     if(divg_option) then 
@@ -931,7 +936,7 @@ do nv = 0,nvar-1,1
     end if
     if(var_option.le.0) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
     if(var_option.eq.-11) then 
     res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
@@ -994,7 +999,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/6,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
 ;end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)

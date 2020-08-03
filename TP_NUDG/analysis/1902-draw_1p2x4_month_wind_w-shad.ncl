@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -22,8 +22,8 @@ if(case_option.eq.1) then
     nsample = 10
 end if
 if(case_option.eq.2) then
-    case1   = (/"F2000","NGTR"/)
-    case2   = (/"F2000","NGTR-F2000"/)
+    case1   = (/"F2000","NUDG"/)       ;NGTR    
+    case2   = (/"F2000","NUDG-F2000"/) ;NGTR
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
@@ -41,20 +41,20 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
-lev = (/700,500,200,100,10/)
+lev = (/850,700,600,500,200,100,10/)
 nl = 0
 nv = 5
-diff = True ;False;
+diff = False;True ;
 perc = False;True ;
 vect_option = True ;False;
-cont_option = False;True ;
+cont_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
-nvc = 2 
-contsig  = True
-barshare = False
+nvc = 0 
+contsig  = False;True
+barshare = True ;False
 
 var_option = 0 
 if(var_option.eq.0) then 
@@ -92,14 +92,14 @@ pre_case   = (/"(a","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
-latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
+lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70,10 /);-20
+latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,50 /);60
 lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
-lonr = (/360,270,390,150,270,390,150,360,150/);220
+lonr = (/360,270,390,150,270,390,150,360,130/);220
 siglvl = 0.05
 lat_spacing = 15
-lon_spacing = 30
-na = 0
+lon_spacing = 20
+na = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -146,9 +146,9 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
+   tick_font      = 0.02
+   subtitle_font  = 0.02
+   title_font     = 0.02
    vcref_font     = 0.02
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
@@ -159,7 +159,7 @@ else
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-;do nl = 0,4,1
+do nl = 0,3,1
 ;do nv = 5,5,1
 ;================================================================
 ;read data
@@ -393,7 +393,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.015 ;0.025
+    resvc@vcMinDistanceF            = 0.02 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
@@ -540,7 +540,7 @@ end if
     resp@gsnMaximize   = True
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
-    resp@gsnPaperOrientation = "portrait"
+    resp@gsnPaperOrientation = "landscaoe";"portrait"
     resp@gsnPanelLabelBar = True
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.8 ;0.05
@@ -565,29 +565,29 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(na.eq.0) then 
+if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/10,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/50,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
                       (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
 else
-    vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+    vcref         = (/(/10,10,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/10,10,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
-if(nvc.eq.0) then ;Z3
-if(nl.eq.0) then ;850hPa
-    cont_spacing = (/20,10/)
+if(nvc.eq.0) then ;Z3 ; 850,700,600,500,200,100,10
+if(nl.le.1) then ;850hPa
+    cont_spacing = (/20,20/)
 end if
-if(nl.eq.1) then ;200hPa
-    cont_spacing = (/80,10/)
+if(nl.le.3.and.nl.ge.2) then ;200hPa
+    cont_spacing = (/20,20/)
 end if
-if(nl.eq.2) then ;200hPa
-    cont_spacing = (/80,10/)
+if(nl.eq.4) then ;200hPa
+    cont_spacing = (/80,80/)
 end if
 end if
 
@@ -635,28 +635,28 @@ if(nl.eq.2) then  ;200
 end if
 end if
 
-if(nv.eq.5) ;T
-if(nl.eq.0) then ;850 
+if(nv.eq.5) ;T ;; 850,700,600,500,200,100,10
+if(nl.le.1) then ;850 
     minlvl = (/-15,-3.5,-3.5/); -24,-24
     maxlvl = (/ 15, 3.5, 3.5/);  24, 24
     spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
 end if
-if(nl.eq.1) then ;500 
+if(nl.le.3.and.nl.ge.2) then ;500 
     minlvl = (/-38,-3.5,-3.5/); -24,-24
     maxlvl = (/-8 , 3.5, 3.5/);  24, 24
     spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
 end if
-if(nl.eq.2) then  ;200
+if(nl.eq.4) then  ;200
     minlvl = (/-68,-3.5,-3.5/); -24,-24
     maxlvl = (/-50, 3.5, 3.5/);  24, 24
     spacig = (/1.2,0.5 ,0.5 /);   3,  3
 end if
-if(nl.eq.3) then  ;100
+if(nl.eq.5) then  ;100
     minlvl = (/-75,-3.5,-3.5/); -24,-24
     maxlvl = (/-60, 3.5, 3.5/);  24, 24
     spacig = (/1  ,0.5 ,0.5 /);   3,  3
 end if
-if(nl.eq.4) then  ;10
+if(nl.eq.6) then  ;10
     minlvl = (/-65,-3.5,-3.5/); -24,-24
     maxlvl = (/-50, 3.5, 3.5/);  24, 24
     spacig = (/1  ,0.5 ,0.5 /);   3,  3
@@ -699,7 +699,7 @@ if(nv.eq.15) then ;precs
     spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
-do nc = 0,1,1
+do nc = 0,0,1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.gt.0).or.nv.eq.2) then
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -733,11 +733,17 @@ end if
         end if
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+        if(diff) then 
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
+        else
+        res@cnLevelSpacingF       := spacig(0)        ; set contour interval
+        res@cnMaxLevelValF        := maxlvl(0) ;32    ; set max contour level
+        res@cnMinLevelValF        := minlvl(0)       ; set min contour level
+        end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
-        if(sig_option.and.nc.gt.0) then 
+        if(diff.and.sig_option.and.nc.gt.0) then 
         sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nm,:,:),res_sig)
         overlay(plot(np),sig(np))
         end if
@@ -811,11 +817,11 @@ end if
    ; attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
    ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
-    gsn_panel(wks,plot,(/4,1/),resp)
+;    gsn_panel(wks,plot,(/4,1/),resp)
 end do
-;end do
+end do
 ;end do
 end
 

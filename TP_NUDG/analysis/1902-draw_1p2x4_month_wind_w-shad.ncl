@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -30,7 +30,7 @@ end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"500EKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
+             "T"            ,"intEKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs" /) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
@@ -38,25 +38,26 @@ unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
              "mm/day" /)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
+                 "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
-lev = (/850,700,600,500,200,100,10/)
-nl = 0
-nv = 5
-diff = False;True ;
+lev = (/850,700,600,500,200,  100,10/)
+nl = 4
+nv = 6
+diff = True ;False;
 perc = False;True ;
-vect_option = True ;False;
-cont_option = True ;False;
-jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-sig_option  = True ;False;only work on shading 
+vect_option = False;True ;
+cont_option = False;True ;
+jet_option  = 1 ;0 = no jet, 1 = jet axis, 2 = jet contour
+sig_option  = False;True ;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
 nvc = 0 
 contsig  = False;True
-barshare = True ;False
+barshare = False;True ;
+barvert  = False;True
 
-var_option = 0 
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -67,9 +68,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-imonth = ispan(0,11,1);(/4,5,6,7/)
+;imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -88,18 +89,18 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(a","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11""eps";
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+fig_out    = "eps";"pdf";"x11";
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70,10 /);-20
-latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,50 /);60
-lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
-lonr = (/360,270,390,150,270,390,150,360,130/);220
+lats = (/10 ,0  ,0  ,-70,-70, -70,10 ,-70,10 /);-20
+latn = (/89 ,70 ,70 , 0 , 0 ,  0 ,55 ,70 ,50 /);60
+lonl = (/0  ,150,270,30 ,150, 270,30 ,0  ,40 /);20
+lonr = (/360,270,390,150,270, 390,150,360,130/);220
 siglvl = 0.05
 lat_spacing = 15
-lon_spacing = 20
-na = 8
+lon_spacing = 30
+na = 6
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -146,20 +147,20 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.02
-   subtitle_font  = 0.02
-   title_font     = 0.02
+   tick_font      = 0.03
+   subtitle_font  = 0.03
+   title_font     = 0.03
    vcref_font     = 0.02
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
    vc_thick       = 2.0
-   mp_thick       = 2.5
+   mp_thick       = 2.5;3.0;
    font_index     = 22
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-do nl = 0,3,1
+;do nl = 0,3,1
 ;do nv = 5,5,1
 ;================================================================
 ;read data
@@ -453,7 +454,7 @@ end if
     res_jet@cnLinesOn        = True      ; turn off contour lines
     res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
     res_jet@cnInfoLabelOn    = False
-    res_jet@cnLineThicknessF = 4
+    res_jet@cnLineThicknessF = mp_thick + 1.5 
     res_jet@cnMonoLineColor  = True ;False
     if(vect_option) then
     res_jet@cnLineColor      = "blueviolet";"green4";"black"
@@ -484,7 +485,7 @@ end if
     res_axis                      = True
     res_axis@gsLineColor          = "black"
     res_axis@gsLineDashPattern    = 1
-    res_axis@gsLineThicknessF     = 3.5
+    res_axis@gsLineThicknessF     = mp_thick + 1.0 
     ;res_axis@gsLineLabelString    = "Westly"
 
 ;--------set the attribute of gtop--------------
@@ -495,7 +496,7 @@ end if
     res_gtop@cnLinesOn        = True      ; turn off contour lines
     res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
     res_gtop@cnInfoLabelOn    = False
-    res_gtop@cnLineThicknessF = mp_thick
+    res_gtop@cnLineThicknessF = mp_thick + 0.5
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/1500/)
@@ -542,21 +543,35 @@ end if
     res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "landscaoe";"portrait"
     resp@gsnPanelLabelBar = True
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.8
+    else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.8 ;0.05
     resp@pmLabelBarHeightF = 0.05;0.8
+    end if
     else
     res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "Vertical";"Horizontal"
     res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation        = "Vertical";
     res@pmLabelBarWidthF  = 0.03
     res@pmLabelBarHeightF = 0.17
-    res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.01
     res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.1
+    res@pmLabelBarOrthogonalPosF     = 0.25 ;y direction
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
     end if
@@ -669,9 +684,12 @@ if(perc) then
     maxlvl = (/80 , 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 5 , 10, 10/);1 ,1 ,1 ,1 
 else
-    minlvl = (/10,-35/);-8,-8,-8,-8
-    maxlvl = (/85, 35/);8 ,8 ,8 ,8 
-    spacig = (/5 , 5 /);1 ,1 ,1 ,1 
+    minlvl = (/2 ,-14/);-8,-8,-8,-8
+    maxlvl = (/47, 14/);8 ,8 ,8 ,8 
+    spacig = (/3 , 2 /);1 ,1 ,1 ,1 
+;    minlvl = (/10,-35/);-8,-8,-8,-8
+;    maxlvl = (/85, 35/);8 ,8 ,8 ,8 
+;    spacig = (/5 , 5 /);1 ,1 ,1 ,1 
 end if
 end if
 
@@ -699,25 +717,26 @@ if(nv.eq.15) then ;precs
     spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
-do nc = 0,0,1
-;do nm = 0,nmonth-1,1
-if((diff.and.nc.gt.0).or.nv.eq.2) then
-    gsn_define_colormap(wks,"BlueDarkRed18")
+do nm = 0,nmonth-1,1
+do nc = 0,1,1
+if((diff.and.nc.ge.1).or.(nv.eq.2)) then
+   ; gsn_define_colormap(wks,"BlueDarkRed18")
+   ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     ;blue and red, has 18 colors,2-10 is blue
-   ; res@cnFillPalette = "BlueDarkRed18"
-   ;blue and red, has 18 colors,2-10 is blue
-   res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+   res@cnFillPalette = "BlueDarkRed18"
+   res@cnFillColors  := (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
 else
-    gsn_define_colormap(wks,"precip3_16lev")
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-    ;res@cnFillPalette = "precip3_16lev"
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-   res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
+   ;gsn_define_colormap(wks,"precip3_16lev")
+   ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
+   ;blue and yellow and red, has 17 colors,2-18,2 is white
+   res@cnFillPalette = "precip3_16lev"
+   res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 0,nmonth-1,1
+;    do nm = 0,nmonth-1,1
         ;np = 2*(nl-2)+nc
-        np = nm
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
+        np = nm*2+nc
+        ;np = nm
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
@@ -817,11 +836,12 @@ end if
    ; attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
    ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/4,1/),resp)
 end do
-end do
+    gsn_panel(wks,plot,(/4,2/),resp)
+;end do
 ;end do
 end
 

@@ -504,8 +504,7 @@ eof0 := f->eof0
 eof1 := f->eof1
 eof2 := f->eof2
 eof3 := f->eof3
-eof4 := f->eof4
-eof5 := f->eof5
+eof4 := f->eof44eof5 := f->eof5
     sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
     sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
     sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)

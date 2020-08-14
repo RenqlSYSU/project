@@ -28,7 +28,7 @@ a  = 6378388 ;the radius of earth, m
 sclhgt = 7991 ;m 
 pi = atan(1.0)*4
 print(pi)
-years = ispan(1979,1990,1)
+years = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
@@ -217,10 +217,13 @@ NN := wgt_areaave(NN*abs(NN), a*cos(lat)*(lon(1)-lon(0)), 1.0, 0) ;(lev)
 ;uv2sfvpf ( u, v, sf, vp )
 ;delete(vp)
 edd_sf = regCoef_n(ts, z, 2, 0) ;narea,neval,nlev,nlat,nlon
+printVarSummary(edd_sf)
 delete(z)
-tval := onedtond(edd_sf@tval ,(/narea,neval,nlev,nlat,nlon/))
-df   := onedtond(edd_sf@nptxy,(/narea,neval,nlon,nlat,nlon/))
-;lon_m := conform(tval,u&lon,ilon);gitude
+tval  := onedtond(edd_sf@tval ,(/narea,neval,nlev,nlat,nlon/))
+df    := onedtond(edd_sf@nptxy,(/narea,neval,nlev,nlat,nlon/))
+lon_m := conform(tval,vars&lon,ilon);gitude
+printVarSummary(tval)
+printVarSummary(df)
 b := tval 
 b = 0.5
 prob  = betainc( df/(df+tval^2), df/2.0, b )
@@ -230,7 +233,7 @@ delete([/tval,df,lon_m/])
 f0     = conform(edd_sf, 2.0*(2.0*pi/24.0/3600.0)*sin(lat), ilat)
 edd_sf = edd_sf/f0
 
-NN = conform(edd_sf, NN, (/ilev/))
+NN := conform(edd_sf, NN, (/ilev/))
 NN = f0*f0/NN
 delete(f0)
 

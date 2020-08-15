@@ -15,7 +15,7 @@ if(waf_option.eq.0) then
 fileout  = path2 + "ERA-Interim_DJF_steady_TN01-reg.nc"
 end if
 if(waf_option.eq.1) then 
-fileout  = path2 + "ERA-Interim_DJF_steady_Pb85-reg.nc"
+fileout  = path2 + "ERA-Interim_DJF_steady_Pb85-reg3.nc"
 end if
 if(waf_option.eq.2) then 
 fileout  = path2 + "ERA-Interim_DJF_steady_Pb85_2-reg.nc"
@@ -53,6 +53,7 @@ nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
+print(nyear)
 
 iyear = 0
 itime = 1
@@ -157,13 +158,16 @@ narea = dimsizes(area)
 ts    = new((/narea,neval,nyear-1/),float)
 eval  = new((/narea,neval/),float)
 pcvar = new((/narea,neval/),float)
+sig   = new((/narea,neval/),logical)
 do na = 0, narea-1,1
     f  = addfile(path2 + "eof_u_6kinds-" + area(na) + ".nc","r")
     eof0 := f->eof0
-    ts(na,:,:)  = f->eof_ts(0, 0:(neval-1), 0:(nyear-2))
     eval(na,:)  = eof0@eval(0:(neval-1))
     pcvar(na,:) = eof0@pcvar(0:(neval-1))
+    ts(na,:,:)  = f->eof_ts(0, 0:(neval-1), 0:(nyear-2))
+    sig(na,:)   = eofunc_north(pcvar(na,:),(nyear-1),False)
 end do
+ts = - ts/conform(ts,sqrt(eval),(/0,1/))
 delete(eof0)
 ;--------------------------------------------------------
 
@@ -216,6 +220,8 @@ NN := wgt_areaave(NN*abs(NN), a*cos(lat)*(lon(1)-lon(0)), 1.0, 0) ;(lev)
 ;vp = v
 ;uv2sfvpf ( u, v, sf, vp )
 ;delete(vp)
+
+z = z - conform(z, dim_avg_n_Wrap(z,ilon-1), (/0,1,2/))
 edd_sf = regCoef_n(ts, z, 2, 0) ;narea,neval,nlev,nlat,nlon
 printVarSummary(edd_sf)
 delete(z)
@@ -227,7 +233,7 @@ printVarSummary(df)
 b := tval 
 b = 0.5
 prob  = betainc( df/(df+tval^2), df/2.0, b )
-;prob   = mask(prob,lon_m.eq.0,False)
+prob  = mask(prob,lon_m.eq.0,False)
 delete([/tval,df,lon_m/])
 
 f0     = conform(edd_sf, 2.0*(2.0*pi/24.0/3600.0)*sin(lat), ilat)
@@ -309,6 +315,7 @@ wafx@long_name = "x wave activity flux"
 wafx@units   = "m2/s2" 
 wafx@pcvar   = ndtooned(pcvar)
 wafx@eval    = ndtooned(eval)
+wafx@sig     = ndtooned(sig)
 wafy@long_name = "y wave activity flux"
 wafy@units     = "m2/s2" 
 wafz@long_name = "z wave activity flux"
@@ -345,6 +352,8 @@ end if
 filevardef(ncdf,"wafx",typeof(wafx),(/"area","neval","lev","lat","lon"/))
 filevardef(ncdf,"wafy",typeof(wafy),(/"area","neval","lev","lat","lon"/))
 filevardef(ncdf,"wafz",typeof(wafz),(/"area","neval","lev","lat","lon"/))
+filevardef(ncdf,"eval" ,typeof(eval) ,(/"area","neval"/))
+filevardef(ncdf,"pcvar",typeof(pcvar),(/"area","neval"/))
 
 ;define var attribute
 filevarattdef(ncdf,"lev",vars&level)
@@ -368,5 +377,7 @@ end if
 ncdf->wafx = (/wafx/)
 ncdf->wafy = (/wafy/)
 ncdf->wafz = (/wafz/)
+ncdf->eval  = (/eval/)
+ncdf->pcvar = (/pcvar/)
 end
 

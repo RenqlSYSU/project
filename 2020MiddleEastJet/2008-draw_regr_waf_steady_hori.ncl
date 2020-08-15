@@ -9,13 +9,15 @@ jet_option  = False;True ;;20191205, control the draw of jet stream
 region_line = False;True ; draw the line for ME, EA, NA
 bar_share = True ;False;
 barvert   = False;True
-nl = 2 ;(/925,850,700,500,250/)
-na = 4 ; "NH","ME","EA","NA"
-DJF_option = False ;True ;
+lev    = (/925,850,700,500,200/) 
+nl = 4 ;(/925,850,700,500,200/)
+na = 0 ; "NH","ME","EA","NA"
+DJF_option = True ;False;
 
 neval = 3
 area  = (/"ME","EA","NA"/);,"GB"
 narea = dimsizes(area)
+siglvl= 0.05
 
 if(DJF_option) then
 months  = (/"DJF_"/)
@@ -26,7 +28,6 @@ months  = (/""/)
 months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
-lev    = (/925,850,700,500,300/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -49,8 +50,8 @@ do var_option = 0,0,1
 if(var_option.eq.0) then 
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
-    unit     = (/"m2/s2" ,"m2/s2" ,"m~S~2~N~/s"/)  ;this can be used as right string 
-    divg_option = False;True ;
+    unit     = (/"m~S~2~N~/s~S~2~N~" ,"m2/s2" ,"10~S~6~N~m~S~2~N~/s"/)  ;this can be used as right string 
+    shad_option = 1 ;0=divg; 1=edd_sf; 2=wafz 
 end if
 
 ;the path of the file
@@ -58,7 +59,7 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.eq.0)
-    filename = path + "data/" + case + "_" + months + "steady_PB852-reg.nc"
+    filename = path + "data/" + case + "_" + months + "steady_Pb85-reg3.nc"
     fig_name = path + "fig/1p3x3_regr_horizontal_" + var_name(0)
 end if
 
@@ -69,16 +70,17 @@ nlat   = dimsizes(phis&latitude )  ;
 nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
 var_m  := new((/3,narea,neval,ntime,nlat,nlon/),double)
+prob   := new((/narea,neval,ntime,nlat,nlon/),double)
 
 ;the number of the panel plot
     plot     = new((/12/),graphic)
     line     = new((/12/),graphic)
-    vect     = new((/12/),graphic)
+    sigl     = new((/12/),graphic)
     line1    = new((/12/),graphic)
     line2    = new((/12/),graphic)
     line3    = new((/12/),graphic)
     gtop     = new((/12/),graphic)
-    cont     = new((/12/),graphic)
+    vect     = new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
@@ -122,6 +124,22 @@ do nv = 0,2,1
     var_m(nv,:,:,:,:)   = f->$var_name(nv)$(:,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do
+;var_m = var_m*10000
+vcref := (/0.5,150,150/) ;(/925,850,700,500,200/)
+;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
+;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
+
+eval  := onedtond(var_m@eval ,(/narea,neval/))
+pcvar := onedtond(var_m@pcvar,(/narea,neval/))
+sig   := onedtond(var_m@sig  ,(/narea,neval/))
+subtitle_color = where(sig,"red","black") 
+
+prob(:,:,0,:,:) = f->prob(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+prob   = mask(prob,prob.lt.siglvl,True)
+lon_m  = conform(prob,var_m&lon,4)
+prob   = mask(prob,lon_m.eq.0,False)
+delete(lon_m)
+
 if(shad_option.eq.0) then ;divg
     var_m(2,:,:,:,:,:) = uv2dv_cfd( var_m(0,:,:,:,:,:), var_m(1,:,:,:,:,:),var_m&lat, var_m&lon, 3 )*100000
     minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5-7,-7,-7
@@ -129,10 +147,10 @@ if(shad_option.eq.0) then ;divg
     spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5 1, 1, 1
 end if
 if(shad_option.eq.1) then ;edd_sf
-    var_m(2,:,:,0,:,:) = f->$var_name(2)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    minlvl := (/-21,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 21, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 3 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    var_m(2,:,:,0,:,:) = (1.0/1000000.0)*f->$var_name(2)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    minlvl := (/-7,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 7, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 1, 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
 if(shad_option.eq.2) then ;wafz
     var_m(2,:,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
@@ -140,12 +158,7 @@ if(shad_option.eq.2) then ;wafz
     maxlvl := (/ 21, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
     spacig := (/ 3 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
-vcref  := (/50,150,150/) ;(/925,850,700,500,200/)
-;vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
-;vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
-
 printVarSummary(var_m)
-printMinMax(var_m,True)
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -213,15 +226,12 @@ printMinMax(var_m,True)
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
     ;res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "Horizontal"
+    ;res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
 
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.2
-    res@pmLabelBarParallelPosF       = 0.5
     ;res@pmLabelBarWidthF  = 0.7
     ;res@pmLabelBarHeightF = 0.1
 
@@ -298,44 +308,37 @@ printMinMax(var_m,True)
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
-
-    res_cont = True
-    res_cont@gsnDraw          = False
-    res_cont@gsnFrame         = False
-    res_cont@gsnAddCyclic     = True;False
-    res_cont@cnFillOn         = False
-    res_cont@cnLinesOn        = True
-    res_cont@cnLineLabelsOn   = False ;True ;
-    res_cont@cnLineLabelFontHeightF = 0.005
-    res_cont@cnInfoLabelOn    = False
-    res_cont@cnLineThicknessF = 4.0
-    if(jet_option) then 
-    res_cont@cnLineColor      = "green4";"black";"blueviolet";
-    else
-    res_cont@cnLineColor      = "blueviolet";"green4";"black";
-    end if
-    res_cont@gsnContourZeroLineThicknessF = 0
-    res_cont@gsnContourNegLineDashPattern = 5
-    res_cont@gsnContourPosLineDashPattern = 0
-  
-    levels = new((/10/),integer)
-    levels(0:4) = (/-300,-250,-150,-80,-20/)
-    levels(5:9) = -levels(0:4:-1)
-    ;res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
-    ;res_cont@cnLevels             = levels       ; set contour interval
-    res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_cont@cnLevelSpacingF       = 20        ; set contour interval
-    res_cont@lbLabelBarOn     = False   ; the label bar
-    res_cont@gsnCenterString  = ""
-    res_cont@gsnLeftString    = " "
-    res_cont@gsnRightString   = " "
-
     if(na.eq.0) then 
-    res_cont@gsnAddCyclic     = True;False
     res_line@gsnAddCyclic     = True;False
     else
-    res_cont@gsnAddCyclic     = False
     res_line@gsnAddCyclic     = False
+    end if
+
+;----------Set res sig-----------
+    res_sig                  = True       ; use plot options
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@gsnFrame         = False
+    res_sig@gsnDraw          = False
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnLineThicknessF = 2
+    res_sig@cnInfoLabelOn    = False
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "gray50";"darkslategray"
+    res_sig@cnFillDotSizeF   = 0.1
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/3000,1000/)
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
+    if(na.eq.0) then 
+    res_sig@gsnAddCyclic     = True ;False;
+    else
+    res_sig@gsnAddCyclic     = False
     end if
 
 ;--------set the attribute of polygon--------------
@@ -354,196 +357,80 @@ printMinMax(var_m,True)
     if(bar_share) then
     res@lbLabelBarOn      = False;True   ; the label bar
     resp@gsnPanelLabelBar = True
+    if(barvert) then 
+        resp@lbOrientation     = "Vertical"
+        resp@pmLabelBarWidthF  = 0.05
+        resp@pmLabelBarHeightF = 0.8
+    else
+        resp@lbOrientation     = "Horizontal" ;"Vertical"
+        resp@pmLabelBarWidthF  = 0.8 ;0.05
+        resp@pmLabelBarHeightF = 0.05;0.8
+    end if
     else
     res@lbLabelBarOn      = True   ; the label bar
     resp@gsnPanelLabelBar = False
+    if(barvert) then
+        res@lbOrientation        = "Vertical";
+        res@pmLabelBarWidthF  = 0.03
+        res@pmLabelBarHeightF = 0.17
+        res@pmLabelBarOrthogonalPosF     = 0.01
+        res@pmLabelBarParallelPosF       = 0.5
+    else
+        res@lbOrientation        = "Horizontal";"Vertical";
+        res@pmLabelBarWidthF  = 0.7
+        res@pmLabelBarHeightF = 0.1
+        res@pmLabelBarOrthogonalPosF     = 0.25 ;y direction
+        res@pmLabelBarParallelPosF       = 0.5
     end if
-    resp@lbOrientation     = "Horizontal" ;"Vertical" ;
-    resp@pmLabelBarWidthF  = 0.8          ;0.05       ;
-    resp@pmLabelBarHeightF = 0.06         ;0.8        ;
+    end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(var_option.le.-6) then 
-    vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
-end if
-
-if(var_option.eq.-17) then ;Eady growth rate
-    minlvl := (/2820/);
-    maxlvl := (/3140/);
-    spacig := (/20  /);
-end if
-
-if(var_option.eq.-16) then ;Eady growth rate
-    minlvl := (/ 0 /);
-    maxlvl := (/1.6/);
-    spacig := (/0.1/);
-end if
-
-if(var_option.eq.-15) then ;T ;(/925,850,700,500,250/)
-if(nl.eq.1) then 
-    minlvl := (/-16/);
-    maxlvl := (/ 16/);
-    spacig := (/ 2 /);
-end if
-if(nl.eq.2) then 
-    minlvl := (/-16/);
-    maxlvl := (/ 16/);
-    spacig := (/ 2 /);
-end if
-if(nl.eq.3) then  ;500
-    minlvl := (/-21/);
-    maxlvl := (/-5 /);
-    spacig := (/ 1 /);
-end if
-if(nl.eq.4) then ;300
-    minlvl := (/-55/);-64
-    maxlvl := (/-39/);-48
-    spacig := (/ 1 /); 1
-end if
-end if
-
-if(var_option.eq.-14) then
-    minlvl := (/-7,-7/);
-    maxlvl := (/ 7, 7/);
-    spacig := (/ 1, 1/);
-end if
-if(var_option.eq.-13) then
-    minlvl := (/-35,-35,-14,-14/);-8,-8,-8,-8,
-    maxlvl := (/ 35, 35, 14, 14/); 8, 8, 8, 8,
-    spacig := (/ 5 , 5 , 2 , 2 /); 1, 1, 1, 1,
-end if
-if(var_option.eq.-12) then
-    minlvl := (/-35 /)
-    maxlvl := (/ 35 /)
-    spacig := (/ 5  /)
-end if
-if(var_option.eq.-11) then
-    minlvl := (/-14 /)
-    maxlvl := (/ 14 /)
-    spacig := (/ 2 /)
-end if
-if(var_option.eq.-10) then
-    minlvl := (/2  ,2  ,2  /);-8,-8,-8,-8,
-    maxlvl := (/130,130,130/); 8, 8, 8, 8,
-    spacig := (/8  ,8  ,8  /); 1, 1, 1, 1,
-end if
-if(var_option.eq.-6) then
-    minlvl := (/-7,-7,-7/);-8,-8,-8,-8,
-    maxlvl := (/ 7, 7, 7/); 8, 8, 8, 8,
-    spacig := (/ 1, 1, 1/); 1, 1, 1, 1,
-end if
-if(var_option.eq.-4.or.var_option.eq.-5) then 
-    minlvl := (/-14,-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl := (/ 14, 14, 14, 14/); 8, 8, 8, 8,
-    spacig := (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
-end if
-if(var_option.le.-2.and.var_option.ge.-3)
-    minlvl := (/-2.1,-14/);-8,-8,-8,-8,
-    maxlvl := (/ 2.1, 14/); 8, 8, 8, 8,
-    spacig := (/ 0.3, 2 /); 1, 1, 1, 1,
-end if
-    
-if(var_option.eq.-1) then
-    minlvl := (/-2.1,-2.1,-14/);-8,-8,-8,-8,
-    maxlvl := (/ 2.1, 2.1, 14/); 8, 8, 8, 8,
-    spacig := (/ 0.3, 0.3, 2 /); 1, 1, 1, 1,
-end if
-    
-if(var_option.eq.0) then 
-    minlvl := (/-2.1,-2.1,-2.1/);
-    maxlvl := (/ 2.1, 2.1, 2.1/);
-    spacig := (/ 0.3, 0.3, 0.3/);
-end if
-
-if(var_option.ge.1.and.var_option.le.6) then
-    minlvl = (/-3.5,-70,-16,-24/);-35,70
-    maxlvl = (/ 3.5, 70, 16, 24/); 35,70
-    spacig = (/ 0.5, 10,  2,  3/);  5,10
-end if
-
-if(var_option.ge.13.and.var_option.lt.20) then ;dbdt
-    minlvl = (/-70,-35,-14,-7,-7,-7/);-8,-8,-8,-8,
-    maxlvl = (/ 70, 35, 14, 7, 7, 7/); 8, 8, 8, 8,
-    spacig = (/ 10, 5 , 2 , 1, 1, 1/); 1, 1, 1, 1,
-end if
 
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    if(.not.(var_option.eq.-10.or.var_option.eq.-15.or.var_option.le.-16)) then 
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-    end if
+
 do nt = 0, ntime-1,1
-do nv = 0,nvar-1,1
-;do ni = 0, 3, 1
-;do np = 0, 2, 1 
-    ;nt = ni*3 + np
-    np = nt 
-    if(var_option.ge.20) then 
-    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv) + " WAF (" + unit(0) + ")"
-    if(divg_option) then 
-    res@gsnRightString  = "divg (" + unit(2) + ")"
+do na = 0, narea-1,1
+do ne = 0, neval-2,1
+do nv = 0, nvar-1, 1
+    nev = ne+1 
+    np = ne 
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev ;area(na) + " " + lonl(na) + "-" + lonr(na) + "E"
+    res@gsnRightStringFontColor   = subtitle_color(na,ne)
+    if(var_option.eq.0) then 
+    if(shad_option.eq.0) then 
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " WAF  divg (" + unit(2) + ")  " + eval(na,ne) + "  " + pcvar(na,ne)+"%" 
     else
-    res@gsnRightString  = var_name(2) + " (" + unit(2) + ")"
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " WAF  " + var_name(2) + " (" + unit(2) + ")  " + eval(na,ne) + "  " + pcvar(na,ne)+"%" 
     end if
-    end if
-    if(var_option.gt.0.and.var_option.lt.20) then 
-    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
-    res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
-    end if
-    if(var_option.le.0) then 
-    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
-    res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")"
-    end if
-    if(var_option.eq.-11) then 
-    res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
-    res@gsnRightString  = lev(nl) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
     
     ;res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    if(var_option.ge.1)
-    res@cnLevelSpacingF       := spacig(nnv)        ; set contour interval
-    res@cnMaxLevelValF        := maxlvl(nnv) ;32    ; set max contour level
-    res@cnMinLevelValF        := minlvl(nnv)       ; set min contour level
-    else
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    end if
-    if(var_option.ge.20)
-    plot(np) = gsn_csm_contour_map_ce(wks,var_m(2,nv,nt,:,:),res)
+    
+    plot(np) = gsn_csm_contour_map_ce(wks,var_m(2,na,ne,nt,:,:),res)
+    sigl(np) = gsn_csm_contour(wks,prob(na,ne,nt,:,:),res_sig)
+    overlay(plot(np),sigl(np))
+    
     resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
-    resvc@vcRefAnnoString2     = vcref(nv)+"m~S~2~N~/s~S~2~N~"
-    vect(np) = gsn_csm_vector(wks,var_m(0,nv,nt,:,:),var_m(1,nv,nt,:,:),resvc)
+    resvc@vcRefAnnoString2     = vcref(nv)+unit(0)
+    vect(np) = gsn_csm_vector(wks,var_m(0,na,ne,nt,:,:),var_m(1,na,ne,nt,:,:),resvc)
     overlay(plot(np),vect(np))
-    printMinMax(var_m(0,nv,nt,:,:),0)
-    printMinMax(var_m(1,nv,nt,:,:),0)
-    printMinMax(var_m(2,nv,nt,:,:),0)
-    else
-    plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,nt,:,:),res)
-    printMinMax(var_m(nv,nt,:,:),0)
-    end if
+    printMinMax(var_m(0,na,ne,nt,:,:),0)
+    printMinMax(var_m(1,na,ne,nt,:,:),0)
+    printMinMax(var_m(2,na,ne,nt,:,:),0)
 
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
-    
-    if(vect_option) then 
-    resvc@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
-    resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
-    vect(np) = gsn_csm_vector(wks,u(nt,:,:),v(nt,:,:),resvc)
-    overlay(plot(np),vect(np))
-    end if
-
-    if(cont_option) then 
-    cont(np) = gsn_csm_contour(wks,var_c(nv,nt,:,:),res_cont)
-    overlay(plot(np),cont(np))
-    printMinMax(var_c(nv,nt,:,:),0)
-    end if
     
     if(region_line) then 
         line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres1 )
@@ -556,14 +443,12 @@ do nv = 0,nvar-1,1
     overlay(plot(np),line(np))
     end if
 end do 
-   ; gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
-;end do ;lev 
-;     gsn_panel(wks,plot,(/2,2/),resp)
+end do 
 end do 
 end do 
 end

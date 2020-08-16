@@ -14,13 +14,21 @@ lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 path1 = "/home/ys17-19/data-model/CMIP5/"
 path2 = "/home/ys17-19/renql/project/2020SouthTrough/"
 
-filepath  = systemfunc("find " + path1 + "-name zg_Amon_*_historical_r1i1p1_*.nc")
+filepath  = systemfunc("find " + path1 + " -name zg_Amon_*_historical_r1i1p1_*.nc")
 modelname = str_get_field(filepath,5,"/")
 nfile     = dimsizes(filepath)
-print(modelname(12))
+;print(modelname(12))
 
-do nf = 1, nfile-1, 1
-if(modelname(nf).eq.modelname(nf-1))
+numb  = 0
+do nf = 0, nfile-2, 1
+if(modelname(nf).eq.modelname(nf+1)) then 
+    numb = numb + 1
+else
+    print("model name :" + modelname(nf))
+    f = addfile
+    numb  = 0
+
+    
 
 
 

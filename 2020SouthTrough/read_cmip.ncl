@@ -1,8 +1,8 @@
 ;***************************************************************************
-;use the reanalysis data to calculate diabatic heating, transient eddy heating
-;and Transient eddy vorticity forcing 
+;Find file and know its resolution variable condition 
+;
 ;                                            by Ql_Ren
-;                                           2020/02/04
+;                                           2020/08/17
 ;******************************************************************************
 begin
 lats =  -30;-20
@@ -13,22 +13,74 @@ lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 
 path1 = "/home/ys17-19/data-model/CMIP5/"
 path2 = "/home/ys17-19/renql/project/2020SouthTrough/"
+fileinfor = False
+test      = False
 
 filepath  = systemfunc("find " + path1 + " -name zg_Amon_*_historical_r1i1p1_*.nc")
 modelname = str_get_field(filepath,5,"/")
 nfile     = dimsizes(filepath)
-;print(modelname(12))
+nfield    = str_fields_count(filepath,"_")
+numbyear  = new((/nfile/),string)
+do nf = 0, nfile-1, 1
+    numbyear(nf) = str_get_field(filepath(nf),nfield(nf),"_")
+end do
+year = stringtoint(str_get_cols(numbyear,0,3))
+print(year(0:10))
 
-numb  = 0
-do nf = 0, nfile-2, 1
-if(modelname(nf).eq.modelname(nf+1)) then 
+if(test) then 
+filepath1 = filepath(0:2)
+yearindex = dim_pqsort(year(0:2),1)
+fs = addfiles(filepath1(yearindex),"r")
+ListSetType(fs,"cat")
+var = fs[:]->zg
+printVarSummary(var)
+end if
+
+if(fileinfor) then 
+numb   = 0
+nmodel = 0
+print("file number " + nfile)
+print(" ")
+do nf = 0, nfile-1, 1
+print(nf + " " + filepath(nf))
+if((nf.le.nfile-2).and.(modelname(nf).eq.modelname(nf+1))) then 
     numb = numb + 1
 else
-    print("model name :" + modelname(nf))
-    f = addfile
-    numb  = 0
+    numb = numb + 1
+    nmodel = nmodel+1
+    print("=============================================================")
+    print( nmodel  + " model name : " + modelname(nf) + "  filenumber : " + numb)
+    f = addfile(filepath(nf),"r")
+    vnames := getfilevarnames(f)           ; all variable names
+    nvars  := dimsizes(vnames)
+    do nv = 0,nvars-1
+        vtype  = getfilevartypes(f,vnames(nv))
+        vatts  := getfilevaratts(f,vnames(nv))     
+        dnames := getfilevardims(f,vnames(nv))  
+        dsizes := getfilevardimsizes(f,vnames(nv)) 
+        if(dimsizes(dnames).ge.3) then
+            print("Variable '" + vnames(nv) + "' ;type : " + vtype)
+            if(.not.any(ismissing(dnames))) then
+            print("  dimension names : " + str_join(dnames,","))
+            else
+            print("  dimension names : ")
+            end if
+            print("  dimension sizes : " + str_join(""+dsizes,","))
+            print("  attributes      : " + str_join(vatts,","))
 
+            var := f->$vnames(nv)$@units
+            print(vnames(nv) + "@units : " + var)
+            var := f->$dnames(1)$
+            print(dnames(1) + "@units : " + var@units)
+            print(dnames(1) + " : " + str_join((/var/),","))
+        end if
+    end do
+    numb  = 0   
+    print("")
+    print("")
+end if
+end do
+end if
+
+end
     
-
-
-

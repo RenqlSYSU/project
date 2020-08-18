@@ -31,9 +31,9 @@ barvert  = False;True
 ;==================================================
 ;figure setting
 ;==================================================
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
+   tick_font      = 0.02
+   subtitle_font  = 0.02
+   title_font     = 0.02
    vcref_font     = 0.02
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
@@ -187,36 +187,38 @@ else
     ListSetType(fs,"cat")
     time := cd_calendar(fs[:]->time,0)
     timeindex := ind(time(:,1).le.2.or.time(:,1).eq.12)
+    print("month number" + dimsizes(timeindex))
     var := dim_avg_n_Wrap(fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     dnames := getfilevardims(fs[0],var_name(nv))  
     dsizes := getfilevardimsizes(fs[0],var_name(nv))
     delete([/fs,filepaths,yearindex,time/])
 
-    print("")
-    print("=============================================================")
+;    print("")
+;    print("=============================================================")
     print( nmodel  + " model name : " + modelname(nf) + "  filenumber : " + numb)
-    print("month number" + dimsizes(timeindex))
-    print("  dimension names : " + str_join(dnames,","))
-    print("  dimension sizes : " + str_join(""+dsizes,","))
-    print("")
+;    print("  dimension names : " + str_join(dnames,","))
+;    print("  dimension sizes : " + str_join(""+dsizes,","))
+;    print("")
     
     if(nv.eq.0) then ;zg, geopotential height
         res@cnFillPalette = "precip3_16lev"
         res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
-        minlvl = (/-65,-3.5,-3.5/); -24,-24
-        maxlvl = (/-50, 3.5, 3.5/);  24, 24
-        spacig = (/1  ,0.5 ,0.5 /);   3,  3
+        minlvl = (/-65,2750,-3.5/); -24,-24
+        maxlvl = (/-50,3200, 3.5/);  24, 24
+        spacig = (/1  , 30 ,0.5 /);   3,  3
     end if
 
-    res@gsnLeftString   = pre_case(0) + ") " + months(0) + "  " + modelname(nf) + " " + str_join(dnames,"x") + ":" + str_join(""+dsizes,"x") 
+;    res@gsnLeftString   = pre_case(0) + ") " + months(0) + "  " + modelname(nf) + " " + str_join(dnames(2:3),"x") + ":" + str_join(""+dsizes(2:3),"x") 
+    res@gsnLeftString   = modelname(nf) + " " + str_join(dnames(2:3),"x") + ":" + str_join(""+dsizes(2:3),"x") 
     res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) + " (" + unit(nv) + ") " 
-;    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-;    res@cnLevelSpacingF       := spacig(nl)        ; set contour interval
-;    res@cnMaxLevelValF        := maxlvl(nl) ;32    ; set max contour level
-;    res@cnMinLevelValF        := minlvl(nl)       ; set min contour level
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnLevelSpacingF       := spacig(nl)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(nl) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(nl)       ; set min contour level
     plot = gsn_csm_contour_map_ce(wks, var, res)
     gtop = gsn_csm_contour(wks, phis, res_gtop)
     overlay(plot,gtop)
+    printMinMax(var,0)
     gsn_panel(wks,plot,(/1,1/),resp)
 
     numb  = 0   

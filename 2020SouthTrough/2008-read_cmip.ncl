@@ -11,21 +11,26 @@ lonl =  0  ;20
 lonr = 360 ;220
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 
-path1 = "/home/ys17-19/data-model/CMIP5/"
+path1 = "/home/ys17-19/data-model/AMIP/ -name zg_Amon_*_r1i1p1_*.nc"
+;path1 = "/home/ys17-19/data-observation/cmip6/"
+;path1 = "/home/ys17-19/data-model/CMIP5/ -name zg_Amon_*_historical_r1i1p1_*.nc"
 path2 = "/home/ys17-19/renql/project/2020SouthTrough/"
-fileinfor = False
+fileinfor = True ; False
 test      = False
 
-filepath  = systemfunc("find " + path1 + " -name zg_Amon_*_historical_r1i1p1_*.nc")
-modelname = str_get_field(filepath,5,"/")
+filepath  = systemfunc("find " + path1) 
 nfile     = dimsizes(filepath)
-nfield    = str_fields_count(filepath,"_")
-numbyear  = new((/nfile/),string)
+nfield    = str_fields_count(filepath,"/")
+
+modelname = new((/nfile/),string)
+year      = new((/nfile/),string)
 do nf = 0, nfile-1, 1
-    numbyear(nf) = str_get_field(filepath(nf),nfield(nf),"_")
+    filename = str_split(str_get_field(filepath(nf),nfield(nf),"/"),"_")
+    modelname(nf) = filename(2)
+    year(nf) = stringtoint(str_get_cols(filename(5),0,3))
 end do
-year = stringtoint(str_get_cols(numbyear,0,3))
 print(year(0:10))
+print(modelname(0:10))
 
 if(test) then 
 filepath1 = filepath(0:2)

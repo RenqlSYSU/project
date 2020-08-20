@@ -3,6 +3,50 @@
  NCAR Command Language Version 6.4.0
  The use of this software is governed by a License Agreement.
  See http://www.ncl.ucar.edu/ for more details.
+
+
+Variable: year (subsection)
+Type: string
+Total Size: 88 bytes
+            11 values
+Number of Dimensions: 1
+Dimensions and sizes:	[11]
+Coordinates: 
+Number Of Attributes: 1
+  _FillValue :	missing
+(0)	1900
+(1)	1850
+(2)	1950
+(3)	1961
+(4)	1850
+(5)	1950
+(6)	1950
+(7)	1850
+(8)	1900
+(9)	1950
+(10)	1850
+
+
+Variable: modelname (subsection)
+Type: string
+Total Size: 88 bytes
+            11 values
+Number of Dimensions: 1
+Dimensions and sizes:	[11]
+Coordinates: 
+Number Of Attributes: 1
+  _FillValue :	missing
+(0)	CCSM4
+(1)	CCSM4
+(2)	CCSM4
+(3)	CanCM4
+(4)	CanESM2
+(5)	CESM1-BGC
+(6)	CESM1-CAM5
+(7)	CESM1-CAM5
+(8)	CESM1-CAM5
+(9)	CESM1-FASTCHEM
+(10)	CESM1-WACCM
 (0)	file number 301
 (0)	 
 (0)	0 /home/ys17-19/data-model/CMIP5/CCSM4/CCSM4_Amon_historical_r1i1p1/zg_Amon_CCSM4_historical_r1i1p1_190001-194912.nc
@@ -16,6 +60,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,comment,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	3 /home/ys17-19/data-model/CMIP5/CanCM4/CanCM4_Amon_historical_r1i1p1/zg_Amon_CanCM4_historical_r1i1p1_196101-200512.nc
@@ -27,6 +72,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
 (0)	
 (0)	
 (0)	4 /home/ys17-19/data-model/CMIP5/CanESM2/CanESM2_Amon_historical_r1i1p1/zg_Amon_CanESM2_historical_r1i1p1_185001-200512.nc
@@ -38,6 +84,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
 (0)	
 (0)	
 (0)	5 /home/ys17-19/data-model/CMIP5/CESM1-BGC/CESM1-BGC_Amon_historical_r1i1p1/zg_Amon_CESM1-BGC_historical_r1i1p1_195001-200512.nc
@@ -49,6 +96,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,comment,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	6 /home/ys17-19/data-model/CMIP5/CESM1-CAM5/CESM1-CAM5_Amon_historical_r1i1p1/zg_Amon_CESM1-CAM5_historical_r1i1p1_195001-200512.nc
@@ -62,6 +110,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,comment,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	9 /home/ys17-19/data-model/CMIP5/CESM1-FASTCHEM/CESM1-FASTCHEM_Amon_historical_r1i1p1_output1/zg_Amon_CESM1-FASTCHEM_historical_r1i1p1_195001-200512.nc
@@ -73,6 +122,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,comment,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	10 /home/ys17-19/data-model/CMIP5/CESM1-WACCM/CESM1-WACCM_Amon_historical_r1i1p1_output1/zg_Amon_CESM1-WACCM_historical_r1i1p1_185001-200512.nc
@@ -84,6 +134,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,comment,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40
 (0)	
 (0)	
 (0)	11 /home/ys17-19/data-model/CMIP5/CNRM-CM5/CNRM-CM5_Amon_historical_r1i1p1/zg_Amon_CNRM-CM5_historical_r1i1p1_185001-189912.nc
@@ -97,6 +148,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	14 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/zg/r1i1p1/zg_Amon_FGOALS-g2_historical_r1i1p1_191001-191912.nc
@@ -123,6 +175,7 @@
 (0)	  attributes      : standard_name,long_name,units,history,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	30 /home/ys17-19/data-model/CMIP5/FGOALS-s2/historical/atmos/zg/r1i1p1/zg_Amon_FGOALS-s2_historical_r1i1p1_185001-200512.nc
@@ -134,6 +187,7 @@
 (0)	  attributes      : standard_name,long_name,units,cell_methods,cell_measures,missing_value,_FillValue,associated_files,history
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	31 /home/ys17-19/data-model/CMIP5/FIO-ESM/FIO-ESM_Amon_historical_r1i1p1_output1/zg_Amon_FIO-ESM_historical_r1i1p1_185001-200512.nc
@@ -145,6 +199,7 @@
 (0)	  attributes      : standard_name,long_name,units,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	32 /home/ys17-19/data-model/CMIP5/GFDL-CM3/GFDL-CM3_Amon_historical_r1i1p1/zg_Amon_GFDL-CM3_historical_r1i1p1_186001-186412.nc
@@ -185,6 +240,7 @@
 (0)	  attributes      : units,long_name,missing_value,cell_methods,interp_method,_FillValue,standard_name,original_units,original_name,cell_measures,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,77500,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
 (0)	
 (0)	
 (0)	62 /home/ys17-19/data-model/CMIP5/GFDL-ESM2G/GFDL-ESM2G_Amon_historical_r1i1p1/zg_Amon_GFDL-ESM2G_historical_r1i1p1_186101-186512.nc
@@ -224,6 +280,7 @@
 (0)	  attributes      : units,long_name,missing_value,cell_methods,_FillValue,standard_name,original_units,original_name,cell_measures,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	91 /home/ys17-19/data-model/CMIP5/GFDL-ESM2M/GFDL-ESM2M_Amon_historical_r1i1p1/zg_Amon_GFDL-ESM2M_historical_r1i1p1_186101-200512.nc
@@ -235,6 +292,7 @@
 (0)	  attributes      : units,long_name,missing_value,cell_methods,_FillValue,standard_name,original_units,original_name,cell_measures,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	92 /home/ys17-19/data-model/CMIP5/GISS-E2-H/GISS-E2-H_Amon_historical_r1i1p1/zg_Amon_GISS-E2-H_historical_r1i1p1_190101-195012.nc
@@ -248,6 +306,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	95 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/zg_Amon_GISS-E2-R_historical_r1i1p1_192601-195012.nc
@@ -265,6 +324,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	102 /home/ys17-19/data-model/CMIP5/GISS-E2-R-CC/GISS-E2-R-CC_Amon_historical_r1i1p1/zg_Amon_GISS-E2-R-CC_historical_r1i1p1_197601-201012.nc
@@ -276,6 +336,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	103 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/zg_Amon_HadCM3_historical_r1i1p1_195912-198411.nc
@@ -292,6 +353,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	109 /home/ys17-19/data-model/CMIP5/IPSL-CM5A-LR/IPSL-CM5A-LR_Amon_historical_r1i1p1/zg_Amon_IPSL-CM5A-LR_historical_r1i1p1_195001-200512.nc
@@ -304,6 +366,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	111 /home/ys17-19/data-model/CMIP5/IPSL-CM5A-MR/IPSL-CM5A-MR_Amon_historical_r1i1p1/zg_Amon_IPSL-CM5A-MR_historical_r1i1p1_195001-200512.nc
@@ -316,6 +379,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	113 /home/ys17-19/data-model/CMIP5/IPSL-CM5B-LR/IPSL-CM5B-LR_Amon_historical_r1i1p1/zg_Amon_IPSL-CM5B-LR_historical_r1i1p1_195001-200512.nc
@@ -328,6 +392,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	115 /home/ys17-19/data-model/CMIP5/MIROC4h/MIROC4h_Amon_historical_r1i1p1/zg_Amon_MIROC4h_historical_r1i1p1_197601-200512.nc
@@ -339,6 +404,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
 (0)	
 (0)	
 (0)	116 /home/ys17-19/data-model/CMIP5/MIROC-ESM/MIROC-ESM_Amon_historical_r1i1p1/zg_Amon_MIROC-ESM_historical_r1i1p1_199001-200512.nc
@@ -351,6 +417,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,17000,15000,13000,11500,10000,9000,8000,7000,5000,3000,2000,1500,1000,700,500,300,200,150,100,50,30.0000011920929,20.00000029802322,10.00000014901161,5.000000074505806,2.999999932944775
 (0)	
 (0)	
 (0)	118 /home/ys17-19/data-model/CMIP5/MIROC-ESM-CHEM/MIROC-ESM-CHEM_Amon_historical_r1i1p1/zg_Amon_MIROC-ESM-CHEM_historical_r1i1p1_185001-198912.nc
@@ -363,6 +430,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,17000,15000,13000,11500,10000,9000,8000,7000,5000,3000,2000,1500,1000,700,500,300,200,150,100,50,30.0000011920929,20.00000029802322,10.00000014901161,5.000000074505806,2.999999932944775
 (0)	
 (0)	
 (0)	120 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/zg_Amon_MPI-ESM-LR_historical_r1i1p1_187001-187912.nc
@@ -389,6 +457,7 @@
 (0)	  attributes      : standard_name,long_name,units,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10
 (0)	
 (0)	
 (0)	136 /home/ys17-19/data-model/CMIP5/MPI-ESM-P/MPI-ESM-P_Amon_historical_r1i1p1/zg_Amon_MPI-ESM-P_historical_r1i1p1_185001-200512.nc
@@ -400,6 +469,7 @@
 (0)	  attributes      : standard_name,long_name,units,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10
 (0)	
 (0)	
 (0)	137 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/zg_Amon_MIROC5_historical_r1i1p1_189001-189912.nc
@@ -427,6 +497,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	154 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/zg_Amon_MPI-ESM-MR_historical_r1i1p1_185001-185912.nc
@@ -453,6 +524,7 @@
 (0)	  attributes      : standard_name,long_name,units,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10
 (0)	
 (0)	
 (0)	170 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/zg_Amon_MRI-CGCM3_historical_r1i1p1_185001-185912.nc
@@ -479,6 +551,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40
 (0)	
 (0)	
 (0)	186 /home/ys17-19/data-model/CMIP5/NorESM1-M/NorESM1-M_Amon_historical_r1i1p1/zg_Amon_NorESM1-M_historical_r1i1p1_185001-194912.nc
@@ -492,6 +565,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	189 /home/ys17-19/data-model/CMIP5/ACCESS1-0/ACCESS1-0_Amon_historical_r1i1p1/zg_Amon_ACCESS1-0_historical_r1i1p1_195001-200512.nc
@@ -503,6 +577,7 @@
 (0)	  attributes      : standard_name,long_name,units,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	190 /home/ys17-19/data-model/CMIP5/bcc-csm1-1/bcc-csm1-1_Amon_historical_r1i1p1/zg_Amon_bcc-csm1-1_historical_r1i1p1_185001-201212.nc
@@ -514,6 +589,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	191 /home/ys17-19/data-model/CMIP5/CSIRO-Mk3-6-0/CSIRO-Mk3-6-0_Amon_historical_r1i1p1/zg_Amon_CSIRO-Mk3-6-0_historical_r1i1p1_185001-186912.nc
@@ -532,6 +608,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,history,cell_methods,cell_measures,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,500
 (0)	
 (0)	
 (0)	199 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/zg_Amon_GFDL-CM2p1_historical_r1i1p1_189601-190012.nc
@@ -578,6 +655,7 @@
 (0)	  attributes      : units,long_name,missing_value,cell_methods,_FillValue,standard_name,original_units,original_name,cell_measures,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	235 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/zg_Amon_inmcm4_historical_r1i1p1_194001-194912.nc
@@ -604,6 +682,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
 (0)	251 /home/ys17-19/data-model/CMIP5/CMCC-CMS/CMCC-CMS_Amon_historical_r1i1p1/zg_Amon_CMCC-CMS_historical_r1i1p1_185001-185912.nc
@@ -630,6 +709,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,missing_value,_FillValue,associated_files,history
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,17000,15000,13000,11500,10000,9000,8000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10,4,2,1
 (0)	
 (0)	
 (0)	267 /home/ys17-19/data-model/CMIP5/CMCC-CESM/CMCC-CESM_Amon_historical_r1i1p1/zg_Amon_CMCC-CESM_historical_r1i1p1_185001-185412.nc
@@ -672,6 +752,7 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,missing_value,_FillValue,associated_files,history
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,17000,15000,13000,11500,10000,9000,8000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10,4,2,1
 (0)	
 (0)	
 (0)	299 /home/ys17-19/data-model/CMIP5/NorESM1-ME/NorESM1-ME_Amon_historical_r1i1p1/zg_Amon_NorESM1-ME_historical_r1i1p1_185001-194912.nc
@@ -684,5 +765,9 @@
 (0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
 (0)	zg@units : m
 (0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
 (0)	
 (0)	
+(0)	nlat: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,48,60,64,64,64,64,64,64,73,89,89,89,90,90,90,90,96,96,96,96,96,96,96,96,96,96,108,120,128,128,143,144,160,192,192,192,192,320
+(0)	
+(0)	nlon: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,96,96,96,96,128,128,128,128,128,128,128,128,144,144,144,144,144,144,144,144,144,144,144,180,192,192,192,192,192,192,256,256,288,288,288,288,320,640

@@ -42,6 +42,10 @@ printVarSummary(var)
 end if
 
 if(fileinfor) then 
+nlon = new((/nfile/),integer)
+nlat = new((/nfile/),integer)
+nlon = 0
+nlat = 0
 numb   = 0
 nmodel = 0
 print("file number " + nfile)
@@ -72,6 +76,8 @@ else
             end if
             print("  dimension sizes : " + str_join(""+dsizes,","))
             print("  attributes      : " + str_join(vatts,","))
+            nlat(nf) = dsizes(2)
+            nlon(nf) = dsizes(3)
 
             var := f->$vnames(nv)$@units
             print(vnames(nv) + "@units : " + var)
@@ -85,6 +91,13 @@ else
     print("")
 end if
 end do
+nlat1 = dim_pqsort(nlat,2)
+nlon1 = dim_pqsort(nlon,2)
+;print(nlat)
+;print(nlon)
+print("nlat: " + str_join(""+nlat,","))
+print("")
+print("nlon: " + str_join(""+nlon,","))
 end if
 
 end

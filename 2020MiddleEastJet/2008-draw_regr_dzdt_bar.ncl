@@ -12,7 +12,7 @@
 begin
 lev  = (/925,850,500,200,100/)
 nl = 3
-ave_option = 1
+ave_option = 2
 
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
@@ -128,8 +128,8 @@ do na = 0, narea-1,1
     n_var(na,:,nvar-1) = dim_sum_n(nureg,(/1,2/))
     uprob := conform(varr,uprob,(/0,2,3/))
     ureg  := conform(varr,ureg ,(/0,2,3/))
-    pureg := where((uprob.lt.siglvl).and.(ureg.gt.0.0).and.(prob.lt.siglvl).and.(varr.gt.0.0), 1, 0)
-    nureg := where((uprob.lt.siglvl).and.(ureg.lt.0.0).and.(prob.lt.siglvl).and.(varr.lt.0.0),-1, 0)
+    pureg := where((uprob.lt.siglvl).and.(ureg.gt.0.0).and.(prob.lt.siglvl).and.(varr.gt.0.0), 1, 0);
+    nureg := where((uprob.lt.siglvl).and.(ureg.lt.0.0).and.(prob.lt.siglvl).and.(varr.lt.0.0),-1, 0);
     p_var(na,:,0:(nvar-2)) = dim_sum_n(pureg,(/2,3/))
     n_var(na,:,0:(nvar-2)) = dim_sum_n(nureg,(/2,3/))
     delete([/pureg,nureg,uprob,ureg,prob,varr/])
@@ -224,55 +224,55 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+ndraw = 7
 do ne = 0,1,1
     np = ne
     nev = ne + 1
     resxy@gsnLeftString  = pre_case(np) + ") EOF" + nev
+    resxy@trXMaxF = ndraw + 0.5 
+    resxy@tmXBValues := ispan(1,ndraw,1)
+    resxy@tmXBLabels := draw_var(0:(nvar-2)) 
+    resxy@tiYAxisString = "%" ;unit(nnv)
 
     if(ave_option.le.1) then 
-    resxy@trYMinF = floor(min(var)) 
-    resxy@trYMaxF =  ceil(max(var))
-    resxy@tiYAxisString = unit(nnv)
+    resxy@trYMinF = floor(min(var(:,ne,0:(ndraw-1)))) 
+    resxy@trYMaxF =  ceil(max(var(:,ne,0:(ndraw-1))))
     resxy@gsnXYBarChartColors = (/"red"/)
     xstart = resxy@trXMinF + (1-resxy@gsnXYBarChartBarWidth*3)/2
     print("xstart = " + xstart)
-    plot1(np) = gsn_csm_xy(wks,fspan(xstart,xstart+7.0,8),var(0,ne,:),resxy)     ; draw each time series
+    plot1(np) = gsn_csm_xy(wks,fspan(xstart,xstart+ndraw-1,ndraw),var(0,ne,0:(ndraw-1)),resxy)     ; draw each time series
     
     resxy@gsnXYBarChartColors = (/"green"/)                    ; seperately, not
     xstart = resxy@trXMinF + (1-resxy@gsnXYBarChartBarWidth*3)/2 + resxy@gsnXYBarChartBarWidth
     print("xstart = " + xstart)
-    plot2(np) = gsn_csm_xy(wks,fspan(xstart,xstart+7.0,8),var(1,ne,:),resxy)     ; draw each time series
+    plot2(np) = gsn_csm_xy(wks,fspan(xstart,xstart+ndraw-1,ndraw),var(1,ne,0:(ndraw-1)),resxy)     ; draw each time series
     overlay(plot1(np),plot2(np))
     
     resxy@gsnXYBarChartColors = (/"blue"/)                   ; but tweaking where
     xstart = resxy@trXMinF + (1-resxy@gsnXYBarChartBarWidth*3)/2 + resxy@gsnXYBarChartBarWidth*2
     print("xstart = " + xstart)
-    plot3(np) = gsn_csm_xy(wks,fspan(xstart,xstart+7.0,8),var(2,ne,:),resxy)     ; draw each time series
+    plot3(np) = gsn_csm_xy(wks,fspan(xstart,xstart+ndraw-1,ndraw),var(2,ne,0:(ndraw-1)),resxy)     ; draw each time series
     overlay(plot1(np),plot3(np))
     else
-    resxy@trXMaxF = 7.5
-    resxy@tmXBValues := (/1,2,3,4,5,6,7/)
-    resxy@tmXBLabels := draw_var(0:(nvar-2)) 
     resxy@trYMinF = floor(min(n_var(:,ne,0:(nvar-2)))) 
     resxy@trYMaxF =  ceil(max(p_var(:,ne,0:(nvar-2))))
-    resxy@tiYAxisString = "%" 
     resxy@gsnXYBarChartColors = (/"red"/)
     xstart = resxy@trXMinF + (1-resxy@gsnXYBarChartBarWidth*3)/2
-    plot1(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),p_var(0,ne,0:(nvar-2)),resxy)     ; draw each time series
     plot4(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),n_var(0,ne,0:(nvar-2)),resxy)     ; draw each time series
+    plot1(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),p_var(0,ne,0:(nvar-2)),resxy)     ; draw each time series
     overlay(plot1(np),plot4(np))
     
     resxy@gsnXYBarChartColors = (/"green"/)                    ; seperately, not
     xstart = resxy@trXMinF + (1-resxy@gsnXYBarChartBarWidth*3)/2 + resxy@gsnXYBarChartBarWidth
+    plot5(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),n_var(1,ne,0:(nvar-2)),resxy)     ; draw each time series
     plot2(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),p_var(1,ne,0:(nvar-2)),resxy)     ; draw each time series
-    plot5(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),n_var(0,ne,0:(nvar-2)),resxy)     ; draw each time series
     overlay(plot1(np),plot2(np))
     overlay(plot1(np),plot5(np))
     
     resxy@gsnXYBarChartColors = (/"blue"/)                   ; but tweaking where
     xstart = resxy@trXMinF + (1-resxy@gsnXYBarChartBarWidth*3)/2 + resxy@gsnXYBarChartBarWidth*2
+    plot6(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),n_var(2,ne,0:(nvar-2)),resxy)     ; draw each time series
     plot3(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),p_var(2,ne,0:(nvar-2)),resxy)     ; draw each time series
-    plot6(np) = gsn_csm_xy(wks,fspan(xstart,xstart+6.0,7),n_var(0,ne,0:(nvar-2)),resxy)     ; draw each time series
     overlay(plot1(np),plot3(np))
     overlay(plot1(np),plot6(np))
     end if

@@ -11,20 +11,27 @@ lonr = (/120,95/);220
 lev  = (/850,700,500,300,200/)
 nl = 1
 
-path1 = "/home/ys17-19/data-model/CMIP5/"
-path2 = "/home/ys17-19/renql/project/2020SouthTrough/"
 var_name = (/"zg"/)
 unit     = (/"m" /)
-case  = "CMIP5"
+case  = (/"CMIP5","AMIP"/)
 nv = 0
+nc = 1
 
+path2 = "~/renql/project/2020SouthTrough"
+if(nc.eq.1) then 
+modelnumb = 19
+path1 = "/home/ys17-19/data-model/AMIP/ -name " + var_name(nv) + "_Amon_*_r1i1p1_*.nc"
+end if
+if(nc.eq.0) then 
+modelnumb = 38
+path1 = "/home/ys17-19/data-model/CMIP5/ -name " + var_name(nv) + "_Amon_*_historical_r1i1p1_*.nc"
+end if
 months   = (/"DJF","MAM","JJA","SON"/)
 fig_name = path2 + "/fig/" + case(0) + "-DJF_ts_" + lev(nl) + "_" + var_name(nv)
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out  = "pdf";"x11";"eps";
 barshare = False;True ;
 barvert  = False;True
-
 ;==================================================
 ;figure setting
 ;==================================================
@@ -39,8 +46,12 @@ barvert  = False;True
 
 wks = gsn_open_wks(fig_out,fig_name)
 
-    gsn_define_colormap(wks,"matlab_jet") 
+    ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red,2-65
+    gsn_define_colormap(wks,"precip3_16lev")
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
 
     resxy     = True
     resxy@vpWidthF  = 0.8
@@ -50,13 +61,19 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
     
+    resxy@xyMonoLineThickness = True
     resxy@xyDashPatterns    = 0 ;(/0,0,0/)
-    resxy@xyLineThicknesses = 2.0;(/2.0, 2.0,2.0/)   ; make second line thicker
-    resxy@xyLineColors      = ispan(4,41,1)
+    resxy@xyLineThicknesses = 5.0;(/2.0, 2.0,2.0/)   ; make second line thicker
+    ;resxy@xyLineColors      = ispan(4,41,1)
     resxy@tiXAxisOn = False
     resxy@tiYAxisOn = False
     ;resxy@trYMinF = floor(min(var))
     ;resxy@trYMaxF = ceil(max(var))
+    resxy@trXMinF    = 1
+    resxy@trXMaxF    = 12
+    resxy@tmXBMode   = "Explicit"
+    resxy@tmXBValues = ispan(1,12,1)
+    resxy@tmXBLabels = ispan(1,12,1)
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -79,13 +96,6 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmYLMinorThicknessF     = mp_thick
     ;resxy@tmXBMajorLengthF = 0.01
     ;resxy@tmYRMajorLengthF = 0.01
-    ;resxy@tmXBMode           = "Manual"
-    ;resxy@tmXBTickSpacingF   = 30
-    ;resxy@tmXBTickStartF     = 0
-    ;resxy@tmXBTickEndF       = 360
-    resxy@tmXBMode            = "Explicit"
-    resxy@tmXBValues          = ispan(1,12,1)
-    resxy@tmXBLabels          = ispan(1,12,1)
     
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2
@@ -107,13 +117,17 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
+    resp@gsnFrame      = False  ; Don't advance frame.
 
 ;=================================================================
 ;read cmip data
 ;=====================================================================
-varm  = new((/38,12/),float)
+varm  = new((/modelnumb,12/),float)
 varo  = new((/12/),float)
-mname = new((/38/),string)
+mname  = new((/modelnumb/),string)
+colors = new((/modelnumb/),string)
+nlat   = new((/modelnumb/),string)
+nlon   = new((/modelnumb/),string)
 
 f     = addfile("~/renql/project/2020MiddleEastJet/data/ERA-Interim_hgt-year.nc","r")
 term := dim_avg_n_Wrap(f->month_ave(:,:,{lev(nl)},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
@@ -122,15 +136,17 @@ varo  = varo/9.8
 delete([/f,term/])
 printMinMax(varo,0) 
 
-filepath  = systemfunc("find " + path1 + " -name " + var_name(nv) + "_Amon_*_historical_r1i1p1_*.nc")
-modelname = str_get_field(filepath,5,"/")
+filepath  = systemfunc("find " + path1)
 nfile     = dimsizes(filepath)
-nfield    = str_fields_count(filepath,"_")
-numbyear  = new((/nfile/),string)
+nfield    = str_fields_count(filepath,"/")
+modelname = new((/nfile/),string)
+year      = new((/nfile/),integer)
 do nf = 0, nfile-1, 1
-    numbyear(nf) = str_get_field(filepath(nf),nfield(nf),"_")
+    filename = str_split(str_get_field(filepath(nf),nfield(nf),"/"),"_")
+    modelname(nf) = filename(2)
+    year(nf) = stringtoint(str_get_cols(filename(5),0,3))
 end do
-year = stringtoint(str_get_cols(numbyear,0,3))
+print(year(0:5))
 
 numb   = 0
 nmodel = -1
@@ -158,12 +174,41 @@ else
     dnames := getfilevardims(fs[0],var_name(nv))  
     dsizes := getfilevardimsizes(fs[0],var_name(nv))
     mname(nmodel) = modelname(nf) + " " + str_join(""+dsizes(2:3),"x")
+    nlat(nmodel) = dsizes(2)
+    nlon(nmodel) = dsizes(3)
     delete([/fs,filepaths,yearindex,time/])
     numb  = 0   
 end if
 end do
-    printMinMax(varm,0) 
 
+dim_lat = (/60,64,90, 96,108,120, 128,143,144, 160,192,320, 720/) ;AMIP
+dim_lon = (/128,144,180, 192,256,288, 320,640,1152/) ;9 AMIP
+;dim_lat = (/48,60,64,73,89,90,96,108,120,128,143,144,160,192,320/) ;CMIP5
+;dim_lon = (/96,128,144,180,192,256,288,320,640/) ;CMIP5
+ndimlat = dimsizes(dim_lat)
+ndimlon = dimsizes(dim_lon)
+numblon = new((/ndimlon/),integer)
+colorindex = (/4,7,8, 9,10,11, 15,17,18/) 
+;colorindex = (/"blue","red","green","grey","purple", "Pink"/) 
+do nla = 0, ndimlon-1, 1
+    colors = where(nlon.eq.dim_lon(nla),colorindex(nla),colors)
+    numblon(nla) = dimsizes(ind(nlon.eq.dim_lon(nla)))
+end do
+    lgres                    = True
+    lgres@vpWidthF           = 0.1     ; width of legend (NDC)
+    lgres@vpHeightF          = 0.09     ; height of one legend (NDC)
+;    lgres@lgBoxMajorExtentF  = 0.02          ; puts space between color boxes
+    lgres@lgPerimOn          = False                 ; turn off perimeter
+;    lgres@lgLineColors       = colorindex 
+    lgres@lgMonoDashIndex    = True
+    lgres@lgDashIndexes      = 0 ; resxy@xyDashPatterns
+    lgres@lgLineThicknesses  = 10.0
+    lgres@lgLineLabelStrings = ""
+    lgres@lgLabelFontHeightF = 0.2 
+    lgres@lgLabelFont        = font_index
+
+    printMinMax(varm,0) 
+    resxy@xyLineColors    = colors 
     resxy@gsnLeftString   = pre_case(0) + ") (" + lonl(1) + "-" + lonr(1) + "E," + lats(1) + "-" + latn(1) \
                                      + "N) - (" + lonl(0) + "-" + lonr(0) + "E," + lats(0) + "-" + latn(0) + "N)"
     resxy@gsnRightString  = lev(nl) + "hPa " + var_name(nv) + " (" + unit(nv) + ")"  
@@ -173,5 +218,16 @@ end do
     plot2 = gsn_csm_xy(wks,ispan(1,12,1),(/varo/),resxy2)
     overlay(plot,plot2)
     gsn_panel(wks,plot,(/1,1/),resp)
+    printMinMax(varo,0) 
+
+xpos = (/0.2, 0.4, 0.6/)
+nnn = 3
+do nn = 0,2,1
+    nns = nnn*nn
+    nne = nnn*nn+2
+    lgres@lgLineColors = colorindex(nns:nne) 
+    gsn_legend_ndc(wks, nnn, numblon(nns:nne)+" nlon="+dim_lon(nns:nne),xpos(nn),0.2,lgres)
+end do
+frame(wks)
 end
     

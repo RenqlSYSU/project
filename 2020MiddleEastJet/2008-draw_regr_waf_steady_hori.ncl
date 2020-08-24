@@ -59,8 +59,10 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.eq.0)
-    filename = path + "data/" + case + "_" + months + "steady_Pb85-reg3.nc"
-    fig_name = path + "fig/1p3x3_regr_horizontal_" + var_name(0)
+    ;filename = path + "data/" + case + "_" + months + "steady_Pb85-reg2.nc"
+    filename = path + "data/" + case + "_" + months + "steady_TN01-reg.nc"
+    ;filename = path + "data/" + case + "_" + months + "steady_Pb85_2-reg.nc"
+    fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(0)
 end if
 
 f = addfile(gtopfile,"r")
@@ -125,7 +127,7 @@ do nv = 0,2,1
     end if
 end do
 ;var_m = var_m*10000
-vcref := (/0.5,150,150/) ;(/925,850,700,500,200/)
+vcref := (/1.0,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
 

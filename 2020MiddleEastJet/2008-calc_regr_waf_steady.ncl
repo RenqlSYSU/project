@@ -10,12 +10,12 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","air","hgt"/)
-waf_option = 1
+waf_option = 2
 if(waf_option.eq.0) then 
 fileout  = path2 + "ERA-Interim_DJF_steady_TN01-reg.nc"
 end if
 if(waf_option.eq.1) then 
-fileout  = path2 + "ERA-Interim_DJF_steady_Pb85-reg3.nc"
+fileout  = path2 + "ERA-Interim_DJF_steady_Pb85-reg2.nc"
 end if
 if(waf_option.eq.2) then 
 fileout  = path2 + "ERA-Interim_DJF_steady_Pb85_2-reg.nc"
@@ -171,11 +171,11 @@ ts = - ts/conform(ts,sqrt(eval),(/0,1/))
 delete(eof0)
 ;--------------------------------------------------------
 
-if(waf_option.eq.2) then
+if(waf_option.eq.2) then ;pb85_2
 
 noz    = -sclhgt*log(lev/1000.0)
 area_t = wgt_areaave(dim_avg_n_Wrap(t,iyear), a*cos(lat)*(lon(1)-lon(0)), 1.0, 0)
-static = center_finite_diff_n(area_t,noz,cyclic,opt,ilev-1) + 0.286*area_t/sclhgt
+static = center_finite_diff_n(area_t,noz,cyclic,opt,0) + 0.286*area_t/sclhgt
 delete([/area_t,noz/])
 
 ;edd_u = u - conform(u,dim_avg_n(u,ilon-1),(/0,1,2/))
@@ -186,7 +186,21 @@ edd_u = regCoef_n(ts, u, 2, 0) ;narea,neval,nlev,nlat,nlon
 edd_v = regCoef_n(ts, v, 2, 0)
 edd_t = regCoef_n(ts, t, 2, 0)
 edd_z = regCoef_n(ts, z, 2, 0)
-delete([/u,v,t,z/])
+
+tval  := onedtond(edd_z@tval ,(/narea,neval,nlev,nlat,nlon/))
+df    := onedtond(edd_z@nptxy,(/narea,neval,nlev,nlat,nlon/))
+lon_m := conform(tval,vars&lon,ilon);gitude
+printVarSummary(tval)
+printVarSummary(df)
+b := tval 
+b = 0.5
+prob  = betainc( df/(df+tval^2), df/2.0, b )
+prob  = mask(prob,lon_m.eq.0,False)
+delete([/tval,df,lon_m/])
+
+f0     = conform(edd_z, 2.0*(2.0*pi/24.0/3600.0)*sin(lat), ilat)
+edd_sf = edd_z/f0
+delete([/u,v,t,z,f0/])
 static := conform(edd_u, static, (/ilev/))
 
 coef1  = conform(edd_u,2.0*a*(2.0*pi/24.0/3600.0)*sin(2.0*lat),ilat)
@@ -221,9 +235,10 @@ NN := wgt_areaave(NN*abs(NN), a*cos(lat)*(lon(1)-lon(0)), 1.0, 0) ;(lev)
 ;uv2sfvpf ( u, v, sf, vp )
 ;delete(vp)
 
-z = z - conform(z, dim_avg_n_Wrap(z,ilon-1), (/0,1,2/))
+;z = z - conform(z, dim_avg_n_Wrap(z,ilon-1), (/0,1,2/))
 edd_sf = regCoef_n(ts, z, 2, 0) ;narea,neval,nlev,nlat,nlon
 printVarSummary(edd_sf)
+;edd_sf = edd_sf - conform(edd_sf, dim_avg_n_Wrap(edd_sf,ilon), (/0,1,2,3/))
 delete(z)
 tval  := onedtond(edd_sf@tval ,(/narea,neval,nlev,nlat,nlon/))
 df    := onedtond(edd_sf@nptxy,(/narea,neval,nlev,nlat,nlon/))
@@ -247,13 +262,10 @@ if (any(ismissing(edd_sf))) then
     print("stream function has missing")
 end if
 
-;==========================================================
-;calc forcing factors: Qeddy, Qd, A, dimension is 5d
-;============================================================
-if(waf_option.eq.0) then
+if(waf_option.eq.0) then ;TN01
 print("")
-u  = conform(edd_sf, dim_avg_n(u ,iyear), (/ilev,ilat,ilon/))
-v  = conform(edd_sf, dim_avg_n(v ,iyear), (/ilev,ilat,ilon/))
+u  := conform(edd_sf, dim_avg_n(u ,iyear), (/ilev,ilat,ilon/))
+v  := conform(edd_sf, dim_avg_n(v ,iyear), (/ilev,ilat,ilon/))
 ;NN = conform(edd_sf, dim_avg_n(NN,iyear), (/ilev,ilat,ilon/))
 ;clm_sf = dim_avg_n(sf,iyear)
 ;edd_sf = sf - conform(sf, clm_sf, (/1,2,3/))
@@ -263,8 +275,8 @@ dsfdx = center_finite_diff_n(edd_sf,lon,loncyc,opt,ilon)
 dsfdy = center_finite_diff_n(edd_sf,lat,cyclic,opt,ilat)
 
 coslat = conform(edd_sf,cos(lat),ilat)
-coef   = coslat/2.0/sqrt(u^2 + v^2)
-;coef   = (coslat*conform(u,lev,ilev)/1000.0)/2.0/sqrt(u^2 + v^2)
+;coef   = coslat/2.0/sqrt(u^2 + v^2)
+coef   = (coslat*conform(u,lev/1000.0,ilev))/2.0/sqrt(u^2 + v^2)
 wafx  = coef*((u/a/a/coslat/coslat)*(dsfdx*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lon,loncyc,opt,ilon)) \
              +(v/a/a/coslat       )*(dsfdy*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lat,cyclic,opt,ilat)))
 printMinMax(wafx,False)
@@ -273,10 +285,12 @@ wafy  = coef*((u/a/a/coslat)*(dsfdx*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lon,
              +(v/a/a       )*(dsfdy*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lat,cyclic,opt,ilat)))
 printMinMax(wafy,False)
 
+noz   = -sclhgt*log(lev/1000.0)
 dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev)
+;dsfdz = center_finite_diff_n(edd_sf,noz,cyclic,opt,ilev)
 wafz  = coef*NN*((u/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lon,loncyc,opt,ilon)) \
                 +(v/a       )*(dsfdy*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lat,cyclic,opt,ilat)))
-delete([/coslat,coef,dsfdx,dsfdy,dsfdz/])
+delete([/coslat,coef,dsfdx,dsfdy,dsfdz,u,v/])
 printMinMax(wafz,False)
 end if
 
@@ -289,7 +303,7 @@ delete([/u,v/])
 
 coslat = conform(edd_sf,cos(lat),ilat)
 ;coef   = coslat/2.0
-coef   = (coslat*conform(edd_sf,lev,ilev)/1000.0)/2.0
+coef   = (coslat*conform(edd_sf,lev/1000.0,ilev))/2.0
 
 dsfdx = center_finite_diff_n(edd_sf,lon,loncyc,opt,ilon)
 wafx  = coef*(1.0/a/a/coslat/coslat)*(dsfdx*dsfdx-edd_sf*center_finite_diff_n(dsfdx,lon,loncyc,opt,ilon))
@@ -306,11 +320,10 @@ wafz  = coef*NN*(1.0/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lo
 delete([/coslat,coef,dsfdx,dsfdz/])
 printMinMax(wafz,False)
 end if
+end if
 
 edd_sf@long_name = "a perturbation streamfunction based on winter climatology"
 edd_sf@units     = "m2/s" 
-end if
-
 wafx@long_name = "x wave activity flux"
 wafx@units   = "m2/s2" 
 wafx@pcvar   = ndtooned(pcvar)
@@ -345,10 +358,8 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
-if(waf_option.le.1) then 
 filevardef(ncdf,"edd_sf",typeof(edd_sf),(/"area","neval","lev","lat","lon"/))
 filevardef(ncdf,"prob"  ,typeof(prob)  ,(/"area","neval","lev","lat","lon"/))
-end if
 filevardef(ncdf,"wafx",typeof(wafx),(/"area","neval","lev","lat","lon"/))
 filevardef(ncdf,"wafy",typeof(wafy),(/"area","neval","lev","lat","lon"/))
 filevardef(ncdf,"wafz",typeof(wafz),(/"area","neval","lev","lat","lon"/))
@@ -359,10 +370,8 @@ filevardef(ncdf,"pcvar",typeof(pcvar),(/"area","neval"/))
 filevarattdef(ncdf,"lev",vars&level)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-if(waf_option.le.1) then 
 filevarattdef(ncdf,"edd_sf",edd_sf)
 filevarattdef(ncdf,"prob"  ,prob)
-end if
 filevarattdef(ncdf,"wafx",wafx)
 filevarattdef(ncdf,"wafy",wafy)
 filevarattdef(ncdf,"wafz",wafz)
@@ -370,10 +379,8 @@ filevarattdef(ncdf,"wafz",wafz)
 ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
-if(waf_option.le.1) then 
 ncdf->edd_sf = (/edd_sf/)
 ncdf->prob   = (/prob/)
-end if
 ncdf->wafx = (/wafx/)
 ncdf->wafy = (/wafy/)
 ncdf->wafz = (/wafz/)

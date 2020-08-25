@@ -10,7 +10,7 @@ region_line = False;True ; draw the line for ME, EA, NA
 bar_share = True ;False;
 barvert   = False;True
 lev    = (/925,850,700,500,200/) 
-nl = 4 ;(/925,850,700,500,200/)
+nl = 3 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
 
@@ -51,7 +51,7 @@ if(var_option.eq.0) then
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
     unit     = (/"m~S~2~N~/s~S~2~N~" ,"m2/s2" ,"10~S~6~N~m~S~2~N~/s"/)  ;this can be used as right string 
-    shad_option = 1 ;0=divg; 1=edd_sf; 2=wafz 
+    shad_option = 2 ;0=divg; 1=edd_sf; 2=wafz 
 end if
 
 ;the path of the file
@@ -155,10 +155,12 @@ if(shad_option.eq.1) then ;edd_sf
     spacig := (/ 1, 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
 if(shad_option.eq.2) then ;wafz
-    var_m(2,:,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
-    minlvl := (/-21,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 21, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 3 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    var_name(2) = "wafz"
+    unit(2)     = "10~S~-4~N~m~S~2~N~/s~S~2~N~"
+    var_m(2,:,:,0,:,:) = 10000.0*f->$var_name(2)$(:,:,{500},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    minlvl := (/-14/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 14/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 2 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
 printVarSummary(var_m)
 

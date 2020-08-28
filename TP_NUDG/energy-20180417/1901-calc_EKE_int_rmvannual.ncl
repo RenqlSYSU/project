@@ -9,12 +9,12 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 90.0 ;day
-cb = 10.0 ;2.5 ;
+ca = 10.0 ;day
+cb = 2.5  ;10.0 ;
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -35,10 +35,10 @@ if(case_option.eq.1) then
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intEKE.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE.nc"
         ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intuv.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE-" + cb + "-" + ca + "day.nc"
     end if  
 end if
 if(case_option.eq.2) then
@@ -99,28 +99,28 @@ end if
 ;============================================================
 do nt = 0,nyear-1,1
 nv = 0
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f  = addfile(files(nt),"r")
-print(" handle with " + files(nt))
-;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f  = addfile(files(nt),"r")
+;print(" handle with " + files(nt))
+f   = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f  = addfile(files(nt),"r")
-;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f  = addfile(files(nt),"r")
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f  = addfile(files(nt),"r")
-;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f  = addfile(files(nt),"r")
+f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 ps(nt,:,:,:)   = f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
 dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),20000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
 u = linmsg_n(u,(/-1/),1)
 v = linmsg_n(v,(/-1/),1)
-print(u(10,10,2,10:20,30))
+print(u(5,10,2,10:20,30))
 
 if(option.eq.1) then
 fca = 1.0/ca
@@ -139,8 +139,8 @@ cf = ezfftf_n(v,1)
 cf(:,:,filt_cf,:,:,:) = 0.0  
 filt_v = ezfftb_n(cf,0,2)
 
-var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n((filt_v(:,:,5:8,:,:)*filt_v(:,:,5:8,:,:) + filt_u(:,:,5:8,:,:)*filt_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((filt_v(:,:,5:12,:,:)*filt_v(:,:,5:12,:,:) + filt_u(:,:,5:12,:,:)*filt_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)*filt_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 delete(filt_u)
 delete(filt_v)
@@ -155,6 +155,7 @@ edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 var   = dim_sum_n( (edd_v(:,:,5:12,:,:)*edd_v(:,:,5:12,:,:) + edd_u(:,:,5:12,:,:)*edd_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+delete([/edd_u,edd_v/])
 end if
 
 EKE   = dim_avg_n(var,0) 

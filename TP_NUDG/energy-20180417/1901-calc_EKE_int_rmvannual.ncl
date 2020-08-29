@@ -35,10 +35,10 @@ if(case_option.eq.1) then
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE.nc"
-        ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intuv.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
+        ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intEKE.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE-" + cb + "-" + ca + "day.nc"
     end if  
 end if
 if(case_option.eq.2) then
@@ -140,8 +140,8 @@ cf(:,:,filt_cf,:,:,:) = 0.0
 filt_v = ezfftb_n(cf,0,2)
 
 ;var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n((filt_v(:,:,5:12,:,:)*filt_v(:,:,5:12,:,:) + filt_u(:,:,5:12,:,:)*filt_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)*filt_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((filt_v(:,:,5:12,:,:)*filt_v(:,:,5:12,:,:) + filt_u(:,:,5:12,:,:)*filt_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)*filt_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 delete(filt_u)
 delete(filt_v)
 else
@@ -151,8 +151,8 @@ edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((edd_u*edd_v)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
-var   = dim_sum_n( (edd_v(:,:,5:12,:,:)*edd_v(:,:,5:12,:,:) + edd_u(:,:,5:12,:,:)*edd_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
+var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n( (edd_v(:,:,5:12,:,:)*edd_v(:,:,5:12,:,:) + edd_u(:,:,5:12,:,:)*edd_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 delete([/edd_u,edd_v/])

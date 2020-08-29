@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -16,7 +16,7 @@ if(case_option.eq.0) then
 end if
 if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
-    case2   = (/"CTRL"   ,"noTP"/)
+    case2   = (/"CTRL"   ,"noTP-CTRL"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
@@ -30,7 +30,7 @@ end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"intEKE"      ,"intEKE2-2.5-10day","intEKE2-10-90day","EKE"       , \
+             "T"            ,"lowEKE"      ,"lowEKE-2.5-10day","lowEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs" /) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
@@ -38,23 +38,23 @@ unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
              "mm/day" /)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
+                 "T"        ,"lowEKE"      ,"lowEKEhgh"       ,"lowEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,700,600,500,200,  100,10/)
 nl = 4
 nv = 6
 diff = True ;False;
-perc = False;True ;
+perc = True ;False;
+sig_option  = True ;False;only work on shading 
 vect_option = False;True ;
 cont_option = False;True ;
 jet_option  = 1 ;0 = no jet, 1 = jet axis, 2 = jet contour
-sig_option  = False;True ;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
 nvc = 0 
 contsig  = False;True
-barshare = False;True ;
+barshare = True ;False;
 barvert  = False;True
 
 var_option = 1
@@ -68,9 +68,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-;imonth = ispan(0,11,1);(/4,5,6,7/)
+imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -90,7 +90,7 @@ end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"pdf";"x11";
+fig_out    = "pdf";"x11";"eps";
 
 ;area: east Asia
 lats = (/10 ,0  ,0  ,-70,-70, -70,10 ,-70,10 /);-20
@@ -100,7 +100,7 @@ lonr = (/360,270,390,150,270, 390,150,360,130/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
-na = 6
+na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -161,7 +161,7 @@ end if
 
 wks = gsn_open_wks(fig_out,fig_name)
 ;do nl = 0,3,1
-;do nv = 5,5,1
+do nv = 6,8,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -717,8 +717,8 @@ if(nv.eq.15) then ;precs
     spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
-do nm = 0,nmonth-1,1
 do nc = 0,1,1
+do nm = 0,nmonth-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -734,8 +734,8 @@ else
 end if 
 ;    do nm = 0,nmonth-1,1
         ;np = 2*(nl-2)+nc
-        np = nm*2+nc
-        ;np = nm
+        ;np = nm*2+nc
+        np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
@@ -747,7 +747,7 @@ end if
         if(cont_option) then 
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
         else
-        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") "
+        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") " ;lev(nl) + "hPa " + 
         end if
         end if
         res@gsnSpreadColors       = False              ; turn of the full color map
@@ -828,20 +828,20 @@ end if
     ;attach3 = gsn_attach_plots(plot(6),plot(7:8),res1,res2)
     ;attach4 = gsn_attach_plots(plot(9),plot(10:11),res1,res2)
     ;gsn_panel(wks,plot(0:9:3),(/4,1/),resp)
-   ; attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
-   ; attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
-   ; attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
-   ; attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
-   ; attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
-   ; attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
-   ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
+    attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
+    attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
+    attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
+    attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
+    attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
+    attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
+    gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/4,1/),resp)
 end do
-    gsn_panel(wks,plot,(/4,2/),resp)
+;    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do
-;end do
+end do
 end
 

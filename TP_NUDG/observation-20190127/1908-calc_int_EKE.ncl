@@ -13,16 +13,16 @@ path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 var_name = (/"uwnd","vwnd"/)
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 30.0 ;day
-cb = 2.5 
+ca = 90.0 ;day
+cb = 10.0 
 
 if(option.eq.0) then
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE.nc"
 else
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE-" + cb + "-" + ca + "day.nc"
 end if
 g  = 9.8 ;m/(s*s)
 years    = ispan(1979,2016,1)
@@ -110,6 +110,7 @@ opt = False
 filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
 filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((filt_v(:,:,5:12,:,:)*filt_v(:,:,5:12,:,:) + filt_u(:,:,5:12,:,:)*filt_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 else
 ;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 ;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))

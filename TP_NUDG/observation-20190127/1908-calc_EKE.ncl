@@ -17,8 +17,8 @@ var_name = (/"uwnd","vwnd"/)
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5 
+ca = 90.0 ;day
+cb = 10.0 
 
 if(option.eq.0) then
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_EKE.nc"

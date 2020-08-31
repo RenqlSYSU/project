@@ -6,13 +6,13 @@
 ;                                                    2019/02/01
 ;*********************************************************************************
 begin
-draw_var = (/"uppEKE"/)     
-unit     = (/"10~S~4~N~J"/)     
-draw_varname =(/"uppEKE"/)     
-lev = (/925,700,300,200/)
-nl = 3
-nv = 0
-jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
+draw_var = (/"uppEKE"    ,"hgt"/)     
+unit     = (/"10~S~4~N~J","gpm"/)     
+draw_varname =(/"uppEKE" ,"hgt"/)     
+lev = (/925,500,300,200/)
+nl = 1
+nv = 1
+jet_option  = 1 ;0 = no jet, 1 = jet axis, 2 = jet contour
 vect_option = False;True ;
 cont_option = False;True ;
 cont_var  = (/"hgt"/)  ;this is the variable used to draw, can used as center string
@@ -23,7 +23,7 @@ case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 
-var_option = 0 
+var_option = 1 
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -63,7 +63,7 @@ fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
 lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
-latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
+latn = (/60 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
 lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
 lonr = (/360,270,390,150,270,390,150,360,150/);220
 siglvl = 0.05
@@ -163,9 +163,12 @@ end if
 printVarSummary(var)
 
 if(nv.eq.0) then
-    var(2,:,:,:) = var(2,:,:,:)/10000 ;omega*100
+    var(2,:,:,:) = var(2,:,:,:)/10000 ;
 end if
 
+if(nv.eq.1) then
+    var(2,:,:,:) = var(2,:,:,:)/10 ;gpm to m 
+end if
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
@@ -432,6 +435,12 @@ if(nv.eq.0)
     spacig = (/5  /)      ; 10, 10
 end if
 
+if(nv.eq.1) 
+    minlvl = (/5350/)  ;q1 ;-80,-80
+    maxlvl = (/5800/)      ; 80, 80
+    spacig = (/30  /)      ; 10, 10
+end if
+
 if(nv.eq.2) then
     gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
@@ -495,6 +504,7 @@ end if
         ;frame(wks)
     end do 
 
-    gsn_panel(wks,plot,(/nmonth,1/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,1/),resp)
+    gsn_panel(wks,plot,(/6,2/),resp)
 end
 

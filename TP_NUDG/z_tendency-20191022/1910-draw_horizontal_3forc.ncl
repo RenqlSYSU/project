@@ -11,14 +11,16 @@ nnv = 0 ;"dzdt","dudt","dTdt","dbdt","dvdt"
 month_option = True ;False
 uv_option    = False;True ;
 duvdt_option = False;True ;
+jet_option   = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl   = 1 ;(/925,850,700,500,200/)
+nl   = 3 ;(/925,850,700,500,200/)
 diff = True;False ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 barshare = False;True ;
+barvert  = False;True
 
-;months   = (/"DJF","MAM","JJA","SON"/)
-months = (/"JF","MA","MJ","JA"/)
+months   = (/"DJF","MAM","JJA","SON"/)
+;months = (/"JF","MA","MJ","JA"/)
 nmonth = dimsizes(months)
 lev = (/925,850,700,500,200/)
 area = (/"TP","EA","NH"/)
@@ -119,16 +121,16 @@ else
         filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     else
         if(var_option.eq.1) then 
-        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon.nc"
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_month_lon_season.nc"
         end if
         if(var_option.eq.2) then 
-        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect_month.nc"
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect_month_season.nc"
         end if
         if(var_option.eq.3) then 
-        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect2_month.nc"
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect2_month_season.nc"
         end if
         if(var_option.eq.4) then 
-        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month.nc"
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month_season.nc"
         end if
     end if
     else
@@ -176,6 +178,8 @@ end if
     line     = new((/nvar*nmonth/),graphic)
     vect     = new((/nvar*nmonth/),graphic)
     wind2    = new((/nvar*nmonth/),graphic)
+    axis     = new((/nvar*nmonth/),graphic)
+    jetl     = new((/nvar*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -188,6 +192,28 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;================================================================
 ;read data
 ;====================================================================
+if(jet_option.ge.1) then 
+axlon = phis&lon
+axlat = new((/ncase,nmonth,nlon/),double)
+lat1 = phis&lat
+;print(lat1)
+;print(ind(lat1.eq.20))
+u    = new((/ncase  ,nmonth,nlat,nlon/),float)
+do nf = 0 ,ncase-1, 1
+    u_f = addfile(path+"/analysis/mdata/" + case1(nf) + "-Clim_month_ave_U.nc","r")
+    u(nf,:,:,:)  = u_f->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    do nm = 0, nmonth-1,1
+    do inln = 0, nlon-1,1
+        lat_ind = maxind(u(nf,nm,{10:48},inln))
+        ;lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
+        axlat(nf,nm,inln) = lat1(lat_ind)
+    end do
+    end do
+    printVarSummary(axlat)
+end do
+delete(u_f)
+end if
+
 if(uv_option) then
 do nc = 0, ncase-1, 1
 fu = addfile(path+"/analysis/mdata/" + case1(nc) + "-Clim_month_ave_U.nc","r")
@@ -425,16 +451,16 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbOrientation        = "Vertical";"Horizontal"
-    res@lbLabelFontHeightF   = tick_font
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
-    res@pmLabelBarWidthF  = 0.03
-    res@pmLabelBarHeightF = 0.17
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.01
-    res@pmLabelBarParallelPosF       = 0.5
+    ;res@lbOrientation        = "Vertical";"Horizontal"
+    ;res@lbLabelFontHeightF   = tick_font
+    ;res@lbLabelFont          = font_index              ; make labels smaller
+    ;res@lbLabelStride        = 1
+    ;res@lbBoxLineThicknessF  = mp_thick-1
+    ;res@pmLabelBarWidthF  = 0.03
+    ;res@pmLabelBarHeightF = 0.17
+    ;res@pmLabelBarZone               = 0
+    ;res@pmLabelBarOrthogonalPosF     = 0.01
+    ;res@pmLabelBarParallelPosF       = 0.5
 
 ;--------set the attribute of vector--------------
     resvc                  = True
@@ -467,6 +493,42 @@ end if
 
     resvc2 = resvc
     resvc2@vcLineArrowColor           = "grey"
+
+;----------Set res line-----------
+    res_jet                  = True
+    res_jet@gsnDraw          = False
+    res_jet@gsnFrame         = False
+    res_jet@gsnAddCyclic     = False
+    res_jet@cnFillOn         = False       ; Fill contours
+    res_jet@cnLinesOn        = True      ; turn off contour lines
+    res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_jet@cnInfoLabelOn    = False
+    res_jet@cnLineThicknessF = mp_thick + 1.5 
+    res_jet@cnMonoLineColor  = True ;False
+    if(uv_option.or.duvdt_option) then
+    res_jet@cnLineColor      = "blueviolet";"green4";"black"
+    else
+    res_jet@cnLineColor      = "black"
+    end if
+    if(jet_option.eq.1) then 
+    res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res_jet@cnLevels         = (/20/)
+    end if
+    if(jet_option.eq.2) then 
+    u = mask(u, u.lt.10 , False) 
+    res_jet@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_jet@cnLevelSpacingF      = 10        ; set contour interval
+    end if
+    res_jet@lbLabelBarOn         = False   ; the label bar
+    res_jet@gsnCenterString      = ""
+    res_jet@gsnLeftString    = " "
+    res_jet@gsnRightString   = " "
+
+    res_axis                      = True
+    res_axis@gsLineColor          = "black"
+    res_axis@gsLineDashPattern    = 1
+    res_axis@gsLineThicknessF     = mp_thick + 1.0 
+    ;res_axis@gsLineLabelString    = "Westly"
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -503,17 +565,42 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape" ;"portrait"
-    if(barshare) then
+    if(barshare) then; .and.nmonth.eq.4
+    res@lbLabelBarOn         = False   ; the label bar
+    resp@gsnPaperOrientation = "landscaoe";"portrait"
     resp@gsnPanelLabelBar = True
-    res@lbLabelBarOn      = False   ; the label bar
-    else
-    resp@gsnPanelLabelBar = False
-    res@lbLabelBarOn      = True   ; the label bar
-    end if
-    resp@lbOrientation     = "Vertical" ;"Horizontal" ;
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
     resp@pmLabelBarWidthF  = 0.05
     resp@pmLabelBarHeightF = 0.8
+    else
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarHeightF = 0.05;0.8
+    end if
+    else
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation        = "Vertical";
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.05
+    res@pmLabelBarOrthogonalPosF     = 0.15 ;y direction
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
+    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    resp@gsnPanelLabelBar = False; True
+    end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -612,7 +699,7 @@ end if
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,nvar-1,1
+do nv = 0,nvar-2,1
 do nm = 0,0,1
     np = nv
    ; np = nm*3 + nv
@@ -631,6 +718,7 @@ do nm = 0,0,1
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(fnc,nv,nm,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
+
     if(uv_option) then 
     resvc@vcRefMagnitudeF      = vcref(nl,fnc)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nl,fnc)+"m/s"
@@ -643,24 +731,34 @@ do nm = 0,0,1
         overlay(plot(np),wind2(np))
         end if
     end if
+    
     if(duvdt_option) then 
     resvc@vcRefMagnitudeF      = vcref(nl,fnc)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nl,fnc)+"x10~S~-5~N~m/s~S~2~N~"
     vect(np) = gsn_csm_vector(wks,uvar(fnc,nv,nm,:,:),vvar(fnc,nv,nm,:,:),resvc)
     overlay(plot(np),vect(np))
     end if
+    
     if(case_option.eq.0) then 
     line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
     end if 
     print(max(var_m(fnc,nv,nm,:,:)))
     print(min(var_m(fnc,nv,nm,:,:)))
+        
+    if(jet_option.ge.1) then 
+    if(jet_option.eq.1) then 
+    axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), res_axis )
+    end if
+    jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
+    overlay(plot(np),jetl(np))
+    end if
 end do 
 ;    gsn_panel(wks,plot,(/nmonth,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
 ;    if(nmonth.eq.1) then
-    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/nvar-1,1/),resp)
 ;    else
 ;    gsn_panel(wks,plot,(/nmonth,3/),resp)
 ;    end if

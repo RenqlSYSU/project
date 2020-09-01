@@ -123,21 +123,25 @@ v = linmsg_n(v,(/-1/),1)
 print(u(5,10,2,10:20,30))
 
 if(option.eq.1) then
+u := reshape(u,(/nyear*ntime,nlev,nlat,nlon/))
+v := reshape(v,(/nyear*ntime,nlev,nlat,nlon/))
 fca = 1.0/ca
 fcb = 1.0/cb
+opt = False
+filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
+filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+delete([/u,v/])
+filt_u := reshape(filt_u,(/nyear,ntime,nlev,nlat,nlon/))
+filt_v := reshape(filt_v,(/nyear,ntime,nlev,nlat,nlon/))
 
-;opt = False
-;filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-;filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
-
-fcf = fspan(0, 0.5, ntime/2) 
-filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
-cf = ezfftf_n(u,1)
-cf(:,:,filt_cf,:,:,:) = 0.0  
-filt_u = ezfftb_n(cf,0,2)
-cf = ezfftf_n(v,1)
-cf(:,:,filt_cf,:,:,:) = 0.0  
-filt_v = ezfftb_n(cf,0,2)
+;fcf = fspan(0, 0.5, ntime/2) 
+;filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
+;cf = ezfftf_n(u,1)
+;cf(:,:,filt_cf,:,:,:) = 0.0  
+;filt_u = ezfftb_n(cf,0,2)
+;cf = ezfftf_n(v,1)
+;cf(:,:,filt_cf,:,:,:) = 0.0  
+;filt_v = ezfftb_n(cf,0,2)
 
 ;var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((filt_v(:,:,5:12,:,:)*filt_v(:,:,5:12,:,:) + filt_u(:,:,5:12,:,:)*filt_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)

@@ -21,9 +21,9 @@ begin
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 case   = "ERA-Interim"
-var_name = (/"uppEKE2-2.5-10day","uppEKE-10-90day","hgt","uwnd","intQ1"/)   ;,"Q1"   the left title 
+var_name = (/"uppEKE3-2.5-10day","uppEKE3-10-90day","hgt","uwnd","intQ1"/)   ;,"Q1"   the left title 
 unit     = (/"10~S~3~N~J"      ,"10~S~3~N~J"     ,"m"  ,"m/s" ,"10W/m2"/)   ;,"W/kg"
-draw_var = (/"STEhgh"          ,"STEhgh"         ,"NBR","Jet" ,"intQ1"/)   ;North Ridge; TPH
+draw_var = (/"STEhgh"          ,"STElow"         ,"NBR","Jet" ,"intQ1"/)   ;North Ridge; TPH
 stand = False;True
 nv = 0
 
@@ -51,6 +51,7 @@ do nv = 0,1,1
 f    = addfile(filename(nv),"r")
 term = f->month_ave(:,{lats(0):latn(0)},{lonl(0):lonr(0)})
 term = term/1000.0
+;ts(nv,:) =  wgt_areaave(term(:,{lats(1):latn(1)},{lonl(1):lonr(1)}),1.0,1.0,0)
 ts(nv,:) =  wgt_areaave(term(:,{lats(1):latn(1)},{lonl(1):lonr(1)}),1.0,1.0,0)\ 
           - wgt_areaave(term(:,{lats(2):latn(2)},{lonl(2):lonr(2)}),1.0,1.0,0)
 printMinMax(ts(nv,:),0)

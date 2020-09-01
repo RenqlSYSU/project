@@ -10,11 +10,11 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 90.0 ;day
-cb = 10.0
+ca = 10.0 ;day
+cb = 2.5
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG24h","NG6h"/)
@@ -84,7 +84,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nf = 1,1,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -111,11 +111,16 @@ end do
 printVarSummary(u)
 
 if(option.eq.1) then
-    fca = 1.0/ca
-    fcb = 1.0/cb    
-    opt = False
-    filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-    filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+u := reshape(u,(/nyear*ntime,nlev,nlat,nlon/))
+v := reshape(v,(/nyear*ntime,nlev,nlat,nlon/))
+fca = 1.0/ca
+fcb = 1.0/cb    
+opt = False
+filt_u = bw_bandpass_filter(u,fca,fcb,opt,0)
+filt_v = bw_bandpass_filter(v,fca,fcb,opt,0)
+delete([/u,v/])
+filt_u := reshape(filt_u,(/nyear,ntime,nlev,nlat,nlon/))
+filt_v := reshape(filt_v,(/nyear,ntime,nlev,nlat,nlon/))
 
 ;fcf = fspan(0, 0.5, ntime/2) 
 ;filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
@@ -126,13 +131,13 @@ if(option.eq.1) then
 ;cf(:,:,filt_cf,:,:,:) = 0.0  
 ;filt_v = ezfftb_n(cf,0,2)
 
-    var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
-    delete(filt_u)
-    delete(filt_v)  
+var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
+delete(filt_u)
+delete(filt_v)  
 else
-    edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-    edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))   
-    var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))   
+var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
 end if
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
@@ -190,10 +195,10 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 ;define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
-filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
-filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
-filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
-filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
+filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
+filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
+filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
+filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lev","lat","lon"/))
@@ -202,10 +207,10 @@ filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/)
 filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lev","lat","lon"/))
 
 ;define var attribute
-filevarattdef(ncdf,"time",u&time)
-filevarattdef(ncdf,"lev",u&level)
-filevarattdef(ncdf,"lat",u&lat)
-filevarattdef(ncdf,"lon",u&lon)
+filevarattdef(ncdf,"time",vars&time)
+filevarattdef(ncdf,"lev",vars&level)
+filevarattdef(ncdf,"lat",vars&lat)
+filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"EKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
@@ -214,10 +219,10 @@ filevarattdef(ncdf,"season_vari",EKE)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
-ncdf->time = (/u&time/)
+ncdf->time = (/vars&time/)
 ncdf->lev  = (/lev/)
-ncdf->lat  = (/u&lat/)
-ncdf->lon  = (/u&lon/)
+ncdf->lat  = (/vars&lat/)
+ncdf->lon  = (/vars&lon/)
 ncdf->EKE  = (/EKE/)
 ncdf->EKE_vari  = (/EKE_vari/)
 ncdf->month_ave   = (/month_ave/)

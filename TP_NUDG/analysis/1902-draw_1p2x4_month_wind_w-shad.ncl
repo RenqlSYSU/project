@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -22,7 +22,7 @@ if(case_option.eq.1) then
     nsample = 10
 end if
 if(case_option.eq.2) then
-    case1   = (/"F2000","NUDG"/)       ;NGTR    
+    case1   = (/"F2000","NGTR"/)       ;NGTR    
     case2   = (/"F2000","NUDG-F2000"/) ;NGTR
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
@@ -30,7 +30,7 @@ end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"lowEKE"      ,"lowEKE-2.5-10day","lowEKE-10-90day","EKE"       , \
+             "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs" /) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
@@ -38,11 +38,11 @@ unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
              "mm/day" /)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"lowEKE"      ,"lowEKEhgh"       ,"lowEKElow"      ,"EKE"       , \
+                 "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 4
+nl = 5
 nv = 6
 diff = True ;False;
 perc = True ;False;
@@ -160,8 +160,8 @@ else
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-;do nl = 0,3,1
-do nv = 6,8,1
+do nl = 5,6,1
+do nv = 10,11,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -568,8 +568,8 @@ end if
     else
     res@lbOrientation        = "Horizontal";"Vertical";
     res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.1
-    res@pmLabelBarOrthogonalPosF     = 0.25 ;y direction
+    res@pmLabelBarHeightF = 0.05
+    res@pmLabelBarOrthogonalPosF     = 0.15 ;y direction
     res@pmLabelBarParallelPosF       = 0.5
     end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
@@ -733,7 +733,7 @@ else
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
 ;    do nm = 0,nmonth-1,1
-        ;np = 2*(nl-2)+nc
+        ;np = 2*(nl-3)+nc
         ;np = nm*2+nc
         np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
@@ -747,7 +747,7 @@ end if
         if(cont_option) then 
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
         else
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") " ;lev(nl) + "hPa " + 
+        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") " ;
         end if
         end if
         res@gsnSpreadColors       = False              ; turn of the full color map
@@ -841,7 +841,8 @@ end if
 ;    gsn_panel(wks,plot,(/4,1/),resp)
 end do
 ;    gsn_panel(wks,plot,(/4,2/),resp)
-;end do
+end do
+;    gsn_panel(wks,plot,(/4,2/),resp)
 end do
 end
 

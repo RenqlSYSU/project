@@ -16,13 +16,13 @@ var_name = (/"uwnd","vwnd"/)
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 90.0 ;day
-cb = 10.0
+ca = 10.0 ;day
+cb = 2.5
 
 if(option.eq.0) then
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE.nc"
 else
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE2-" + cb + "-" + ca + "day.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE3-" + cb + "-" + ca + "day.nc"
 end if
 g  = 9.8 ;m/(s*s)
 years    = ispan(1979,2016,1)
@@ -104,23 +104,29 @@ printVarSummary(u)
 printVarSummary(dp)
 
 if(option.eq.1) then
+u := reshape(u,(/nyear*ntime,nlev,nlat,nlon/))
+v := reshape(v,(/nyear*ntime,nlev,nlat,nlon/))
 fca = 1.0/ca
 fcb = 1.0/cb
-;opt = False
-;filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-;filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+opt = False
+filt_u = bw_bandpass_filter(u,fca,fcb,opt,0)
+filt_v = bw_bandpass_filter(v,fca,fcb,opt,0)
+delete([/u,v/])
+filt_u := reshape(filt_u,(/nyear,ntime,nlev,nlat,nlon/))
+filt_v := reshape(filt_v,(/nyear,ntime,nlev,nlat,nlon/))
 
-fcf = fspan(0, 0.5, ntime/2) 
-filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
-cf = ezfftf_n(u,1)
-cf(:,:,filt_cf,:,:,:) = 0.0  
-filt_u = ezfftb_n(cf,0,2)
-cf = ezfftf_n(v,1)
-cf(:,:,filt_cf,:,:,:) = 0.0  
-filt_v = ezfftb_n(cf,0,2)
+;fcf = fspan(0, 0.5, ntime/2) 
+;filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
+;cf = ezfftf_n(u,1)
+;cf(:,:,filt_cf,:,:,:) = 0.0  
+;filt_u = ezfftb_n(cf,0,2)
+;cf = ezfftf_n(v,1)
+;cf(:,:,filt_cf,:,:,:) = 0.0  
+;filt_v = ezfftb_n(cf,0,2)
 
 ;var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 var   = dim_sum_n((filt_v(:,:,5:12,:,:)*filt_v(:,:,5:12,:,:) + filt_u(:,:,5:12,:,:)*filt_u(:,:,5:12,:,:))*dp(:,:,5:12,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+delete([/filt_u,filt_v,dp/])
 else
 ;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 ;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
@@ -188,8 +194,8 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"time",typeof(t&time),getvardims(t&time))
-filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
-filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
+filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
+filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 ;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
@@ -197,8 +203,8 @@ filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"time",t&time)
-filevarattdef(ncdf,"lat",u&lat)
-filevarattdef(ncdf,"lon",u&lon)
+filevarattdef(ncdf,"lat",vars&lat)
+filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"EKE",EKE)
 ;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
@@ -207,8 +213,8 @@ filevarattdef(ncdf,"season_ave",EKE)
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
 ncdf->time = (/t&time/)
-ncdf->lat  = (/u&lat/)
-ncdf->lon  = (/u&lon/)
+ncdf->lat  = (/vars&lat/)
+ncdf->lon  = (/vars&lon/)
 ncdf->EKE  = (/EKE/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)

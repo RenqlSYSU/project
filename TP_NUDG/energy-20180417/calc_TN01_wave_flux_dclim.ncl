@@ -12,8 +12,8 @@
 ;******************************************************************************
 begin
 ;the path of the file
-path     = "/users/yangsong3/renql/project/TP_NUDG"
-case = (/"CTRL","NUDG24h","NUDG6h"/)
+path  = "/users/yangsong3/renql/project/TP_NUDG"
+case  = (/"CTRL","NUDG24h","NUDG6h"/)
 basic = 1
 filein  = path +(/"/data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/data/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\

@@ -167,7 +167,7 @@ if(var_option.eq.5)
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
+pre_case   = (/"(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
 fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
@@ -293,7 +293,7 @@ end if
 if(egr_option) then
 egr_m = new((/narea,ntime,unlev,nlat/),float)
 if(DJF_option) then
-f2 = addfile(path + "data/" + case + "_DJF_EGR4-year.nc","r")
+f2 = addfile(path + "data/" + case + "_DJF_EGR-year.nc","r")
 do na = 0,narea-1,1
     egr := dim_avg_n_Wrap(f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     egr_m(na,0,:,:) = dim_avg_n_Wrap(egr,2)
@@ -695,7 +695,7 @@ do nv = 0, nvar-1,1
     if(var_option.ge.1) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E MSF&uwnd&EGR"; + draw_var(nv) + " (" + unit(nv) + ")"
     end if
     ;res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

@@ -4,13 +4,12 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-var_option  = 0  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option  = False;True ;;20191205, control the draw of jet stream
 region_line = False;True ; draw the line for ME, EA, NA
 bar_share = True ;False;
 barvert   = False;True
 lev    = (/925,850,700,500,200/) 
-nl = 3 ;(/925,850,700,500,200/)
+nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
 
@@ -36,7 +35,7 @@ fig_out    ="pdf";"x11"
 ;area: east Asia
 ;area = (/"NH","ME","EA","NA","TP"/)
 lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
+latn = (/ 80 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -46,12 +45,17 @@ lon_spacing = 20
 density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
-do var_option = 0,0,1 
+do var_option = 1,1,1 
 if(var_option.eq.0) then 
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
     unit     = (/"m~S~2~N~/s~S~2~N~" ,"m2/s2" ,"10~S~6~N~m~S~2~N~/s"/)  ;this can be used as right string 
     shad_option = 2 ;0=divg; 1=edd_sf; 2=wafz 
+end if
+if(var_option.eq.1) then 
+    draw_var = (/"RWS"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"rws" /)  ;
+    unit     = (/"10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 
 ;the path of the file
@@ -64,6 +68,10 @@ if(var_option.eq.0)
     ;filename = path + "data/" + case + "_" + months + "steady_Pb85_2-reg.nc"
     fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(0)
 end if
+if(var_option.eq.1)
+    filename = path + "data/" + case + "_" + months + "rws-reg2.nc"
+    fig_name = path + "fig/1p3x3_regr_horizontal_" + var_name(0)
+end if
 
 f = addfile(gtopfile,"r")
 phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
@@ -71,8 +79,12 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nlat   = dimsizes(phis&latitude )  ;
 nlon   = dimsizes(phis&longitude)  ;
 nvar   = dimsizes(draw_var)
+if(var_option.eq.0) then 
 var_m  := new((/3,narea,neval,ntime,nlat,nlon/),double)
 prob   := new((/narea,neval,ntime,nlat,nlon/),double)
+else
+var_m  := new((/nvar,narea,neval,ntime,nlat,nlon/),float)
+end if
 
 ;the number of the panel plot
     plot     = new((/12/),graphic)
@@ -119,29 +131,35 @@ if(jet_option) then
 end if
 
 f = addfile(filename,"r")
-do nv = 0,2,1
+do nv = 0,nvar-1,1
     if(DJF_option) then
     var_m(nv,:,:,0,:,:) = f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     else
     var_m(nv,:,:,:,:)   = f->$var_name(nv)$(:,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
 end do
-;var_m = var_m*10000
-vcref := (/1.0,150,150/) ;(/925,850,700,500,200/)
-;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
-;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
+
+if(var_option.eq.1) then 
+    var_m = var_m*10^11
+    minlvl := (/-7,-3.5,-3.5/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5-7,-7,-7
+    maxlvl := (/ 7, 3.5, 3.5/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5 7, 7, 7
+    spacig := (/ 1, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5 1, 1, 1
+end if
 
 eval  := onedtond(var_m@eval ,(/narea,neval/))
 pcvar := onedtond(var_m@pcvar,(/narea,neval/))
 sig   := onedtond(var_m@sig  ,(/narea,neval/))
 subtitle_color = where(sig,"red","black") 
 
+if(var_option.eq.0) then 
+vcref := (/1.0,150,150/) ;(/925,850,700,500,200/)
+;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
+;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
 prob(:,:,0,:,:) = f->prob(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
 prob   = mask(prob,prob.lt.siglvl,True)
 lon_m  = conform(prob,var_m&lon,4)
 prob   = mask(prob,lon_m.eq.0,False)
 delete(lon_m)
-
 if(shad_option.eq.0) then ;divg
     var_m(2,:,:,:,:,:) = uv2dv_cfd( var_m(0,:,:,:,:,:), var_m(1,:,:,:,:,:),var_m&lat, var_m&lon, 3 )*100000
     minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5-7,-7,-7
@@ -161,6 +179,7 @@ if(shad_option.eq.2) then ;wafz
     minlvl := (/-14/);-3.5,-3.5,-3.54.2,-4.2,-4.2
     maxlvl := (/ 14/); 3.5, 3.5, 3.54.2, 4.2, 4.2
     spacig := (/ 2 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+end if
 end if
 printVarSummary(var_m)
 
@@ -413,6 +432,8 @@ do nv = 0, nvar-1, 1
     else
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " WAF  " + var_name(2) + " (" + unit(2) + ")  " + eval(na,ne) + "  " + pcvar(na,ne)+"%" 
     end if
+    else
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")  " + eval(na,ne) + "  " + pcvar(na,ne)+"%" 
     end if
     
     ;res@gsnSpreadColors       = False              ; turn of the full color map
@@ -420,11 +441,11 @@ do nv = 0, nvar-1, 1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    
+   
+    if(var_option.eq.0) then 
     plot(np) = gsn_csm_contour_map_ce(wks,var_m(2,na,ne,nt,:,:),res)
     sigl(np) = gsn_csm_contour(wks,prob(na,ne,nt,:,:),res_sig)
     overlay(plot(np),sigl(np))
-    
     resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nv)+unit(0)
     vect(np) = gsn_csm_vector(wks,var_m(0,na,ne,nt,:,:),var_m(1,na,ne,nt,:,:),resvc)
@@ -432,6 +453,10 @@ do nv = 0, nvar-1, 1
     printMinMax(var_m(0,na,ne,nt,:,:),0)
     printMinMax(var_m(1,na,ne,nt,:,:),0)
     printMinMax(var_m(2,na,ne,nt,:,:),0)
+    else
+    plot(np) = gsn_csm_contour_map_ce(wks,var_m(nv,na,ne,nt,:,:),res)
+    printMinMax(var_m(nv,na,ne,nt,:,:),0)
+    end if
 
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))

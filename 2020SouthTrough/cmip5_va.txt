@@ -1,0 +1,757 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+
+Variable: year (subsection)
+Type: string
+Total Size: 88 bytes
+            11 values
+Number of Dimensions: 1
+Dimensions and sizes:	[11]
+Coordinates: 
+Number Of Attributes: 1
+  _FillValue :	missing
+(0)	1850
+(1)	1900
+(2)	1950
+(3)	1961
+(4)	1850
+(5)	1950
+(6)	1950
+(7)	1900
+(8)	1850
+(9)	1950
+(10)	1850
+
+
+Variable: modelname
+Type: string
+Total Size: 1448 bytes
+            181 values
+Number of Dimensions: 1
+Dimensions and sizes:	[181]
+Coordinates: 
+Number Of Attributes: 1
+  _FillValue :	missing
+(0)	CCSM4
+(1)	CCSM4
+(2)	CCSM4
+(3)	CanCM4
+(4)	CanESM2
+(5)	CESM1-BGC
+(6)	CESM1-CAM5
+(7)	CESM1-CAM5
+(8)	CESM1-CAM5
+(9)	CESM1-FASTCHEM
+(10)	CESM1-WACCM
+(11)	CNRM-CM5
+(12)	CNRM-CM5
+(13)	CNRM-CM5
+(14)	FGOALS-g2
+(15)	FGOALS-g2
+(16)	FGOALS-g2
+(17)	FGOALS-g2
+(18)	FGOALS-g2
+(19)	FGOALS-g2
+(20)	FGOALS-g2
+(21)	FGOALS-g2
+(22)	FGOALS-g2
+(23)	FGOALS-g2
+(24)	FGOALS-g2
+(25)	FGOALS-g2
+(26)	FGOALS-g2
+(27)	FGOALS-g2
+(28)	FGOALS-g2
+(29)	FGOALS-g2
+(30)	FGOALS-s2
+(31)	FIO-ESM
+(32)	GFDL-ESM2M
+(33)	GISS-E2-H
+(34)	GISS-E2-H
+(35)	GISS-E2-H
+(36)	GISS-E2-R
+(37)	GISS-E2-R
+(38)	GISS-E2-R
+(39)	GISS-E2-R
+(40)	GISS-E2-R
+(41)	GISS-E2-R
+(42)	GISS-E2-R
+(43)	GISS-E2-R-CC
+(44)	HadCM3
+(45)	HadCM3
+(46)	HadCM3
+(47)	HadCM3
+(48)	HadCM3
+(49)	HadCM3
+(50)	HadGEM2-AO
+(51)	IPSL-CM5A-LR
+(52)	IPSL-CM5A-LR
+(53)	IPSL-CM5B-LR
+(54)	MIROC4h
+(55)	MIROC-ESM
+(56)	MIROC-ESM
+(57)	MIROC-ESM-CHEM
+(58)	MIROC-ESM-CHEM
+(59)	MPI-ESM-LR
+(60)	MPI-ESM-LR
+(61)	MPI-ESM-LR
+(62)	MPI-ESM-LR
+(63)	MPI-ESM-LR
+(64)	MPI-ESM-LR
+(65)	MPI-ESM-LR
+(66)	MPI-ESM-LR
+(67)	MPI-ESM-LR
+(68)	MPI-ESM-LR
+(69)	MPI-ESM-LR
+(70)	MPI-ESM-LR
+(71)	MPI-ESM-LR
+(72)	MPI-ESM-LR
+(73)	MPI-ESM-LR
+(74)	MPI-ESM-LR
+(75)	MPI-ESM-P
+(76)	MIROC5
+(77)	MIROC5
+(78)	MIROC5
+(79)	MIROC5
+(80)	MIROC5
+(81)	MIROC5
+(82)	MIROC5
+(83)	MIROC5
+(84)	MIROC5
+(85)	MIROC5
+(86)	MIROC5
+(87)	MIROC5
+(88)	MIROC5
+(89)	MIROC5
+(90)	MIROC5
+(91)	MIROC5
+(92)	MIROC5
+(93)	MPI-ESM-MR
+(94)	MPI-ESM-MR
+(95)	MPI-ESM-MR
+(96)	MPI-ESM-MR
+(97)	MPI-ESM-MR
+(98)	MPI-ESM-MR
+(99)	MPI-ESM-MR
+(100)	MPI-ESM-MR
+(101)	MPI-ESM-MR
+(102)	MPI-ESM-MR
+(103)	MPI-ESM-MR
+(104)	MPI-ESM-MR
+(105)	MPI-ESM-MR
+(106)	MPI-ESM-MR
+(107)	MPI-ESM-MR
+(108)	MPI-ESM-MR
+(109)	MRI-CGCM3
+(110)	MRI-CGCM3
+(111)	MRI-CGCM3
+(112)	MRI-CGCM3
+(113)	MRI-CGCM3
+(114)	MRI-CGCM3
+(115)	MRI-CGCM3
+(116)	MRI-CGCM3
+(117)	MRI-CGCM3
+(118)	MRI-CGCM3
+(119)	MRI-CGCM3
+(120)	MRI-CGCM3
+(121)	MRI-CGCM3
+(122)	MRI-CGCM3
+(123)	MRI-CGCM3
+(124)	MRI-CGCM3
+(125)	NorESM1-M
+(126)	NorESM1-M
+(127)	ACCESS1-0
+(128)	bcc-csm1-1
+(129)	GFDL-CM2p1
+(130)	GFDL-CM2p1
+(131)	GFDL-CM2p1
+(132)	GFDL-CM2p1
+(133)	GFDL-CM2p1
+(134)	GFDL-CM2p1
+(135)	GFDL-CM2p1
+(136)	GFDL-CM2p1
+(137)	GFDL-CM2p1
+(138)	GFDL-CM2p1
+(139)	GFDL-CM2p1
+(140)	GFDL-CM2p1
+(141)	GFDL-CM2p1
+(142)	GFDL-CM2p1
+(143)	GFDL-CM2p1
+(144)	GFDL-CM2p1
+(145)	GFDL-CM2p1
+(146)	GFDL-CM2p1
+(147)	GFDL-CM2p1
+(148)	GFDL-CM2p1
+(149)	GFDL-CM2p1
+(150)	GFDL-CM2p1
+(151)	GFDL-CM2p1
+(152)	GFDL-CM2p1
+(153)	GFDL-CM2p1
+(154)	GFDL-CM2p1
+(155)	GFDL-CM2p1
+(156)	GFDL-CM2p1
+(157)	GFDL-CM2p1
+(158)	GFDL-CM2p1
+(159)	GFDL-CM2p1
+(160)	GFDL-CM2p1
+(161)	GFDL-CM2p1
+(162)	GFDL-CM2p1
+(163)	GFDL-CM2p1
+(164)	GFDL-CM2p1
+(165)	inmcm4
+(166)	inmcm4
+(167)	inmcm4
+(168)	inmcm4
+(169)	inmcm4
+(170)	inmcm4
+(171)	inmcm4
+(172)	inmcm4
+(173)	inmcm4
+(174)	inmcm4
+(175)	inmcm4
+(176)	inmcm4
+(177)	inmcm4
+(178)	inmcm4
+(179)	inmcm4
+(180)	inmcm4
+(0)	file number 181
+(0)	 
+(0)	0 /home/ys17-19/data-model/CMIP5/CCSM4/CCSM4_Amon_historical_r1i1p1/va_Amon_CCSM4_historical_r1i1p1_185001-189912.nc
+(0)	1 /home/ys17-19/data-model/CMIP5/CCSM4/CCSM4_Amon_historical_r1i1p1/va_Amon_CCSM4_historical_r1i1p1_190001-194912.nc
+(0)	2 /home/ys17-19/data-model/CMIP5/CCSM4/CCSM4_Amon_historical_r1i1p1/va_Amon_CCSM4_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	1 model name : CCSM4  filenumber : 3
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,192,288
+(0)	  attributes      : standard_name,long_name,units,original_name,comment,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	3 /home/ys17-19/data-model/CMIP5/CanCM4/CanCM4_Amon_historical_r1i1p1/va_Amon_CanCM4_historical_r1i1p1_196101-200512.nc
+(0)	=============================================================
+(0)	2 model name : CanCM4  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 540,22,64,128
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
+(0)	
+(0)	
+(0)	4 /home/ys17-19/data-model/CMIP5/CanESM2/CanESM2_Amon_historical_r1i1p1/va_Amon_CanESM2_historical_r1i1p1_185001-200512.nc
+(0)	=============================================================
+(0)	3 model name : CanESM2  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1872,22,64,128
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
+(0)	
+(0)	
+(0)	5 /home/ys17-19/data-model/CMIP5/CESM1-BGC/CESM1-BGC_Amon_historical_r1i1p1/va_Amon_CESM1-BGC_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	4 model name : CESM1-BGC  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,192,288
+(0)	  attributes      : standard_name,long_name,units,original_name,comment,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	6 /home/ys17-19/data-model/CMIP5/CESM1-CAM5/CESM1-CAM5_Amon_historical_r1i1p1/va_Amon_CESM1-CAM5_historical_r1i1p1_195001-200512.nc
+(0)	7 /home/ys17-19/data-model/CMIP5/CESM1-CAM5/CESM1-CAM5_Amon_historical_r1i1p1/va_Amon_CESM1-CAM5_historical_r1i1p1_190001-194912.nc
+(0)	8 /home/ys17-19/data-model/CMIP5/CESM1-CAM5/CESM1-CAM5_Amon_historical_r1i1p1/va_Amon_CESM1-CAM5_historical_r1i1p1_185001-189912.nc
+(0)	=============================================================
+(0)	5 model name : CESM1-CAM5  filenumber : 3
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 600,17,192,288
+(0)	  attributes      : standard_name,long_name,units,original_name,comment,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	9 /home/ys17-19/data-model/CMIP5/CESM1-FASTCHEM/CESM1-FASTCHEM_Amon_historical_r1i1p1_output1/va_Amon_CESM1-FASTCHEM_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	6 model name : CESM1-FASTCHEM  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,192,288
+(0)	  attributes      : standard_name,long_name,units,original_name,comment,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	10 /home/ys17-19/data-model/CMIP5/CESM1-WACCM/CESM1-WACCM_Amon_historical_r1i1p1_output1/va_Amon_CESM1-WACCM_historical_r1i1p1_185001-200512.nc
+(0)	=============================================================
+(0)	7 model name : CESM1-WACCM  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1872,23,96,144
+(0)	  attributes      : standard_name,long_name,units,original_name,comment,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40
+(0)	
+(0)	
+(0)	11 /home/ys17-19/data-model/CMIP5/CNRM-CM5/CNRM-CM5_Amon_historical_r1i1p1/va_Amon_CNRM-CM5_historical_r1i1p1_195001-200512.nc
+(0)	12 /home/ys17-19/data-model/CMIP5/CNRM-CM5/CNRM-CM5_Amon_historical_r1i1p1/va_Amon_CNRM-CM5_historical_r1i1p1_185001-189912.nc
+(0)	13 /home/ys17-19/data-model/CMIP5/CNRM-CM5/CNRM-CM5_Amon_historical_r1i1p1/va_Amon_CNRM-CM5_historical_r1i1p1_190001-194912.nc
+(0)	=============================================================
+(0)	8 model name : CNRM-CM5  filenumber : 3
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 600,17,128,256
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	14 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_193001-193912.nc
+(0)	15 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_192001-192912.nc
+(0)	16 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_191001-191912.nc
+(0)	17 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_190001-190912.nc
+(0)	18 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_198001-198912.nc
+(0)	19 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_189001-189912.nc
+(0)	20 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_196001-196912.nc
+(0)	21 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_187001-187912.nc
+(0)	22 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_186001-186912.nc
+(0)	23 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_197001-197912.nc
+(0)	24 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_200001-200512.nc
+(0)	25 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_188001-188912.nc
+(0)	26 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_199001-199912.nc
+(0)	27 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_185001-185912.nc
+(0)	28 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_194001-194912.nc
+(0)	29 /home/ys17-19/data-model/CMIP5/FGOALS-g2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-g2_historical_r1i1p1_195001-195912.nc
+(0)	=============================================================
+(0)	9 model name : FGOALS-g2  filenumber : 16
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 120,17,60,128
+(0)	  attributes      : standard_name,long_name,units,history,original_units,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	30 /home/ys17-19/data-model/CMIP5/FGOALS-s2/historical/atmos/va/r1i1p1/va_Amon_FGOALS-s2_historical_r1i1p1_185001-200512.nc
+(0)	=============================================================
+(0)	10 model name : FGOALS-s2  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1872,17,108,128
+(0)	  attributes      : standard_name,long_name,units,cell_methods,missing_value,_FillValue,associated_files,history
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	31 /home/ys17-19/data-model/CMIP5/FIO-ESM/FIO-ESM_Amon_historical_r1i1p1_output1/va_Amon_FIO-ESM_historical_r1i1p1_185001-200512.nc
+(0)	=============================================================
+(0)	11 model name : FIO-ESM  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1872,17,64,128
+(0)	  attributes      : standard_name,long_name,units,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	32 /home/ys17-19/data-model/CMIP5/GFDL-ESM2M/GFDL-ESM2M_Amon_historical_r1i1p1/va_Amon_GFDL-ESM2M_historical_r1i1p1_186101-200512.nc
+(0)	=============================================================
+(0)	12 model name : GFDL-ESM2M  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1740,17,90,144
+(0)	  attributes      : long_name,units,valid_range,missing_value,cell_methods,_FillValue,standard_name,original_units,original_name,cell_measures,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	33 /home/ys17-19/data-model/CMIP5/GISS-E2-H/GISS-E2-H_Amon_historical_r1i1p1/va_Amon_GISS-E2-H_historical_r1i1p1_195101-200512.nc
+(0)	34 /home/ys17-19/data-model/CMIP5/GISS-E2-H/GISS-E2-H_Amon_historical_r1i1p1/va_Amon_GISS-E2-H_historical_r1i1p1_190101-195012.nc
+(0)	35 /home/ys17-19/data-model/CMIP5/GISS-E2-H/GISS-E2-H_Amon_historical_r1i1p1/va_Amon_GISS-E2-H_historical_r1i1p1_185001-190012.nc
+(0)	=============================================================
+(0)	13 model name : GISS-E2-H  filenumber : 3
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 612,17,89,144
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	36 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_187601-190012.nc
+(0)	37 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_197601-200012.nc
+(0)	38 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_185001-187512.nc
+(0)	39 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_190101-192512.nc
+(0)	40 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_192601-195012.nc
+(0)	41 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_195101-197512.nc
+(0)	42 /home/ys17-19/data-model/CMIP5/GISS-E2-R/GISS-E2-R_Amon_historical_r1i1p1/va_Amon_GISS-E2-R_historical_r1i1p1_200101-200512.nc
+(0)	=============================================================
+(0)	14 model name : GISS-E2-R  filenumber : 7
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 60,17,89,144
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	43 /home/ys17-19/data-model/CMIP5/GISS-E2-R-CC/GISS-E2-R-CC_Amon_historical_r1i1p1/va_Amon_GISS-E2-R-CC_historical_r1i1p1_197601-201012.nc
+(0)	=============================================================
+(0)	15 model name : GISS-E2-R-CC  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 420,17,89,144
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	44 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/va_Amon_HadCM3_historical_r1i1p1_190912-193411.nc
+(0)	45 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/va_Amon_HadCM3_historical_r1i1p1_198412-200512.nc
+(0)	46 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/va_Amon_HadCM3_historical_r1i1p1_188412-190911.nc
+(0)	47 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/va_Amon_HadCM3_historical_r1i1p1_193412-195911.nc
+(0)	48 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/va_Amon_HadCM3_historical_r1i1p1_195912-198411.nc
+(0)	49 /home/ys17-19/data-model/CMIP5/HadCM3/HadCM3_Amon_historical_r1i1p1/va_Amon_HadCM3_historical_r1i1p1_185912-188411.nc
+(0)	=============================================================
+(0)	16 model name : HadCM3  filenumber : 6
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 300,17,72,96
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	50 /home/ys17-19/data-model/CMIP5/HadGEM2-AO/HadGEM2-AO_Amon_historical_r1i1p1_output1/va_Amon_HadGEM2-AO_historical_r1i1p1_186001-200512.nc
+(0)	=============================================================
+(0)	17 model name : HadGEM2-AO  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1752,17,144,192
+(0)	  attributes      : standard_name,long_name,units,original_name,original_units,history,cell_methods,cell_measures,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	51 /home/ys17-19/data-model/CMIP5/IPSL-CM5A-LR/IPSL-CM5A-LR_Amon_historical_r1i1p1/va_Amon_IPSL-CM5A-LR_historical_r1i1p1_185001-194912.nc
+(0)	52 /home/ys17-19/data-model/CMIP5/IPSL-CM5A-LR/IPSL-CM5A-LR_Amon_historical_r1i1p1/va_Amon_IPSL-CM5A-LR_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	18 model name : IPSL-CM5A-LR  filenumber : 2
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,96,96
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	53 /home/ys17-19/data-model/CMIP5/IPSL-CM5B-LR/IPSL-CM5B-LR_Amon_historical_r1i1p1/va_Amon_IPSL-CM5B-LR_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	19 model name : IPSL-CM5B-LR  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,96,96
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	54 /home/ys17-19/data-model/CMIP5/MIROC4h/MIROC4h_Amon_historical_r1i1p1/va_Amon_MIROC4h_historical_r1i1p1_197601-200512.nc
+(0)	=============================================================
+(0)	20 model name : MIROC4h  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 360,22,320,640
+(0)	  attributes      : standard_name,long_name,units,original_name,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100
+(0)	
+(0)	
+(0)	55 /home/ys17-19/data-model/CMIP5/MIROC-ESM/MIROC-ESM_Amon_historical_r1i1p1/va_Amon_MIROC-ESM_historical_r1i1p1_199001-200512.nc
+(0)	56 /home/ys17-19/data-model/CMIP5/MIROC-ESM/MIROC-ESM_Amon_historical_r1i1p1/va_Amon_MIROC-ESM_historical_r1i1p1_185001-198912.nc
+(0)	=============================================================
+(0)	21 model name : MIROC-ESM  filenumber : 2
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1680,35,64,128
+(0)	  attributes      : standard_name,long_name,units,original_name,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,17000,15000,13000,11500,10000,9000,8000,7000,5000,3000,2000,1500,1000,700,500,300,200,150,100,50,30.0000011920929,20.00000029802322,10.00000014901161,5.000000074505806,2.999999932944775
+(0)	
+(0)	
+(0)	57 /home/ys17-19/data-model/CMIP5/MIROC-ESM-CHEM/MIROC-ESM-CHEM_Amon_historical_r1i1p1/va_Amon_MIROC-ESM-CHEM_historical_r1i1p1_199001-200512.nc
+(0)	58 /home/ys17-19/data-model/CMIP5/MIROC-ESM-CHEM/MIROC-ESM-CHEM_Amon_historical_r1i1p1/va_Amon_MIROC-ESM-CHEM_historical_r1i1p1_185001-198912.nc
+(0)	=============================================================
+(0)	22 model name : MIROC-ESM-CHEM  filenumber : 2
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1680,35,64,128
+(0)	  attributes      : standard_name,long_name,units,original_name,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,17000,15000,13000,11500,10000,9000,8000,7000,5000,3000,2000,1500,1000,700,500,300,200,150,100,50,30.0000011920929,20.00000029802322,10.00000014901161,5.000000074505806,2.999999932944775
+(0)	
+(0)	
+(0)	59 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_192001-192912.nc
+(0)	60 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_193001-193912.nc
+(0)	61 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_190001-190912.nc
+(0)	62 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_191001-191912.nc
+(0)	63 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_199001-199912.nc
+(0)	64 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_188001-188912.nc
+(0)	65 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_200001-200512.nc
+(0)	66 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_197001-197912.nc
+(0)	67 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_186001-186912.nc
+(0)	68 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_187001-187912.nc
+(0)	69 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_196001-196912.nc
+(0)	70 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_189001-189912.nc
+(0)	71 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_198001-198912.nc
+(0)	72 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_195001-195912.nc
+(0)	73 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_194001-194912.nc
+(0)	74 /home/ys17-19/data-model/CMIP5/MPI-ESM-LR/MPI-ESM-LR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-LR_historical_r1i1p1_185001-185912.nc
+(0)	=============================================================
+(0)	23 model name : MPI-ESM-LR  filenumber : 16
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 120,25,96,192
+(0)	  attributes      : standard_name,long_name,units,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10
+(0)	
+(0)	
+(0)	75 /home/ys17-19/data-model/CMIP5/MPI-ESM-P/MPI-ESM-P_Amon_historical_r1i1p1/va_Amon_MPI-ESM-P_historical_r1i1p1_185001-200512.nc
+(0)	=============================================================
+(0)	24 model name : MPI-ESM-P  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1872,25,96,192
+(0)	  attributes      : standard_name,long_name,units,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10
+(0)	
+(0)	
+(0)	76 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_191001-191912.nc
+(0)	77 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_190001-190912.nc
+(0)	78 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_193001-193912.nc
+(0)	79 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_192001-192912.nc
+(0)	80 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_201001-201212.nc
+(0)	81 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_194001-194912.nc
+(0)	82 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_185001-185912.nc
+(0)	83 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_195001-195912.nc
+(0)	84 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_200001-200912.nc
+(0)	85 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_189001-189912.nc
+(0)	86 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_198001-198912.nc
+(0)	87 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_187001-187912.nc
+(0)	88 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_196001-196912.nc
+(0)	89 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_197001-197912.nc
+(0)	90 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_186001-186912.nc
+(0)	91 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_199001-199912.nc
+(0)	92 /home/ys17-19/data-model/CMIP5/MIROC5/MIROC5_Amon_historical_r1i1p1/va_Amon_MIROC5_historical_r1i1p1_188001-188912.nc
+(0)	=============================================================
+(0)	25 model name : MIROC5  filenumber : 17
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 120,17,128,256
+(0)	  attributes      : standard_name,long_name,units,original_name,original_units,history,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	93 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_185001-185912.nc
+(0)	94 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_186001-186912.nc
+(0)	95 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_187001-187912.nc
+(0)	96 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_188001-188912.nc
+(0)	97 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_189001-189912.nc
+(0)	98 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_190001-190912.nc
+(0)	99 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_191001-191912.nc
+(0)	100 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_192001-192912.nc
+(0)	101 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_193001-193912.nc
+(0)	102 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_194001-194912.nc
+(0)	103 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_195001-195912.nc
+(0)	104 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_196001-196912.nc
+(0)	105 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_197001-197912.nc
+(0)	106 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_198001-198912.nc
+(0)	107 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_199001-199912.nc
+(0)	108 /home/ys17-19/data-model/CMIP5/MPI-ESM-MR/MPI-ESM-MR_Amon_historical_r1i1p1/va_Amon_MPI-ESM-MR_historical_r1i1p1_200001-200512.nc
+(0)	=============================================================
+(0)	26 model name : MPI-ESM-MR  filenumber : 16
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 72,25,96,192
+(0)	  attributes      : standard_name,long_name,units,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40,20,10
+(0)	
+(0)	
+(0)	109 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_185001-185912.nc
+(0)	110 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_186001-186912.nc
+(0)	111 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_187001-187912.nc
+(0)	112 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_188001-188912.nc
+(0)	113 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_189001-189912.nc
+(0)	114 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_190001-190912.nc
+(0)	115 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_191001-191912.nc
+(0)	116 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_192001-192912.nc
+(0)	117 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_193001-193912.nc
+(0)	118 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_194001-194912.nc
+(0)	119 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_195001-195912.nc
+(0)	120 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_196001-196912.nc
+(0)	121 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_197001-197912.nc
+(0)	122 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_198001-198912.nc
+(0)	123 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_199001-199912.nc
+(0)	124 /home/ys17-19/data-model/CMIP5/MRI-CGCM3/MRI-CGCM3_Amon_historical_r1i1p1/va_Amon_MRI-CGCM3_historical_r1i1p1_200001-200512.nc
+(0)	=============================================================
+(0)	27 model name : MRI-CGCM3  filenumber : 16
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 72,23,160,320
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000,700,500,300,200,100,40
+(0)	
+(0)	
+(0)	125 /home/ys17-19/data-model/CMIP5/NorESM1-M/NorESM1-M_Amon_historical_r1i1p1/va_Amon_NorESM1-M_historical_r1i1p1_185001-194912.nc
+(0)	126 /home/ys17-19/data-model/CMIP5/NorESM1-M/NorESM1-M_Amon_historical_r1i1p1/va_Amon_NorESM1-M_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	28 model name : NorESM1-M  filenumber : 2
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,96,144
+(0)	  attributes      : standard_name,long_name,units,original_name,original_units,history,cell_methods,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	127 /home/ys17-19/data-model/CMIP5/ACCESS1-0/ACCESS1-0_Amon_historical_r1i1p1/va_Amon_ACCESS1-0_historical_r1i1p1_195001-200512.nc
+(0)	=============================================================
+(0)	29 model name : ACCESS1-0  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 672,17,144,192
+(0)	  attributes      : standard_name,long_name,units,cell_methods,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	128 /home/ys17-19/data-model/CMIP5/bcc-csm1-1/bcc-csm1-1_Amon_historical_r1i1p1/va_Amon_bcc-csm1-1_historical_r1i1p1_185001-201212.nc
+(0)	=============================================================
+(0)	30 model name : bcc-csm1-1  filenumber : 1
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 1956,17,64,128
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	129 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_187101-187512.nc
+(0)	130 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_196101-196512.nc
+(0)	131 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_189101-189512.nc
+(0)	132 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_198101-198512.nc
+(0)	133 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_200101-200512.nc
+(0)	134 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_190601-191012.nc
+(0)	135 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_199101-199512.nc
+(0)	136 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_188101-188512.nc
+(0)	137 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_197101-197512.nc
+(0)	138 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_186101-186512.nc
+(0)	139 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_201101-201512.nc
+(0)	140 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_192601-193012.nc
+(0)	141 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_202101-202512.nc
+(0)	142 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_194101-194512.nc
+(0)	143 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_203601-204012.nc
+(0)	144 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_203101-203512.nc
+(0)	145 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_195101-195512.nc
+(0)	146 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_191601-192012.nc
+(0)	147 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_201601-202012.nc
+(0)	148 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_197601-198012.nc
+(0)	149 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_193101-193512.nc
+(0)	150 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_189601-190012.nc
+(0)	151 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_194601-195012.nc
+(0)	152 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_193601-194012.nc
+(0)	153 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_187601-188012.nc
+(0)	154 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_192101-192512.nc
+(0)	155 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_202601-203012.nc
+(0)	156 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_199601-200012.nc
+(0)	157 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_195601-196012.nc
+(0)	158 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_191101-191512.nc
+(0)	159 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_188601-189012.nc
+(0)	160 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_186601-187012.nc
+(0)	161 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_200601-201012.nc
+(0)	162 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_190101-190512.nc
+(0)	163 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_196601-197012.nc
+(0)	164 /home/ys17-19/data-model/CMIP5/GFDL-CM2p1/GFDL-CM2p1_Amon_historical_r1i1p1/va_Amon_GFDL-CM2p1_historical_r1i1p1_198601-199012.nc
+(0)	=============================================================
+(0)	31 model name : GFDL-CM2p1  filenumber : 36
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 60,17,90,144
+(0)	  attributes      : long_name,units,valid_range,missing_value,cell_methods,_FillValue,standard_name,original_units,original_name,cell_measures,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	165 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_193001-193912.nc
+(0)	166 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_192001-192912.nc
+(0)	167 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_191001-191912.nc
+(0)	168 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_190001-190912.nc
+(0)	169 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_189001-189912.nc
+(0)	170 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_198001-198912.nc
+(0)	171 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_187001-187912.nc
+(0)	172 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_196001-196912.nc
+(0)	173 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_200001-200512.nc
+(0)	174 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_197001-197912.nc
+(0)	175 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_186001-186912.nc
+(0)	176 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_199001-199912.nc
+(0)	177 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_188001-188912.nc
+(0)	178 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_194001-194912.nc
+(0)	179 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_185001-185912.nc
+(0)	180 /home/ys17-19/data-model/CMIP5/inmcm4/inmcm4_Amon_historical_r1i1p1/va_Amon_inmcm4_historical_r1i1p1_195001-195912.nc
+(0)	=============================================================
+(0)	32 model name : inmcm4  filenumber : 16
+(0)	Variable 'va' ;type : float
+(0)	  dimension names : time,plev,lat,lon
+(0)	  dimension sizes : 120,17,120,180
+(0)	  attributes      : standard_name,long_name,units,original_name,cell_methods,cell_measures,history,missing_value,_FillValue,associated_files
+(0)	va@units : m s-1
+(0)	plev@units : Pa
+(0)	plev : 100000,92500,85000,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,2000,1000
+(0)	
+(0)	
+(0)	nlat: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,64,64,64,64,64,64,72,89,89,89,90,90,96,96,96,96,96,96,96,108,120,128,128,144,144,160,192,192,192,192,320
+(0)	
+(0)	nlon: 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,96,96,96,128,128,128,128,128,128,128,128,144,144,144,144,144,144,144,180,192,192,192,192,192,256,256,288,288,288,288,320,640

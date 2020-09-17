@@ -21,9 +21,9 @@ begin
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 case   = "ERA-Interim"
-var_name = (/"uppEKE3-2.5-10day","uppEKE3-10-90day","hgt","uwnd","intQ1"/)   ;,"Q1"   the left title 
-unit     = (/"10~S~3~N~J"      ,"10~S~3~N~J"     ,"m"  ,"m/s" ,"10W/m2"/)   ;,"W/kg"
-draw_var = (/"STEhgh"          ,"STElow"         ,"NBR","Jet" ,"intQ1"/)   ;North Ridge; TPH
+var_name = (/"uppEKE-2.5-10day","uppEKE-10-90day","uppEKE-2.5-10day","uppEKE-10-90day","hgt","uwnd","intQ1"/)   ;,"Q1"   the left title 
+unit     = (/"10~S~3~N~J"      ,"10~S~3~N~J"     ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"m"  ,"m/s" ,"10W/m2"/)   ;,"W/kg"
+draw_var = (/"STEhgh"          ,"STElow"         ,"TEhgh"           ,"TElow"          ,"NBR","Jet" ,"intQ1"/)   ;North Ridge; TPH
 stand = False;True
 nv = 0
 
@@ -51,13 +51,20 @@ do nv = 0,1,1
 f    = addfile(filename(nv),"r")
 term = f->month_ave(:,{lats(0):latn(0)},{lonl(0):lonr(0)})
 term = term/1000.0
-;ts(nv,:) =  wgt_areaave(term(:,{lats(1):latn(1)},{lonl(1):lonr(1)}),1.0,1.0,0)
 ts(nv,:) =  wgt_areaave(term(:,{lats(1):latn(1)},{lonl(1):lonr(1)}),1.0,1.0,0)\ 
           - wgt_areaave(term(:,{lats(2):latn(2)},{lonl(2):lonr(2)}),1.0,1.0,0)
 printMinMax(ts(nv,:),0)
 end do
 
-nv = 2 ;NBR
+do nv = 2,3,1
+f    = addfile(filename(nv),"r")
+term := f->month_ave(:,{lats(1):latn(1)},{lonl(1):lonr(1)})
+term = term/10000.0
+ts(nv,:) =  wgt_areaave(term(:,{lats(1):latn(1)},{lonl(1):lonr(1)}),1.0,1.0,0)
+printMinMax(ts(nv,:),0)
+end do
+
+nv = 4 ;NBR
 f     = addfile(filename(nv),"r")
 term := f->month_ave(:,{500},{lats(0):latn(0)},{lonl(0):lonr(0)})
 term = term/10.0
@@ -66,13 +73,13 @@ ts(nv,:) =  wgt_areaave(term(:,{lats(3):latn(3)},{lonl(3):lonr(3)}),1.0,1.0,0) \
           - wgt_areaave(term(:,{lats(4):latn(4)},{lonl(4):lonr(4)}),1.0,1.0,0)
 printMinMax(ts(nv,:),0)
 
-nv = 3 ;jet
+nv = 5 ;jet
 f     = addfile(filename(nv),"r")
 term := f->month_ave(:,{200},{lats(1):latn(1)},{lonl(1):lonr(1)})
 ts(nv,:) = wgt_areaave(term,1.0,1.0,0) 
 printMinMax(ts(nv,:),0)
 
-nv = 4;intQ1
+nv = 6;intQ1
 f     = addfile(filename(nv),"r")
 term := f->month_ave(:,{lats(1):latn(1)},{lonl(1):lonr(1)})
 term = term/10.0
@@ -98,9 +105,9 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
     
-    resxy@xyDashPatterns     = (/0 ,2  , 0 , 0 , 0 /)
-    resxy@xyLineThicknesses = (/4.0,4.0,3.0,3.0,3.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"black","black","red","blue","green"/) ; change line color
+    resxy@xyDashPatterns    = (/0  ,2  ,0  ,2  , 0 , 0 , 0 /)
+    resxy@xyLineThicknesses = (/4.0,4.0,4.0,4.0,3.0,3.0,3.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"black","black","lightcyan4","lightcyan4","red","blue","green"/) ; change line color
     resxy@tiXAxisOn = True 
     resxy@tiYAxisOn = False
     resxy@tiXAxisString = "month"
@@ -148,10 +155,10 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@lgLabelFontThicknessF  = label_thick
     resxy@lgLabelFontHeightF     = label_font
     resxy@pmLegendWidthF   = 0.04
-    resxy@pmLegendHeightF  = 0.06
+    resxy@pmLegendHeightF  = 0.07
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-    resxy@pmLegendOrthogonalPosF  = 0.38   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.35    ; move ref vector along X-axis
+    resxy@pmLegendOrthogonalPosF  = 0.35   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.20    ; move ref vector along X-axis
 
     resp  = True    
     resp@gsnMaximize   = True

@@ -8,10 +8,10 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 
 begin
 path    = "/home/ys17-19/renql"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 na = 1
-month_s = 5
-month_e = 8
+month_s = 1 
+month_e = 12
 
 var_name = (/"U"/)
 draw_var = (/"200hPa U"/)  ;this is the variable used to draw, can used as center string
@@ -49,10 +49,10 @@ pre_case   = (/"(c","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m",
 fig_out    ="pdf"       ;"x11"
 
 ;area:   TP , east Asia
-lats = (/25 , 10/)  ;-20
-latn = (/50 , 55/)  ;60
+lats = (/25 , 20/)  ;-20
+latn = (/50 , 50/)  ;60
 lonl = (/70 ,110/)  ;20
-lonr = (/105,130/)  ;130 ;220
+lonr = (/105,122/)  ;130 ;220
 lev  = (/200/)
 lat_spacing = 10
 
@@ -150,12 +150,12 @@ copy_VarMeta(temp(0,:),diff(0,:,0))
     res@tiYAxisString   = "Latitude(N)"
 
     res@tmXBMode        = "Explicit"
-    ;res@tmXBValues      = ispan(0,(ntime-1),60)
-    ;res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
+    res@tmXBValues      = ispan(0,(ntime-1),60)
+    res@tmXBLabels      = (/"1 Jan","1 Mar","30 Apr","29 Jun","28 Aug","27 Oct","26 Dec"/)
     ;res@tmXBValues      = ispan(15,(ntime-1),30) 
     ;res@tmXBLabels      = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"/) 
-    res@tmXBValues      = ispan(0,(ntime-1),20)
-    res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
+    ;res@tmXBValues      = ispan(0,(ntime-1),20)
+    ;res@tmXBLabels      = (/"1 May","21 May","10 Jun","30 Jun","20 Jul","9 Aug","29 Aug"/)
 
     ;res@tmYLMode        = "Manual"
     ;res@tmYLTickStartF  = lats(na)

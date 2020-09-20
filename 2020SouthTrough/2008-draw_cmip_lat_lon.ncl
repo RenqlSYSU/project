@@ -16,13 +16,14 @@ na = 0
 
 path1 = "/home/ys17-19/data-model/CMIP5/"
 path2 = "/home/ys17-19/renql/project/2020SouthTrough/"
-var_name = (/"zg"/)
-unit     = (/"m" /)
+draw_var = (/"zg","vort"/)
+var_name = (/"zg","ua"  /)
+unit     = (/"m" ,"10~S~-5~N~s~S~-1~N~"/)
 case  = "CMIP5"
-nv = 0
+nv = 1
 
 months   = (/"DJF","MAM","JJA","SON"/)
-fig_name = path2 + "/fig/" + case(0) + "-DJF_" + lev(nl) + "_" + var_name(nv)
+fig_name = path2 + "/fig/" + case(0) + "-DJF_" + lev(nl) + "_" + draw_var(nv)
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out  = "pdf";"x11";"eps";
 barshare = False;True ;
@@ -162,6 +163,9 @@ wks = gsn_open_wks(fig_out,fig_name)
 ;read cmip data
 ;=====================================================================
 filepath  = systemfunc("find " + path1 + " -name " + var_name(nv) + "_Amon_*_historical_r1i1p1_*.nc")
+if(nv.eq.1) then 
+filepath2 = systemfunc("find " + path1 + " -name va_Amon_*_historical_r1i1p1_*.nc")
+end if
 modelname = str_get_field(filepath,5,"/")
 nfile     = dimsizes(filepath)
 nfield    = str_fields_count(filepath,"_")
@@ -170,6 +174,24 @@ do nf = 0, nfile-1, 1
     numbyear(nf) = str_get_field(filepath(nf),nfield(nf),"_")
 end do
 year = stringtoint(str_get_cols(numbyear,0,3))
+plot = new((/12/),graphic)
+gtop = new((/12/),graphic)
+
+if(nv.eq.0) then ;zg, geopotential height
+    res@cnFillPalette = "precip3_16lev"
+    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
+    minlvl = (/-65,2750,-3.5/); -24,-24
+    maxlvl = (/-50,3200, 3.5/);  24, 24
+    spacig = (/1  , 30 ,0.5 /);   3,  3
+end if
+
+if(nv.eq.1) then ;zg, geopotential height
+    res@cnFillPalette = "BlueDarkRed18"
+    res@cnFillColors  := (/0,1,2,3,4,5,6,7,  10,11,12,13,14,15,16,17/)
+    minlvl = (/-3.5,-3.5/); -24,-24
+    maxlvl = (/ 3.5, 3.5/);  24, 24
+    spacig = (/0.5 ,0.5 /);   3,  3
+end if
 
 numb   = 0
 nmodel = 0
@@ -186,12 +208,32 @@ else
     fs := addfiles(filepaths(yearindex),"r")
     ListSetType(fs,"cat")
     time := cd_calendar(fs[:]->time,0)
-    timeindex := ind(time(:,1).le.2.or.time(:,1).eq.12)
-    print("month number" + dimsizes(timeindex))
-    var := dim_avg_n_Wrap(fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     dnames := getfilevardims(fs[0],var_name(nv))  
     dsizes := getfilevardimsizes(fs[0],var_name(nv))
-    delete([/fs,filepaths,yearindex,time/])
+    
+    do nm = 0, 3, 1
+    if(nm.eq.0) then 
+    timeindex := ind(time(:,1).eq.12.or.time(:,1).le.2)
+    else
+    month_s = 3*nm
+    month_e = 3*nm + 2
+    timeindex := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+    end if
+    print("month number" + dimsizes(timeindex))
+    
+    if(nv.eq.0) then 
+    var := dim_avg_n_Wrap(fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    else
+    filepaths2  := filepath2((nf-numb+1):nf)
+    fs2 := addfiles(filepaths2(yearindex),"r")
+    ListSetType(fs2,"cat")
+    uwnd := dim_avg_n_Wrap(fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    vwnd := dim_avg_n_Wrap(fs2[:]->va(timeindex,{lev(nl)*100},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    var  := uv2vr_cfd ( uwnd, vwnd, uwnd&lat, uwnd&lon, 2 )
+    var   = var*100000
+    copy_VarMeta(uwnd,var)
+    delete([/uwnd,vwnd,fs2,filepaths2/])
+    end if
 
 ;    print("")
 ;    print("=============================================================")
@@ -200,26 +242,21 @@ else
 ;    print("  dimension sizes : " + str_join(""+dsizes,","))
 ;    print("")
     
-    if(nv.eq.0) then ;zg, geopotential height
-        res@cnFillPalette = "precip3_16lev"
-        res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
-        minlvl = (/-65,2750,-3.5/); -24,-24
-        maxlvl = (/-50,3200, 3.5/);  24, 24
-        spacig = (/1  , 30 ,0.5 /);   3,  3
-    end if
-
-;    res@gsnLeftString   = pre_case(0) + ") " + months(0) + "  " + modelname(nf) + " " + str_join(dnames(2:3),"x") + ":" + str_join(""+dsizes(2:3),"x") 
-    res@gsnLeftString   = modelname(nf) + " " + str_join(dnames(2:3),"x") + ":" + str_join(""+dsizes(2:3),"x") 
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) + " (" + unit(nv) + ") " 
+    np = nm
+    res@gsnLeftString   = pre_case(np) + ") " + months(nm)
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nl)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nl) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nl)       ; set min contour level
-    plot = gsn_csm_contour_map_ce(wks, var, res)
-    gtop = gsn_csm_contour(wks, phis, res_gtop)
-    overlay(plot,gtop)
+    plot(np) = gsn_csm_contour_map_ce(wks, var, res)
+    gtop(np) = gsn_csm_contour(wks, phis, res_gtop)
+    overlay(plot(np),gtop(np))
     printMinMax(var,0)
-    gsn_panel(wks,plot,(/1,1/),resp)
+    end do
+
+    resp@txString = modelname(nf) + " " + str_join(dnames(2:3),"x") + ":" + str_join(""+dsizes(2:3),"x") 
+    gsn_panel(wks,plot,(/2,2/),resp)
 
     numb  = 0   
 end if

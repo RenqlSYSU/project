@@ -11,23 +11,25 @@ lonr = (/120,95/);220
 lev  = (/850,700,500,300,200/)
 nl = 1
 
-var_name = (/"zg"/)
-unit     = (/"m" /)
+draw_var = (/"zg","vort"/)
+var_name = (/"zg","ua"  /)
+unit     = (/"m" ,"10~S~-5~N~s~S~-1~N~"/)
 case  = (/"CMIP5","AMIP"/)
-nv = 0
-nc = 1
+nv = 1
+nc = 0
 
-path2 = "~/renql/project/2020SouthTrough"
+path3 = "~/renql/project/2020SouthTrough"
 if(nc.eq.1) then 
 modelnumb = 19
 path1 = "/home/ys17-19/data-model/AMIP/ -name " + var_name(nv) + "_Amon_*_r1i1p1_*.nc"
 end if
 if(nc.eq.0) then 
-modelnumb = 38
+modelnumb = 32
 path1 = "/home/ys17-19/data-model/CMIP5/ -name " + var_name(nv) + "_Amon_*_historical_r1i1p1_*.nc"
+path2 = "/home/ys17-19/data-model/CMIP5/ -name va_Amon_*_historical_r1i1p1_*.nc"
 end if
 months   = (/"DJF","MAM","JJA","SON"/)
-fig_name = path2 + "/fig/" + case(0) + "-DJF_ts_" + lev(nl) + "_" + var_name(nv)
+fig_name = path3 + "/fig/" + case(nc) + "-DJF_ts_" + lev(nl) + "_" + var_name(nv)
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out  = "pdf";"x11";"eps";
 barshare = False;True ;
@@ -129,14 +131,23 @@ colors = new((/modelnumb/),string)
 nlat   = new((/modelnumb/),string)
 nlon   = new((/modelnumb/),string)
 
+if(nv.eq.0) then 
 f     = addfile("~/renql/project/2020MiddleEastJet/data/ERA-Interim_hgt-year.nc","r")
 term := dim_avg_n_Wrap(f->month_ave(:,:,{lev(nl)},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
 varo  = wgt_areaave(term(:,:,{lonl(1):lonr(1)}),1.0,1.0,0) - wgt_areaave(term(:,:,{lonl(0):lonr(0)}),1.0,1.0,0)
 varo  = varo/9.8
+end if
+if(nv.eq.1) then 
+f     = addfile("~/renql/project/2020MiddleEastJet/data/ERA-Interim_sfvp_global-year.nc","r")
+term := dim_avg_n_Wrap(f->vort_m(:,:,{lev(nl)},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
+varo  = wgt_areaave(term(:,:,{lonl(1):lonr(1)}),1.0,1.0,0)
+varo  = varo*100000
+end if
 delete([/f,term/])
 printMinMax(varo,0) 
 
 filepath  = systemfunc("find " + path1)
+filepath2 = systemfunc("find " + path2)
 nfile     = dimsizes(filepath)
 nfield    = str_fields_count(filepath,"/")
 modelname = new((/nfile/),string)
@@ -167,8 +178,18 @@ else
     
     do nm = 0, 11, 1
     timeindex := ind(time(:,1).eq.(nm+1))
+    if(nv.eq.0) then 
     term := dim_avg_n_Wrap(fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
     varm(nmodel,nm) = wgt_areaave(term(:,{lonl(1):lonr(1)}),1.0,1.0,0) - wgt_areaave(term(:,{lonl(0):lonr(0)}),1.0,1.0,0)
+    else
+    filepaths2  := filepath2((nf-numb+1):nf)
+    fs2 := addfiles(filepaths2(yearindex),"r")
+    ListSetType(fs2,"cat")
+    ua := dim_avg_n_Wrap( fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
+    va := dim_avg_n_Wrap(fs2[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
+    term  := uv2vr_cfd ( ua, va, ua&lat, ua&lon, 2 )
+    varm(nmodel,nm) = wgt_areaave(term(:,{lonl(1):lonr(1)}),1.0,1.0,0)
+    end if
     end do
 
     dnames := getfilevardims(fs[0],var_name(nv))  
@@ -181,10 +202,10 @@ else
 end if
 end do
 
-dim_lat = (/60,64,90, 96,108,120, 128,143,144, 160,192,320, 720/) ;AMIP
-dim_lon = (/128,144,180, 192,256,288, 320,640,1152/) ;9 AMIP
-;dim_lat = (/48,60,64,73,89,90,96,108,120,128,143,144,160,192,320/) ;CMIP5
-;dim_lon = (/96,128,144,180,192,256,288,320,640/) ;CMIP5
+;dim_lat = (/60,64,90, 96,108,120, 128,143,144, 160,192,320, 720/) ;AMIP
+;dim_lon = (/128,144,180, 192,256,288, 320,640,1152/) ;9 AMIP
+dim_lat = (/48,60,64,73,89,90,96,108,120,128,143,144,160,192,320/) ;38 CMIP5 zg
+dim_lon = (/96,128,144, 180,192,256, 288,320,640/) ;CMIP5
 ndimlat = dimsizes(dim_lat)
 ndimlon = dimsizes(dim_lon)
 numblon = new((/ndimlon/),integer)

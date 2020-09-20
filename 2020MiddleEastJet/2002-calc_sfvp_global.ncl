@@ -55,7 +55,7 @@ year_option = True;False ;
 if(DJF_option) then 
 fileout  = path2 + "ERA-Interim_DJF_sfvp-year.nc"
 else
-fileout  = path2 + "ERA-Interim_sfvp-year.nc"
+fileout  = path2 + "ERA-Interim_sfvp_global-year.nc"
 end if
 ;==========================================================
 ;read the data
@@ -162,20 +162,20 @@ uv2sfvpf(u_month,v_month,sf_m,vp_m) ;calculate stream function and velocity pote
 vr2uvf(vort_m,ur_m,vr_m)    ;calculate the rotational wind components via spherical harmonics
 dv2uvf(divg_m,ud_m,vd_m)    ;calculate the divergent wind components via spherical harmonics
 delete([/u_month,v_month/])
-;vort_s = new((/nyear,4,nlev,nlat,nlon/),float)
-;divg_s = new((/nyear,4,nlev,nlat,nlon/),float)
-;sf_s   = new((/nyear,4,nlev,nlat,nlon/),float)
-;vp_s   = new((/nyear,4,nlev,nlat,nlon/),float)
-;ur_s   = new((/nyear,4,nlev,nlat,nlon/),float)
-;vr_s   = new((/nyear,4,nlev,nlat,nlon/),float)
-;ud_s   = new((/nyear,4,nlev,nlat,nlon/),float)
-;vd_s   = new((/nyear,4,nlev,nlat,nlon/),float)
-;uv2vrdvf(u_season,v_season,vort_s,divg_s) ;Computes the vorticity and divergence via spherical harmonics
-;uv2sfvpf(u_season,v_season,sf_s,vp_s) ;calculate stream function and velocity potential via spherical harmonics
-;vr2uvf(vort_s,ur_s,vr_s)    ;calculate the rotational wind components via spherical harmonics
-;dv2uvf(divg_s,ud_s,vd_s)    ;calculate the divergent wind components via spherical harmonics
-;delete([/u_season,v_season/])
-;printVarSummary(ur_s)
+vort_s = new((/nyear,4,nlev,nlat,nlon/),float)
+divg_s = new((/nyear,4,nlev,nlat,nlon/),float)
+sf_s   = new((/nyear,4,nlev,nlat,nlon/),float)
+vp_s   = new((/nyear,4,nlev,nlat,nlon/),float)
+ur_s   = new((/nyear,4,nlev,nlat,nlon/),float)
+vr_s   = new((/nyear,4,nlev,nlat,nlon/),float)
+ud_s   = new((/nyear,4,nlev,nlat,nlon/),float)
+vd_s   = new((/nyear,4,nlev,nlat,nlon/),float)
+uv2vrdvf(u_season,v_season,vort_s,divg_s) ;Computes the vorticity and divergence via spherical harmonics
+uv2sfvpf(u_season,v_season,sf_s,vp_s) ;calculate stream function and velocity potential via spherical harmonics
+vr2uvf(vort_s,ur_s,vr_s)    ;calculate the rotational wind components via spherical harmonics
+dv2uvf(divg_s,ud_s,vd_s)    ;calculate the divergent wind components via spherical harmonics
+delete([/u_season,v_season/])
+printVarSummary(ur_s)
 end if
 
 ;========================================================================
@@ -248,14 +248,14 @@ filevardef(ncdf,"ur_m",typeof(ur_m),(/"year","month","lev","lat","lon"/))
 filevardef(ncdf,"vr_m",typeof(vr_m),(/"year","month","lev","lat","lon"/))
 filevardef(ncdf,"ud_m",typeof(ud_m),(/"year","month","lev","lat","lon"/))
 filevardef(ncdf,"vd_m",typeof(vd_m),(/"year","month","lev","lat","lon"/))
-;filevardef(ncdf,"vort_s",typeof(vort_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"divg_s",typeof(divg_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"sf_s",typeof(sf_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"vp_s",typeof(vp_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"ur_s",typeof(ur_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"vr_s",typeof(vr_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"ud_s",typeof(ud_s),(/"year","season","lev","lat","lon"/))
-;filevardef(ncdf,"vd_s",typeof(vd_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"vort_s",typeof(vort_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"divg_s",typeof(divg_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"sf_s",typeof(sf_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"vp_s",typeof(vp_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"ur_s",typeof(ur_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"vr_s",typeof(vr_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"ud_s",typeof(ud_s),(/"year","season","lev","lat","lon"/))
+filevardef(ncdf,"vd_s",typeof(vd_s),(/"year","season","lev","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"lev",vars&level)
@@ -273,14 +273,14 @@ ncdf->ur_m = (/ur_m/)
 ncdf->vr_m = (/vr_m/)
 ncdf->ud_m = (/ud_m/)
 ncdf->vd_m = (/vd_m/)
-;ncdf->vort_s = (/vort_s/)
-;ncdf->divg_s = (/divg_s/)
-;ncdf->sf_s = (/sf_s/)
-;ncdf->vp_s = (/vp_s/)
-;ncdf->ur_s = (/ur_s/)
-;ncdf->vr_s = (/vr_s/)
-;ncdf->ud_s = (/ud_s/)
-;ncdf->vd_s = (/vd_s/)
+ncdf->vort_s = (/vort_s/)
+ncdf->divg_s = (/divg_s/)
+ncdf->sf_s = (/sf_s/)
+ncdf->vp_s = (/vp_s/)
+ncdf->ur_s = (/ur_s/)
+ncdf->vr_s = (/vr_s/)
+ncdf->ud_s = (/ud_s/)
+ncdf->vd_s = (/vd_s/)
 end if
 end
 

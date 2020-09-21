@@ -29,7 +29,7 @@ path1 = "/home/ys17-19/data-model/CMIP5/ -name " + var_name(nv) + "_Amon_*_histo
 path2 = "/home/ys17-19/data-model/CMIP5/ -name va_Amon_*_historical_r1i1p1_*.nc"
 end if
 months   = (/"DJF","MAM","JJA","SON"/)
-fig_name = path3 + "/fig/" + case(nc) + "-DJF_ts_" + lev(nl) + "_" + var_name(nv)
+fig_name = path3 + "/fig/" + case(nc) + "-DJF_ts_" + lev(nl) + "_" + draw_var(nv)
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out  = "pdf";"x11";"eps";
 barshare = False;True ;
@@ -186,8 +186,9 @@ else
     fs2 := addfiles(filepaths2(yearindex),"r")
     ListSetType(fs2,"cat")
     ua := dim_avg_n_Wrap( fs[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
-    va := dim_avg_n_Wrap(fs2[:]->$var_name(nv)$(timeindex,{lev(nl)*100},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
-    term  := uv2vr_cfd ( ua, va, ua&lat, ua&lon, 2 )
+    va := dim_avg_n_Wrap(fs2[:]->va(timeindex,{lev(nl)*100},{lats(0):latn(0)},{lonl(0):lonr(0)}),0)
+    term  := uv2vr_cfd ( ua, va, ua&lat, ua&lon, 2 )*100000
+    copy_VarMeta(ua,term)
     varm(nmodel,nm) = wgt_areaave(term(:,{lonl(1):lonr(1)}),1.0,1.0,0)
     end if
     end do

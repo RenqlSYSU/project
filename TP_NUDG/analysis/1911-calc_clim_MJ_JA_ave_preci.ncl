@@ -12,7 +12,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 nmonth = 4
 month_s = 1
 month_e = 8
@@ -23,7 +23,9 @@ if(case_option.eq.0) then
                       "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_MJ_JA_ave_preci.nc"
     years    = ispan(1979,2005,1)   ;the calculate time
-else
+end if
+
+if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
@@ -31,6 +33,15 @@ else
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
+if(case_option.eq.2) then
+    case    = (/"F2000","NGTR","NGall","NG58"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+    years   = ispan(1,30,1)   ;the calculate time
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_preci.nc"
+end if
 var_name = (/"PRECC","PRECL"/) ;,"OMEGA","RELHUM"
 
 ;area: east Asia
@@ -42,7 +53,7 @@ lonr = 360 ;
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lats:latn},{lonl:lonr})
 time1 = cd_calendar(f->time,0)
 select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
@@ -57,7 +68,7 @@ var_month  = new((/nyear,nmonth,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nf = 0 , ncase-1,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -67,7 +78,9 @@ end if
 var = 0
 do nv = 0,nvar-1,1 
 do nt = 0,nyear-1,1
-    f   = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f      = addfile(files(nt),"r")
+    ;f   = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(select_time1,{lats:latn},{lonl:lonr})
 end do
 end do

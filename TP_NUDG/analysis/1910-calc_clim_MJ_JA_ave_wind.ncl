@@ -12,9 +12,8 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-var_name = (/"U","V","T","Z3","Q", "dzdt","Ahgt","dTdy","dudt","PS"/) ;,"OMEGA","RELHUM"
-nv = 0
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+var_name = (/"U","V","OMEGA","T","Z3",  "Q", "dzdt","Ahgt","dTdy","dudt",  "PS"/) ;,"OMEGA","RELHUM"
 nmonth = 4
 month_s = 1
 month_e = 8
@@ -36,26 +35,27 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NGall","NG58"/)
+    case    = (/"F2000","NGTR","NGall","NG58"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,2,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_"
 end if
 ;area: east Asia
 lats = 0   ;-90 ;
 latn = 90  ;90  ;
-lonl = 0   ;0   ;
-lonr = 360 ;360 ;
-lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
-;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels hPa
+lonl = 90   ;0   ;
+lonr = 150 ;360 ;
+;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels hPa
 ;lev  = (/850,500,200/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 time1 = cd_calendar(f->time,0)
 select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
@@ -72,21 +72,21 @@ month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
 do nv = 9 ,9 ,1
-do nf = 0 ,2, 2
+do nf = 0 ,1, 1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-if(nv.eq.8) then 
+if(nv.eq.9) then 
     var_name2 = (/"U","V","OMEGA"/)
     u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
 end if
 
-if(nv.eq.9) then 
+if(nv.eq.10) then 
 var        := new((/nyear,ntime ,nlat,nlon/),float)
 var_month  := new((/nyear,nmonth,nlat,nlon/),float)
 month_ave  := new((/      nmonth,nlat,nlon/),float)
@@ -94,15 +94,15 @@ month_vari := new((/      nmonth,nlat,nlon/),float) ;be used to exam the signifi
 end if
 
 do nt = 0,nyear-1,1
-if((nv.eq.5).or.(nv.eq.6)) then
+if((nv.eq.6).or.(nv.eq.7)) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(3)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(3)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
-if(nv.eq.7) then
+if(nv.eq.8) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(2)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
-if(nv.eq.8) then
+if(nv.eq.9) then
     nv2 = 0
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
     f      = addfile(files(nt),"r")
@@ -116,19 +116,19 @@ if(nv.eq.8) then
     f      = addfile(files(nt),"r")
     w(nt,:,:,:,:) = f->$var_name2(nv2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
-if(nv.lt.5) then
+if(nv.lt.6) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     f      = addfile(files(nt),"r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
-if(nv.eq.9) then
+if(nv.eq.10) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     f      = addfile(files(nt),"r")
     var(nt,:,:,:) = f->$var_name(nv)$(select_time1,{lats:latn},{lonl:lonr})
 end if
 end do
 
-if(nv.eq.5) then ;calc dzdt
+if(nv.eq.6) then ;calc dzdt
     opt    = 0     ;used by center_finite_diff_n, no meanging 
     cyclic = False ;used by center_finite_diff_n
     ;means NOT treated as cyclic in differenced coordinates
@@ -139,7 +139,7 @@ if(nv.eq.5) then ;calc dzdt
     var@units     = "gpm/s" 
 end if
 
-if(nv.eq.8) then 
+if(nv.eq.9) then 
     iyear = 0
     itime = 1
     ilev  = 2
@@ -170,20 +170,20 @@ do nm = 0, nmonth-1, 1
     month_s = 2*nm + 1
     month_e = 2*nm + 2
     select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
-    if(nv.lt.9) then 
+    if(nv.lt.10) then 
     var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
     else
     var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
     end if
 end do
 
-if(nv.eq.6) then ;calc dzdt
+if(nv.eq.7) then ;calc dzdt
 var_month = var_month - conform(var_month,dim_avg_n(var_month,4),(/0,1,2,3/))
 var_month@long_name = "zonal asymmetric geopotential height"
 var_month@units     = "gpm" 
 end if
 
-if(nv.eq.7) then ;calc dzdt
+if(nv.eq.8) then ;calc dzdt
 a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 lat = var&lat
@@ -222,7 +222,7 @@ filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-if(nv.lt.9) then 
+if(nv.lt.10) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"month_vari",typeof(month_vari),(/"month" ,"lev","lat","lon"/))
 else

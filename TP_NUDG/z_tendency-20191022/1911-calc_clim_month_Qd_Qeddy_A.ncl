@@ -14,10 +14,10 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment ; 2 means F2000
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment ; 2 means F2000
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-nmonth = 4
-season = True ;False
+nmonth = 2
+season = False;True ;
 geo = True ;False ;if true, only can calc 10N 
 
 ;parameter for bw_bandpass_filter
@@ -50,13 +50,14 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG","NG58"/)
+    case    = (/"F2000","NGTR","NUDG","NG58"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon12.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -125,13 +126,20 @@ end if
 ;read the data
 ;============================================================
 do nm = 0, nmonth-1, 1
-if(nm.eq.0.and.season) then 
+if(season) then 
+if(nm.eq.0) then 
 month_s = 12  
 month_e = 2
 select_time := ind(time(:,1).eq.12.or.time(:,1).le.2)
 else
 month_s = 3*nm ;+ 1
 month_e = 3*nm + 2
+select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+end if
+
+else
+month_s = 2*nm + 5;1
+month_e = 2*nm + 6;2
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 end if
 ntime = dimsizes(select_time)

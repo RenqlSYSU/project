@@ -12,9 +12,8 @@ begin
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 var_name = (/"uwnd","vwnd"/)
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 90.0 ;day
@@ -31,21 +30,21 @@ years    = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats =  10 ;-20
+lats =  0 ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600,500,400,300,200,150,100,50,30,10,5/)
+lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f_model = addfile(path3,"r")
-    t   = f_model->U(:,0,{lats:latn},{lonl:lonr})
+    t   = f_model->U(:,0,0,0)
 printVarSummary(t)
 
 f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
-vars = f->$var_name(0)$(0,0,{lats:latn},{lonl:lonr})
+vars = f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 ntime = 365
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -54,8 +53,6 @@ nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
-ps    = new((/nyear,ntime,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlev,nlat,nlon/),float)
@@ -98,11 +95,12 @@ filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 print(filt_u(0,0:10,0,30,30))
 var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
 else
-ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;get (nyear,ntime,nlat,nlon)
+delete([/edd_u,edd_v,v,u/])
 end if
 printVarSummary(var)
 print(var(0,1,8,50,20:30))
@@ -164,9 +162,9 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"time",typeof(t&time),getvardims(t&time))
-filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
-filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
-filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
+filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
+filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
+filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 ;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
 filevardef(ncdf,"EKE",typeof(EKE),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lev","lat","lon"/))
@@ -174,9 +172,9 @@ filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lev","lat","lon"/)
 
 ;define var attribute
 filevarattdef(ncdf,"time",t&time)
-filevarattdef(ncdf,"lev",u&level)
-filevarattdef(ncdf,"lat",u&lat)
-filevarattdef(ncdf,"lon",u&lon)
+filevarattdef(ncdf,"lev",vars&level)
+filevarattdef(ncdf,"lat",vars&lat)
+filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"EKE",EKE)
 ;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
@@ -186,8 +184,8 @@ ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
 ncdf->time = (/t&time/)
 ncdf->lev  = (/lev/)
-ncdf->lat  = (/u&lat/)
-ncdf->lon  = (/u&lon/)
+ncdf->lat  = (/vars&lat/)
+ncdf->lon  = (/vars&lon/)
 ncdf->EKE  = (/EKE/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)

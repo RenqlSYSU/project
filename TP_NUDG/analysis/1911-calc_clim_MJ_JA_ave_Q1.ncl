@@ -12,7 +12,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -25,15 +25,16 @@ if(case_option.eq.1) then
     ;remove TP experiment, sample number is ten years 
     case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_q1.nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_intQ1.nc"
     years   = ispan(21,30,1)   ;the calculate time
 end if
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    case    = (/"F2000","NGTR","NUDG"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_Q1.nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_intQ1.nc"
 end if
 
 var_name= (/"Q1","PS"/)
@@ -44,8 +45,8 @@ lats =  0  ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-;lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
-lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+;lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;hPa
 month_s = 1
 month_e = 8
 nmonth = 4
@@ -69,7 +70,7 @@ var_month  = new((/nyear,nmonth,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nf = 0 , ncase-1,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

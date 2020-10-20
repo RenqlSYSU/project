@@ -10,7 +10,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
@@ -61,7 +61,8 @@ lats =  0  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/925,850,700,500,300,200,100,10/)
+;lev  = (/925,850,700,500,300,200,100,10/)
+lev  = (/1000,925,850,700,600,  500,400,350,300,250,  200,150,100,10/) 
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -141,6 +142,8 @@ var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,n
 end if
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
+EKE(0,:,:,:)  = dim_avg_n(dim_avg_n(var,1),0) ;annual mean 
+EKE_vari(0,:,:,:) = dim_variance_n(dim_avg_n(var,1),0) 
 
 EKE@long_name = "Integrated transient eddies kinetic energy"
 EKE@units     = "J" 

@@ -9,7 +9,7 @@ unit     = (/"J"  ,"m/s" /)    ;this can be used as right string
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 case = (/"NCEP1","ERA-Interim"/)
 zonal = False ; True means to calc anomaly based on zonal average
 na = 0  ; "TP","EA","NH","CA"
@@ -31,7 +31,8 @@ lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
 do na = 0,0,1
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
+;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
+filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 ;filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
@@ -61,6 +62,7 @@ nmonth = dimsizes(months)
 f = addfile(filename,"r")
 var := f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 var := dim_avg_n_Wrap(var,2)
+var(0,:,:) = dim_avg_n_Wrap(var,0) ;annual average
 printVarSummary(var)
 if(zonal) then 
 var_ave := f->$var_name(0)$(:,:,{lats(na):latn(na)},:) ;get an array (ncase,nmonth,nlat,nlon)
@@ -171,9 +173,9 @@ printVarSummary(var)
     resp@txFontThicknessF = title_thick
 
 if(nv.eq.0) then
-    minlvl = (/ 3 /);
-    maxlvl = (/ 48/);
-    spacig = (/ 3 /);
+    minlvl = (/10 /);3 
+    maxlvl = (/160/);48
+    spacig = (/10 /);3 
 end if
 
 if(nv.eq.1) then

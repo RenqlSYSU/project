@@ -26,8 +26,7 @@ end if
 nmonth = dimsizes(imonth)
 month_s = 5
 month_e = 8
-lev = (/1000,850,700,600,500, 400,300,250,200,150,100/)
-;lev  = (/1000,925,850,700,600,500,400,300,200,100/)
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels hPa
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)
@@ -65,16 +64,17 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case1 = (/"F2000","NG58"/)
+    case1 = (/"F2000","NGTR"/)
     if(diff) then
-    case2 = (/"F2000","NG58-F2000"/)
+    case2 = (/"F2000","NGTR-F2000"/)
     else
     case2 = case1
     end if
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+;                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
 ;                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
-    years   = ispan(1,29,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
 end if
 fig_name = path + "/project/TP_NUDG/analysis/fig/" + case1(0) + "_vertical_div_jet"
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
@@ -336,9 +336,9 @@ delete([/u,v,vars,time1,time/])
     res_line@tmYLLabelsOn = False
    
     levels = new((/10/),integer)
-    ;levels(0) = 0
-    ;levels(1) = 5
-    levels(0:9) = ispan(10,100,10)
+    levels(0) = 0
+    levels(1) = 5
+    levels(2:9) = ispan(10,80,10)
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
@@ -356,7 +356,7 @@ delete([/u,v,vars,time1,time/])
     div_line@cnLineLabelsOn   = True
     div_line@cnInfoLabelOn    = False
     div_line@cnLineThicknessF = 3.5
-    div_line@cnLineColor      = "gray40"
+    div_line@cnLineColor      = "blueviolet";"gray40"
     div_line@gsnContourZeroLineThicknessF = 0
     div_line@gsnContourNegLineDashPattern = 2
     div_line@gsnContourPosLineDashPattern = 0

@@ -30,14 +30,16 @@ if(case_option.eq.1) then
     fileout = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
 end if
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG","NG58"/)
+    case    = (/"F2000","NUDG","NG58","NGTR"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
     fileout = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
 end if
 
 var_name= (/"U","V","T","OMEGA"/)
@@ -54,7 +56,7 @@ lats = -90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-lev  = (/1000,925,850,700,600,500,400,300,250,200,150,100/) ;hPa
+lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;hPa
 month_s = 1 
 month_e = 12
 
@@ -72,7 +74,6 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-u     = new((/ntime,nlev,nlat,nlon/),float)
 
 iday  = 0
 ilev  = 1
@@ -82,15 +83,15 @@ lat  = vars&lat
 lon  = vars&lon
 lat  = lat*pi/180.0
 lon  = lon*pi/180.0
-coslat = conform(u, cos(lat),ilat)
-lev4d  = conform(u, lev*100, ilev)
+coslat = conform(vars, cos(lat),ilat)
+lev4d  = conform(vars, lev*100, ilev)
 opt    = 0     ;used by center_finite_diff_n, no meanging 
 cyclic = False ;used by center_finite_diff_n
 loncyc = True  ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 0,1,1
+do nf = 3,3,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -129,7 +130,7 @@ sigm0 = (R/cp)*(t/lev4d) - center_finite_diff_n(t,lev*100,cyclic,opt,ilev)
 Q1    =   (u/a/coslat) * center_finite_diff_n(t,lon,loncyc,opt,ilon) \
         + (v/a       ) * center_finite_diff_n(t,lat,cyclic,opt,ilat) \
         - sigm0 * w + center_finite_diff_n(t,24*3600,cyclic,opt,iday)
-delete([/v,t,w/])
+delete([/u,v,t,w,sigm0/])
 Q1    = Q1*cp
 print(Q1(15,5,30,30))
 
@@ -156,23 +157,23 @@ dimUnlim = (/False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
-filevardef(ncdf,"lev" ,typeof(u&level),(/"lev"/))
-filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
-filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
+filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
+filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
+filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
+filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"Q1"  ,typeof(Q1  ),(/"time","lev","lat","lon"/))
 
 ;define var attribute
-filevarattdef(ncdf,"time",u&time)
-filevarattdef(ncdf,"lev",u&level)
-filevarattdef(ncdf,"lat",u&lat)
-filevarattdef(ncdf,"lon",u&lon)
+filevarattdef(ncdf,"time",vars&time)
+filevarattdef(ncdf,"lev",vars&level)
+filevarattdef(ncdf,"lat",vars&lat)
+filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"Q1" ,Q1   )
 
-ncdf->time = (/u&time/)
+ncdf->time = (/vars&time/)
 ncdf->lev  = (/lev/)
-ncdf->lat  = (/u&lat/)
-ncdf->lon  = (/u&lon/)
+ncdf->lat  = (/vars&lat/)
+ncdf->lon  = (/vars&lon/)
 ncdf->Q1   = (/Q1   /)
 end do
 end do

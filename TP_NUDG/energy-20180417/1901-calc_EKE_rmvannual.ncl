@@ -9,7 +9,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
@@ -17,15 +17,15 @@ ca = 10.0 ;day
 cb = 2.5
 
 if(case_option.eq.0) then
-    case    = (/"CTRL","NG24h","NG6h"/)
+    case    = (/"CTRL","NG6h","NG24h"/)
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_EKE.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
     end if  
 end if  
 if(case_option.eq.1) then
@@ -62,7 +62,7 @@ latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
 ;lev  = (/925,850,700,500,300,200,100,10/)
-lev  = (/1000,925,850,700,600,  500,400,350,300,250,  200,150,100,10/) 
+lev  = (/1000,925,850,700,600,  500,400,350,300,250,  200,150,100/) 
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data

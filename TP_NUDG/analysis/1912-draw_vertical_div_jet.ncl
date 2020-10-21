@@ -6,13 +6,13 @@
 ;*********************************************************************************
 begin
 path   = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 vector = True ;False
 draw_var = (/"Div","Vor","dudt"/)  ;this is the variable used to draw, can used as center string
 var_name = (/"U","V","OMEGA"/)
 unit     = (/"10~S~-6~N~s~S~-1~N~","10~S~-6~N~s~S~-1~N~","10~S~-5~N~m/s~S~2~N~"/)    ;this can be used as right string 
 diff = True ;False ;
-dnv = 2
+dnv  = 2
 contour_div = True
 
 season = False;True
@@ -45,9 +45,6 @@ if(case_option.eq.0) then
     else
     case2 = (/"CTRL","NG6h"/)
     end if
-    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-;                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
@@ -59,7 +56,6 @@ if(case_option.eq.1) then
     else
     case2 = (/"CTRL","noTP"/)
     end if
-    filein  = path + "/model/" + case1 + "/pro/" + case1 + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
     years   = ispan(21,30,1)   ;the calculate time
 end if
 
@@ -70,12 +66,9 @@ if(case_option.eq.2) then
     else
     case2 = case1
     end if
-    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
-;                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-;                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
     years   = ispan(1,30,1)   ;the calculate time
 end if
+filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/project/TP_NUDG/analysis/fig/" + case1(0) + "_vertical_div_jet"
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 ;fig_out  = "eps";

@@ -13,7 +13,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-var_name = (/"U","V","OMEGA","T","Z3",  "Q", "dzdt","Ahgt","dTdy","dudt",  "PS"/) ;,"OMEGA","RELHUM"
+var_name = (/"U","V","OMEGA","T","Z3",  "Q","dzdt","Ahgt","dTdy","dudt",  "Div","PS"/) ;,"OMEGA","RELHUM"
 nmonth = 4
 month_s = 1
 month_e = 8
@@ -71,7 +71,7 @@ var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nv = 9 ,9 ,1
+do nv = 10,10,1
 do nf = 0 ,1, 1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -79,14 +79,14 @@ end if
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-if(nv.eq.9) then 
+if(nv.eq.9.or.nv.eq.10) then 
     var_name2 = (/"U","V","OMEGA"/)
     u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
 end if
 
-if(nv.eq.10) then 
+if(nv.eq.11) then 
 var        := new((/nyear,ntime ,nlat,nlon/),float)
 var_month  := new((/nyear,nmonth,nlat,nlon/),float)
 month_ave  := new((/      nmonth,nlat,nlon/),float)
@@ -102,7 +102,7 @@ if(nv.eq.8) then
     f  = addfile(filein(nf)+years(nt)+".daily."+var_name(2)+".nc","r")
     var(nt,:,:,:,:) = f->$var_name(2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
-if(nv.eq.9) then
+if(nv.eq.9.or.nv.eq.10) then
     nv2 = 0
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
     f      = addfile(files(nt),"r")
@@ -111,17 +111,19 @@ if(nv.eq.9) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
     f      = addfile(files(nt),"r")
     v(nt,:,:,:,:) = f->$var_name2(nv2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    if(nv.eq.10) then 
     nv2 = 2
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
     f      = addfile(files(nt),"r")
     w(nt,:,:,:,:) = f->$var_name2(nv2)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    end if
 end if
 if(nv.lt.6) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     f      = addfile(files(nt),"r")
     var(nt,:,:,:,:) = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
 end if
-if(nv.eq.10) then
+if(nv.eq.11) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     f      = addfile(files(nt),"r")
     var(nt,:,:,:) = f->$var_name(nv)$(select_time1,{lats:latn},{lonl:lonr})
@@ -165,12 +167,21 @@ if(nv.eq.9) then
     delete([/u,v,w,term,lat,lon,pi,coslat,a/])
 end if
 
+if(nv.eq.10) then 
+u = linmsg_n(u,-1,4)
+v = linmsg_n(v,-1,4)
+var = -uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
+var@long_name = "divergence"
+var@units     = "1/s"
+delete([/u,v/])
+end if
+
 time = cd_calendar(f->time(select_time1),0)
 do nm = 0, nmonth-1, 1
     month_s = 2*nm + 1
     month_e = 2*nm + 2
     select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
-    if(nv.lt.10) then 
+    if(nv.lt.11) then 
     var_month(:,nm,:,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:,:),1) ;get (nyear,nmonth,nlat,nlon)
     else
     var_month(:,nm,:,:) = dim_avg_n_Wrap(var(:,select_time,:,:),1) ;get (nyear,nmonth,nlat,nlon)
@@ -222,7 +233,7 @@ filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-if(nv.lt.10) then 
+if(nv.lt.11) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"month_vari",typeof(month_vari),(/"month" ,"lev","lat","lon"/))
 else

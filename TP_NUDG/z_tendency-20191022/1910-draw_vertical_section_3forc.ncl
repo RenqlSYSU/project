@@ -4,7 +4,7 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = 4 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
 nnv = 1  ;used to read dzdt induced by different forcing
@@ -130,11 +130,11 @@ if(case_option.eq.1) then
     nsample = 10
 end if
 if(case_option.eq.2) then
-    case1   = (/"F2000","NUDG"/)
+    case1   = (/"F2000","NGTR"/)
     if(diff) then 
-    case2   = (/"F2000","NUDG-F2000"/)
+    case2   = (/"F2000","NGTR-F2000"/)
     else
-    case2   = (/"F2000","NUDG"/)
+    case2   = (/"F2000","NGTR"/)
     end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27

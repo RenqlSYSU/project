@@ -11,7 +11,7 @@ case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
-    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    gtopfile= path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
 if(case_option.eq.1) then

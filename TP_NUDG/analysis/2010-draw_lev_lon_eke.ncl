@@ -127,9 +127,9 @@ phis1  := 1013.25*(1-dim_avg_n_Wrap(phis,0)*0.0065/288.15)^5.25145
 phis1   = where(phis1.le.1000, phis1, 1000)
 ypoly = new((/nlon+4/),float)
 xpoly = new((/nlon+4/),float)
-ypoly(0:nlon-1) = tofloat(phis1)
+ypoly(0:nlon-1)    = tofloat(phis1)
 ypoly(nlon:nlon+3) = (/tofloat(phis1(nlon-1)),1000,1000,tofloat(phis1(0))/)
-xpoly(0:nlon-1) = tofloat(phis&lon)
+xpoly(0:nlon-1)    = tofloat(phis&lon)
 xpoly(nlon:nlon+3) = (/tofloat(lonr(na)),tofloat(lonr(na)),tofloat(lonl(na)),tofloat(lonl(na))/)
 delete(phis1)
 

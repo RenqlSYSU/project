@@ -8,7 +8,7 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","hgt","intQ1"/)
-nv  = 3
+nv  = 0
 
 years   = ispan(1979,2016,1)
 years@calendar = "standard"

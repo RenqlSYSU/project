@@ -12,6 +12,7 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 case = (/"NCEP1","ERA-Interim"/)
 zonal = False ; True means to calc anomaly based on zonal average
+jet_option = False;True ;
 na = 0  ; "TP","EA","NH","CA"
 nv = 0
 nc = 1
@@ -33,6 +34,7 @@ do na = 0,0,1
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 ;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
 filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
+jetfile  = path + "/mdata/ERA-Interim_Clim_month_ave_uwnd.nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 ;filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
@@ -44,7 +46,9 @@ fig_out    ="pdf";"x11"
 nmonth = dimsizes(months)
 
 ;the number of the panel plot
-    plot     = new((/nmonth/),graphic)
+    plot   = new((/nmonth/),graphic)
+    topo   = new((/nmonth/),graphic)
+    line   = new((/nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -59,17 +63,38 @@ nmonth = dimsizes(months)
 ;================================================================
 ;read data
 ;====================================================================
+fps  = addfile(gtopfile,"r")
+phis = short2flt(fps->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+phis = phis/9.8   ;convert unit from m2/s2 to gpm
+nlat = dimsizes(phis&latitude)
+nlon = dimsizes(phis&longitude)
+phis1   = 1013.25*(1-dim_avg_n_Wrap(phis,0)*0.0065/288.15)^5.25145
+phis1   = where(phis1.le.1000, phis1, 1000)
+ypoly = new((/nlon+4/),float)
+xpoly = new((/nlon+4/),float)
+ypoly(0:nlon-1)    = tofloat(phis1)
+ypoly(nlon:nlon+3) = (/tofloat(phis1(nlon-1)),1000,1000,tofloat(phis1(0))/)
+xpoly(0:nlon-1)    = tofloat(phis&longitude)
+xpoly(nlon:nlon+3) = (/tofloat(lonr(na)),tofloat(lonr(na)),tofloat(lonl(na)),tofloat(lonl(na))/)
+delete([/phis,phis1/])
+
 f = addfile(filename,"r")
 var := f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 var := dim_avg_n_Wrap(var,2)
-var(0,:,:) = dim_avg_n_Wrap(var,0) ;annual average
+;var(0,:,:) = dim_avg_n_Wrap(var,0) ;annual average
 printVarSummary(var)
 if(zonal) then 
 var_ave := f->$var_name(0)$(:,:,{lats(na):latn(na)},:) ;get an array (ncase,nmonth,nlat,nlon)
 var = var - dim_avg_n_Wrap(var_ave,3)
 end if
-
 printVarSummary(var)
+
+if(jet_option) then 
+    f  = addfile(jetfile,"r")
+    u  = f->season_ave(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := dim_avg_n_Wrap(u,2)
+    printVarSummary(u)
+end if
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -135,7 +160,7 @@ printVarSummary(var)
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelBarOn         = False;True   ; the label bar
     res@lbOrientation        = "Horizontal"
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
@@ -161,14 +186,42 @@ printVarSummary(var)
     res@tmXBTickStartF     = lonl(na) ;lats(na)
     res@tmXBTickEndF       = lonr(na) ;latn(na)
 
+;---------set the attribute of the contour-----------------
+    res_line = res
+    res_line@cnFillOn         = False
+    res_line@cnLinesOn        = True
+    res_line@cnLineLabelsOn   = True
+    res_line@cnInfoLabelOn    = False
+    res_line@cnLineThicknessF = 4.0
+    res_line@cnLineColor      = "black"
+    res_line@gsnContourZeroLineThicknessF = 8
+    res_line@gsnContourNegLineDashPattern = 2
+    res_line@gsnContourPosLineDashPattern = 0
+   
+    levels = new((/10/),integer)
+    levels(0) = 0
+    levels(1) = 5
+    levels(2:9) = ispan(10,80,10)
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             = levels       ; set contour interval
+    ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSpacingF       = 10        ; set contour interval
+    res_line@gsnCenterString      = ""
+    res_line@gsnLeftString    = " "
+    res_line@gsnRightString   = " "
+
+;used to draw the black terrain
+    pres                  = True
+    pres@gsFillColor      = "gray"
+
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    ;resp@gsnPanelLabelBar = True
-    ;resp@pmLabelBarWidthF  = 0.5
-    ;resp@pmLabelBarHeightF = 0.05
-    ;resp@lbLabelFontHeightF = tick_font
-    ;resp@lbLabelFontThicknessF = tick_thick
+    resp@gsnPanelLabelBar = True
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.05
+    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
@@ -192,6 +245,7 @@ end if
 
 ;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nm = 0,nmonth-1,1
+    np = nm
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig        ; set contour interval
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
@@ -199,7 +253,14 @@ do nm = 0,nmonth-1,1
     res@gsnLeftString   = pre_case(nm) + ") " + case(nc) + " " + months(nm)
     ;res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
     res@gsnRightString  = lats(na) + "-" + latn(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
-    plot(nm) = gsn_csm_pres_hgt(wks,var(nm,:,:),res)
+    plot(np) = gsn_csm_pres_hgt(wks,var(nm,:,:),res)
+
+    if(jet_option) then 
+    line(np) = gsn_csm_pres_hgt(wks,u(nm,:,:),res_line)
+    overlay(plot(np),line(np))
+    end if
+    
+    topo(np) = gsn_add_polygon(wks, plot(np), xpoly, ypoly, pres)
     print(max(var(nm,:,:)))
     print(min(var(nm,:,:)))
 end do 

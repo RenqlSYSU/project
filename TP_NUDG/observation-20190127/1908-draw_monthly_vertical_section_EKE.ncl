@@ -4,17 +4,17 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-draw_var = (/"EKE","uwnd"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"J"  ,"m/s" /)    ;this can be used as right string 
+draw_var = (/"EKE","uwnd","variu","variv","variu-2.5-10day","variv-2.5-10day","variu-10-90day","variv-10-90day"/)  ;-2.5-10day this is the variable used to draw, can used as center string
+unit     = (/"J"  ,"m/s" ,"m~S~2~N~/s~S~2~N~"/)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 case = (/"NCEP1","ERA-Interim"/)
 zonal = False ; True means to calc anomaly based on zonal average
-jet_option = False;True ;
+jet_option = True ;False;
 na = 0  ; "TP","EA","NH","CA"
-nv = 0
+nv = 2
 nc = 1
 
 ;parameter for bw_bandpass_filter
@@ -27,13 +27,12 @@ lats = (/ 35 , 15 , 0  , 15 /);20 ;-20
 latn = (/ 35 , 55 , 89 , 55 /) ;55 ;60
 lonl = (/ 30 ,110 , 1  ,0   /) ;30 ;20
 lonr = (/150 ,130 ,359 ,70  /) ;150;220
-lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
+;lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
 
 do na = 0,0,1
 ;the path of the file
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
-;filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + "-" + cb + "-" + ca + "day.nc"
-filename = path + "/mdata/ERA-Interim_Clim_month_ave_" + draw_var(nv) + ".nc"
 jetfile  = path + "/mdata/ERA-Interim_Clim_month_ave_uwnd.nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
@@ -60,6 +59,16 @@ nmonth = dimsizes(months)
    mp_thick       = 1.5
    font_index     = 22
 
+    wks = gsn_open_wks(fig_out,fig_name)
+    gsn_define_colormap(wks,"precip3_16lev")
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+    ;gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+    ;gsn_define_colormap(wks,"GMT_polar") 
+    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
+    ;gsn_define_colormap(wks,"matlab_jet") 
+    ;has 64 colors blue green yellow,red
+
 ;================================================================
 ;read data
 ;====================================================================
@@ -78,6 +87,15 @@ xpoly(0:nlon-1)    = tofloat(phis&longitude)
 xpoly(nlon:nlon+3) = (/tofloat(lonr(na)),tofloat(lonr(na)),tofloat(lonl(na)),tofloat(lonl(na))/)
 delete([/phis,phis1/])
 
+if(jet_option) then 
+    f  = addfile(jetfile,"r")
+    u  = f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := dim_avg_n_Wrap(u,2)
+    printVarSummary(u)
+end if
+
+do nv = 2,7,1
+filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
 f = addfile(filename,"r")
 var := f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 var := dim_avg_n_Wrap(var,2)
@@ -89,26 +107,9 @@ var = var - dim_avg_n_Wrap(var_ave,3)
 end if
 printVarSummary(var)
 
-if(jet_option) then 
-    f  = addfile(jetfile,"r")
-    u  = f->season_ave(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    u := dim_avg_n_Wrap(u,2)
-    printVarSummary(u)
-end if
-
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"precip3_16lev")
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-    ;gsn_define_colormap(wks,"BlueDarkRed18")
-    ;blue and red, has 18 colors,2-10 is blue
-    ;gsn_define_colormap(wks,"GMT_polar") 
-    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    ;gsn_define_colormap(wks,"matlab_jet") 
-    ;has 64 colors blue green yellow,red
-
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
@@ -225,7 +226,7 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(nv.eq.0) then
+if(nv.eq.0.or.nv.ge.2) then
     minlvl = (/10 /);3 
     maxlvl = (/160/);48
     spacig = (/10 /);3 
@@ -252,7 +253,11 @@ do nm = 0,nmonth-1,1
     res@cnMinLevelValF        := minlvl       ; set min contour level
     res@gsnLeftString   = pre_case(nm) + ") " + case(nc) + " " + months(nm)
     ;res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
-    res@gsnRightString  = lats(na) + "-" + latn(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    if(nv.ge.2) then 
+    res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv) + " (" + unit(2) + ")"
+    else
+    res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv) + " (" + unit(nv) + ")"
+    end if
     plot(np) = gsn_csm_pres_hgt(wks,var(nm,:,:),res)
 
     if(jet_option) then 
@@ -268,6 +273,7 @@ end do
 ;    resp@txString      = fig_title
     gsn_panel(wks,plot,(/3,4/),resp)
 ;    gsn_panel(wks,plot,(/1,4/),resp)
+end do 
 end do 
 end
 

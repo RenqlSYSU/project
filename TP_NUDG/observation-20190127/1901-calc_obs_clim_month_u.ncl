@@ -23,7 +23,7 @@ lev  = (/1000,925,850,700,600,\
          500 ,400,350,300,250,\
          200 ,150,100/) ;hPa ;intQ1
 
-do nv = 3,3,1
+do nv = 1,1,1
 fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_" + var_name(nv) + ".nc"
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data

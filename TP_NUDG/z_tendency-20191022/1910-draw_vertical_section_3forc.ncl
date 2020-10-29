@@ -6,7 +6,7 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 4 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
+var_option = -1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
 nnv = 1  ;used to read dzdt induced by different forcing
 
 jet_option    = True  ;20191205, control the draw of jet stream
@@ -16,7 +16,8 @@ diff = False ; True ;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
-months  = (/"JF","MA","MJ","JA"/)
+;months  = (/"JF","MA","MJ","JA"/)
+months  = (/"MJ","JA"/)
 ;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
@@ -25,9 +26,10 @@ nmonth = dimsizes(months)
 month_s = 1
 month_e = 12
 lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/)
-lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lev_u = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa 13levels
 
-do na = 4,4,1 ;"TP","EA","NH","CA","NP"
+do na = 1,1,1 ;"TP","EA","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
@@ -134,7 +136,7 @@ if(case_option.eq.2) then
     if(diff) then 
     case2   = (/"F2000","NGTR-F2000"/)
     else
-    case2   = (/"F2000","NGTR"/)
+    case2   = (/"F2000","NGTR","NGTR-F2000"/)
     end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
@@ -155,7 +157,7 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -271,7 +273,7 @@ if(month_option) then
 do nc = 0, nfile-1, 1
     if(jet_option) then
     f = addfile(jetfile(nc),"r")
-    u := f->month_ave(:,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->month_ave(2:3,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
     var_u(nc,:,:,:) = dim_avg_n_Wrap(u,3)
     end if
 

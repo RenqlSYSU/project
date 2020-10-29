@@ -4,7 +4,7 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-draw_var = (/"EKE","uwnd","variu","variv","variu-2.5-10day","variv-2.5-10day","variu-10-90day","variv-10-90day"/)  ;-2.5-10day this is the variable used to draw, can used as center string
+draw_var = (/"EKE","uwnd","variu","variu-2.5-10day","variu-10-90day","variv","variv-2.5-10day","variv-10-90day"/)  ;-2.5-10day this is the variable used to draw, can used as center string
 unit     = (/"J"  ,"m/s" ,"m~S~2~N~/s~S~2~N~"/)    ;this can be used as right string 
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
@@ -13,6 +13,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 case = (/"NCEP1","ERA-Interim"/)
 zonal = False ; True means to calc anomaly based on zonal average
 jet_option = True ;False;
+homogenization = True ; False; 
 na = 0  ; "TP","EA","NH","CA"
 nv = 2
 nc = 1
@@ -25,8 +26,8 @@ cb = 2.5
 area = (/"TP","EA","NH","CA"/)
 lats = (/ 35 , 15 , 0  , 15 /);20 ;-20
 latn = (/ 35 , 55 , 89 , 55 /) ;55 ;60
-lonl = (/ 30 ,110 , 1  ,0   /) ;30 ;20
-lonr = (/150 ,130 ,359 ,70  /) ;150;220
+lonl = (/ 0  ,110 , 1  ,0   /) ;30 ;20
+lonr = (/180 ,130 ,359 ,70  /) ;150;220
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 ;lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
 
@@ -37,7 +38,11 @@ jetfile  = path + "/mdata/ERA-Interim_Clim_month_ave_uwnd.nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 ;filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
+if(homogenization) then 
+fig_name = path + "/fig/1p1x4_vertical_section_" + area(na) + draw_var(nv) + "homo"
+else
 fig_name = path + "/fig/1p1x4_vertical_section_" + area(na) + draw_var(nv)
+end if
 ;fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
@@ -104,6 +109,13 @@ printVarSummary(var)
 if(zonal) then 
 var_ave := f->$var_name(0)$(:,:,{lats(na):latn(na)},:) ;get an array (ncase,nmonth,nlat,nlon)
 var = var - dim_avg_n_Wrap(var_ave,3)
+end if
+if(homogenization) then
+    draw_var2 = (/"EKE","uwnd","uwnd","uwnd","uwnd","vwnd","vwnd","vwnd"/)  ;-2.5-10day this is the variable used to draw, can used as center string
+    f2 = addfile(path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var2(nv) + ".nc","r")
+    temp := f2->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    temp := dim_avg_n_Wrap(temp,2)
+    var = sqrt(var)/abs(temp)
 end if
 printVarSummary(var)
 
@@ -226,35 +238,37 @@ printVarSummary(var)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-if(nv.eq.0.or.nv.ge.2) then
-    minlvl = (/10 /);3 
-    maxlvl = (/160/);48
-    spacig = (/10 /);3 
+if(homogenization) then 
+    minlvl = (/0.2,-42, 0.1,0.1,0.1,0.5 ,0.5 ,0.5 /);3 
+    maxlvl = (/3.2, 42, 1.6,1.6,1.6,15.5,15.5,15.5/);48
+    spacig = (/0.2,  6, 0.1,0.1,0.1, 1  , 1  , 1  /);3 
+else
+    minlvl = (/10 ,-42, 10 ,10 ,10 ,10 ,10 ,10 /);3 
+    maxlvl = (/160, 42, 160,160,160,160,160,160/);48
+    spacig = (/10 ,  6, 10 ,10 ,10 ,10 ,10 ,10 /);3 
 end if
 
-if(nv.eq.1) then
 if(zonal) then 
-    minlvl = (/-21/);
-    maxlvl = (/ 21/);
-    spacig = (/ 3 /);
-else
-    minlvl = (/-42/);
-    maxlvl = (/ 42/);
-    spacig = (/ 6 /);
-end if
+    minlvl(1) = (/-21/);
+    maxlvl(1) = (/ 21/);
+    spacig(1) = (/ 3 /);
 end if
 
 ;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nm = 0,nmonth-1,1
     np = nm
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnLevelSpacingF       := spacig        ; set contour interval
-    res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
-    res@cnMinLevelValF        := minlvl       ; set min contour level
+    res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     res@gsnLeftString   = pre_case(nm) + ") " + case(nc) + " " + months(nm)
     ;res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
-    if(nv.ge.2) then 
+    if(nv.ge.2) then
+    if(homogenization) then 
+    res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv)
+    else
     res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv) + " (" + unit(2) + ")"
+    end if
     else
     res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
@@ -271,7 +285,7 @@ do nm = 0,nmonth-1,1
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot,(/4,3/),resp)
 ;    gsn_panel(wks,plot,(/1,4/),resp)
 end do 
 end do 

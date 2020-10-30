@@ -47,7 +47,7 @@ do na = 0, narea-1,1
     ts(na,:,:)  = f->eof_ts(0, 0:(neval-1), 0:(nyear-1))
     sig(na,:)   = eofunc_north(pcvar(na,:),nyear,False)
 end do
-ts = ts/conform(ts,sqrt(eval),(/0,1/))
+ts = - ts/conform(ts,sqrt(eval),(/0,1/))
 delete(eof0)
 
 ;--------------------------------------------------------

@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 jet_option  = False;True ;;20191205, control the draw of jet stream
-region_line = False;True ; draw the line for ME, EA, NA
+region_line = True ;False; draw the line for ME, EA, NA
 bar_share = True ;False;
 barvert   = False;True
 lev    = (/925,850,700,500,200/) 
@@ -69,7 +69,7 @@ if(var_option.eq.0)
     fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(0)
 end if
 if(var_option.eq.1)
-    filename = path + "data/" + case + "_" + months + "rws-reg2.nc"
+    filename = path + "data/" + case + "_" + months + "rws-reg.nc"
     fig_name = path + "fig/1p3x3_regr_horizontal_" + var_name(0)
 end if
 
@@ -462,9 +462,9 @@ do nv = 0, nvar-1, 1
     overlay(plot(np),gtop(np))
     
     if(region_line) then 
-        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres1 )
-        line2(np) = gsn_add_polyline( wks, plot(np), lonx(:,2), latx(:,2), lnres2 )
-        line3(np) = gsn_add_polyline( wks, plot(np), lonx(:,3), latx(:,3), lnres3 )
+        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,na+1), latx(:,na+1), lnres1 )
+        ;line2(np) = gsn_add_polyline( wks, plot(np), lonx(:,2), latx(:,2), lnres2 )
+        ;line3(np) = gsn_add_polyline( wks, plot(np), lonx(:,3), latx(:,3), lnres3 )
     end if
     
     if(jet_option) then 

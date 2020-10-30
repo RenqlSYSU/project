@@ -190,7 +190,7 @@ delete([/p_in,p_out,linlog/])
 ;--------------------------------------
 ;Calculate seasonal averages and anomalies based on seasonal averages
 ;---------------------------------------------------
-dudt = (u(:,ntime-1,:,:,:)-u(:,0,:,:,:))/(ntime*24*3600)
+dudt = (u(:,ntime-1,:,:,:)-u(:,0,:,:,:))/(24*3600)
 clm_u = dim_avg_n(u,itime)
 clm_v = dim_avg_n(v,itime) 
 clm_t = dim_avg_n(t,itime) 

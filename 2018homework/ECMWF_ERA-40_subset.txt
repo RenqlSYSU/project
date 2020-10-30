@@ -1,0 +1,167 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+
+Variable: f
+Type: file
+filename:	ECMWF_ERA-40_subset
+path:	ECMWF_ERA-40_subset.nc
+   file global attributes:
+      Conventions : CF-1.0
+      history : 2004-09-15 17:04:29 GMT by mars2netcdf-0.92
+   dimensions:
+      longitude = 144
+      latitude = 73
+      time = 62  // unlimited
+   variables:
+      float longitude ( longitude )
+         units :	degrees_east
+         long_name :	longitude
+
+      float latitude ( latitude )
+         units :	degrees_north
+         long_name :	latitude
+
+      integer time ( time )
+         units :	hours since 1900-01-01 00:00:0.0
+         long_name :	time
+
+      short tcw ( time, latitude, longitude )
+         scale_factor :	0.001350098174548095
+         add_offset :	44.3250482744756
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	kg m**-2
+         long_name :	Total column water
+
+      short tcwv ( time, latitude, longitude )
+         scale_factor :	0.001327110772668999
+         add_offset :	43.57046355461544
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	kg m**-2
+         long_name :	Total column water vapour
+
+      short lsp ( time, latitude, longitude )
+         scale_factor :	8.033293038506593e-07
+         add_offset :	0.02632108464066685
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m
+         long_name :	Stratiform precipitation (Large-scale precipitation)
+
+      short cp ( time, latitude, longitude )
+         scale_factor :	4.82483645945993e-07
+         add_offset :	0.01580857665942046
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m
+         long_name :	Convective precipitation
+
+      short msl ( time, latitude, longitude )
+         scale_factor :	0.1721754257462003
+         add_offset :	99424.26532457425
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	Pa
+         long_name :	Mean sea level pressure
+
+      short blh ( time, latitude, longitude )
+         scale_factor :	0.108739383344517
+         add_offset :	3570.143670551653
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m
+         long_name :	Boundary layer height
+
+      short tcc ( time, latitude, longitude )
+         scale_factor :	1.52597204419215e-05
+         add_offset :	0.4999847402805582
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	(0 - 1)
+         long_name :	Total cloud cover
+
+      short p10u ( time, latitude, longitude )
+         scale_factor :	0.0007584155104298998
+         add_offset :	-0.4405090868971486
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m s**-1
+         long_name :	10 metre U wind component
+
+      short p10v ( time, latitude, longitude )
+         scale_factor :	0.0006643594610147523
+         add_offset :	-0.7458883584844522
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m s**-1
+         long_name :	10 metre V wind component
+
+      short p2t ( time, latitude, longitude )
+         scale_factor :	0.001835583519937063
+         add_offset :	262.3984787475347
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	K
+         long_name :	2 metre temperature
+
+      short p2d ( time, latitude, longitude )
+         scale_factor :	0.001611264511785511
+         add_offset :	251.8871063868554
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	K
+         long_name :	2 metre dewpoint temperature
+
+      short e ( time, latitude, longitude )
+         scale_factor :	1.167024519079164e-07
+         add_offset :	-0.002321997129641079
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m of water
+         long_name :	Evaporation
+
+      short lcc ( time, latitude, longitude )
+         scale_factor :	1.52597204419215e-05
+         add_offset :	0.4999847402795581
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	(0 - 1)
+         long_name :	Low cloud cover
+
+      short mcc ( time, latitude, longitude )
+         scale_factor :	1.52597204419215e-05
+         add_offset :	0.4999847402795581
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	(0 - 1)
+         long_name :	Medium cloud cover
+
+      short hcc ( time, latitude, longitude )
+         scale_factor :	1.52597204419215e-05
+         add_offset :	0.4999847402805582
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	(0 - 1)
+         long_name :	High cloud cover
+
+      short tco3 ( time, latitude, longitude )
+         scale_factor :	7.697705390695933e-08
+         add_offset :	0.007369083675106737
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	kg m**-2
+         long_name :	Total column ozone
+
+      short tp ( time, latitude, longitude )
+         scale_factor :	1.052269559854525e-06
+         add_offset :	0.0344776121286335
+         _FillValue :	-32767
+         missing_value :	-32767
+         units :	m
+         long_name :	Total precipitation
+
+ 

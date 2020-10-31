@@ -17,12 +17,12 @@ data_type = (/"double","float"/)
 ntype = 0
 
 obs_option  = False ;True
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 year_option = False;True
 csa = False  ;cubic spline interpolation
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nc = 1
-ntime = 4
+ntime = 2
 month_s = 1
 month_e = 8
 
@@ -35,24 +35,27 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG","NG58"/)
+    case    = (/"F2000","NGTR","NG58"/)
 end if
 
 if(.not.(obs_option)) then 
+
 if(ntime.gt.12) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
-if(ntime.eq.4) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_forc_te_season.nc"
-;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
+if(ntime.le.4.and.ntime.ge.2) then 
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_forc_te_season.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.1) then 
 filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_DJF_Qd_Qeddy_A.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
+
 else
+
 if(ntime.eq.4) then 
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_month_Qd_Qeddy_A-geo.nc"
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_Clim_4f6c_month.dat"
@@ -61,10 +64,10 @@ filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
 end if
 end if
-var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
-var_name2 = (/"Qeddh","Qeddl"/)  ;this is the variable used to draw, can used as center string
-;var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-;var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
+;var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
+;var_name2 = (/"Qeddh","Qeddl"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -169,7 +172,7 @@ else
     sigm1 := f->sigm1({lev},{lats:latn},{lonl:lonr})
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
     end if
-    if(ntime.eq.4) then 
+    if(ntime.le.4.and.ntime.ge.2) then 
     sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
     end if

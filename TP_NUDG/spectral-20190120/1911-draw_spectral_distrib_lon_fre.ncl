@@ -12,15 +12,15 @@ area = (/"EA","TP","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,E
 lats = (/ 35 ,20  , 22  , 30  /)
 latn = (/ 35 ,40  , 30  , 45  /)
 lonl = (/ 0  , 0  ,107  ,115  /)
-lonr = (/270 ,180 ,130  ,130  /)
+lonr = (/180 ,180 ,130  ,130  /)
 lon_spcing = 45
 lev  = (/850,500,200/) ;500,400,300,
 var_name = (/"U","V","T","vort"/)
 stand = (/"","stand_"/)
-month_s = 10 
-month_e = 3
+month_s = 1 
+month_e = 12
 
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 stand_option = 0
 diff = True
 na = 0 ;"EA","TP","SEA","NEA"
@@ -28,9 +28,10 @@ nv = 3 ;"U","V","T","vort"
 
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h","NUDG24h"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG6h","NG24h"/) ;,"NG24h"
     if(diff) then 
     case2   = (/"CTRL","NG6h","NG6h-CTRL"/) ;,"NG24h"
+    else
+    case2   = (/"CTRL","NG6h","NG24h"/) ;,"NG24h"
     end if
     years   = ispan(1979,2005,1)   ;the calculate time
 end if
@@ -43,8 +44,12 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case1    = (/"F2000","NG6h"/)
-    case2    = (/"F2000","NG6h"/)
+    case1    = (/"F2000","NGTR"/)
+    if(diff) then 
+    case2   = (/"F2000","NGTR","NGTR-CTRL"/) ;,"NG24h"
+    else
+    case2    = (/"F2000","NGTR"/)
+    end if
     years    = ispan(1,30,1)   ;the calculate time
 end if
 
@@ -60,11 +65,12 @@ nfrq = dimsizes(spcx&frq)
 nlev = dimsizes(lev)
 nlon = dimsizes(spcx&lon)
 nlat = dimsizes(spcx&lat)
-ncase = dimsizes(case1)
+ncase = dimsizes(case2)
+nfile = dimsizes(case1)
 var  = new((/ncase,nfrq,nlev,nlat,nlon/),float)
 plot = new((/ncase*nlev/),graphic)
 
-do nc = 0, ncase-1, 1
+do nc = 0, nfile-1, 1
     f    = addfile(filein(nc),"r")
     var(nc,:,:,:,:) = f->spcx(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do

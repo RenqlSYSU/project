@@ -32,27 +32,27 @@ end if
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
-             "precs" /) 
+             "precs"        ,"Div"/) 
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
-             "mm/day" /)   
+             "mm/day"       ,"10~S~-6~N~s~S~-1~N~"/)   
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
-                 "snow" /) 
+                 "snow"     ,"div" /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 0
-nv = 1
+nl = 3
+nv = 12
 diff = True ;False;
 perc = False;True ;
-sig_option  = True ;False;only work on shading 
-vect_option = True ;False;
-cont_option = False;True ;
+sig_option  = False;True ;only work on shading 
+vect_option = False;True ;
+cont_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
-nvc = 0 
+cont_var  = (/"Z3" ,"intQ1","PSL","Div"/)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
+nvc = 3 
 contsig  = False;True
 barshare = False;True ;
 barvert  = False;True
@@ -177,7 +177,7 @@ do nf = 0 ,ncase-1, 1
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{10:48},inln))
+        lat_ind = maxind(u(nf,nm,{0:48},inln))
         ;lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
@@ -230,6 +230,10 @@ if(nvc.eq.2) then
     var(:,3,:,:,:) = var(:,3,:,:,:)/100 ;Pa -> hPa
 end if
 
+if(nvc.eq.3) then
+    var(:,3,:,:,:) = var(:,3,:,:,:)*1000000
+end if
+
 if(nv.eq.2) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
 end if
@@ -249,6 +253,10 @@ end if
 
 if(nv.eq.14) then
     var(:,2,:,:,:) = var(:,2,:,:,:)/100 ;Pa -> hPa
+end if
+
+if(nv.eq.16) then
+    var(:,2,:,:,:) = var(:,2,:,:,:)*1000000 ;
 end if
 
 if(diff) then 
@@ -439,7 +447,7 @@ end if
     res_line@gsnContourPosLineDashPattern = 0
     res_line@cnLevelSelectionMode  = "AutomaticLevels"   ; set manual contour levels
     ;res_line@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res_line@cnLevelSpacingF       = 20 ;        ; set contour interval
+    ;res_line@cnLevelSpacingF       = 1.0 ;        ; set contour interval
     res_line@lbLabelBarOn     = False   ; the label bar
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
@@ -616,6 +624,10 @@ if(nvc.eq.2) then ;SLP
     cont_spacing = (/5,2/)
 end if
 
+if(nvc.eq.3) then ;Div
+    cont_spacing = (/1.5,1.5/)
+end if
+
 if(nv.eq.0) 
     minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
     maxlvl = (/300, 140, 140/)      ; 80, 80
@@ -719,9 +731,15 @@ if(nv.eq.15) then ;precs
     spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
+if(nv.eq.16) then ;div
+    minlvl = (/-7,-7,-7/)
+    maxlvl = (/ 7, 7, 7/)
+    spacig = (/ 1, 1, 1/)
+end if
+
 do nc = 0,1,1
 do nm = 0,nmonth-1,1
-if((diff.and.nc.ge.1).or.(nv.eq.2)) then
+if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.eq.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     ;blue and red, has 18 colors,2-10 is blue

@@ -32,15 +32,17 @@ end if
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
-             "precs"        ,"Div"/) 
+             "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      /)
+
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
-             "mm/day"       ,"10~S~-6~N~s~S~-1~N~"/)   
+             "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/s"      ,"K/s"            ,"K/s"       /)
+
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
-                 "snow"     ,"div" /) 
+                 "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
 nl = 3
 nv = 12
@@ -48,11 +50,11 @@ diff = True ;False;
 perc = False;True ;
 sig_option  = False;True ;only work on shading 
 vect_option = False;True ;
-cont_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_var  = (/"Z3" ,"intQ1","PSL","Div"/)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~"/)    ;this can be used as right string 
-nvc = 3 
+cont_option = True ;False;
+cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA"/)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s"/)
+nvc = 4 
 contsig  = False;True
 barshare = False;True ;
 barvert  = False;True
@@ -204,8 +206,13 @@ if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
+if(nv.ge.17.and.nv.le.19) then 
+var(nf,inv,:,:,:)  = f->$var_name(0)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+end if
 end if
 
 if(cont_option) then
@@ -257,6 +264,10 @@ end if
 
 if(nv.eq.16) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*1000000 ;
+end if
+
+if(nv.ge.17.and.nv.le.19) then 
+    var(:,2,:,:,:) = var(:,2,:,:,:)*3600*24 ;K/s -> K/day
 end if
 
 if(diff) then 
@@ -737,9 +748,15 @@ if(nv.eq.16) then ;div
     spacig = (/ 1, 1, 1/)
 end if
 
+if(nv.ge.17.and.nv.le.19) then 
+    minlvl = (/-7,-7,-7/)
+    maxlvl = (/ 7, 7, 7/)
+    spacig = (/ 1, 1, 1/)
+end if
+
 do nc = 0,1,1
 do nm = 0,nmonth-1,1
-if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.eq.16)) then
+if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     ;blue and red, has 18 colors,2-10 is blue

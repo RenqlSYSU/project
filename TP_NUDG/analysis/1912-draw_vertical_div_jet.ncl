@@ -127,7 +127,7 @@ end do
 end do
 var  := dim_avg_n_Wrap(var ,5)
 vari := dim_avg_n_Wrap(vari,5)
-vari = where(abs(vari).le.0.000001,0.001,vari)
+;vari = where(abs(vari).le.0.000001,0.001,vari)
 prob = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nyear,var(1,:,:,:,:),vari(1,:,:,:,:),nyear,True,False)
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,:,:))
 printVarSummary(prob)
@@ -144,11 +144,13 @@ if(diff) then
     var(1,1:4,:,:,:)= var(1,1:4,:,:,:) - var(0,1:4,:,:,:)   ;get the difference between CTRL and NUDG
 end if
 if(sigmask) then 
-    ;var(1,3:4,:,:,:) = mask(var(1,3:4,:,:,:), prob(3:4,:,:,:).lt.siglvl, True);cont_var, shad_var
-    var(1,3,:,:,:) = mask(var(1,3,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
-    var(1,4,:,:,:) = mask(var(1,4,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
-    var(1,1,:,:,:) = mask(var(1,1,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
-    var(1,2,:,:,:) = mask(var(1,2,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
+    var(1,3:4,:,:,:) = mask(var(1,3:4,:,:,:), prob(3:4,:,:,:).lt.siglvl, True);cont_var, shad_var
+    ;var(1,3,:,:,:) = mask(var(1,3,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
+    ;var(1,4,:,:,:) = mask(var(1,4,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
+    v = var(1,1,:,:,:)
+    w = var(1,2,:,:,:)
+    var(1,1,:,:,:) = mask(var(1,1,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
+    var(1,2,:,:,:) = mask(var(1,2,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
 end if
 printVarSummary(var)
 

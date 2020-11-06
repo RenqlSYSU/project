@@ -33,7 +33,7 @@ if(case_option.eq.2) then
     case    = (/"F2000","NGTR"/) ;
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
-    years   = ispan(1,10,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_advT.nc"
 end if
 
@@ -125,6 +125,7 @@ var = -(u/a/coslat5d)*center_finite_diff_n(t,lon,cyclic,opt,ilon) \
       -(v/a         )*center_finite_diff_n(t,lat,cyclic,opt,ilat)
 var@long_name = "temperature advection: total, stationary, transient"
 var@units     = "K/s"
+delete(coslat5d)
 
 time1 = cd_calendar(f->time(select_time),0)
 do nm = 0, nmonth-1, 1
@@ -144,10 +145,11 @@ do nm = 0, nmonth-1, 1
     v_edd = v(:,select_time1,:,:,:)-conform(v(:,select_time1,:,:,:),v_month,(/0,2,3,4/))
     t_edd = t(:,select_time1,:,:,:)-conform(t(:,select_time1,:,:,:),t_month,(/0,2,3,4/))
     delete([/u_month,v_month,t_month/])
+    coslat5d = conform(u_edd,cos(lat),ilat)
     term  = -(u_edd/a/coslat5d)*center_finite_diff_n(t_edd,lon,cyclic,opt,ilon) \
             -(v_edd/a         )*center_finite_diff_n(t_edd,lat,cyclic,opt,ilat)
     var_month(2,:,nm,:,:,:) = dim_avg_n_Wrap(term,1)
-    delete([/u_edd,v_edd,t_edd,term/])
+    delete([/u_edd,v_edd,t_edd,term,coslat5d/])
 end do
 delete([/u,v,t/])
 month_ave  = dim_avg_n_Wrap(var_month,1) ;get (nmonth,nlat,nlon)
@@ -170,7 +172,7 @@ fileattdef(ncdf,fileatt)
 
 ;define all coordinate`
 dimNames = (/"nvar","month","lev","lat","lon"/);
-dimSizes = (/   3  , 12    ,nlev ,nlat ,nlon/) ;
+dimSizes = (/   3  ,nmonth ,nlev ,nlat ,nlon/) ;
 dimUnlim = (/False ,False  ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 

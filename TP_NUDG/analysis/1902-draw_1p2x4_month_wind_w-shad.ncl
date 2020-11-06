@@ -37,7 +37,7 @@ draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             
 unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
-             "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/s"      ,"K/s"            ,"K/s"       /)
+             "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/day"    ,"K/day"          ,"K/day"     /)
 
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
@@ -45,17 +45,17 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
 nl = 3
-nv = 12
+nv = 17
 diff = True ;False;
 perc = False;True ;
-sig_option  = False;True ;only work on shading 
+sig_option  = True ;False;only work on shading 
 vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = True ;False;
 cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s"/)
 nvc = 4 
-contsig  = False;True
+contsig  = True ;False;
 barshare = False;True ;
 barvert  = False;True
 
@@ -207,8 +207,8 @@ var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
 if(nv.ge.17.and.nv.le.19) then 
-var(nf,inv,:,:,:)  = f->$var_name(0)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = tofloat(f->$var_name(0)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = tofloat(f->$var_name(1)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
 else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -228,21 +228,44 @@ end if
 end if
 end do
 
-vari = where(abs(vari).le.0.000001,0.1,vari)
+;vari = where(abs(vari).le.0.000000000001,0.0000000001,vari)
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:,:) = ttest(var(0,:,:,:,:),vari(0,:,:,:,:),nsample,var(nf+1,:,:,:,:),vari(nf+1,:,:,:,:),nsample,True,False)
 end do
 
-if(nvc.eq.2) then
-    var(:,3,:,:,:) = var(:,3,:,:,:)/100 ;Pa -> hPa
+if(nvc.eq.0) then ;Z3 ; 850,700,600,500,200,100,10
+if(nl.le.1) then ;850hPa
+    cont_spacing = (/20,20/)
+end if
+if(nl.le.3.and.nl.ge.2) then ;200hPa
+    cont_spacing = (/20,20/)
+end if
+if(nl.eq.4) then ;200hPa
+    cont_spacing = (/80,80/)
+end if
 end if
 
-if(nvc.eq.3) then
+if(nvc.eq.1) then ;intQ1
+    cont_spacing = (/20,1/)
+end if
+
+if(nvc.eq.2) then ;SLP
+    var(:,3,:,:,:) = var(:,3,:,:,:)/100 ;Pa -> hPa
+    cont_spacing = (/5,2/)
+end if
+
+if(nvc.eq.3) then ;Div
     var(:,3,:,:,:) = var(:,3,:,:,:)*1000000
+    cont_spacing = (/1.5,1.5/)
+end if
+
+if(nvc.eq.4) then
+    var(:,3,:,:,:) = -var(:,3,:,:,:)*100
+    cont_spacing = (/2,1/)
 end if
 
 if(nv.eq.2) then
-    var(:,2,:,:,:) = var(:,2,:,:,:)*100 ;omega*100
+    var(:,2,:,:,:) = -var(:,2,:,:,:)*100 ;omega*100
 end if
 
 if(nv.eq.4) then
@@ -615,30 +638,6 @@ else
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
-if(nvc.eq.0) then ;Z3 ; 850,700,600,500,200,100,10
-if(nl.le.1) then ;850hPa
-    cont_spacing = (/20,20/)
-end if
-if(nl.le.3.and.nl.ge.2) then ;200hPa
-    cont_spacing = (/20,20/)
-end if
-if(nl.eq.4) then ;200hPa
-    cont_spacing = (/80,80/)
-end if
-end if
-
-if(nvc.eq.1) then ;intQ1
-    cont_spacing = (/20,1/)
-end if
-
-if(nvc.eq.2) then ;SLP
-    cont_spacing = (/5,2/)
-end if
-
-if(nvc.eq.3) then ;Div
-    cont_spacing = (/1.5,1.5/)
-end if
-
 if(nv.eq.0) 
     minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
     maxlvl = (/300, 140, 140/)      ; 80, 80
@@ -749,9 +748,9 @@ if(nv.eq.16) then ;div
 end if
 
 if(nv.ge.17.and.nv.le.19) then 
-    minlvl = (/-7,-7,-7/)
-    maxlvl = (/ 7, 7, 7/)
-    spacig = (/ 1, 1, 1/)
+    minlvl = (/-0.7,-0.7,-0.7/)
+    maxlvl = (/ 0.7, 0.7, 0.7/)
+    spacig = (/ 0.1, 0.1, 0.1/)
 end if
 
 do nc = 0,1,1

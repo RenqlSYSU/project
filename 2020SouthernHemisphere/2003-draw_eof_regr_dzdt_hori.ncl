@@ -476,54 +476,26 @@ if(nnv.eq.3) then ;dbdt
 end if
 end if
 
-lin_spc = (/1,1,1.5/)
-f2 = addfile(path + "/data/ERA-Interim_DJF_uwnd-year.nc","r")
-f3 = addfile(filename,"r")
-sig   = new((/6,neval/),logical)
-eval  = new((/6,neval/),float)
-pcvar = new((/6,neval/),float)
-do na = 0, narea-1,1
-f  = addfile(filename0(na),"r")
-ts = f->eof_ts
-nyear = dimsizes(ts&year)
-eof0 := f->eof0
-eof1 := f->eof1
-eof2 := f->eof2
-eof3 := f->eof3
-eof4 := f->eof44eof5 := f->eof5
-    sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
-    sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
-    sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)
-    sig(3,:)  = eofunc_north(eof3@pcvar,nyear,False)
-    sig(4,:)  = eofunc_north(eof4@pcvar,nyear,False)
-    sig(5,:)  = eofunc_north(eof5@pcvar,nyear,False)
-    eval(0,:) = eof0@eval
-    eval(1,:) = eof1@eval
-    eval(2,:) = eof2@eval
-    eval(3,:) = eof3@eval
-    eval(4,:) = eof4@eval
-    eval(5,:) = eof5@eval
-    pcvar(0,:) = eof0@pcvar
-    pcvar(1,:) = eof1@pcvar
-    pcvar(2,:) = eof2@pcvar
-    pcvar(3,:) = eof3@pcvar
-    pcvar(4,:) = eof4@pcvar
-    pcvar(5,:) = eof5@pcvar
-ts = ts/conform(ts,sqrt(eval),(/0,1/))
-subtitle_color = where(sig,"red","black") 
+ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
+2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
+-3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654,2.65007,-2.947284/)
+;ts = (/0.6843878,0.2328069,-0.8883422,0.9194,-2.049343,0.8701207,0.6956607,1.529305,-1.833134,0.4640056,0.6192874,0.03531907,-0.2721298,-1.553613,-0.5360572,\
+;0.6987813,0.01709986,-0.04073962,-2.473586,-1.550633,1.244261,0.5346467,0.845744,-0.1475716,0.04019789,0.7101959,0.5763686,0.6535391,0.1671478,\
+;0.2156614,0.3582229,0.4480299,1.124319,1.026412,0.4648125,-1.267753,-2.003626,-0.9242076,0.8890295,-0.5240264/)
 
+lin_spc = (/1,1,1.5/)
+f2 = addfile("/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_uwnd-year.nc","r")
 u := f2->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)})
 nlat = dimsizes(u&lat)
 nlon = dimsizes(u&lon)
-vars := new((/nvar,nyear,nlat,nlon/),double)
+
+f3 = addfile(filename,"r")
+vars := new((/nvar,nyear,nmonth,nlat,nlon/),double)
 if(var_option.ge.20) then
-vars := new((/3,nvar,nyear,nlat,nlon/),double)
+vars := new((/3,nvar,nyear,nmonth,nlat,nlon/),double)
 end if
 
 if(var_option.eq.-22.or.var_option.eq.-23) then 
-    ntime = 1
-    month = (/"DJF"/)
-    ;month = (/"Sep","Oct","Nov","Dec","Jan","Feb"/)
     if(var_option.eq.-22) then 
     temp  = short2flt(f3->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
     minlvl := (/-7/);
@@ -641,24 +613,24 @@ if(var_option.ge.20) then
         end if
     end do
     if(divg_option) then 
-        vars(2,:,:,:,:) = uv2dv_cfd( vars(0,:,:,:,:), vars(1,:,:,:,:),vars&lat, vars&lon, 3 )*100000
+        vars(2,:,:,:,:,:) = uv2dv_cfd( vars(0,:,:,:,:,:), vars(1,:,:,:,:,:),vars&lat, vars&lon, 3 )*100000
         minlvl := (/-3.5,-3.5,-3.5/); -1.4,-1.4,-1.4-3.5,-3.5,-3.5
         maxlvl := (/ 3.5, 3.5, 3.5/);  1.4, 1.4, 1.4 3.5, 3.5, 3.5
         spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5
     else
         if(var_option.eq.22) then ;wafz or edd_sf 
-        vars(2,0,:,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(2,0,:,:,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
         else
-        vars(2,:,:,:,:) = -100.0*f3->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(2,:,:,:,:,:) = -100.0*f3->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if
         minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
         maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
         spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
     end if
     vcref  := (/10,20,20/) ;(/925,850,700,500,200/)
-    printMinMax(vars(0,:,:,:,:),0)
-    printMinMax(vars(1,:,:,:,:),0)
-    printMinMax(vars(2,:,:,:,:),0)
+    printMinMax(vars(0,:,:,:,:,:),0)
+    printMinMax(vars(1,:,:,:,:,:),0)
+    printMinMax(vars(2,:,:,:,:,:),0)
 end if    
 
 if(var_option.gt.0.and.var_option.lt.20)
@@ -682,23 +654,23 @@ vars(2,:,:,:) = dim_sum_n_Wrap(fbv->$var_name(nnv)$(0:1,:,{lev(nl)},{lats(na):la
 end if
 
 if(var_option.ge.20) then 
-var  := regCoef_n(ts,vars,2,2)
-tval := onedtond(var@tval ,(/6,neval,3,nvar,nlat,nlon/))
-df   := onedtond(var@nptxy,(/6,neval,3,nvar,nlat,nlon/))
-copy_VarCoords(vars(0,0,0,:,:), var(0,0,0,0,:,:))
-lon_m := conform(tval,vars&lon,5)
-printMinMax(var(:,:,0,:,:,:),0)
-printMinMax(var(:,:,1,:,:,:),0)
-printMinMax(var(:,:,2,:,:,:),0)
+var  := regCoef_n(ts,vars,0,2)
+tval := onedtond(var@tval ,(/3,nvar,nmonth,nlat,nlon/))
+df   := onedtond(var@nptxy,(/3,nvar,nmonth,nlat,nlon/))
+copy_VarCoords(vars(0,0,0,:,:), var(0,0,0,:,:))
+lon_m := conform(tval,vars&lon,4)
+printMinMax(var(0,:,:,:,:),0)
+printMinMax(var(1,:,:,:,:),0)
+printMinMax(var(2,:,:,:,:),0)
 else
-var  := regCoef_n(ts,vars,2,1)
+var  := regCoef_n(ts,vars,0,2)
 if(var_option.le.-21) then 
-tval := onedtond(var@tval ,(/6,neval,ntime,nlat1,nlon1/))
-df   := onedtond(var@nptxy,(/6,neval,ntime,nlat1,nlon1/))
-lon_m := conform(tval,vars&lon,4);gitude
+tval := onedtond(var@tval ,(/ntime,nlat1,nlon1/))
+df   := onedtond(var@nptxy,(/ntime,nlat1,nlon1/))
+lon_m := conform(tval,vars&lon,2);gitude
 else
-tval := onedtond(var@tval ,(/6,neval,nvar,nlat,nlon/))
-df   := onedtond(var@nptxy,(/6,neval,nvar,nlat,nlon/))
+tval := onedtond(var@tval ,(/nvar,nlat,nlon/))
+df   := onedtond(var@nptxy,(/nvar,nlat,nlon/))
 lon_m := conform(tval,vars&lon,4)
 end if
 copy_VarCoords(vars(0,0,:,:), var(0,0,0,:,:))
@@ -781,16 +753,9 @@ end if
 end if
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nk = 0, 0, 1
-do ne = 0, neval-3, 1
 do nv = 0, nvar-1,1
 do nt = 0, ntime-1, 1
-    nev = ne + 1
-    np = ne
-    ;np = ne*2+(nv-1)
-    ;np  = 2*na + ne ;1 var ;2 area
-    ;np = ne*nvar + nv ;1 var ;2 area
-    ;np = nk*(neval-1) + ne ;1 eof ;2 kind; 3 area
+    np = nt
     if(.not.(global)) then 
     res@mpMaxLatF        = latn(na) 
     res@mpMinLatF        = lats(na)
@@ -798,23 +763,22 @@ do nt = 0, ntime-1, 1
     res@mpMinLonF        = lonl(na)
     end if
     
-    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev ;area(na) + " " + lonl(na) + "-" + lonr(na) + "E"
-    res@gsnRightStringFontColor   = subtitle_color(nk,ne)
+    res@gsnLeftString   = pre_case(np) + ") " + area(na)
     if(var_option.ge.20) then
     if(divg_option) then 
-    res@gsnRightString  = draw_var(nv) + " WAF divg (" + unit(2) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightString  = draw_var(nv) + " WAF divg (" + unit(2) + ")  "
     else
-    res@gsnRightString  = draw_var(nv) + " WAF " + var_name(2) + " (" + unit(2) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightString  = draw_var(nv) + " WAF " + var_name(2) + " (" + unit(2) + ")  "
     end if
     end if
     if(var_option.ge.1.and.var_option.lt.20) then 
-    res@gsnRightString  = draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightString  = draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")  "
     end if
     if(var_option.le.0) then
     if(var_option.le.-21) then 
-    res@gsnRightString  = month(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightString  = month(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")  "
     else
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")  " + eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")  "
     end if
     end if
     

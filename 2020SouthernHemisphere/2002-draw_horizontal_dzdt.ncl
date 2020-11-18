@@ -7,12 +7,12 @@ begin
 year_option = True ;calc yearly DJF 
 jet_option  = False;True ;;20191205, control the draw of jet stream
 region_line = False;True ; draw the line for ME, EA, NA
-vect_option = True ;False;
-cont_option = True ;False;
+vect_option = False;True ;
+cont_option = False;True ;
 bar_share = True ;False;
-nl = 2 ;(/925,850,700,500,250/)
-na = 4 ; "NH","ME","EA","NA"
-DJF_option = False ;True ;
+nl = 4 ;(/925,850,700,500,250/)
+na = 0 ; "NH","ME","EA","NA"
+DJF_option = True ;False;
 
 if(DJF_option) then
 months  = (/"MAM_"/)
@@ -23,7 +23,7 @@ months  = (/""/)
 months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
-lev    = (/925,850,700,500,300/) 
+lev    = (/925,850,700,500,200/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
@@ -201,9 +201,9 @@ if(var_option.eq.22) then
 end if
 
 ;area: east Asia
-area = (/"NH","ME","EA","NA","TP"/)
-lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
+area = (/"SH","ME","EA","NA","TP"/)
+lats = (/ -90, 0  ,  0 ,  0 , 10 /);10 ;-20
+latn = (/ -10, 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -214,9 +214,8 @@ density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
 ;the path of the file
-path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
+path   = "/home/ys17-19/renql/project/2020SouthernHemisphere/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.le.-16)
     filename = path + "data/" + case + "_" + months + draw_var(0) + "-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
@@ -296,7 +295,7 @@ if(var_option.eq.21)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.22)
-    filename = path + "data/" + case + "_" + months + "steady_TN01-year.nc"
+    filename = path + "data/" + case + "_" + months + "steady_TN01-reg.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 
@@ -494,7 +493,8 @@ f = addfile(filename,"r")
 do nv = 0,2,1
     if(DJF_option) then
     if(var_option.eq.22) then 
-    var_m(nv,0,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    ;var_m(nv,0,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(nv,0,0,:,:)  = f->$var_name(nv)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     else
     var_m(nv,:,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
@@ -509,15 +509,16 @@ if(divg_option) then
     spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5 1, 1, 1
 else
     if(var_option.eq.22) then ;(1.0/1000000.0)*
-    var_m(2,0,0,:,:) = dim_avg_n_Wrap(f->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+    var_m(2,0,0,:,:) = (1.0/1000000.0)*f->$var_name(2)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    ;var_m(2,0,0,:,:) = dim_avg_n_Wrap(f->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     else
     var_m(2,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
-    minlvl := (/-21,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 21, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 3 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    minlvl := (/-7,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 7, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 1, 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
-vcref  := (/50,150,150/) ;(/925,850,700,500,200/)
+vcref  := (/10,150,150/) ;(/925,850,700,500,200/)
 ;vcref  := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref  := (/50,50,50/) ;(/925,850,700,500,200/)
 end if
@@ -917,9 +918,6 @@ end if
     end if
 do nt = 0, ntime-1,1
 do nv = 0,nvar-1,1
-;do ni = 0, 3, 1
-;do np = 0, 2, 1 
-    ;nt = ni*3 + np
     np = nt 
     if(var_option.ge.20) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv) + " WAF (" + unit(0) + ")"
@@ -998,7 +996,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
 ;end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)

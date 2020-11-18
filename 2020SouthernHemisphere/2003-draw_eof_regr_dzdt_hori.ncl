@@ -6,13 +6,18 @@
 begin
 lev  = (/925,850,500,200,100/)
 nlev = dimsizes(lev)
-nmonth = 3
+nl   = 3
+nmonth = 1
+months = (/"MAM"/)
+;months = (/"Mar","Apr","May"/)
 global = True
+siglvl = 0.1
 bar_share   = True ;False;
 bar_verti   = False;True ;
-jet_option  = True ;False
-regu_option = True ;False;
+jet_option  = False;True ;
+regu_option = False;True ;
 
+do nl = 1,4,1
 do var_option = 22,22,1 
 if(var_option.eq.-23) then 
     draw_var := (/"preci"/)  ;this is the variable used to draw, can used as center string
@@ -110,18 +115,18 @@ if(var_option.eq.22) then
 end if
 nvar = dimsizes(draw_var)
 
+na   = 0
 lats = (/ -90/);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
 latn = (/ -10/);, 60  ;90 , 90 , 90 , 90  60 , 60 , 60
 lonl = (/ 0  /);, 0   ;30 ;20  0  ,105 , 250
 lonr = (/ 360/);, 360 ;150;220 70 ,175 , 320
 lon_spacing = 30
 lat_spacing = 20
-siglvl = 0.05
 years = ispan(1979,2016,1)
+nyear = dimsizes(years)
 
 case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/2020SouthernHemisphere/"
-filename0  = path + "data/eof_u_6kinds-" + area + ".nc"
 if(var_option.eq.-23)
     filename = "/home/ys17-19/data-observation/GPCP/precip.mon.mean.197901.201809.nc"
     fig_name = path + "fig/eof_regression_hor-preci"
@@ -176,7 +181,7 @@ if(var_option.eq.21)
 end if
 if(var_option.eq.22)
     filename = path + "data/" + case + "_steady_Pb85-year_month.nc"
-    fig_name = path + "fig/eof_regression_hor-" + draw_var(0)
+    fig_name = path + "fig/eof_regression_hor-" + draw_var(0) + lev(nl)
 end if
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
@@ -478,7 +483,9 @@ end if
 
 ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
 2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
--3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654,2.65007,-2.947284/)
+-3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
+print("nyear of ts : " + dimsizes(ts))
+print("nyear of waf : " + nyear)
 ;ts = (/0.6843878,0.2328069,-0.8883422,0.9194,-2.049343,0.8701207,0.6956607,1.529305,-1.833134,0.4640056,0.6192874,0.03531907,-0.2721298,-1.553613,-0.5360572,\
 ;0.6987813,0.01709986,-0.04073962,-2.473586,-1.550633,1.244261,0.5346467,0.845744,-0.1475716,0.04019789,0.7101959,0.5763686,0.6535391,0.1671478,\
 ;0.2156614,0.3582229,0.4480299,1.124319,1.026412,0.4648125,-1.267753,-2.003626,-0.9242076,0.8890295,-0.5240264/)
@@ -509,9 +516,9 @@ if(var_option.eq.-22.or.var_option.eq.-23) then
     end if
     nlat1 = dimsizes(temp&lat)
     nlon1 = dimsizes(temp&lon)
-    vars := new((/ntime,nyear,nlat1,nlon1/),float)
+    vars := new((/nmonth,nyear,nlat1,nlon1/),float)
     time  = cd_calendar(f3->time,0)
-    if(ntime.eq.1) then
+    if(nmonth.eq.1) then
     vars = 0
     if(var_option.eq.-22) then 
     select_time   := ind(time(:,0).ge.1979.and.time(:,0).le.2015.and.time(:,1).eq.12)
@@ -553,15 +560,12 @@ if(var_option.eq.-22.or.var_option.eq.-23) then
 end if
 
 if(var_option.eq.-21) then 
-    ntime = 1
-    month = (/"DJF"/)
-    ;month = (/"Sep","Oct","Nov","Dec","Jan","Feb"/)
     temp  = f3->$var_name(0)$(0,{lats(na):latn(na)},{-180:180})
     nlat1 = dimsizes(temp&latitude)
     nlon1 = dimsizes(temp&longitude)
-    vars := new((/ntime,nyear,nlat1,nlon1/),float)
+    vars := new((/nmonth,nyear,nlat1,nlon1/),float)
     time  = cd_calendar(f3->time,0)
-    if(ntime.eq.1) then
+    if(nmonth.eq.1) then
     vars = 0
     select_time   := ind(time(:,0).ge.1979.and.time(:,0).le.2015.and.time(:,1).eq.12)
     vars(0,:,:,:) = vars(0,:,:,:) + f3->$var_name(0)$(select_time,{lats(na):latn(na)},{-180:180})
@@ -607,9 +611,9 @@ end if
 if(var_option.ge.20) then 
     do nv = 0,2,1
         if(var_option.eq.22) then 
-        vars(nv,0,:,:,:)  = f3->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(nv,0,:,:,:,:)  = f3->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         else
-        vars(nv,:,:,:,:)  = f3->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(nv,:,:,:,:,:)  = f3->$var_name(nv)$(:,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if
     end do
     if(divg_option) then 
@@ -621,13 +625,13 @@ if(var_option.ge.20) then
         if(var_option.eq.22) then ;wafz or edd_sf 
         vars(2,0,:,:,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
         else
-        vars(2,:,:,:,:,:) = -100.0*f3->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(2,:,:,:,:,:) = -100.0*f3->$var_name(2)$(:,:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if
-        minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-        maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-        spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
+        minlvl := (/-0.7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+        maxlvl := (/ 0.7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+        spacig := (/ 0.1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
     end if
-    vcref  := (/10,20,20/) ;(/925,850,700,500,200/)
+    vcref  := (/0.5,20,20/) ;(/925,850,700,500,200/)
     printMinMax(vars(0,:,:,:,:,:),0)
     printMinMax(vars(1,:,:,:,:,:),0)
     printMinMax(vars(2,:,:,:,:,:),0)
@@ -657,23 +661,14 @@ if(var_option.ge.20) then
 var  := regCoef_n(ts,vars,0,2)
 tval := onedtond(var@tval ,(/3,nvar,nmonth,nlat,nlon/))
 df   := onedtond(var@nptxy,(/3,nvar,nmonth,nlat,nlon/))
-copy_VarCoords(vars(0,0,0,:,:), var(0,0,0,:,:))
+copy_VarCoords(vars(0,0,0,0,:,:), var(0,0,0,:,:))
 lon_m := conform(tval,vars&lon,4)
-printMinMax(var(0,:,:,:,:),0)
-printMinMax(var(1,:,:,:,:),0)
-printMinMax(var(2,:,:,:,:),0)
 else
-var  := regCoef_n(ts,vars,0,2)
-if(var_option.le.-21) then 
-tval := onedtond(var@tval ,(/ntime,nlat1,nlon1/))
-df   := onedtond(var@nptxy,(/ntime,nlat1,nlon1/))
-lon_m := conform(tval,vars&lon,2);gitude
-else
-tval := onedtond(var@tval ,(/nvar,nlat,nlon/))
-df   := onedtond(var@nptxy,(/nvar,nlat,nlon/))
-lon_m := conform(tval,vars&lon,4)
-end if
-copy_VarCoords(vars(0,0,:,:), var(0,0,0,:,:))
+var  := regCoef_n(ts,vars,0,1)
+tval := onedtond(var@tval ,(/nvar,nmonth,nlat,nlon/))
+df   := onedtond(var@nptxy,(/nvar,nmonth,nlat,nlon/))
+lon_m := conform(tval,vars&lon,3)
+copy_VarCoords(vars(0,0,0,:,:), var(0,0,:,:))
 end if
 
 b := tval 
@@ -683,14 +678,14 @@ prob   = mask(prob,lon_m.eq.0,False)
 delete([/tval,df,lon_m/])
 if(var_option.ge.20) then
 svar   = var
-svar(:,:,0,:,:,:)   = mask(var(:,:,0,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),True) ;pass significance
-svar(:,:,1,:,:,:)   = mask(var(:,:,1,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),True) ;pass significance
- var(:,:,0,:,:,:)   = mask(var(:,:,0,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),False) ;not pass significance
- var(:,:,1,:,:,:)   = mask(var(:,:,1,:,:,:),(prob(:,:,0,:,:,:).lt.siglvl).or.(prob(:,:,1,:,:,:).lt.siglvl),False) ;not pass significance
-copy_VarCoords(vars(0,0,0,:,:), prob(0,0,0,0,:,:))
-copy_VarCoords(vars(0,0,0,:,:), svar(0,0,0,0,:,:))
+svar(0,:,:,:,:)   = mask(var(0,:,:,:,:),(prob(0,:,:,:,:).lt.siglvl).or.(prob(1,:,:,:,:).lt.siglvl),True) ;pass significance
+svar(1,:,:,:,:)   = mask(var(1,:,:,:,:),(prob(0,:,:,:,:).lt.siglvl).or.(prob(1,:,:,:,:).lt.siglvl),True) ;pass significance
+ var(0,:,:,:,:)   = mask(var(0,:,:,:,:),(prob(0,:,:,:,:).lt.siglvl).or.(prob(1,:,:,:,:).lt.siglvl),False) ;not pass significance
+ var(1,:,:,:,:)   = mask(var(1,:,:,:,:),(prob(0,:,:,:,:).lt.siglvl).or.(prob(1,:,:,:,:).lt.siglvl),False) ;not pass significance
+copy_VarCoords(vars(0,0,0,0,:,:), prob(0,0,0,:,:))
+copy_VarCoords(vars(0,0,0,0,:,:), svar(0,0,0,:,:))
 else
-copy_VarCoords(vars(0,0,:,:), prob(0,0,0,:,:))
+copy_VarCoords(vars(0,0,0,:,:), prob(0,0,:,:))
 end if
 prob   = mask(prob,prob.lt.siglvl,True)
 
@@ -754,7 +749,7 @@ end if
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nv = 0, nvar-1,1
-do nt = 0, ntime-1, 1
+do nt = 0, nmonth-1, 1
     np = nt
     if(.not.(global)) then 
     res@mpMaxLatF        = latn(na) 
@@ -763,7 +758,7 @@ do nt = 0, ntime-1, 1
     res@mpMinLonF        = lonl(na)
     end if
     
-    res@gsnLeftString   = pre_case(np) + ") " + area(na)
+    res@gsnLeftString   = pre_case(np) + ") " + months(nt) + " " + lev(nl) + "hPa"
     if(var_option.ge.20) then
     if(divg_option) then 
     res@gsnRightString  = draw_var(nv) + " WAF divg (" + unit(2) + ")  "
@@ -775,11 +770,7 @@ do nt = 0, ntime-1, 1
     res@gsnRightString  = draw_var(nv) + " " + var_name(nnv) + " (" + unit(nnv) + ")  "
     end if
     if(var_option.le.0) then
-    if(var_option.le.-21) then 
-    res@gsnRightString  = month(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")  "
-    else
     res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")  "
-    end if
     end if
     
     if(nv.gt.10) then
@@ -792,36 +783,30 @@ do nt = 0, ntime-1, 1
     end if
     
     if(var_option.ge.20)
-    plot(np) = gsn_csm_contour_map_ce(wks,var(nk,ne,2,nv,:,:),res)
-    sigl(np) = gsn_csm_contour(wks,prob(nk,ne,2,nv,:,:),res_sig)
+    plot(np) = gsn_csm_contour_map_ce(wks,var(2,nv,nt,:,:),res)
+    sigl(np) = gsn_csm_contour(wks,prob(2,nv,nt,:,:),res_sig)
     overlay(plot(np),sigl(np))
     resvc@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
     resvc@vcRefAnnoString2     = vcref(nv)+"m~S~2~N~/s~S~2~N~"
     resvc2@vcRefMagnitudeF      = vcref(nv)             ; define vector ref mag
     resvc2@vcRefAnnoString2     = vcref(nv)+"m~S~2~N~/s~S~2~N~"
-    vect(np)  = gsn_csm_vector(wks,var(nk,ne,0,nv,:,:) ,var(nk,ne,1,nv,:,:) ,resvc2)
-    vect2(np) = gsn_csm_vector(wks,svar(nk,ne,0,nv,:,:),svar(nk,ne,1,nv,:,:),resvc) ;pass significance
+    vect(np)  = gsn_csm_vector(wks,var(0,nv,nt,:,:) ,var(1,nv,nt,:,:) ,resvc2)
+    vect2(np) = gsn_csm_vector(wks,svar(0,nv,nt,:,:),svar(1,nv,nt,:,:),resvc) ;pass significance
     overlay(plot(np),vect(np))
     overlay(plot(np),vect2(np))
-    printMinMax(var(nk,ne,0,nv,:,:),0)
-    printMinMax(var(nk,ne,1,nv,:,:),0)
-    printMinMax(var(nk,ne,2,nv,:,:),0)
+    printMinMax(var(0,nv,nt,:,:),0)
+    printMinMax(var(1,nv,nt,:,:),0)
+    printMinMax(var(2,nv,nt,:,:),0)
     else
-    if(var_option.le.-21) then 
-    plot(np) = gsn_csm_contour_map_ce(wks, var(nk,ne,nt,:,:),res)
-    sigl(np) = gsn_csm_contour(wks,prob(nk,ne,nt,:,:),res_sig)
-    printMinMax(var(nk,ne,nt,:,:),0)
-    else
-    plot(np) = gsn_csm_contour_map_ce(wks, var(nk,ne,nv,:,:),res)
-    sigl(np) = gsn_csm_contour(wks,prob(nk,ne,nv,:,:),res_sig)
-    printMinMax(var(nk,ne,nv,:,:),0)
-    end if
+    plot(np) = gsn_csm_contour_map_ce(wks, var(nv,nt,:,:),res)
+    sigl(np) = gsn_csm_contour(wks,prob(nv,nt,:,:),res_sig)
+    printMinMax(var(nv,nt,:,:),0)
     overlay(plot(np),sigl(np))
     end if
   
     if(regu_option) then 
     reg_line@cnLevelSpacingF      := lin_spc(na)     ; set contour interval
-    regl(np) = gsn_csm_contour(wks,ureg(nk,ne,:,:),reg_line)
+    regl(np) = gsn_csm_contour(wks,ureg(nt,:,:),reg_line)
     overlay(plot(np),regl(np))
     end if
 
@@ -829,21 +814,17 @@ do nt = 0, ntime-1, 1
     line(np) = gsn_csm_contour(wks,u,res_line)
     overlay(plot(np),line(np))
     end if
-
-    line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,na), latx(:,na), lnres1 )
 end do 
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    gsn_panel(wks,plot,(/nvar,1/),resp)
-end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-    gsn_panel(wks,plot,(/2,1/),resp)
-end do ;EOF kinds
-end do ;area 
+    gsn_panel(wks,plot,(/3,1/),resp)
 ;    gsn_panel(wks,plot,(/narea,2/),resp)
 end do ;var_option
+end do ;level
 end
 

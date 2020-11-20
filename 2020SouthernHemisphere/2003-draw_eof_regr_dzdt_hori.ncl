@@ -7,9 +7,9 @@ begin
 lev  = (/925,850,500,200,100/)
 nlev = dimsizes(lev)
 nl   = 3
-nmonth = 1
-months = (/"MAM"/)
-;months = (/"Mar","Apr","May"/)
+nmonth = 3
+;months = (/"MAM"/)
+months = (/"Mar","Apr","May"/)
 global = True
 siglvl = 0.1
 bar_share   = True ;False;

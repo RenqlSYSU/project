@@ -7,8 +7,7 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
-data_option = 1 ;0 ERA, 1 CPC
-selecmod = 1
+data_option = 0 ;0 ERA, 1 CPC
 allyear  = False
 ;area:    east Asia
 lats = (/ 20/)  ;-20
@@ -19,7 +18,7 @@ lat_spacing = 15
 lon_spacing = 20
 na = 0
 nm_s = 5
-nm_e = 6
+nm_e = 8
 siglvl = 0.05
 
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
@@ -27,20 +26,22 @@ path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 case1 = "ERA-Interim"
 if(data_option.eq.0) then 
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/rain_daily/rain.daily.interim."; + years(nt) + ".nc"
-var_name  = (/"r"/)
+var_name= (/"r"/)
+years   = ispan(1979,2010,1)
+fig_name= path2 + "fig/Obs_corr_TE_ERApreci"
 else
-path4   = "/home/ys17-19/data-observation/CPC_daily_precip/precip."; + years(nt) + ".nc"
-var_name  = (/"precip"/)
+path4   = "/home/ys17-19/data-observation/CAMS/CPC_daily_precip/precip."; + years(nt) + ".nc"
+var_name= (/"precip"/)
+years   = ispan(1979,2016,1)
+fig_name= path2 + "fig/Obs_corr_TE_CPCpreci"
 end if
 
-fig_name  = path2 + "fig/Obs_corr_TE_preci"
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 fig_out   ="pdf"       ;"x11"
 unit      = "mm/day"   ;this can be used as right string 
 draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
 
-years    = ispan(1979,2016,1)
 years@calendar = "standard"
 nyear = dimsizes(years)
 
@@ -63,7 +64,7 @@ select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
 ts2 = f1->EKEts(0:(nyear-1),select_time)
 
 f    = addfile(path4 + years(0) + ".nc", "r")
-vars = f->$var_name(0)$(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+vars = f->$var_name(0)$(0,{lats(na)-5:latn(na)+5},{lonl(na)-5:lonr(na)+5})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 ntime = dimsizes(select_time)
@@ -89,8 +90,9 @@ if(isleapyear(years(nt))) then ;leap year,366 day
 else
     select = select_time
 end if 
-    rain(nt,:,:,:) = f->$var_name$(select,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    rain(nt,:,:,:) = f->$var_name$(select,{lats(na)-5:latn(na)+5},{lonl(na)-5:lonr(na)+5})
 end do   ;the loop of 3 cases
+;ts2 = dim_standardize_n(ts2,0,0)
 
 if(allyear) then 
 nday  = dimsizes(select_time)
@@ -104,6 +106,13 @@ copy_VarMeta(vars,var2 )
 copy_VarMeta(vars,prob2)
 end if
 
+    wks = gsn_open_wks(fig_out,fig_name+lonl(na)+"-"+lonr(na)+"-"+nm_s+nm_e)  
+    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+    ;gsn_define_colormap(wks,"precip3_16lev") 
+    ;blue and yellow and red, has 17 colors,2-18,2 is white
+
+do lag = 0,2,1
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, (nm_e-nm_s), 1
     nm2_s = nm + nm_s
@@ -114,7 +123,8 @@ do nm = 0, (nm_e-nm_s), 1
     var  := reshape(rain(:,select2,:,:),(/nsample,nlat,nlon/))
     ts   := ndtooned(ts2(:,select2))
 
-    term := regCoef_n(ts,var,0,0)
+    ;term := regCoef_n(ts,var,0,0)
+    term := regCoef_n(ts(0:nsample-lag-1),var(lag:nsample-1,:,:),0,0)
     tval := onedtond(term@tval ,(/nlat,nlon/))
     df   := onedtond(term@nptxy,(/nlat,nlon/))
     b = tval 
@@ -136,12 +146,6 @@ printVarSummary(var1)
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name+lonl(na)+"-"+lonr(na))  
-    gsn_define_colormap(wks,"BlueDarkRed18")
-    ;blue and red, has 18 colors,2-10 is blue
-    ;gsn_define_colormap(wks,"precip3_16lev") 
-    ;blue and yellow and red, has 17 colors,2-18,2 is white
-
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
@@ -210,9 +214,9 @@ printVarSummary(var1)
     ;res@cnLevels             = ispan(0,60,10)
 ;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -0.8          ; set min contour level
-    res@cnMaxLevelValF        =  0.8;32        ; set max contour level
-    res@cnLevelSpacingF       = 0.1        ; set contour interval
+    res@cnMinLevelValF        = -1.6          ; set min contour level
+    res@cnMaxLevelValF        =  1.6;32        ; set max contour level
+    res@cnLevelSpacingF       = 0.2        ; set contour interval
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -311,6 +315,8 @@ if(allyear) then
     overlay(plot(nm),plot2(nm))
     overlay(plot(nm),gtop(nm))
 end if
-    gsn_panel(wks,plot,(/1,2/),resp)
+    resp@txString  = "EKE leads precip" + lag + " day" 
+    gsn_panel(wks,plot,(/2,2/),resp)
+end do
 end
 

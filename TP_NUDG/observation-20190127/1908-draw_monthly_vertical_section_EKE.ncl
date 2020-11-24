@@ -9,14 +9,13 @@ unit     = (/"J"  ,"m/s" ,"m~S~2~N~/s~S~2~N~"/)    ;this can be used as right st
 ;var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 ;months   = (/"DJF","MAM","JJA","SON"/)
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 case = (/"NCEP1","ERA-Interim"/)
 zonal = False ; True means to calc anomaly based on zonal average
 jet_option = True ;False;
-homogenization = True ; False; 
-na = 0  ; "TP","EA","NH","CA"
-nv = 2
+homogenization = False; True ;
 nc = 1
+nv = 0
 
 ;parameter for bw_bandpass_filter
 ca = 10.0 ;day
@@ -28,8 +27,8 @@ lats = (/ 35 , 15 , 0  , 15 /);20 ;-20
 latn = (/ 35 , 55 , 89 , 55 /) ;55 ;60
 lonl = (/ 0  ,110 , 1  ,0   /) ;30 ;20
 lonr = (/180 ,130 ,359 ,70  /) ;150;220
-lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
-;lev  = (/1000,925,850,700,600,500,400,300,200,150,100/)
+;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
+lev  = (/1000,925,850,700,600, 500,400,300,200,150, 100/) ;EKE
 
 do na = 0,0,1
 ;the path of the file
@@ -44,7 +43,7 @@ else
 fig_name = path + "/fig/1p1x4_vertical_section_" + area(na) + draw_var(nv)
 end if
 ;fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(f","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 nmonth = dimsizes(months)
@@ -61,7 +60,7 @@ nmonth = dimsizes(months)
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5
+   mp_thick       = 3.0
    font_index     = 22
 
     wks = gsn_open_wks(fig_out,fig_name)
@@ -99,12 +98,12 @@ if(jet_option) then
     printVarSummary(u)
 end if
 
-do nv = 2,7,1
+do nv = 0,0,1
 filename = path + "/mdata/" + case(nc) + "_Clim_month_ave_" + draw_var(nv) + ".nc" 
 f = addfile(filename,"r")
 var := f->$var_name(0)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 var := dim_avg_n_Wrap(var,2)
-;var(0,:,:) = dim_avg_n_Wrap(var,0) ;annual average
+var(0,:,:) = dim_avg_n_Wrap(var,0) ;annual average
 printVarSummary(var)
 if(zonal) then 
 var_ave := f->$var_name(0)$(:,:,{lats(na):latn(na)},:) ;get an array (ncase,nmonth,nlat,nlon)
@@ -144,15 +143,15 @@ printVarSummary(var)
     
     res@tmXBMajorThicknessF     = mp_thick
     res@tmYLMajorThicknessF     = mp_thick
-    ;  res@tmXBMajorOutwardLengthF = -0.
-    ;  res@tmYLMajorOutwardLengthF = -0.
-    ;  res@tmYRMajorOutwardLengthF = -0.
+    res@tmXBMajorOutwardLengthF = -0.
+    res@tmYLMajorOutwardLengthF = -0.
+    res@tmYRMajorOutwardLengthF = -0.
       
     res@tmXBMinorThicknessF     = mp_thick
     res@tmYLMinorThicknessF     = mp_thick
-    ;  res@tmXBMinorOutwardLengthF = -0.
-    ;  res@tmYLMinorOutwardLengthF = -0.
-    ;  res@tmYRMinorOutwardLengthF = -0.
+    res@tmXBMinorOutwardLengthF = -0.
+    res@tmYLMinorOutwardLengthF = -0.
+    res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
@@ -270,7 +269,7 @@ do nm = 0,nmonth-1,1
     res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv) + " (" + unit(2) + ")"
     end if
     else
-    res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lats(na) + "N " + draw_var(nv) + " (" + unit(nv) + ")" ;+ "-" + latn(na) 
     end if
     plot(np) = gsn_csm_pres_hgt(wks,var(nm,:,:),res)
 
@@ -285,7 +284,7 @@ do nm = 0,nmonth-1,1
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/4,3/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 ;    gsn_panel(wks,plot,(/1,4/),resp)
 end do 
 end do 

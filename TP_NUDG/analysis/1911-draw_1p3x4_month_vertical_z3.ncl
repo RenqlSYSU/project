@@ -36,11 +36,11 @@ draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt","4q1","V"/)  ;this i
 lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 nv = 9
-diff = True;False
+diff = False;True ;
 jet_option = True
 jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
-var_option = 2
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)

@@ -37,7 +37,7 @@ lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,h
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = lev
 nv = 9
-diff = True ;False;
+diff = False;True ;
 perc = True
 jet_option = True ;False 
 barshare = True ;False;
@@ -55,8 +55,9 @@ jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 imonth = ispan(0,11,1);(/4,5,6,7/)
+annual = True
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
@@ -101,8 +102,8 @@ fig_out    = "pdf";"x11"
 area = (/"TP","EA","NH","CA"/)
 lats = (/ 35 , 15 , 0  , 15 /);20 ;-20
 latn = (/ 35 , 55 , 89 , 55 /) ;55 ;60
-lonl = (/ 30 ,110 , 1  ,0   /) ;30 ;20
-lonr = (/150 ,130 ,359 ,70  /) ;150;220
+lonl = (/  0 ,110 , 1  ,0   /) ;30 ;20
+lonr = (/180 ,130 ,359 ,70  /) ;150;220
 lon_spacing = 30
 na = 0
 
@@ -195,6 +196,10 @@ if(var_option.le.2) then
         f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
         var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         vari(nf,:,:,:,:) = f->$var_name(1)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        if(annual) then 
+        var(nf,0,:,:,:)  = f->EKE(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vari(nf,0,:,:,:) = f->EKE_vari(0,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        end if
         end do
         var := dim_avg_n_Wrap(var,3)
         vari := dim_avg_n_Wrap(vari,3)
@@ -212,7 +217,7 @@ if(var_option.eq.4) then
     vari := dim_avg_n_Wrap(vari,3)
 end if
     
-vari  = where(abs(vari).le.0.000001, 0.01, vari)
+;vari  = where(abs(vari).le.0.0000001, 0.01, vari)
 prob  = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(1,:,:,:),vari(1,:,:,:),nsample,True,False)
 prob  = mask(prob, prob.lt.siglvl, True)
 copy_VarMeta(var(0,:,:,:),prob)
@@ -228,6 +233,10 @@ if(jet_option) then
     end if
     var_u(nf,:,:,:) = dim_avg_n_Wrap(u,2)
     end do
+    
+    if(annual) then 
+    var_u(:,0,:,:) = dim_avg_n_Wrap(var_u,1)
+    end if
     
     copy_VarMeta(u(0,:,0,:),var_u(0,0,:,:))
     printVarSummary(var_u)
@@ -314,15 +323,15 @@ printVarSummary(var)
     
     res@tmXBMajorThicknessF     = mp_thick
     res@tmYLMajorThicknessF     = mp_thick
-    ;  res@tmXBMajorOutwardLengthF = -0.
-    ;  res@tmYLMajorOutwardLengthF = -0.
-    ;  res@tmYRMajorOutwardLengthF = -0.
+    res@tmXBMajorOutwardLengthF = -0.
+    res@tmYLMajorOutwardLengthF = -0.
+    res@tmYRMajorOutwardLengthF = -0.
       
     res@tmXBMinorThicknessF     = mp_thick
     res@tmYLMinorThicknessF     = mp_thick
-    ;  res@tmXBMinorOutwardLengthF = -0.
-    ;  res@tmYLMinorOutwardLengthF = -0.
-    ;  res@tmYRMinorOutwardLengthF = -0.
+    res@tmXBMinorOutwardLengthF = -0.
+    res@tmYLMinorOutwardLengthF = -0.
+    res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
@@ -562,8 +571,8 @@ end do ;for the month
 
 else
 do nc = 0, ncase-1,1
-do nm = 0,nmonth-1,1
-if((nc.le.0).and.(nv.eq.9)) then
+do nm = 0,0,1 ;nmonth-1,1
+if((nc.le.0).or.(nv.eq.9)) then
     res@cnFillPalette = "precip3_16lev"
     res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
     ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -573,10 +582,10 @@ else
     ;blue and red, has 18 colors,2-10 is blue
 end if 
         ;np = nmonth*nc + nm
-        np = nm
+         np = nc
     ;    np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lats(na) + "-" + latn(na) + "N " + draw_varname(nv) ;+ " (" + unit(nv) + ")"
+        res@gsnRightString  = lats(na) + "N " + draw_varname(nv) + " (" + unit(nv) + ")";+ "-" + latn(na) 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -598,12 +607,12 @@ end if
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
-    gsn_panel(wks,plot,(/3,4/),resp)
+;    gsn_panel(wks,plot,(/3,4/),resp)
 end do ;for the month 
     
 ;    gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    ;gsn_panel(wks,plot,(/nmonth,1/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 end if
 end
 

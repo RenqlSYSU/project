@@ -7,7 +7,7 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
-data_option = 0 ;0 ERA, 1 CPC
+data_option = 1 ;0 ERA, 1 CPC
 allyear  = False
 ;area:    east Asia
 lats = (/ 20/)  ;-20
@@ -33,7 +33,7 @@ else
 path4   = "/home/ys17-19/data-observation/CAMS/CPC_daily_precip/precip."; + years(nt) + ".nc"
 var_name= (/"precip"/)
 years   = ispan(1979,2016,1)
-fig_name= path2 + "fig/Obs_corr_TE_CPCpreci"
+fig_name= path2 + "fig/Obs_corr_TE_CPCpreci_"
 end if
 
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -112,11 +112,11 @@ end if
     ;gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 
-do lag = 0,2,1
+do lag = 0,6,1
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, (nm_e-nm_s), 1
     nm2_s = nm + nm_s
-    nm2_e = nm + nm_s 
+    nm2_e = nm + nm_s
     select2 := ind(time1(:,1).ge.nm2_s.and.time1(:,1).le.nm2_e)
     nday     = dimsizes(select2)
     nsample  = nyear*nday

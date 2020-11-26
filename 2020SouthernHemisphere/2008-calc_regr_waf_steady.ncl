@@ -35,7 +35,7 @@ lats =  -5  ;-20
 latn =  -90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100, 70,50,30,20,10,7/)
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -229,8 +229,8 @@ wafy  = coef*((u/a/a/coslat)*(dsfdx*dsfdy-edd_sf*center_finite_diff_n(dsfdy,lon,
 printMinMax(wafy,False)
 
 noz   = -sclhgt*log(lev/1000.0)
-dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev-2)
-;dsfdz = center_finite_diff_n(edd_sf,noz,cyclic,opt,ilev)
+dsfdz = center_finite_diff_n(edd_sf,noz,cyclic,opt,ilev-2)
+;dsfdz = center_finite_diff_n(edd_sf,lev*100,cyclic,opt,ilev-2)
 wafz  = coef*NN*((u/a/coslat)*(dsfdx*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lon,loncyc,opt,ilon-2)) \
                 +(v/a       )*(dsfdy*dsfdz-edd_sf*center_finite_diff_n(dsfdz,lat,cyclic,opt,ilat-2)))
 delete([/coslat,coef,dsfdx,dsfdy,dsfdz,u,v/])

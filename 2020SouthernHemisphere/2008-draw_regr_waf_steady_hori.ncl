@@ -6,8 +6,8 @@
 begin
 jet_option  = False;True ;;20191205, control the draw of jet stream
 bar_share = True ;False;
-barvert   = False;True
-lev    = (/925,850,700,500,200/) 
+barvert   = True ;False;
+lev    = (/925,850,500,200,100, 50,10/) 
 nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
@@ -43,7 +43,7 @@ if(var_option.eq.0) then
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
     unit     = (/"m~S~2~N~/s~S~2~N~" ,"m2/s2" ,"10~S~4~N~m~S~2~N~/s"/)  ;this can be used as right string 
-    shad_option = 1 ;0=divg; 1=edd_sf; 2=wafz 
+    shad_option = 2 ;0=divg; 1=edd_sf; 2=wafz 
 end if
 if(var_option.eq.1) then 
     draw_var = (/"RWS"/)  ;this is the variable used to draw, can used as center string
@@ -58,7 +58,7 @@ if(var_option.eq.0)
     ;filename = path + "data/" + case + "_" + months + "steady_Pb85-reg2.nc"
     filename = path + "data/" + case + "_" + months + "steady_TN01-reg.nc"
     ;filename = path + "data/" + case + "_" + months + "steady_Pb85_2-reg.nc"
-    fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(0)
+    fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(2)
 end if
 if(var_option.eq.1)
     filename = path + "data/" + case + "_" + months + "rws-reg.nc"
@@ -106,7 +106,7 @@ end if
     gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
 
-;do nl = 1, 4, 1
+do nl = 3, 6, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -140,7 +140,7 @@ end if
 
 if(var_option.eq.0) then 
 var_m = var_m*1000
-vcref := (/2,150,150/) ;(/925,850,700,500,200/)
+vcref := (/1,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
 prob(0,:,:) = f->prob({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -162,8 +162,8 @@ if(shad_option.eq.1) then ;edd_sf
 end if
 if(shad_option.eq.2) then ;wafz
     var_name(2) = "wafz"
-    unit(2)     = "10~S~-4~N~m~S~2~N~/s~S~2~N~"
-    var_m(2,0,:,:) = 10000.0*f->$var_name(2)$({500},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    unit(2)     = "10~S~-8~N~m~S~2~N~/s~S~2~N~"
+    var_m(2,0,:,:) = 100000000.0*f->$var_name(2)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     minlvl := (/-14/);-3.5,-3.5,-3.54.2,-4.2,-4.2
     maxlvl := (/ 14/); 3.5, 3.5, 3.54.2, 4.2, 4.2
     spacig := (/ 2 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
@@ -408,7 +408,7 @@ printVarSummary(var_m)
 
 do nt = 0, ntime-1,1
 do nv = 0, nvar-1, 1
-    np = nt 
+    np = nl-3
     res@gsnLeftString   = pre_case(np) + ") "
     if(var_option.eq.0) then 
     if(shad_option.eq.0) then 
@@ -453,8 +453,10 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/1,1/),resp)
+;    gsn_panel(wks,plot,(/1,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
+end do 
+    gsn_panel(wks,plot,(/4,1/),resp)
 end do 
 end
 

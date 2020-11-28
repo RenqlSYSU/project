@@ -14,26 +14,26 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 nmonth = 4
 month_s = 1 
 month_e = 8
 
 ;parameter for bw_bandpass_filter
-ca = 7.0 ;day
+ca = 10.0 ;day
 cb = 2.5 
 
 if(case_option.eq.0) then
-    case    = (/"CTRL","NG24h","NG6h"/)
+    case    = (/"CTRL","NG6h","NG24h"/)
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_eddy_flux4.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_eddy_flux4.nc"
     else
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG24h","NUDG6h"/) + "-Clim_month_eddy_flux_" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_eddy_flux_" + cb + "-" + ca + "day.nc"
     end if  
 end if
 
@@ -50,11 +50,12 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG","NG58"/)
+    case    = (/"F2000","NGTR","NUDG","NG58"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,30,1)   ;the calculate time
+    years   = ispan(1,10,1)   ;the calculate time
     if(option.eq.0) then
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_eddy_flux12.nc"
     else
@@ -93,7 +94,7 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-Qeddy_m  = new((/ 3,nmonth,nlev,nlat,nlon/),float)
+Qeddy_m  = new((/ 4,nmonth,nlev,nlat,nlon/),float)
 A_m      = new((/ 2,nmonth,nlev,nlat,nlon/),float)
 Tflux_m  = new((/ 3,nmonth,nlev,nlat,nlon/),float)
 Sflux_m  = new((/ 3,nmonth,nlev,nlat,nlon/),float)
@@ -113,7 +114,7 @@ cyclic = False ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf =2,2,1
+do nf = 0,1,1
 ;do nf = 0,ncase-2,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -168,10 +169,30 @@ if(option.eq.1) then
     edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
     edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 else
+if(case_option.eq.2) then
+    cf = ezfftf_n(dim_avg_n(u,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_u = conform(u,ezfftb_n(cf,cf@xbar,1),(/1,2,3,4/))
+    printVarSummary(cf)
+    
+    cf = ezfftf_n(dim_avg_n(v,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_v = conform(u,ezfftb_n(cf,cf@xbar,1),(/1,2,3,4/))
+    
+    cf = ezfftf_n(dim_avg_n(w,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_w = conform(u,ezfftb_n(cf,cf@xbar,1),(/1,2,3,4/))
+    
+    cf = ezfftf_n(dim_avg_n(t,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_t = conform(u,ezfftb_n(cf,cf@xbar,1),(/1,2,3,4/))
+    delete(cf)
+else
     clm_u = conform(u, dim_avg_n(u,iyear), (/1,2,3,4/))
     clm_v = conform(v, dim_avg_n(v,iyear), (/1,2,3,4/)) 
     clm_t = conform(t, dim_avg_n(t,iyear), (/1,2,3,4/)) 
     clm_w = conform(w, dim_avg_n(w,iyear), (/1,2,3,4/)) 
+end if
     edd_u = u - clm_u
     edd_v = v - clm_v   
     edd_t = t - clm_t   
@@ -181,20 +202,21 @@ printVarSummary(clm_u)
 lev5d = tofloat(conform(clm_t,lev*100,ilev))
 density = 1.293*(lev5d/101325.0)*(273.15/clm_t)
 delete([/u,v,t,w/])
-delete([/clm_u,clm_v,clm_t,clm_w,lev5d/])
+delete([/clm_u,clm_v,clm_t,clm_w/])
 
 ;==========================================================
 ;calc forcing factors: Qeddy, Qd, A, dimension is 5d
 ;============================================================
 coslat = conform(edd_u,cos(lat),ilat)
-Qeddy6 = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
+Qeddy6 = new((/nyear,4,ntime,nlev,nlat,nlon/),double)
 Qeddy6(:,0,:,:,:,:) = - (1.0/a/coslat) * center_finite_diff_n(edd_u*edd_t       ,lon,cyclic,opt,ilon)
 Qeddy6(:,1,:,:,:,:) = - (1.0/a/coslat) * center_finite_diff_n(edd_v*edd_t*coslat,lat,cyclic,opt,ilat) 
 Qeddy6(:,2,:,:,:,:) = - center_finite_diff_n(edd_w*edd_t,lev*100,cyclic,opt,ilev) 
+Qeddy6(:,3,:,:,:,:) = (R/cp/lev5d/100)*edd_w*edd_t
 Qeddy = tofloat(dim_avg_n(Qeddy6,iyear))
 Qeddy_m(:,nm,:,:,:) = dim_avg_n(Qeddy,itime)
 print(Qeddy(0,15,5,30,30:35))
-delete([/Qeddy6,Qeddy/])
+delete([/Qeddy6,Qeddy,lev5d/])
 
 sinlat = conform(edd_u,sin(lat),ilat)
 A6   = new((/nyear,2,ntime,nlev,nlat,nlon/),double)
@@ -261,16 +283,16 @@ fileatt@discription   = "12 month"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"term1","term2","time","lev","lat","lon"/);
-dimSizes = (/ 3     , 2     ,nmonth,nlev ,nlat ,nlon/) ;
-dimUnlim = (/False  ,False  ,False ,False,False,False/);
+dimNames = (/"term1","term2","term3","time","lev","lat","lon"/);
+dimSizes = (/ 3     , 2     , 4     ,nmonth,nlev ,nlat ,nlon/) ;
+dimUnlim = (/False  ,False  ,False  ,False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
 filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"Qeddy",typeof(Qeddy_m),(/"term1","time","lev","lat","lon"/))
+filevardef(ncdf,"Qeddy",typeof(Qeddy_m),(/"term3","time","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A_m),(/"term2","time","lev","lat","lon"/))
 filevardef(ncdf,"Tflux",typeof(Tflux_m),(/"term1","time","lev","lat","lon"/))
 filevardef(ncdf,"Sflux",typeof(Sflux_m),(/"term1","time","lev","lat","lon"/))

@@ -237,10 +237,30 @@ if(option.eq.1) then
     edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
     edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 else
+if(case_option.eq.2) then
+    cf = ezfftf_n(dim_avg_n(u,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_u = ezfftb_n(cf,cf@xbar,1)
+    printVarSummary(cf)
+    
+    cf = ezfftf_n(dim_avg_n(v,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_v = ezfftb_n(cf,cf@xbar,1)
+    
+    cf = ezfftf_n(dim_avg_n(w,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_w = ezfftb_n(cf,cf@xbar,1)
+    
+    cf = ezfftf_n(dim_avg_n(t,iyear),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_t = ezfftb_n(cf,cf@xbar,1)
+    delete(cf)
+else
     clm_u = dim_avg_n(u,iyear)
     clm_v = dim_avg_n(v,iyear) 
     clm_t = dim_avg_n(t,iyear) 
     clm_w = dim_avg_n(w,iyear) 
+end if
     edd_u = u - conform(u, clm_u, (/1,2,3,4/))
     edd_v = v - conform(v, clm_v, (/1,2,3,4/))   
     edd_t = t - conform(t, clm_t, (/1,2,3,4/))   

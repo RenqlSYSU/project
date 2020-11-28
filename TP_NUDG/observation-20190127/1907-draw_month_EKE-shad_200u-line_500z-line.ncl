@@ -6,28 +6,30 @@
 ;                                                    2019/02/01
 ;*********************************************************************************
 begin
-draw_var = (/"uppEKE"    ,"hgt"/)     
-unit     = (/"10~S~4~N~J","gpm"/)     
-draw_varname =(/"uppEKE" ,"hgt"/)     
+draw_var = (/"uppEKE3-2-90day","uppEKE_filter"    ,"hgt"/) ;_filter
+unit     = (/"10~S~4~N~J","10~S~4~N~J","gpm"/)     
+draw_varname =(/"uppEKE-2-90day" ,"uppEKE-daily_clim"    ,"hgt"/)     
 lev = (/925,500,300,200/)
 nl = 1
-nv = 1
-jet_option  = 1 ;0 = no jet, 1 = jet axis, 2 = jet contour
+nv = 0
+jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 vect_option = False;True ;
 cont_option = False;True ;
 cont_var  = (/"hgt"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"hgt"/)    ;this can be used as right string 
 nvc = 0 
+barshare = True ;False;
+barvert  = False;True
 
 case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 
-var_option = 1 
+var_option = 0 
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(0,2,2)
+imonth = ispan(0,3,1)
 filename = path + "/mdata/" + case + "_Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.1) then 
@@ -46,7 +48,7 @@ imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/mdata/" + case + "_Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 
-if(nv.eq.0) then 
+if(nv.le.1) then 
     fig_name = path + "/fig/" + case + "-month_" + draw_var(nv)
 else
     fig_name = path + "/fig/" + case + "-month_" + lev(nl) + "_" + draw_var(nv)
@@ -58,14 +60,14 @@ else
     end if
 end if
 
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(b","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
-latn = (/60 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
-lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
-lonr = (/360,270,390,150,270,390,150,360,150/);220
+lats = (/10 ,10 ,-70, 0 /);-20
+latn = (/60 ,55 ,70 ,60 /);60
+lonl = (/0  ,30 ,0  ,40 /);20
+lonr = (/360,150,360,150/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
@@ -145,7 +147,7 @@ end if
 
 inv = 2
 f = addfile(filename + draw_var(nv) + ".nc","r")
-if(nv.eq.0) then
+if(nv.le.1) then
 var(inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
 var(inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -162,11 +164,11 @@ end if
 end if
 printVarSummary(var)
 
-if(nv.eq.0) then
+if(nv.le.1) then
     var(2,:,:,:) = var(2,:,:,:)/10000 ;
 end if
 
-if(nv.eq.1) then
+if(nv.eq.2) then
     var(2,:,:,:) = var(2,:,:,:)/10 ;gpm to m 
 end if
 ;==============================================================
@@ -250,23 +252,6 @@ end if
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
    
-    ;if(na.eq.0) then 
-    ;res@lbLabelBarOn         = False   ; the label bar
-    ;else
-    ;res@lbLabelBarOn         = True   ; the label bar
-    ;end if
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
-    ;res@pmLabelBarWidthF  = 0.65
-    ;res@pmLabelBarHeightF = 0.08
-
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.15
-    res@pmLabelBarParallelPosF       = 0.5
-
 ;--------set the attribute of vector--------------
     resvc                  = True
     resvc@gsnDraw          = False
@@ -344,7 +329,7 @@ end if
     res_jet@cnInfoLabelOn    = False
     res_jet@cnLineThicknessF = 4
     res_jet@cnMonoLineColor  = True ;False
-    res_jet@cnLineColor      = "black"
+    res_jet@cnLineColor      = "blueviolet"
     if(jet_option.eq.1) then 
     res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_jet@cnLevels         = (/20/)
@@ -393,20 +378,41 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    if(na.eq.0) then; .and.nmonth.eq.4
+    if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
-    resp@gsnPaperOrientation = "portrait"
+    resp@gsnPaperOrientation = "landscaoe";"portrait"
     resp@gsnPanelLabelBar = True
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.8
+    else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.8 ;0.05
     resp@pmLabelBarHeightF = 0.05;0.8
+    end if
     else
     res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation        = "Vertical";
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.05
+    res@pmLabelBarOrthogonalPosF     = 0.2 ;y direction
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
-    resp@lbOrientation     = "Horizontal"
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05
     end if
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -429,13 +435,13 @@ if(nvc.eq.0) then ;Z3
     cont_spacing = (/20,30,50,80/)
 end if
 
-if(nv.eq.0) 
-    minlvl = (/10 /)  ;q1 ;-80,-80
-    maxlvl = (/85 /)      ; 80, 80
-    spacig = (/5  /)      ; 10, 10
+if(nv.le.1) 
+    minlvl = (/2 /)  ;5  ;-80,-80
+    maxlvl = (/62/)  ;80 ; 80, 80
+    spacig = (/4 /)  ;5  ; 10, 10
 end if
 
-if(nv.eq.1) 
+if(nv.eq.2) 
     minlvl = (/5350/)  ;q1 ;-80,-80
     maxlvl = (/5800/)      ; 80, 80
     spacig = (/30  /)      ; 10, 10
@@ -460,7 +466,7 @@ end if
         if(cont_option) then 
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
         else
-        if(nv.eq.0) then
+        if(nv.le.1) then
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
         else
         res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") "
@@ -505,6 +511,6 @@ end if
     end do 
 
     ;gsn_panel(wks,plot,(/nmonth,1/),resp)
-    gsn_panel(wks,plot,(/6,2/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
 end
 

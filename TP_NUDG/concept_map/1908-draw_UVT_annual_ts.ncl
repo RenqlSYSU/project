@@ -11,22 +11,45 @@ begin
 path     = "/home/ys17-19/renql"
 draw_var = (/"U","V","T"/)
 unit     = (/"m/s","m/s","~S~o~N~C"/)   ;this can be used as right string 
-case     = (/"F2000_CAM5"/)
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 pre_case = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i"/)
-years    = ispan(1,30,1)   ;the calculate time
 nv = 2
 
 ;the path of the file
-filein   = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR." ; + year + ".daily." + var_name + ".nc"
-fig_name = path + "/project/TP_NUDG/concept_map/fig/1p3X1_annual_cycle-" + draw_var(nv) 
+if(case_option.eq.0) then
+    case    = (/"CTRL","NG6h","NG24h"/)
+    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
+                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
+    years    = ispan(1979,2005,1)   ;the calculate time
+    gtopfile= path + "/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+end if  
+if(case_option.eq.1) then
+    ;remove TP experiment, sample number is ten years 
+    case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
+    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
+    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    years   = ispan(21,30,1)   ;the calculate time
+end if
+if(case_option.eq.2) then
+    case    = (/"F2000","NGTR"/) ;
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+                      ;"/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
+    gtopfile = path + "/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    years   = ispan(1,30,1)   ;the calculate time
+end if
+fig_name = path + "/project/TP_NUDG/concept_map/fig/" + case(0) + "_annual_cycle-" + draw_var(nv) 
 fig_out  = "pdf" ;"eps" ;"x,11"
 
 ;area of TP 
-lats = 25 
-latn = 40
-lonl = 70
-lonr = 105
-lev  = (/850,500,200/)
+lats = (/25 /)
+latn = (/40 /)
+lonl = (/70 /)
+lonr = (/105/)
+lev  = (/850,500,300,200/)
+na = 0
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
@@ -43,6 +66,9 @@ lev  = (/850,500,200/)
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
+f = addfile(gtopfile,"r")
+phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
+phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(draw_var)
@@ -57,11 +83,18 @@ plot3 = new((/ncase*nlev/),graphic)
 ;---------------------------------------------------------------
 ;read the data, then calculate the area and season average
 ;--------------------------------------------------------------
+wks = gsn_open_wks(fig_out,fig_name)
+    gsn_define_colormap(wks,"matlab_jet") 
+    ;has 64 colors blue green yellow,red
+
+do nv = 0,nvar-1,1
 do nc = 0,ncase-1,1
 files = systemfunc("ls " + filein(nc) + "*.daily."+draw_var(nv)+".nc")
 do nt = 0, nyear-1 ,1
+    print("handle with " + files(nt))
     f   = addfile(files(nt),"r")
-    var1 = f->$draw_var(nv)$(0:349,{lev},{lats:latn},{lonl:lonr})
+    var1 = f->$draw_var(nv)$(0:(nday-1),{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var1 = mask(var1,phis.gt.3000,True) 
     var(nc,nt,:,:) = wgt_areaave_Wrap(var1,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
 end do
 end do
@@ -79,11 +112,6 @@ printVarSummary(ave)
 ;===============================================
 ;draw the figure
 ;=============================================
-wks = gsn_open_wks(fig_out,fig_name)
-
-    gsn_define_colormap(wks,"matlab_jet") 
-    ;has 64 colors blue green yellow,red
-
     resxy     = True
     resxy@vpWidthF  = 0.3
     resxy@vpHeightF = 0.1
@@ -128,6 +156,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@tmXBMode            = "Explicit"
     resxy@tmXBValues          = ispan(0,360,30)
     resxy@tmXBLabels          = ispan(0,360,30)
+    ;resxy@tmXBLabels   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
     
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2
@@ -153,11 +182,11 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
 
-do nc = 0, ncase-1,1
 do nl = 0,nlev-1,1
-    nn = nl +1
-    np = nlev*nc + nl
-    resxy@gsnLeftString   = pre_case(nc) + nn + ") " + case(nc)
+do nc = 0, ncase-1,1
+    np = ncase*nl + nc
+;    np = nlev*nc + nl
+    resxy@gsnLeftString   = pre_case(np) + ") " + case(nc)
     resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
     resxy@trYMinF = floor(min(var(:,:,:,nl)))
     resxy@trYMaxF =  ceil(max(var(:,:,:,nl)))
@@ -170,5 +199,6 @@ end do
 end do
     
    gsn_panel(wks,plot,(/nlev,ncase/),resp)
+end do
 end
 

@@ -6,9 +6,9 @@
 ;                                                    2019/02/01
 ;*********************************************************************************
 begin
-draw_var = (/"uppEKE3-2-90day","uppEKE_filter"    ,"hgt"/) ;_filter
+draw_var = (/"uppEKE3-2.5-90day","uppEKE_filter"    ,"hgt"/) ;_filter
 unit     = (/"10~S~4~N~J","10~S~4~N~J","gpm"/)     
-draw_varname =(/"uppEKE-2-90day" ,"uppEKE-daily_clim"    ,"hgt"/)     
+draw_varname =(/"uppEKE-2.5-90day" ,"uppEKE-daily_clim"    ,"hgt"/)     
 lev = (/925,500,300,200/)
 nl = 1
 nv = 0
@@ -436,9 +436,9 @@ if(nvc.eq.0) then ;Z3
 end if
 
 if(nv.le.1) 
-    minlvl = (/2 /)  ;5  ;-80,-80
-    maxlvl = (/62/)  ;80 ; 80, 80
-    spacig = (/4 /)  ;5  ; 10, 10
+    minlvl = (/5 /)  ;2  ;-80,-80
+    maxlvl = (/80/)  ;62 ; 80, 80
+    spacig = (/5 /)  ;4  ; 10, 10
 end if
 
 if(nv.eq.2) 

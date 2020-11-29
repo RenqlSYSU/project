@@ -55,11 +55,11 @@ if(case_option.eq.2) then
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,10,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_eddy_flux12.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_eddy_new_flux4.nc"
     else
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_eddy_flux12_" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_eddy_flux4_" + cb + "-" + ca + "day.nc"
     end if  
 end if
 
@@ -96,9 +96,9 @@ nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 Qeddy_m  = new((/ 4,nmonth,nlev,nlat,nlon/),float)
 A_m      = new((/ 2,nmonth,nlev,nlat,nlon/),float)
-Tflux_m  = new((/ 3,nmonth,nlev,nlat,nlon/),float)
-Sflux_m  = new((/ 3,nmonth,nlev,nlat,nlon/),float)
-Mflux_m  = new((/ 3,nmonth,nlev,nlat,nlon/),float)
+Tflux_m  = new((/ 4,nmonth,nlev,nlat,nlon/),float)
+Sflux_m  = new((/ 4,nmonth,nlev,nlat,nlon/),float)
+Mflux_m  = new((/ 5,nmonth,nlev,nlat,nlon/),float)
 
 iyear = 0
 itime = 1
@@ -229,28 +229,32 @@ print(A(0,15,5,30,30:35))
 print(vort(0,15,5,30,30:35))
 delete([/A6,A,coslat,sinlat/])
 
-Sflux6   = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
+Sflux6   = new((/nyear,4,ntime,nlev,nlat,nlon/),double)
 Sflux6(:,0,:,:,:,:) = edd_u*vort
 Sflux6(:,1,:,:,:,:) = edd_v*vort
 Sflux6(:,2,:,:,:,:) = edd_w*vort/density/g
+Sflux6(:,3,:,:,:,:) = edd_w*vort
 Sflux = tofloat(dim_avg_n(Sflux6,iyear))
 Sflux_m(:,nm,:,:,:) = dim_avg_n(Sflux,itime)
 print(Sflux(0,15,5,30,30:35))
 delete([/Sflux6,Sflux,vort/])
 
-Tflux6 = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
+Tflux6 = new((/nyear,4,ntime,nlev,nlat,nlon/),double)
 Tflux6(:,0,:,:,:,:) = edd_u*edd_t
 Tflux6(:,1,:,:,:,:) = edd_v*edd_t
 Tflux6(:,2,:,:,:,:) = edd_w*edd_t/density/g
+Tflux6(:,3,:,:,:,:) = edd_w*edd_t
 Tflux = tofloat(dim_avg_n(Tflux6,iyear))
 Tflux_m(:,nm,:,:,:) = dim_avg_n(Tflux,itime)
 print(Tflux(0,15,5,30,30:35))
 delete([/Tflux6,Tflux/])
 
-Mflux6 = new((/nyear,3,ntime,nlev,nlat,nlon/),double)
+Mflux6 = new((/nyear,5,ntime,nlev,nlat,nlon/),double)
 Mflux6(:,0,:,:,:,:) = edd_u*edd_v
 Mflux6(:,1,:,:,:,:) = edd_u*edd_w/density/g
 Mflux6(:,2,:,:,:,:) = edd_w*edd_v/density/g
+Mflux6(:,3,:,:,:,:) = edd_u*edd_w
+Mflux6(:,4,:,:,:,:) = edd_w*edd_v
 Mflux = tofloat(dim_avg_n(Mflux6,iyear))
 Mflux_m(:,nm,:,:,:) = dim_avg_n(Mflux,itime)
 print(Mflux(0,15,5,30,30:35))
@@ -284,7 +288,7 @@ fileattdef(ncdf,fileatt)
 
 ;define all coordinate
 dimNames = (/"term1","term2","term3","time","lev","lat","lon"/);
-dimSizes = (/ 3     , 2     , 4     ,nmonth,nlev ,nlat ,nlon/) ;
+dimSizes = (/ 4     , 2     , 5     ,nmonth,nlev ,nlat ,nlon/) ;
 dimUnlim = (/False  ,False  ,False  ,False ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
@@ -292,11 +296,11 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"lev" ,typeof(vars&level),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"Qeddy",typeof(Qeddy_m),(/"term3","time","lev","lat","lon"/))
+filevardef(ncdf,"Qeddy",typeof(Qeddy_m),(/"term1","time","lev","lat","lon"/))
 filevardef(ncdf,"A"    ,typeof(A_m),(/"term2","time","lev","lat","lon"/))
 filevardef(ncdf,"Tflux",typeof(Tflux_m),(/"term1","time","lev","lat","lon"/))
 filevardef(ncdf,"Sflux",typeof(Sflux_m),(/"term1","time","lev","lat","lon"/))
-filevardef(ncdf,"Mflux",typeof(Mflux_m),(/"term1","time","lev","lat","lon"/))
+filevardef(ncdf,"Mflux",typeof(Mflux_m),(/"term3","time","lev","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"lev",vars&level)

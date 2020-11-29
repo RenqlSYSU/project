@@ -6,18 +6,19 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 6 means b1
-nnv = 1  ;used to read dzdt induced by different forcing
+var_option = 5 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+nnv = 0  ;used to read dzdt induced by different forcing
 
 jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False;True ; 
 fnc  = 1    ;chose which case to draw
-diff = False ; True ;whether draw the difference ;False;
+diff = True ;False;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
-;months  = (/"JF","MA","MJ","JA"/)
-months  = (/"MJ","JA"/)
+months  = (/"JF","MJ","JA"/);,"MA"
+select_time = (/0,2,3/)
+;months  = (/"MJ","JA"/)
 ;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
@@ -84,7 +85,7 @@ if(var_option.eq.5) then
     unit     = (/"K/Day","10~S~-11~N~s~S~-2~N~","10~S~-5~N~m*s~S~-2~N~","m~S~2~N~*s~S~-2~N~","K*m/s"/)
     lev := (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa
     if(nnv.eq.0) then 
-        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz", "Qeddy"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"-duTdx", "-dvTdy", "-dwTdz","Qte"/)  ;this is the variable used to draw, can used as center string
         select   = (/0,1,2/)
     end if
     if(nnv.eq.1) then 
@@ -103,6 +104,7 @@ if(var_option.eq.5) then
         draw_var = (/"uT", "vT", "wT", "total"/)  ;this is the variable used to draw, can used as center string
         select   = (/0,1,2/)
     end if
+    lev := lev_u
 end if
 
 ;area: east Asia
@@ -178,19 +180,19 @@ if(var_option.eq.1)
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/"+case1(0)+"_height_lat_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.2)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_monthly_advection.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_advect_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/"+case1(0)+"_height_lat_advect_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.4) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_te_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/"+case1(0)+"_height_lat_te_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.5)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_eddy_flux4.nc"
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_eddy_flux_" + var_name(nnv) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/"+case1(0)+"_height_lat_eddy_flux_" + var_name(nnv) + area(na)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
@@ -270,15 +272,17 @@ print(min(msf_m))
 end if
 
 if(month_option) then
+
 do nc = 0, nfile-1, 1
     if(jet_option) then
     f = addfile(jetfile(nc),"r")
-    u := f->month_ave(2:3,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->month_ave(select_time,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
     var_u(nc,:,:,:) = dim_avg_n_Wrap(u,3)
     end if
 
     f = addfile(filename(nc),"r")
     if(var_option.le.0)
+    
     if(nmonth.eq.1)
         do nv = 0, nvar-2,1
         var_m(nc,nv,0,:,:,:)  = f->$var_name(nv)$({lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
@@ -288,17 +292,22 @@ do nc = 0, nfile-1, 1
         var_m(nc,nv,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     end if
+    
     else
+    
     if((var_option.eq.2).and.(nnv.eq.5)) then 
         dudt = f->$var_name(1)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         dvdt = f->$var_name(4)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         var_m(nc,0:(nvar-2),:,:,:,:) = uv2vr_cfd( dudt, dvdt, dudt&lat, dudt&lon, 2 )
     else
-        var_m(nc,0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,0:(nvar-2),:,:,:,:)  = f->$var_name(nnv)$(select,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     end if
+    
     end if
 end do
+
 else
+
 do nc = 0, nfile-1, 1
     f = addfile(filename(nc),"r")
     if(var_option.le.0)
@@ -314,7 +323,9 @@ select_time := ind(time(:,1).ge.5.and.time(:,1).le.6)
 var_m(:,:,0,:,:,:) = dim_avg_n(var(:,:,select_time,:,:,:),2)
 select_time := ind(time(:,1).ge.7.and.time(:,1).le.8)
 var_m(:,:,1,:,:,:) = dim_avg_n(var(:,:,select_time,:,:,:),2)
+
 end if
+
 var_m := dim_avg_n(var_m,5)
 var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
@@ -623,9 +634,9 @@ end if
 
 if(var_option.eq.5) then 
 if(nnv.eq.0) then  ;Qeddy
-    minlvl = (/-1.4,-1.4,-1.4,-1.4/);-2.4,-2.4,-2.4,-2.4,-2.4/);-0.8,-0.8,-0.8,-0.8,-0.8/);
-    maxlvl = (/ 1.4, 1.4, 1.4, 1.4/); 2.4, 2.4, 2.4, 2.4, 2.4/); 0.8, 0.8, 0.8, 0.8, 0.8/);
-    spacig = (/ 0.2, 0.2, 0.2, 0.2/); 0.3, 0.3, 0.3, 0.3, 0.3/); 0.1, 0.1, 0.1, 0.1, 0.1/);
+    minlvl = (/-1.4,-1.4,-1.4,-1.4,-1.4/);-0.7,-0.7,-0.7,-0.7,-0.7-2.4,-2.4,-2.4,-2.4,-2.4/);/);
+    maxlvl = (/ 1.4, 1.4, 1.4, 1.4, 1.4/); 0.7, 0.7, 0.7, 0.7, 0.7 2.4, 2.4, 2.4, 2.4, 2.4/);/);
+    spacig = (/ 0.2, 0.2, 0.2, 0.2, 0.2/); 0.1, 0.1, 0.1, 0.1, 0.1 0.3, 0.3, 0.3, 0.3, 0.3/);/);
 end if
 if(nnv.eq.1) then ;A
     minlvl = (/-7,-7,-7/);
@@ -653,15 +664,15 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nv = 0, nvar-2,1
+do nv = 0, nvar-1,1
 do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     np = nv*nmonth + nm ;1 var, 2 month
     ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
-    if(var_option.ge.1.and.var_option.le.4) then 
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
+    if(var_option.ge.1.and.var_option.le.5) then 
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nnv) + ")" ;lonl(na) + "-" + lonr(na) + "E " + 
     else
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
     end if
@@ -702,7 +713,7 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
+    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
 end do 
 end do 

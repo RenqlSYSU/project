@@ -34,13 +34,14 @@ unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6
 draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt","4q1","V"/)  ;this is the variable used to draw, can used as center string
 ;lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
-lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
-nv = 9
-diff = False;True ;
+;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lev_u = lev  
+nv = 3
+diff = True ;False;
 jet_option = True
 jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 
-var_option = 1
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -474,9 +475,9 @@ do nm = 0,nmonth-1,1
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
         if(jet_option) then 
-        line(np) = gsn_csm_pres_hgt(wks,var_u(1,nm,:,:),res_line)
+        line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
         overlay(plot(np),line(np))
-        core(np) = gsn_add_polymarker(wks,plot(np),corey(1,nm),corez(1,nm),polyres)
+        core(np) = gsn_add_polymarker(wks,plot(np),corey(0,nm),corez(0,nm),polyres)
         end if
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
@@ -486,7 +487,7 @@ end do ;for the month
     
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nmonth,1/),resp)
+    gsn_panel(wks,plot,(/1,nmonth/),resp)
 end if
 end
 

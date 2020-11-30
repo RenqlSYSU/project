@@ -6,8 +6,8 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 5 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
-nnv = 0  ;used to read dzdt induced by different forcing
+var_option = -1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+nnv = 1  ;used to read dzdt induced by different forcing
 
 jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False;True ; 
@@ -16,9 +16,10 @@ diff = True ;False;whether draw the difference ;False;
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
-months  = (/"JF","MJ","JA"/);,"MA"
-select_time = (/0,2,3/)
-;months  = (/"MJ","JA"/)
+;months  = (/"JF","MJ","JA"/);,"MA"
+select_time = (/0,1/)
+select_time_u = (/2,3/)
+months  = (/"MJ","JA"/)
 ;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
@@ -53,7 +54,7 @@ if(var_option.eq.-1) then
 end if
 if(var_option.eq.0) then 
     draw_var = (/"Qd"   ,"Qte"  ,"total"/)  ;this is the variable used to draw, can used as center string
-    var_name = (/"Qd"   ,"Qeddy"/)  ;use to read variables
+    var_name = (/"Qd"   ,"Qeddy","total"/)  ;use to read variables
     unit     = (/"K/Day","K/Day","K/day"/)  ;this can be used as right string 
 end if
 if(var_option.eq.1) then 
@@ -276,7 +277,7 @@ if(month_option) then
 do nc = 0, nfile-1, 1
     if(jet_option) then
     f = addfile(jetfile(nc),"r")
-    u := f->month_ave(select_time,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->month_ave(select_time_u,{lev_u},{lats(na):latn(na)},{lonl(na):lonr(na)})
     var_u(nc,:,:,:) = dim_avg_n_Wrap(u,3)
     end if
 
@@ -664,10 +665,12 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nv = 0, nvar-1,1
+do nv = 0, nvar-2,1
 do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     np = nv*nmonth + nm ;1 var, 2 month
+    ;np = nm*nvar + nv ;1 var, 2 month
+    ;np = fnc*nvar+nv
     ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
@@ -715,6 +718,7 @@ end do
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
 end do 
 end

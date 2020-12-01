@@ -9,7 +9,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
@@ -136,10 +136,23 @@ var   = (filt_v*filt_v + filt_u*filt_u)/2.0   ;get (nyear,ntime,nlat,nlon)
 delete(filt_u)
 delete(filt_v)  
 else
-edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))   
-var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+if(case_option.eq.2) then 
+    cf = ezfftf_n(dim_avg_n(u,0),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_u = ezfftb_n(cf,cf@xbar,1)
+    cf = ezfftf_n(dim_avg_n(v,0),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_v = ezfftb_n(cf,cf@xbar,1)
+else
+    clm_u = dim_avg_n(u,0)
+    clm_v = dim_avg_n(v,0)
 end if
+edd_u = u - conform(u,clm_u,(/1,2,3,4/))
+edd_v = v - conform(v,clm_v,(/1,2,3,4/))   
+var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+delete([/clm_u,clm_v,edd_u,edd_v,u,v/])
+end if
+
 EKE   = dim_avg_n(var,0) 
 EKE_vari = dim_variance_n(var,0) 
 EKE(0,:,:,:)  = dim_avg_n(dim_avg_n(var,1),0) ;annual mean 

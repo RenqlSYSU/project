@@ -12,17 +12,17 @@ begin
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-var_name = (/"vwnd","vwnd"/)
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+var_name = (/"uwnd","vwnd"/)
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 90.0 ;day
 cb = 10.0 
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_variv.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_EKE.nc"
 else
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_variv-" + cb + "-" + ca + "day.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_EKE-" + cb + "-" + ca + "day.nc"
 end if
 
 g  = 9.8 ;m/(s*s)
@@ -53,7 +53,7 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
-;v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
+v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 var_month  = new((/nyear,12 ,nlev,nlat,nlon/),float)
 var_season = new((/nyear,4  ,nlev,nlat,nlon/),float)
 month_ave  = new((/      12 ,nlev,nlat,nlon/),float)
@@ -73,37 +73,45 @@ if(isleapyear(years(nt))) then ;leap year,366 day
     nv = 0
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     u(nt,:,:,:,:)  = f->$var_name(nv)$(index,{lev},{lats:latn},{lonl:lonr})
-;    nv = 1
-;    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-;    v(nt,:,:,:,:)  = f->$var_name(nv)$(index,{lev},{lats:latn},{lonl:lonr})
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = f->$var_name(nv)$(index,{lev},{lats:latn},{lonl:lonr})
 else   ;non-leap year, 365 day
     nv = 0
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     u(nt,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
-;    nv = 1
-;    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
-;    v(nt,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
 printVarSummary(u)
 
 if(option.eq.1) then
-fca = 1.0/ca
-fcb = 1.0/cb
-opt = False
-edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-;edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+    fca = 1.0/ca
+    fcb = 1.0/cb
+    opt = False
+    edd_u = bw_bandpass_filter(u,fca,fcb,opt,1)
+    edd_v = bw_bandpass_filter(v,fca,fcb,opt,1)
 else
-;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-;edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+    ;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+    ;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+    ;clm_u = dim_avg_n(u,0)
+    ;clm_v = dim_avg_n(v,0)
+    cf = ezfftf_n(dim_avg_n(u,0),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_u = ezfftb_n(cf,cf@xbar,1)
+    cf = ezfftf_n(dim_avg_n(v,0),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_v = ezfftb_n(cf,cf@xbar,1)
+    edd_u = u - conform(u,clm_u,(/1,2,3,4/))
+    edd_v = v - conform(v,clm_v,(/1,2,3,4/))   
 end if
 print(edd_u(0,0:10,0,30,30))
-;var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;get (nyear,ntime,nlat,nlon)
-;delete([/edd_u,edd_v,v,u/])
-var   = edd_u*edd_u   ;get (nyear,ntime,nlat,nlon)
-delete([/edd_u,u/])
+var   = (edd_v*edd_v + edd_u*edd_u)/2.0   ;get (nyear,ntime,nlat,nlon)
+delete([/edd_u,edd_v,v,u,clm_u,clm_v/])
+;var   = edd_u*edd_u   ;get (nyear,ntime,nlat,nlon)
+;delete([/edd_u,u/])
 printVarSummary(var)
 print(var(0,1,8,50,20:30))
 

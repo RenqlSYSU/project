@@ -150,10 +150,21 @@ var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)
 delete(filt_u)
 delete(filt_v)
 else
+if(case_option.eq.2) then 
+    cf = ezfftf_n(dim_avg_n(u,0),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_u = ezfftb_n(cf,cf@xbar,1)
+    cf = ezfftf_n(dim_avg_n(v,0),0)
+    cf(:,4:,:,:,:)  = 0
+    clm_v = ezfftb_n(cf,cf@xbar,1)
+else
+    clm_u = dim_avg_n(u,0)
+    clm_v = dim_avg_n(v,0)
+end if
+edd_u = u - conform(u,clm_u,(/1,2,3,4/))
+edd_v = v - conform(v,clm_v,(/1,2,3,4/))   
 ;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 ;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
-edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((edd_u*edd_v)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)

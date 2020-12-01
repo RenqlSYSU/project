@@ -48,7 +48,7 @@ lats = (/25 /)
 latn = (/40 /)
 lonl = (/70 /)
 lonr = (/105/)
-lev  = (/850,500,300,200/)
+lev  = (/300,200/);850,500,,200
 na = 0
 
 ;define the thickness and height of the title,tick and label
@@ -73,9 +73,10 @@ nyear = dimsizes(years)
 ncase = dimsizes(case)
 nvar  = dimsizes(draw_var)
 nlev  = dimsizes(lev)
-nday  = 350
-var   = new((/ncase,nyear,nday,nlev/),float)
-ave   = new((/ncase,      nday,nlev/),float)
+nday1 = 365
+nday2 = 350
+var   = new((/ncase,nyear,nday1,nlev/),float)
+ave   = new((/ncase,      nday1,nlev/),float)
 plot  = new((/ncase*nlev/),graphic)
 plot2 = new((/ncase*nlev/),graphic)
 plot3 = new((/ncase*nlev/),graphic)
@@ -87,24 +88,34 @@ wks = gsn_open_wks(fig_out,fig_name)
     gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
-do nv = 0,nvar-1,1
+do nv = 2,2,1;nvar-1,1
 do nc = 0,ncase-1,1
 files = systemfunc("ls " + filein(nc) + "*.daily."+draw_var(nv)+".nc")
 do nt = 0, nyear-1 ,1
     print("handle with " + files(nt))
     f   = addfile(files(nt),"r")
-    var1 = f->$draw_var(nv)$(0:(nday-1),{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    var1 = mask(var1,phis.gt.3000,True) 
-    var(nc,nt,:,:) = wgt_areaave_Wrap(var1,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
+    temp = f->$draw_var(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    temp = mask(temp,phis.gt.3000,True) 
+    var(nc,nt,:,:) = wgt_areaave_Wrap(temp,1.0,1.0,0) ;get var(nvar,ncase,nyear,365,nlev)
 end do
 end do
-var&time = ispan(1,350,1)
-ave = dim_avg_n_Wrap(var,1)
+
+if(case_option.eq.2) then 
+    cf = ezfftf_n(dim_avg_n(var,1),1)
+    cf(:,:,4:,:)  = 0
+    ave = ezfftb_n(cf,cf@xbar,2)
+else
+    ave = dim_avg_n_Wrap(var,1)
+end if
 
 if(nv.eq.2) then
 var = var - 273.15   ;convert unit from k to c
 ave = ave - 273.15
 end if
+
+var1 = var(:,:,0:nday2-1,:)
+ave1 = ave(:,  0:nday2-1,:)
+var1&time = ispan(1,nday2,1)
 
 printVarSummary(var)
 printVarSummary(ave)
@@ -188,10 +199,10 @@ do nc = 0, ncase-1,1
 ;    np = nlev*nc + nl
     resxy@gsnLeftString   = pre_case(np) + ") " + case(nc)
     resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
-    resxy@trYMinF = floor(min(var(:,:,:,nl)))
-    resxy@trYMaxF =  ceil(max(var(:,:,:,nl)))
-    plot(np)  = gsn_csm_xy(wks,var&time,(/var(nc,:,:,nl)/),resxy)
-    plot2(np) = gsn_csm_xy(wks,var&time,(/ave(0 ,  :,nl)/),resxy2)
+    resxy@trYMinF = floor(min(var1(:,:,:,nl)))
+    resxy@trYMaxF =  ceil(max(var1(:,:,:,nl)))
+    plot(np)  = gsn_csm_xy(wks,var1&time,(/var1(nc,:,:,nl)/),resxy)
+    plot2(np) = gsn_csm_xy(wks,var1&time,(/ave1(0 ,  :,nl)/),resxy2)
     ;plot3(np) = gsn_csm_xy(wks,var&day,(/ave(nc,nv,  :,nl)/),resxy3)
     overlay(plot(np),plot2(np))
     ;overlay(plot(np),plot3(np))

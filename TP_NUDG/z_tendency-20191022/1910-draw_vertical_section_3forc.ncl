@@ -160,12 +160,12 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58_30.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_30" + var_name(0) + area(na)
 end if
 if(var_option.eq.1)
     if(month_option) then
@@ -716,7 +716,7 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 

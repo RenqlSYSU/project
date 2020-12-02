@@ -44,22 +44,22 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 3
-nv = 17
+nl = 4
+nv = 6
 diff = True ;False;
 perc = False;True ;
-sig_option  = True ;False;only work on shading 
+sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = False;True ;
-jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = True ;False;
-cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA"/)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s"/)
-nvc = 4 
-contsig  = True ;False;
-barshare = False;True ;
+jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
+cont_option = False;True ;
+cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
+nvc = 5
+contsig  = False;True ;;if True, only the significant values are contoured 
+barshare = True ;False;
 barvert  = False;True
 
-var_option = 2
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -70,9 +70,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-;imonth = ispan(0,11,1);(/4,5,6,7/)
+imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -96,13 +96,13 @@ fig_out    = "pdf";"x11";"eps";
 
 ;area: east Asia
 lats = (/10 ,0  ,0  ,  -70,-70, -70,  0  ,-70,10 /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,50 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,40 /);20
-lonr = (/360,270,390,  150,270, 390,  150,360,130/);220
+latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,60 /);60
+lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,30 /);20
+lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
-na = 6
+na = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -262,6 +262,10 @@ end if
 if(nvc.eq.4) then
     var(:,3,:,:,:) = -var(:,3,:,:,:)*100
     cont_spacing = (/2,1/)
+end if
+
+if(nvc.eq.5) then
+    cont_spacing = (/10,1/)
 end if
 
 if(nv.eq.2) then
@@ -474,7 +478,7 @@ end if
     if(jet_option.ge.1.or.vect_option) then
     res_line@cnLineColor      = "blueviolet";"green4";"black"
     else
-    res_line@cnLineColor      = "black"
+    res_line@cnLineColor      = "blueviolet";"green4";"black""black"
     end if
     res_line@gsnContourZeroLineThicknessF = 0
     res_line@gsnContourNegLineDashPattern = 2
@@ -510,7 +514,7 @@ end if
     if(jet_option.eq.2) then 
     u = mask(u, u.lt.0 , False) 
     res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_jet@cnLevels         = (/20,30,40/)
+    res_jet@cnLevels         = (/20,30,40,50,60/)
     ;res_jet@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     ;res_jet@cnLevelSpacingF      = 10        ; set contour interval
     end if
@@ -527,7 +531,7 @@ end if
     ;lnres@gsLineLabelString    = "TP"
 
     res_axis                      = True
-    res_axis@gsLineColor          = "black"
+    res_axis@gsLineColor          = "blueviolet";"black"
     res_axis@gsLineDashPattern    = 1
     res_axis@gsLineThicknessF     = mp_thick + 2.5 
     ;res_axis@gsLineLabelString    = "Westly"
@@ -612,8 +616,8 @@ end if
     else
     res@lbOrientation        = "Horizontal";"Vertical";
     res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.05
-    res@pmLabelBarOrthogonalPosF     = 0.2 ;y direction
+    res@pmLabelBarHeightF = 0.08
+    res@pmLabelBarOrthogonalPosF     = 0.3 ;y direction
     res@pmLabelBarParallelPosF       = 0.5
     end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
@@ -753,8 +757,8 @@ if(nv.ge.17.and.nv.le.19) then
     spacig = (/ 0.1, 0.1, 0.1/)
 end if
 
+;do nm = 0,nmonth-1,1
 do nc = 0,1,1
-do nm = 0,nmonth-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -768,11 +772,11 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-;    do nm = 0,nmonth-1,1
+    do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
         ;np = nm*2+nc
-        np = nc*2+nm
-        ;np = nm
+        ;np = nc*nmonth+nm
+        np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
@@ -875,9 +879,9 @@ end if
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
-;    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/4,3/),resp)
 end do
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do

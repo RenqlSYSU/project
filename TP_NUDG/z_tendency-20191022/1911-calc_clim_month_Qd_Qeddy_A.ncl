@@ -55,9 +55,9 @@ if(case_option.eq.2) then
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(21,30,1)   ;the calculate time
+    years   = ispan(11,20,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon58_30.nc"
+        fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon58_20.nc"
     else
         fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A_" + cb + "-" + ca + "day.nc"
     end if  
@@ -156,28 +156,33 @@ z     := new((/nyear,ntime,nzlev,nlat,nlon/),float)
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
 nv = 0
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f      = addfile(files(nt),"r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f      = addfile(files(nt),"r")
+f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f      = addfile(files(nt),"r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f      = addfile(files(nt),"r")
+f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f      = addfile(files(nt),"r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f      = addfile(files(nt),"r")
+f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 3
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f      = addfile(files(nt),"r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f      = addfile(files(nt),"r")
+f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 w(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 4
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f      = addfile(files(nt),"r")
+;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+;f      = addfile(files(nt),"r")
+f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{zlev},{lats:latn},{lonl:lonr})
 end do
 u = linmsg_n(u,-1,ilon)

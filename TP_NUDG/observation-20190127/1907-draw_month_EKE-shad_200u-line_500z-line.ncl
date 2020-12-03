@@ -11,7 +11,7 @@ unit     = (/"10~S~4~N~J","10~S~4~N~J","gpm"/)
 draw_varname =(/"uppEKE-2.5-90day" ,"uppEKE-daily_clim"    ,"hgt"/)     
 lev = (/925,500,300,200/)
 nl = 1
-nv = 0
+nv = 1
 jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 vect_option = False;True ;
 cont_option = False;True ;
@@ -25,16 +25,18 @@ case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 
-var_option = 0 
+var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
+nnv = 1
 imonth = ispan(0,3,1)
 filename = path + "/mdata/" + case + "_Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+nnv = 1
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
 ;imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
@@ -148,9 +150,9 @@ end if
 inv = 2
 f = addfile(filename + draw_var(nv) + ".nc","r")
 if(nv.le.1) then
-var(inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(inv,:,:,:)  = f->$var_name(nnv)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
-var(inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(inv,:,:,:)  = f->$var_name(nnv)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 
 if(cont_option) then
@@ -164,11 +166,15 @@ end if
 end if
 printVarSummary(var)
 
-if(nv.le.1) then
+if(nv.le.1.and.nnv.eq.1) then
+;    term  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    var(2,:,:,:) = sqrt(var(2,:,:,:))/10000 ;term ;
+end if
+if(nv.le.1.and.nnv.eq.0) then
     var(2,:,:,:) = var(2,:,:,:)/10000 ;
 end if
 
-if(nv.eq.2) then
+if(nv.eq.2.and.nnv.eq.0) then
     var(2,:,:,:) = var(2,:,:,:)/10 ;gpm to m 
 end if
 ;==============================================================
@@ -435,7 +441,13 @@ if(nvc.eq.0) then ;Z3
     cont_spacing = (/20,30,50,80/)
 end if
 
-if(nv.le.1) 
+if(nv.le.1.and.nnv.eq.1) 
+    minlvl = (/1 /)  ;2  ;-80,-80
+    maxlvl = (/16/)  ;62 ; 80, 80
+    spacig = (/1 /)  ;4  ; 10, 10
+end if
+
+if(nv.le.1.and.nnv.eq.0) 
     minlvl = (/5 /)  ;2  ;-80,-80
     maxlvl = (/80/)  ;62 ; 80, 80
     spacig = (/5 /)  ;4  ; 10, 10
@@ -511,6 +523,7 @@ end if
     end do 
 
     ;gsn_panel(wks,plot,(/nmonth,1/),resp)
+    ;gsn_panel(wks,plot,(/6,2/),resp)
     gsn_panel(wks,plot,(/4,1/),resp)
 end
 

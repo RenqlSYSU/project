@@ -16,7 +16,7 @@ if(case_option.eq.0) then
 end if
 if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
-    case2   = (/"CTRL"   ,"noTP-CTRL"/)
+    case2   = (/"CTRL"   ,"CTRL-noTP"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
@@ -30,7 +30,7 @@ end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
+             "T"            ,"intEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      /)
 
@@ -40,26 +40,27 @@ unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
              "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/day"    ,"K/day"          ,"K/day"     /)
 
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
+                 "T"        ,"intEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 4
-nv = 6
+nl = 3
+nv = 0
 diff = True ;False;
 perc = False;True ;
+siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = False;True ;
-jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
+vect_option = True ;False;
+jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
 nvc = 5
 contsig  = False;True ;;if True, only the significant values are contoured 
-barshare = True ;False;
+barshare = False;True ;
 barvert  = False;True
 
-var_option = 1
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -70,9 +71,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-imonth = ispan(0,11,1);(/4,5,6,7/)
+;imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -96,10 +97,9 @@ fig_out    = "pdf";"x11";"eps";
 
 ;area: east Asia
 lats = (/10 ,0  ,0  ,  -70,-70, -70,  0  ,-70,10 /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,60 /);60
+latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,55 /);60
 lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
-siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
 na = 8
@@ -179,7 +179,7 @@ do nf = 0 ,ncase-1, 1
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,{0:48},inln))
+        lat_ind = maxind(u(nf,nm,{10:55},inln))
         ;lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
@@ -189,15 +189,23 @@ end do
 end if
 
 do nf = 0 ,ncase-1, 1
+f = addfile(filename(nf)+"PS.nc","r")
+ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+printVarSummary(ps)
+
 if(vect_option) then 
 inv = 0
 f = addfile(filename(nf)+"U.nc","r")
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
+vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 inv = 1
 f = addfile(filename(nf)+"V.nc","r")
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
+vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 end if
 
 inv = 2
@@ -213,6 +221,8 @@ else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
+var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
+vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 end if
 
 if(cont_option) then
@@ -224,8 +234,11 @@ vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(
 else
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
+vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 end if
 end if
+delete(ps)
 end do
 
 ;vari = where(abs(vari).le.0.000000000001,0.0000000001,vari)
@@ -713,8 +726,8 @@ if(perc) then
     spacig = (/ 2 , 10, 10/);1 ,1 ,1 ,1 
 else
     minlvl = (/2 ,-14/);-8,-8,-8,-8
-    maxlvl = (/47, 14/);8 ,8 ,8 ,8 
-    spacig = (/3 , 2 /);1 ,1 ,1 ,1 
+    maxlvl = (/32, 14/);8 ,8 ,8 ,8 
+    spacig = (/2 , 2 /);1 ,1 ,1 ,1 
 ;    minlvl = (/10,-35/);-8,-8,-8,-8
 ;    maxlvl = (/85, 35/);8 ,8 ,8 ,8 
 ;    spacig = (/5 , 5 /);1 ,1 ,1 ,1 
@@ -757,7 +770,7 @@ if(nv.ge.17.and.nv.le.19) then
     spacig = (/ 0.1, 0.1, 0.1/)
 end if
 
-;do nm = 0,nmonth-1,1
+do nm = 0,nmonth-1,1
 do nc = 0,1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -772,11 +785,11 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 0,nmonth-1,1
+;    do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
-        ;np = nm*2+nc
+        np = nm*2+nc
         ;np = nc*nmonth+nm
-        np = nm
+        ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
@@ -879,9 +892,9 @@ end if
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
-    gsn_panel(wks,plot,(/4,3/),resp)
+;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
-;    gsn_panel(wks,plot,(/4,2/),resp)
+    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do

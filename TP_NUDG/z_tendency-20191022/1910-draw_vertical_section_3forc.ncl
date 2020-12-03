@@ -6,7 +6,7 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = -1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 jet_option    = True  ;20191205, control the draw of jet stream
@@ -160,12 +160,12 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58_30.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58_20.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_30" + var_name(0) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_20" + var_name(0) + area(na)
 end if
 if(var_option.eq.1)
     if(month_option) then

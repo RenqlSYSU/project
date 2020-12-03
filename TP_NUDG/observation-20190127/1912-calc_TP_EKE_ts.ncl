@@ -11,7 +11,7 @@ path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc" ;in order to select TP area
 var_name = (/"uwnd","vwnd"/)
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 na = 0
 
 ;parameter for bw_bandpass_filter
@@ -112,13 +112,25 @@ if(option.eq.1) then
     var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
     delete([/filt_u,filt_v,dp,u,v/])
 else
-    edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
-    edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
+    cf = ezfftf_n(dim_avg_n(u,0),0)
+    cf(:,4:,:,:,:)  = 0
+    ste_u = ezfftb_n(cf,cf@xbar,1)
+    printVarSummary(cf)
+    cf = ezfftf_n(dim_avg_n(v,0),0)
+    cf(:,4:,:,:,:)  = 0
+    ste_v = ezfftb_n(cf,cf@xbar,1)
+    printVarSummary(ste_v)
+    delete(cf)
+    edd_u = u - conform(u,ste_u,(/1,2,3,4/))
+    edd_v = v - conform(v,ste_v,(/1,2,3,4/))
+    delete([/ste_u,ste_v/])
+    ;edd_u = u - conform(u,dim_avg_n(u,0),(/1,2,3,4/))
+    ;edd_v = v - conform(v,dim_avg_n(v,0),(/1,2,3,4/))
     delete([/u,v/])
     var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
     delete([/edd_u,edd_v,dp/])
 end if
-;var = mask(var,phis.gt.1500,True) 
+var = mask(var,phis.gt.1500,True) 
 ts  = wgt_areaave_Wrap(var,1.0,1.0,0)
 ts@long_name = "Climatology daily TP area average vertically integrated EKE"
 ts@units     = "J" 

@@ -13,7 +13,7 @@ path2   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 var_name = (/"uwnd","vwnd"/)
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 filter   = True ;use filtered daily climatology
 
 ;parameter for bw_bandpass_filter
@@ -204,7 +204,9 @@ do ns = 0,3,1
     end if
 end do
 month_ave  = dim_avg_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
+month_vari = dim_variance_n_Wrap(var_month,0) ;get (nmonth,nlat,nlon)
 season_ave  = dim_avg_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
+season_vari = dim_variance_n_Wrap(var_season,0) ;get (nseason,nlat,nlon)
 printVarSummary(month_ave)
 printVarSummary(season_ave)
 
@@ -237,6 +239,8 @@ filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 ;filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
+filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
+filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 
 ;define var attribute
 ;filevarattdef(ncdf,"time",t&time)
@@ -246,6 +250,8 @@ filevarattdef(ncdf,"lon",vars&lon)
 ;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
+filevarattdef(ncdf,"month_vari",var)
+filevarattdef(ncdf,"season_vari",var)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
@@ -255,5 +261,7 @@ ncdf->lon  = (/vars&lon/)
 ;ncdf->EKE  = (/EKE/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
+ncdf->month_vari  = (/month_vari/)
+ncdf->season_vari = (/season_vari/)
 end
 

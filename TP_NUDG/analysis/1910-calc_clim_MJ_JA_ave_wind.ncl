@@ -46,8 +46,8 @@ end if
 ;area: east Asia
 lats = 0   ;-90 ;
 latn = 90  ;90  ;
-lonl = 20   ;0   ;
-lonr = 160 ;360 ;
+lonl = 0   ;20  ;
+lonr = 360 ;160 ;
 ;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels hPa
 ;lev  = (/850,500,200/)
@@ -71,7 +71,7 @@ var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nv = 10,10,1
+do nv = 11,11,1
 do nf = 0 ,1, 1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time

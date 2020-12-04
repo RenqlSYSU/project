@@ -71,7 +71,7 @@ var_month  = new((/nyear,nmonth,nlev,nlat,nlon/),float)
 month_ave  = new((/      nmonth,nlev,nlat,nlon/),float)
 month_vari = new((/      nmonth,nlev,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 
-do nv = 11,11,1
+do nv = 3,3,1
 do nf = 0 ,1, 1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time

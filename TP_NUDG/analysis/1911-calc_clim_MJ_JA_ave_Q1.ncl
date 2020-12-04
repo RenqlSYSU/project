@@ -34,10 +34,10 @@ if(case_option.eq.2) then
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_intQ1.nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_intQ11.nc"
 end if
 
-var_name= (/"Q1","PS"/)
+var_name= (/"Q11","PS"/)
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
@@ -55,7 +55,7 @@ nmonth = 4
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
-vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
+vars:= f->Q1(:,{lev},{lats:latn},{lonl:lonr})
 time1 = cd_calendar(f->time,0)
 select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
 ntime = dimsizes(select_time1)
@@ -87,7 +87,7 @@ nv = 0
 files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
 f      = addfile(files(nt),"r")
 ;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-q1(nt,:,:,:,:)  = tofloat(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+q1(nt,:,:,:,:)  = tofloat(f->Q1(select_time1,{lev},{lats:latn},{lonl:lonr}))
 
 nv = 1
 files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )

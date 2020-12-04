@@ -30,16 +30,16 @@ if(case_option.eq.1) then
     fileout = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
 end if
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG","NG58","NGTR"/)
+    case    = (/"F2000","NGTR","NUDG","NG58"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
     fileout = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+                      "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
 end if
 
 var_name= (/"U","V","T","OMEGA"/)
@@ -91,7 +91,7 @@ loncyc = True  ;used by center_finite_diff_n
 ;means NOT treated as cyclic in differenced coordinates
 ;the end values will use a one-sided difference scheme for the end points. 
 
-do nf = 3,3,1
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -126,6 +126,18 @@ f      = addfile(files(nt),"r")
 w  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 printVarSummary(w)
 
+files := systemfunc("ls "+filein(nf)+"*.daily.PS.nc" )
+f      = addfile(files(nt),"r")
+ps   = f->PS(select_time,{lats:latn},{lonl:lonr}) ;get an array (ncase,nmonth,nlat,nlon)
+psn  = conform(u,ps,(/0,2,3/))
+delete(ps)
+levn = conform(u,lev*100,(/1/))
+u  = mask( u, psn.ge.levn,True)
+v  = mask( v, psn.ge.levn,True)
+t  = mask( t, psn.ge.levn,True)
+w  = mask( w, psn.ge.levn,True)
+delete([/psn,levn/])
+
 sigm0 = (R/cp)*(t/lev4d) - center_finite_diff_n(t,lev*100,cyclic,opt,ilev)
 Q1    =   (u/a/coslat) * center_finite_diff_n(t,lon,loncyc,opt,ilon) \
         + (v/a       ) * center_finite_diff_n(t,lat,cyclic,opt,ilat) \
@@ -140,14 +152,14 @@ Q1@units     = "W/kg"
 ;========================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf)+years(nt)+".daily.Q1.nc")
-ncdf = addfile(fileout(nf)+years(nt)+".daily.Q1.nc","c")
+system("rm -f " + fileout(nf)+years(nt)+".daily.Q11.nc")
+ncdf = addfile(fileout(nf)+years(nt)+".daily.Q11.nc","c")
 setfileoption(ncdf,"definemode",True)
 
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "Daily apparent heat source (W/kg) calculated from the temperature equation" 
+fileatt@discription   = "Daily apparent heat source (W/kg) calculated from the temperature equation, mask value bellow topography" 
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate

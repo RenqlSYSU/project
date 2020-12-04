@@ -44,8 +44,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 3
-nv = 0
+nl = 0
+nv = 5
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
@@ -92,7 +92,7 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(a","(c","(c","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 
 ;area: east Asia
@@ -101,7 +101,7 @@ latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,55 /);60
 lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
 lat_spacing = 15
-lon_spacing = 30
+lon_spacing = 20
 na = 8
 
 f = addfile(gtopfile,"r")
@@ -630,7 +630,7 @@ end if
     res@lbOrientation        = "Horizontal";"Vertical";
     res@pmLabelBarWidthF  = 0.7
     res@pmLabelBarHeightF = 0.08
-    res@pmLabelBarOrthogonalPosF     = 0.3 ;y direction
+    res@pmLabelBarOrthogonalPosF     = 0.15 ;y direction
     res@pmLabelBarParallelPosF       = 0.5
     end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
@@ -667,9 +667,9 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-3.5,-1.4/);-8,-8,-8,-8
-    maxlvl = (/16 , 3.5, 1.4/);8 ,8 ,8 ,8 
-    spacig = (/ 1 , 0.5, 0.2/);1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-3.5,-1.4/);-3.5 -8,-8,-8,-8
+    maxlvl = (/16 , 3.5, 1.4/); 3.5  8 ,8 ,8 ,8 
+    spacig = (/ 1 , 0.5, 0.2/); 0.5  1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.2) 
@@ -770,7 +770,7 @@ if(nv.ge.17.and.nv.le.19) then
     spacig = (/ 0.1, 0.1, 0.1/)
 end if
 
-do nm = 0,nmonth-1,1
+;do nm = 0,nmonth-1,1
 do nc = 0,1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -785,10 +785,10 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-;    do nm = 0,nmonth-1,1
+    do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
-        np = nm*2+nc
-        ;np = nc*nmonth+nm
+        ;np = nm*2+nc
+        np = nc*nmonth+nm
         ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
@@ -894,7 +894,7 @@ end if
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
-    gsn_panel(wks,plot,(/4,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do

@@ -27,9 +27,11 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
+pre_case   = (/"(a","(a","(c","(c","(e","(f","(g","(h","(i","(j","(k","(l"/)
+fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
-draw_var = (/"intQ11"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
+draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"intEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      /)
@@ -44,8 +46,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 4
-nv = 0
+nl = 0
+nv = 1
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
@@ -90,10 +92,6 @@ end if
 if(cont_option) then 
 fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
 end if
-
-;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"x11";"eps";
 
 ;area: east Asia
 lats = (/10 ,0  ,0  ,  -70,-70, -70,  0  ,-70,10 /);-20
@@ -453,10 +451,10 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.02 ;0.025
+    resvc@vcMinDistanceF            = 0.025 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
-    resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
+    resvc@vcLineArrowHeadMinSizeF   = 0.015;0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015;0.015
 end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -636,6 +634,7 @@ end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
     end if
+    resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 

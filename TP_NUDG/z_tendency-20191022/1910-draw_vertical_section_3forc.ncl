@@ -9,10 +9,14 @@ month_option = True
 var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
+barshare = True ;False;
+barvert  = False;True
 jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False;True ; 
 fnc  = 1    ;chose which case to draw
 diff = True ;False;whether draw the difference ;False;
+pre_case   = (/"(a","(b","(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
+fig_out    = "eps";"pdf";"x11"
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
@@ -160,12 +164,12 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58_20.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_20" + var_name(0) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if
 if(var_option.eq.1)
     if(month_option) then
@@ -197,8 +201,6 @@ if(var_option.eq.5)
 end if
 
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    ="pdf";"x11"
 
 f = addfile(gtopfile,"r")
 phis   := f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -408,6 +410,7 @@ end if
 
 if(diff) then
     var_m(1,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
+    var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 else
     var_m(2,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
     var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
@@ -416,7 +419,7 @@ end if
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
+    wks = gsn_open_wks(fig_out,fig_name+nv)
     gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
@@ -467,17 +470,6 @@ end if
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    ;res@lbLabelBarOn         = False;True   ; the label bar
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
-
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0
-    res@pmLabelBarParallelPosF       = 0.5
-
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -501,19 +493,19 @@ end if
     res_msf@cnLinesOn        = True
     res_msf@cnLineLabelsOn   = True ;False
     res_msf@cnInfoLabelOn    = False
-    res_msf@cnLineThicknessF = 3.0
-    res_msf@cnLineColor      = "blueviolet";"gray40"
+    res_msf@cnLineThicknessF = 4.0
+    res_msf@cnLineColor      = "black";"blueviolet";"gray40"
     res_msf@gsnContourZeroLineThicknessF = 0
     res_msf@gsnContourNegLineDashPattern = 2
     res_msf@gsnContourPosLineDashPattern = 0
     
-    levels2 = new((/20/),integer)
-    levels2(10:19) = ispan(5,50,5)
-    levels2(0:9) = ispan(-20,-2,2)
-    res_msf@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
-    res_msf@cnLevels             = levels2       ; set contour interval
-    ;res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res_msf@cnLevelSpacingF      = 5.0        ; set contour interval
+    ;levels2 = new((/20/),integer)
+    ;levels2(10:19) = ispan(5,50,5)
+    ;levels2(0:9) = ispan(-20,-2,2)
+    ;res_msf@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    ;res_msf@cnLevels             = levels2       ; set contour interval
+    res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_msf@cnLevelSpacingF      = 1.0        ; set contour interval
     res_msf@gsnPresHgtHeightLabelOn = False
     res_msf@tiYAxisOn = False
     res_msf@lbLabelBarOn     = False   ; the label bar
@@ -554,16 +546,42 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    if(var_option.eq.-1.or.var_option.eq.-4) then
-    resp@gsnPanelLabelBar = False
-    res@lbLabelBarOn      = True   ; the label bar
-    else
+    if(barshare) then; .and.nmonth.eq.4
+    res@lbLabelBarOn         = False   ; the label bar
+    resp@gsnPaperOrientation = "landscaoe";"portrait"
     resp@gsnPanelLabelBar = True
-    res@lbLabelBarOn      = False   ; the label bar
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.6
+    else
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarHeightF = 0.05;0.8
     end if
-    resp@lbOrientation     = "Horizontal";"Vertical" ;
-    resp@pmLabelBarWidthF  = 0.8  ;0.05 ;
-    resp@pmLabelBarHeightF = 0.05 ;0.8  ;
+    else
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation        = "Vertical";
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.08
+    res@pmLabelBarOrthogonalPosF     = 0.15 ;y direction
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
+    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    resp@gsnPanelLabelBar = False; True
+    end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -664,20 +682,21 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do fnc = 0,ncase-1,1
-do nv = 0, nvar-2,1
+do nv = nvar-1, nvar-1,1
+do fnc = 1,ncase-1,1
 do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
-    np = nv*nmonth + nm ;1 var, 2 month
+    ;np = nv*nmonth + nm ;1 var, 2 month
     ;np = nm*nvar + nv ;1 var, 2 month
     ;np = fnc*nvar+nv
+    np = fnc*nmonth+nm
     ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.1.and.var_option.le.5) then 
-    res@gsnRightString  = draw_var(nv) + " (" + unit(nnv) + ")" ;lonl(na) + "-" + lonr(na) + "E " + 
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nnv) + ")" ;
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nv) + ")"
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -689,9 +708,10 @@ do nm = 0, nmonth-1,1
     print(min(var_m(fnc,nv,nm,:,:)))
     
     if(jet_option) then 
-    if(fnc.eq.2) then 
+    if(fnc.eq.1) then 
+    ;res_line@gsnContourZeroLineThicknessF = 8
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 2       ; set contour interval
+    res_line@cnLevelSpacingF       = 1       ; set contour interval
     else
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
@@ -715,8 +735,8 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
+    gsn_panel(wks,plot,(/3,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
     ;gsn_panel(wks,plot,(/3,4/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 

@@ -42,8 +42,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,500,200,100,10/)
-nl = 2
-nv = 5
+nl = 1
+nv = 3
 diff = True ;False;
 perc = False;True ;
 vect_option = True ;False;
@@ -599,6 +599,11 @@ if(nl.eq.0) then ;850
     minlvl = (/1300,-35,-35/); -24,-24
     maxlvl = (/1525, 35, 35/);  24, 24
     spacig = (/ 15 , 5 , 5 /);   3,  3
+end if
+if(nl.eq.1) then  ;200
+    minlvl = (/10900,-70,-70/) 
+    maxlvl = (/12400, 70, 70/)
+    spacig = (/  100, 10, 10/) 
 end if
 if(nl.eq.2) then  ;200
     minlvl = (/10900,-70,-70/) 

@@ -29,8 +29,8 @@ if(case_option.eq.2) then
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(11,20,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_qtran_int_rmvannual-20.nc"
+    years   = ispan(1,30,1)   ;the calculate time
+    fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_qtran_int_rmvannual.nc"
 end if
 
 ;var_name= (/"U","V","Q","PS"/)
@@ -71,28 +71,28 @@ do nf = 0,1,1
 ;============================================================
 do nt = 0,nyear-1,1
 nv = 0
-;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-;f  = addfile(files(nt),"r")
-;print(" handle with " + files(nt))
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f  = addfile(files(nt),"r")
+print(" handle with " + files(nt))
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)   = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-;f  = addfile(files(nt),"r")
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f  = addfile(files(nt),"r")
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-;f  = addfile(files(nt),"r")
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f  = addfile(files(nt),"r")
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 q(nt,:,:,:,:)   = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 3
-;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-;f  = addfile(files(nt),"r")
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f  = addfile(files(nt),"r")
+;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 ps(nt,:,:,:)  = f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})   ;ps(time,lat,lon),double, surface pressure, unit is Pa
 dp(nt,:,:,:,:)  = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),30000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do

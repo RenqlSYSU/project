@@ -28,7 +28,7 @@ if(case_option.eq.2) then
     nsample = 30
 end if
 pre_case   = (/"(a","(a","(c","(c","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
@@ -46,15 +46,15 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 0
+nl = 3
 nv = 1
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
-sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = True ;False;
+sig_option  = True ;False;if False, only the significant values are shaded 
+vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = False;True ;
+cont_option = True ;False;
 cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
 nvc = 5
@@ -81,7 +81,7 @@ end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
-imonth = ispan(2,3,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 
@@ -96,7 +96,7 @@ end if
 ;area: east Asia
 lats = (/10 ,0  ,0  ,  -70,-70, -70,  0  ,-70,10 /);-20
 latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,55 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,90 /);20
+lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
 lat_spacing = 15
 lon_spacing = 20
@@ -161,7 +161,7 @@ end if
 
 wks = gsn_open_wks(fig_out,fig_name)
 ;do nl = 5,5,1
-;do nv = 6,6,1
+do nv = 17,19,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -451,10 +451,10 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.025 ;0.025
+    resvc@vcMinDistanceF            = 0.02 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
-    resvc@vcLineArrowHeadMinSizeF   = 0.015;0.015
-    resvc@vcLineArrowHeadMaxSizeF   = 0.015;0.015
+    resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
 end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -648,7 +648,7 @@ if(na.eq.0) then ; 850,700,600,500,200,100,10
                       (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
 else
     vcref         = (/(/7 , 2,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,10,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+                      (/10, 2,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/15,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
@@ -769,7 +769,7 @@ if(nv.ge.17.and.nv.le.19) then
     spacig = (/ 0.1, 0.1, 0.1/)
 end if
 
-;do nm = 0,nmonth-1,1
+do nm = 0,nmonth-1,1
 do nc = 0,1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -784,10 +784,10 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 0,nmonth-1,1
+;    do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
-        ;np = nm*2+nc
-        np = nc*nmonth+nm
+        np = nm*2+nc
+        ;np = nc*nmonth+nm
         ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
@@ -893,9 +893,9 @@ end if
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/4,2/),resp)
-;end do
+end do
 end
 

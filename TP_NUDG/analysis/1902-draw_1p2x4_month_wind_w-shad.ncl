@@ -46,23 +46,23 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    /) 
 lev = (/850,700,600,500,200,  100,10/)
-nl = 3
+nl = 0
 nv = 1
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
-sig_option  = True ;False;if False, only the significant values are shaded 
-vect_option = False;True ;
+sig_option  = False;True ;if False, only the significant values are shaded 
+vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = True ;False;
+cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
 nvc = 5
 contsig  = False;True ;;if True, only the significant values are contoured 
-barshare = False;True ;
-barvert  = False;True
+barshare = True ;False;
+barvert  = True ;False;
 
-var_option = 2
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -73,9 +73,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-imonth = ispan(4,7,1);(/4,5,6,7/)
+;imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-;imonth = ispan(0,11,1);(/4,5,6,7/)
+imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -100,7 +100,7 @@ lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
 lat_spacing = 15
 lon_spacing = 20
-na = 8
+na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -161,7 +161,7 @@ end if
 
 wks = gsn_open_wks(fig_out,fig_name)
 ;do nl = 5,5,1
-do nv = 17,19,1
+;do nv = 17,19,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -605,7 +605,7 @@ end if
     if(barvert) then 
     resp@lbOrientation     = "Vertical"
     resp@pmLabelBarWidthF  = 0.05
-    resp@pmLabelBarHeightF = 0.8
+    resp@pmLabelBarHeightF = 0.7
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.8 ;0.05
@@ -769,7 +769,7 @@ if(nv.ge.17.and.nv.le.19) then
     spacig = (/ 0.1, 0.1, 0.1/)
 end if
 
-do nm = 0,nmonth-1,1
+;do nm = 0,nmonth-1,1
 do nc = 0,1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -784,11 +784,11 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-;    do nm = 0,nmonth-1,1
+    do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
-        np = nm*2+nc
+        ;np = nm*2+nc
         ;np = nc*nmonth+nm
-        ;np = nm
+        np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
@@ -891,11 +891,11 @@ end if
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
-;    gsn_panel(wks,plot,(/4,3/),resp)
+    gsn_panel(wks,plot,(/6,2/),resp)
 end do
-    gsn_panel(wks,plot,(/4,2/),resp)
+;    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/4,2/),resp)
-end do
+;end do
 end
 

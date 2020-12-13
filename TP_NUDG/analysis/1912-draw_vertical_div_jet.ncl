@@ -26,7 +26,7 @@ imonth = ispan(0,3,1)
 else
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months = (/"JF","MA","MJ","JA"/)
-imonth = ispan(2,3,1)
+imonth = ispan(0,3,1)
 ;months  = (/"May","Jun","Jul","Aug"/)
 end if
 nmonth = dimsizes(imonth)
@@ -144,13 +144,15 @@ if(diff) then
     var(1,1:4,:,:,:)= var(1,1:4,:,:,:) - var(0,1:4,:,:,:)   ;get the difference between CTRL and NUDG
 end if
 if(sigmask) then 
-    var(1,3:4,:,:,:) = mask(var(1,3:4,:,:,:), prob(3:4,:,:,:).lt.siglvl, True);cont_var, shad_var
-    ;var(1,3,:,:,:) = mask(var(1,3,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
-    ;var(1,4,:,:,:) = mask(var(1,4,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
+    ;var(1,3:4,:,:,:) = mask(var(1,3:4,:,:,:), prob(3:4,:,:,:).lt.siglvl, True);cont_var, shad_var
+    var(1,3,:,:,:) = mask(var(1,3,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
+    var(1,4,:,:,:) = mask(var(1,4,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
     v = var(1,1,:,:,:)
     w = var(1,2,:,:,:)
-    var(1,1,:,:,:) = mask(var(1,1,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
-    var(1,2,:,:,:) = mask(var(1,2,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
+    ;var(1,1,:,:,:) = mask(var(1,1,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
+    ;var(1,2,:,:,:) = mask(var(1,2,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
+    var(1,1,:,:,:) = mask(var(1,1,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
+    var(1,2,:,:,:) = mask(var(1,2,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
 end if
 printVarSummary(var)
 

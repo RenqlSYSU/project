@@ -60,7 +60,7 @@ if(var_option.eq.2) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
-imonth = ispan(2,3,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 end if
@@ -226,7 +226,7 @@ if(nv.eq.7) then
 end if
 
 if(diff) then 
-case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
+case2(1) = case1(1)+"-"+case1(0) ;,"NG24h-CTRL"
 do nf = 0 ,ncase-2,1
 if(nv.eq.7) then 
 var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG

@@ -22,7 +22,7 @@ year_option = False;True
 csa = False  ;cubic spline interpolation
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nc = 1
-ntime = 2
+ntime = 4
 month_s = 1
 month_e = 8
 
@@ -46,7 +46,7 @@ fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4
 end if
 if(ntime.le.4.and.ntime.ge.2) then 
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_forc_te_season.nc"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.1) then 

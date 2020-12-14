@@ -26,7 +26,7 @@ imonth = ispan(0,3,1)
 else
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months = (/"JF","MA","MJ","JA"/)
-imonth = ispan(0,3,1)
+imonth = ispan(2,3,1)
 ;months  = (/"May","Jun","Jul","Aug"/)
 end if
 nmonth = dimsizes(imonth)
@@ -80,8 +80,8 @@ end if
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_"
 fig_name = path + "/analysis/fig/" + case1(0) + "_vertical_div_jet"
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-;fig_out  = "eps";
-fig_out  = "pdf";"x11""eps";
+fig_out  = "eps";
+;fig_out  = "pdf";"x11""eps";
 
 f = addfile(gtopfile,"r")
 phis  = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -145,8 +145,8 @@ if(diff) then
 end if
 if(sigmask) then 
     ;var(1,3:4,:,:,:) = mask(var(1,3:4,:,:,:), prob(3:4,:,:,:).lt.siglvl, True);cont_var, shad_var
-    var(1,3,:,:,:) = mask(var(1,3,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);v
-    var(1,4,:,:,:) = mask(var(1,4,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);w
+    var(1,3,:,:,:) = mask(var(1,3,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl.or.prob(3,:,:,:).lt.siglvl.or.prob(4,:,:,:).lt.siglvl, True);v
+    var(1,4,:,:,:) = mask(var(1,4,:,:,:), prob(0,:,:,:).lt.siglvl.or.prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl.or.prob(3,:,:,:).lt.siglvl.or.prob(4,:,:,:).lt.siglvl, True);w
     v = var(1,1,:,:,:)
     w = var(1,2,:,:,:)
     ;var(1,1,:,:,:) = mask(var(1,1,:,:,:), prob(1,:,:,:).lt.siglvl.or.prob(2,:,:,:).lt.siglvl, True);prob(0,:,:,:).lt.siglvl.or.
@@ -278,7 +278,7 @@ printVarSummary(var)
     div_line@tmYLLabelsOn = False
    
     div_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    div_line@cnLevelSpacingF       = 1.0       ; set contour interval
+    div_line@cnLevelSpacingF      = 1.0; 0.5;      ; set contour interval
     div_line@gsnCenterString   = ""
     div_line@gsnLeftString     = " "
     div_line@gsnRightString    = " "
@@ -345,10 +345,11 @@ else
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if 
     do nm = 0,nmonth-1,1
+        ;np = nc
         np = nmonth*nc + nm
         ;np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
-        res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(snv) ;+ " (" + unit(dnv) + ")"
+        res@gsnRightString  = lonl(na) + "E " + draw_var(snv) + " (" + unit(2) + ")";+ "-" + lonr(na) 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -378,6 +379,7 @@ end if
     end do 
 end do ;for the month 
 
+;    gsn_panel(wks,plot,(/1,2/),resp)
     gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
 ;end do

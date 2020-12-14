@@ -20,10 +20,28 @@ month_e = 8
 
 ;the path of the file
 path     = "/home/ys17-19/renql/project/TP_NUDG"
-filename = path + "/energy-20180417/mdata/" + (/"CTRL","NUDG6h"/) + "-Clim_qtran_int_rmvannual.nc" ;,"NUDG24h"
-gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-fig_name = path + "/energy-20180417/fig/1p2x3_qtran_int_rmvannual"
-    case   = (/" CTRL"," NG6h-CTRL"/) ;," NG24h-CTRL"
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+if(case_option.eq.0) then
+    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
+    gtopfile= path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
+end if
+if(case_option.eq.1) then
+    case1   = (/"TP_CTRL","TP_CR"/)
+    case2   = (/"CTRL"   ,"CTRL-noTP"/)
+    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    nsample = 10
+end if
+if(case_option.eq.2) then
+    case1   = (/"F2000","NGTR"/)       ;NGTR    
+    case2   = (/"F2000","NGTR-F2000"/) ;NGTR
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
+end if
+filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_qtran_int_rmvannual-20.nc" ;,"NUDG24h"
+fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_rmvannual-10"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
@@ -40,7 +58,7 @@ na = 0
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-ncase  = dimsizes(case)
+ncase  = dimsizes(case1)
 nvar   = dimsizes(draw_var)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
@@ -74,8 +92,8 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 do nf = 0 ,ncase-1, 1
 f = addfile(filename(nf),"r")
 do nv = 0,nvar-1,1
-    print("read " + case(nf) + " " + var_name_u(nv))
-    print("read " + case(nf) + " " + var_name_v(nv))
+    print("read " + case1(nf) + " " + var_name_u(nv))
+    print("read " + case1(nf) + " " + var_name_v(nv))
     u(nf,nv,:,:,:)  = f->$var_name_u(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
     v(nf,nv,:,:,:)  = f->$var_name_v(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end do
@@ -265,7 +283,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     res_gtop@cnLineThicknessF = 4.0
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_gtop@cnLevels         = (/1500/)
+    res_gtop@cnLevels         = (/3000/)
     res_gtop@gsnCenterString      = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
@@ -329,7 +347,7 @@ do nm = 0, nmonth-1,1
         ;    res@tmYLLabelsOn         = False              ; no right labels
         ;    res@tmYLOn               = False              ; no right tickmarks
         ;end if
-        res@gsnLeftString   = pre_case(np) + ")" + case(nc) + " " + months(nm) ;+ " " + draw_var(nv)
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(nm) ;+ " " + draw_var(nv)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
@@ -342,7 +360,7 @@ do nm = 0, nmonth-1,1
         gtop(np)   = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),plotvc(np))
         overlay(plot(np),gtop(np))
-        line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
+        ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
         print(max(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         print(min(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 

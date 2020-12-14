@@ -29,7 +29,7 @@ if(case_option.eq.2) then
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,10,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_qtran_int_rmvannual-10.nc"
 end if
 

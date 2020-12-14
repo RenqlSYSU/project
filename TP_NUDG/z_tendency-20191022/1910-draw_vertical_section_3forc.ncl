@@ -14,16 +14,16 @@ barvert  = False;True
 jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False;True ; 
 fnc  = 1    ;chose which case to draw
-diff = True ;False;whether draw the difference ;False;
-pre_case   = (/"(a","(b","(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    = "eps";"pdf";"x11"
+diff = False;True ;whether draw the difference ;False;
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
+fig_out    = "pdf";"pdf";"x11"
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
 ;months  = (/"JF","MJ","JA"/);,"MA"
-select_time = (/0,1/)
-select_time_u = (/2,3/)
-months  = (/"MJ","JA"/)
+select_time = (/0,1,2,3/)
+select_time_u = (/0,1,2,3/)
+months  = (/"JF","MA","MJ","JA"/)
 ;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
@@ -164,7 +164,7 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon58.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -177,7 +177,7 @@ if(var_option.eq.1)
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_DJF.nc"
     end if
     if(nmonth.le.4.and.nmonth.ge.2) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_2month_lon58.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_2month_lon18.nc"
     end if
     if(nmonth.gt.12) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_daily5.nc"
@@ -410,7 +410,7 @@ end if
 
 if(diff) then
     var_m(1,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
-    var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
+    ;var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 else
     var_m(2,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
     var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
@@ -419,7 +419,7 @@ end if
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name+nv)
+    wks = gsn_open_wks(fig_out,fig_name)
     gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
     ;gsn_define_colormap(wks,"GMT_polar") 
@@ -682,14 +682,14 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = nvar-1, nvar-1,1
-do fnc = 1,ncase-1,1
-do nm = 0, nmonth-1,1
+do fnc = 2,ncase-1,1
+do nm = 0,0,1;, nmonth-1,1
+do nv = 0, 2,1;nvar-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
-    ;np = nm*nvar + nv ;1 var, 2 month
+    np = nm*nvar + nv ;1 var, 2 month
     ;np = fnc*nvar+nv
-    np = fnc*nmonth+nm
+    ;np = fnc*nmonth+nm
     ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
     ;np = nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
@@ -708,7 +708,7 @@ do nm = 0, nmonth-1,1
     print(min(var_m(fnc,nv,nm,:,:)))
     
     if(jet_option) then 
-    if(fnc.eq.1) then 
+    if(fnc.eq.2) then 
     ;res_line@gsnContourZeroLineThicknessF = 8
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     res_line@cnLevelSpacingF       = 1       ; set contour interval
@@ -735,9 +735,9 @@ end do
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
-    gsn_panel(wks,plot,(/3,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
     ;gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
-    ;gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot,(/1,3/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
 end do 

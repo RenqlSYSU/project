@@ -5,19 +5,21 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var = (/"Total","Steady","Transient"/) 
-var_name_u = (/"qu","ste_qu","edd_qu"/)
-var_name_v = (/"qv","ste_qv","edd_qv"/)
-unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
-div_option = True
-diffterm   = False;True
+draw_var  = (/"Total","Steady","Transient"/) 
+var_name  = (/"qu_ave","qv_ave","div_ave"/)
+vari_name = (/"qu_vari","qv_vari","div_vari"/)
+unit      = "kg/(s*m)" ;"K"   ;this can be used as right string 
+diffterm  = True ;False;
+sig_option= False;True ;if False, only the significant values are shaded 
 barshare  = True ;False;
 barvert   = False;True ;
 
-months = (/"MJ","JA"/)
-;months = (/"JF","MA","MJ","JA"/)
+;months   = (/"MJ","JA"/)
+;imonth = ispan(0,1,1);(/4,5,6,7/)
+months   = (/"JF","MA","MJ","JA"/)
+imonth = ispan(2,3,1);(/4,5,6,7/)
 ;months  = (/"May","Jun","Jul","Aug"/)
-nmonth = dimsizes(months)
+nmonth = dimsizes(imonth)
 month_s = 5
 month_e = 8
 
@@ -46,13 +48,10 @@ if(case_option.eq.2) then
     case1   := (/"Ano"/)       ;NGTR    
     case2   := (/"Ano"/) ;NGTR
     draw_var   := (/"q'V","qV'"/) 
-    var_name_u := (/"qu1","qu2"/)
-    var_name_v := (/"qv1","qv2"/)
-    var_name := (/"div1","div2"/)
     end if
 end if
-filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_qtran_int_rmvannual.nc" ;,"NUDG24h"
-fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_rmvannual"
+filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_2month_ave_qtran_int.nc" ;,"NUDG24h"
+fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_2month"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
@@ -63,20 +62,21 @@ latn = (/55 ,55 /) ;60
 lonl = (/90 ,30 /) ;20
 lonr = (/150,150/) ;220
 siglvl = 0.05
-ntime  = 27
 na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case1)
-nvar   = dimsizes(draw_var)
+nvar1  = dimsizes(draw_var)
+nvar2  = dimsizes(var_name)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 
 ;the number of the panel plot
     plot     = new((/3*nmonth/),graphic)
     plotvc   = new((/3*nmonth/),graphic)
+    wind2    = new((/3*nmonth/),graphic)
     line     = new((/3*nmonth/),graphic)
     gtop     = new((/3*nmonth/),graphic)
 
@@ -91,51 +91,48 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;================================================================
 ;read data
 ;====================================================================
-f      = addfile(filename(0),"r")
-time   = cd_calendar(f->time,0)
-var_u  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
-var_v  = new((/ncase,nvar,nmonth,nlat,nlon/),float)
-var    = new((/ncase,nvar,nmonth,nlat,nlon/),float)
+var  = new((/ncase,nvar2,nvar1,nmonth,nlat,nlon/),double)
+vari = new((/ncase,nvar2,nvar1,nmonth,nlat,nlon/),double)
 
 do nf = 0 ,ncase-1, 1
 f = addfile(filename(nf),"r")
-do nv = 0,nvar-1,1
-do nm = 0, nmonth-1, 1
-    ;mons = nm + month_s
-    ;mone = nm + month_s
-    mons = 2*nm + month_s
-    mone = 2*nm + month_s + 1
-    select_time := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
-    print("read " + case1(nf) + " " + var_name_u(nv))
-    print("read " + case1(nf) + " " + var_name_v(nv))
-    var_u(nf,nv,nm,:,:)  = dim_avg_n_Wrap(f->$var_name_u(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-    var_v(nf,nv,nm,:,:)  = dim_avg_n_Wrap(f->$var_name_v(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-;    if(diffterm) then 
-;    var(nf,nv,nm,:,:)= dim_avg_n_Wrap(f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-;    end if
-end do
+do nv = 0,nvar2-1,1
+    print("read " + case1(nf) + " " + var_name(nv))
+    var(nf,nv,:,:,:,:)   =  f->$var_name(nv)$(:,imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    if(.not.diffterm) then 
+    vari(nf,nv,:,:,:,:)  = f->$vari_name(nv)$(:,imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    end if
 end do
 end do
 
-if(diffterm) then 
-var = -uv2dv_cfd ( var_u, var_v, var_u&lat, var_v&lon, 2)*100000
-;var = var*100000
+if(diffterm) then
+var(:,2,:,:,:,:) = var(:,2,:,:,:,:)*100000
 else
-if(div_option) then 
-var = -uv2dv_cfd ( var_u, var_v, var_u&lat, var_v&lon, 2)*100000
-else
-var = sqrt(var_u^2 + var_v^2)
-end if
+prob = new((/ncase-1,nvar2,nvar1,nmonth,nlat,nlon/),double)
+do nf = 0 ,ncase-2,1
+prob(nf,:,:,:,:,:) = ttest(var(0,:,:,:,:,:),vari(0,:,:,:,:,:),nsample,var(nf+1,:,:,:,:,:),vari(nf+1,:,:,:,:,:),nsample,True,False)
+end do
+
+var(:,2,:,:,:,:) = var(:,2,:,:,:,:)*100000
+;var(:,2,:,:,:,:) = -uv2dv_cfd ( var(:,0,:,:,:,:), var(:,1,:,:,:,:), var&lat, var&lon, 2)*100000
 do nc = 1, ncase-1, 1
-    var_u(nc,:,:,:,:) =  var_u(nc,:,:,:,:) - var_u(0,:,:,:,:) 
-    var_v(nc,:,:,:,:) =  var_v(nc,:,:,:,:) - var_v(0,:,:,:,:) 
-    var(nc,:,:,:,:) =  var(nc,:,:,:,:) - var(0,:,:,:,:) 
+    var(nc,:,:,:,:,:) =  var(nc,:,:,:,:,:) - var(0,:,:,:,:,:) 
 end do
-end if
-copy_VarMeta(var_u,var)
-
-printVarSummary(var_u)
 printVarSummary(var)
+
+uvar = mask(var(1:(ncase-1),0,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl)),False) ;not significance
+vvar = mask(var(1:(ncase-1),1,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl)),False)
+var(1:(ncase-1),0,:,:,:,:) = mask(var(1:(ncase-1),0,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl)),True)
+var(1:(ncase-1),1,:,:,:,:) = mask(var(1:(ncase-1),1,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl)),True)
+copy_VarMeta(var(0,0,0,0,:,:),uvar(0,0,0,:,:))
+copy_VarMeta(var(0,0,0,0,:,:),vvar(0,0,0,:,:))
+if(sig_option) then 
+prob(:,2,:,:,:,:) = mask(prob(:,2,:,:,:,:),prob(:,2,:,:,:,:).lt.siglvl,True)
+else
+var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),prob(:,2,:,:,:,:).lt.siglvl,True)
+;var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl).or.(prob(:,2,:,:,:,:).lt.siglvl)),True)
+end if
+end if
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -247,7 +244,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMinDistanceF             = 0.028
+    resvc@vcMinDistanceF             = 0.025
     resvc@vcLineArrowHeadMinSizeF    = 0.015
     resvc@vcLineArrowHeadMaxSizeF    = 0.015
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
@@ -268,6 +265,9 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
+
+    resvc2 = resvc
+    resvc2@vcLineArrowColor           = "grey"
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -292,10 +292,32 @@ wks = gsn_open_wks(fig_out,fig_name)
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
 
+;----------Set res sig-----------
+    res_sig                  = True       ; use plot options
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@gsnFrame         = False
+    res_sig@gsnDraw          = False
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
+    res_sig@cnInfoLabelOn    = False
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.25
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/3000,1000/)
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
+
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"  ;"portrait"
@@ -348,46 +370,19 @@ end if
     ;minlvl = (/(/15 ,45 , 0/),(/-80,-16,-16/),(/-80,-16,-16/)/) ;used for East Asian Shaded ration
     ;maxlvl = (/(/615,120,30/),(/ 80, 16, 16/),(/ 80, 16, 16/)/)
     ;spacig = (/(/40 ,5  , 2/),(/ 10, 2 , 2 /),(/ 10, 2 , 2 /)/)
-if(div_option) then 
     res@cnFillPalette = "BlueDarkRed18"
     res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/) ; If the color indexes are derived from cnFillPalette the first color comes from element 0
     maxlvl = (/(/ 7, 7, 7/),(/ 7, 7, 7/),(/ 7, 7, 7/)/) ;used for East Asian moist transiation
     minlvl = (/(/-7,-7,-7/),(/-7,-7,-7/),(/-7,-7,-7/)/) ;used for CTRL-NUDG
     spacig = (/(/ 1, 1, 1/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
-else
-    res@cnFillPalette = "precip3_16lev"
-    if(na.eq.1) then
-    minlvl = (/(/15 ,15 , 0/),(/ 0, 0, 0/),(/ 0, 0, 0/)/) ;used for East Asian moist transiation
-    maxlvl = (/(/615,615,75/),(/45,45,45/),(/45,45,45/)/)
-    spacig = (/(/40 ,40 , 5/),(/ 3, 3, 3/),(/ 3, 3, 3/)/)
-    else
-    minlvl = (/(/30 ,30 , 0/),(/20,20,0 /),(/20,20,0 /)/) ;used for East Asian moist transiation
-    maxlvl = (/(/180,180,45/),(/95,95,30/),(/95,95,30/)/)
-    spacig = (/(/10 ,10 , 3/),(/ 5, 5,2 /),(/ 5, 5,2 /)/)
-    end if
-end if
 
-do nv = 0 ,nvar-1,1
+do nv = 0 ,nvar1-1,1
 do nc = 0, ncase-1,1
 do nm = 0, nmonth-1,1
-;if(nc.eq.0) then
-;    res@cnFillPalette = "precip3_16lev"
-;    ;blue and yellow and red, has 17 colors,2-18,2 is white
-;else
-;    res@cnFillPalette = "BlueDarkRed18"
-;    ;blue and red, has 18 colors,2-10 is blue
-;end if 
         ;np = nvar*nc + nv
-        np = nmonth*nc + nm
-        ;np = nmonth*nv + nm
-        ;if(np.eq.0.or.np.eq.4.or.np.eq.8) then 
-        ;    res@tmYLLabelsOn         = True              ; no right labels
-        ;    res@tmYLOn               = True              ; no right tickmarks
-        ;else
-        ;    res@tmYLLabelsOn         = False              ; no right labels
-        ;    res@tmYLOn               = False              ; no right tickmarks
-        ;end if
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(nm) ;+ " " + draw_var(nv)
+        ;np = nmonth*nc + nm
+        np = nmonth*nv + nm
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm));+ " " + draw_var(nv)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
@@ -395,14 +390,28 @@ do nm = 0, nmonth-1,1
         res@cnMinLevelValF       := minlvl(nc,nv)       ; set min contour level
         resvc@vcRefMagnitudeF   = vcref(nc,nv)                ; define vector ref mag
         resvc@vcRefAnnoString2  = vcref(nc,nv) + " " + unit
-        plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,nv,nm,:,:),res) 
-        plotvc(np) = gsn_csm_vector(wks,var_u(nc,nv,nm,:,:),var_v(nc,nv,nm,:,:),resvc)
-        gtop(np)   = gsn_csm_contour(wks,phis,res_gtop)
+        resvc2@vcRefMagnitudeF  = vcref(nc,nv)                ; define vector ref mag
+        resvc2@vcRefAnnoString2 = vcref(nc,nv) + " " + unit
+        plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,2,nv,nm,:,:),res) 
+        if(.not.diffterm) then 
+        if(sig_option.and.nc.gt.0) then 
+        sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nv,nm,:,:),res_sig)
+        overlay(plot(np),sig(np))
+        end if
+        
+        if(nc.gt.0)
+        wind2(np)  = gsn_csm_vector(wks,uvar(nc-1,nv,nm,:,:),vvar(nc-1,nv,nm,:,:),resvc2)
+        overlay(plot(np),wind2(np))
+        end if
+        end if
+        plotvc(np) = gsn_csm_vector(wks,var(nc,0,nv,nm,:,:),var(nc,1,nv,nm,:,:),resvc)
         overlay(plot(np),plotvc(np))
+        
+        gtop(np)   = gsn_csm_contour(wks,phis,res_gtop)
         overlay(plot(np),gtop(np))
         ;line(np) = gsn_add_polyline( wks, plot(np), lonx, latx, lnres )
-        print(max(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        print(min(var_u(nc,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(max(var(nc,2,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(min(var(nc,2,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
 end do 
     ;res1 = True
@@ -412,8 +421,8 @@ end do
     ;attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
     ;gsn_panel(wks,plot(0:7:4),(/ncase,1/),resp)
     ;gsn_panel(wks,plot,(/ncase,nvar/),resp)
-    gsn_panel(wks,plot,(/ncase,nmonth/),resp)
+ ;   gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end do
-;    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
+    gsn_panel(wks,plot,(/nvar1,nmonth/),resp)
 end 
 

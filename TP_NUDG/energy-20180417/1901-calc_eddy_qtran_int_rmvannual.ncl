@@ -29,8 +29,8 @@ if(case_option.eq.2) then
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,10,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_qtran_int_rmvannual-10.nc"
+    years   = ispan(1,30,1)   ;the calculate time
+    fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_qtran_int_rmvannual.nc"
 end if
 
 var_name= (/"U","V","Q","PS"/)
@@ -59,16 +59,17 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
+
+do nf = 0,1,1 
+;==========================================================
+;read the data
+;============================================================
 u     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 q     = new((/nyear,ntime,nlev,nlat,nlon/),float)
 dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 ps    = new((/nyear,ntime,nlat,nlon/),float)
 
-do nf = 0,1,1 
-;==========================================================
-;read the data
-;============================================================
 do nt = 0,nyear-1,1
 nv = 0
 files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
@@ -107,8 +108,10 @@ printVarSummary(dp)
 
 qu := dim_sum_n(q*u*dp,2)/g ;get integrated qu(nyear,time,lat,lon)
 qv := dim_sum_n(q*v*dp,2)/g ;get integrated qu(nyear,time,lat,lon)
+div:= dim_sum_n(-uv2dv_cfd(q*u, q*v, u&lat, v&lon, 2)*dp,2)/g ;get (nyear,nmonth,nlat,nlon)
 qu := dim_avg_n(qu,0)  ;get integrated qu(lat,lon)
 qv := dim_avg_n(qv,0)  ;get integrated qu(lat,lon)
+div:= dim_avg_n(div,0)  ;get integrated qu(lat,lon)
 
 if(case_option.ge.1) then 
     cf = ezfftf_n(dim_avg_n(u,0),0)
@@ -131,17 +134,20 @@ else
 end if
 ste_qu := dim_sum_n(clm_u*clm_q*clm_dp,1)/g ;get steady integrated qu(ntime,lat,lon)
 ste_qv := dim_sum_n(clm_v*clm_q*clm_dp,1)/g ;get steady integrated qv(ntime,lat,lon)
+ste_div:= dim_sum_n(-uv2dv_cfd(clm_q*clm_u, clm_q*clm_v, u&lat, v&lon, 2)*clm_dp,1)/g ;get (nyear,nmonth,nlat,nlon)
 delete(clm_dp)
 
 edd_q = q - conform(q,clm_q,(/1,2,3,4/))
 edd_u = u - conform(u,clm_u,(/1,2,3,4/))
 edd_v = v - conform(v,clm_v,(/1,2,3,4/))
-delete([/clm_q,clm_u,clm_v/])
+delete([/clm_q,clm_u,clm_v,u,v,q/])
 edd_qu := dim_sum_n(edd_q*edd_u*dp,2)/g ;get transient eddy integrated qu(nyear,ntime,lat,lon)
 edd_qv := dim_sum_n(edd_q*edd_v*dp,2)/g
-delete([/edd_q,edd_u,edd_v/])
+edd_div:= dim_sum_n(-uv2dv_cfd(edd_q*edd_u, edd_q*edd_v, dp&lat, dp&lon, 2)*dp,2)/g ;get (nyear,nmonth,nlat,nlon)
+delete([/edd_q,edd_u,edd_v,dp/])
 edd_qu := dim_avg_n(edd_qu,0) ;get transient eddy integrated qu(lat,lon)
 edd_qv := dim_avg_n(edd_qv,0)
+edd_div:= dim_avg_n(edd_div,0)
 
 qu@long_name = "Integrated zonal temperature transport"
 qv@long_name = "Integrated meridional temperature transport"
@@ -173,12 +179,15 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"time",typeof(vars&time),getvardims(vars&time))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
-filevardef(ncdf,"qu",typeof(qu),(/"time","lat","lon"/))
-filevardef(ncdf,"qv",typeof(qv),(/"time","lat","lon"/))
-filevardef(ncdf,"ste_qu",typeof(ste_qu),(/"time","lat","lon"/))
-filevardef(ncdf,"ste_qv",typeof(ste_qv),(/"time","lat","lon"/))
-filevardef(ncdf,"edd_qu",typeof(edd_qu),(/"time","lat","lon"/))
-filevardef(ncdf,"edd_qv",typeof(edd_qv),(/"time","lat","lon"/))
+filevardef(ncdf,"qu" ,typeof(qu) ,(/"time","lat","lon"/))
+filevardef(ncdf,"qv" ,typeof(qv) ,(/"time","lat","lon"/))
+filevardef(ncdf,"div",typeof(div),(/"time","lat","lon"/))
+filevardef(ncdf,"ste_qu" ,typeof(ste_qu) ,(/"time","lat","lon"/))
+filevardef(ncdf,"ste_qv" ,typeof(ste_qv) ,(/"time","lat","lon"/))
+filevardef(ncdf,"ste_div",typeof(ste_div),(/"time","lat","lon"/))
+filevardef(ncdf,"edd_qu" ,typeof(edd_qu) ,(/"time","lat","lon"/))
+filevardef(ncdf,"edd_qv" ,typeof(edd_qv) ,(/"time","lat","lon"/))
+filevardef(ncdf,"edd_div",typeof(edd_div),(/"time","lat","lon"/))
 
 ;define var attribute
 filevarattdef(ncdf,"time",vars&time)
@@ -194,10 +203,13 @@ ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->qu   = (/qu/)
 ncdf->qv   = (/qv/)
-ncdf->ste_qu = (/ste_qu/)
-ncdf->ste_qv = (/ste_qv/)
-ncdf->edd_qu = (/edd_qu/)
-ncdf->edd_qv = (/edd_qv/)
+ncdf->div  = (/div/)
+ncdf->ste_qu  = (/ste_qu/)
+ncdf->ste_qv  = (/ste_qv/)
+ncdf->ste_div = (/ste_div/)
+ncdf->edd_qu  = (/edd_qu/)
+ncdf->edd_qv  = (/edd_qv/)
+ncdf->edd_div = (/edd_div/)
 end do
 end
 

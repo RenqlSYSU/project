@@ -6,8 +6,9 @@
 ;*********************************************************************************
 begin
 draw_var = (/"Total","Steady","Transient"/) 
-var_name_u = (/"qu","ste_qu","edd_qu"/)
-var_name_v = (/"qv","ste_qv","edd_qv"/)
+var_name_u = (/"qu" ,"ste_qu" ,"edd_qu" /)
+var_name_v = (/"qv" ,"ste_qv" ,"edd_qv" /)
+var_name   = (/"div","ste_div","edd_div"/)
 unit     = "kg/(s*m)" ;"K"   ;this can be used as right string 
 div_option = True
 diffterm   = False;True
@@ -51,8 +52,8 @@ if(case_option.eq.2) then
     var_name := (/"div1","div2"/)
     end if
 end if
-filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_qtran_int_rmvannual.nc" ;,"NUDG24h"
-fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_rmvannual"
+filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_qtran_int_rmvannual-30.nc" ;,"NUDG24h"
+fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_rmvannual-30"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
@@ -110,22 +111,19 @@ do nm = 0, nmonth-1, 1
     print("read " + case1(nf) + " " + var_name_v(nv))
     var_u(nf,nv,nm,:,:)  = dim_avg_n_Wrap(f->$var_name_u(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     var_v(nf,nv,nm,:,:)  = dim_avg_n_Wrap(f->$var_name_v(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-;    if(diffterm) then 
-;    var(nf,nv,nm,:,:)= dim_avg_n_Wrap(f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-;    end if
+    var(nf,nv,nm,:,:)    = dim_avg_n_Wrap(f->$var_name(nv)$(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
 end do
 end do
 end do
 
-if(diffterm) then 
-var = -uv2dv_cfd ( var_u, var_v, var_u&lat, var_v&lon, 2)*100000
-;var = var*100000
-else
 if(div_option) then 
-var = -uv2dv_cfd ( var_u, var_v, var_u&lat, var_v&lon, 2)*100000
+;var = -uv2dv_cfd ( var_u, var_v, var_u&lat, var_v&lon, 2)*100000
+var = var*100000
 else
 var = sqrt(var_u^2 + var_v^2)
 end if
+
+if(.not.diffterm) then
 do nc = 1, ncase-1, 1
     var_u(nc,:,:,:,:) =  var_u(nc,:,:,:,:) - var_u(0,:,:,:,:) 
     var_v(nc,:,:,:,:) =  var_v(nc,:,:,:,:) - var_v(0,:,:,:,:) 
@@ -247,7 +245,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMinDistanceF             = 0.028
+    resvc@vcMinDistanceF             = 0.025
     resvc@vcLineArrowHeadMinSizeF    = 0.015
     resvc@vcLineArrowHeadMaxSizeF    = 0.015
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag

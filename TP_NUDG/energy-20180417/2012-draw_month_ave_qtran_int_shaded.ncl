@@ -14,10 +14,10 @@ sig_option= False;True ;if False, only the significant values are shaded
 barshare  = True ;False;
 barvert   = False;True ;
 
-;months   = (/"MJ","JA"/)
-;imonth = ispan(0,1,1);(/4,5,6,7/)
-months   = (/"JF","MA","MJ","JA"/)
-imonth = ispan(2,3,1);(/4,5,6,7/)
+months   = (/"MJ","JA"/)
+imonth = ispan(0,1,1);(/4,5,6,7/)
+;months   = (/"JF","MA","MJ","JA"/)
+;imonth = ispan(2,3,1);(/4,5,6,7/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 nmonth = dimsizes(imonth)
 month_s = 5
@@ -45,8 +45,8 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
     if(diffterm) then
-    case1   := (/"Ano"/)       ;NGTR    
-    case2   := (/"Ano"/) ;NGTR
+    case1   := (/"Ano2"/)       ;NGTR    
+    case2   := (/"NGTR-F2000"/) ;NGTR
     draw_var   := (/"q'V","qV'"/) 
     end if
 end if

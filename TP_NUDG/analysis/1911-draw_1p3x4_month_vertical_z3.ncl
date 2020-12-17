@@ -39,7 +39,8 @@ lev_u = lev
 nv = 3
 diff = True ;False;
 jet_option = True
-jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+barshare = True ;False;
+barvert  = False;True ;
 
 var_option = 2
 if(var_option.eq.0) then 
@@ -48,6 +49,7 @@ months   = (/"DJF","MAM","JJA","SON"/)
 imonth = ispan(0,3,1)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -55,6 +57,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -62,7 +65,8 @@ months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
 imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
-fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 end if
 if(var_option.eq.3) then 
 var_name = draw_var(nv) ;this is the var_name in data file
@@ -84,35 +88,57 @@ fig_out    = "pdf";"x11"
 ;fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
-area = (/"TP","EA","NH"/)
-lats = (/15  ,15  , 0  /);20 ;-20
-latn = (/55  ,55  , 89 /) ;55 ;60
-lonl = (/70  ,110 , 10 /) ;30 ;20
-lonr = (/105 ,130 ,350 /) ;150;220
+area = (/"TP","EA","UP","NH"/)
+lats = (/15  ,15  , 15 , 0  /);20 ;-20
+latn = (/55  ,55  , 55 , 89 /) ;55 ;60
+lonl = (/75  ,110 , 50 , 10 /) ;30 ;20
+lonr = (/95  ,130 , 70 ,350 /) ;150;220
 lat_spacing = 15
 lon_spacing = 30
-na = 1
+na = 2
 
+    wks = gsn_open_wks(fig_out,fig_name)
+    gsn_define_colormap(wks,"BlueDarkRed18")
+    ;blue and red, has 18 colors,2-10 is blue
+    ;gsn_define_colormap(wks,"GMT_polar") 
+    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
+    ;gsn_define_colormap(wks,"matlab_jet") 
+    ;has 64 colors blue green yellow,red
+
+do na=0,2,1
 f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
+phis   := f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-ncase  = dimsizes(case1)
-nmonth = dimsizes(imonth)
 nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
+phis1  := 1013.25*(1-dim_avg_n_Wrap(phis,1)*0.0065/288.15)^5.25145
+phis1  = where(phis1.le.1000, phis1, 1000)
+ypoly := new((/nlat+4/),float)
+xpoly := new((/nlat+4/),float)
+ypoly(0:nlat-1)    = tofloat(phis1)
+ypoly(nlat:nlat+3) = (/tofloat(phis1(nlat-1)),1000,1000,tofloat(phis1(0))/)
+xpoly(0:nlat-1)    = tofloat(phis&lat)
+xpoly(nlat:nlat+3) = (/tofloat(latn(na)),tofloat(latn(na)),tofloat(lats(na)),tofloat(lats(na))/)
+delete([/phis,phis1/])
+
+ncase  = dimsizes(case1)
+nmonth = dimsizes(imonth)
 nlev   = dimsizes(lev)
 nlev2  = dimsizes(lev_u)
 if(nv.eq.7) then 
-var    = new((/ncase,4,nmonth,nlev ,nlat,nlon/),float)
+var    := new((/ncase,4,nmonth,nlev ,nlat,nlon/),float)
 else
-var    = new((/ncase,nmonth,nlev ,nlat,nlon/),float)
+var    := new((/ncase,nmonth,nlev ,nlat,nlon/),float)
 end if
-var_u  = new((/ncase,nmonth,nlev2,nlat/),float)
+var_u  := new((/ncase,nmonth,nlev2,nlat/),float)
 
 ;the number of the panel plot
     plot   = new((/ncase*nmonth/),graphic)
+    topo   = new((/ncase*nmonth/),graphic)
     line   = new((/ncase*nmonth/),graphic)
     core   = new((/ncase*nmonth/),graphic)
+    line2  = new((/ncase*nmonth/),graphic)
+    core2  = new((/ncase*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -136,7 +162,7 @@ if(var_option.eq.3) then
     select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
     ntime = dimsizes(select_time)
     nyear = dimsizes(years)
-    var0 = new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
+    var0 := new((/ncase,nyear,ntime,nlev,nlat,nlon/),float)
     
     do nf = 0 , ncase-1,1
     do nt = 0,nyear-1,1
@@ -240,14 +266,6 @@ printVarSummary(var)
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-    wks = gsn_open_wks(fig_out,fig_name)
-    gsn_define_colormap(wks,"BlueDarkRed18")
-    ;blue and red, has 18 colors,2-10 is blue
-    ;gsn_define_colormap(wks,"GMT_polar") 
-    ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
-    ;gsn_define_colormap(wks,"matlab_jet") 
-    ;has 64 colors blue green yellow,red
-
     res                  = True
     res@gsnFrame         = False
     res@gsnDraw          = False
@@ -294,17 +312,6 @@ printVarSummary(var)
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
     
-    res@lbLabelBarOn         = False;True; the label bar False ;
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
-
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0
-    res@pmLabelBarParallelPosF       = 0.5
-
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -320,7 +327,7 @@ printVarSummary(var)
     res@tmXBTickStartF     = lats(na)
     res@tmXBTickEndF       = latn(na)
 
-;---------set the attribute of the contour-----------------
+;---------set the attribute of jet-----------------
     res_line = res
     res_line@cnFillOn         = False
     res_line@cnLinesOn        = True
@@ -350,13 +357,52 @@ printVarSummary(var)
     polyres@gsMarkerColor     = "black"
     polyres@gsMarkerThicknessF  = 5.0 
 
+    res_line2 = res_line
+    res_line2@cnLineColor      = "blueviolet";"black"
+    polyres2  = polyres
+    polyres2@gsMarkerColor    = "blueviolet";"black"
+
+;used to draw the black terrain
+    pres                  = True
+    pres@gsFillColor      = "gray"
+
     resp  = True    
     resp@gsnMaximize   = False;True
     resp@gsnPaperOrientation = "landscape";"portrait"
+    if(barshare) then; .and.nmonth.eq.4
+    res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation     = "Horizontal";"Vertical" ;
-    resp@pmLabelBarWidthF  = 0.5  ;0.05 ;
-    resp@pmLabelBarHeightF = 0.05 ;0.8  ;
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.7
+    else
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarHeightF = 0.05;0.8
+    end if
+    else
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation        = "Vertical";
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.08
+    res@pmLabelBarOrthogonalPosF     = 0.23 ;y direction
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
+    resp@gsnPanelLabelBar = False; True
+    end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015
     resp@lbLabelFontThicknessF = tick_thick
@@ -474,11 +520,17 @@ do nm = 0,nmonth-1,1
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
+       
         if(jet_option) then 
-        line(np) = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
+        line(np)  = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
         overlay(plot(np),line(np))
-        core(np) = gsn_add_polymarker(wks,plot(np),corey(0,nm),corez(0,nm),polyres)
+        line2(np) = gsn_csm_pres_hgt(wks,var_u(1,nm,:,:),res_line2)
+        overlay(plot(np),line2(np))
+        core(np)  = gsn_add_polymarker(wks,plot(np),corey(0,nm),corez(0,nm),polyres)
+        core2(np) = gsn_add_polymarker(wks,plot(np),corey(1,nm),corez(1,nm),polyres2)
         end if
+        
+        topo(np) = gsn_add_polygon(wks, plot(np), xpoly, ypoly, pres)
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
@@ -487,7 +539,9 @@ end do ;for the month
     
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/1,nmonth/),resp)
+    ;gsn_panel(wks,plot,(/1,nmonth/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end if
+end do ;for the month 
 end
 

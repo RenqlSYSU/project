@@ -44,12 +44,12 @@ var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
 
 ;area: east Asia
 lats = 0 ;-90 ;
-latn = 90  ;90  ;
-lonl = 0   ;0   ;
-lonr = 360 ;360 ;
+latn = 60  ;90  ;
+lonl = 20   ;0   ;
+lonr = 180 ;360 ;
 ;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
-;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa dudt
-lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;hPa
+lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200/) ;hPa
+;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;hPa
 ;lev  = (/850,500,200/) ;v,
 
 ;==========================================================
@@ -165,7 +165,7 @@ month_vari := new((/      12 ,nlat,nlon/),float) ;be used to exam the significan
 season_ave := new((/       4 ,nlat,nlon/),float)
 season_vari:= new((/       4 ,nlat,nlon/),float)
 if(nv.eq.5) then 
-var_name(nv) = "Q1"
+var_name(nv) = "T"
 files2 := systemfunc("ls "+filein(nf)+"*.daily.PS.nc" )
 q1    = new((/nyear,ntime,nlev,nlat,nlon/),float)
 dp    = new((/nyear,ntime,nlev,nlat,nlon/),float)
@@ -181,11 +181,13 @@ do nt = 0,nyear-1,1
 end do
 print(q1(10,10,2,10:20,30))
 g  = 9.8 ;m/(s*s)
-var = dim_sum_n(q1*dp,2)/g
+var = dim_sum_n(q1(:,:,5:10,:,:)*dp(:,:,5:10,:,:),2)/dim_sum_n(dp(:,:,5:10,:,:),2)
 delete([/q1,ps,dp,g/])
-var@long_name = "Integrated Apparent Heat Source calc from temperature equation"
-var@units     = "W/kg"
-var_name(nv) = "intQ1"
+;var@long_name = "Integrated Apparent Heat Source calc from temperature equation"
+;var@units     = "W/kg"
+var@long_name = "500-200hPa T"
+var@units     = "K"
+var_name(nv) = "uppT"
 end if
 
 if(nv.eq.6) then

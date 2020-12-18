@@ -37,16 +37,18 @@ lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,h
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = lev  
 nv = 3
+siglvl = 0.05
 diff = True ;False;
+sig_option = True ;False;
 jet_option = True
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 2
+var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(0,3,1)
+imonth = ispan(2,3,1)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
@@ -82,20 +84,22 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + dra
 years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
-pre_case   = (/"(g","(h","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
 ;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 ;fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
-area = (/"TP","EA","UP","NH"/)
-lats = (/15  ,15  , 15 , 0  /);20 ;-20
-latn = (/55  ,55  , 55 , 89 /) ;55 ;60
-lonl = (/75  ,110 , 50 , 10 /) ;30 ;20
-lonr = (/95  ,130 , 70 ,350 /) ;150;220
+area = (/"UP","TP","EA","NH"/)
+lats = (/ 15 ,15  ,15  , 0  /);20 ;-20
+latn = (/ 55 ,55  ,55  , 89 /) ;55 ;60
+lonl = (/ 50 ,75  ,110 , 10 /) ;30 ;20
+lonr = (/ 70 ,95  ,130 ,350 /) ;150;220
 lat_spacing = 15
 lon_spacing = 30
 na = 2
+ncase  = dimsizes(case1)
+nmonth = dimsizes(imonth)
 
     wks = gsn_open_wks(fig_out,fig_name)
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -105,7 +109,16 @@ na = 2
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
-do na=0,2,1
+;the number of the panel plot
+    plot   = new((/ncase*nmonth/),graphic)
+    sig    = new((/ncase*nmonth/),graphic)
+    topo   = new((/ncase*nmonth/),graphic)
+    line   = new((/ncase*nmonth/),graphic)
+    core   = new((/ncase*nmonth/),graphic)
+    line2  = new((/ncase*nmonth/),graphic)
+    core2  = new((/ncase*nmonth/),graphic)
+
+do na=0,1,1
 f = addfile(gtopfile,"r")
 phis   := f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
@@ -121,24 +134,15 @@ xpoly(0:nlat-1)    = tofloat(phis&lat)
 xpoly(nlat:nlat+3) = (/tofloat(latn(na)),tofloat(latn(na)),tofloat(lats(na)),tofloat(lats(na))/)
 delete([/phis,phis1/])
 
-ncase  = dimsizes(case1)
-nmonth = dimsizes(imonth)
 nlev   = dimsizes(lev)
 nlev2  = dimsizes(lev_u)
 if(nv.eq.7) then 
 var    := new((/ncase,4,nmonth,nlev ,nlat,nlon/),float)
 else
 var    := new((/ncase,nmonth,nlev ,nlat,nlon/),float)
+vari   := new((/ncase,nmonth,nlev ,nlat,nlon/),float)
 end if
 var_u  := new((/ncase,nmonth,nlev2,nlat/),float)
-
-;the number of the panel plot
-    plot   = new((/ncase*nmonth/),graphic)
-    topo   = new((/ncase*nmonth/),graphic)
-    line   = new((/ncase*nmonth/),graphic)
-    core   = new((/ncase*nmonth/),graphic)
-    line2  = new((/ncase*nmonth/),graphic)
-    core2  = new((/ncase*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -191,9 +195,15 @@ else
         do nf = 0 ,ncase-1, 1
         print(filename(nf) + draw_var(nv) + ".nc")
         f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-        var(nf,:,:,:,:)  = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var(nf,:,:,:,:)   = f->$var_name(0)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vari(nf,:,:,:,:)  = f->$var_name(1)$(imonth,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
-        var := dim_avg_n_Wrap(var,4)
+        var := dim_avg_n_Wrap(var ,4)
+        vari:= dim_avg_n_Wrap(vari,4)
+        prob = ttest(var(0,:,:,:),vari(0,:,:,:),nsample,var(1,:,:,:),vari(1,:,:,:),nsample,True,False)
+        copy_VarMeta(var(0,0,:,:),prob(0,:,:))
+        prob = mask(prob,prob.lt.siglvl,True)
+        printVarSummary(prob)
     end if
 end if
 printVarSummary(var)
@@ -326,6 +336,29 @@ printVarSummary(var)
     res@tmXBTickSpacingF   = 10
     res@tmXBTickStartF     = lats(na)
     res@tmXBTickEndF       = latn(na)
+
+;----------Set res sig-----------
+    res_sig                  = True       ; use plot options
+    res_sig@cnFillOn         = True       ; Fill contours
+    res_sig@cnLinesOn        = False;True      ; turn off contour lines
+    res_sig@gsnFrame         = False
+    res_sig@gsnDraw          = False
+    res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
+    res_sig@cnLineThicknessF = 2
+    ;res_sig@cnLineColor     = "black"
+    res_sig@cnInfoLabelOn    = False
+    res_sig@cnMonoFillPattern= True;False
+    res_sig@cnFillPattern    = 11
+    res_sig@cnMonoFillScale  = True
+    res_sig@cnFillScaleF     = 0.5
+    res_sig@cnMonoFillColor  = True
+    res_sig@cnFillColor      = "darkslategray"
+    res_sig@cnFillDotSizeF   = 0.25
+    res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
+    ;res_sig@cnLevelSelectionMode ="ExplicitLevels"
+    ;res_sig@cnLevels             = (/3000,1000/)
+    res_sig@gsnLeftString    = " "
+    res_sig@gsnRightString   = " "
 
 ;---------set the attribute of jet-----------------
     res_line = res
@@ -501,7 +534,7 @@ end do ;for the month
 
 else
 do nc = 1, ncase-1,1
-do nm = 0,nmonth-1,1
+do nm = 0,0,1;nmonth-1,1
 ;if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
 ;    res@cnFillPalette = "BlueDarkRed18"
 ;   ;blue and red, has 18 colors,2-10 is blue
@@ -510,9 +543,9 @@ do nm = 0,nmonth-1,1
 ;   ;blue and yellow and red, has 17 colors,2-18,2 is white
 ;end if 
         ;np = nmonth*nc + nm
-        np = nm
+        np = na
     ;    np = ncase*nm + nc
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
+        res@gsnLeftString   = pre_case(np) + ") " + months(imonth(nm)); + case2(nc) + " " 
         res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) ;+ " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -520,7 +553,11 @@ do nm = 0,nmonth-1,1
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np) = gsn_csm_pres_hgt(wks,var(nc,nm,:,:),res)
-       
+        if(diff.and.sig_option.and.nc.gt.0) then 
+        sig(np) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
+        overlay(plot(np),sig(np))
+        end if
+        
         if(jet_option) then 
         line(np)  = gsn_csm_pres_hgt(wks,var_u(0,nm,:,:),res_line)
         overlay(plot(np),line(np))
@@ -540,8 +577,9 @@ end do ;for the month
     ;gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/1,nmonth/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 end if
 end do ;for the month 
+    gsn_panel(wks,plot,(/1,2/),resp)
 end
 

@@ -14,14 +14,14 @@ path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 var_name = (/"uwnd","vwnd"/)
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-filter   = True ;use filtered daily climatology
+filter   = True ;False;use filtered daily climatology
 
 ;parameter for bw_bandpass_filter
 ca = 90.0 ;day
 cb = 2.5
 
 if(option.eq.0) then
-    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE_filter.nc"
+    fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE_filter.nc";
 else
     fileout  = path2 + "mdata/ERA-Interim_Clim_month_ave_uppEKE3-" + cb + "-" + ca + "day.nc"
 end if
@@ -175,7 +175,8 @@ var   = dim_sum_n((edd_v(:,:,5:10,:,:)*edd_v(:,:,5:10,:,:) + edd_u(:,:,5:10,:,:)
 delete([/edd_u,edd_v,dp/])
 end if
 
-EKE   = dim_avg_n(var,0) 
+;EKE   = dim_avg_n(var,0) 
+EKE   = var 
 ;EKE_vari = dim_variance_n(var,0) 
 
 EKE@long_name = "Daily Integrated transient eddies kinetic energy"
@@ -224,41 +225,43 @@ fileatt@discription   = "rmvannual cycle"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate
-dimNames = (/"month","season","time","lat","lon"/);
-dimSizes = (/  12   ,  4     ,ntime ,nlat ,nlon/) ;
-dimUnlim = (/False  ,False   ,False ,False,False/);
+dimNames = (/"year","month","season","time","lat","lon"/);
+dimSizes = (/nyear ,  12   ,  4     ,ntime ,nlat ,nlon/) ;
+dimUnlim = (/False ,False  ,False   ,False ,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
+filevardef(ncdf,"year" ,"integer",(/"year" /))
 filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
-;filevardef(ncdf,"time",typeof(t&time),getvardims(t&time))
+filevardef(ncdf,"time",typeof(t&time),getvardims(t&time))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 ;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
-;filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
+filevardef(ncdf,"EKE",typeof(EKE),(/"year","time","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
 filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
 filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 
 ;define var attribute
-;filevarattdef(ncdf,"time",t&time)
+filevarattdef(ncdf,"time",t&time)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
-;filevarattdef(ncdf,"EKE",EKE)
+filevarattdef(ncdf,"EKE",EKE)
 ;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
 filevarattdef(ncdf,"month_vari",var)
 filevarattdef(ncdf,"season_vari",var)
 
+ncdf->year = years
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
-;ncdf->time = (/t&time/)
+ncdf->time = (/t&time/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
-;ncdf->EKE  = (/EKE/)
+ncdf->EKE  = (/EKE/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
 ncdf->month_vari  = (/month_vari/)

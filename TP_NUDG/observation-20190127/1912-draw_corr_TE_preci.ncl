@@ -1,30 +1,62 @@
 ;*************************************************************************
-;read the 27 years PRECC and PRECL of three cases at East Asia(20N­45N,110-130E)
-;then calc the zonal average and the climatology (ncase,nlat,nday)
+;1. read the 27 years daily EKE over TP region and then calc area average
+;2. read 27 years daily rain over East Asia
+;3. calc nyear*nday correlation 
 ;                                            by Ql_Ren
-;                                           2019/01/21
+;                                           2019/12/01
 ;******************************************************************************
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
-data_option = 1 ;0 ERA, 1 CPC
-allyear  = False
-;area:    east Asia
-lats = (/ 20/)  ;-20
-latn = (/ 50/)  ;60
-lonl = (/90 /)  ;20
-lonr = (/130/)  ;130 ;220
-lat_spacing = 15
-lon_spacing = 20
-na = 0
+interannual = False;True
+allyear  = False ;use 365*nyear correlation data to draw last figure
+rmvannual= True ;False;if true, remove annual cycle
+tna = 0
+na = 0 ;0=EA; 1=NH
+nv = 0
+time_option = 1
+gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+case1    = "ERA-Interim"
+path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
+filename = path2 + "/mdata/" + case1 + "_Clim_month_ave_intEKE_filter.nc";
+draw_var = (/"preci" ,"intEKE"    ,"uppEKE"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~J","10~S~4~N~J"/)  
+if(time_option.eq.0) then 
+months = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+imonth = ispan(4,7,1);(/4,5,6,7/)
 nm_s = 5
 nm_e = 8
+end if
+if(time_option.eq.1) then
+months = (/"JF","MA","MJ","JA"/)
+imonth = ispan(2,3,1);(/4,5,6,7/)
+nm_s = 5
+nm_e = 8
+end if
+if(time_option.eq.2) then
+months = (/"DJF","MAM","JJA","SON"/)
+imonth = ispan(2,2,1)
+nm_s = 6
+nm_e = 8
+end if
+nmonth = dimsizes(imonth)
+
+tarea = (/"TP","SEA","NEA"/)
+tlats = (/25  ,22   ,30 /)
+tlatn = (/40  ,30   ,45 /)
+tlonl = (/70  ,107  ,107/)
+tlonr = (/105 ,130  ,130/)
+lats = (/ 20,10  /)  ;-20
+latn = (/ 50,90  /)  ;60
+lonl = (/90 ,0   /)  ;20
+lonr = (/130,360 /)  ;130 ;220
+lat_spacing = (/15,20/)
+lon_spacing = (/20,30/)
 siglvl = 0.05
 
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
-case1 = "ERA-Interim"
-if(data_option.eq.0) then 
+if(nv.eq.0)
+rain_option = 1 ;0 ERA, 1 CPC
+if(rain_option.eq.0) then 
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/rain_daily/rain.daily.interim."; + years(nt) + ".nc"
 var_name= (/"r"/)
 years   = ispan(1979,2010,1)
@@ -33,14 +65,19 @@ else
 path4   = "/home/ys17-19/data-observation/CAMS/CPC_daily_precip/precip."; + years(nt) + ".nc"
 var_name= (/"precip"/)
 years   = ispan(1979,2016,1)
-fig_name= path2 + "fig/Obs_corr_TE_CPCpreci_"
+fig_name= path2 + "fig/Obs_corr_TE_CPCpreci"
+end if
+end if
+if(nv.ge.1) then
+path4   = path2 + "/mdata/" + case1 + "_Clim_month_ave_" + draw_var(nv) + "_filter.nc"
+var_name= (/"EKE"/)
+years   = ispan(1979,2016,1)
+fig_name= path2 + "fig/Obs_corr_TE_EKE"
 end if
 
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-fig_out   ="pdf"       ;"x11"
-unit      = "mm/day"   ;this can be used as right string 
-draw_var = (/"preci"/)  ;this is the variable used to draw, can used as center string
+fig_out   ="eps"       ;"x11"
+;fig_out   ="pdf"       ;"x11"
 
 years@calendar = "standard"
 nyear = dimsizes(years)
@@ -58,41 +95,69 @@ nyear = dimsizes(years)
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f1   = addfile(path2 + "mdata/" + case1 + "_intEKE_TP_ts.nc","r") ;-2.5-10day
+f = addfile(gtopfile,"r")
+phis = short2flt(f->z(0,{tlats(tna):tlatn(tna)},{tlonl(tna):tlonr(tna)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
+phis = phis/9.8   ;convert unit from m2/s2 to gpm
+
+f1   = addfile(filename,"r") ;-2.5-10day
 time = cd_calendar(f1->time,0)
 select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
-ts2 = f1->EKEts(0:(nyear-1),select_time)
+term = f1->EKE(0:(nyear-1),select_time,{tlats(tna):tlatn(tna)},{tlonl(tna):tlonr(tna)})
+term = mask(term,phis.gt.3000,True) 
+ts2 = wgt_areaave_Wrap(term,1.0,1.0,0)
+delete(term)
 
-f    = addfile(path4 + years(0) + ".nc", "r")
-vars = f->$var_name(0)$(0,{lats(na)-5:latn(na)+5},{lonl(na)-5:lonr(na)+5})
-nlat  = dimsizes(vars&lat)
-nlon  = dimsizes(vars&lon)
-ntime = dimsizes(select_time)
-rain  = new((/nyear,ntime,nlat,nlon/),float)
-var1  = new((/12,nlat,nlon/),float)
-prob  = new((/12,nlat,nlon/),float)
 plot  = new((/12/),graphic)
 plot2 = new((/12/),graphic)
 gtop  = new((/12/),graphic)
 
-f = addfile(gtopfile,"r")
-phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
-phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-
+phis := short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
+phis = phis/9.8   ;convert unit from m2/s2 to gpm
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-do nt = 0,nyear-1,1
+if(nv.eq.0) then 
+    f     = addfile(path4 + years(0) + ".nc", "r")
+    vars  = f->$var_name$(0,{lats(na)-5:latn(na)+5},{lonl(na)-5:lonr(na)+5})
+    nlat  = dimsizes(vars&lat)
+    nlon  = dimsizes(vars&lon)
+    ntime = dimsizes(select_time)
+    rain  = new((/nyear,ntime,nlat,nlon/),float)
+    do nt = 0,nyear-1,1
     f     = addfile(path4 + years(nt) + ".nc","r")
-if(isleapyear(years(nt))) then ;leap year,366 day
-    select = select_time+1
-    ;select(59:364) = select_time(59:364) + 1
-else
-    select = select_time
-end if 
+    if(isleapyear(years(nt))) then ;leap year,366 day
+        select = select_time+1
+        ;select(59:364) = select_time(59:364) + 1
+    else
+        select = select_time
+    end if 
     rain(nt,:,:,:) = f->$var_name$(select,{lats(na)-5:latn(na)+5},{lonl(na)-5:lonr(na)+5})
-end do   ;the loop of 3 cases
-;ts2 = dim_standardize_n(ts2,0,0)
+    end do   ;the loop of 3 cases
+    minlvl = (/-1.6/) ;-2.4 
+    maxlvl = (/ 1.6/) ; 2.4 
+    spacig = (/ 0.2/) ; 0.3 
+else
+    f    = addfile(path4, "r")
+    rain = f->$var_name(0)$(0:(nyear-1),select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    nlat = dimsizes(rain&lat)
+    nlon = dimsizes(rain&lon)
+    rain = rain/10000
+    minlvl = (/-8/) ; -4 
+    maxlvl = (/ 8/) ;  4 
+    spacig = (/ 1/) ; 0.5
+end if
+printVarSummary(rain)
+prob  = new((/12,nlat,nlon/),float)
+var1  = new((/12,nlat,nlon/),float)
+
+if(rmvannual) then
+ts2  = ts2  - conform(ts2 ,dim_avg_n(ts2 ,0),(/1/))
+rain = rain - conform(rain,dim_avg_n(rain,0),(/1,2,3/))
+fig_name = fig_name + "_rmva"
+end if
+if(interannual) then
+fig_name = fig_name + "_interan"
+end if
 
 if(allyear) then 
 nday  = dimsizes(select_time)
@@ -102,8 +167,8 @@ var := reshape(rain,(/nsample,nlat,nlon/))
 var2  = escorc_n(var,ts,0,0)
 prob2 = rtest(var2,nsample,0)
 prob2 = mask(prob2,prob2.lt.siglvl,True)
-copy_VarMeta(vars,var2 )
-copy_VarMeta(vars,prob2)
+copy_VarMeta(rain(0,0,:,:),var2 )
+copy_VarMeta(rain(0,0,:,:),prob2)
 end if
 
     wks = gsn_open_wks(fig_out,fig_name+lonl(na)+"-"+lonr(na)+"-"+nm_s+nm_e)  
@@ -112,19 +177,45 @@ end if
     ;gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 
-do lag = 0,6,1
+;np = -1
+do lag = 0,4,1
 time1 = cd_calendar(f1->time(select_time),0)
-do nm = 0, (nm_e-nm_s), 1
+do nm = 0, nmonth-1, 1
+if(time_option.eq.0) then 
     nm2_s = nm + nm_s
     nm2_e = nm + nm_s
+end if
+if(time_option.eq.1) then 
+    nm2_s = 2*nm + nm_s
+    nm2_e = 2*nm + nm_s + 1
+end if
+if(time_option.eq.2) then
+    nm2_s = 3*nm + nm_s
+    nm2_e = 3*nm + nm_s + 2
     select2 := ind(time1(:,1).ge.nm2_s.and.time1(:,1).le.nm2_e)
+end if
+if(time_option.eq.2.and.nm.eq.0.and.nm_s.eq.1) then 
+    select2 := ind(time1(:,1).eq.12.or.time1(:,1).le.2)
+else
+    select2 := ind(time1(:,1).ge.nm2_s.and.time1(:,1).le.nm2_e)
+end if
     nday     = dimsizes(select2)
+    if(interannual) then 
+    nsample = nyear
+    var  = dim_avg_n(rain(:,select2,:,:),1) ;(nyear,nlat,nlon)
+    ts   = dim_avg_n(ts2(:,select2),1)
+    else
     nsample  = nyear*nday
     var  := reshape(rain(:,select2,:,:),(/nsample,nlat,nlon/))
     ts   := ndtooned(ts2(:,select2))
+    end if
 
     ;term := regCoef_n(ts,var,0,0)
+    if(lag.lt.0) then 
+    term := regCoef_n(ts(-lag:nsample-1),var(0:nsample+lag-1,:,:),0,0)
+    else
     term := regCoef_n(ts(0:nsample-lag-1),var(lag:nsample-1,:,:),0,0)
+    end if
     tval := onedtond(term@tval ,(/nlat,nlon/))
     df   := onedtond(term@nptxy,(/nlat,nlon/))
     b = tval 
@@ -134,13 +225,14 @@ do nm = 0, (nm_e-nm_s), 1
 
     ;var1(nm,:,:) = escorc_n(var,ts,0,0)
     ;prob(nm,:,:) = rtest(var1(nm,:,:),nsample,0)
-    print("sample number is " + nyear*nday)
+    print("sample number is " + nsample) 
 end do
 var1 = var1*100000
+unit_reg = unit(nv)+"/10~S~5~N~J" ;"corr";draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
 prob = mask(prob,prob.lt.siglvl,True)
 prob = mask(prob,var1.eq.0,False)
-copy_VarMeta(vars,var1(0,:,:))
-copy_VarMeta(vars,prob(0,:,:))
+copy_VarMeta(rain(0,0,:,:),var1(0,:,:))
+copy_VarMeta(rain(0,0,:,:),prob(0,:,:))
 printVarSummary(var1)
 
 ;==============================================================
@@ -161,8 +253,8 @@ printVarSummary(var1)
     res@mpMinLatF        = lats(na)
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
-    res@gsnMajorLatSpacing = lat_spacing
-    res@gsnMajorLonSpacing = lon_spacing
+    res@gsnMajorLatSpacing = lat_spacing(na)
+    res@gsnMajorLonSpacing = lon_spacing(na)
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -214,9 +306,9 @@ printVarSummary(var1)
     ;res@cnLevels             = ispan(0,60,10)
 ;    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -1.6          ; set min contour level
-    res@cnMaxLevelValF        =  1.6;32        ; set max contour level
-    res@cnLevelSpacingF       = 0.2        ; set contour interval
+    res@cnLevelSpacingF       := spacig        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl       ; set min contour level
 
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
@@ -269,7 +361,7 @@ printVarSummary(var1)
     res_gtop@cnLineThicknessF = 4.0
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_gtop@cnLevels         = (/1500/)
+    res_gtop@cnLevels         = (/3000/)
     res_gtop@gsnCenterString      = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
@@ -283,7 +375,7 @@ printVarSummary(var1)
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
-    res@gsnRightString  =  "mm/day/10~S~5~N~J" ;"corr";draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
+    res@gsnRightString  =  unit_reg ;"corr";draw_var + " (" + unit +") " ;nm_s + "-" + nm_e + " " + 
 
     resp  = True    
     resp@gsnMaximize   = True
@@ -296,27 +388,30 @@ printVarSummary(var1)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-do nm = 0, (nm_e-nm_s), 1
-    res@gsnLeftString  = pre_case(nm) + ") " + months((nm+nm_s-1))
-    plot(nm)  = gsn_csm_contour_map_ce(wks,var1(nm,:,:),res)
-    plot2(nm) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
-    gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
-    overlay(plot(nm),plot2(nm))
-    overlay(plot(nm),gtop(nm))
+do nm = 0, nmonth-1, 1
+    np = nm
+    ;np = np + 1 
+    res@gsnLeftString  = pre_case(np) + ") " + months(imonth(nm)) + " " + draw_var(nv); + " " + lag
+    plot(np)  = gsn_csm_contour_map_ce(wks,var1(nm,:,:),res)
+    plot2(np) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
+    gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(np),plot2(np))
+    overlay(plot(np),gtop(np))
     print(max(var1(nm,:,:)))
     print(min(var1(nm,:,:)))
 end do
 
 if(allyear) then 
-    nm = 11
-    plot(nm)  = gsn_csm_contour_map_ce(wks,var2,res)
-    plot2(nm) = gsn_csm_contour(wks,prob2,res_sig)
-    gtop(nm) = gsn_csm_contour(wks,phis,res_gtop)
-    overlay(plot(nm),plot2(nm))
-    overlay(plot(nm),gtop(nm))
+    np = 11
+    plot(np)  = gsn_csm_contour_map_ce(wks,var2,res)
+    plot2(np) = gsn_csm_contour(wks,prob2,res_sig)
+    gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(np),plot2(np))
+    overlay(plot(np),gtop(np))
 end if
     resp@txString  = "EKE leads precip" + lag + " day" 
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 end do
+;    gsn_panel(wks,plot,(/3,2/),resp)
 end
 

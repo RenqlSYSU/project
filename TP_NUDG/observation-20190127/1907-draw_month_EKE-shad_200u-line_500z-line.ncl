@@ -6,9 +6,9 @@
 ;                                                    2019/02/01
 ;*********************************************************************************
 begin
-draw_var = (/"uppEKE3-2.5-90day","uppEKE_filter"    ,"hgt"/) ;_filter
+draw_var = (/"intEKE_filter","uppEKE_filter"    ,"hgt"/) ;_filter
 unit     = (/"10~S~4~N~J","10~S~4~N~J","gpm"/)     
-draw_varname =(/"uppEKE-2.5-90day" ,"uppEKE-daily_clim"    ,"hgt"/)     
+draw_varname =(/"uppEKE-2.5-90day" ,"uppEKE"    ,"hgt"/)     
 lev = (/925,500,300,200/)
 nl = 1
 nv = 1
@@ -25,7 +25,7 @@ case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 
-var_option = 0
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -38,9 +38,9 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 nnv = 1
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-imonth = ispan(0,11,1);(/4,5,6,7/)
+;imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/mdata/" + case + "_Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -62,7 +62,7 @@ else
     end if
 end if
 
-pre_case   = (/"(a","(b","(b","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
@@ -73,7 +73,7 @@ lonr = (/360,150,360,150/);220
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
-na = 0
+na = 1
 
 f = addfile(gtopfile,"r")
 phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
@@ -367,7 +367,7 @@ end if
     res_gtop@cnLineThicknessF = mp_thick
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_gtop@cnLevels         = (/1500/)
+    res_gtop@cnLevels         = (/3000/)
     res_gtop@gsnCenterString      = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
@@ -442,9 +442,9 @@ if(nvc.eq.0) then ;Z3
 end if
 
 if(nv.le.1.and.nnv.eq.1) 
-    minlvl = (/1 /)  ;2  ;-80,-80
-    maxlvl = (/16/)  ;62 ; 80, 80
-    spacig = (/1 /)  ;4  ; 10, 10
+    minlvl = (/0  /)  ;0.13 0.5 2  ;,-80
+    maxlvl = (/15 /)  ;0.58 3.5 62 ;, 80
+    spacig = (/1  /)  ;0.03 0.2 4  ;, 10
 end if
 
 if(nv.le.1.and.nnv.eq.0) 
@@ -524,6 +524,6 @@ end if
 
     ;gsn_panel(wks,plot,(/nmonth,1/),resp)
     ;gsn_panel(wks,plot,(/6,2/),resp)
-    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end
 

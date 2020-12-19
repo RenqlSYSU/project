@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -51,9 +51,9 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,300,200,700,600,  100,10/)
 nl = 0
-nv = 6
-perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
-diff = False;True ;
+nv = 1
+perc_effect_by_weakTE = True ;False; if True, will calc (CTRL-noTP)/(NGTR-F2000)
+diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
@@ -67,7 +67,7 @@ contsig  = True ;False;;if True, only the significant values are contoured
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 0
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -105,7 +105,7 @@ lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,0 /);20
 lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
 lat_spacing = 15
 lon_spacing = 20
-na = 0
+na = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})

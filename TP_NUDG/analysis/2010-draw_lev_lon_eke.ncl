@@ -39,7 +39,7 @@ lev_u = lev
 nv = 9
 diff = False;True ;
 perc = True
-jet_option = True ;False 
+jet_option = False;True ;
 barshare = True ;False;
 barvert  = False;True
 siglvl   = 0.05
@@ -51,7 +51,7 @@ months   = (/"DJF","MAM","JJA","SON"/)
 imonth = ispan(0,3,1)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -60,7 +60,7 @@ imonth = ispan(0,11,1);(/4,5,6,7/)
 annual = True
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 if(var_option.eq.2) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
@@ -69,7 +69,7 @@ months   = (/"JF","MA","MJ","JA"/)
 imonth = ispan(2,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
-jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 end if
 if(var_option.eq.3) then 
 var_name = draw_var(nv) ;this is the var_name in data file
@@ -95,8 +95,8 @@ end if
 
 pre_case   = (/"(g","(h","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
 ;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11"
-;fig_out    = "eps";"pdf";"x11"
+;fig_out    = "pdf";"x11"
+fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
@@ -143,7 +143,7 @@ delete(phis1)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
-   subtitle_font  = 0.03
+   subtitle_font  = 0.035
    title_font     = 0.03
    vcref_font     = 0.02
    tick_thick     = 8.0
@@ -584,7 +584,7 @@ end if
         ;np = nmonth*nc + nm
          np = nc
     ;    np = ncase*nm + nc
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) ;+ " " + months(imonth(nm)) 
         res@gsnRightString  = lats(na) + "N " + draw_varname(nv) + " (" + unit(nv) + ")";+ "-" + latn(na) 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

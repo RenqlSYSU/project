@@ -56,7 +56,8 @@ end if
 filein   = path + "/mdata/" + case1 + "-" + month_s + month_e + "_spec_" + stand(stand_option) + var_name(nv) + "-" + area(na) + ".nc"
 fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + "_spec_" + stand(stand_option) + var_name(nv) + "-" + lats(na) + "N"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    ="pdf";"x11"
+;fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
 
 f    = addfile(filein(0),"r")
 spcx = f->spcx(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -125,7 +126,7 @@ end if
 ;==================================================================
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
-   subtitle_font  = 0.03
+   subtitle_font  = 0.04
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -134,7 +135,7 @@ end if
    font_index     = 22
    
 
-wks  = gsn_open_wks("pdf",fig_name)             ; send graphics to PNG file
+wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 
     res                  = True
     res@gsnFrame         = False
@@ -275,7 +276,8 @@ if((nc.eq.2).and.diff) then
 end if 
     res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
 if(lats(na).eq.latn(na)) then 
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)" ;+" - "+latn(na) 
+    res@gsnRightString  = lats(na)+"N " + var_name(nv); +" ("+   
+;    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)" ;+" - "+latn(na) 
 else
     res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"-"+latn(na) +"N)" 
 end if

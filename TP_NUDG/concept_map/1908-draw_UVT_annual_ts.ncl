@@ -41,7 +41,8 @@ if(case_option.eq.2) then
     years   = ispan(1,30,1)   ;the calculate time
 end if
 fig_name = path + "/project/TP_NUDG/concept_map/fig/" + case(0) + "_annual_cycle-" + draw_var(nv) 
-fig_out  = "pdf" ;"eps" ;"x,11"
+fig_out  = "eps" ;"eps" ;"x,11"
+;fig_out  = "pdf" ;"eps" ;"x,11"
 
 ;area of TP 
 lats = (/25 /)
@@ -53,7 +54,7 @@ na = 0
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
-   subtitle_font  = 0.013
+   subtitle_font  = 0.012
    title_font     = 0.03
    label_font     = 0.015
    tick_thick     = 5.0
@@ -193,12 +194,12 @@ printVarSummary(ave)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
 
-do nl = 0,nlev-1,1
+do nl = 0,0,1;nlev-1,1
 do nc = 0, ncase-1,1
     np = ncase*nl + nc
 ;    np = nlev*nc + nl
     resxy@gsnLeftString   = pre_case(np) + ") " + case(nc)
-    resxy@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
+    resxy@gsnRightString  = "" ;lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"  
     resxy@trYMinF = floor(min(var1(:,:,:,nl)))
     resxy@trYMaxF =  ceil(max(var1(:,:,:,nl)))
     plot(np)  = gsn_csm_xy(wks,var1&time,(/var1(nc,:,:,nl)/),resxy)

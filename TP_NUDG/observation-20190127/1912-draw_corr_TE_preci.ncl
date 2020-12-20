@@ -8,13 +8,15 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 
 begin
-interannual = False;True
+interannual = False;True ;
 allyear  = False ;use 365*nyear correlation data to draw last figure
 rmvannual= True ;False;if true, remove annual cycle
 tna = 0
 na = 0 ;0=EA; 1=NH
 nv = 0
 time_option = 1
+fig_out   ="eps"       ;"x11"
+;fig_out   ="pdf"       ;"x11"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 case1    = "ERA-Interim"
 path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
@@ -76,8 +78,6 @@ fig_name= path2 + "fig/Obs_corr_TE_EKE"
 end if
 
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out   ="eps"       ;"x11"
-;fig_out   ="pdf"       ;"x11"
 
 years@calendar = "standard"
 nyear = dimsizes(years)
@@ -178,7 +178,7 @@ end if
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 
 ;np = -1
-do lag = 0,4,1
+do lag = 1,1,1
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, nmonth-1, 1
 if(time_option.eq.0) then 

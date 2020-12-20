@@ -36,11 +36,11 @@ draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt","4q1","V"/)  ;this i
 lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = lev  
-nv = 3
+nv = 9
 siglvl = 0.05
-diff = True ;False;
-sig_option = True ;False;
-jet_option = True
+diff = False;True ;
+sig_option = False;True ;
+jet_option = False;True ;
 barshare = True ;False;
 barvert  = False;True ;
 
@@ -84,7 +84,7 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_MJ_JA_" + dra
 years    = ispan(1979,2005,1)   ;the calculate time
 end if
 
-pre_case   = (/"(a","(b","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(g","(h","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
 ;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11"
 ;fig_out    = "eps";"pdf";"x11"

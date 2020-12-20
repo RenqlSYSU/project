@@ -28,8 +28,8 @@ if(case_option.eq.2) then
     nsample = 30
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
-;fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
@@ -49,17 +49,17 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
-lev = (/850,300,200,700,600,  100,10/)
-nl = 0
-nv = 1
-perc_effect_by_weakTE = True ;False; if True, will calc (CTRL-noTP)/(NGTR-F2000)
+lev = (/850,500,200,700,600,  100,10/)
+nl = 1
+nv = 18
+perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
-sig_option  = True ;False;if False, only the significant values are shaded 
-vect_option = False;True ;
+sig_option  = False;True ;if False, only the significant values are shaded 
+vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = False;True ;
+cont_option = True ;False;
 cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
 nvc = 4
@@ -67,7 +67,7 @@ contsig  = True ;False;;if True, only the significant values are contoured
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 1
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -101,7 +101,7 @@ end if
 ;area: east Asia
 lats = (/10 ,0  ,0  ,  -70,-70, -70,  0  ,-70,10 /);-20
 latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,55 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,0 /);20
+lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,90 /);20
 lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
 lat_spacing = 15
 lon_spacing = 20
@@ -192,9 +192,9 @@ end do
 end if
 
 do nf = 0 ,ncase-1, 1
-;f = addfile(filename(nf)+"PS.nc","r")
-;ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-;printVarSummary(ps)
+f = addfile(filename(nf)+"PS.nc","r")
+ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+printVarSummary(ps)
 
 if(vect_option) then 
 inv = 0
@@ -513,10 +513,10 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.02 ;0.025
+    resvc@vcMinDistanceF            = 0.025 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
-    resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
+    resvc@vcLineArrowHeadMinSizeF   = 0.015;0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.015;0.015
 end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -843,7 +843,7 @@ if(nv.eq.20) then  ;200
     spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
-do nm = 0,nmonth-1,1
+;do nm = 0,nmonth-1,1
 do nc = 0,1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -858,10 +858,10 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-;    do nm = 0,nmonth-1,1
+    do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
-        np = nm*2+nc
-        ;np = nc*nmonth+nm
+        ;np = nm*2+nc
+        np = nc*nmonth+nm
         ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
@@ -889,7 +889,7 @@ end if
         res@cnMaxLevelValF        := maxlvl(0) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(0)       ; set min contour level
         end if
-        plot(np)    = gsn_csm_contour_map_ce(wks,vari(nc,2,nm,:,:),res)
+        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
         if(diff.and.sig_option.and.nc.gt.0) then 
         sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nm,:,:),res_sig)
         overlay(plot(np),sig(np))
@@ -936,8 +936,8 @@ end if
         jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
         overlay(plot(np),jetl(np))
         end if
-        print(max(vari(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        print(min(vari(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         ;draw(plot(np))
         ;frame(wks)
     end do 
@@ -968,7 +968,7 @@ end if
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 end do
-    gsn_panel(wks,plot,(/4,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do

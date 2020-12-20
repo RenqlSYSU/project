@@ -33,7 +33,8 @@ fig_name = path + "/fig/" + case + "_allyear_spec_" + var_name(nv) + "-" + area(
 end if
 pre_case  = (/"(c","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_title = "Power Spectrum"
-fig_out   ="pdf";"x11"
+fig_out   ="eps";"x11"
+;fig_out   ="pdf";"x11"
 
 f    = addfile(filein,"r")
 if(area_option) then 
@@ -101,7 +102,7 @@ print(var(0:1000:100,5))
 ;==================================================================
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
-   subtitle_font  = 0.03
+   subtitle_font  = 0.04
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -205,7 +206,8 @@ print(var(0:1000:100,5))
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
     if(area_option) then 
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)"   
+    res@gsnRightString  = lats(na)+"N " + var_name(nv); +" ("+   
+    ;res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)"   
     else
     res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+" - "+latn(na)+"N)"   
     end if
@@ -251,6 +253,6 @@ end do
     resp@txFont        = font_index
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    gsn_panel(wks,plot,(/2,3/),resp)
+    gsn_panel(wks,plot,(/3,3/),resp)
 end
 

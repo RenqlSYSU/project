@@ -12,7 +12,7 @@ var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 case = (/"NCEP1","ERA-Interim"/)
 zonal = False ; True means to calc anomaly based on zonal average
-jet_option = True ;False;
+jet_option = False;True ;
 homogenization = False; True ;
 nc = 1
 nv = 0
@@ -27,8 +27,8 @@ lats = (/ 35 , 15 , 0  , 15 /);20 ;-20
 latn = (/ 35 , 55 , 89 , 55 /) ;55 ;60
 lonl = (/ 0  ,110 , 1  ,0   /) ;30 ;20
 lonr = (/180 ,130 ,359 ,70  /) ;150;220
-;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
-lev  = (/1000,925,850,700,600, 500,400,300,200,150, 100/) ;EKE
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
+;lev  = (/1000,925,850,700,600, 500,400,300,200,150, 100/) ;EKE
 
 do na = 0,0,1
 ;the path of the file
@@ -44,7 +44,8 @@ fig_name = path + "/fig/1p1x4_vertical_section_" + area(na) + draw_var(nv)
 end if
 ;fig_title  = "Climate " + draw_var(nv) + " (" + unit(0) + ")"
 pre_case   = (/"(f","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
 
 nmonth = dimsizes(months)
 
@@ -55,7 +56,7 @@ nmonth = dimsizes(months)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
-   subtitle_font  = 0.03
+   subtitle_font  = 0.035
    title_font     = 0.03
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
@@ -260,7 +261,7 @@ do nm = 0,nmonth-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    res@gsnLeftString   = pre_case(nm) + ") " + case(nc) + " " + months(nm)
+    res@gsnLeftString   = pre_case(nm) + ") " + case(nc) ;+ " " + months(nm)
     ;res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")"
     if(nv.ge.2) then
     if(homogenization) then 

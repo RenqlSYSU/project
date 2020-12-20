@@ -209,6 +209,8 @@ printVarSummary(var)
     
     res@lbLabelBarOn         = True   ;False ; the label bar
     res@lbOrientation        = "Horizontal"
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.08
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
@@ -298,13 +300,13 @@ printVarSummary(var)
     resvc@vcMinDistanceF             = 0.02
     resvc@vcLineArrowHeadMinSizeF   = 0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.015
-    resvc@vcRefAnnoOn                = False
+    resvc@vcRefAnnoOn                = True
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = -0.85           ; move ref vector along Y-axis
-    resvc@vcRefAnnoParallelPosF      = 0.25            ; move ref vector along X-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.33           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
@@ -362,9 +364,11 @@ end if
         print(min(var(nc,3,nm,:,:)))
         
         if(diff.and.(nc.eq.1)) then
-        resvc@vcRefMagnitudeF          = 4.0             ; define vector ref mag
+        resvc@vcRefMagnitudeF      = 4.0             ; define vector ref mag
+        resvc@vcRefAnnoString2     = 4 
         else
-        resvc@vcRefMagnitudeF          = 8.0             ; define vector ref mag
+        resvc@vcRefMagnitudeF      = 8.0             ; define vector ref mag
+        resvc@vcRefAnnoString2     = 8 
         end if
         line(np) = gsn_csm_pres_hgt(wks,var(nc,0,nm,:,:),res_line)
         overlay(plot(np),line(np))

@@ -9,10 +9,10 @@ draw_var  = (/"Total","Steady","Transient"/)
 var_name  = (/"qu_ave","qv_ave","div_ave"/)
 vari_name = (/"qu_vari","qv_vari","div_vari"/)
 unit      = "kg/(s*m)" ;"K"   ;this can be used as right string 
-diffterm  = True ;False;
+diffterm  = False;True ;
 sig_option= False;True ;if False, only the significant values are shaded 
 barshare  = True ;False;
-barvert   = False;True ;
+barvert   = True ;False;
 
 months   = (/"MJ","JA"/)
 imonth = ispan(0,1,1);(/4,5,6,7/)
@@ -53,8 +53,8 @@ end if
 filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_2month_ave_qtran_int.nc" ;,"NUDG24h"
 fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_2month"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
-fig_out    ="pdf";"x11"
-;fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
 
 ;area: east Asia
 lats = (/10 ,-15/) ;-20
@@ -74,11 +74,11 @@ nlat   = dimsizes(phis&lat)
 nlon   = dimsizes(phis&lon)
 
 ;the number of the panel plot
-    plot     = new((/3*nmonth/),graphic)
-    plotvc   = new((/3*nmonth/),graphic)
-    wind2    = new((/3*nmonth/),graphic)
-    line     = new((/3*nmonth/),graphic)
-    gtop     = new((/3*nmonth/),graphic)
+    plot     = new((/5*nmonth/),graphic)
+    plotvc   = new((/5*nmonth/),graphic)
+    wind2    = new((/5*nmonth/),graphic)
+    line     = new((/5*nmonth/),graphic)
+    gtop     = new((/5*nmonth/),graphic)
 
 ;set the area of the box
 maxlon = 105
@@ -244,17 +244,17 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
-    resvc@vcMinDistanceF             = 0.025
-    resvc@vcLineArrowHeadMinSizeF    = 0.015
-    resvc@vcLineArrowHeadMaxSizeF    = 0.015
+    resvc@vcMinDistanceF             = 0.028
+    resvc@vcLineArrowHeadMinSizeF    = 0.013
+    resvc@vcLineArrowHeadMaxSizeF    = 0.013
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcRefAnnoOn                = False
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = -0.78           ; move ref vector along Y-axis
-    resvc@vcRefAnnoParallelPosF      = 0.25            ; move ref vector along X-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.5           ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
@@ -364,7 +364,7 @@ wks = gsn_open_wks(fig_out,fig_name)
 if(diffterm) then 
     vcref  = (/(/50,50,20/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
 else
-    vcref  = (/(/200,200,20/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/200,200,50/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
     ;minlvl = (/(/15 ,45 , 0/),(/-80,-16,-16/),(/-80,-16,-16/)/) ;used for East Asian Shaded ration
@@ -376,20 +376,23 @@ end if
     minlvl = (/(/-7,-7,-7/),(/-7,-7,-7/),(/-7,-7,-7/)/) ;used for CTRL-NUDG
     spacig = (/(/ 1, 1, 1/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
 
-do nv = 0 ,nvar1-1,1
+np = -1
+do nv = 1 ,nvar1-1,1
 do nc = 0, ncase-1,1
 do nm = 0, nmonth-1,1
+        np = np + 1
         ;np = nvar*nc + nv
         ;np = nmonth*nc + nm
-        np = nmonth*nv + nm
+        ;np = nmonth*nv + nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm));+ " " + draw_var(nv)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
         res@cnMaxLevelValF       := maxlvl(nc,nv) ;32    ; set max contour level
         res@cnMinLevelValF       := minlvl(nc,nv)       ; set min contour level
+        resvc@vcRefAnnoOn       = True
         resvc@vcRefMagnitudeF   = vcref(nc,nv)                ; define vector ref mag
-        resvc@vcRefAnnoString2  = vcref(nc,nv) + " " + unit
+        resvc@vcRefAnnoString2  = vcref(nc,nv); + " " + unit
         resvc2@vcRefMagnitudeF  = vcref(nc,nv)                ; define vector ref mag
         resvc2@vcRefAnnoString2 = vcref(nc,nv) + " " + unit
         plot(np)   = gsn_csm_contour_map_ce(wks,var(nc,2,nv,nm,:,:),res) 
@@ -423,6 +426,7 @@ end do
     ;gsn_panel(wks,plot,(/ncase,nvar/),resp)
  ;   gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end do
-    gsn_panel(wks,plot,(/nvar1,nmonth/),resp)
+;    gsn_panel(wks,plot,(/nvar1,nmonth/),resp)
+    gsn_panel(wks,plot,(/4,2/),resp)
 end 
 

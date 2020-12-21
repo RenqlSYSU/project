@@ -377,8 +377,8 @@ end if
     spacig = (/(/ 1, 1, 1/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
 
 np = -1
-do nv = 1 ,nvar1-1,1
 do nc = 0, ncase-1,1
+do nv = 1 ,nvar1-1,1
 do nm = 0, nmonth-1,1
         np = np + 1
         ;np = nvar*nc + nv

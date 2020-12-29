@@ -48,7 +48,7 @@ if(case_option.eq.2) then
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intEKE.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
         ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intuv.nc"
     else
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intEKE-" + cb + "-" + ca + "day.nc"
@@ -91,7 +91,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 0,0,1 
+do nf = 0,1,1 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -166,8 +166,8 @@ edd_v = v - conform(v,clm_v,(/1,2,3,4/))
 ;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 ;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((edd_u*edd_v)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,5:10,:,:)*edd_v(:,:,5:10,:,:) + edd_u(:,:,5:10,:,:)*edd_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
@@ -175,10 +175,10 @@ delete([/edd_u,edd_v/])
 end if
 
 EKE   = dim_avg_n(var,0) 
-;EKE_vari = dim_variance_n(var,0) 
+EKE_vari = dim_variance_n(var,0) 
 
-;EKE@long_name = "Integrated eddy momentum flux" 
-;EKE@units     = "m2/s2" 
+EKE@long_name = "Integrated eddy momentum flux" 
+EKE@units     = "m2/s2" 
 EKE@long_name = "Integrated transient eddies kinetic energy";"Integrated stationary waves kinetic energy"
 EKE@units     = "J" 
 
@@ -260,7 +260,7 @@ filevarattdef(ncdf,"season_vari",EKE)
 
 ncdf->month  = ispan(1,12,1)
 ncdf->season = (/1212,345,678,91011/)
-ncdf->time = (/u&time/)
+;ncdf->time = (/u&time/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
 ;ncdf->uv  = (/EKE/)

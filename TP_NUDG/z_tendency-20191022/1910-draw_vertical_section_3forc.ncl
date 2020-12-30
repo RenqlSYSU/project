@@ -6,7 +6,7 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = -1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = True ;False;
@@ -35,7 +35,7 @@ lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,20
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa 13levels
 
-do na = 1,1,1 ;"TP","EA","NH","CA","NP"
+do na = 2,2,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
@@ -113,11 +113,11 @@ if(var_option.eq.5) then
 end if
 
 ;area: east Asia
-area = (/"TP","EA","NH","CA","NP"/)
-lats = (/15  , 15 , 10 , 10 , 10 /);15 ;-210
-latn = (/55  , 55 , 89 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,110 , 1  , 0  ,150 /) ;30 ;20
-lonr = (/105 ,130 ,359 , 70 ,210 /) ;150;220
+area = (/"TP","EA","UP","NH","CA","NP"/)
+lats = (/15  , 15 , 15 , 10 , 10 , 10 /);15 ;-210
+latn = (/55  , 55 , 55 , 89 , 89 , 89 /) ;55 ;60
+lonl = (/70  ,110 , 40 , 1  , 0  ,150 /) ;30 ;20
+lonr = (/105 ,130 , 60 ,359 , 70 ,210 /) ;150;220
 
 ;the path of the file
 path    = "/home/ys17-19/renql/project/TP_NUDG"
@@ -211,6 +211,15 @@ nlev   = dimsizes(lev)
 nvar   = dimsizes(draw_var)
 ncase  = dimsizes(case2)
 nfile  = dimsizes(case1)
+phis1  := 1013.25*(1-dim_avg_n_Wrap(phis,1)*0.0065/288.15)^5.25145
+phis1  = where(phis1.le.1000, phis1, 1000)
+ypoly := new((/nlat+4/),float)
+xpoly := new((/nlat+4/),float)
+ypoly(0:nlat-1)    = tofloat(phis1)
+ypoly(nlat:nlat+3) = (/tofloat(phis1(nlat-1)),1000,1000,tofloat(phis1(0))/)
+xpoly(0:nlat-1)    = tofloat(phis&lat)
+xpoly(nlat:nlat+3) = (/tofloat(latn(na)),tofloat(latn(na)),tofloat(lats(na)),tofloat(lats(na))/)
+delete([/phis,phis1/])
 
 f = addfile(filename(0),"r")
 if(var_option.le.0)
@@ -237,6 +246,7 @@ var_u := new((/ncase,nmonth,nlev2,nlat/),double)
     line     = new((/nvar*nmonth/),graphic)
     core     = new((/nvar*nmonth/),graphic)
     msfp     = new((/nvar*nmonth/),graphic)
+    topo   = new((/ncase*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -543,6 +553,10 @@ end if
     polyres@gsMarkerColor     = "black"
     polyres@gsMarkerThicknessF  = 5.0 
 
+;used to draw the black terrain
+    pres                  = True
+    pres@gsFillColor      = "gray"
+
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape";"portrait"
@@ -682,12 +696,12 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do fnc = 2,ncase-1,1
-do nm = 0,0,1;, nmonth-1,1
+do fnc = 0,ncase-1,1
+do nm = 0, nmonth-1,1
 do nv = 0, 2,1;nvar-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     ;np = nv*nmonth + nm ;1 var, 2 month
-    np = nm*nvar + nv ;1 var, 2 month
+    np = nm*3 + nv ;1 var, 2 month
     ;np = fnc*nvar+nv
     ;np = fnc*nmonth+nm
     ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
@@ -730,6 +744,8 @@ do nv = 0, 2,1;nvar-1,1
     ;vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
     ;overlay(plot(np),vect(np))
     end if
+    
+    topo(np) = gsn_add_polygon(wks, plot(np), xpoly, ypoly, pres)
 end do 
 
 ;    resp@txString      = fig_title
@@ -737,8 +753,8 @@ end do
 end do 
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
     ;gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
-    gsn_panel(wks,plot,(/1,3/),resp)
-    ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
+    ;gsn_panel(wks,plot,(/1,3/),resp)
+    gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
 end do 
 end do 
 end

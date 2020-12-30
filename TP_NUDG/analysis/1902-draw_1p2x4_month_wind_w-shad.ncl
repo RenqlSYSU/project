@@ -27,13 +27,13 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(a","(a","(c","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"intEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
+             "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
              "uppT" /)
@@ -45,11 +45,11 @@ unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
              "K"/)
 
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"intEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
+                 "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
-lev = (/850,500,200,700,600,  100,10/)
+lev = (/700,500,200,700,600,  100,10/)
 nl = 1
 nv = 6
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
@@ -58,16 +58,16 @@ perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
-jet_option  = 1 ;0 = no jet, 1 = jet axis, 2 = jet contour
+jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = True ;False;
-barvert  = True ;False;
+barshare = False;True ;
+barvert  = False;True ;
 
-var_option = 1
+var_option = 1 
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -78,9 +78,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(4,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-imonth = ispan(0,11,1);(/4,5,6,7/)
+;imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -99,13 +99,13 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,  -70,-70, -70,  0  ,-70,10 /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  55 ,70 ,55 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  30 ,0  ,90 /);20
-lonr = (/360,270,390,  150,270, 390,  150,360,150/);220
+lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
+latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
+lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,30 /);20
+lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
 lat_spacing = 15
 lon_spacing = 20
-na = 0
+na = 8
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -585,11 +585,14 @@ end if
     res_jet@cnLevels         = (/20/)
     end if
     if(jet_option.eq.2) then 
-    u = mask(u, u.lt.0 , False) 
-    res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_jet@cnLevels         = (/20,30,40,50,60/)
-    ;res_jet@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res_jet@cnLevelSpacingF      = 10        ; set contour interval
+    ;u = mask(u, u.lt.0 , False) 
+    ;res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    ;res_jet@cnLevels         = (/20,30,40,50,60/)
+    res_jet@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    res_jet@cnLevelSpacingF      = 10        ; set contour interval
+    res_jet@gsnContourZeroLineThicknessF = mp_thick + 4.0
+    res_jet@gsnContourNegLineDashPattern = 2
+    res_jet@gsnContourPosLineDashPattern = 0
     end if
     res_jet@lbLabelBarOn         = False   ; the label bar
     res_jet@gsnCenterString      = ""
@@ -843,7 +846,7 @@ if(nv.eq.20) then  ;200
     spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
-;do nm = 0,nmonth-1,1
+do nm = 0,nmonth-1,1
 do nc = 0,1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -858,11 +861,11 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 0,nmonth-1,1
+    ;do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
-        ;np = nm*2+nc
+        np = nm*2+nc
         ;np = nc*nmonth+nm
-        np = nm
+        ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
@@ -966,9 +969,9 @@ end if
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
-    gsn_panel(wks,plot,(/6,2/),resp)
+;    gsn_panel(wks,plot,(/6,2/),resp)
 end do
-;    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/4,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do

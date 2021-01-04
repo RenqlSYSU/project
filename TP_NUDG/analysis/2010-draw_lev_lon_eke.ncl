@@ -37,9 +37,9 @@ lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,h
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = lev
 nv = 9
-diff = False;True ;
-perc = True
-jet_option = False;True ;
+diff = True ;False;
+perc = False;True
+jet_option = True ;False;
 barshare = True ;False;
 barvert  = False;True
 siglvl   = 0.05
@@ -55,9 +55,9 @@ jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Ann","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 imonth = ispan(0,11,1);(/4,5,6,7/)
-annual = True
+annual = False;True
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
@@ -93,10 +93,10 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-level_lon_" + draw_var(nv) + "
 jetfile    = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
 end if
 
-pre_case   = (/"(g","(h","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
-;pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-;fig_out    = "pdf";"x11"
-fig_out    = "eps";"pdf";"x11"
+;pre_case   = (/"(g","(h","(o","(p","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+fig_out    = "pdf";"x11"
+;fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
 area = (/"TP","EA","NH","CA"/)
@@ -528,8 +528,8 @@ end if
 if(nv.eq.9) then 
 if(diff) then
     minlvl = (/ 10,-70, 10/);
-    maxlvl = (/160, 70,160/);
-    spacig = (/ 10, 10, 10/);
+    maxlvl = (/235, 70,160/);
+    spacig = (/ 15, 10, 10/);
 else
     minlvl = (/ 10, 10/);
     maxlvl = (/160,160/);
@@ -571,8 +571,8 @@ end do ;for the month
 
 else
 do nc = 0, ncase-1,1
-do nm = 0,0,1 ;nmonth-1,1
-if((nc.le.0).or.(nv.eq.9)) then
+do nm = 0,nmonth-1,1
+if((nc.le.0).or.(nv.gt.9)) then
     res@cnFillPalette = "precip3_16lev"
     res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
     ;blue and yellow and red, has 17 colors,2-18,2 is white
@@ -582,10 +582,10 @@ else
     ;blue and red, has 18 colors,2-10 is blue
 end if 
         ;np = nmonth*nc + nm
-         np = nc
+         np = nm
     ;    np = ncase*nm + nc
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) ;+ " " + months(imonth(nm)) 
-        res@gsnRightString  = lats(na) + "N " + draw_varname(nv) + " (" + unit(nv) + ")";+ "-" + latn(na) 
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
+        res@gsnRightString  = lats(na) + "N " + draw_varname(nv) ;+ " (" + unit(nv) + ")";+ "-" + latn(na) 
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
         res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
@@ -607,12 +607,12 @@ end if
         print(max(var(nc,nm,:,:)))
         print(min(var(nc,nm,:,:)))
     end do 
-;    gsn_panel(wks,plot,(/3,4/),resp)
+    gsn_panel(wks,plot,(/3,4/),resp)
 end do ;for the month 
     
 ;    gsn_panel(wks,plot,(/nmonth,ncase/),resp)
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
-    gsn_panel(wks,plot,(/1,2/),resp)
+;    gsn_panel(wks,plot,(/1,2/),resp)
 end if
 end
 

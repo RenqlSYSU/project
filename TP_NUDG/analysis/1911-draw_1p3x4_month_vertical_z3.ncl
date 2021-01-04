@@ -31,7 +31,7 @@ end if
 
 draw_var = (/"Z3","dzdt","Ahgt","U","T", "dTdy","dudt","4q1","V","EKE"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"gpm","10~S~-4~N~m~S~2~N~/s~S~3~N~","gpm","m/s","~S~o~N~C","10~S~-6~N~m/s","10~S~-5~N~m/s~S~2~N~","K/day","m/s","J"/)    ;this can be used as right string 
-draw_varname = (/"hgt","dzdt","Ahgt","U","T","-dTdy","dudt","4q1","V"/)  ;this is the variable used to draw, can used as center string
+draw_varname = (/"hgt","dzdt","Ahgt","U","T", "-dTdy","dudt","4q1","V","EKE"/)  ;this is the variable used to draw, can used as center string
 ;lev   = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
@@ -44,7 +44,7 @@ jet_option = False;True ;
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 0
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)

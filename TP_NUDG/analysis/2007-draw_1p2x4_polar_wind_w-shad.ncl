@@ -27,6 +27,12 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
+if(case_option.eq.3) then
+    case1   = (/"F2000","NUDG"/)
+    case2   = (/"F2000","NUDG-F2000"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
+end if
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
@@ -42,8 +48,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,500,200,100,10/)
-nl = 1
-nv = 3
+nl = 2
+nv = 0
 diff = True ;False;
 perc = False;True ;
 vect_option = True ;False;

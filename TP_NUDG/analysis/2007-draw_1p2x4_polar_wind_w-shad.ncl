@@ -7,19 +7,20 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
+do case_option=3,3,1
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
-    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-    nsample = 27
-end if
-if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
+end if
+if(case_option.eq.1) then
+    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
 end if
 if(case_option.eq.2) then
     case1   = (/"F2000","NGTR"/)
@@ -48,8 +49,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,500,200,100,10/)
-nl = 2
-nv = 0
+nl = 0
+nv = 1
 diff = True ;False;
 perc = False;True ;
 vect_option = True ;False;
@@ -142,14 +143,14 @@ latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
    tick_font      = 0.01
-   subtitle_font  = 0.01
+   subtitle_font  = 0.02
    title_font     = 0.01
-   vcref_font     = 0.01
+   vcref_font     = 0.017
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 2.5
-   mp_thick       = 1.5
+   vc_thick       = 3.0
+   mp_thick       = 2.0
    font_index     = 22
 else
    tick_font      = 0.03
@@ -380,8 +381,8 @@ end if
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
-    resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.33           ; move ref vector along Y-axis
+    resvc@vcRefAnnoParallelPosF      = 0.53            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
@@ -799,6 +800,6 @@ end if
     gsn_panel(wks,plot,(/2,2/),resp)
 end do
 ;end do
-;end do
+end do
 end
 

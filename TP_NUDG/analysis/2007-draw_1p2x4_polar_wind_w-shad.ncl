@@ -8,7 +8,7 @@
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-do case_option=3,3,1
+do case_option=2,2,1
 if(case_option.eq.0) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
@@ -49,14 +49,14 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,500,200,100,10/)
-nl = 0
-nv = 1
+nl = 3
+nv = 3
 diff = True ;False;
 perc = False;True ;
+sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = True ;False;
 cont_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-sig_option  = True ;False;only work on shading 
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
 nvc = 2 
@@ -613,6 +613,16 @@ if(nl.eq.1) then  ;200
     spacig = (/  100, 10, 10/) 
 end if
 if(nl.eq.2) then  ;200
+    minlvl = (/10900,-70,-70/) 
+    maxlvl = (/12400, 70, 70/)
+    spacig = (/  100, 10, 10/) 
+end if
+if(nl.eq.3) then  ;10
+    minlvl = (/10900,-70,-70/) 
+    maxlvl = (/12400, 70, 70/)
+    spacig = (/  100, 10, 10/) 
+end if
+if(nl.eq.4) then  ;10
     minlvl = (/10900,-70,-70/) 
     maxlvl = (/12400, 70, 70/)
     spacig = (/  100, 10, 10/) 

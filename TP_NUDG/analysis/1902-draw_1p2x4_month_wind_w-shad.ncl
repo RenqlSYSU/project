@@ -51,7 +51,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 0
+nv = 20
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -64,10 +64,10 @@ cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is th
 cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = False;True ;
+barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 2 
+var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -99,10 +99,10 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,30 /);20
-lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
+lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,0  /);-20
+latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,65 /);60
+lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,0  /);20
+lonr = (/360,270,390,  150,270, 390,  85 ,360,180/);220
 lat_spacing = 15
 lon_spacing = 30
 na = 8
@@ -293,7 +293,7 @@ if(nv.eq.4) then
     var(:,2,:,:,:) = var(:,2,:,:,:)*cp ;Q1,transform unit from K/S to W/kg
 end if
 
-if(nv.eq.5.or.nv.eq.13) then
+if(nv.eq.5.or.nv.eq.13.or.nv.eq.20) then
     var(:,2,:,:,:) = var(:,2,:,:,:)-273.15 ;transform unit from K to c
 end if
 
@@ -714,7 +714,7 @@ if(na.eq.0) then ; 850,700,600,500,200,100,10
 else
     vcref         = (/(/7 , 2,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/15,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
+                      (/20,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/10, 2,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
@@ -841,9 +841,9 @@ if(nv.ge.17.and.nv.le.19) then
 end if
 
 if(nv.eq.20) then  ;200
-    minlvl = (/235,-0.7,-3.5/);-68 -24,-24
-    maxlvl = (/250, 0.7, 3.5/);-50  24, 24
-    spacig = (/1  , 0.1,0.5 /);1.2   3,  3
+    minlvl = (/-54,-0.7,-3.5/);-68 -24,-24
+    maxlvl = (/-24, 0.7, 3.5/);-50  24, 24
+    spacig = (/2  , 0.1,0.5 /);1.2   3,  3
 end if
 
 do nc = 0,1,1
@@ -864,8 +864,8 @@ end if
     do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
         ;np = nm*2+nc
-        np = nc*nmonth+nm
-        ;np = nm
+        ;np = nc*nmonth+nm
+        np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
@@ -967,11 +967,11 @@ end if
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 end do
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do

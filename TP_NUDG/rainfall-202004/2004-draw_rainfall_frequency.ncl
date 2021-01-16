@@ -109,13 +109,13 @@ else
         filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect2_month.nc"
         end if
         if(var_option.eq.10) then 
-        filename = path + "/analysis/mdata/" + case1 + "-rainfall_frequency.nc"
+        filename = path + "/rainfall-202004/mdata/" + case1 + "-rainfall_frequency.nc"
         end if
     end if
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
+    filename = path + "/data/" + case1 + "-Clim_daily_dzdt.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_clim_" + draw_var(0) + "_" + var_name(nnv) + "-" + lev(nl)  
+    fig_name = path + "/rainfall-202004/1p2x3_clim_" + draw_var(0) + "_" + var_name(nnv) + "-" + lev(nl)  
 end if
 ;fig_title  = "Seasonal " + draw_var(nv) + " variance in " ;+season
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)

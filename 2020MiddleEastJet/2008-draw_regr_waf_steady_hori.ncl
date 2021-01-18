@@ -12,6 +12,8 @@ lev    = (/925,850,700,500,200/)
 nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
+case = (/"NCEP2","ERA-Interim"/)
+nc = 0
 
 neval = 3
 area  = (/"ME","EA","NA"/);,"GB"
@@ -27,8 +29,6 @@ months  = (/""/)
 months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
-case   = "ERA-Interim"
-;case   = "NCEP1"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    ="pdf";"x11"
 
@@ -63,13 +63,13 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.eq.0)
-    ;filename = path + "data/" + case + "_" + months + "steady_Pb85-reg2.nc"
-    filename = path + "data/" + case + "_" + months + "steady_TN01-reg.nc"
-    ;filename = path + "data/" + case + "_" + months + "steady_Pb85_2-reg.nc"
+    ;filename = path + "data/" + case(nc) + "_" + months + "steady_Pb85-reg2.nc"
+    filename = path + "data/" + case(nc) + "_" + months + "steady_TN01-reg.nc"
+    ;filename = path + "data/" + case(nc) + "_" + months + "steady_Pb85_2-reg.nc"
     fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(0)
 end if
 if(var_option.eq.1)
-    filename = path + "data/" + case + "_" + months + "rws-reg.nc"
+    filename = path + "data/" + case(nc) + "_" + months + "rws-reg.nc"
     fig_name = path + "fig/1p3x3_regr_horizontal_" + var_name(0)
 end if
 

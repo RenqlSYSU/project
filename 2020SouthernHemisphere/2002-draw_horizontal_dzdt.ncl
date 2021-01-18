@@ -15,8 +15,8 @@ na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
 
 if(DJF_option) then
-months  = (/"MAM_"/)
-months2 = (/"MAM"/)
+months  = (/"DJF_"/)
+months2 = (/"DJF"/)
 else
 months  = (/""/)
 ;months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
@@ -24,8 +24,8 @@ months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
 lev    = (/925,850,700,500,200/) 
-case   = "ERA-Interim"
-;case   = "NCEP1"
+case = (/"NCEP2","ERA-Interim"/)
+nc = 0
 
 do var_option = 22,22,1 
 do nnv = 1,1,1
@@ -202,8 +202,8 @@ end if
 
 ;area: east Asia
 area = (/"SH","ME","EA","NA","TP"/)
-lats = (/ -90, 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ -10, 89 , 89 , 89 , 50 /) ;55 ;60
+lats = (/ 5  , 0  ,  0 ,  0 , 10 /);10 ;-20
+latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -295,7 +295,7 @@ if(var_option.eq.21)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.22)
-    filename = path + "data/" + case + "_" + months + "steady_TN01-reg.nc"
+    filename = path + "data/" + case + "_" + months + "steady_PB85-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 

@@ -5,32 +5,32 @@
 ;*********************************************************************************
 begin
 jet_option  = False;True ;;20191205, control the draw of jet stream
-bar_share = True ;False;
-barvert   = True ;False;
-lev    = (/925,850,500,200,100, 50,10/) 
+bar_share = False;
+barvert   = False;
+lev    = (/925,850,500,300,200,  100,50,10/) 
 nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
 siglvl= 0.05
 
 if(DJF_option) then
-months  = (/"MAM_"/)
-months2 = (/"MAM"/)
+months  = (/"DJF_"/)
+months2 = (/"DJF"/)
 else
 months  = (/""/)
 ;months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
-case   = "ERA-Interim"
-;case   = "NCEP1"
+case = (/"NCEP2","ERA-Interim"/)
+nc = 0
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    ="pdf";"x11"
 
 ;area: east Asia
 ;area = (/"NH","ME","EA","NA","TP"/)
-lats = (/ -90, 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ -5, 89 , 89 , 89 , 50 /) ;55 ;60
+lats = (/ 5  , 0  ,  0 ,  0 , 10 /);10 ;-20
+latn = (/ 89 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lat_spacing = 15
@@ -42,8 +42,8 @@ do var_option = 0,0,1
 if(var_option.eq.0) then 
     draw_var = (/"steady"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"wafx"  ,"wafy"  ,"edd_sf" /)  ;
-    unit     = (/"m~S~2~N~/s~S~2~N~" ,"m2/s2" ,"10~S~4~N~m~S~2~N~/s"/)  ;this can be used as right string 
-    shad_option = 2 ;0=divg; 1=edd_sf; 2=wafz 
+    unit     = (/"m~S~2~N~/s~S~2~N~" ,"m2/s2" ,"10~S~6~N~m~S~2~N~/s"/)  ;this can be used as right string 
+    shad_option = 1 ;0=divg; 1=edd_sf; 2=wafz 
 end if
 if(var_option.eq.1) then 
     draw_var = (/"RWS"/)  ;this is the variable used to draw, can used as center string
@@ -55,10 +55,10 @@ end if
 path   = "/home/ys17-19/renql/project/2020SouthernHemisphere/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 if(var_option.eq.0)
-    ;filename = path + "data/" + case + "_" + months + "steady_Pb85-reg2.nc"
-    filename = path + "data/" + case + "_" + months + "steady_TN01-reg.nc"
-    ;filename = path + "data/" + case + "_" + months + "steady_Pb85_2-reg.nc"
-    fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(2)
+    filename = path + "data/" + case(nc) + "_" + months + "steady_TN01-comp.nc"
+    fig_name = path + "fig/1p3x3_pcomp_horizontal_TN01_" + var_name(2)
+    ;filename = path + "data/" + case(nc) + "_" + months + "steady_TN01-reg.nc"
+;    fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(2)
 end if
 if(var_option.eq.1)
     filename = path + "data/" + case + "_" + months + "rws-reg.nc"
@@ -68,8 +68,11 @@ end if
 f = addfile(gtopfile,"r")
 phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-nlat   = dimsizes(phis&latitude )  ;
-nlon   = dimsizes(phis&longitude)  ;
+
+f = addfile(filename,"r")
+vars = f->$var_name(0)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+nlat   = dimsizes(vars&lat)  ;
+nlon   = dimsizes(vars&lon)  ;
 nvar   = dimsizes(draw_var)
 if(var_option.eq.0) then 
 var_m  := new((/3,ntime,nlat,nlon/),double)
@@ -106,7 +109,7 @@ end if
     gsn_define_colormap(wks,"BlueDarkRed18")
     ;blue and red, has 18 colors,2-10 is blue
 
-do nl = 3, 6, 1
+do nl = 4, 4, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -139,8 +142,8 @@ if(var_option.eq.1) then
 end if
 
 if(var_option.eq.0) then 
-var_m = var_m*1000
-vcref := (/1,150,150/) ;(/925,850,700,500,200/)
+;var_m = var_m*1000
+vcref := (/4,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
 prob(0,:,:) = f->prob({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -155,10 +158,10 @@ if(shad_option.eq.0) then ;divg
     spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5 1, 1, 1
 end if
 if(shad_option.eq.1) then ;edd_sf
-    var_m(2,0,:,:) = (1.0/10000.0)*f->$var_name(2)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    minlvl := (/-14,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 14, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 2 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    var_m(2,0,:,:) = (1.0/1000000.0)*f->$var_name(2)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+    minlvl := (/-7,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 7, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 1, 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
 if(shad_option.eq.2) then ;wafz
     var_name(2) = "wafz"
@@ -371,7 +374,7 @@ printVarSummary(var_m)
     if(barvert) then 
         resp@lbOrientation     = "Vertical"
         resp@pmLabelBarWidthF  = 0.05
-        resp@pmLabelBarHeightF = 0.8
+        resp@pmLabelBarHeightF = 0.6
     else
         resp@lbOrientation     = "Horizontal" ;"Vertical"
         resp@pmLabelBarWidthF  = 0.8 ;0.05
@@ -408,16 +411,16 @@ printVarSummary(var_m)
 
 do nt = 0, ntime-1,1
 do nv = 0, nvar-1, 1
-    np = nl-3
-    res@gsnLeftString   = pre_case(np) + ") "
+    np = nl-4
+    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa positive5";negitive6"
     if(var_option.eq.0) then 
     if(shad_option.eq.0) then 
-    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " WAF  divg (" + unit(2) + ")"
+    res@gsnRightString  = draw_var(nv) + " WAF  divg (" + unit(2) + ")"
     else
-    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " WAF  " + var_name(2) + " (" + unit(2) + ")"
+    res@gsnRightString  = draw_var(nv) + " WAF  " + var_name(2) + " (" + unit(2) + ")"
     end if
     else
-    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")"
     end if
     
     ;res@gsnSpreadColors       = False              ; turn of the full color map
@@ -456,7 +459,7 @@ end do
 ;    gsn_panel(wks,plot,(/1,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
-    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 end do 
 end
 

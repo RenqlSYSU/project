@@ -65,9 +65,10 @@ do nnv = 1,1,1
         unit     = (/"10~S~-6~N~K/m"/)  ;this can be used as right string 
     end if
     if(var_option.eq.-10) then 
+        var_calc = (/"intAPE","intEKE","variV","variZ"/)
         draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
-        unit     = (/"10~S~4~N~J","10~S~4~N~J","10~S~4~N~J"/)  ;this can be used as right string 
+        unit     = (/"10~S~4~N~J","10~S~4~N~J","K~S~2~N~","m~S~4~N~s~S~-4~N~"/)  ;this can be used as right string 
     end if
     if(var_option.eq.-6) then 
         draw_var := (/"T3x","Tadvect"/)  ;Tadvect
@@ -232,7 +233,7 @@ if(var_option.eq.-13.or.var_option.eq.-14)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-10)
-    filename = path + "data/" + case + "_" + months + "intEKE-year.nc"
+    filename = path + "data/" + case + "_" + months + "_" + var_calc(nnv) + "-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-5.or.var_option.eq.-6)

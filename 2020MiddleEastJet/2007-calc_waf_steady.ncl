@@ -5,20 +5,28 @@
 ;                                           2020/02/04
 ;******************************************************************************
 begin
-path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
-;path1  = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
+case = (/"NCEP2","ERA-Interim"/)
+nc = 0
+if(nc.eq.0) then 
+path1  = "/home/ys17-19/data-observation/NCEP_DOE/daily/" ;hgt unit is m 
+years = ispan(1979,2018,1)
+else
+path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/" ;hgt unit is m2/s2
+years = ispan(1979,2016,1)
+end if
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
+
 var_name = (/"uwnd","vwnd","air","hgt"/)
 waf_option = 1
 if(waf_option.eq.0) then 
-fileout  = path2 + "ERA-Interim_DJF_steady_TN01-year.nc"
+fileout  = path2 + case(nc) + "_DJF_steady_TN01-year.nc"
 end if
 if(waf_option.eq.1) then 
-fileout  = path2 + "ERA-Interim_DJF_steady_Pb852-year.nc"
+fileout  = path2 + case(nc) + "_DJF_steady_Pb85-year.nc"  ;use streamfunction to calc
 end if
 if(waf_option.eq.2) then 
-fileout  = path2 + "ERA-Interim_DJF_steady_Pb85_2-year.nc"
+fileout  = path2 + case(nc) + "_DJF_steady_Pb85_2-year.nc" ;use anomalous wind to calc
 end if
 year_option = True;False 
 
@@ -29,7 +37,6 @@ a  = 6378388 ;the radius of earth, m
 sclhgt = 7991 ;m 
 pi = atan(1.0)*4
 print(pi)
-years = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
@@ -37,7 +44,9 @@ lats =  5  ;-20
 latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
+lev  = (/400,300,250, 200,150,100/) 
+;lev  = (/ 1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10 /) ;NCEP2
+;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/) ;ERA-Interim
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -47,7 +56,11 @@ time = cd_calendar(f_model->time,0)
 delete(f_model)
 printVarSummary(time)
 
+if(nc.eq.0) then 
+f    = addfile(path1+var_name(0)+"/"+var_name(0)+"."+years(0)+".nc", "r")
+else
 f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
+end if
 vars = f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -82,6 +95,38 @@ v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
+if(nc.eq.0) then 
+do nt = 0,nyear-1,1
+print("read: " + years(nt))
+if(isleapyear(years(nt))) then ;leap year,366 day
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+else   ;non-leap year, 365 day
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+end if
+end do
+else
 do nt = 0,nyear-1,1
 print("read: " + years(nt))
 if(isleapyear(years(nt))) then ;leap year,366 day
@@ -112,6 +157,7 @@ else   ;non-leap year, 365 day
     z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end if
 end do
+end if
 
 ;--------------------------------------
 ;DJF
@@ -184,7 +230,14 @@ else
 ;the Brunt-Vaisala frequency of atmosphere
 theta = pot_temp(lev*100, t, ilev-1, False)
 delete(t)
+
+if(nc.eq.1)
 hgt = z/9.8 ;convert unit from m2/s2 to m
+else
+hgt = z
+z   = z*9.8  ;convert unit from m to m2/s2
+end if
+
 NN  = brunt_vaisala_atm(theta, hgt, 0, ilev-1)
 delete([/theta,hgt/])
 NN = NN*abs(NN)

@@ -7,9 +7,9 @@ begin
 lev  = (/925,850,500,200,100/)
 nlev = dimsizes(lev)
 nl   = 3
-nmonth = 3
-;months = (/"MAM"/)
-months = (/"Mar","Apr","May"/)
+months = (/"DJF"/)
+;months = (/"Mar","Apr","May"/)
+nmonth = dimsizes(months)
 global = True
 siglvl = 0.1
 bar_share   = True ;False;
@@ -17,7 +17,7 @@ bar_verti   = False;True ;
 jet_option  = False;True ;
 regu_option = False;True ;
 
-do nl = 1,4,1
+do nl = 3,3,1
 do var_option = 22,22,1 
 if(var_option.eq.-23) then 
     draw_var := (/"preci"/)  ;this is the variable used to draw, can used as center string
@@ -116,16 +116,17 @@ end if
 nvar = dimsizes(draw_var)
 
 na   = 0
-lats = (/ -90/);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
-latn = (/ -10/);, 60  ;90 , 90 , 90 , 90  60 , 60 , 60
+lats = (/ 5  /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
+latn = (/ 90 /);, 60  ;90 , 90 , 90 , 90  60 , 60 , 60
 lonl = (/ 0  /);, 0   ;30 ;20  0  ,105 , 250
 lonr = (/ 360/);, 360 ;150;220 70 ,175 , 320
 lon_spacing = 30
 lat_spacing = 20
-years = ispan(1979,2016,1)
+years = ispan(1979,2018,1)
 nyear = dimsizes(years)
 
-case   = "ERA-Interim"
+case = (/"NCEP2","ERA-Interim"/)
+nc = 0
 path   = "/home/ys17-19/renql/project/2020SouthernHemisphere/"
 if(var_option.eq.-23)
     filename = "/home/ys17-19/data-observation/GPCP/precip.mon.mean.197901.201809.nc"
@@ -140,47 +141,47 @@ if(var_option.eq.-21)
     fig_name = path + "fig/eof_regression_hor-sst"
 end if
 if(var_option.eq.-12)
-    filename = path + "data/" + case + "_DJF_air-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_air-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + draw_var(0)+lev(nl)
 end if
 if(var_option.eq.-10.or.var_option.eq.-11)
-    filename = path + "data/" + case + "_DJF_" + draw_var(0) + "-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_" + draw_var(0) + "-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + draw_var(0)+lev(nl)
 end if
 if(var_option.eq.-3)
-    filename = path + "data/" + case + "_DJF_forc_in2-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_forc_in2-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(0)+lev(nl)
 end if
 if(var_option.eq.-2)
-    filename = path + "data/" + case + "_DJF_forc_te-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_forc_te-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(0)+lev(nl)
 end if
 if(var_option.le.0.and.var_option.ge.-1.or.var_option.eq.-4)
-    filename = path + "data/" + case + "_DJF_forc_ex-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_forc_ex-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(0)+lev(nl)
 end if
 if(var_option.eq.1)
-    filename = path + "data/" + case + "_DJF_dzdt_ex-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_dzdt_ex-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.2)
-    filename = path + "data/" + case + "_DJF_dzdt_te-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_dzdt_te-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.3)
-    filename = path + "data/" + case + "_DJF_dzdt_in-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_dzdt_in-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.20)
-    filename = path + "data/" + case + "_DJF_e_vector-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_e_vector-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + draw_var(0)
 end if
 if(var_option.eq.21)
-    filename = path + "data/" + case + "_DJF_TN01-year.nc"
+    filename = path + "data/" + case(nc) + "_DJF_TN01-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + draw_var(0)
 end if
 if(var_option.eq.22)
-    filename = path + "data/" + case + "_steady_Pb85-year_month.nc"
+    filename = path + "data/" + case(nc) + "_DJF_steady_Pb85-year.nc"
     fig_name = path + "fig/eof_regression_hor-" + draw_var(0) + lev(nl)
 end if
 fig_out    = "pdf" ;"eps";"x11"
@@ -481,9 +482,11 @@ if(nnv.eq.3) then ;dbdt
 end if
 end if
 
-ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
-2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
--3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
+;ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
+;2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
+;-3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
+ts = asciiread(path+"data/JET_index_MEJindx_2040N5080E_7918_DJF.txt",-1,"float")
+ts := ts(1::)
 print("nyear of ts : " + dimsizes(ts))
 print("nyear of waf : " + nyear)
 ;ts = (/0.6843878,0.2328069,-0.8883422,0.9194,-2.049343,0.8701207,0.6956607,1.529305,-1.833134,0.4640056,0.6192874,0.03531907,-0.2721298,-1.553613,-0.5360572,\
@@ -493,13 +496,13 @@ print("nyear of waf : " + nyear)
 lin_spc = (/1,1,1.5/)
 f2 = addfile("/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_uwnd-year.nc","r")
 u := f2->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)})
-nlat = dimsizes(u&lat)
-nlon = dimsizes(u&lon)
 
 f3 = addfile(filename,"r")
+nlat = dimsizes(f3->lat)
+nlon = dimsizes(f3->lon)
 vars := new((/nvar,nyear,nmonth,nlat,nlon/),double)
 if(var_option.ge.20) then
-vars := new((/3,nvar,nyear,nmonth,nlat,nlon/),double)
+vars := new((/3,nvar,nyear-1,nmonth,nlat,nlon/),double)
 end if
 
 if(var_option.eq.-22.or.var_option.eq.-23) then 
@@ -611,7 +614,8 @@ end if
 if(var_option.ge.20) then 
     do nv = 0,2,1
         if(var_option.eq.22) then 
-        vars(nv,0,:,:,:,:)  = f3->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        ;vars(nv,0,:,:,:,:)  = f3->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(nv,0,:,0,:,:)  = f3->$var_name(nv)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         else
         vars(nv,:,:,:,:,:)  = f3->$var_name(nv)$(:,:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if
@@ -623,15 +627,16 @@ if(var_option.ge.20) then
         spacig := (/ 0.5, 0.5, 0.5/);  0.2, 0.2, 0.2 0.5, 0.5, 0.5
     else
         if(var_option.eq.22) then ;wafz or edd_sf 
-        vars(2,0,:,:,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
+        vars(2,0,:,0,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
+        ;vars(2,0,:,:,:,:) = (1.0/1000000.0)*(f3->$var_name(2)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
         else
         vars(2,:,:,:,:,:) = -100.0*f3->$var_name(2)$(:,:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end if
-        minlvl := (/-0.7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-        maxlvl := (/ 0.7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-        spacig := (/ 0.1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
+        minlvl := (/-7,-7,-7/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+        maxlvl := (/ 7, 7, 7/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+        spacig := (/ 1, 1, 1/); 0.5, 0.5, 0.50.6, 0.6, 0.6
     end if
-    vcref  := (/0.5,20,20/) ;(/925,850,700,500,200/)
+    vcref  := (/10,20,20/) ;(/925,850,700,500,200/)
     printMinMax(vars(0,:,:,:,:,:),0)
     printMinMax(vars(1,:,:,:,:,:),0)
     printMinMax(vars(2,:,:,:,:,:),0)
@@ -822,7 +827,7 @@ end do
 ;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 ;    gsn_panel(wks,plot,(/narea,2/),resp)
 end do ;var_option
 end do ;level

@@ -4,21 +4,38 @@
 ;                                           2020/11/10
 ;******************************************************************************
 begin
-path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
-;path1  = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
+case = (/"NCEP2","ERA-Interim"/)
+nc = 0
+if(nc.eq.0) then 
+path1  = "/home/ys17-19/data-observation/NCEP_DOE/daily/" ;hgt unit is m 
+years = ispan(1979,2018,1)
+else
+path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/" ;hgt unit is m2/s2
+years = ispan(1979,2016,1)
+end if
 path2   = "/home/ys17-19/renql/project/2020SouthernHemisphere/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","air","hgt"/)
+
+;ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
+;2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
+;-3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
+ts = asciiread(path2+"JET_index_MEJindx_2040N5080E_7918_DJF.txt",-1,"float")
+ts := ts(1::)
+printVarSummary(ts)
+print(ts)
+
 waf_option = 0
 if(waf_option.eq.0) then 
-fileout  = path2 + "ERA-Interim_MAM_steady_TN01-reg.nc"
+fileout  = path2 + case(nc) + "_DJF_steady_TN01-reg.nc"
 end if
 if(waf_option.eq.1) then 
-fileout  = path2 + "ERA-Interim_MAM_steady_Pb85-reg2.nc"
+fileout  = path2 + case(nc) + "_DJF_steady_Pb85-reg2.nc"  ;use streamfunction to calc
+end if                                                                                
+if(waf_option.eq.2) then                                                              
+fileout  = path2 + case(nc) + "_DJF_steady_Pb85_2-reg.nc" ;use anomalous wind to calc
 end if
-if(waf_option.eq.2) then 
-fileout  = path2 + "ERA-Interim_MAM_steady_Pb85_2-reg.nc"
-end if
+DJF_option = True
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -27,15 +44,16 @@ a  = 6378388 ;the radius of earth, m
 sclhgt = 7991 ;m 
 pi = atan(1.0)*4
 print(pi)
-years = ispan(1979,2016,1)
 years@calendar = "standard"
 
 ;area: east Asia
-lats =  -5  ;-20
-latn =  -90 ;60
+lats =  5  ;-20
+latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
-lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100, 70,50,30,20,10,7/)
+lev  = (/400,300,250, 200,150,100/) 
+;lev  = (/ 1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100, 70, 50, 30, 20, 10 /) ;NCEP2
+;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/) ;ERA-Interim
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -45,7 +63,11 @@ time = cd_calendar(f_model->time,0)
 delete(f_model)
 printVarSummary(time)
 
+if(nc.eq.0) then 
+f    = addfile(path1+var_name(0)+"/"+var_name(0)+"."+years(0)+".nc", "r")
+else
 f    = addfile(path1+var_name(0)+"/"+var_name(0)+".interim."+years(0)+".nc", "r")
+end if
 vars = f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
@@ -72,13 +94,124 @@ cyclic = False ;used by center_finite_diff_n
 ;read the data
 ;============================================================
 nlev  = dimsizes(lev)
+if(DJF_option) then 
+select_time  = ind(time(:,1).eq.12.or.time(:,1).le.2)
+select_time1 = select_time
+select_time1(58:89) = select_time(58:89) + 1
+else
 select_time  = ind(time(:,1).ge.3.and.time(:,1).le.5)
+end if
 ntime = dimsizes(select_time)
 u     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 z     := new((/nyear,ntime,nlev,nlat,nlon/),float)
 
+if(DJF_option) then 
+if(nc.eq.0) then 
+do nt = 0,nyear-1,1
+print("read: " + years(nt))
+if(isleapyear(years(nt))) then ;leap year,366 day
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
+else   ;non-leap year, 365 day
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+end if
+end do
+else
+do nt = 0,nyear-1,1
+print("read: " + years(nt))
+if(isleapyear(years(nt))) then ;leap year,366 day
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr})
+else   ;non-leap year, 365 day
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+end if
+end do
+end if
+;--------------------------------------
+;DJF
+;---------------------------------------------------
+u2 := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+v2 := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+t2 := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+z2 := new((/nyear-1,ntime,nlev,nlat,nlon/),float)
+do ny = 0,nyear-2,1
+    u2(ny,0:30,:,:,:) = u(ny,59:89,:,:,:)
+    v2(ny,0:30,:,:,:) = v(ny,59:89,:,:,:)
+    t2(ny,0:30,:,:,:) = t(ny,59:89,:,:,:)
+    z2(ny,0:30,:,:,:) = z(ny,59:89,:,:,:)
+    u2(ny,31:89,:,:,:) = u(ny+1,0:58,:,:,:)
+    v2(ny,31:89,:,:,:) = v(ny+1,0:58,:,:,:)
+    t2(ny,31:89,:,:,:) = t(ny+1,0:58,:,:,:)
+    z2(ny,31:89,:,:,:) = z(ny+1,0:58,:,:,:)
+end do
+u  := dim_avg_n(u2,itime)
+v  := dim_avg_n(v2,itime)
+t  := dim_avg_n(t2,itime)
+z  := dim_avg_n(z2,itime)
+
+else
+
+if(nc.eq.0) then 
+do nt = 0,nyear-1,1
+print("read: " + years(nt))
+    nv = 0
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    u(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 1
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    v(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 2
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    t(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+    nv = 3
+    f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+"."+years(nt)+".nc","r")
+    z(nt,:,:,:,:)  = short2flt(f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr}))
+end do
+else
 do nt = 0,nyear-1,1
     print("read: " + years(nt))
     nv = 0
@@ -94,10 +227,12 @@ do nt = 0,nyear-1,1
     f      = addfile(path1+var_name(nv)+"/"+var_name(nv)+".interim."+years(nt)+".nc","r")
     z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 end do
+end if
 u  := dim_avg_n(u,itime)
 v  := dim_avg_n(v,itime)
 t  := dim_avg_n(t,itime)
 z  := dim_avg_n(z,itime)
+end if
 printVarSummary(u)
 
 if (any(ismissing(z))) then
@@ -113,10 +248,6 @@ z = linmsg_n(z,-1,ilon-1)
 u = linmsg_n(u,-1,ilon-1)
 v = linmsg_n(v,-1,ilon-1)
 t = linmsg_n(t,-1,ilon-1)
-;ts = (/-16.33339,-10.07344/)
-ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
-2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
--3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
 
 if(waf_option.eq.2) then ;pb85_2
 
@@ -129,10 +260,10 @@ delete([/area_t,noz/])
 ;edd_v = v - conform(u,dim_avg_n(v,ilon-1),(/0,1,2/))
 ;edd_t = t - conform(u,dim_avg_n(t,ilon-1),(/0,1,2/))
 ;edd_z = z - conform(u,dim_avg_n(z,ilon-1),(/0,1,2/))
-edd_u = regCoef_n(ts, u, 2, 0) ;narea,neval,nlev,nlat,nlon
-edd_v = regCoef_n(ts, v, 2, 0)
-edd_t = regCoef_n(ts, t, 2, 0)
-edd_z = regCoef_n(ts, z, 2, 0)
+edd_u = regCoef_n(ts, u, 0, 0) ;narea,neval,nlev,nlat,nlon
+edd_v = regCoef_n(ts, v, 0, 0)
+edd_t = regCoef_n(ts, t, 0, 0)
+edd_z = regCoef_n(ts, z, 0, 0)
 
 tval  := onedtond(edd_z@tval ,(/narea,neval,nlev,nlat,nlon/))
 df    := onedtond(edd_z@nptxy,(/narea,neval,nlev,nlat,nlon/))
@@ -170,7 +301,13 @@ else
 ;the Brunt-Vaisala frequency of atmosphere
 theta = pot_temp(lev*100, dim_avg_n_Wrap(t,iyear), ilev-2, False)
 delete(t)
+
+if(nc.eq.1)
 hgt = dim_avg_n_Wrap(z,iyear)/9.8 ;convert unit from m2/s2 to m
+else
+hgt = dim_avg_n_Wrap(z,iyear) ;convert unit from m2/s2 to m
+z   = z*9.8  ;convert unit from m to m2/s2
+end if
 NN  = brunt_vaisala_atm(theta, hgt, 0, ilev-2)
 delete([/theta,hgt/])
 NN := wgt_areaave(NN*abs(NN), a*cos(lat)*(lon(1)-lon(0)), 1.0, 0) ;(lev)

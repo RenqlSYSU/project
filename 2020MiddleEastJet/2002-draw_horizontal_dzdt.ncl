@@ -5,30 +5,30 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-jet_option  = False;True ;;20191205, control the draw of jet stream
+jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = False;True ; draw the line for ME, EA, NA
-vect_option = True ;False;
-cont_option = True ;False;
-bar_share = True ;False;
-nl = 2 ;(/925,850,700,500,250/)
-na = 4 ; "NH","ME","EA","NA"
-DJF_option = False ;True ;
+vect_option = False;True ;
+cont_option = False;True ;
+bar_share = False;True ;
+nl = 3 ;
+na = 0 ; "NH","ME","EA","NA"
+DJF_option = True ;True ;
 
+lev    = (/925,850,500,250,200/) 
 if(DJF_option) then
-months  = (/"MAM_"/)
-months2 = (/"MAM"/)
+months  = (/"DJF_"/)
+months2 = (/"DJF"/)
 else
 months  = (/""/)
 ;months2 = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 months2 = (/"DJF","MAM","JJA","SON"/)
 end if
 ntime = dimsizes(months2) 
-lev    = (/925,850,700,500,300/) 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 22,22,1 
-do nnv = 1,1,1
+do var_option = -10,-10,1 
+do nnv = 0,0,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -66,9 +66,9 @@ do nnv = 1,1,1
     end if
     if(var_option.eq.-10) then 
         var_calc = (/"intAPE","intEKE","variV","variZ"/)
-        draw_var = (/"intEKE","hghEKE","lowEKE"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"all"   ,"hgh"   ,"low"   /)  ;this is the variable used to draw, can used as center string
         var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
-        unit     = (/"10~S~4~N~J","10~S~4~N~J","K~S~2~N~","m~S~4~N~s~S~-4~N~"/)  ;this can be used as right string 
+        unit     = (/"10~S~4~N~J","10~S~4~N~J","m~S~2~N~s~S~-2~N~","10~S~4~N~m~S~4~N~s~S~-4~N~"/)  ;this can be used as right string 
     end if
     if(var_option.eq.-6) then 
         draw_var := (/"T3x","Tadvect"/)  ;Tadvect
@@ -233,8 +233,8 @@ if(var_option.eq.-13.or.var_option.eq.-14)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 if(var_option.eq.-10)
-    filename = path + "data/" + case + "_" + months + "_" + var_calc(nnv) + "-year.nc"
-    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+    filename = path + "data/" + case + "_" + months + var_calc(nnv) + "-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + var_calc(nnv)
 end if
 if(var_option.eq.-5.or.var_option.eq.-6)
     filename = path + "data/" + case + "_"+months+"forc_in2-year.nc"
@@ -351,7 +351,7 @@ end if
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
 
-;do nl = 1, 4, 1
+do nl = 2, 2, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -408,7 +408,7 @@ end if
 
 if((var_option.le.0.and.var_option.ge.-10).or.var_option.le.-12)
 f = addfile(filename,"r")
-if(var_option.eq.-10) then 
+if(var_option.eq.-10.and.nnv.le.1) then 
     do nv = 0, nvar-1,1
     if(DJF_option) then
     var_m(nv,0,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
@@ -546,7 +546,23 @@ if(var_option.eq.-12) then
 end if
 
 if(var_option.eq.-10) then 
+if(nnv.le.1) then 
     var_m = var_m/10000
+    minlvl := (/10 ,10 ,10 /);-8,-8,-8,-8,
+    maxlvl := (/130,130,130/); 8, 8, 8, 8,
+    spacig := (/8  ,8  ,8  /); 1, 1, 1, 1,
+end if
+if(nnv.eq.2) then 
+    minlvl := (/20 ,10 ,10 /);-8,-8,-8,-8,
+    maxlvl := (/245,130,130/); 8, 8, 8, 8,
+    spacig := (/15 ,8  ,8  /); 1, 1, 1, 1,
+end if
+if(nnv.eq.3) then 
+    var_m = var_m/10000
+    minlvl := (/10 ,0  ,10 /);-8,-8,-8,-8,
+    maxlvl := (/310,105,310/); 8, 8, 8, 8,
+    spacig := (/20 ,7 ,20  /); 1, 1, 1, 1,
+end if
 end if
 
 if(var_option.eq.-6) then 
@@ -865,11 +881,6 @@ if(var_option.eq.-11) then
     maxlvl := (/ 14 /)
     spacig := (/ 2 /)
 end if
-if(var_option.eq.-10) then
-    minlvl := (/2  ,2  ,2  /);-8,-8,-8,-8,
-    maxlvl := (/130,130,130/); 8, 8, 8, 8,
-    spacig := (/8  ,8  ,8  /); 1, 1, 1, 1,
-end if
 if(var_option.eq.-6) then
     minlvl := (/-7,-7,-7/);-8,-8,-8,-8,
     maxlvl := (/ 7, 7, 7/); 8, 8, 8, 8,
@@ -921,7 +932,7 @@ do nv = 0,nvar-1,1
 ;do ni = 0, 3, 1
 ;do np = 0, 2, 1 
     ;nt = ni*3 + np
-    np = nt 
+    np = nv
     if(var_option.ge.20) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv) + " WAF (" + unit(0) + ")"
     if(divg_option) then 
@@ -934,13 +945,16 @@ do nv = 0,nvar-1,1
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
     res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
     end if
-    if(var_option.le.0) then 
+    if(var_option.le.0) then
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
     res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")"
-    end if
     if(var_option.eq.-11) then 
     res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
-    res@gsnRightString  = lev(nl) + " " + draw_var(nv) + " (" + unit(nv) + ")"
+    end if
+    end if
+    if(var_option.eq.-10) then 
+    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + var_calc(nnv)
+    res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nnv) + ")"
     end if
     
     ;res@gsnSpreadColors       = False              ; turn of the full color map
@@ -995,13 +1009,13 @@ do nv = 0,nvar-1,1
     overlay(plot(np),line(np))
     end if
 end do 
-   ; gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
-;end do ;lev 
+end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)
 end do 
 end do 

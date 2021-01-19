@@ -12,7 +12,7 @@ path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.
 path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
 var_name = (/"air"   ,"uwnd"  ,"vwnd" ,"hgt"  /)
 var_calc = (/"intAPE","intEKE","variV","variZ"/)
-nv = 2
+nv = 0
 
 year_option = True;False ;
 fileout  = path2 + "ERA-Interim_DJF_"+var_calc(nv)+"-year.nc"
@@ -27,7 +27,8 @@ latn =  90 ;60
 lonl =  0  ;20
 lonr = 360 ;220
 if(nv.le.1) then 
-lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200/)
+;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 else
 lev  = (/850,500,300,250,200,100/)
 end if
@@ -165,9 +166,11 @@ if(nv.eq.0) then
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
 R  = 287.0  ; J/(kg*K) for dry air
 opt= 0     ;used by center_finite_diff_n, no meanging 
-plev  = conform(clm_u, lev*100,1)
-sigma = -(R/plev/cp)*((100000/plev)^(R/cp))/center_finite_diff_n(clm_u,lev*100,False,opt,1)
-delete([/clm_u,plev/])
+plev  = conform(clm_u, lev*100.0,1)
+theta = pot_temp(lev*100, clm_u, 1, False)
+delete(clm_u)
+sigma = -(R/plev/cp)*((100000.0/plev)^(R/cp))/center_finite_diff_n(theta,lev*100.0,False,opt,1)
+delete([/theta,plev/])
 sigma1= conform(edd_u, sigma*cp/2.0, (/0,2,3,4/))
 delete(sigma)
 
@@ -226,7 +229,7 @@ dimUnlim = (/False  ,False,False,False/);
 filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 
 ;define var_names, type(string) and dims_names(string)
-filevardef(ncdf,"lev" ,typeof(vars&level),getvardims(vars&level))
+filevardef(ncdf,"lev" ,typeof(lev),(/"lev"/))
 filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 if(nv.le.1) then 
@@ -240,14 +243,13 @@ filevardef(ncdf,"lowEKE",typeof(lowEKE),(/"year","lev","lat","lon"/))
 end if
 
 ;define var attribute
-filevarattdef(ncdf,"lev",vars&level)
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"intEKE",EKE)
 filevarattdef(ncdf,"hghEKE",hghEKE)
 filevarattdef(ncdf,"lowEKE",lowEKE)
 
-ncdf->lev  = (/vars&level/)
+ncdf->lev  = (/lev/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->intEKE = (/EKE/)

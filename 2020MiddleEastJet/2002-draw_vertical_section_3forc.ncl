@@ -15,7 +15,9 @@ cont_option = False;True
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
-DJF_option = True ;False 
+DJF_option = True ;False
+barshare = True
+barvert  = False
 
 if(DJF_option) then
 months = (/"DJF"/)
@@ -116,7 +118,9 @@ density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
 ;the path of the file
-path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
+path     = "/home/ys17-19/renql/project/2020MiddleEastJet/"
+gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.eq.-13.or.var_option.eq.-14)
     filename = path + "data/" + case + "_" + months + "_zonal_momentum-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
@@ -189,8 +193,24 @@ if(cont_option) then
 var_c  := new((/narea,nvar,ntime,nlev,nlat/),double)
 end if
 
+ypoly = new((/narea,nlat+4/),float)
+xpoly = new((/narea,nlat+4/),float)
+fps  = addfile(gtopfile,"r")
+do na = 0, narea-1, 1
+phis := short2flt(fps->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
+phis  = phis/9.8   ;convert unit from m2/s2 to gpm
+phis1:= 1013.25*(1-dim_avg_n_Wrap(phis,1)*0.0065/288.15)^5.25145
+phis1 = where(phis1.le.1000, phis1, 1000)
+ypoly(na,0:nlat-1)    = tofloat(phis1)
+ypoly(na,nlat:nlat+3) = (/tofloat(phis1(nlat-1)),1000,1000,tofloat(phis1(0))/)
+xpoly(na,0:nlat-1)    = tofloat(phis&latitude)
+xpoly(na,nlat:nlat+3) = (/tofloat(latn(na)),tofloat(latn(na)),tofloat(lats(na)),tofloat(lats(na))/)
+end do
+delete([/phis,phis1/])
+
 ;the number of the panel plot
     plot     := new((/12/),graphic)
+    topo     := new((/12/),graphic)
     line     := new((/12/),graphic)
     msfp     := new((/12/),graphic)
     egrp     := new((/12/),graphic)
@@ -592,18 +612,47 @@ printVarSummary(var_m)
     resvc@gsnLeftString    = " "
     resvc@gsnRightString   = " "
     
+;used to draw the black terrain
+    pres                  = True
+    pres@gsFillColor      = "gray"
+
     resp  = True    
-    resp@gsnMaximize   = True
+    resp@gsnMaximize   = False;True
     resp@gsnPaperOrientation = "landscape";"portrait"
-    if(var_option.ge.1.or.(var_option.le.-4.and.var_option.gt.-11)) then
-    res@lbLabelBarOn      = False   ; the label bar
+    if(barshare) then; .and.nmonth.eq.4
+    res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPanelLabelBar = True
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.7
     else
-    res@lbLabelBarOn      = True   ; the label bar
-    resp@gsnPanelLabelBar = False
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarHeightF = 0.05;0.8
     end if
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.06
+    else
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation     = "Vertical";
+    res@pmLabelBarWidthF  = 0.03
+    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF  = 0.7
+    res@pmLabelBarHeightF = 0.08
+    res@pmLabelBarOrthogonalPosF     = 0.23 ;y direction
+    res@pmLabelBarParallelPosF       = 0.5
+    end if
+    resp@gsnPanelLabelBar = False; True
+    end if
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -731,6 +780,8 @@ do nv = 0, nvar-1,1
     vect(np) = gsn_csm_pres_hgt_vector(wks,var_m(na,nv,nt,:,:),v_m(na,:,:),w_m(na,:,:),resvc)
     overlay(plot(np),vect(np))
     end if
+
+    topo(np) = gsn_add_polygon(wks, plot(np), xpoly(na,:), ypoly(na,:), pres)
 end do 
 end do 
 

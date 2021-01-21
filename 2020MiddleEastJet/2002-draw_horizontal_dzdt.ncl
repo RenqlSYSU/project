@@ -6,7 +6,7 @@
 begin
 year_option = True ;calc yearly DJF 
 jet_option  = True ;False;;20191205, control the draw of jet stream
-region_line = False;True ; draw the line for ME, EA, NA
+region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
 bar_share = False;True ;
@@ -14,7 +14,7 @@ nl = 3 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 
-lev    = (/925,850,500,250,200/) 
+lev    = (/925,500,300,250,200/) 
 if(DJF_option) then
 months  = (/"DJF_"/)
 months2 = (/"DJF"/)
@@ -28,7 +28,7 @@ case   = "ERA-Interim"
 ;case   = "NCEP1"
 
 do var_option = -10,-10,1 
-do nnv = 0,0,1
+do nnv = 2,2,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -351,7 +351,7 @@ end if
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
 
-do nl = 2, 2, 1
+do nl = 1, 4, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -554,8 +554,8 @@ if(nnv.le.1) then
 end if
 if(nnv.eq.2) then 
     minlvl := (/20 ,10 ,10 /);-8,-8,-8,-8,
-    maxlvl := (/245,130,130/); 8, 8, 8, 8,
-    spacig := (/15 ,8  ,8  /); 1, 1, 1, 1,
+    maxlvl := (/320,160,160/); 8, 8, 8, 8,
+    spacig := (/20 ,10 ,10 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.3) then 
     var_m = var_m/10000

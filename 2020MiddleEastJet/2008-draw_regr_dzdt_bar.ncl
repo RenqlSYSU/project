@@ -12,7 +12,8 @@
 begin
 lev  = (/925,850,500,200,100/)
 nl = 3
-ave_option = 2
+ave_option = 2 ;1=percentage ;0=area average wind tendency
+space_corr = True ;if true, calc pattern correlation
 
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
@@ -26,8 +27,6 @@ nyear = dimsizes(years)
 
 case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-filename1 = path + "data/" + case + "_DJF_dzdt_in-year.nc"
-filename2 = path + "data/" + case + "_DJF_dzdt_in-year.nc"
 fig_name = path + "fig/eof_regr_" + lev(nl) + "dzdt_bar"
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
@@ -44,6 +43,9 @@ nnv = 1 ;used to read dzdt induced by different forcing
 draw_var := (/"Qd","vort","Tadv","lQte","lFte","hQte","hFte","ureg"/)  ;,"advect","b3y" this is the variable used to draw, can used as center string
 select := (/0,1,2,1,3,0,2,0/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 nvar = dimsizes(draw_var)
+;fopt      = True
+;fopt@fout = path + "pattern_correlation.txt" 
+;fopt@row  = False 
 
 ;------------------EOF time series------------------------
 neval = 4
@@ -105,7 +107,25 @@ do na = 0, narea-1,1
     delete([/tval,df,lon_m,b/])
     printVarSummary(varr)
 
-    if(ave_option.eq.0) then 
+    if(space_corr) then 
+    ;The centred (uncentred) measures the similarity of two patterns after (without) removal of the global mean.
+    opt    := 0 ;0 = centered pattern correlation; 1 = uncentered pattern correlation.
+    weight := cos(u&lat*4.0*atan(1.0)/180.0) 
+    uprobm := conform(tofloat(varr), uprob,(/0,2,3/))
+    uregm  := conform(tofloat(varr), ureg ,(/0,2,3/))
+    uregm  := mask(uregm, uprobm.lt.siglvl, True)
+    varrm  := mask(varr , uprobm.lt.siglvl, True)
+    printVarSummary(uregm)
+    spcor  := pattern_cor(uregm,tofloat(varrm),weight,opt) 
+;    write_matrix(area(na),"A25",fopt)
+;    write_matrix(spcor,"f12.7",fopt)
+    print(area(na))
+    print(spcor)
+    delete([/uregm,spcor/])
+    delete([/varrm,uprobm/])
+    end if
+
+    if(ave_option.eq.0) then ;the area while ureg  is positive
     pureg = mask(ureg, (uprob.lt.siglvl).and.(ureg.gt.0.0), True)
     nureg = mask(ureg, (uprob.lt.siglvl).and.(ureg.lt.0.0), True)
     var(na,:,nvar-1) = wgt_areaave(pureg,cos(u&lat*4.0*atan(1.0)/180.0),1.0,0) \
@@ -121,7 +141,7 @@ do na = 0, narea-1,1
     printMinMax(var(:,:,0:(nvar-2)),0)
     end if
 
-    if(ave_option.gt.0) then
+    if(ave_option.gt.0) then ;percentage
     pureg = where((uprob.lt.siglvl).and.(ureg.gt.0.0), 1, 0)
     nureg = where((uprob.lt.siglvl).and.(ureg.lt.0.0),-1, 0)
     p_var(na,:,nvar-1) = dim_sum_n(pureg,(/1,2/))

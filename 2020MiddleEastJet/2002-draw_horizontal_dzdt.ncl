@@ -10,7 +10,7 @@ region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
 bar_share = False;True ;
-nl = 3 ;
+nl = 0 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 
@@ -27,7 +27,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -10,-10,1 
+do var_option = -16,-16,1 
 do nnv = 2,2,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
@@ -35,7 +35,7 @@ do nnv = 2,2,1
         unit     = (/"m"/)  ;this can be used as right string 
     end if
     if(var_option.eq.-16) then 
-        draw_var = (/"EGR4"/)  ;this is the variable used to draw, can used as center string
+        draw_var = (/"EGR"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
         unit     = (/"1/day"/)  ;this can be used as right string 
     end if
@@ -220,7 +220,7 @@ gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 ;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
 if(var_option.le.-16)
     filename = path + "data/" + case + "_" + months + draw_var(0) + "-year.nc"
-    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+    fig_name = path + "fig/1p3x3_horizontal_" + draw_var(0)
 end if
 if(var_option.eq.-15)
     filename = path + "data/" + case + "_" + months + "air-year.nc"
@@ -351,7 +351,7 @@ end if
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
 
-do nl = 1, 4, 1
+do nl = 0, 0, 1
 ;================================================================
 ;read data
 ;====================================================================

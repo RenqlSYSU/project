@@ -693,8 +693,8 @@ end if
     res@lbOrientation        = "Horizontal";"Vertical";
     res@pmLabelBarWidthF  = 0.7
     res@pmLabelBarHeightF = 0.08
-    res@pmLabelBarOrthogonalPosF     = 0.23 ;y direction
-    res@pmLabelBarParallelPosF       = 0.5
+    res@pmLabelBarOrthogonalPosF  = 0.23 ;y direction
+    res@pmLabelBarParallelPosF    = 0.5
     end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True

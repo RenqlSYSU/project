@@ -7,16 +7,16 @@ begin
 year_option = True ;calc yearly DJF 
 var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False;;control the draw of jet stream
-stream_option =  True ;False;
-egr_option = True ;False; Eady growth rate 
+stream_option =  False;True ;
+egr_option = False;True ; Eady growth rate 
 vect_option = False;True ;
-cont_option = False;True
+cont_option = True ;False;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 DJF_option = True ;False
-barshare = True
+barshare = False ;True
 barvert  = False
 
 if(DJF_option) then
@@ -26,7 +26,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -10,-10,1
+do var_option = -1,-1,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -108,8 +108,8 @@ end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"EEA","WNP","ENP","GB"
-lats = (/0  , 0 ,0  /);,  0  ,   0 , 0   , 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
-latn = (/90  , 90 , 90 /);60  , 60 , 60 , , 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
+lats = (/10  ,10  ,10  /);,  0  ,   0 , 0   , 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
+latn = (/60  , 60 , 60 /);60  , 60 , 60 , , 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
 lonl = (/ 0  ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
 lonr = (/70  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
 lat_spacing = 10
@@ -172,7 +172,8 @@ if(var_option.eq.5)
 end if
 
 pre_case   = (/"(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
-fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
 if(DJF_option) then
@@ -465,19 +466,6 @@ printVarSummary(var_m)
     res@gsnSpreadColorStart  = 9    ;This resource only takes effect if gsnSpreadColors is set to True 
     res@gsnSpreadColorEnd    = 0                ; end at color 200
    
-    ;res@lbLabelBarOn         = False   ; the label bar
-    res@lbOrientation        = "Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-1
-
-    res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0
-    res@pmLabelBarParallelPosF       = 0.5
-    res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.1
-
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -538,7 +526,7 @@ printVarSummary(var_m)
     ;res_egr@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_egr@cnLevels             = levels2       ; set contour interval
     res_egr@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_egr@cnLevelSpacingF      = 0.2        ; set contour interval
+    res_egr@cnLevelSpacingF      = 5        ; set contour interval
     res_egr@gsnPresHgtHeightLabelOn = False
     res_egr@tiYAxisOn = False
     res_egr@lbLabelBarOn     = False   ; the label bar
@@ -646,9 +634,9 @@ printVarSummary(var_m)
     res@pmLabelBarParallelPosF       = 0.5
     else
     res@lbOrientation        = "Horizontal";"Vertical";
-    res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.08
-    res@pmLabelBarOrthogonalPosF     = 0.23 ;y direction
+    res@pmLabelBarWidthF  = 0.8
+    res@pmLabelBarHeightF = 0.12
+    res@pmLabelBarOrthogonalPosF     = 0.04 ;y direction
     res@pmLabelBarParallelPosF       = 0.5
     end if
     resp@gsnPanelLabelBar = False; True
@@ -744,17 +732,16 @@ do nv = 0, nvar-1,1
     if(var_option.ge.1) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nnv) + ")"
     else
-    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E MSF&uwnd&EGR"; + draw_var(nv) + " (" + unit(nv) + ")"
+    res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) + " (" + unit(nv) + ")" ;MSF&uwnd&EGR
     end if
     ;res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    ;plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
-    plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
-    print(max(var_m(na,nv,nt,:,:)))
-    print(min(var_m(na,nv,nt,:,:)))
+    plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
+    ;plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
+    printMinMax(var_m(na,nv,nt,:,:),True)
 
     if(jet_option) then 
     line(np) = gsn_csm_pres_hgt(wks,u_m(na,nt,:,:),res_line)
@@ -787,7 +774,7 @@ end do
 
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/narea,nvar/),resp)
-    gsn_panel(wks,plot,(/1,3/),resp)
+    gsn_panel(wks,plot,(/3,3/),resp)
 end do 
 end do 
 end

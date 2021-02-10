@@ -49,12 +49,12 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/850,500,200,100,10/)
-nl = 3
-nv = 3
+nl = 2
+nv = 12
 diff = True ;False;
 perc = False;True ;
 sig_option  = True ;False;if False, only the significant values are shaded 
-vect_option = True ;False;
+vect_option = False;True ;
 cont_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
@@ -99,7 +99,7 @@ pre_case   = (/"(a","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
+lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
 latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
 lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
 lonr = (/360,270,390,150,270,390,150,360,150/);220
@@ -670,19 +670,19 @@ end if
 end if
 
 if(nv.eq.12) 
-    minlvl = (/ 0 ,-7 ,-7 /)  ;omega*100
+    minlvl = (/ 0 ,-7 ,-7 /) ;U 
     maxlvl = (/ 75, 7 , 7 /)
     spacig = (/ 5 , 1 , 1 /)
 end if
 
 if(nv.eq.13) 
-    minlvl = (/-45 ,-3.5 ,-7 /)  ;omega*100
+    minlvl = (/-45 ,-3.5 ,-7 /) 
     maxlvl = (/ 30, 3.5 , 7 /)
     spacig = (/ 5 , 0.5 , 1 /)
 end if
 
 if(nv.eq.14) 
-    minlvl = (/1000,-14,-7 /)  ;omega*100
+    minlvl = (/1000,-14,-7 /)  
     maxlvl = (/1030, 14, 7 /)
     spacig = (/ 2  , 2 , 1 /)
 end if

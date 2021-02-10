@@ -48,8 +48,8 @@ latn =  90  ;60
 lonl =  0   ;20 
 lonr =  360 ;180
 ;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
-lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200/) ;hPa
-;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100,10/) ;hPa
+;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200/) ;hPa
+lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100,50,20, 10,5/) ;17levels hPa
 ;lev  = (/850,500,200/) ;v,
 
 ;==========================================================
@@ -72,8 +72,8 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 5,5,1; ,nvar-1 ,1 
-do nf = 0,1,1
+do nv = 0,3,1; ,nvar-1 ,1 
+do nf = 0,2,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

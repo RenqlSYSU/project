@@ -7,8 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-do case_option=2,2,1
+do case_option=1,2,1
 if(case_option.eq.0) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
@@ -48,13 +47,13 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
-lev = (/850,500,200,100,10/)
+lev = (/850,500,200,100,50, 20,10,5/)
 nl = 2
-nv = 12
+nv = 3
 diff = True ;False;
 perc = False;True ;
 sig_option  = True ;False;if False, only the significant values are shaded 
-vect_option = False;True ;
+vect_option = True ;False;
 cont_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
@@ -166,7 +165,7 @@ else
 end if
 
 wks = gsn_open_wks(fig_out,fig_name)
-;do nl = 0,4,1
+do nl = 0,7,1
 ;do nv = 5,5,1
 ;================================================================
 ;read data
@@ -517,9 +516,10 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
+    resp@gsnPaperOrientation = "landscape" ;"portrait"
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
-    resp@gsnPaperOrientation = "portrait"
+    ;resp@gsnPaperOrientation = "portrait"
     resp@gsnPanelLabelBar = True
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.8 ;0.05
@@ -536,7 +536,7 @@ end if
     res@pmLabelBarZone               = 0
     res@pmLabelBarOrthogonalPosF     = 0.01
     res@pmLabelBarParallelPosF       = 0.5
-    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    ;resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
     end if
     resp@lbLabelFontHeightF = 0.015 
@@ -544,12 +544,16 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+;lev = (/850,500,200,100,50, 20,10,5/)
 if(na.eq.0) then 
     vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/20,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/50,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
-                      (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
+                      (/50,10,10/), \  ;the level of 50 hpa    ctrl,nudg,diff
+                      (/50,10,10/), \  ;the level of 20 hpa    ctrl,nudg,diff
+                      (/50,10,10/), \  ;the level of 10 hpa    ctrl,nudg,diff
+                      (/50,10,10/)/)   ;the level of 5  hpa    ctrl,nudg,diff
 else
     vcref         = (/(/7 ,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/7 ,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
@@ -602,30 +606,46 @@ if(nv.eq.2)
 end if
 
 if(nv.eq.3) ;Z3
+;lev = (/850,500,200,100,50, 20,10,5/)
 if(nl.eq.0) then ;850 
     minlvl = (/1300,-35,-35/); -24,-24
     maxlvl = (/1525, 35, 35/);  24, 24
     spacig = (/ 15 , 5 , 5 /);   3,  3
 end if
-if(nl.eq.1) then  ;200
-    minlvl = (/10900,-70,-70/) 
-    maxlvl = (/12400, 70, 70/)
-    spacig = (/  100, 10, 10/) 
+if(nl.eq.1) then  ;500
+    minlvl = (/5100,-70,-70/) 
+    maxlvl = (/5850, 70, 70/)
+    spacig = (/  50, 10, 10/) 
 end if
 if(nl.eq.2) then  ;200
     minlvl = (/10900,-70,-70/) 
     maxlvl = (/12400, 70, 70/)
     spacig = (/  100, 10, 10/) 
 end if
-if(nl.eq.3) then  ;10
-    minlvl = (/10900,-70,-70/) 
-    maxlvl = (/12400, 70, 70/)
+if(nl.eq.3) then  ;100
+    minlvl = (/15100,-70,-70/) 
+    maxlvl = (/16600, 70, 70/)
     spacig = (/  100, 10, 10/) 
 end if
-if(nl.eq.4) then  ;10
-    minlvl = (/10900,-70,-70/) 
-    maxlvl = (/12400, 70, 70/)
+if(nl.eq.4) then  ;50
+    minlvl = (/19100,-70,-70/) 
+    maxlvl = (/20600, 70, 70/)
     spacig = (/  100, 10, 10/) 
+end if
+if(nl.eq.5) then  ;20
+    minlvl = (/24000,-70,-70/) 
+    maxlvl = (/27000, 70, 70/)
+    spacig = (/  200, 10, 10/) 
+end if
+if(nl.eq.6) then  ;10
+    minlvl = (/27900,-70,-70/) 
+    maxlvl = (/30900, 70, 70/)
+    spacig = (/  200, 10, 10/) 
+end if
+if(nl.eq.7) then  ;5
+    minlvl = (/32000,-70,-70/) 
+    maxlvl = (/35750, 70, 70/)
+    spacig = (/  250, 10, 10/) 
 end if
 end if
 
@@ -693,7 +713,7 @@ if(nv.eq.15) then ;precs
     spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
-do nc = 0,1,1
+do nc = 1,1,1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.gt.0).or.nv.eq.2) then
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -809,7 +829,7 @@ end if
 ;    gsn_panel(wks,plot,(/2,1/),resp)
     gsn_panel(wks,plot,(/2,2/),resp)
 end do
-;end do
+end do
 end do
 end
 

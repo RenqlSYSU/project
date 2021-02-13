@@ -171,9 +171,9 @@ if(var_option.eq.5)
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
-pre_case   = (/"(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
-fig_out    ="eps";"x11"
-;fig_out    ="pdf";"x11"
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
+;fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
 if(DJF_option) then

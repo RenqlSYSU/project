@@ -10,7 +10,7 @@ region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
 bar_share = False;True ;
-nl = 0 ;
+nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 
@@ -27,8 +27,8 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -16,-16,1 
-do nnv = 2,2,1
+do var_option = 2,2,1 
+do nnv = 1,1,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -118,8 +118,8 @@ do nnv = 2,2,1
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.2) then 
-        draw_var := (/"Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
-        select := (/1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        draw_var := (/"Qte_low","Fte_low","Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
+        select := (/1,3,0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.3) then 
         draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string

@@ -9,7 +9,7 @@ jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
-bar_share = False;True ;
+bar_share = True ;False;
 nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
@@ -118,8 +118,8 @@ do nnv = 1,1,1
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.2) then 
-        draw_var := (/"Qte_low","Fte_low","Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
-        select := (/1,3,0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        draw_var := (/"Qte_hgh","Fte_hgh","Qte_low","Fte_low"/)  ;this is the variable used to draw, can used as center string
+        select := (/0,2,1,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.3) then 
         draw_var := (/"Qte_hgh","Fte_hgh"/)  ;this is the variable used to draw, can used as center string
@@ -204,7 +204,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA","TP"/)
 lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
+latn = (/ 60 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -351,7 +351,7 @@ end if
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
 
-do nl = 0, 0, 1
+do nl = 4,4, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -363,7 +363,7 @@ if(jet_option) then
     else
     u_m = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if
-    u_m = mask(u_m, u_m.lt.10 , False) 
+    u_m = mask(u_m, u_m.lt.25 , False) 
     printVarSummary(u_m)
 end if
 
@@ -910,9 +910,9 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.ge.1.and.var_option.le.6) then
-    minlvl = (/-3.5,-70,-16,-24/);-35,70
-    maxlvl = (/ 3.5, 70, 16, 24/); 35,70
-    spacig = (/ 0.5, 10,  2,  3/);  5,10
+    minlvl = (/-3.5,-35,-16,-24/);-35,70
+    maxlvl = (/ 3.5, 35, 16, 24/); 35,70
+    spacig = (/ 0.5, 5 ,  2,  3/);  5,10
 end if
 
 if(var_option.ge.13.and.var_option.lt.20) then ;dbdt
@@ -1009,7 +1009,7 @@ do nv = 0,nvar-1,1
     overlay(plot(np),line(np))
     end if
 end do 
-    gsn_panel(wks,plot,(/3,1/),resp)
+    gsn_panel(wks,plot,(/4,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title

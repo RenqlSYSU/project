@@ -8,13 +8,15 @@ year_option = True ;calc yearly DJF
 jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
-cont_option = False;True ;
+cont_option = True ;False;
 bar_share = True ;False;
 nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
+pre_case   = (/"(a","(a","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
+fig_out    = "pdf";"x11""eps";
 
-lev    = (/925,500,300,250,200/) 
+lev    = (/850,500,300,250,200/) 
 if(DJF_option) then
 months  = (/"DJF_"/)
 months2 = (/"DJF"/)
@@ -27,7 +29,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = 2,2,1 
+do var_option = -5,-5,1 
 do nnv = 1,1,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
@@ -74,12 +76,13 @@ do nnv = 1,1,1
         draw_var := (/"T3x","Tadvect"/)  ;Tadvect
         var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
         unit     := (/"K/day","k/day"/)  ;this can be used as right string 
+        select := (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.-5) then 
         draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
         var_name := (/"b1x","b1y","b3x"/)  ;,"b3y" use to read variables
         unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
-        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        select := (/2,3,0/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.-4) then 
         draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -209,8 +212,8 @@ lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
 latx = (/ lats, lats, latn, latn, lats /)
-lat_spacing = 15
-lon_spacing = 20
+lat_spacing = 20
+lon_spacing = 30
 density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
@@ -238,8 +241,8 @@ if(var_option.eq.-10)
 end if
 if(var_option.eq.-5.or.var_option.eq.-6)
     filename = path + "data/" + case + "_"+months+"forc_in2-year.nc"
-    contname = path + "data/" + case + "_"+months+"dzdt_in2-year.nc"
-    fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
+    contname = path + "data/" + case + "_"+months+"dzdt_in3-year.nc"
+    fig_name = path + "fig/1p3x3_horizontal_" + lev(nl) + var_name(0)
 end if
 if(var_option.eq.-4.or.var_option.eq.-12)
     filename = path + "data/" + case + "_"+months+"forc_in-year.nc"
@@ -301,9 +304,6 @@ if(var_option.eq.22)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(0)
 end if
 
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    ="pdf";"x11"
-
 f = addfile(gtopfile,"r")
 phis   = short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
@@ -351,7 +351,7 @@ end if
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
 
-do nl = 4,4, 1
+;do nl = 4,4, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -428,6 +428,9 @@ else
     fc = addfile(contname,"r")
     if(var_option.ge.-6) then 
     var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+    var_c(nvar-1,:,:,:) = dim_sum_n_Wrap(var_c(:,:,:,:),0)
+    var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(:,:,:,:),0)
+    ;var_c = var_c*10^3
     var_c = var_c*10^6
     else
     if(DJF_option) then
@@ -440,6 +443,7 @@ else
     end if 
 end if
 end if
+
 if(var_option.ge.1.and.var_option.le.5)
 f = addfile(filename,"r")
     if(DJF_option) then
@@ -478,7 +482,7 @@ var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):l
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 if(cont_option) then 
     fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
-    var_c(1,0,:,:) = var_c(1,0,:,:) + dim_avg_n_Wrap(fbv->dudt(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    var_c(1,0,:,:) = var_c(1,0,:,:) + dim_avg_n_Wrap(fbv->dudt(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)*10^6
     var_c(2,:,:,:) = dim_sum_n_Wrap(var_c(0:1,:,:,:),0)
 end if
 end if
@@ -511,7 +515,6 @@ if(divg_option) then
 else
     if(var_option.eq.22) then ;(1.0/1000000.0)*
     var_m(2,0,0,:,:) = dim_avg_n_Wrap(f->$var_name(2)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-    else
     var_m(2,:,0,:,:) = -100.0*dim_avg_n_Wrap(f->$var_name(2)$(:,:,{925},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     minlvl := (/-21,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
@@ -779,7 +782,7 @@ end if
     ;res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_cont@cnLevels             = levels       ; set contour interval
     res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_cont@cnLevelSpacingF       = 20        ; set contour interval
+    res_cont@cnLevelSpacingF      = 50        ; set contour interval
     res_cont@lbLabelBarOn     = False   ; the label bar
     res_cont@gsnCenterString  = ""
     res_cont@gsnLeftString    = " "
@@ -887,9 +890,9 @@ if(var_option.eq.-6) then
     spacig := (/ 1, 1, 1/); 1, 1, 1, 1,
 end if
 if(var_option.eq.-4.or.var_option.eq.-5) then 
-    minlvl := (/-14,-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl := (/ 14, 14, 14, 14/); 8, 8, 8, 8,
-    spacig := (/ 2 , 2 , 2 , 2 /); 1, 1, 1, 1,
+    minlvl := (/-35,-35,-35,-35/);-14,-14,-14,-14
+    maxlvl := (/ 35, 35, 35, 35/); 14, 14, 14, 14
+    spacig := (/ 5 , 5 , 5 , 5 /); 2 , 2 , 2 , 2 
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
     minlvl := (/-2.1,-14/);-8,-8,-8,-8,
@@ -910,9 +913,9 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.ge.1.and.var_option.le.6) then
-    minlvl = (/-3.5,-35,-16,-24/);-35,70
-    maxlvl = (/ 3.5, 35, 16, 24/); 35,70
-    spacig = (/ 0.5, 5 ,  2,  3/);  5,10
+    minlvl = (/-3.5,-70,-16,-24/);-35,35
+    maxlvl = (/ 3.5, 70, 16, 24/); 35,35
+    spacig = (/ 0.5, 10,  2,  3/);  5,5 
 end if
 
 if(var_option.ge.13.and.var_option.lt.20) then ;dbdt
@@ -1018,6 +1021,6 @@ end do
 end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)
 end do 
-end do 
+;end do 
 end
 

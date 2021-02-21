@@ -7,13 +7,13 @@ begin
 year_option = True ;calc yearly DJF 
 jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
-vect_option = False;True ;
-cont_option = True ;False;
+vect_option = True ;False;
+cont_option = False;True ;
 bar_share = True ;False;
 nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
-pre_case   = (/"(a","(a","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    = "pdf";"x11""eps";
 
 lev    = (/850,500,300,250,200/) 
@@ -29,7 +29,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -5,-5,1 
+do var_option = -12,-12,1 
 do nnv = 1,1,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
@@ -715,7 +715,7 @@ end if
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
-    resvc@vcMinDistanceF             = 0.012
+    resvc@vcMinDistanceF             = 0.015
     resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
@@ -946,7 +946,7 @@ do nv = 0,nvar-1,1
     end if
     if(var_option.gt.0.and.var_option.lt.20) then 
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + draw_var(nv)
-    res@gsnRightString  = var_name(nnv) + " (" + unit(nnv) + ")"
+    res@gsnRightString  = months2(nt) + " " + var_name(nnv) + " (" + unit(nnv) + ")"
     end if
     if(var_option.le.0) then
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
@@ -1012,7 +1012,7 @@ do nv = 0,nvar-1,1
     overlay(plot(np),line(np))
     end if
 end do 
-    gsn_panel(wks,plot,(/4,1/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title

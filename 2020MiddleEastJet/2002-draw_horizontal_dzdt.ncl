@@ -73,10 +73,10 @@ do nnv = 1,1,1
         unit     = (/"10~S~4~N~J","10~S~4~N~J","m~S~2~N~s~S~-2~N~","10~S~4~N~m~S~4~N~s~S~-4~N~"/)  ;this can be used as right string 
     end if
     if(var_option.eq.-6) then 
-        draw_var := (/"T3x","Tadvect"/)  ;Tadvect
-        var_name := (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
-        unit     := (/"K/day","k/day"/)  ;this can be used as right string 
-        select := (/0,1/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        draw_var := (/"T3x","T3y","Tadvect"/)  ;Tadvect
+        var_name := (/"t3x","t3y","b3y"/)  ;this is the variable used to draw, can used as center string
+        unit     := (/"K/day","k/day","k/day"/)  ;this can be used as right string 
+        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.-5) then 
         draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
@@ -351,7 +351,7 @@ end if
     ;gsn_define_colormap(wks,"GMT_polar") 
     ;blue and red, has 20 colors, 2-11 is bule, 12-21 is red
 
-;do nl = 4,4, 1
+;do nl = 0,4, 1
 ;================================================================
 ;read data
 ;====================================================================
@@ -424,12 +424,12 @@ else
     var_m(nv,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     end do
+    ;var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
     if(cont_option) then 
     fc = addfile(contname,"r")
     if(var_option.ge.-6) then 
     var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
     var_c(nvar-1,:,:,:) = dim_sum_n_Wrap(var_c(:,:,:,:),0)
-    var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(:,:,:,:),0)
     ;var_c = var_c*10^3
     var_c = var_c*10^6
     else
@@ -544,7 +544,10 @@ if(var_option.le.-13.and.var_option.ge.-14) then
     var_m = var_m*100000
 end if
 
-if(var_option.eq.-12) then 
+if(var_option.eq.-12) then
+    pi = atan(1.0)*4
+    lat  = (var_m&lat)*pi/180.0
+    var_m = var_m + conform(var_m,2*(2*pi/24.0/3600.0)*sin(lat),2)
     var_m = var_m*1000000
 end if
 
@@ -826,7 +829,7 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(var_option.le.-6) then 
-    vcref = (/10,10,10,20,40/) ;(/925,850,700,500,200/)
+    vcref = (/10,20,25,30,40/) ;(/925,850,700,500,200/)
 end if
 
 if(var_option.eq.-17) then ;Eady growth rate
@@ -842,24 +845,29 @@ if(var_option.eq.-16) then ;Eady growth rate
 end if
 
 if(var_option.eq.-15) then ;T ;(/925,850,700,500,250/)
-if(nl.eq.1) then 
+if(nl.eq.0) then ;850 
     minlvl := (/-16/);
     maxlvl := (/ 16/);
     spacig := (/ 2 /);
 end if
-if(nl.eq.2) then 
-    minlvl := (/-16/);
-    maxlvl := (/ 16/);
-    spacig := (/ 2 /);
-end if
-if(nl.eq.3) then  ;500
-    minlvl := (/-21/);
-    maxlvl := (/-5 /);
+if(nl.eq.1) then ;500 
+    minlvl := (/-26/);
+    maxlvl := (/-10/);
     spacig := (/ 1 /);
 end if
-if(nl.eq.4) then ;300
-    minlvl := (/-55/);-64
-    maxlvl := (/-39/);-48
+if(nl.eq.2) then ;300
+    minlvl := (/-51/);
+    maxlvl := (/-35/);
+    spacig := (/ 1 /);
+end if
+if(nl.eq.3) then  ;250
+    minlvl := (/-58/);
+    maxlvl := (/-42/);
+    spacig := (/ 1 /);
+end if
+if(nl.eq.4) then ;200
+    minlvl := (/-60/);-64
+    maxlvl := (/-52/);-48
     spacig := (/ 1 /); 1
 end if
 end if
@@ -1012,11 +1020,11 @@ do nv = 0,nvar-1,1
     overlay(plot(np),line(np))
     end if
 end do 
-    gsn_panel(wks,plot,(/1,1/),resp)
+;    gsn_panel(wks,plot,(/3,1/),resp)
 end do 
 
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/5,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)

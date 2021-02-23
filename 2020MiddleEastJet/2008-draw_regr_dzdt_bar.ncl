@@ -12,7 +12,7 @@
 begin
 lev  = (/925,850,500,200,100/)
 nl = 3
-ave_option = 2 ;1=percentage ;0=area average wind tendency
+ave_option = 2 ;1=percentage ;0=area average wind tendency 
 space_corr = True ;if true, calc pattern correlation
 
 area = (/"ME","EA","NA"/);,"GB"
@@ -43,9 +43,6 @@ nnv = 1 ;used to read dzdt induced by different forcing
 draw_var := (/"Qd","vort","Tadv","lQte","lFte","hQte","hFte","ureg"/)  ;,"advect","b3y" this is the variable used to draw, can used as center string
 select := (/0,1,2,1,3,0,2,0/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 nvar = dimsizes(draw_var)
-;fopt      = True
-;fopt@fout = path + "pattern_correlation.txt" 
-;fopt@row  = False 
 
 ;------------------EOF time series------------------------
 neval = 4
@@ -109,7 +106,7 @@ do na = 0, narea-1,1
 
     if(space_corr) then 
     ;The centred (uncentred) measures the similarity of two patterns after (without) removal of the global mean.
-    opt    := 0 ;0 = centered pattern correlation; 1 = uncentered pattern correlation.
+    opt    := 1 ;0 = centered pattern correlation; 1 = uncentered pattern correlation.
     weight := cos(u&lat*4.0*atan(1.0)/180.0) 
     uprobm := conform(tofloat(varr), uprob,(/0,2,3/))
     uregm  := conform(tofloat(varr), ureg ,(/0,2,3/))
@@ -117,8 +114,6 @@ do na = 0, narea-1,1
     varrm  := mask(varr , uprobm.lt.siglvl, True)
     printVarSummary(uregm)
     spcor  := pattern_cor(uregm,tofloat(varrm),weight,opt) 
-;    write_matrix(area(na),"A25",fopt)
-;    write_matrix(spcor,"f12.7",fopt)
     print(area(na))
     print(spcor)
     delete([/uregm,spcor/])

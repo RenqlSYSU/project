@@ -32,6 +32,7 @@ draw_var := (/"Qd","vort","Tadv","lQte","lFte","hQte","hFte","ureg"/)  ;,"advect
 select := (/0,1,2,1,3,0,2,0/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 nvar = dimsizes(draw_var)
 
+pi = atan(1.0)*4
 ;------------------EOF time series------------------------
 neval = 4
 ts    = new((/narea,neval,nyear/),float)
@@ -91,12 +92,12 @@ do na = 0, narea-1,1
 
     ;The centred (uncentred) measures the similarity of two patterns after (without) removal of the global mean.
     opt    := 1 ;0 = centered pattern correlation; 1 = uncentered pattern correlation.
-    weight := conform(u(0,:,:,:), cos(u&lat*4.0*atan(1.0)/180.0),(/1/)) 
+    weight := conform(u(0,:,:,:), cos(u&lat*pi/180.0),(/1/)) 
     uprobm := conform(tofloat(varr), uprob,(/0,2,3,4/))
     uregm  := conform(tofloat(varr), ureg ,(/0,2,3,4/))
-    ;uregm  := mask(uregm, uprobm.lt.siglvl, True)
-    ;varrm  := mask(varr , uprobm.lt.siglvl, True)
     varrm  := varr
+    uregm  := mask(uregm, uprobm.lt.siglvl, True)
+    varrm  := mask(varr , uprobm.lt.siglvl, True)
     printVarSummary(uregm)
     uregm  := reshape(uregm ,(/neval,nvar-1,nlev*nlat,nlon/))
     varrm  := reshape(varrm ,(/neval,nvar-1,nlev*nlat,nlon/))

@@ -46,7 +46,7 @@ filename   = path + "/data/eof_u_6kinds-" + area + ".nc"
 ;filename   = path + "/data/eof_u_6kinds-" + months2(nt) + "_" + area + ".nc"
 fig_name   = path + "/fig/eof_regression_ver-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
-pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
+pre_case   = (/"(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/) ;"(a","(b","(c", "(d","(e","(f", 
 plot   = new((/18/),graphic)
 line   = new((/18/),graphic)
 sigl   = new((/18/),graphic)
@@ -170,9 +170,9 @@ sigl   = new((/18/),graphic)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation    = "Vertical" ;"Horizontal"
-    resp@pmLabelBarWidthF  = 0.06
-    resp@pmLabelBarHeightF = 0.8
+    resp@lbOrientation    = "Horizontal"
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.06
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -185,6 +185,7 @@ if(nv.eq.0) then
     spacig = (/ 0.5 /)
 end if
 
+do ne = 0, 1, 1;neval-2, 1
 do na = 0, narea-1,1
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
@@ -198,7 +199,6 @@ eof2 := f->eof2
 eof3 := f->eof3
 eof4 := f->eof4
 eof5 := f->eof5
-do ne = 0, neval-1, 1
     sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
     sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
     sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)
@@ -217,7 +217,6 @@ do ne = 0, neval-1, 1
     pcvar(3,:) = eof3@pcvar
     pcvar(4,:) = eof4@pcvar
     pcvar(5,:) = eof5@pcvar
-end do
 ts = ts/conform(ts,sqrt(eval),(/0,1/))
 subtitle_color = where(sig,"red","black") 
 
@@ -265,9 +264,10 @@ print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 0, 1
-do ne = 0, 1, 1;neval-2, 1
+;do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
-    np = na*(neval-2) + ne 
+    np = ne*narea + na 
+    ;np = na*(neval-2) + ne 
     res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
     res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
@@ -291,6 +291,6 @@ end do
     ;resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
     ;gsn_panel(wks,plot,(/6,3/),resp)
 end do ;area 
-    gsn_panel(wks,plot,(/3,2/),resp)
+    gsn_panel(wks,plot,(/2,3/),resp)
 end
 

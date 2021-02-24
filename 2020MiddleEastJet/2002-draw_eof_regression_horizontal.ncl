@@ -97,6 +97,7 @@ sigl   = new((/18/),graphic)
     ;res@pmLabelBarWidthF  = 0.7
     ;res@pmLabelBarHeightF = 0.1
 
+do ne = 0, 1, 1;neval-2, 1
 do na = 0, narea-1,1
 ;-------set the attribute of the map-------------------
     res@mpCenterLonF     = 180.
@@ -126,6 +127,7 @@ do na = 0, narea-1,1
     levels = new((/10/),integer)
     levels(0) = 0
     levels(1:9) = ispan(5,85,10)
+;    levels(0:9) = ispan(5,85,10)
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     res_line@lbLabelBarOn     = False   ; the label bar
@@ -160,9 +162,9 @@ do na = 0, narea-1,1
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation    = "Vertical" ;"Horizontal"
-    resp@pmLabelBarWidthF  = 0.06
-    resp@pmLabelBarHeightF = 0.8
+    resp@lbOrientation    = "Horizontal"
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.06
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -232,9 +234,10 @@ print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 0, 1
-do ne = 0, 1, 1;neval-2, 1
+;do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
-    np = na*(neval-2) + ne 
+    np = ne*narea + na 
+    ;np = na*(neval-2) + ne 
     res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
     ;res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
@@ -259,6 +262,6 @@ end do
 ;    resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
 ;    gsn_panel(wks,plot,(/6,3/),resp)
 end do ;area 
-    gsn_panel(wks,plot,(/3,2/),resp)
+    gsn_panel(wks,plot,(/2,3/),resp)
 end
 

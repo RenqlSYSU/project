@@ -189,6 +189,12 @@ do ne = 0, 1, 1;neval-2, 1
 do na = 0, narea-1,1
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
+if(na.eq.1) then
+    ts(0,0,:)=-ts(0,0,:)
+end if
+if(na.eq.2) then
+    ts(0,1,:)=-ts(0,1,:)
+end if
 nyear = dimsizes(ts&year)
 sig   = new((/6,neval/),logical)
 eval  = new((/6,neval/),float)

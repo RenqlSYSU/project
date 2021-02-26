@@ -13,7 +13,7 @@ nl = 4 ;(/925,850,700,500,200/)
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
 case = (/"NCEP2","ERA-Interim"/)
-nc = 0
+nc = 1
 
 neval = 3
 area  = (/"ME","EA","NA"/);,"GB"

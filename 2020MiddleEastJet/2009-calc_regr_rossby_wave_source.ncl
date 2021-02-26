@@ -83,7 +83,7 @@ coslat = conform(ano_ud, cos(lat), ilat+1)
 term1 = (f0+clm_vort)*(center_finite_diff_n(ano_ud,lon,loncyc,opt,ilon+1) \
         + center_finite_diff_n(ano_vd*coslat,lat,cyclic,opt,ilat+1))/(a*coslat) 
 term1 = (ano_ud*center_finite_diff_n(f0+clm_vort,lon,loncyc,opt,ilon+1) \
-        + ano_vd*center_finite_diff_n(f0+clm_vort*coslat,lat,cyclic,opt,ilat+1))/(a*coslat) + term1
+        + ano_vd*center_finite_diff_n((f0+clm_vort)*coslat,lat,cyclic,opt,ilat+1))/(a*coslat) + term1
 delete([/f0, clm_vort, ano_vd, ano_ud/])
 
 ano_vort = regCoef_n(ts, vort,2, iyear) ;narea,neval,nlev,nlat,nlon
@@ -91,12 +91,12 @@ clm_ud   = conform(ano_vort,dim_avg_n(ud,iyear),(/ilev+1,ilat+1,ilon+1/))
 clm_vd   = conform(ano_vort,dim_avg_n(vd,iyear),(/ilev+1,ilat+1,ilon+1/))
 delete([/vd,vort/])
 
-term2 = ano_vort*(center_finite_diff_n(clm_ud,lon,loncyc,opt,ilon+1) \
+term1 = ano_vort*(center_finite_diff_n(clm_ud,lon,loncyc,opt,ilon+1) \
         + center_finite_diff_n(clm_vd*coslat,lat,cyclic,opt,ilat+1))/(a*coslat)  + term1
-term4 = (clm_ud*center_finite_diff_n(ano_vort,lon,loncyc,opt,ilon+1) \
+term1 = (clm_ud*center_finite_diff_n(ano_vort,lon,loncyc,opt,ilon+1) \
         + clm_vd*center_finite_diff_n(ano_vort*coslat,lat,cyclic,opt,ilat+1))/(a*coslat) + term1
 delete([/ano_vort, clm_vd, clm_ud, coslat/])
-rws   = term1
+rws   = -term1
 delete(term1)
 
 rws@long_name = "Rossby wave source"

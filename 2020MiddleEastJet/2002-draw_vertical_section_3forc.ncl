@@ -7,10 +7,10 @@ begin
 year_option = True ;calc yearly DJF 
 var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False;;control the draw of jet stream
-stream_option =  False;True ;
-egr_option = False;True ; Eady growth rate 
+stream_option =  True ;False;
+egr_option = True ;False; Eady growth rate 
 vect_option = False;True ;
-cont_option = True ;False;
+cont_option = False;True ;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
@@ -26,7 +26,7 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -1,-1,1
+do var_option = -10,-10,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -108,10 +108,10 @@ end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"EEA","WNP","ENP","GB"
-lats = (/10  ,10  ,10  /);,  0  ,   0 , 0   , 10  ;-90 ,-90 ,-90 ,-90  10 , 10 , 10     
-latn = (/60  , 60 , 60 /);60  , 60 , 60 , , 60  ;90  , 90 , 90 , 90  60 , 60 , 60    
-lonl = (/ 0  ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
-lonr = (/70  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
+lats = (/ 0  , 0  , 0  /);10  ,10  ,10 
+latn = (/90  ,90  ,90  /);60  ,60  ,60
+lonl = (/20  ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
+lonr = (/60  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
@@ -526,7 +526,11 @@ printVarSummary(var_m)
     ;res_egr@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_egr@cnLevels             = levels2       ; set contour interval
     res_egr@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    if(egr_option) then 
+    res_egr@cnLevelSpacingF      = 0.2        ; set contour interval
+    else
     res_egr@cnLevelSpacingF      = 5        ; set contour interval
+    end if
     res_egr@gsnPresHgtHeightLabelOn = False
     res_egr@tiYAxisOn = False
     res_egr@lbLabelBarOn     = False   ; the label bar
@@ -739,8 +743,11 @@ do nv = 0, nvar-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
+    if(var_option.eq.-10) then 
+    plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
+    else
     plot(np) = gsn_csm_pres_hgt(wks,var_m(na,nv,nt,:,:),res)
-    ;plot(np) = gsn_csm_pres_hgt(wks,msf_m(na,nt,:,:),res)
+    end if
     printMinMax(var_m(na,nv,nt,:,:),True)
 
     if(jet_option) then 

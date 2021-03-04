@@ -17,8 +17,8 @@ nv = 0
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
 neval = 4
-filter = False;True
-DJF_option = False ;True;
+filter = True;False;
+DJF_option = True;;
 
 if(DJF_option) then
 months  = (/"DJF_"/)
@@ -34,13 +34,13 @@ case   = "ERA-Interim"
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 40 , 45 , 50 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 20 ,110 , 250/);, 0   ;30 ;20
-lonr = (/ 60 ,180 , 320/);, 360 ;150;220
+lonl = (/ 20 ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 60 ,175 , 320/);, 360 ;150;220
 narea = dimsizes(area)
 
 path     = "/home/ys17-19/renql/project/2020MiddleEastJet"
 filein   = path + "/data/" + case + "_" + months + var_name(nv) + "-year.nc"
-fileout  = path + "/data/eof_u_6kinds-" + months2(nt) + "_" + area + ".nc"
+fileout  = path + "/data/eof2_u_6kinds-" + months2(nt) + "_" + area + ".nc"
 
 f2 = addfile(path + "/data/" + case + "_" + months + "ps-year.nc","r")
 f  = addfile(filein,"r")
@@ -69,6 +69,7 @@ nlon = dimsizes(vars&lon)
 remove_mean = True
 return_info = True
 var := dtrend_msg_n(years,vars,remove_mean,return_info,0)
+;var := vars
 
 if(filter) then
 ca = 9.0 ;year

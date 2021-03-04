@@ -30,8 +30,8 @@ siglvl = 0.05
 years = ispan(1979,2015,1)
 
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
-filename   = path + "/data/eof_u_6kinds-" + area + ".nc"
-fig_name   = path + "/fig/eof_regression_hor-" + draw_var(nv)
+filename   = path + "/data/eof2_u_6kinds-DJF_" + area + ".nc"
+fig_name   = path + "/fig/eof2_regression_hor-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
 plot   = new((/18/),graphic)
@@ -179,12 +179,12 @@ end if
 
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
-if(na.eq.1) then
-    ts(0,0,:)=-ts(0,0,:)
-end if
-if(na.eq.2) then
-    ts(0,1,:)=-ts(0,1,:)
-end if
+;if(na.eq.1) then
+;    ts(0,0,:)=-ts(0,0,:)
+;end if
+;if(na.eq.2) then
+;    ts(0,1,:)=-ts(0,1,:)
+;end if
 nyear = dimsizes(ts&year)
 sig   = new((/6,neval/),logical)
 eval  = new((/6,neval/),float)

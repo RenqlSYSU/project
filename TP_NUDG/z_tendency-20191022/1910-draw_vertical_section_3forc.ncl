@@ -6,24 +6,24 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = -1 ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = 1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = True ;False;
-barvert  = False;True
+barvert  = True ;False;
 jet_option    = True  ;20191205, control the draw of jet stream
-stream_option = False;True ; 
+stream_option = False ;True ; 
 fnc  = 1    ;chose which case to draw
-diff = False;True ;whether draw the difference ;False;
+diff = False;True ;False;whether draw the difference ;False;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    = "pdf";"pdf";"x11"
 
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
 ;months  = (/"JF","MJ","JA"/);,"MA"
-select_time = (/0,1,2,3/)
-select_time_u = (/0,1,2,3/)
-months  = (/"JF","MA","MJ","JA"/)
+select_time = (/2,3/)
+select_time_u = (/2,3/)
+months  = (/"MJ","JA"/)
 ;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
@@ -35,7 +35,7 @@ lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,20
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa 13levels
 
-do na = 2,2,1 ;"TP","EA","UP","NH","CA","NP"
+do na = 1,1,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
@@ -242,11 +242,11 @@ var_m := new((/ncase,nvar,nmonth,nlev,nlat,nlon/),double)
 var_u := new((/ncase,nmonth,nlev2,nlat/),double)
 
 ;the number of the panel plot
-    plot     = new((/nvar*nmonth/),graphic)
-    line     = new((/nvar*nmonth/),graphic)
-    core     = new((/nvar*nmonth/),graphic)
-    msfp     = new((/nvar*nmonth/),graphic)
-    topo   = new((/ncase*nmonth/),graphic)
+    plot   = new((/nvar*nmonth/),graphic)
+    line   = new((/nvar*nmonth/),graphic)
+    core   = new((/nvar*nmonth/),graphic)
+    msfp   = new((/nvar*nmonth/),graphic)
+    topo   = new((/nvar*nmonth/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -697,11 +697,11 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nm = 0, nmonth-1,1
 do nv = 0, 2,1;nvar-1,1
+do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
-    ;np = nv*nmonth + nm ;1 var, 2 month
-    np = nm*3 + nv ;1 var, 2 month
+    np = nv*nmonth + nm ;1 var, 2 month
+    ;np = nm*3 + nv ;1 var, 2 month
     ;np = fnc*nvar+nv
     ;np = fnc*nmonth+nm
     ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
@@ -752,9 +752,9 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    ;gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
+    gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
     ;gsn_panel(wks,plot,(/1,3/),resp)
-    gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
+    ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
 end do 
 end do 
 end

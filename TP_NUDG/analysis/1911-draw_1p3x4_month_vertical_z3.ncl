@@ -36,19 +36,19 @@ draw_varname = (/"hgt","dzdt","Ahgt","U","T", "-dTdy","dudt","4q1","V","EKE"/)  
 lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = lev  
-nv = 9
+nv = 3
 siglvl = 0.05
-diff = False;True ;
+diff = True ;False;
 sig_option = False;True ;
-jet_option = False;True ;
+jet_option = True ;False;
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 1
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(2,3,1)
+imonth = ispan(0,3,1)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
@@ -65,7 +65,7 @@ if(var_option.eq.2) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
-imonth = ispan(0,3,1);(/4,5,6,7/)
+imonth = ispan(2,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
@@ -110,15 +110,15 @@ nmonth = dimsizes(imonth)
     ;has 64 colors blue green yellow,red
 
 ;the number of the panel plot
-    plot   = new((/ncase*nmonth/),graphic)
-    sig    = new((/ncase*nmonth/),graphic)
-    topo   = new((/ncase*nmonth/),graphic)
-    line   = new((/ncase*nmonth/),graphic)
-    core   = new((/ncase*nmonth/),graphic)
-    line2  = new((/ncase*nmonth/),graphic)
-    core2  = new((/ncase*nmonth/),graphic)
+    plot   = new((/6*nmonth/),graphic)
+    sig    = new((/6*nmonth/),graphic)
+    topo   = new((/6*nmonth/),graphic)
+    line   = new((/6*nmonth/),graphic)
+    core   = new((/6*nmonth/),graphic)
+    line2  = new((/6*nmonth/),graphic)
+    core2  = new((/6*nmonth/),graphic)
 
-do na=0,1,1
+do na=0,2,1
 f = addfile(gtopfile,"r")
 phis   := f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
@@ -505,11 +505,11 @@ end if
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 if(nv.eq.7) then
 draw_varname2 = (/"QRL","QRS","DTCOND","DTV","total"/) 
-do nv2 = 0,4,1
 do nc = 0, ncase-1,1
+do nv2 = 0,4,1
 do nm = 0,nmonth-1,1
-        np = nm
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) 
+        np = nv2*nmonth + nm
+        res@gsnLeftString   = case2(nc) + " " + months(imonth(nm));pre_case(np) + ") " +  
         res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname2(nv2) + " (" + unit(nv) + ")"
         res@gsnSpreadColors       = False              ; turn of the full color map
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -528,13 +528,13 @@ do nm = 0,nmonth-1,1
         overlay(plot(np),line(np))
         end if
     end do 
-    gsn_panel(wks,plot,(/3,4/),resp)
-end do ;for the month 
+    end do ;for the month 
+    gsn_panel(wks,plot,(/5,4/),resp)
 end do ;for the month 
 
 else
 do nc = 1, ncase-1,1
-do nm = 0,0,1;nmonth-1,1
+do nm = 0,nmonth-1,1
 ;if((nc.gt.0).or.(nv.eq.1).or.(nv.eq.2).or.(nv.eq.3)) then
 ;    res@cnFillPalette = "BlueDarkRed18"
 ;   ;blue and red, has 18 colors,2-10 is blue
@@ -543,7 +543,7 @@ do nm = 0,0,1;nmonth-1,1
 ;   ;blue and yellow and red, has 17 colors,2-18,2 is white
 ;end if 
         ;np = nmonth*nc + nm
-        np = na
+        np = na*nmonth + nm
     ;    np = ncase*nm + nc
         res@gsnLeftString   = pre_case(np) + ") " + months(imonth(nm)); + case2(nc) + " " 
         res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_varname(nv) ;+ " (" + unit(nv) + ")"
@@ -578,8 +578,9 @@ end do ;for the month
     ;gsn_panel(wks,plot,(/ncase,nmonth/),resp)
     ;gsn_panel(wks,plot,(/1,nmonth/),resp)
 ;    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/1,2/),resp)
 end if
 end do ;for the month 
-    gsn_panel(wks,plot,(/1,2/),resp)
+    gsn_panel(wks,plot,(/3,2/),resp)
 end
 

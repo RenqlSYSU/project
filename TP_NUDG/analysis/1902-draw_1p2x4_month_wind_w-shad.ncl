@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -51,7 +51,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 20
+nv = 0 
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -725,8 +725,8 @@ if(nv.eq.0)
     spacig = (/20 , 20 ,  20/)      ; 10, 10
 end if
 if(nv.eq.4) 
-    minlvl = (/0  ,-160,-160/)  ;q1 ;-80,-80
-    maxlvl = (/300, 160, 160/)      ; 80, 80
+    minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
+    maxlvl = (/300, 140, 140/)      ; 80, 80
     spacig = (/20 ,  20,  20/)      ; 10, 10
 end if
 

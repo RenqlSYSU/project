@@ -41,8 +41,8 @@ if(case_option.eq.2) then
     years   = ispan(1,30,1)   ;the calculate time
 end if
 fig_name = path + "/project/TP_NUDG/concept_map/fig/" + case(0) + "_annual_cycle-" + draw_var(nv) 
-fig_out  = "eps" ;"eps" ;"x,11"
-;fig_out  = "pdf" ;"eps" ;"x,11"
+;fig_out  = "eps" ;"eps" ;"x,11"
+fig_out  = "pdf" ;"eps" ;"x,11"
 
 ;area of TP 
 lats = (/25 /)
@@ -135,8 +135,10 @@ printVarSummary(ave)
     resxy@xyDashPatterns    = 0 ;(/0,0,0/)
     resxy@xyLineThicknesses = 2.0;(/2.0, 2.0,2.0/)   ; make second line thicker
     resxy@xyLineColors      = ispan(4,62,2)
-    resxy@tiXAxisOn = False
-    resxy@tiYAxisOn = False
+    resxy@tiXAxisOn = True;False
+    resxy@tiYAxisOn = True ;False
+    resxy@tiXAxisString = "day"
+    resxy@tiYAxisString = draw_var(nv) + "(" + unit(nv) + ")" 
     ;resxy@trYMinF = floor(min(var))
     ;resxy@trYMaxF = ceil(max(var))
     
@@ -167,8 +169,8 @@ printVarSummary(ave)
     ;resxy@tmXBTickEndF       = 360
     resxy@tmXBMode            = "Explicit"
     resxy@tmXBValues          = ispan(0,360,30)
-    resxy@tmXBLabels          = ispan(0,360,30)
-    ;resxy@tmXBLabels   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+    ;resxy@tmXBLabels          = ispan(0,360,30)
+    resxy@tmXBLabels   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
     
     resxy@tmXMajorGrid                   = True
     resxy@tmXMajorGridLineDashPattern    = 2

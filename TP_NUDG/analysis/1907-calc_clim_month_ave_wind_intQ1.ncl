@@ -182,6 +182,7 @@ end do
 print(q1(10,10,2,10:20,30))
 g  = 9.8 ;m/(s*s)
 var = dim_sum_n(q1(:,:,5:10,:,:)*dp(:,:,5:10,:,:),2)/dim_sum_n(dp(:,:,5:10,:,:),2)
+;var = dim_sum_n(q1*dp,2)/g
 delete([/q1,ps,dp,g/])
 ;var@long_name = "Integrated Apparent Heat Source calc from temperature equation"
 ;var@units     = "W/kg"

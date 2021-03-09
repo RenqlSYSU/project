@@ -4,9 +4,9 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = -1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = True ;False;
@@ -21,10 +21,10 @@ fig_out    = "pdf";"pdf";"x11"
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
 ;months  = (/"JF","MJ","JA"/);,"MA"
-select_time = (/2,3/)
-select_time_u = (/2,3/)
-months  = (/"MJ","JA"/)
-;months   = (/"DJF","MAM","JJA","SON"/)
+select_time = ispan(0,3,1)
+select_time_u = select_time 
+;months  = (/"JF","MJ","MJ","JA"/)
+months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 ;months  = (/"Apr","May","Jun","Jul"/)
@@ -164,7 +164,8 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
+    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"

@@ -8,7 +8,7 @@
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
 path1   = "/home/ys17-19/renql"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h"/) ;,"NG24h"
@@ -36,11 +36,11 @@ draw_varname = (/"hgt","dzdt","Ahgt","U","T", "-dTdy","dudt","4q1","V","EKE"/)  
 lev   = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels ,hPa , 4q1
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = lev  
-nv = 3
+nv = 7
 siglvl = 0.05
 diff = True ;False;
 sig_option = False;True ;
-jet_option = True ;False;
+jet_option = False;True ;
 barshare = True ;False;
 barvert  = False;True ;
 
@@ -65,7 +65,7 @@ if(var_option.eq.2) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"JF","MA","MJ","JA"/)
 ;months   = (/"MJ","JA"/)
-imonth = ispan(2,3,1);(/4,5,6,7/)
+imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 fig_name = path + "/analysis/fig/" + case1(0) + "-vertical_section_" + draw_var(nv) + "_" + var_name(0) + "-3c" 
 jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"

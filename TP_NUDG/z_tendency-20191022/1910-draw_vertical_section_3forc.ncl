@@ -4,7 +4,7 @@
 ;                                                    2019/08/12
 ;*********************************************************************************
 begin
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
 var_option = -1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
@@ -21,14 +21,14 @@ fig_out    = "pdf";"pdf";"x11"
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
 ;months  = (/"JF","MJ","JA"/);,"MA"
-select_time = ispan(0,3,1)
+select_time = ispan(2,3,1)
 select_time_u = select_time 
-;months  = (/"JF","MJ","MJ","JA"/)
-months   = (/"DJF","MAM","JJA","SON"/)
+months  = (/"JF","MJ","MJ","JA"/)
+;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 ;months  = (/"Apr","May","Jun","Jul"/)
-nmonth = dimsizes(months)
+nmonth = dimsizes(select_time)
 month_s = 1
 month_e = 12
 lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,150,100/)
@@ -164,8 +164,8 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
-    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
@@ -303,7 +303,7 @@ do nc = 0, nfile-1, 1
         end do
     else
         do nv = 0, nvar-2,1
-        var_m(nc,nv,:,:,:,:)  = f->$var_name(nv)$(:,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+        var_m(nc,nv,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
         end do
     end if
     

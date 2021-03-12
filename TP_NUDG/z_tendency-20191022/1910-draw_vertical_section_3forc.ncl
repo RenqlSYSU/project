@@ -6,7 +6,7 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = -1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = 1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = True ;False;
@@ -698,7 +698,7 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nv = 0, 2,1;nvar-1,1
+do nv = 0, nvar-1,1
 do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     np = nv*nmonth + nm ;1 var, 2 month
@@ -753,7 +753,7 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    gsn_panel(wks,plot,(/nvar-1,nmonth/),resp)
+    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/1,3/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
 end do 

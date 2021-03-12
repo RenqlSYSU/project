@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -38,7 +38,7 @@ draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
              "uppT" /)
 
-unit     = (/"W/kg"         ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/kg"      , \
+unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
              "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/day"    ,"K/day"          ,"K/day"     , \ 
@@ -50,24 +50,24 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
-nl = 2
-nv = 0 
+nl = 1
+nv = 17 
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
-sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = True ;False;
+sig_option  = True ;False;if False, only the significant values are shaded 
+vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = False;True ;
-cont_var  = (/"Z3" ,"intQ1","PSL","Div","OMEGA",              "U"/)  ;this is the variable used to draw, can used as center string
-cont_unit = (/"gpm","W/kg" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s","m/s"/)
+cont_option = True ;False;
+cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
+cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
-contsig  = True ;False;;if True, only the significant values are contoured 
+contsig  = False;True ;;if True, only the significant values are contoured 
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 0
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -99,12 +99,12 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,0  /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,65 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,0  /);20
-lonr = (/360,270,390,  150,270, 390,  85 ,360,180/);220
+lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
+latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
+lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,90 /);20
+lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
 lat_spacing = 15
-lon_spacing = 30
+lon_spacing = 20
 na = 8
 
 f = addfile(gtopfile,"r")
@@ -166,7 +166,7 @@ end if
 
 wks = gsn_open_wks(fig_out,fig_name)
 ;do nl = 0,2,1
-;do nv = 17,19,1
+do nv = 17,19,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -864,8 +864,8 @@ end if
     do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
         ;np = nm*2+nc
-        ;np = nc*nmonth+nm
-        np = nm
+        np = nc*nmonth+nm
+        ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
@@ -967,12 +967,12 @@ end if
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 end do
-;    gsn_panel(wks,plot,(/2,2/),resp)
-;end do
+    gsn_panel(wks,plot,(/2,2/),resp)
+end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do
 end

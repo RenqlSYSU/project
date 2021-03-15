@@ -7,7 +7,8 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-do case_option=1,2,1
+wks = gsn_open_wks("pdf","925T")
+do case_option=1,3,1
 if(case_option.eq.0) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
@@ -47,20 +48,20 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "T"        ,"uppEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
-lev = (/850,500,200,100,50, 20,10,5/)
-nl = 2
-nv = 3
+lev = (/925,500,200,50, 10/);,10,5,100,
+nl = 0
+nv = 5
 diff = True ;False;
 perc = False;True ;
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = True ;False;
-cont_option = False;True ;
+cont_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
-nvc = 2 
+nvc = 0 
 contsig  = True
-barshare = True ;False
+barshare = True ;False;
 
 var_option = 0 
 if(var_option.eq.0) then 
@@ -85,16 +86,16 @@ imonth = ispan(0,3,1);(/4,5,6,7/)
 filename = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 
-fig_name = path + "/analysis/fig/" + case1(0) + "-2month_polar_" + lev(nl) + "_" + draw_var(nv)
+fig_name = path + "/analysis/fig/" + case1(1) + "-2month_polar_" + lev(nl) + "_" + draw_var(nv)
 if(vect_option) then 
-fig_name = path + "/analysis/fig/" + case1(0) + "-2month_polar_" + lev(nl) + "wind_" + draw_var(nv)
+fig_name = path + "/analysis/fig/" + case1(1) + "-2month_polar_" + lev(nl) + "wind_" + draw_var(nv)
 end if
 if(cont_option) then 
-fig_name = path + "/analysis/fig/" + case1(0) + "-2month_polar_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
+fig_name = path + "/analysis/fig/" + case1(1) + "-2month_polar_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
 end if
 
 ;pre_case   = (/"(e","(f","(g","(h","(e","(f","(g","(h","(i","(j","(k","(l"/)
-pre_case   = (/"(a","(b","(d","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
@@ -149,7 +150,7 @@ if(na.eq.0) then
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
    vc_thick       = 3.0
-   mp_thick       = 2.0
+   mp_thick       = 3.0
    font_index     = 22
 else
    tick_font      = 0.03
@@ -164,8 +165,8 @@ else
    font_index     = 22
 end if
 
-wks = gsn_open_wks(fig_out,fig_name)
-do nl = 0,7,1
+;wks = gsn_open_wks(fig_out,fig_name)
+;do nl = 1,1,1
 ;do nv = 5,5,1
 ;================================================================
 ;read data
@@ -531,10 +532,10 @@ end if
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
     res@lbBoxLineThicknessF  = mp_thick-1
-    res@pmLabelBarWidthF  = 0.03
-    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarWidthF  = 0.05
+    res@pmLabelBarHeightF = 0.5
     res@pmLabelBarZone               = 0
-    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarOrthogonalPosF     = 0.1
     res@pmLabelBarParallelPosF       = 0.5
     ;resp@gsnPaperOrientation = "landscape" ;"portrait"
     resp@gsnPanelLabelBar = False; True
@@ -728,9 +729,9 @@ else
     ;blue and yellow and red, has 17 colors,2-18,2 is white
    res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
 end if 
-    do nm = 0,nmonth-1,1
+    do nm = 0,0,1;nmonth-1,1
         ;np = 2*(nl-2)+nc
-        np = nm
+        np = nc-1;nl-1
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
@@ -827,9 +828,10 @@ end if
 ;    resp@txString      = fig_title
     ;gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
 end do
-end do
+;end do
+    ;gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 end do
 end
 

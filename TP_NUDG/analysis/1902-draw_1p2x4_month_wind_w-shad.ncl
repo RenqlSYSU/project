@@ -56,14 +56,14 @@ perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
-sig_option  = True ;False;if False, only the significant values are shaded 
-vect_option = False;True ;
+sig_option  = False;True ;if False, only the significant values are shaded 
+vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = True ;False;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
-contsig  = False;True ;;if True, only the significant values are contoured 
+contsig  = True ;False;;if True, only the significant values are contoured 
 barshare = True ;False;
 barvert  = False;True ;
 
@@ -513,7 +513,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.02 ;0.025
+    resvc@vcMinDistanceF            = 0.025 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
@@ -522,7 +522,7 @@ end if
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.28           ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.35           ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index

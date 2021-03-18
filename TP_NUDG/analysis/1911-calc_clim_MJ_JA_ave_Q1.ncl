@@ -34,10 +34,12 @@ if(case_option.eq.2) then
                       "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_intQ11.nc"
+    ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_intQ11.nc"
+    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_2month_ave_uppT.nc"
 end if
 
-var_name= (/"Q11","PS"/)
+var_name= (/"T","PS"/)
+;var_name= (/"Q11","PS"/)
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
@@ -55,7 +57,7 @@ nmonth = 4
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
 f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
-vars:= f->Q1(:,{lev},{lats:latn},{lonl:lonr})
+vars:= f->$var_name(0)$(:,{lev},{lats:latn},{lonl:lonr})
 time1 = cd_calendar(f->time,0)
 select_time1 = ind(time1(:,1).ge.month_s.and.time1(:,1).le.month_e)
 ntime = dimsizes(select_time1)
@@ -87,7 +89,7 @@ nv = 0
 files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
 f      = addfile(files(nt),"r")
 ;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-q1(nt,:,:,:,:)  = tofloat(f->Q1(select_time1,{lev},{lats:latn},{lonl:lonr}))
+q1(nt,:,:,:,:)  = tofloat(f->$var_name(nv)$(select_time1,{lev},{lats:latn},{lonl:lonr}))
 
 nv = 1
 files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
@@ -97,11 +99,14 @@ ps(nt,:,:,:)   = f->$var_name(nv)$(select_time1,{lats:latn},{lonl:lonr})   ;ps(t
 dp(nt,:,:,:,:) = dpres_plevel_Wrap(lev*100,ps(nt,:,:,:),10000,1)  ;unit is Pa, get dp (year,time,lev,lat,lon)
 end do
 print(q1(10,10,2,10:20,30))
-var = dim_sum_n(q1*dp,2)/g
+;var = dim_sum_n(q1*dp,2)/g
+var = dim_sum_n(q1(:,:,5:10,:,:)*dp(:,:,5:10,:,:),2)/dim_sum_n(dp(:,:,5:10,:,:),2)
 delete([/q1,ps,dp/])
 
-var@long_name = "Integrated Apparent Heat Source calc from temperature equation"
-var@units     = "W/kg" 
+;var@long_name = "Integrated Apparent Heat Source calc from temperature equation"
+;var@units     = "W/kg" 
+var@long_name = "500-200hPa T"
+var@units     = "K"
 
 time = cd_calendar(f->time(select_time1),0)
 do nm = 0, nmonth-1, 1
@@ -126,7 +131,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "Integrated Apparent Heat Source calculated from temperature equation"
+;fileAtt@discription   = "Integrated Apparent Heat Source calculated from temperature equation"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

@@ -50,8 +50,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
-nl = 1
-nv = 17 
+nl = 2
+nv = 20 
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -59,12 +59,12 @@ siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = True ;False;
+cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = True ;False;
+barshare = False;True ;
 barvert  = False;True ;
 
 var_option = 2
@@ -100,12 +100,12 @@ end if
 
 ;area: east Asia
 lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,90 /);20
+latn = (/55 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
+lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
 lat_spacing = 15
 lon_spacing = 20
-na = 8
+na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -166,7 +166,7 @@ end if
 
 wks = gsn_open_wks(fig_out,fig_name)
 ;do nl = 0,2,1
-do nv = 17,19,1
+;do nv = 17,19,1
 ;================================================================
 ;read data
 ;====================================================================
@@ -513,7 +513,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.025 ;0.025
+    resvc@vcMinDistanceF            = 0.02 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
@@ -522,7 +522,7 @@ end if
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.35           ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.5          ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -692,7 +692,7 @@ end if
     else
     res@lbOrientation        = "Horizontal";"Vertical";
     res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.08
+    res@pmLabelBarHeightF = 0.04
     res@pmLabelBarOrthogonalPosF  = 0.23 ;y direction
     res@pmLabelBarParallelPosF    = 0.5
     end if
@@ -841,9 +841,9 @@ if(nv.ge.17.and.nv.le.19) then
 end if
 
 if(nv.eq.20) then  ;200
-    minlvl = (/-54,-0.7,-3.5/);-68 -24,-24
+    minlvl = (/-39,-0.7,-3.5/);-68 -24,-24
     maxlvl = (/-24, 0.7, 3.5/);-50  24, 24
-    spacig = (/2  , 0.1,0.5 /);1.2   3,  3
+    spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
 do nc = 0,1,1
@@ -971,8 +971,8 @@ end if
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 end do
-    gsn_panel(wks,plot,(/2,2/),resp)
-end do
+    gsn_panel(wks,plot,(/4,1/),resp)
+;end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do
 end

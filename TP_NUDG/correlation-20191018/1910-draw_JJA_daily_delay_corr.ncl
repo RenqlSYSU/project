@@ -8,28 +8,48 @@
 ;                                           2017/04/11
 ;******************************************************************************
 begin
+path     = "/home/ys17-19/renql/project/TP_NUDG"
 draw_var = (/"corr"/)
 var_name = (/"corr"/)
-case1    = (/"CTRL","NUDG6h"/)
-case2    = (/"CTRL","NG6h-CTRL"/)
-month_s = 3
-month_e = 7
-mxlag    = 10
-nc = 1
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+if(case_option.eq.0) then
+    case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
+    gtopfile= path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 27
+end if
+if(case_option.eq.1) then
+    case1   = (/"TP_CTRL","TP_CR"/)
+    case2   = (/"CTRL"   ,"CTRL-noTP"/)
+    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
+    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    nsample = 10
+end if
+if(case_option.eq.2) then
+    case1   = (/"F2000","NGTR"/)       ;NGTR    
+    case2   = (/"F2000","NGTR-F2000"/) ;NGTR
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
+end if
+month_s = 5
+month_e = 6
+mxlag   = 10
+nc = 0
 
 ;the path of the file
-path     = "/home/ys17-19/renql/project/TP_NUDG"
-filein = path + "/correlation-20191018/mdata/" + case1(nc) + "-daily" + mxlag + "delay_corri_" + month_s + "-" + month_e + ".nc"
+filein = path + "/correlation-20191018/mdata/" + case1(nc) + "-allyear_daily_" + mxlag + "delay_corr-"+month_s+month_e+".nc"
+;filein = path + "/correlation-20191018/mdata/" + case1(nc) + "-daily" + mxlag + "delay_corri_" + month_s + "-" + month_e + ".nc"
 fig_name = path + "/correlation-20191018/fig/" + case1(nc) + "-daily" + mxlag + "delay_corri_" + month_s + "-" + month_e
 fig_title= "Daily Delay Correlation" 
 fig_out  = "pdf" ;"eps" ;"x,11"
 pre_case = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i"/)
 
-varname = (/"preci","QTE850","EKE850","EKE200","q1_850","q1_200","div850","div200"/)
+;varname = (/"preci","QTE850","EKE850","EKE200","q1_850","q1_200","div850","div200"/)
+varname = (/"preci","div850","intEKE","intQTE"/)
 nvar2 = dimsizes(varname)
 nvar3 = (nvar2-1)*nvar2/2
 label = new((/nvar3/),string)
-npanel = 7
+;npanel = 7
 nv3 = 0
 do nv1 = 0,nvar2-2, 1
 do nv2 = nv1+1, nvar2-1, 1
@@ -39,10 +59,10 @@ end do
 end do
 
 area = (/"SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 22  , 30  /)
-latn = (/ 30  , 45  /)
-lonl = (/107  ,115  /)
-lonr = (/130  ,130  /)
+lats = (/ 29  , 35  /); 22  , 30  
+latn = (/ 31  , 40  /); 30  , 45  
+lonl = (/107  ,105  /);107  ,115  
+lonr = (/112  ,112  /);130  ,130  
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.01
@@ -81,9 +101,9 @@ wks = gsn_open_wks(fig_out,fig_name)
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
     
-    resxy@xyDashPatterns    = (/0,0,0,0/) ;,0,0
-    resxy@xyLineThicknesses = (/4.0, 4.0, 4.0, 4.0/) ;, 4.0, 4.0  ; make second line thicker
-    resxy@xyLineColors      = (/"black","red","blue","grey"/); ,"darkorange3","chartreuse4"
+    resxy@xyDashPatterns    = (/0,0,0,0,0,0/) ;
+    resxy@xyLineThicknesses = (/4.0, 4.0, 4.0, 4.0, 4.0, 4.0/) ;, 4.0, 4.0  ; make second line thicker
+    resxy@xyLineColors      = (/"black","red","blue","grey", "darkorange3","chartreuse4"/); ,"darkorange3","chartreuse4"
     resxy@tiXAxisOn = True
     resxy@tiXAxisString = "lag(days)"
     resxy@tiYAxisOn = False
@@ -155,21 +175,23 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "landscape"
 
-do np = 0,npanel-1,1
-    nvs = np*(nvar3/npanel)
-    nve = (np+1)*(nvar3/npanel)-1
-    resxy@xyExplicitLegendLabels = label(nvs:nve)
+;do np = 0,npanel-1,1
+;    nvs = np*(nvar3/npanel)
+;    nve = (np+1)*(nvar3/npanel)-1
+    ;resxy@xyExplicitLegendLabels = label(nvs:nve)
+    resxy@xyExplicitLegendLabels = label
     do na = 0, narea-1,1
         resxy@gsnLeftString   = pre_case(na) + ") " + case2(nc)
         resxy@gsnRightString  = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
         if(na.eq.1) then
         resxy@pmLegendDisplayMode = "Always"
         end if
-        plot(na)  = gsn_csm_xy(wks,var&delay,(/var(na,nvs:nve,:)/),resxy)
+        plot(na)  = gsn_csm_xy(wks,var&delay,(/var(na,:,:)/),resxy)
+        ;plot(na)  = gsn_csm_xy(wks,var&delay,(/var(na,nvs:nve,:)/),resxy)
     end do
     
    gsn_panel(wks,plot,(/1,2/),resp)
-end do
+;end do
 end
 
 

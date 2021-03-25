@@ -7,8 +7,8 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/TP_NUDG"
-wks = gsn_open_wks("pdf","925T")
-do case_option=1,3,1
+;wks = gsn_open_wks("pdf","200U")
+do case_option=0,0,1
 if(case_option.eq.0) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
@@ -49,13 +49,13 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow" /) 
 lev = (/925,500,200,50, 10/);,10,5,100,
-nl = 0
-nv = 5
+nl = 2
+nv = 12
 diff = True ;False;
 perc = False;True ;
 sig_option  = True ;False;if False, only the significant values are shaded 
-vect_option = True ;False;
-cont_option = True ;False;
+vect_option = False;True ;
+cont_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_var  = (/"Z3" ,"intQ1","PSL" /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/kg" ,"hPa"/)    ;this can be used as right string 
@@ -103,6 +103,7 @@ lats = (/0  ,0  ,0  ,-70,-70,-70,10 ,-70, 0 /);-20
 latn = (/89 ,70 ,70 , 0 , 0 , 0 ,55 ,70 ,60 /);60
 lonl = (/0  ,150,270,30 ,150,270,90 ,0  ,40 /);20
 lonr = (/360,270,390,150,270,390,150,360,150/);220
+polar_direction = "NH"
 siglvl = 0.05
 lat_spacing = 15
 lon_spacing = 30
@@ -165,7 +166,7 @@ else
    font_index     = 22
 end if
 
-;wks = gsn_open_wks(fig_out,fig_name)
+wks = gsn_open_wks(fig_out,fig_name)
 ;do nl = 1,1,1
 ;do nv = 5,5,1
 ;================================================================
@@ -311,7 +312,7 @@ print("draw lats = " + lats(na) + ", latn = " + latn(na) + ", lonl = " + lonl(na
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
 
-    res@gsnPolar = "NH"
+    res@gsnPolar = polar_direction
     res@gsnPolarLabelFontHeightF = 0.02
     res@gsnPolarLabelDistance    = 1.
     res@gsnPolarLabelFont        = font_index
@@ -690,10 +691,16 @@ else
 end if
 end if
 
-if(nv.eq.12) 
+if(nv.eq.12)
+if(diff) then 
     minlvl = (/ 0 ,-7 ,-7 /) ;U 
     maxlvl = (/ 75, 7 , 7 /)
     spacig = (/ 5 , 1 , 1 /)
+else
+    minlvl = (/ 0 ,0 ,-7 ,-7 /) ;U 
+    maxlvl = (/ 75,75, 7 , 7 /)
+    spacig = (/ 5 ,5 , 1 , 1 /)
+end if
 end if
 
 if(nv.eq.13) 
@@ -714,7 +721,7 @@ if(nv.eq.15) then ;precs
     spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
 end if
 
-do nc = 1,1,1
+do nc = 0,1,1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.gt.0).or.nv.eq.2) then
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -729,9 +736,10 @@ else
     ;blue and yellow and red, has 17 colors,2-18,2 is white
    res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
 end if 
-    do nm = 0,0,1;nmonth-1,1
+    do nm = 0,nmonth-1,1;0,1;
         ;np = 2*(nl-2)+nc
-        np = nc-1;nl-1
+        ;np = nc-1;nl-1
+        np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15)) then
         if(cont_option) then 
@@ -752,7 +760,7 @@ end if
         res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
         res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
         plot(np)    = gsn_csm_contour_map_polar(wks,var(nc,2,nm,:,:),res)
-        if(sig_option.and.nc.gt.0) then 
+        if(sig_option.and.nc.gt.0.and.diff) then 
         sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nm,:,:),res_sig)
         overlay(plot(np),sig(np))
         end if
@@ -826,12 +834,12 @@ end if
    ; attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
    ; gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 end do
 ;end do
     ;gsn_panel(wks,plot,(/2,2/),resp)
-    gsn_panel(wks,plot,(/1,1/),resp)
+;    gsn_panel(wks,plot,(/1,1/),resp)
 end do
 end
 

@@ -50,8 +50,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/700,500,200,700,600,  100,10/)
-nl = 1
-nv = 0 
+nl = 2
+nv = 20 
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -64,10 +64,10 @@ cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = False;True ;
+barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 2
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -99,8 +99,8 @@ fig_name = path + "/analysis/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(
 end if
 
 ;area: east Asia
-lats = (/10 ,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
-latn = (/55 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
+lats = (/0  ,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
+latn = (/70 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
 lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
 lat_spacing = 15
@@ -528,7 +528,7 @@ end if
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
     resvc@vcRefAnnoString1On         = False
-    resvc@vcRefAnnoString2On         = True
+    resvc@vcRefAnnoString2On         = False;True
     ;resvc@vcRefAnnoString2           = "30m/s"
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
@@ -864,8 +864,8 @@ end if
     do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
         ;np = nm*2+nc
-        np = nc*nmonth+nm
-        ;np = nm
+        ;np = nc*nmonth+nm
+        np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
@@ -970,8 +970,9 @@ end if
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
-end do
     gsn_panel(wks,plot,(/4,1/),resp)
+end do
+;    gsn_panel(wks,plot,(/4,1/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do

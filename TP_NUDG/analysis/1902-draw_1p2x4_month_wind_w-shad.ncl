@@ -50,8 +50,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/700,500,200,700,600,  100,10/)
-nl = 2
-nv = 20 
+nl = 0
+nv = 1 
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -64,10 +64,10 @@ cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = True ;False;
+barshare = False;True ;
 barvert  = False;True ;
 
-var_option = 1
+var_option = 2
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -864,8 +864,8 @@ end if
     do nm = 0,nmonth-1,1
         ;np = 2*(nl-3)+nc
         ;np = nm*2+nc
-        ;np = nc*nmonth+nm
-        np = nm
+        np = nc*nmonth+nm
+        ;np = nm
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
@@ -898,11 +898,18 @@ end if
         overlay(plot(np),sig(np))
         end if
 
-        if(vect_option) then 
+        if(vect_option) then
+        if(diff) then 
         resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
         resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
         resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
+        else
+        resvc@vcRefMagnitudeF      = vcref(nl,0)             ; define vector ref mag
+        resvc@vcRefAnnoString2     = vcref(nl,0)+"m/s"
+        resvc2@vcRefMagnitudeF      = vcref(nl,0)             ; define vector ref mag
+        resvc2@vcRefAnnoString2     = vcref(nl,0)+"m/s"
+        end if
         if(diff.and.nc.gt.0)
         wind2(np)   = gsn_csm_vector(wks,uvar(nc-1,nm,:,:),vvar(nc-1,nm,:,:),resvc2)
         overlay(plot(np),wind2(np))
@@ -970,9 +977,9 @@ end if
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
-    gsn_panel(wks,plot,(/4,1/),resp)
-end do
 ;    gsn_panel(wks,plot,(/4,1/),resp)
+end do
+    gsn_panel(wks,plot,(/4,1/),resp)
 ;end do
 ;    gsn_panel(wks,plot,(/3,2/),resp)
 ;end do

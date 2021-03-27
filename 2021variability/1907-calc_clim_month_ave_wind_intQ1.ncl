@@ -42,7 +42,7 @@ if(case_option.eq.3) then
                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                       "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
                       "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR.",\
-                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",/)
+                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"
 end if

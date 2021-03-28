@@ -10,7 +10,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
 ca = 90.0 ;day
@@ -40,7 +40,8 @@ lats = -90   ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0   ; 0  ;
 lonr = 360 ;360 ;
-lev  = (/1000,925,850,700,600,500,400,350,300,250,200/) ;,150,100hPa
+lev  = (/1000,850,600,500,400, 300,200,100,50,10/) ;,150,100hPa
+;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100,50,20, 10,5/) 
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -67,7 +68,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 0,1,1 
+do nf = 0,4,4 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if
@@ -142,8 +143,8 @@ edd_v = v - conform(v,clm_v,(/1,2,3,4/))
 ;ste_u = conform(u,dim_avg_n(u,0),(/1,2,3,4/))
 ;ste_v = conform(v,dim_avg_n(v,0),(/1,2,3,4/))
 ;var   = dim_sum_n((edd_u*edd_v)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-;var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;ps-200hPa integral get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n( (edd_v(:,:,0:5,:,:)*edd_v(:,:,0:5,:,:) + edd_u(:,:,0:5,:,:)*edd_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:), 2 )/g/2.0   ;surface-500hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n( (edd_v(:,:,5:10,:,:)*edd_v(:,:,5:10,:,:) + edd_u(:,:,5:10,:,:)*edd_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v*ste_v + ste_u*ste_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((ste_v(:,:,5:8,:,:)*ste_v(:,:,5:8,:,:) + ste_u(:,:,5:8,:,:)*ste_u(:,:,5:8,:,:))*dp(:,:,5:8,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
@@ -196,7 +197,7 @@ setfileoption(ncdf,"definemode",True)
 ;set all field attribute
 fileatt =  True
 fileatt@creation_date = systemfunc("date")
-fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600,500hPa 500,400,300,200"
+fileatt@discription   = "rmvannual cycle, the integration is based on 1000,925,850,700,600, 500,400,300,200"
 fileattdef(ncdf,fileatt)  
 
 ;define all coordinate`
@@ -211,12 +212,6 @@ filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"time",typeof(u&time),getvardims(u&time))
 filevardef(ncdf,"lat" ,typeof(u&lat),getvardims(u&lat))
 filevardef(ncdf,"lon" ,typeof(u&lon),getvardims(u&lon))
-;filevardef(ncdf,"uv",typeof(EKE),(/"time","lat","lon"/))
-;filevardef(ncdf,"uv_vari",typeof(EKE_vari),(/"time","lat","lon"/))
-;filevardef(ncdf,"SKE",typeof(EKE),(/"time","lat","lon"/))
-;filevardef(ncdf,"SKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
-;filevardef(ncdf,"EKE",typeof(EKE),(/"time","lat","lon"/))
-;filevardef(ncdf,"EKE_vari",typeof(EKE_vari),(/"time","lat","lon"/))
 filevardef(ncdf,"month_ave"  ,typeof(month_ave)  ,(/"month" ,"lat","lon"/))
 filevardef(ncdf,"season_ave" ,typeof(season_ave) ,(/"season","lat","lon"/))
 filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lat","lon"/))
@@ -226,9 +221,6 @@ filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 filevarattdef(ncdf,"time",u&time)
 filevarattdef(ncdf,"lat",u&lat)
 filevarattdef(ncdf,"lon",u&lon)
-;filevarattdef(ncdf,"uv",EKE)
-;filevarattdef(ncdf,"EKE",EKE)
-;filevarattdef(ncdf,"SKE",EKE)
 filevarattdef(ncdf,"month_ave",EKE)
 filevarattdef(ncdf,"season_ave",EKE)
 filevarattdef(ncdf,"month_vari",EKE)
@@ -239,12 +231,6 @@ ncdf->season = (/1212,345,678,91011/)
 ;ncdf->time = (/u&time/)
 ncdf->lat  = (/u&lat/)
 ncdf->lon  = (/u&lon/)
-;ncdf->uv  = (/EKE/)
-;ncdf->uv_vari  = (/EKE_vari/)
-;ncdf->SKE  = (/EKE/)
-;ncdf->SKE_vari  = (/EKE_vari/)
-;ncdf->EKE  = (/EKE/)
-;ncdf->EKE_vari  = (/EKE_vari/)
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
 ncdf->month_vari  = (/month_vari/)

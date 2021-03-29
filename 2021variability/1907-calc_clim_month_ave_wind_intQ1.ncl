@@ -82,8 +82,8 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,3,1; ,nvar-1 ,1 
-do nf = 4,4,1
+do nv = 6,6,1; ,nvar-1 ,1 
+do nf = 1,4,3
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

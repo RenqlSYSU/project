@@ -158,7 +158,6 @@ wks  = gsn_open_wks("png",fig_name)             ; send graphics to PNG file
     resxy@gsnLeftString    = "sm = " + sm
     resxy@gsnRightString   = fig_title
 
-
    ip   = ind(frq.le.0.2)                        ; all indices for "short" periods
    ;plot = gsn_csm_xy(wks,p(ip), splt(:,ip),res)     
    plot = gsn_csm_xy(wks, frq(ip), splt(:,ip), resxy)     

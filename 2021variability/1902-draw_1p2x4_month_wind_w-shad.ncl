@@ -599,7 +599,7 @@ end if
     resp@gsnMaximize   = True
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
-    resp@gsnPaperOrientation = "landscaoe";"portrait"
+    resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
     if(barvert) then 
     resp@lbOrientation     = "Vertical"

@@ -12,16 +12,23 @@ area = (/"EA","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mea
 lats = (/ 25 , 22  , 30  /)
 latn = (/ 40 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
-lonr = (/150 ,130  ,130  /)
-lon_spcing = 10
+lonr = (/125 ,130  ,130  /)
+lat_spcing = 5 
 var_name = (/"preci"/)
-month_s = 1 
-month_e = 12
+stand = (/"","_stand"/)
+ns = 1
+month_s = 5 
+month_e = 9
 
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 diff = True
+perc = False
+barshare = False;True ;
+barvert  = False;True ;
+landscap = False;True ;False mean portrait
 na = 0 ;"EA","TP","SEA","NEA"
-nv = 3 ;"U","V","T","vort"
+nv = 0 ;"U","V","T","vort"
+p_draw = (/60,20,10,7,5/)
 
 if(case_option.eq.0) then
     case1   = (/"CTRL","NG15S","NG4550"/) ;,"NUDG24h"
@@ -33,8 +40,8 @@ if(case_option.eq.0) then
     years   = ispan(1979,2005,1)   ;the calculate time
 end if
 
-filein   = path + "/data/" + case1 + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
-fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + "_spec_" + var_name(nv)
+filein   = path + "/data/" + case1 + "-" + month_s + month_e + stand(ns) + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
+fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + stand(ns) + "_spec_" + var_name(nv)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
@@ -57,7 +64,7 @@ do nc = 0, ncase-1, 1
     var(nc,:,:,:,:,:) = f->spcx(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do
 printVarSummary(var)
-var := dim_avg_n_Wrap(var,4)
+var := dim_avg_n_Wrap(var,5)
 print(var(0, 0, 0, 0:50:10, 5))
 
 vari = dim_variance_n_Wrap(var,1)
@@ -108,17 +115,19 @@ var2 = var
 frq2 = frq
 end if
 
+;var2&frq = 1.0/frq2
+
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
-   subtitle_font  = 0.04
+   subtitle_font  = 0.03
    title_font     = 0.03
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 5.0
+   mp_thick       = 2.5
    font_index     = 22
    
 
@@ -139,16 +148,18 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     res@tiXAxisFont     = font_index 
     res@tiYAxisFont     = font_index 
     res@tiYAxisString   = "Frequency (1/day)"
-    res@tiXAxisString   = "Longitude (E)"
+    res@tiXAxisString   = "Latitude (N)"
 
     res@tmYLMode        = "Explicit"
+    ;res@tmXBValues      = fspan(2,140,20) ;1.0/p_draw
+    ;res@tmXBLabels      = fspan(2,140,20) ;p_draw
     res@tmYLValues      = fspan(0.0,0.5,6)
     res@tmYLLabels      = fspan(0.0,0.5,6)
 
     res@tmXBMode        = "Manual"
-    res@tmXBTickStartF  = lonl(na)
-    res@tmXBTickEndF    = lonr(na)
-    res@tmXBTickSpacingF= lon_spcing 
+    res@tmXBTickStartF  = lats(na)
+    res@tmXBTickEndF    = latn(na)
+    res@tmXBTickSpacingF= lat_spcing 
 
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
@@ -201,15 +212,6 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     res@gsnSpreadColorStart  = 2                ; start at color 17
     res@gsnSpreadColorEnd    = 21                ; end at color 200
     
-    res@lbLabelBarOn         = True   ; the label bar
-    res@lbOrientation        = "Vertical";"Horizontal"
-    res@lbLabelFontHeightF   = tick_font              ; make labels smaller
-    res@lbLabelFont          = font_index              ; make labels smaller
-    res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-2
-    res@pmLabelBarWidthF  = 0.1
-    res@pmLabelBarHeightF = 0.8
-
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
@@ -222,64 +224,97 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 
     resp  = True    
     resp@gsnMaximize   = True
+    if(landscap) then
     resp@gsnPaperOrientation = "landscape";"portrait"
-    resp@gsnPanelLabelBar = False
-    resp@lbOrientation    = "Horizontal"
-    resp@lbLabelStride    = 2
+    else
+    resp@gsnPaperOrientation = "portrait"
+    end if
+
+    if(barshare) then; .and.nmonth.eq.4
+    res@lbLabelBarOn      = False   ; the label bar
+    resp@gsnPanelLabelBar = True
+    if(barvert) then 
+    resp@lbOrientation     = "Vertical"
+    resp@pmLabelBarWidthF  = 0.05
+    resp@pmLabelBarHeightF = 0.7
+    else
+    resp@lbOrientation     = "Horizontal" ;"Vertical"
+    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarHeightF = 0.05;0.8
+    end if
+    else
+    resp@gsnPanelLabelBar = False; True
+    res@lbLabelBarOn         = True   ; the label bar
+    res@lbLabelFontHeightF   = tick_font
+    res@lbLabelFont          = font_index              ; make labels smaller
+    res@lbLabelStride        = 1
+    res@lbBoxLineThicknessF  = mp_thick-1
+    res@pmLabelBarZone               = 0
+    if(barvert) then
+    res@lbOrientation        = "Vertical";
+    res@pmLabelBarWidthF             = 0.03
+    res@pmLabelBarHeightF            = 0.17
+    res@pmLabelBarOrthogonalPosF     = 0.01
+    res@pmLabelBarParallelPosF       = 0.5
+    else
+    res@lbOrientation        = "Horizontal";"Vertical";
+    res@pmLabelBarWidthF          = 0.7
+    res@pmLabelBarHeightF         = 0.08
+    res@pmLabelBarOrthogonalPosF  = 0.05 ;y direction
+    res@pmLabelBarParallelPosF    = 0.5
+    end if
+    end if
     resp@lbLabelFont      = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = tick_font
     resp@lbLabelFontThicknessF = tick_thick
-    resp@pmLabelBarWidthF  = 0.8
-    resp@pmLabelBarHeightF = 0.05
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    
-    minlvl := (/10 ,10 ,10 /) ;used for East Asian moist transiation
-    maxlvl := (/170,170,170/) ;used for CTRL-NUDG
-    spacig := (/10 ,10 ,10 /)
+if(ns.eq.0) then 
+    minlvl := (/30 ,30 ,30 /) 
+    maxlvl := (/480,480,480/)
+    spacig := (/30 ,30 ,30 /)
 if(diff) then
-if(stand_option.eq.0) then 
-    minlvl := (/10 ,10 ,-0.8/) ;used for East Asian moist transiation
-    maxlvl := (/490,490, 0.8/) ;used for CTRL-NUDG
-    spacig := (/30 ,30 , 0.1/)
-else
-    minlvl := (/0  , 0 ,-0.8/) ;used for East Asian moist transiation
-    maxlvl := (/4.8,4.8, 0.8/) ;used for CTRL-NUDG
-    spacig := (/0.3,0.3, 0.1/)
+    minlvl := (/30 ,-80,-80/) 
+    maxlvl := (/480, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/30 , 10, 10/)
 end if
 end if
-
-ip   = ind(frq.ge.0.001)    ; all indices for "short" periods
+if(ns.eq.1) then 
+    minlvl := (/0  ,0  ,0  /) 
+    maxlvl := (/6.0,6.0,6.0/)
+    spacig := (/0.4,0.4,0.4/)
+if(diff) then
+    minlvl := (/0  ,-0.8,-0.8/) 
+    maxlvl := (/6.0, 0.8, 0.8/) ;used for CTRL-NUDG
+    spacig := (/0.4, 0.1, 0.1/)
+end if
+end if
 
 np = 0
-do nl = 0, nlev-1,1
 do nc = 0, ncase-1,1
     res@cnFillPalette := "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
-if((nc.eq.2).and.diff) then
+    if((nc.gt.0).and.diff) then
     res@cnFillPalette := "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
-end if 
+    end if 
     res@gsnLeftString   = pre_case(np) + ") " + case2(nc)
-if(lats(na).eq.latn(na)) then 
-    res@gsnRightString  = lats(na)+"N " + var_name(nv); +" ("+   
-;    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"N)" ;+" - "+latn(na) 
-else
-    res@gsnRightString  = lev(nl) + "hPa " + var_name(nv) +" ("+ lats(na)+"-"+latn(na) +"N)" 
-end if
+    if(lonl(na).eq.lonr(na)) then 
+    res@gsnRightString  = lonl(na)+"N " + var_name(nv); +" ("+   
+    else
+    res@gsnRightString  = lonl(na)+"-"+lonr(na) +"E " + var_name(nv) 
+    end if
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
     res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-    ;plot(nc)  = gsn_csm_hov(wks,var(nc,ip,:),res)
-    plot(np)  = gsn_csm_hov(wks,var2(nc,:,nl,:),res)
-    print(max(var2(nc,:,nl,:)))
-    print(min(var2(nc,:,nl,:)))
+    plot(np)  = gsn_csm_time_lat(wks,var2(nc,0,:,:),res)
+    print(max(var2(nc,0,:,:)))
+    print(min(var2(nc,0,:,:)))
     np = np + 1
 end do 
-end do 
 
-    gsn_panel(wks,plot,(/nlev,ncase/),resp)
+    gsn_panel(wks,plot,(/1,ncase/),resp)
 end
 

@@ -18,6 +18,8 @@ nv = 0
 na = 0
 month_s = 5
 month_e = 9
+stand = (/"","_stand"/)
+ns = 1
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG15S","NG4550","NG45N","NG1520"/) ;
@@ -30,7 +32,7 @@ if(case_option.eq.0) then
 end if
 
 do na = 0,0,1
-fileout  = path + "/project/2021variability/data/" + case + "-" + month_s + month_e + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
+fileout  = path + "/project/2021variability/data/" + case + "-" + month_s + month_e + stand(ns) + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 
 f    = addfile(filein(0)+years(9)+".daily.PRECC.nc","r")
 vars:= f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -73,6 +75,10 @@ var  = linmsg_n(var, -1, 2)
 printVarSummary(var)
 if (any(ismissing(var))) then
     print("var has missing values")
+end if
+
+if(ns.eq.1) then
+var = dim_standardize_n(var,1,1)
 end if
 
 do nt = 0, nyear-1, 1

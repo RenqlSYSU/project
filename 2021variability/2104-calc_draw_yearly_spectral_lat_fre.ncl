@@ -16,11 +16,11 @@ lonr = (/125 ,130  ,130  /)
 lat_spcing = 5 
 var_name = (/"preci"/)
 stand = (/"","_stand"/)
-ns = 1
+ns = 0
 month_s = 5 
 month_e = 9
 
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
+case_option  = 0 
 diff = True;False;
 perc = True;False
 barshare = False;True ;
@@ -38,24 +38,34 @@ if(case_option.eq.0) then
     case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL"/) ;,"NG24h-CTRL"
     end if
     years   = ispan(1979,2005,1)   ;the calculate time
+    path2   = "/home/ys17-19/renql"
+    filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
+                       "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR."/)
 end if
 
-filein   = path + "/data/" + case1 + "-" + month_s + month_e + stand(ns) + "_spec_" + var_name(nv) + "-" + area(na) + ".nc"
 fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + stand(ns) + "_spec_" + var_name(nv)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
-f    = addfile(filein(0),"r")
-spcx = f->spcx(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
-frq  = f->frq
-nfrq = dimsizes(spcx&frq)
-nlon = dimsizes(spcx&lon)
-nlat = dimsizes(spcx&lat)
-ncase = dimsizes(case2)
+f    = addfile(filein(0)+years(9)+".daily.PRECC.nc","r")
+vars:= f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+time = cd_calendar(f->time,0)
+if(month_s.gt.month_e) then 
+select_time = ind(time(:,1).ge.month_s.or.time(:,1).le.month_e)
+else
+select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+end if
+ntime = dimsizes(select_time)
+ncase = dimsizes(case1)
 nyear = dimsizes(years)
+nlat  = dimsizes(vars&lat)
+nlon  = dimsizes(vars&lon)
+nfrq = toint(ntime/2.0) 
 indx = 4 ;the result of specx_ci
-var  = new((/ncase,nyear,indx  ,nfrq,nlat,nlon/),float)
+
+var  = new((/ncase,nyear,indx ,nfrq,nlat/),float)
 pero = new((/ncase,indx-1,nfrq,nlat/),float)
 prob = new((/ncase-1,indx,nfrq,nlat/),float)
 plot = new((/ncase/),graphic)
@@ -63,23 +73,68 @@ sig1 = new((/ncase/),graphic)
 sig2 = new((/ncase/),graphic)
 sig3 = new((/ncase/),graphic)
 
-do nc = 0, ncase-1, 1
-    f    = addfile(filein(nc),"r")
-    var(nc,:,:,:,:,:) = f->spcx(:,:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
-end do
-printVarSummary(var)
-var := dim_avg_n_Wrap(var,5)
-print(var(0, 0, 0, 0:50:10, 5))
+;---------------------------------------------------------------
+;read the data, then calculate the yearly power spectra 
+;--------------------------------------------------------------
+; set spectral function arguments
+  d   = 0    ; detrending opt: 0=>remove mean 1=>remove mean + detrend
+  sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
+  pct = 0;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
+do nc = 0,2,1; ncase-1 ,1
+print("handle with " + case1(nc) + " " + area(na))
+term := new((/nyear,ntime,nlat,nlon/),float)
+
+do nt = 0, nyear-1 ,1
+    f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
+    term(nt,:,:,:) = f->PRECC(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
+    term(nt,:,:,:) = term(nt,:,:,:) + f->PRECL(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+end do
+term = term*1000*3600*24 ;convert m/s to mm/day
+term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
+printVarSummary(term)
+term  = linmsg_n(term, -1, 3)
+term  = linmsg_n(term, -1, 2)
+term := dim_avg_n_Wrap(term,3)
+printVarSummary(term)
+if (any(ismissing(term))) then
+    print("term has missing values")
+end if
+
+if(ns.eq.1) then
+term = dim_standardize_n(term,1,1)
+end if
+
+do nt = 0, nyear-1, 1
+do ny = 0, nlat-1, 1
+    ; calculate spectrum
+    sdof = specx_anal(term(nt,:,ny),d,sm,pct) ;returns the degrees of freedom as a scalar.
+    var(nc,nt,:,:,ny) = specx_ci(sdof, 0.05, 0.95) 
+end do 
+end do 
+end do ;end case
+print(sdof)
+copy_VarMeta(vars(:,0),var(0,0,0,0,:))
+printVarSummary(var)
+frq = sdof@frq
+var!3   = "frq"
+var&frq = frq
+var@long_name = "frequency"
+var@units     = "1/day"
+
+;---------------------------------------------------------------
+;calc significance and difference, then draw the picture
+;--------------------------------------------------------------
 vari = dim_variance_n_Wrap(var,1)
 var := dim_avg_n_Wrap(var,1)
 do nf = 0 ,ncase-2,1
 prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nyear,var(nf+1,:,:,:),vari(nf+1,:,:,:),nyear,True,False)
 end do
-term = conform(pero,var(:,0,:,:),(/0,2,3/))
-pero = mask(term,term.gt.var(:,1:3,:,:),True)
-prob = mask(prob,prob.lt.siglvl,True)
-delete([/term,vari/])
+term1 = conform(pero,var(:,0,:,:),(/0,2,3/))
+pero  = mask(term1,term1.gt.var(:,1:3,:,:),True)
+prob  = mask(prob,prob.lt.siglvl,True)
+delete([/term,term1,vari/])
 
 if(diff) then 
 do nf = 0 ,ncase-2,1

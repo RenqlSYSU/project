@@ -14,35 +14,14 @@ begin
 path    = "/home/ys17-19/renql"
 case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
 
-if(case_option.eq.0) then
-    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-6h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR.",\
-                      "/model/TP-NUDG-24h/AMIP_C5PM_TP_NUDG.cam.h1.YEAR."/)
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + (/"CTRL","NUDG6h","NUDG24h"/) + "-Clim_month_ave_"
-    years    = ispan(1979,2005,1)   ;the calculate time
-end if  
-if(case_option.eq.1) then
-    ;remove TP experiment, sample number is ten years 
-    case    = (/"TP_CTRL","TP_CR"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
-    filein  = path + "/model/" + case + "/pro/" + case + ".cam.h1.YEAR.00" ; + year + ".daily." + var_name + ".nc"
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
-    years   = ispan(21,30,1)   ;the calculate time
-end if
-if(case_option.eq.2) then
-    case    = (/"F2000","NGTR","NUDG"/) ;
-    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
-end if
 if(case_option.eq.3) then
-    case    = (/"CTRL","NG15S","NG45N","NG1520","NG4550"/) ;
+    case    = (/"CTRL","NG15S","NG4550","NGEN","NG45N","NG1520"/) ;
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
+                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                      "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR.",\
                       "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
-                      "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR.",\
-                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR."/)
+                      "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"
 end if
@@ -83,8 +62,9 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,3,1; ,nvar-1 ,1 
-do nf = 1,4,3
+;do nv = 0,3,1; ,nvar-1 ,1 
+do nv = 6,6,1; ,nvar-1 ,1 
+do nf = 3,3,3
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

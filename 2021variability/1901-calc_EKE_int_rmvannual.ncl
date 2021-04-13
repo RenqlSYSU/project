@@ -17,12 +17,13 @@ ca = 90.0 ;day
 cb = 2.5  ;10.0 ;
 
 if(case_option.eq.3) then
-    case    = (/"CTRL","NG15S","NG45N","NG1520","NG4550"/) ;
+    case    = (/"CTRL","NG15S","NG4550","NGEN","NG45N","NG1520"/) ;
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
+                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                      "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR.",\
                       "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
-                      "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR.",\
-                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR."/)
+                      "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
         fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_intEKE.nc"
@@ -68,7 +69,7 @@ month_vari = new((/      12 ,nlat,nlon/),float) ;be used to exam the significanc
 season_ave = new((/       4 ,nlat,nlon/),float)
 season_vari= new((/       4 ,nlat,nlon/),float)
 
-do nf = 1,1,4 
+do nf = 3,3,4 
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

@@ -1,6 +1,8 @@
 ;***************************************************************************
-;read the spcx  
-;then do the spectral analysis and plot the figure
+;read preci, remove annual cycle, zonal average, 
+;then yearly power spectrum is calculated
+;make significance testing and draw the results
+;
 ;                                           by Ql_Ren
 ;                                           2019/11/11
 ;******************************************************************************
@@ -96,7 +98,7 @@ term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
 printVarSummary(term)
 term  = linmsg_n(term, -1, 3)
 term  = linmsg_n(term, -1, 2)
-term := dim_avg_n_Wrap(term,3)
+term := dim_avg_n_Wrap(term,3) ;zonal average
 printVarSummary(term)
 if (any(ismissing(term))) then
     print("term has missing values")

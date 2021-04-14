@@ -9,8 +9,8 @@ begin
 path    = "/home/ys17-19/renql/project/2021variability"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NG15S","NG4550"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL"/) ;,"NG24h-CTRL"
+    case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL","NGEN-CTRL"/) ;,"NG24h-CTRL"
     gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
@@ -38,7 +38,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 0
-nv = 1
+nv = 6
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
@@ -53,7 +53,7 @@ contsig  = True ;False;;if True, only the significant values are contoured
 barshare = True ;False;
 barvert  = False;True ;
 
-var_option = 1
+var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -665,9 +665,9 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-7,-7/);-3.5 -8,-8,-8,-8
-    maxlvl = (/16 , 7, 7/); 3.5  8 ,8 ,8 ,8 
-    spacig = (/ 1 , 1, 1/); 0.5  1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-7,-7,-7/);-3.5 -8,-8,-8,-8
+    maxlvl = (/16 , 7, 7, 7/); 3.5  8 ,8 ,8 ,8 
+    spacig = (/ 1 , 1, 1, 1/); 0.5  1 ,1 ,1 ,1 
 end if
 
 if(nv.eq.2) 
@@ -719,16 +719,16 @@ end if
 
 if(nv.ge.6.and.nv.le.11) then ;intEKE
 if(perc) then 
-    minlvl = (/ 2 ,-70,-70/);-8,-8,-8,-8
-    maxlvl = (/32 , 70, 70/);8 ,8 ,8 ,8 
-    spacig = (/ 2 , 10, 10/);1 ,1 ,1 ,1 
+    minlvl = (/ 2 ,-70,-70,-70/);-8,-8,-8,-8
+    maxlvl = (/32 , 70, 70, 70/);8 ,8 ,8 ,8 
+    spacig = (/ 2 , 10, 10, 10/);1 ,1 ,1 ,1 
 else
 ;    minlvl = (/2 ,-14,-14/);-8,-8,-8,-8
 ;    maxlvl = (/32, 14, 14/);8 ,8 ,8 ,8 
 ;    spacig = (/2 , 2 , 2 /);1 ,1 ,1 ,1 
-    minlvl = (/10,-35,-35/);-8,-8,-8,-8
-    maxlvl = (/85, 35, 35/);8 ,8 ,8 ,8 
-    spacig = (/5 , 5 , 5 /);1 ,1 ,1 ,1 
+    minlvl = (/10,-35,-35,-35/);-8,-8,-8,-8
+    maxlvl = (/85, 35, 35, 35/);8 ,8 ,8 ,8 
+    spacig = (/5 , 5 , 5 , 5 /);1 ,1 ,1 ,1 
 end if
 end if
 
@@ -856,7 +856,7 @@ end if
         overlay(plot(np),plot2(np))
         end if
         
-        if(nc.eq.0) then
+        if(nc.eq.0.or.nc.eq.3) then
         line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
         line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
         else
@@ -896,10 +896,10 @@ end if
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;   gsn_panel(wks,plot,(/4,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
-    gsn_panel(wks,plot,(/4,3/),resp)
+;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do

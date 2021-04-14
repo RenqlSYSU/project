@@ -9,8 +9,8 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
 area = (/"EA","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 25 , 22  , 30  /)
-latn = (/ 40 , 30  , 45  /)
+lats = (/ 10 , 22  , 30  /)
+latn = (/ 50 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
 lat_spcing = 5 
@@ -18,7 +18,7 @@ var_name = (/"preci"/)
 stand = (/"","_stand"/)
 ns = 1
 month_s = 5 
-month_e = 9
+month_e = 8
 
 case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
 diff = True;False;
@@ -32,10 +32,10 @@ siglvl = 0.05
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NG15S","NG4550"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG15S","NG4550"/) ;,"NUDG24h"
+    case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
     if(diff) then 
-    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL"/) ;,"NG24h-CTRL"
+    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL","NGEN-CTRL"/) ;,"NG24h-CTRL"
     end if
     years   = ispan(1979,2005,1)   ;the calculate time
 end if
@@ -309,29 +309,29 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resp@txFontThicknessF = title_thick
 
 if(ns.eq.0) then 
-    minlvl := (/30 ,30 ,30 /) 
-    maxlvl := (/480,480,480/)
-    spacig := (/30 ,30 ,30 /)
-if(diff) then
-    minlvl := (/30 ,-80,-80/) 
-    maxlvl := (/480, 80, 80/) ;used for CTRL-NUDG
-    spacig := (/30 , 10, 10/)
+    minlvl := (/30 ,30 ,30 ,30 /) 
+    maxlvl := (/480,480,480,480/)
+    spacig := (/30 ,30 ,30 ,30 /)
+if(diff) then                  
+    minlvl := (/30 ,-80,-80,-80/) 
+    maxlvl := (/480, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/30 , 10, 10, 10/)
 end if
 end if
 
 if(ns.eq.1) then 
-    minlvl := (/0  ,0  ,0  /) 
-    maxlvl := (/6.0,6.0,6.0/)
-    spacig := (/0.4,0.4,0.4/)
-if(diff) then
-if(perc) then 
-    minlvl := (/0  ,-80,-80/) 
-    maxlvl := (/6.0, 80, 80/) ;used for CTRL-NUDG
-    spacig := (/0.4, 10, 10/)
+    minlvl := (/0  ,0  ,0  ,0  /) 
+    maxlvl := (/6.0,6.0,6.0,6.0/)
+    spacig := (/0.4,0.4,0.4,0.4/)
+if(diff) then                  
+if(perc) then                  
+    minlvl := (/0  ,-80,-80,-80/) 
+    maxlvl := (/6.0, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/0.4, 10, 10, 10/)
 else
-    minlvl := (/0  ,-0.8,-0.8/) 
-    maxlvl := (/6.0, 0.8, 0.8/) ;used for CTRL-NUDG
-    spacig := (/0.4, 0.1, 0.1/)
+    minlvl := (/0  ,-0.8,-0.8,-0.8/) 
+    maxlvl := (/6.0, 0.8, 0.8, 0.8/) ;used for CTRL-NUDG
+    spacig := (/0.4, 0.1, 0.1, 0.1/)
 end if
 end if
 end if

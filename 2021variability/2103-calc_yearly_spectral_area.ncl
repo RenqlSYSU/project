@@ -1,31 +1,31 @@
 ;***************************************************************************
-;filename:      spec.ncl
-;read the 27 years U,V,T at TP areas in three cases (CTRL, NUDG6h, NUDG24h)
-;then do the spectral analysis and plot the figure
+;read preci, remove annual cycle, zonal average, 
+;then power spectrum is calculated
 ;                                           by Ql_Ren
-;                                           2019/01/20
+;                                           2021/03/16
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
 var_name = (/"preci"/)
 area = (/"EA","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 25 , 22  , 30  /)
-latn = (/ 40 , 30  , 45  /)
+lats = (/ 10 , 22  , 30  /)
+latn = (/ 50 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
-lonr = (/150 ,130  ,130  /)
+lonr = (/125 ,130  ,130  /)
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 nv = 0
 na = 0
 month_s = 5
-month_e = 9
+month_e = 8
 stand = (/"","_stand"/)
 ns = 1
 
 if(case_option.eq.0) then
-    case    = (/"CTRL","NG15S","NG4550","NG45N","NG1520"/) ;
+    case    = (/"CTRL","NG15S","NG4550","NGEN","NG45N","NG1520"/) ;
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                       "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                      "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR.",\
                       "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
                       "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
@@ -56,7 +56,7 @@ nlon  = dimsizes(vars&lon)
   sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
   pct = 0;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
-do nc = 0,2,1; ncase-1 ,1
+do nc = 0,3,1; ncase-1 ,1
 print("handle with " + case(nc) + " " + area(na))
 var  := new((/nyear,ntime,nlat,nlon/),float)
 spcx := new((/nyear,4,toint(ntime/2),nlat,nlon/),float)

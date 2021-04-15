@@ -38,19 +38,20 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 0
-nv = 6
+nv = 1
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = False;True ;
+ifannual = True ;Whether to do the annual average
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = True ;False;
+barshare = False;True ;
 barvert  = False;True ;
 
 var_option = 0
@@ -89,8 +90,8 @@ lats = (/-89,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
 latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
 lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,30 /);20
 lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
-lat_spacing = 20
-lon_spacing = 30
+lat_spacing = 30
+lon_spacing = 40
 na = 0
 
 f = addfile(gtopfile,"r")
@@ -131,9 +132,9 @@ printVarSummary(lonx)
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
-   tick_font      = 0.01
-   subtitle_font  = 0.01
-   title_font     = 0.01
+   tick_font      = 0.02
+   subtitle_font  = 0.02
+   title_font     = 0.02
    vcref_font     = 0.008
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
@@ -537,7 +538,7 @@ end if
     lnres                      = True
     lnres@gsLineColor          = "black"
     lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = 2.0
+    lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
 
     res_axis                      = True
@@ -627,7 +628,7 @@ end if
     res@lbOrientation        = "Horizontal";"Vertical";
     res@pmLabelBarWidthF  = 0.7
     res@pmLabelBarHeightF = 0.04
-    res@pmLabelBarOrthogonalPosF  = 0.23 ;y direction
+    res@pmLabelBarOrthogonalPosF  = 0.2 ;y direction
     res@pmLabelBarParallelPosF    = 0.5
     end if
     resp@gsnPaperOrientation = "landscape" ;"portrait"
@@ -774,6 +775,7 @@ if(nv.eq.20) then  ;200
     spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
+np = -1
 do nc = 0,ncase-1,1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
@@ -789,11 +791,8 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 0,nmonth-1,1
-        ;np = 2*(nl-3)+nc
-        ;np = nm*2+nc
-        ;np = nc*nmonth+nm
-        np = nm
+    do nm = 2,2,1;0,nmonth-1,1
+        np = np + 1
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
@@ -896,14 +895,14 @@ end if
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;   gsn_panel(wks,plot,(/4,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
-;    gsn_panel(wks,plot,(/3,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 end
 

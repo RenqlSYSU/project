@@ -37,13 +37,13 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
-nl = 0
-nv = 1
+nl = 2
+nv = 5
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = False;True ;
+vect_option = True ;False;
 ifannual = True ;Whether to do the annual average
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
@@ -183,9 +183,9 @@ end do
 end if
 
 do nf = 0 ,ncase-1, 1
-;f = addfile(filename(nf)+"PS.nc","r")
-;ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-;printVarSummary(ps)
+f = addfile(filename(nf)+"PS.nc","r")
+ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+printVarSummary(ps)
 
 if(vect_option) then 
 inv = 0
@@ -641,17 +641,17 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10
-    vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
-                      (/50,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
-                      (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
-else
-    vcref         = (/(/7 , 2,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/20,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
-                      (/10, 2,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
-                      (/15,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/10,5 ,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/10,5 ,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/30,10,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
+                      (/50,10,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
+                      (/50,10,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
+else                               
+    vcref         = (/(/7 , 2,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/15,4 ,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/20,4 ,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
+                      (/10, 2,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
+                      (/15,4 ,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
 if(nv.eq.0) 
@@ -692,29 +692,29 @@ end if
 
 if(nv.eq.5) ;T ;; 850,700,600,500,200,100,10
 if(nl.eq.0) then ;850 
-    minlvl = (/ 4 ,-3.5,-3.5/); -24,-24
-    maxlvl = (/ 34, 3.5, 3.5/);  24, 24
-    spacig = (/ 2 ,0.5 ,0.5 /);   3,  3
-end if
+    minlvl = (/ 4 ,-3.5,-3.5,-3.5/); -24,-24
+    maxlvl = (/ 34, 3.5, 3.5, 3.5/);  24, 24
+    spacig = (/ 2 ,0.5 ,0.5 ,0.5 /);   3,  3
+end if                           
 if(nl.eq.1) then ;500 nl.le.3.and.nl.ge.2
-    minlvl = (/-15,-3.5,-3.5/); -24,-24
-    maxlvl = (/  0, 3.5, 3.5/);  24, 24
-    spacig = (/ 1 ,0.5 ,0.5 /);   3,  3
-end if
-if(nl.eq.2) then  ;200
-    minlvl = (/-62,-3.5,-3.5/);-68 -24,-24
-    maxlvl = (/-47, 3.5, 3.5/);-50  24, 24
-    spacig = (/1  ,0.5 ,0.5 /);1.2   3,  3
-end if
-if(nl.eq.5) then  ;100
-    minlvl = (/-75,-3.5,-3.5/); -24,-24
-    maxlvl = (/-60, 3.5, 3.5/);  24, 24
-    spacig = (/1  ,0.5 ,0.5 /);   3,  3
-end if
-if(nl.eq.6) then  ;10
-    minlvl = (/-65,-3.5,-3.5/); -24,-24
-    maxlvl = (/-50, 3.5, 3.5/);  24, 24
-    spacig = (/1  ,0.5 ,0.5 /);   3,  3
+    minlvl = (/-15,-3.5,-3.5,-3.5/); -24,-24
+    maxlvl = (/  0, 3.5, 3.5, 3.5/);  24, 24
+    spacig = (/ 1 ,0.5 ,0.5 ,0.5 /);   3,  3
+end if                           
+if(nl.eq.2) then  ;200           
+    minlvl = (/-62,-3.5,-3.5,-3.5/);-68 -24,-24
+    maxlvl = (/-47, 3.5, 3.5, 3.5/);-50  24, 24
+    spacig = (/1  ,0.5 ,0.5 ,0.5 /);1.2   3,  3
+end if                           
+if(nl.eq.5) then  ;100           
+    minlvl = (/-75,-3.5,-3.5,-3.5/); -24,-24
+    maxlvl = (/-60, 3.5, 3.5, 3.5/);  24, 24
+    spacig = (/1  ,0.5 ,0.5 ,0.5 /);   3,  3
+end if                           
+if(nl.eq.6) then  ;10            
+    minlvl = (/-65,-3.5,-3.5,-3.5/); -24,-24
+    maxlvl = (/-50, 3.5, 3.5, 3.5/);  24, 24
+    spacig = (/1  ,0.5 ,0.5 ,0.5 /);   3,  3
 end if
 end if
 
@@ -775,8 +775,8 @@ if(nv.eq.20) then  ;200
     spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
-np = -1
 do nc = 0,ncase-1,1
+np = -1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -791,7 +791,7 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 2,2,1;0,nmonth-1,1
+    do nm = 0,nmonth-1,1 ;2,1;
         np = np + 1
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
@@ -895,14 +895,14 @@ end if
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-;    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;   gsn_panel(wks,plot,(/4,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 end
 

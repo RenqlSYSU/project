@@ -14,7 +14,10 @@ lats = (/ 27 , 22  , 30  /)
 latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
-var_name = (/"preci"/)
+var_name = (/"preci","vort"/)
+nv = 0 ;
+lev = (/850,500,200,700,600,  100,10/)
+nl = 0
 stand = (/"","_stand"/)
 ns = 0
 month_s = 5 
@@ -24,7 +27,6 @@ first_areaave = True ;False;
 case_option  = 0 
 siglvl = 0.1
 na = 0 ;"EA","TP","SEA","NEA"
-nv = 0 ;"U","V","T","vort"
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
 if(case_option.eq.0) then
@@ -77,18 +79,32 @@ do nc = 0, ncase-1 ,1
 print("handle with " + case1(nc) + " " + area(na))
 term := new((/nyear,ntime,nlat,nlon/),float)
 
+if (nv.eq.0) then ;preci
 do nt = 0, nyear-1 ,1
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
     term(nt,:,:,:) = f->PRECC(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
     f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
     term(nt,:,:,:) = term(nt,:,:,:) + f->PRECL(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do
+term = term*1000*3600*24 ;convert m/s to mm/day
+end if
+
+if (nv.eq.1) then ;vort
+do nt = 0, nyear-1 ,1
+    f  = addfile(filein(nc)+years(nt)+".daily.U.nc","r")
+    u  = f->U(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f  = addfile(filein(nc)+years(nt)+".daily.V.nc","r")
+    v  = f->V(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    term(nt,:,:,:) = uv2vr_cfd(u,v,v&lat,v&lon,2) 
+end do
+term = term*10^5 ;10^-5 s^-1
+end if
+
 term  = linmsg_n(term, -1, 3)
 term  = linmsg_n(term, -1, 2)
 if (any(ismissing(term))) then
     print("term has missing values")
 end if
-term = term*1000*3600*24 ;convert m/s to mm/day
 nave = 5 ;five days run ave
 opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
@@ -101,44 +117,62 @@ if(first_areaave) then
     if(ns.eq.1) then
     term = dim_standardize_n(term,1,1) ;dim_standardize_n(x, opt, dims)
     end if
-
+   
+    spcavg = new ((/nfrq/),typeof(term))
+    spcavg = 0.0
+    r1zsum = 0.0
     do nt = 0, nyear-1, 1
-    ; calculate spectrum
-    sdof := specx_anal(term(nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    var(nc,nt,:,:) = specx_ci(sdof, siglvl, 1.0-siglvl) 
+        ; calculate spectrum
+        sdof := specx_anal(term(nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spcavg = spcavg + sdof@spcx                ; sum spc of each segment
+        r1     = sdof@xlag1                        ; extract segment lag-1
+        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
     end do 
-    sdof := specx_anal(dim_avg_n(term,0),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    ave(nc,:,:) = specx_ci(sdof, siglvl, 1.0-siglvl) 
+    r1z  = r1zsum/nyear                 ; average r1z
+    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
+    spcavg  = spcavg/nyear              ; average spectrum
+    df      = 2.0*nyear   ; deg of freedom
+    df@spcx = spcavg      ; assign the mean spc
+    df@frq  = sdof@frq
+    df@xlag1= r1          ; assign mean lag-1
+    ave(nc,:,:) = specx_ci(df, siglvl, 1.0-siglvl) 
 
 else
 
-    var1  = new((/nyear,indx ,nfrq,nlat,nlon/),float)
-    ave1  = new((/      indx ,nfrq,nlat,nlon/),float)
+    ave1  = new((/indx,nfrq,nlat,nlon/),typeof(term))
     if(ns.eq.1) then
     term = dim_standardize_n(term,1,1) ;dim_standardize_n(x, opt, dims)
     end if
 
+    spcavg = new ((/nfrq/),typeof(term))
     do ny = 0, nlat-1, 1
     do nx = 0, nlon-1, 1
-    sdof := specx_anal(dim_avg_n(term(:,:,ny,nx),0),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    ave1(:,:,ny,nx) = specx_ci(sdof, siglvl, 1.0-siglvl) 
+    spcavg = 0.0
+    r1zsum = 0.0
     do nt = 0, nyear-1, 1
-    ; calculate spectrum
-    sdof := specx_anal(term(nt,:,ny,nx),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    var1(nt,:,:,ny,nx) = specx_ci(sdof, siglvl, 1.0-siglvl) 
+        ; calculate spectrum
+        sdof := specx_anal(term(nt,:,ny,nx),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spcavg = spcavg + sdof@spcx                ; sum spc of each segment
+        r1     = sdof@xlag1                        ; extract segment lag-1
+        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
+    end do 
+    r1z  = r1zsum/nyear                 ; average r1z
+    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
+    spcavg  = spcavg/nyear              ; average spectrum
+    df      = 2.0*nyear   ; deg of freedom
+    df@spcx = spcavg      ; assign the mean spc
+    df@frq  = sdof@frq
+    df@xlag1= r1          ; assign mean lag-1
+    ave1(nt,:,:,ny,nx) = specx_ci(df, siglvl, 1.0-siglvl) 
     end do 
     end do 
-    end do 
-    var(nc,:,:,:) = wgt_areaave_Wrap(var1,1.0,1.0,0) ;area average
-    ave(nc,:,:)   = wgt_areaave_Wrap(ave1,1.0,1.0,0) ;area average
+    ave(nc,:,:) = wgt_areaave_Wrap(ave1,1.0,1.0,0) ;area average
+    term := wgt_areaave_Wrap(term,1.0,1.0,0) ;area average
 end if
 vari2(nc) = dim_avg_n(dim_variance_n(term,1),0)
 vari3(nc) = dim_variance(ndtooned(term))
 end do ;end case
 
-var := dim_avg_n_Wrap(var,1)
-ave = var
-;ave(:,0,:) = var(:,0,:)
 ave = ave*(1.0/ntime)
 ave(:,:,0) = ave(:,:,0)/2.0
 ave(:,:,nfrq-1) = ave(:,:,nfrq-1)/2.0

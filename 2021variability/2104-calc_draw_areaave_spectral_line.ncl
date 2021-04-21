@@ -15,7 +15,7 @@ latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
 var_name = (/"preci","vort"/)
-nv = 0 ;
+nv = 1 ;
 lev = (/850,500,200,700,600,  100,10/)
 nl = 0
 stand = (/"","_stand"/)
@@ -77,8 +77,9 @@ vari3 = new((/ncase/),float)
 
 do nc = 0, ncase-1 ,1
 print("handle with " + case1(nc) + " " + area(na))
-term := new((/nyear,ntime,nlat,nlon/),float)
 
+;========= read data ======================================
+term := new((/nyear,ntime,nlat,nlon/),float)
 if (nv.eq.0) then ;preci
 do nt = 0, nyear-1 ,1
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
@@ -100,6 +101,7 @@ end do
 term = term*10^5 ;10^-5 s^-1
 end if
 
+;========= data processing and calc spectrum ======================================
 term  = linmsg_n(term, -1, 3)
 term  = linmsg_n(term, -1, 2)
 if (any(ismissing(term))) then
@@ -108,7 +110,7 @@ end if
 nave = 5 ;five days run ave
 opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
-term = runave_n_Wrap(term, nave, opt, dimh)
+;term = runave_n_Wrap(term, nave, opt, dimh)
 term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
 printVarSummary(term)
 
@@ -282,7 +284,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@tmXMajorGridLineColor          = "gray"
     resxy@tmXMajorGridThicknessF         = 2.0
                              
-    resxy@gsnStringFont         = font_index
+    resxy@gsnStringFont        = font_index
     resxy@gsnStringFontHeightF = subtitle_font
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
     resxy@gsnRightString   = var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"

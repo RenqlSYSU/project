@@ -15,11 +15,13 @@ latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
 var_name = (/"preci","vort"/)
-nv = 1 ;
+nv = 0 ;
 lev = (/850,500,200,700,600,  100,10/)
 nl = 0
 stand = (/"","_stand"/)
 ns = 0
+allcase = False ;if True, four case be draw in one figure
+ifrunave= False
 month_s = 5 
 month_e = 9
 
@@ -110,7 +112,9 @@ end if
 nave = 5 ;five days run ave
 opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
-;term = runave_n_Wrap(term, nave, opt, dimh)
+if(ifrunave) then 
+term = runave_n_Wrap(term, nave, opt, dimh)
+end if
 term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
 printVarSummary(term)
 
@@ -219,12 +223,6 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
     
-    resxy@xyDashPatterns    = (/0,0,0,0/)
-    resxy@xyLineThicknesses = (/5.0,3.0,3.0,3.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"grey","red","blue","black"/)
-    ;resxy@xyDashPatterns    = (/0,0,1,3/)
-    ;resxy@xyLineThicknesses = (/2.0,3.0,3.0,3.0/)   ; make second line thicker
-    ;resxy@xyLineColors      = (/"black","red","red","red"/)
     resxy@tmYLAutoPrecision = False
     resxy@tmYLPrecision     = 2 
     ;resxy@tiXAxisOn = False
@@ -232,8 +230,8 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@tiXAxisString = "Period (day)"          ; xaxis
     resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
-    ;resxy@trYMinF = 0
-    ;resxy@trYMaxF = 4.0 
+    resxy@trYMinF = 0
+    resxy@trYMaxF = max(ave(:,0,:))
     resxy@xyComputeXMin = True
     resxy@trXLog  = True
     resxy@tmXBMode    = "Explicit"
@@ -289,22 +287,36 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@gsnCenterString  = "";lev(nl) + " hPa" 
     resxy@gsnRightString   = var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 
-;ip   = ind(frq.le.0.2)    ; all indices for "short" periods
-ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
-np = 0
-;do nc = 0, ncase-1, 1
-    resxy@gsnLeftString   = pre_case(np) + ") " ;+ case2(nc)
-    plot(np) = gsn_csm_xy(wks, ave&frq, ave(:,0,:), resxy)     
-    np = np + 1
-;end do
-
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+    resp@txString      = "sm="+sm+" pct="+pct+" runave="+ifrunave 
 
-;    resp@txString      = fig_title
-    ;gsn_panel(wks,plot,(/1,ncase/),resp)
+;ip   = ind(frq.le.0.2)    ; all indices for "short" periods
+ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
+
+np = 0
+if(allcase) then 
+    resxy@xyDashPatterns    = (/0,0,0,0/)
+    resxy@xyLineThicknesses = (/5.0,3.0,3.0,3.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"grey","red","blue","black"/)
+    resxy@pmLegendDisplayMode = "Always"
+    resxy@gsnLeftString   = pre_case(np) + ") " ;+ case2(nc)
+    plot(np) = gsn_csm_xy(wks, ave&frq, ave(:,0,:), resxy)     
+    np = np + 1
     gsn_panel(wks,plot,(/1,1/),resp)
+else
+    resxy@xyDashPatterns    = (/0,0,1,3/)
+    resxy@xyLineThicknesses = (/2.0,3.0,3.0,3.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"black","red","red","red"/)
+    resxy@pmLegendDisplayMode = "NoCreate"
+    do nc = 0, ncase-1, 1
+    resxy@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + vari1(nc)
+    plot(np) = gsn_csm_xy(wks, ave&frq, ave(nc,:,:), resxy)     
+    np = np + 1
+    end do
+    gsn_panel(wks,plot,(/1,ncase/),resp)
+end if
 end

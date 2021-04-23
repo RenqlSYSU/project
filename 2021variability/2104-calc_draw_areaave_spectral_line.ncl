@@ -20,8 +20,9 @@ lev = (/850,500,200,700,600,  100,10/)
 nl = 0
 stand = (/"","_stand"/)
 ns = 0
-allcase = False ;if True, four case be draw in one figure
-ifrunave= False
+allcase = True ;False ;if True, four case be draw in one figure
+ifrunave= True ;False;
+nave = 8 ;five days run ave
 month_s = 5 
 month_e = 9
 
@@ -109,7 +110,6 @@ term  = linmsg_n(term, -1, 2)
 if (any(ismissing(term))) then
     print("term has missing values")
 end if
-nave = 5 ;five days run ave
 opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
 if(ifrunave) then 
@@ -179,14 +179,14 @@ vari2(nc) = dim_avg_n(dim_variance_n(term,1),0)
 vari3(nc) = dim_variance(ndtooned(term))
 end do ;end case
 
-ave = ave*(1.0/ntime)
-ave(:,:,0) = ave(:,:,0)/2.0
-ave(:,:,nfrq-1) = ave(:,:,nfrq-1)/2.0
+varia = ave*(1.0/ntime)
+varia(:,:,0) = varia(:,:,0)/2.0
+varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
 frq = sdof@frq
-;ave = ave*conform(ave,frq,2)
+ave = ave*conform(ave,frq,2)
 
 ;calc total variance
-vari1 = dim_sum_n(ave(:,0,:),1)
+vari1 = dim_sum_n(varia(:,0,:),1)
 print(vari1)
 print(vari2)
 print(vari3)
@@ -194,9 +194,11 @@ print(vari3)
 print(sdof)
 printVarSummary(ave)
 ave!2   = "frq"
-ave&frq = frq
-ave@long_name = "frequency"
+ave&frq = log(frq)
+ave@long_name = "power*frequency"
 ave@units     = "1/day"
+;ave@long_name = "frequency"
+;ave@units     = "1/day"
 
 ;************************************************
 ; plotting
@@ -228,14 +230,17 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     ;resxy@tiXAxisOn = False
     ;resxy@tiYAxisOn = False
     resxy@tiXAxisString = "Period (day)"          ; xaxis
-    resxy@tiYAxisString = "Variance"           ; yaxis
+    resxy@tiYAxisString = "Power*frq"           ; yaxis
+    ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
     resxy@trYMaxF = max(ave(:,0,:))
+    resxy@trXMinF = log(min(frq))
+    resxy@trXMaxF = log(max(frq)) 
     resxy@xyComputeXMin = True
-    resxy@trXLog  = True
+    ;resxy@trXLog  = True
     resxy@tmXBMode    = "Explicit"
-    resxy@tmXBValues  = 1.0/p_draw
+    resxy@tmXBValues  = log(1.0/p_draw)
     resxy@tmXBLabels  = p_draw
     
     ;legend
@@ -253,7 +258,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@pmLegendHeightF  = 0.18
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = - 0.35   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.25    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = 0.3    ; move ref vector along X-axis
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -292,7 +297,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    resp@txString      = "sm="+sm+" pct="+pct+" runave="+ifrunave 
+    resp@txString      = "sm="+sm+" pct="+pct+" runave="+ifrunave+" nave="+nave
 
 ;ip   = ind(frq.le.0.2)    ; all indices for "short" periods
 ip   = ind(frq.ge.0.01)    ; all indices for "short" periods

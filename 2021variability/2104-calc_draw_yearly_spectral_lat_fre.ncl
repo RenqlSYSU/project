@@ -11,39 +11,45 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
 area = (/"EA","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
-lats = (/ 25 , 22  , 30  /)
-latn = (/ 40 , 30  , 45  /)
+lats = (/ 10 , 22  , 30  /)
+latn = (/ 50 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
+na = 0 ;"EA","TP","SEA","NEA"
 lat_spcing = 5 
-var_name = (/"preci"/)
+var_name = (/"preci","vort"/)
+nv = 0 ;
+lev = (/850,500,200,700,600,  100,10/)
+nl = 0
 stand = (/"","_stand"/)
 ns = 0
 month_s = 5 
 month_e = 9
+ifrunave= False;True ;
+nave = 8 ;five days run ave
 
+first_areaave = True ;False;
 case_option  = 0 
 diff = True;False;
 perc = True;False
 barshare = False;True ;
 barvert  = False;True ;
 landscap = False;True ;False mean portrait
-na = 0 ;"EA","TP","SEA","NEA"
-nv = 0 ;"U","V","T","vort"
 siglvl = 0.05
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NG15S","NG4550"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG15S","NG4550"/) ;,"NUDG24h"
+    case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    case2   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
     if(diff) then 
-    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL"/) ;,"NG24h-CTRL"
+    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL","NGEN-CTRL"/) ;,"NG24h-CTRL"
     end if
     years   = ispan(1979,2005,1)   ;the calculate time
     path2   = "/home/ys17-19/renql"
     filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                        "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
-                       "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR."/)
+                       "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                       "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 end if
 
 fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + stand(ns) + "_spec_" + var_name(nv)
@@ -67,9 +73,10 @@ nlon  = dimsizes(vars&lon)
 nfrq = toint(ntime/2.0) 
 indx = 4 ;the result of specx_ci
 
-var  = new((/ncase,nyear,indx ,nfrq,nlat/),float)
-pero = new((/ncase,indx-1,nfrq,nlat/),float)
-prob = new((/ncase-1,indx,nfrq,nlat/),float)
+spc  = new((/ncase,nyear,nfrq,nlat/),typeof(vars))
+ave  = new((/ncase,indx ,nfrq,nlat/),typeof(vars))
+pero = new((/ncase,indx-1,nfrq,nlat/),float) ;main period that pass the significance
+prob = new((/ncase-1,nfrq,nlat/),float)
 plot = new((/ncase/),graphic)
 sig1 = new((/ncase/),graphic)
 sig2 = new((/ncase/),graphic)
@@ -81,12 +88,15 @@ sig3 = new((/ncase/),graphic)
 ; set spectral function arguments
   d   = 0    ; detrending opt: 0=>remove mean 1=>remove mean + detrend
   sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
-  pct = 0;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
+  pct = 0.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. 
+  ;If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
-do nc = 0,2,1; ncase-1 ,1
+do nc = 0, ncase-1 ,1
 print("handle with " + case1(nc) + " " + area(na))
-term := new((/nyear,ntime,nlat,nlon/),float)
 
+;========= read data ======================================
+term := new((/nyear,ntime,nlat,nlon/),float)
+if (nv.eq.0) then ;preci
 do nt = 0, nyear-1 ,1
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
     term(nt,:,:,:) = f->PRECC(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -94,95 +104,129 @@ do nt = 0, nyear-1 ,1
     term(nt,:,:,:) = term(nt,:,:,:) + f->PRECL(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
 end do
 term = term*1000*3600*24 ;convert m/s to mm/day
-term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
-printVarSummary(term)
+end if
+
+if (nv.eq.1) then ;vort
+do nt = 0, nyear-1 ,1
+    f  = addfile(filein(nc)+years(nt)+".daily.U.nc","r")
+    u  = f->U(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f  = addfile(filein(nc)+years(nt)+".daily.V.nc","r")
+    v  = f->V(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    term(nt,:,:,:) = uv2vr_cfd(u,v,v&lat,v&lon,2) 
+end do
+term = term*10^5 ;10^-5 s^-1
+end if
+
+;========= data processing and calc spectrum ======================================
 term  = linmsg_n(term, -1, 3)
 term  = linmsg_n(term, -1, 2)
-term := dim_avg_n_Wrap(term,3) ;zonal average
 printVarSummary(term)
 if (any(ismissing(term))) then
     print("term has missing values")
 end if
-
-if(ns.eq.1) then
-term = dim_standardize_n(term,1,1)
+opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
+dimh = 1
+if(ifrunave) then 
+term = runave_n_Wrap(term, nave, opt, dimh)
 end if
+term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
+printVarSummary(term)
 
-do nt = 0, nyear-1, 1
-do ny = 0, nlat-1, 1
-    ; calculate spectrum
-    sdof = specx_anal(term(nt,:,ny),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    var(nc,nt,:,:,ny) = specx_ci(sdof, 0.05, 0.95) 
-end do 
-end do 
+if(first_areaave) then 
+    term := dim_avg_n_Wrap(term,3) ;zonal average
+    if(ns.eq.1) then
+    term = dim_standardize_n(term,1,1)
+    end if
+   
+    do ny = 0, nlat-1, 1
+    r1zsum = 0.0
+    do nt = 0, nyear-1, 1
+        ; calculate spectrum
+        sdof := specx_anal(term(nt,:,ny),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        r1     = sdof@xlag1                        ; extract segment lag-1
+        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
+        spc(nc,nt,:,ny) = sdof@spcx                ; sum spc of each segment
+    end do 
+    r1z  = r1zsum/nyear                 ; average r1z
+    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
+    spcavg  = dim_avg_n(spc(nc,:,:,ny),0)              ; average spectrum
+    df      = 2.0*nyear   ; deg of freedom
+    df@spcx = spcavg      ; assign the mean spc
+    df@frq  = sdof@frq
+    df@xlag1= r1          ; assign mean lag-1
+    ave(nc,:,:,ny) = specx_ci(df, siglvl, 1.0-siglvl) 
+    end do 
+
+else
+
+    spc1 = new((/nyear,nfrq,nlat,nlon/),typeof(term))
+    ave1 = new((/indx ,nfrq,nlat,nlon/),typeof(term))
+    if(ns.eq.1) then
+    term = dim_standardize_n(term,1,1) ;dim_standardize_n(x, opt, dims)
+    end if
+
+    do ny = 0, nlat-1, 1
+    do nx = 0, nlon-1, 1
+    r1zsum = 0.0
+    do nt = 0, nyear-1, 1
+        ; calculate spectrum
+        sdof := specx_anal(term(nt,:,ny,nx),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        r1     = sdof@xlag1                        ; extract segment lag-1
+        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
+        spc1(nt,:,ny,nx) = sdof@spcx                ; sum spc of each segment
+    end do 
+    r1z  = r1zsum/nyear                 ; average r1z
+    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
+    spcavg  = dim_avg_n(spc1(:,:,ny,nx),0)              ; average spectrum
+    df      = 2.0*nyear   ; deg of freedom
+    df@spcx = spcavg      ; assign the mean spc
+    df@frq  = sdof@frq
+    df@xlag1= r1          ; assign mean lag-1
+    ave1(:,:,ny,nx) = specx_ci(df, siglvl, 1.0-siglvl) 
+    end do 
+    end do 
+    ave(nc,:,:,:) = dim_avg_n(ave1,3) 
+    spc(nc,:,:,:) = dim_avg_n(spc1,3) 
+    term := dim_avg_n(term,3) 
+end if
 end do ;end case
-print(sdof)
-copy_VarMeta(vars(:,0),var(0,0,0,0,:))
-printVarSummary(var)
+
 frq = sdof@frq
-var!3   = "frq"
-var&frq = frq
-var@long_name = "frequency"
-var@units     = "1/day"
+ave = ave*conform(ave,frq,2)
+
+print(sdof)
+copy_VarMeta(vars(:,0),ave(0,0,0,:))
+ave!2   = "frq"
+ave&frq = log(frq)
+ave@long_name = "power*frequency"
+;ave@long_name = "frequency"
+;ave@units     = "1/day"
+printVarSummary(ave)
 
 ;---------------------------------------------------------------
 ;calc significance and difference, then draw the picture
 ;--------------------------------------------------------------
-vari = dim_variance_n_Wrap(var,1)
-var := dim_avg_n_Wrap(var,1)
+vari = dim_variance_n_Wrap(spc,1)
 do nf = 0 ,ncase-2,1
-prob(nf,:,:,:) = ttest(var(0,:,:,:),vari(0,:,:,:),nyear,var(nf+1,:,:,:),vari(nf+1,:,:,:),nyear,True,False)
+prob(nf,:,:) = ttest(ave(0,0,:,:),vari(0,:,:),nyear,ave(nf+1,0,:,:),vari(nf+1,:,:),nyear,True,False)
 end do
-term1 = conform(pero,var(:,0,:,:),(/0,2,3/))
-pero  = mask(term1,term1.gt.var(:,1:3,:,:),True)
-prob  = mask(prob,prob.lt.siglvl,True)
+prob  = mask(prob,prob.lt.siglvl,True) ;to determine the dominant period
+term1 = conform(pero,ave(:,0,:,:),(/0,2,3/))
+pero  = mask(term1,term1.gt.ave(:,1:3,:,:),True)
 delete([/term,term1,vari/])
 
 if(diff) then 
 do nf = 0 ,ncase-2,1
     if(perc) then 
-    var(nf+1,:,:,:) = var(nf+1,:,:,:)/var(0,:,:,:)*100.0-100.0
+    ave(nf+1,:,:,:) = ave(nf+1,:,:,:)/ave(0,:,:,:)*100.0-100.0
     else
-    var(nf+1,:,:,:) = var(nf+1,:,:,:)-var(0,:,:,:)
+    ave(nf+1,:,:,:) = ave(nf+1,:,:,:)-ave(0,:,:,:)
     end if
 end do
 end if
 
-if(nfrq.gt.200) then 
-nfrq2 = 100
-nspc  = toint(nfrq/nfrq2)
-nsta  = nfrq - nspc*nfrq2
-print("nfrq = " + nfrq2 + ", spacing = " + nspc + ", start point = " + nsta)
-var2 = new((/ncase,nfrq2,nlev,nlon/),float)
-frq2 = new((/nfrq2/),float)
-calc_option = 1
-if(calc_option.eq.0) then 
-    frq2 = fspan(0.001,0.5,nfrq2)
-    var2 = linint1_n_Wrap(frq,var,False,frq2,0,1)
-else
-    do nfr = 0, nfrq2-1, 1
-        n1 = nsta - 1 + nspc * nfr
-        n2 = nsta - 1 + nspc *(nfr+1)
-        n3 = (n1+n2)/2
-        var2(:,nfr,:,:) = dim_avg_n_Wrap(var(:,n1:n2,:,:),1)
-        frq2(nfr) = frq(n3)
-    end do
-    var2!1   = "frq"
-    var2&frq = frq2
-end if
-printVarSummary(var2)
-print(frq2(0:20))
-print(frq(0:100:10))
-print(var2(0,0:20,0,5))
-print(var(0,0:100:10,0,5))
-else
-var2 = var
-frq2 = frq
-end if
-
-var2&frq = 1.0/frq2
-copy_VarMeta(var2(0,0,:,:),prob(0,0,:,:))
-copy_VarMeta(var2(0,0,:,:),pero(0,0,:,:))
+copy_VarMeta(ave(0,0,:,:),prob(0,:,:))
+copy_VarMeta(ave(0,0,:,:),pero(0,0,:,:))
 
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
@@ -214,15 +258,12 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     res@tiYAxisOn       = True
     res@tiXAxisFont     = font_index 
     res@tiYAxisFont     = font_index 
-    res@tiYAxisString   = "Frequency (1/day)"
+    res@tiYAxisString   = "day"
     res@tiXAxisString   = "Latitude (N)"
 
     res@tmYLMode        = "Explicit"
-    res@tmYLValues      = p_draw
+    res@tmYLValues      = log(1.0/p_draw)
     res@tmYLLabels      = p_draw
-    ;res@tmYLValues      = fspan(0.0,0.5,6)
-    ;res@tmYLLabels      = fspan(0.0,0.5,6)
-    res@gsnYAxisIrregular2Log = True
 
     res@tmXBMode        = "Manual"
     res@tmXBTickStartF  = lats(na)
@@ -267,15 +308,6 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
    
-    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/10,20,40,80,120,  160,200,300,400,600,  800,1000,1200,1400,1600,  1800,2000/)
-    ;res@cnLevels             = ispan(0,60,10)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = 10         ; set min contour level
-    ;res@cnMaxLevelValF        = 330       ; set max contour level
-    ;res@cnLevelSpacingF       = 20        ; set contour interval
-
     res@gsnSpreadColors      = False              ; turn of the full color map
     res@gsnSpreadColorStart  = 2                ; start at color 17
     res@gsnSpreadColorEnd    = 21                ; end at color 200
@@ -283,9 +315,6 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
 ;-----------------------------------------------------------------------
-   ; res@tiMainString         = fig_title + "in" + months(m)
-    ;res@tiMainFontHeightF    = 0.04
-   ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
@@ -365,31 +394,44 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+if(nv.eq.0) then 
 if(ns.eq.0) then 
-    minlvl := (/30 ,30 ,30 /) 
-    maxlvl := (/480,480,480/)
-    spacig := (/30 ,30 ,30 /)
-if(diff) then
-    minlvl := (/30 ,-80,-80/) 
-    maxlvl := (/480, 80, 80/) ;used for CTRL-NUDG
-    spacig := (/30 , 10, 10/)
+    minlvl := (/30 ,30 ,30 ,30 /) 
+    maxlvl := (/480,480,480,480/)
+    spacig := (/30 ,30 ,30 ,30 /)
+if(diff) then                  
+    minlvl := (/30 ,-80,-80,-80/) 
+    maxlvl := (/480, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/30 , 10, 10, 10/)
+end if                         
+end if                         
+                               
+if(ns.eq.1) then               
+    minlvl := (/0  ,0  ,0  ,0  /) 
+    maxlvl := (/6.0,6.0,6.0,6.0/)
+    spacig := (/0.4,0.4,0.4,0.4/)
+if(diff) then                  
+if(perc) then                  
+    minlvl := (/0  ,-80,-80,-80/) 
+    maxlvl := (/6.0, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/0.4, 10, 10, 10/)
+else
+    minlvl := (/0  ,-0.8,-0.8,-0.8/) 
+    maxlvl := (/6.0, 0.8, 0.8, 0.8/) ;used for CTRL-NUDG
+    spacig := (/0.4, 0.1, 0.1, 0.1/)
+end if
+end if
 end if
 end if
 
-if(ns.eq.1) then 
-    minlvl := (/0  ,0  ,0  /) 
-    maxlvl := (/6.0,6.0,6.0/)
-    spacig := (/0.4,0.4,0.4/)
-if(diff) then
-if(perc) then 
-    minlvl := (/0  ,-80,-80/) 
-    maxlvl := (/6.0, 80, 80/) ;used for CTRL-NUDG
-    spacig := (/0.4, 10, 10/)
-else
-    minlvl := (/0  ,-0.8,-0.8/) 
-    maxlvl := (/6.0, 0.8, 0.8/) ;used for CTRL-NUDG
-    spacig := (/0.4, 0.1, 0.1/)
-end if
+if(nv.eq.1) then  ;vort
+    minlvl := (/30 ,30 ,30 ,30 /) 
+    maxlvl := (/480,480,480,480/)
+    spacig := (/30 ,30 ,30 ,30 /)
+if(diff) then              
+    minlvl := (/30 ,-80,-80,-80/) 
+    maxlvl := (/480, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/30 , 10, 10, 10/)
 end if
 end if
 
@@ -411,12 +453,12 @@ do nc = 0, ncase-1,1
     res@cnLevelSpacingF      := spacig(nc)        ; set contour interval
     res@cnMaxLevelValF       := maxlvl(nc) ;32    ; set max contour level
     res@cnMinLevelValF       := minlvl(nc)       ; set min contour level
-    plot(np)  = gsn_csm_time_lat(wks,var2(nc,0,:,:),res)
-    print(max(var2(nc,0,:,:)))
-    print(min(var2(nc,0,:,:)))
+    plot(np)  = gsn_csm_time_lat(wks,ave(nc,0,:,:),res)
+    print(max(ave(nc,0,:,:)))
+    print(min(ave(nc,0,:,:)))
 
     if(diff.and.nc.gt.0) then 
-        sig1(np) = gsn_csm_contour(wks,prob(nc-1,0,:,:),res_sig)
+        sig1(np) = gsn_csm_contour(wks,prob(nc-1,:,:),res_sig)
         overlay(plot(np),sig1(np))
     else
         ;sig1(np) = gsn_csm_contour(wks,pero(nc,1,:,:),res_sig1)
@@ -429,6 +471,7 @@ do nc = 0, ncase-1,1
     np = np + 1
 end do 
 
+    resp@txString      = "sm="+sm+" pct="+pct+" runave="+ifrunave+" nave="+nave
     gsn_panel(wks,plot,(/1,ncase/),resp)
 end
 

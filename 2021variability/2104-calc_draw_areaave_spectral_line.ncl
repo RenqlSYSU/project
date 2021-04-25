@@ -169,7 +169,7 @@ else
     df@spcx = spcavg      ; assign the mean spc
     df@frq  = sdof@frq
     df@xlag1= r1          ; assign mean lag-1
-    ave1(nt,:,:,ny,nx) = specx_ci(df, siglvl, 1.0-siglvl) 
+    ave1(:,:,ny,nx) = specx_ci(df, siglvl, 1.0-siglvl) 
     end do 
     end do 
     ave(nc,:,:) = wgt_areaave_Wrap(ave1,1.0,1.0,0) ;area average

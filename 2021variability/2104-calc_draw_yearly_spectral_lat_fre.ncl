@@ -18,14 +18,14 @@ lonr = (/125 ,130  ,130  /)
 na = 0 ;"EA","TP","SEA","NEA"
 lat_spcing = 5 
 var_name = (/"preci","vort"/)
-nv = 0 ;
+nv = 1 ;
 lev = (/850,500,200,700,600,  100,10/)
-nl = 0
+nl = 2
 stand = (/"","_stand"/)
 ns = 0
 month_s = 5 
 month_e = 9
-ifrunave= False;True ;
+ifrunave= True ;False;
 nave = 8 ;five days run ave
 
 first_areaave = True ;False;
@@ -114,7 +114,7 @@ do nt = 0, nyear-1 ,1
     v  = f->V(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     term(nt,:,:,:) = uv2vr_cfd(u,v,v&lat,v&lon,2) 
 end do
-term = term*10^5 ;10^-5 s^-1
+term = term*10^6 ;10^-5 s^-1
 end if
 
 ;========= data processing and calc spectrum ======================================
@@ -191,18 +191,6 @@ else
 end if
 end do ;end case
 
-frq = sdof@frq
-ave = ave*conform(ave,frq,2)
-
-print(sdof)
-copy_VarMeta(vars(:,0),ave(0,0,0,:))
-ave!2   = "frq"
-ave&frq = log(frq)
-ave@long_name = "power*frequency"
-;ave@long_name = "frequency"
-;ave@units     = "1/day"
-printVarSummary(ave)
-
 ;---------------------------------------------------------------
 ;calc significance and difference, then draw the picture
 ;--------------------------------------------------------------
@@ -215,6 +203,9 @@ term1 = conform(pero,ave(:,0,:,:),(/0,2,3/))
 pero  = mask(term1,term1.gt.ave(:,1:3,:,:),True)
 delete([/term,term1,vari/])
 
+frq = sdof@frq
+ave = ave*conform(ave,frq,2)
+
 if(diff) then 
 do nf = 0 ,ncase-2,1
     if(perc) then 
@@ -225,6 +216,14 @@ do nf = 0 ,ncase-2,1
 end do
 end if
 
+print(sdof)
+copy_VarMeta(vars(:,0),ave(0,0,0,:))
+ave!2   = "frq"
+ave&frq = 1.0/frq ;the natural log of a numeric type
+ave@long_name = "power*frequency"
+;ave@long_name = "frequency"
+;ave@units     = "1/day"
+printVarSummary(ave)
 copy_VarMeta(ave(0,0,:,:),prob(0,:,:))
 copy_VarMeta(ave(0,0,:,:),pero(0,0,:,:))
 
@@ -262,8 +261,9 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     res@tiXAxisString   = "Latitude (N)"
 
     res@tmYLMode        = "Explicit"
-    res@tmYLValues      = log(1.0/p_draw)
+    res@tmYLValues      = p_draw
     res@tmYLLabels      = p_draw
+    res@gsnYAxisIrregular2Log = True
 
     res@tmXBMode        = "Manual"
     res@tmXBTickStartF  = lats(na)
@@ -400,9 +400,9 @@ if(ns.eq.0) then
     maxlvl := (/480,480,480,480/)
     spacig := (/30 ,30 ,30 ,30 /)
 if(diff) then                  
-    minlvl := (/30 ,-80,-80,-80/) 
-    maxlvl := (/480, 80, 80, 80/) ;used for CTRL-NUDG
-    spacig := (/30 , 10, 10, 10/)
+    minlvl := (/ 0 ,-80,-80,-80/) 
+    maxlvl := (/ 15, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/ 1 , 10, 10, 10/)
 end if                         
 end if                         
                                
@@ -429,9 +429,9 @@ if(nv.eq.1) then  ;vort
     maxlvl := (/480,480,480,480/)
     spacig := (/30 ,30 ,30 ,30 /)
 if(diff) then              
-    minlvl := (/30 ,-80,-80,-80/) 
-    maxlvl := (/480, 80, 80, 80/) ;used for CTRL-NUDG
-    spacig := (/30 , 10, 10, 10/)
+    minlvl := (/ 0 ,-80,-80,-80/) 
+    maxlvl := (/ 75, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/ 5 , 10, 10, 10/)
 end if
 end if
 

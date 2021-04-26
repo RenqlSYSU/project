@@ -15,9 +15,9 @@ latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
 var_name = (/"preci","vort"/)
-nv = 0 ;
+nv = 1 ;
 lev = (/850,500,200,700,600,  100,10/)
-nl = 0
+nl = 2
 stand = (/"","_stand"/)
 ns = 0
 allcase = True ;False ;if True, four case be draw in one figure
@@ -289,8 +289,12 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
                              
     resxy@gsnStringFont        = font_index
     resxy@gsnStringFontHeightF = subtitle_font
-    resxy@gsnCenterString  = "";lev(nl) + " hPa" 
+    resxy@gsnCenterString  = "";lev(nl) + " hPa"
+    if(nv.eq.1) then 
+    resxy@gsnRightString   = lev(nl) + "hPa " + var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+    else
     resxy@gsnRightString   = var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+    end if
 
     resp  = True    
     resp@gsnMaximize   = True

@@ -39,7 +39,7 @@ if(case_option.eq.0) then
     if(diff) then 
     case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL","NGEN-CTRL"/) ;,"NG24h-CTRL"
     end if
-    years   = ispan(1979,1981,1)   ;the calculate time
+    years   = ispan(1979,2005,1)   ;the calculate time
     path2   = "/home/ys17-19/renql"
     filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                        "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\

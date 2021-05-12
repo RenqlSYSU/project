@@ -24,12 +24,14 @@ month_e = 12
 ifrunave= False;True ;
 nave = 8 ;five days run ave
 
+draw_gws = True
+no_bias  = True
 first_areaave = True ;False;
 case_option  = 0 
 diff = False;True ;
 perc = True ;False
 barshare = True ;False;
-barvert  = True ;False;
+barvert  = False;True ;
 landscap = False;True ;False mean portrait
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
@@ -96,6 +98,8 @@ sig1   = new((/jtot,npad/),float)
 gws1   = new((/jtot/),float)
 plot   = new((/ncase/),graphic)
 plot2  = new((/ncase/),graphic)
+plotg  = new((/ncase/),graphic)
+plotc  = new((/ncase/),graphic)
 
 do nc = 0, ncase-1,1
 print("start calc " + case1(nc) + var_name(nv) + lev(nl))
@@ -141,17 +145,24 @@ do nt = 0, nyear-1 ,1
     print("year " + years(nt))
     wave = wavelet(var(nt,:),mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
     power1 = power1 + onedtond(wave@power,(/jtot,npad/))
+    ;sig1 = sig1 + conform(power1,wave@signif,0)
     sig1 = sig1 + power1/conform(power1,wave@signif,0)
     gws1 = gws1 + wave@gws  
     ;mean   = mean   + wave@mean
     ;stdev  = stdev  + wave@stdev
 end do
 power(nc,:,:) = power1/nyear
-power(nc,:,:) = power(nc,:,:)/conform(power(nc,:,:),wave@scale ,0)   ;no bias, referenced by Liu et.al(2007)
+;sig(nc,:,:) = power1/(sig1/nyear)
 sig(nc,:,:) = sig1/nyear
 gws(nc,:) = gws1/nyear
+if(no_bias) then 
+    power(nc,:,:) = power(nc,:,:)/conform(power(nc,:,:),wave@scale ,0)   ;no bias, referenced by Liu et.al(2007)
+    gws(nc,:) = gws(nc,:)/wave@scale   ;no bias, referenced by Liu et.al(2007)
+end if
 end do;for case
 
+gws!1         = "period"
+gws&period    = wave@period
 power!1         = "period"
 power&period    = wave@period
 power!2         = "time"
@@ -239,7 +250,6 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@tmYMajorGridLineColor          = "black"
     res@tmYMajorGridThicknessF         = 4.0
 
-    res_sig                  = True
     res_sig = res
 ;------------set the attribute of the contour----------------------
     res@cnFillOn         = True
@@ -272,6 +282,17 @@ wks = gsn_open_wks(fig_out,fig_name)
 ;------------set the attribute of the cone of influence---------------------
     rescoi              = True
     rescoi@gsFillIndex  = 1 
+
+;------------set the attribute of global wavelet spectrum---------------------
+    resl          = True
+    resl@gsnFrame = False
+    resl@gsnDraw  = False
+    resl@trYAxisType = "LogAxis"
+    resl@trYReverse  = True                  ; reverse y-axis
+    resl@tmYLMode     = res@tmYLMode  
+    resl@tmYLValues   = res@tmYLValues 
+    resl@tmYLLabels   = res@tmYLLabels
+    resl@xyComputeYMin = True
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles
@@ -328,6 +349,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+    resp@txString      = years(0)+"-"+years(nyear-1)+" no_bias="+no_bias+" runave="+ifrunave+" nave="+nave
 
 if (nv.eq.0) then 
     minlvl := (/ 0 ,0 ,0 ,0 /) 
@@ -353,6 +375,10 @@ do nc = 0,ncase-1,1
     plot(nc) = ShadeCOI(wks, plot(nc), wave, power&time, False)
     print(max(power(nc,:,:)))
     print(min(power(nc,:,:)))
+if(draw_gws) then 
+  plotg(nc) = gsn_csm_xy(wks,gws(nc,:),power&period,resl)
+  plotc(nc) = gsn_attach_plots(plot(nc),plotg(nc),res,resl)
+end if
 end do
 
 gsn_panel(wks,plot,(/ncase,1/),resp)

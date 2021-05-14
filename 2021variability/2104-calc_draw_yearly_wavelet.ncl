@@ -21,12 +21,13 @@ stand = (/"","_stand"/)
 ns = 0
 month_s = 1 
 month_e = 12
-ifrunave= False;True ;
+ifrunave= True ;False;
 nave = 8 ;five days run ave
 
 draw_gws = True
-no_bias  = True
+no_bias  = True ;False;
 first_areaave = True ;False;
+climat = False;True ;if true, calc the wavelet of climatology
 case_option  = 0 
 diff = False;True ;
 perc = True ;False
@@ -155,6 +156,12 @@ power(nc,:,:) = power1/nyear
 ;sig(nc,:,:) = power1/(sig1/nyear)
 sig(nc,:,:) = sig1/nyear
 gws(nc,:) = gws1/nyear
+if(climat) then 
+    wave = wavelet(dim_avg_n(var,0),mother,dt,param,s0,dj,jtot,npad,noise,isigtest,siglvl,nadof)
+    power(nc,:,:) = onedtond(wave@power,(/jtot,npad/))
+    sig(nc,:,:) = power(nc,:,:)/conform(power1,wave@signif,0)
+    gws(nc,:) = wave@gws  
+end if
 if(no_bias) then 
     power(nc,:,:) = power(nc,:,:)/conform(power(nc,:,:),wave@scale ,0)   ;no bias, referenced by Liu et.al(2007)
     gws(nc,:) = gws(nc,:)/wave@scale   ;no bias, referenced by Liu et.al(2007)
@@ -169,6 +176,12 @@ power!2         = "time"
 power&time      = ispan(1,ntime,1) 
 copy_VarMeta(power,sig)
 sig = mask(sig,sig.ge.1.0,True)
+if(climat) then
+    power = power*10^15
+end if
+if(ifrunave) then
+    power = power*10
+end if
 printVarSummary(power)
 printVarSummary(sig)
 

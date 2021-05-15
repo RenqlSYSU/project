@@ -24,12 +24,12 @@ month_e = 12
 ifrunave= True ;False;
 nave = 8 ;five days run ave
 
-draw_gws = True
+draw_gws = False;True ;
 no_bias  = True ;False;
 first_areaave = True ;False;
 climat = False;True ;if true, calc the wavelet of climatology
 case_option  = 0 
-diff = False;True ;
+diff = True ;False;
 perc = True ;False
 barshare = True ;False;
 barvert  = False;True ;
@@ -184,6 +184,16 @@ if(ifrunave) then
 end if
 printVarSummary(power)
 printVarSummary(sig)
+
+if(diff) then 
+do nf = 0 ,ncase-2,1
+    power(nf+1,:,:)= power(nf+1,:,:) - power(0,:,:)   ;get the difference between CTRL and NUDG
+    if(perc) then 
+    power(0,:,:) = where(abs(power(0,:,:)).le.0.000001,0.1,power(0,:,:))
+    power(nf+1,:,:)= power(nf+1,:,:)*100.0/power(0,:,:)   ;get the difference between CTRL and NUDG
+    end if
+end do
+end if
 
 ;==============================================================
 ;draw figure 
@@ -365,9 +375,16 @@ wks = gsn_open_wks(fig_out,fig_name)
     resp@txString      = years(0)+"-"+years(nyear-1)+" no_bias="+no_bias+" runave="+ifrunave+" nave="+nave
 
 if (nv.eq.0) then 
-    minlvl := (/ 0 ,0 ,0 ,0 /) 
+    minlvl := (/ 0  ,0  ,0  ,0  /) 
     maxlvl := (/ 7.5,7.5,7.5,7.5/) ;used for CTRL-NUDG
-    spacig := (/ 0.5 ,0.5 ,0.5 ,0.5 /)
+    spacig := (/ 0.5,0.5,0.5,0.5/)
+    if(diff) then
+    if(perc) then 
+    minlvl := (/ 0  ,-80,-80,-80/) 
+    maxlvl := (/ 7.5, 80, 80, 80/) ;used for CTRL-NUDG
+    spacig := (/ 0.5, 10, 10, 10/)
+    end if
+    end if
 end if
 
 do nc = 0,ncase-1,1

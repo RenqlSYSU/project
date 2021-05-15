@@ -53,13 +53,13 @@ lonl1 = (/105 /);20
 lonr1 = (/125 /);220
 
 ;area: east Asia
-lats = (/0 /);-20
-latn = (/70 /);60
-lonl = (/30 /);20
-lonr = (/150/);220
+lats = (/0  ,0  /);-20
+latn = (/90 ,70 /);60
+lonl = (/0  ,30 /);20
+lonr = (/360,150/);220
 lat_spacing = 30
 lon_spacing = 40
-na = 0
+na = 1
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -108,15 +108,38 @@ end do
 end do
 if(nv.eq.0) then ;vort
     var(:,2,:,:,:,:) = uv2vr_cfd(var(:,0,:,:,:,:)u,var(:,1,:,:,:,:),var(:,0,:,:,:,:)&lat,var(:,0,:,:,:,:)&lon,2) 
+    var(:,2,:,:,:,:) = var(:,2,:,:,:,:)*10^5
 end if
 preci = preci*1000*3600*24 ;convert m/s to mm/day
 fca = 1.0/ca
 fcb = 1.0/cb
 opt = False
 ts = bw_bandpass_filter(reshape(preci,(/ncase,nyear*ntime/)),fca,fcb,opt,1)
-;ts = bw_bandpass_filter(preci,fca,fcb,opt,2)
-var := reshape(var,(/ncase,nyear*ntime,nlev,nlat,nlon/))
+;ts = reshape(bw_bandpass_filter(preci,fca,fcb,opt,2),(/ncase,nyear*ntime/))
+var := reshape(var,(/ncase,nvar,nyear*ntime,nlat,nlon/))
 
+;do nc = 0, ncase-1, 1
+;    regr(nc,:,:,:) = regCoef_n(ts(nc,:),var(nc,:,:,:,:),0,1)
+;    print(regr@tval(0))
+;    tval(nc,:,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
+;    df(nc,:,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
+;end do
+regr = regCoef_n(ts,var,0,1)
+tval = onedtond(regr@tval ,(/ncase,nvar,nlat,nlon/))
+df   = onedtond(regr@nptxy,(/ncase,nvar,nlat,nlon/))
+copy_VarCoords(var(0,0,0,:,:), regr(0,0,:,:))
+b := tval 
+b = 0.5
+prob  := betainc( df/(df+tval^2), df/2.0, b )
+delete([/tval,df/])
+
+notsiguv = mask(regr(:,0:1,:,:),prob(:,0:1,:,:).lt.siglvl,False)
+if(sig_option) then
+regr(:,0:1,:,:) = mask(regr(:,0:1,:,:),prob(:,0:1,:,:).lt.siglvl,True)
+else
+regr = mask(regr,prob.lt.siglvl,True)
+end if
+prob   = mask(prob,prob.lt.siglvl,True)
 
 ;the number of the panel plot
     plot   = new((/12/),graphic)
@@ -138,8 +161,13 @@ mdlon1 = (/120,120/)
 mdlon2 = (/240,240/)
 maxlat = (/ 15,50/) 
 minlat = (/-15,45/)
+if(na.eq.1) then 
 lonx = (/minlon,mdlon1,mdlon2,maxlon,maxlon,mdlon2,mdlon1,minlon,minlon/)
 latx = (/minlat,minlat,minlat,minlat,maxlat,maxlat,maxlat,maxlat,minlat/)
+else
+lonx = (/minlon,maxlon,maxlon,minlon,minlon/)
+latx = (/minlat,minlat,maxlat,maxlat,minlat/)
+end if
 printVarSummary(lonx)
 
 ;define the thickness and height of the title,tick and label
@@ -224,41 +252,11 @@ end if
     res@cnLinesOn        = False ;True
     res@cnLineLabelsOn   = False
     res@cnInfoLabelOn    = False
-    ;res@cnLineThicknessF = 0
-    ;res@gsnContourZeroLineThicknessF = 4.0
-    ;res@cnLineColor      = "blue"
-   
-    ;res@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    ;res@cnLevelSelectionMode = "ExplicitLevels"   ; set manual contour levels
-    ;res@cnLevels             = (/-5,-4.5,-4,-3.5,-3,-2.5,-2,-1.5,-1,-0.5,0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5/)
-    ;res@cnLevels             = ispan(0,60,10)
-    ;res@cnFillColors         = (/-1,20,47,57,94,127,152/)
-    ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ;res@cnMinLevelValF        = 1          ; set min contour level
-    ;res@cnMaxLevelValF        = 13 ;32        ; set max contour level
-    ;res@cnLevelSpacingF       = 1        ; set contour interval
 
     res@gsnSpreadColors      = False  ;True              ; turn of the full color map
     res@gsnSpreadColorStart  = 11                ; start at color 17
     res@gsnSpreadColorEnd    = 2                ; end at color 200
    
-    ;if(na.eq.0) then 
-    ;res@lbLabelBarOn         = False   ; the label bar
-    ;else
-    ;res@lbLabelBarOn         = True   ; the label bar
-    ;end if
-    ;res@lbOrientation        = "Horizontal"
-    ;res@lbLabelFontHeightF   = tick_font
-    ;res@lbLabelFont          = font_index              ; make labels smaller
-    ;res@lbLabelStride        = 1
-    ;res@lbBoxLineThicknessF  = mp_thick-1
-    ;res@pmLabelBarWidthF  = 0.65
-    ;res@pmLabelBarHeightF = 0.08
-
-    ;res@pmLabelBarZone               = 0
-    ;res@pmLabelBarOrthogonalPosF     = 0.15
-    ;res@pmLabelBarParallelPosF       = 0.5
-
 ;--------set the attribute of vector--------------
     resvc                  = True
     resvc@gsnDraw          = False
@@ -480,255 +478,64 @@ else
                       (/15,4 ,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
 
-if(nv.eq.0) 
-    minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
-    maxlvl = (/300, 140, 140/)      ; 80, 80
-    spacig = (/20 , 20 ,  20/)      ; 10, 10
-end if
-if(nv.eq.4) 
-    minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
-    maxlvl = (/300, 140, 140/)      ; 80, 80
-    spacig = (/20 ,  20,  20/)      ; 10, 10
-end if
+minlvl = (/-3.5/)  ;q1 ;-80,-80
+maxlvl = (/ 3.5/)      ; 80, 80
+spacig = (/ 0.5/)      ; 10, 10
 
-if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-7,-7,-7/);-3.5 -8,-8,-8,-8
-    maxlvl = (/16 , 7, 7, 7/); 3.5  8 ,8 ,8 ,8 
-    spacig = (/ 1 , 1, 1, 1/); 0.5  1 ,1 ,1 ,1 
-end if
-
-if(nv.eq.2) 
-    minlvl = (/-8 ,-4 , -4/)  ;omega*100
-    maxlvl = (/ 8 , 4 ,  4/)
-    spacig = (/ 1 ,0.5,0.5/)
-end if
-
-if(nv.eq.3) ;Z3
-if(nl.eq.0) then ;850 
-    minlvl = (/1300,-35,-35/); -24,-24
-    maxlvl = (/1525, 35, 35/);  24, 24
-    spacig = (/ 15 , 5 , 5 /);   3,  3
-end if
-if(nl.eq.2) then  ;200
-    minlvl = (/10900,-70,-70/) 
-    maxlvl = (/12400, 70, 70/)
-    spacig = (/  100, 10, 10/) 
-end if
-end if
-
-if(nv.eq.5) ;T ;; 850,700,600,500,200,100,10
-if(nl.eq.0) then ;850 
-    minlvl = (/ 4 ,-3.5,-3.5,-3.5/); -24,-24
-    maxlvl = (/ 34, 3.5, 3.5, 3.5/);  24, 24
-    spacig = (/ 2 ,0.5 ,0.5 ,0.5 /);   3,  3
-end if                           
-if(nl.eq.1) then ;500 nl.le.3.and.nl.ge.2
-    minlvl = (/-15,-3.5,-3.5,-3.5/); -24,-24
-    maxlvl = (/  0, 3.5, 3.5, 3.5/);  24, 24
-    spacig = (/ 1 ,0.5 ,0.5 ,0.5 /);   3,  3
-end if                           
-if(nl.eq.2) then  ;200           
-    minlvl = (/-62,-3.5,-3.5,-3.5/);-68 -24,-24
-    maxlvl = (/-47, 3.5, 3.5, 3.5/);-50  24, 24
-    spacig = (/1  ,0.5 ,0.5 ,0.5 /);1.2   3,  3
-end if                           
-if(nl.eq.5) then  ;100           
-    minlvl = (/-75,-3.5,-3.5,-3.5/); -24,-24
-    maxlvl = (/-60, 3.5, 3.5, 3.5/);  24, 24
-    spacig = (/1  ,0.5 ,0.5 ,0.5 /);   3,  3
-end if                           
-if(nl.eq.6) then  ;10            
-    minlvl = (/-65,-3.5,-3.5,-3.5/); -24,-24
-    maxlvl = (/-50, 3.5, 3.5, 3.5/);  24, 24
-    spacig = (/1  ,0.5 ,0.5 ,0.5 /);   3,  3
-end if
-end if
-
-if(nv.ge.6.and.nv.le.11) then ;intEKE
-if(perc) then 
-    minlvl = (/ 2 ,-70,-70,-70/);-8,-8,-8,-8
-    maxlvl = (/32 , 70, 70, 70/);8 ,8 ,8 ,8 
-    spacig = (/ 2 , 10, 10, 10/);1 ,1 ,1 ,1 
-else
-;    minlvl = (/2 ,-14,-14/);-8,-8,-8,-8
-;    maxlvl = (/32, 14, 14/);8 ,8 ,8 ,8 
-;    spacig = (/2 , 2 , 2 /);1 ,1 ,1 ,1 
-    minlvl = (/10,-35,-35,-35/);-8,-8,-8,-8
-    maxlvl = (/85, 35, 35, 35/);8 ,8 ,8 ,8 
-    spacig = (/5 , 5 , 5 , 5 /);1 ,1 ,1 ,1 
-end if
-end if
-
-if(nv.eq.12) 
-    minlvl = (/ 0 ,-7 ,-7 /)  ;omega*100
-    maxlvl = (/ 75, 7 , 7 /)
-    spacig = (/ 5 , 1 , 1 /)
-end if
-
-if(nv.eq.13) 
-    minlvl = (/-45 ,-3.5 ,-7 /)  ;omega*100
-    maxlvl = (/ 30, 3.5 , 7 /)
-    spacig = (/ 5 , 0.5 , 1 /)
-end if
-
-if(nv.eq.14) 
-    minlvl = (/1000,-14,-7 /)  ;omega*100
-    maxlvl = (/1030, 14, 7 /)
-    spacig = (/ 2  , 2 , 1 /)
-end if
-
-if(nv.eq.15) then ;precs
-    minlvl = (/0.5,-1.4,-3.5/);-8,-8,-8,-8
-    maxlvl = (/ 8 , 1.4, 3.5/);8 ,8 ,8 ,8 
-    spacig = (/0.5, 0.2, 0.5/);1 ,1 ,1 ,1 
-end if
-
-if(nv.eq.16) then ;div
-    minlvl = (/-7,-7,-7/)
-    maxlvl = (/ 7, 7, 7/)
-    spacig = (/ 1, 1, 1/)
-end if
-
-if(nv.ge.17.and.nv.le.19) then 
-    minlvl = (/-1.4,-1.4,-1.4/);-0.7,-0.7,-0.7
-    maxlvl = (/ 1.4, 1.4, 1.4/); 0.7, 0.7, 0.7
-    spacig = (/ 0.2, 0.2, 0.2/); 0.1, 0.1, 0.1
-end if
-
-if(nv.eq.20) then  ;200
-    minlvl = (/-39,-0.7,-3.5/);-68 -24,-24
-    maxlvl = (/-24, 0.7, 3.5/);-50  24, 24
-    spacig = (/1  , 0.1,0.5 /);1.2   3,  3
-end if
-
-do nc = 0,ncase-1,1
+res@cnFillPalette = "BlueDarkRed18"
+res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
 np = -1
-;do nm = 0,nmonth-1,1
-if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
-   ; gsn_define_colormap(wks,"BlueDarkRed18")
-   ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-    ;blue and red, has 18 colors,2-10 is blue
-   res@cnFillPalette = "BlueDarkRed18"
-   res@cnFillColors  := (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
-else
-   ;gsn_define_colormap(wks,"precip3_16lev")
-   ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)
-   ;blue and yellow and red, has 17 colors,2-18,2 is white
-   res@cnFillPalette = "precip3_16lev"
-   res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
-end if 
-    do nm = 0,nmonth-1,1 ;2,1;
-        np = np + 1
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
-        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
-        if(cont_option) then 
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
-        else
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")";lev(nl) + "hPa wind & " +  
-        end if
-        else
-        if(cont_option) then 
-        ;res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
-        res@gsnRightString  = lev(nl) + "hPa"; + draw_varname(nv) + " & " + cont_var(nvc) ;+ " (" + cont_unit(nvc) + ") "
-        else
-        res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") " ;
-        end if
-        end if
-        res@gsnSpreadColors       = False              ; turn of the full color map
-        res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        if(diff) then 
-        res@cnLevelSpacingF       := spacig(nc)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(nc) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(nc)       ; set min contour level
-        else
-        res@cnLevelSpacingF       := spacig(0)        ; set contour interval
-        res@cnMaxLevelValF        := maxlvl(0) ;32    ; set max contour level
-        res@cnMinLevelValF        := minlvl(0)       ; set min contour level
-        end if
-        plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
-        if(diff.and.sig_option.and.nc.gt.0) then 
-        sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nm,:,:),res_sig)
-        overlay(plot(np),sig(np))
-        end if
+do nc = 0,ncase-1,1
+    np = np + 1
+    res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
+    res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") " ;
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
+    plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,:,:),res)
+    if(sig_option) then 
+    sig(np) = gsn_csm_contour(wks,prob(nc,2,:,:),res_sig)
+    overlay(plot(np),sig(np))
+    end if
 
-        if(vect_option) then
-        if(diff) then 
-        resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
-        resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
-        resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
-        resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
-        else
-        resvc@vcRefMagnitudeF      = vcref(nl,0)             ; define vector ref mag
-        resvc@vcRefAnnoString2     = vcref(nl,0)+"m/s"
-        resvc2@vcRefMagnitudeF      = vcref(nl,0)             ; define vector ref mag
-        resvc2@vcRefAnnoString2     = vcref(nl,0)+"m/s"
-        end if
-        if(diff.and.nc.gt.0)
-        wind2(np)   = gsn_csm_vector(wks,uvar(nc-1,nm,:,:),vvar(nc-1,nm,:,:),resvc2)
-        overlay(plot(np),wind2(np))
-        end if
-        wind(np)    = gsn_csm_vector(wks,var(nc,0,nm,:,:),var(nc,1,nm,:,:),resvc)
-        overlay(plot(np),wind(np))
-        end if
-        
-        gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
-        overlay(plot(np),gtop(np))
-        
-        if(cont_option)
-        res_line@cnLevelSpacingF    = cont_spacing(nc) 
-        res_line@cnLineColor      = "blueviolet";"green4";"black"
-        plot2(np)   = gsn_csm_contour(wks,var(nc,3,nm,:,:),res_line)
-        overlay(plot(np),plot2(np))
-        end if
-        
-        if(nc.eq.0.or.nc.eq.3) then
-        line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
-        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
-        else
-        line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
-        end if
-        
-        if(jet_option.ge.1) then 
-        axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), res_axis )
-        jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
-        overlay(plot(np),jetl(np))
-        end if
-        print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        ;draw(plot(np))
-        ;frame(wks)
-    end do 
-    ;gsn_panel(wks,plot,(/ncase,1/),resp)
-;end do ;for the month 
+    if(vect_option) then
+    resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
+    resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
+    resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
+    wind2(np)   = gsn_csm_vector(wks,notsiguv(nc,0,:,:),notsiguv(nc,1,:,:),resvc2)
+    overlay(plot(np),wind2(np))
+    wind(np)    = gsn_csm_vector(wks,var(nc,0,:,:),var(nc,1,:,:),resvc)
+    overlay(plot(np),wind(np))
+    end if
+    
+    gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
+    overlay(plot(np),gtop(np))
+    
+    if(cont_option)
+    res_line@cnLevelSpacingF    = cont_spacing(nc) 
+    res_line@cnLineColor      = "blueviolet";"green4";"black"
+    plot2(np)   = gsn_csm_contour(wks,var(nc,3,:,:),res_line)
+    overlay(plot(np),plot2(np))
+    end if
+    
+    if(nc.eq.0.or.nc.eq.3) then
+    line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
+    line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
+    else
+    line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
+    end if
+    
+    if(jet_option.ge.1) then 
+    axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,:), res_axis )
+    jetl(np) = gsn_csm_contour(wks,u(nc,:,:),res_jet)
+    overlay(plot(np),jetl(np))
+    end if
+    print(max(var(nc,2,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+    print(min(var(nc,2,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+end do 
 
-    res1 = True
-    res2 = True
-    res1@gsnMaximize = True
-    ;attach1 = gsn_attach_plots(plot(0),plot(1:3),res1,res2)
-    ;attach2 = gsn_attach_plots(plot(4),plot(5:7),res1,res2)
-    ;attach3 = gsn_attach_plots(plot(8),plot(9:11),res1,res2)
-    ;gsn_panel(wks,plot(0:8:4),(/3,1/),resp)
-    ;attach1 = gsn_attach_plots(plot(0),plot(1:2),res1,res2)
-    ;attach2 = gsn_attach_plots(plot(3),plot(4:5),res1,res2)
-    ;attach3 = gsn_attach_plots(plot(6),plot(7:8),res1,res2)
-    ;attach4 = gsn_attach_plots(plot(9),plot(10:11),res1,res2)
-    ;gsn_panel(wks,plot(0:9:3),(/4,1/),resp)
-    ;attach1 = gsn_attach_plots(plot(0),plot(1),res1,res2)
-    ;attach2 = gsn_attach_plots(plot(2),plot(3),res1,res2)
-    ;attach3 = gsn_attach_plots(plot(4),plot(5),res1,res2)
-    ;attach4 = gsn_attach_plots(plot(6),plot(7),res1,res2)
-    ;attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
-    ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
-    ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
-;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
-;   gsn_panel(wks,plot,(/4,1/),resp)
-;    gsn_panel(wks,plot,(/6,2/),resp)
-;    gsn_panel(wks,plot,(/4,3/),resp)
-end do
-;    gsn_panel(wks,plot,(/2,1/),resp)
-;end do
-;    gsn_panel(wks,plot,(/2,2/),resp)
-;end do
+gsn_panel(wks,plot,(/4,1/),resp)
 end
 

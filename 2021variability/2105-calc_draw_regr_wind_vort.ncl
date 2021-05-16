@@ -8,14 +8,17 @@
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-var_name = (/"vort"/)
-unit     = (/"m~S~-1~N~"/)
-draw_var = (/"vort"/)      
-ca = 90.0 ;day
-cb = 8.0  ;10.0 ;
+var_name = (/"vort","preci"/)
+unit     = (/"10~S~-6~N~ m~S~-1~N~","mm/day"/)
+draw_var = (/"vort","preci"/)      
+ca = 90.0;60.0 ;day
+cb = 8.0 ;25.0
+month_s = 5
+month_e = 9
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 0
+nv = 1
+nlag = 7
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
@@ -24,7 +27,7 @@ cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = False;True ;
+barshare = True ;False;
 barvert  = False;True ;
 
 if(case_option.eq.0) then
@@ -41,7 +44,7 @@ end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 
-fig_name = path + "/fig/" + case1(0) + "-regr_" + lev(nl) + "wind_" + draw_var(nv)
+fig_name = path + "/fig/" + case1(0) + "-regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
 fig_name = path + "/fig/" + case1(0) + "-regr_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
 end if
@@ -57,8 +60,8 @@ lats = (/0  ,0  /);-20
 latn = (/90 ,70 /);60
 lonl = (/0  ,30 /);20
 lonr = (/360,150/);220
-lat_spacing = 30
-lon_spacing = 40
+lat_spacing = 20
+lon_spacing = 20
 na = 1
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
@@ -80,62 +83,74 @@ nlon  = dimsizes(phis&lon)
 nvar  = 3
 preci = new((/ncase,nyear,ntime/),float)
 var   = new((/ncase,nvar,nyear,ntime,nlat,nlon/),float)
-regr  = new((/ncase,nvar,nlat,nlon/),float)
-prob  = new((/ncase,nvar,nlat,nlon/),float)
+regr  = new((/ncase,nvar,nlag,nlat,nlon/),float)
+tval  = new((/ncase,nvar,nlag,nlat,nlon/),float)
+df    = new((/ncase,nvar,nlag,nlat,nlon/),float)
+prob  = new((/ncase,nvar,nlag,nlat,nlon/),float)
 
 ;=====================================================
 ;read data and filter and regression
 ;==================================================
 do nc = 0, ncase-1, 1
 do nt = 0, nyear-1 ,1
+    print("year " + years(nt))
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
-    preci(nc,nt,:) = wgt_areaave_Wrap(f->PRECC(select_time,{lats1(na):latn1(na)},{lonl1(na):lonr1(na)}),1.0,1.0,0)
+    preci(nc,nt,:) = wgt_areaave_Wrap(f->PRECC(select_time,{lats1:latn1},{lonl1:lonr1}),1.0,1.0,0)
     f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
-    preci(nc,nt,:) = preci(nc,nt,:) + wgt_areaave_Wrap(f->PRECL(select_time,{lats1(na):latn1(na)},{lonl1(na):lonr1(na)}),1.0,1.0,0)
+    preci(nc,nt,:) = preci(nc,nt,:) + wgt_areaave_Wrap(f->PRECL(select_time,{lats1:latn1},{lonl1:lonr1}),1.0,1.0,0)
 
     inv = 0
     f   = addfile(filein(nc)+years(nt)+".daily.U.nc","r")
-    var(nc,inv,nt,:,:,:) = f->U(select_time,lev(nl),{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var(nc,inv,nt,:,:,:) = f->U(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     inv = 1
     f   = addfile(filein(nc)+years(nt)+".daily.V.nc","r")
-    var(nc,inv,nt,:,:,:) = f->V(select_time,lev(nl),{lats(na):latn(na)},{lonl(na):lonr(na)})
-    if(nv.ge.1) then 
+    var(nc,inv,nt,:,:,:) = f->V(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    if(nv.eq.1) then 
+    inv = 2
+    f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
+    var(nc,inv,nt,:,:,:) = f->PRECC(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
+    var(nc,inv,nt,:,:,:) = var(nc,inv,nt,:,:,:) + f->PRECL(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    end if
+    if(nv.ge.2) then 
     inv = 2
     f   = addfile(filein(nc)+years(nt)+".daily."+var_name(nv)+".nc","r")
-    var(nc,inv,nt,:,:,:) = f->$var_name$(select_time,lev(nl),{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var(nc,inv,nt,:,:,:) = f->$var_name$(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     end if
 end do
 end do
 if(nv.eq.0) then ;vort
-    var(:,2,:,:,:,:) = uv2vr_cfd(var(:,0,:,:,:,:)u,var(:,1,:,:,:,:),var(:,0,:,:,:,:)&lat,var(:,0,:,:,:,:)&lon,2) 
-    var(:,2,:,:,:,:) = var(:,2,:,:,:,:)*10^5
+    var(:,2,:,:,:,:) = uv2vr_cfd(var(:,0,:,:,:,:),var(:,1,:,:,:,:),var&lat,var&lon,2) 
+    var(:,2,:,:,:,:) = var(:,2,:,:,:,:)*10^6
+end if
+if(nv.eq.1) then ;preci
+    var(:,2,:,:,:,:) = var(:,2,:,:,:,:)*1000*3600*24
 end if
 preci = preci*1000*3600*24 ;convert m/s to mm/day
 fca = 1.0/ca
 fcb = 1.0/cb
 opt = False
-ts = bw_bandpass_filter(reshape(preci,(/ncase,nyear*ntime/)),fca,fcb,opt,1)
-;ts = reshape(bw_bandpass_filter(preci,fca,fcb,opt,2),(/ncase,nyear*ntime/))
-var := reshape(var,(/ncase,nvar,nyear*ntime,nlat,nlon/))
+;ts = bw_bandpass_filter(reshape(preci,(/ncase,nyear*ntime/)),fca,fcb,opt,1)
+ts = reshape(bw_bandpass_filter(preci,fca,fcb,opt,2),(/ncase,nyear*ntime/))
+var := reshape(bw_bandpass_filter(var,fca,fcb,opt,3),(/ncase,nvar,nyear*ntime,nlat,nlon/))
+;var := reshape(var,(/ncase,nvar,nyear*ntime,nlat,nlon/))
 
-;do nc = 0, ncase-1, 1
-;    regr(nc,:,:,:) = regCoef_n(ts(nc,:),var(nc,:,:,:,:),0,1)
-;    print(regr@tval(0))
-;    tval(nc,:,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
-;    df(nc,:,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
-;end do
-regr = regCoef_n(ts,var,0,1)
-tval = onedtond(regr@tval ,(/ncase,nvar,nlat,nlon/))
-df   = onedtond(regr@nptxy,(/ncase,nvar,nlat,nlon/))
-copy_VarCoords(var(0,0,0,:,:), regr(0,0,:,:))
+do nc = 0, ncase-1, 1
+do nlg = 0, nlag-1, 1
+    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,nlg:(nyear*ntime-1)),var(nc,:,0:(nyear*ntime-nlg-1),:,:),0,1)
+    tval(nc,:,nlg,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
+    df(nc,:,nlg,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
+end do
+end do
+copy_VarCoords(phis, regr(0,0,0,:,:))
 b := tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
 delete([/tval,df/])
 
-notsiguv = mask(regr(:,0:1,:,:),prob(:,0:1,:,:).lt.siglvl,False)
+notsiguv = mask(regr(:,0:1,:,:,:),prob(:,0:1,:,:,:).lt.siglvl,False)
 if(sig_option) then
-regr(:,0:1,:,:) = mask(regr(:,0:1,:,:),prob(:,0:1,:,:).lt.siglvl,True)
+regr(:,0:1,:,:,:) = mask(regr(:,0:1,:,:,:),prob(:,0:1,:,:,:).lt.siglvl,True)
 else
 regr = mask(regr,prob.lt.siglvl,True)
 end if
@@ -183,9 +198,9 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
+   tick_font      = 0.02
+   subtitle_font  = 0.02
+   title_font     = 0.02
    vcref_font     = 0.015
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
@@ -261,7 +276,7 @@ end if
     resvc                  = True
     resvc@gsnDraw          = False
     resvc@gsnFrame         = False
-    resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
+    resvc@vcGlyphStyle               = "LineArrow";"CurlyVector";
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
@@ -274,8 +289,8 @@ if(na.eq.0) then
 else
     resvc@vcMinDistanceF            = 0.02 ;0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
-    resvc@vcLineArrowHeadMinSizeF   = 0.01;0.015
-    resvc@vcLineArrowHeadMaxSizeF   = 0.01;0.015
+    resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
+    resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
 end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
@@ -286,8 +301,8 @@ end if
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
-    resvc@vcRefAnnoString1On         = True
-    resvc@vcRefAnnoString2On         = False;True
+    resvc@vcRefAnnoString1On         = False ;True
+    resvc@vcRefAnnoString2On         = True ;False;
     ;resvc@vcRefAnnoString2           = "30m/s"
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
@@ -307,11 +322,7 @@ end if
     res_line@cnInfoLabelOn    = False
     res_line@cnLineThicknessF = 5.0
     res_line@cnMonoLineColor  = True ;False
-    if(jet_option.ge.1.or.vect_option) then
     res_line@cnLineColor      = "blueviolet";"green4";"black"
-    else
-    res_line@cnLineColor      = "blueviolet";"green4";"black""black"
-    end if
     res_line@gsnContourZeroLineThicknessF = 0
     res_line@gsnContourNegLineDashPattern = 2
     res_line@gsnContourPosLineDashPattern = 0
@@ -322,41 +333,6 @@ end if
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
-
-;----------Set res line-----------
-    res_jet                  = True
-    res_jet@gsnDraw          = False
-    res_jet@gsnFrame         = False
-    res_jet@gsnAddCyclic     = False
-    res_jet@cnFillOn         = False       ; Fill contours
-    res_jet@cnLinesOn        = True      ; turn off contour lines
-    res_jet@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_jet@cnInfoLabelOn    = False
-    res_jet@cnLineThicknessF = mp_thick + 2.0 
-    res_jet@cnMonoLineColor  = True ;False
-    if(vect_option) then
-    res_jet@cnLineColor      = "blueviolet";"green4";"black"
-    else
-    res_jet@cnLineColor      = "blueviolet";"black"
-    end if
-    if(jet_option.eq.1) then 
-    res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_jet@cnLevels         = (/20/)
-    end if
-    if(jet_option.eq.2) then 
-    ;u = mask(u, u.lt.0 , False) 
-    ;res_jet@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    ;res_jet@cnLevels         = (/20,30,40,50,60/)
-    res_jet@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_jet@cnLevelSpacingF      = 10        ; set contour interval
-    res_jet@gsnContourZeroLineThicknessF = mp_thick + 4.0
-    res_jet@gsnContourNegLineDashPattern = 2
-    res_jet@gsnContourPosLineDashPattern = 0
-    end if
-    res_jet@lbLabelBarOn         = False   ; the label bar
-    res_jet@gsnCenterString      = ""
-    res_jet@gsnLeftString    = " "
-    res_jet@gsnRightString   = " "
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
@@ -463,50 +439,49 @@ end if
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+    resp@txString      = cb+"-"+ca+"-day filter, month: "+month_s+"-"+month_e+", preci (" + lats1 + "-" + latn1 + "N," + lonl1 + "-" + lonr1 + "E)"
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10
-    vcref         = (/(/10,5 ,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,5 ,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/30,10,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
-                      (/50,10,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
-                      (/50,10,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
+    vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
 else                               
-    vcref         = (/(/7 , 2,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/15,4 ,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/20,4 ,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
-                      (/10, 2,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
-                      (/15,4 ,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/0.5, 1,1 ,1 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
-minlvl = (/-3.5/)  ;q1 ;-80,-80
-maxlvl = (/ 3.5/)      ; 80, 80
-spacig = (/ 0.5/)      ; 10, 10
+minlvl = (/-4.0,-4.0/)  ;q1 ;-80,-80
+maxlvl = (/ 4.0, 4.0/)      ; 80, 80
+spacig = (/ 0.5, 0.5/)      ; 10, 10
 
 res@cnFillPalette = "BlueDarkRed18"
-res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
+res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
+do nlg = 0,nlag-1,1
+;do nlg = nlag-1, 0, -1
 np = -1
 do nc = 0,ncase-1,1
     np = np + 1
-    res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
-    res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") " ;
+    if(nlg.eq.0) then 
+    res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " (" + nlg + " day)" 
+    else
+    res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " (-" + nlg + " day)" 
+    end if
+    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,:,:),res)
+    plot(np)    = gsn_csm_contour_map_ce(wks,regr(nc,2,nlg,:,:),res)
     if(sig_option) then 
-    sig(np) = gsn_csm_contour(wks,prob(nc,2,:,:),res_sig)
+    sig(np) = gsn_csm_contour(wks,prob(nc,2,nlg,:,:),res_sig)
     overlay(plot(np),sig(np))
     end if
 
     if(vect_option) then
-    resvc@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
-    resvc@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
-    resvc2@vcRefMagnitudeF      = vcref(nl,nc)             ; define vector ref mag
-    resvc2@vcRefAnnoString2     = vcref(nl,nc)+"m/s"
-    wind2(np)   = gsn_csm_vector(wks,notsiguv(nc,0,:,:),notsiguv(nc,1,:,:),resvc2)
+    resvc@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
+    resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
+    resvc2@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
+    resvc2@vcRefAnnoString2     = vcref(nl)+"m/s"
+    wind2(np)   = gsn_csm_vector(wks,notsiguv(nc,0,nlg,:,:),notsiguv(nc,1,nlg,:,:),resvc2)
     overlay(plot(np),wind2(np))
-    wind(np)    = gsn_csm_vector(wks,var(nc,0,:,:),var(nc,1,:,:),resvc)
+    wind(np)    = gsn_csm_vector(wks,regr(nc,0,nlg,:,:),regr(nc,1,nlg,:,:),resvc)
     overlay(plot(np),wind(np))
     end if
     
@@ -516,7 +491,7 @@ do nc = 0,ncase-1,1
     if(cont_option)
     res_line@cnLevelSpacingF    = cont_spacing(nc) 
     res_line@cnLineColor      = "blueviolet";"green4";"black"
-    plot2(np)   = gsn_csm_contour(wks,var(nc,3,:,:),res_line)
+    plot2(np)   = gsn_csm_contour(wks,regr(nc,3,nlg,:,:),res_line)
     overlay(plot(np),plot2(np))
     end if
     
@@ -527,15 +502,10 @@ do nc = 0,ncase-1,1
     line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
     end if
     
-    if(jet_option.ge.1) then 
-    axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,:), res_axis )
-    jetl(np) = gsn_csm_contour(wks,u(nc,:,:),res_jet)
-    overlay(plot(np),jetl(np))
-    end if
-    print(max(var(nc,2,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-    print(min(var(nc,2,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+    print(max(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+    print(min(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
-
-gsn_panel(wks,plot,(/4,1/),resp)
+gsn_panel(wks,plot,(/2,2/),resp)
+end do 
 end
 

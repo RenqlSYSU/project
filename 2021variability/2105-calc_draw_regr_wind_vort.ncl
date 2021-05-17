@@ -18,7 +18,7 @@ month_e = 9
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
-nlag = 7
+nlag = 6
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
@@ -58,8 +58,8 @@ lonr1 = (/125 /);220
 ;area: east Asia
 lats = (/0  ,0  /);-20
 latn = (/90 ,70 /);60
-lonl = (/0  ,30 /);20
-lonr = (/360,150/);220
+lonl = (/0  ,0  /);20
+lonr = (/360,180/);220
 lat_spacing = 20
 lon_spacing = 20
 na = 1
@@ -137,7 +137,8 @@ var := reshape(bw_bandpass_filter(var,fca,fcb,opt,3),(/ncase,nvar,nyear*ntime,nl
 
 do nc = 0, ncase-1, 1
 do nlg = 0, nlag-1, 1
-    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,nlg:(nyear*ntime-1)),var(nc,:,0:(nyear*ntime-nlg-1),:,:),0,1)
+    nlg1 = (nlag-1)-nlg
+    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,nlg1:(nyear*ntime-1)),var(nc,:,0:(nyear*ntime-nlg1-1),:,:),0,1)
     tval(nc,:,nlg,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
     df(nc,:,nlg,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
 end do
@@ -157,17 +158,17 @@ end if
 prob   = mask(prob,prob.lt.siglvl,True)
 
 ;the number of the panel plot
-    plot   = new((/12/),graphic)
-    plot2  = new((/12/),graphic)
-    plot3  = new((/12/),graphic)
-    wind   = new((/12/),graphic)
-    wind2  = new((/12/),graphic)
-    gtop   = new((/12/),graphic)
-    line   = new((/12/),graphic)
-    line1  = new((/12/),graphic)
-    axis   = new((/12/),graphic)
-    jetl   = new((/12/),graphic)
-    sig    = new((/12/),graphic)
+    plot   = new((/28/),graphic)
+    plot2  = new((/28/),graphic)
+    plot3  = new((/28/),graphic)
+    wind   = new((/28/),graphic)
+    wind2  = new((/28/),graphic)
+    gtop   = new((/28/),graphic)
+    line   = new((/28/),graphic)
+    line1  = new((/28/),graphic)
+    axis   = new((/28/),graphic)
+    jetl   = new((/28/),graphic)
+    sig    = new((/28/),graphic)
 
 ;set the area of the box
 maxlon = (/lonr(na),lonr(na)/)
@@ -205,8 +206,8 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 3.0
-   mp_thick       = 2.5;3.0;
+   mp_thick       = 1.5 ;3.0;
+   vc_thick       = mp_thick + 0.5 
    font_index     = 22
 end if
 
@@ -276,7 +277,7 @@ end if
     resvc                  = True
     resvc@gsnDraw          = False
     resvc@gsnFrame         = False
-    resvc@vcGlyphStyle               = "LineArrow";"CurlyVector";
+    resvc@vcGlyphStyle               = "CurlyVector";"LineArrow";
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
@@ -287,13 +288,14 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.02 ;0.025
+    resvc@vcMinDistanceF            = 0.02
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
 end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
+    resvc@vcRefAnnoOn                = False
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
     resvc@vcRefAnnoOrthogonalPosF    = 0.3          ; move ref vector along Y-axis
@@ -301,8 +303,8 @@ end if
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
     resvc@vcRefAnnoFontHeightF       = vcref_font
-    resvc@vcRefAnnoString1On         = False ;True
-    resvc@vcRefAnnoString2On         = True ;False;
+    resvc@vcRefAnnoString1On         = False;True
+    resvc@vcRefAnnoString2On         = False;True ;
     ;resvc@vcRefAnnoString2           = "30m/s"
     resvc@gsnCenterString      = ""
     resvc@gsnLeftString    = " "
@@ -336,9 +338,9 @@ end if
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
-    lnres@gsLineColor          = "black"
+    lnres@gsLineColor          = "blueviolet";"black"
     lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = 4.0
+    lnres@gsLineThicknessF     = mp_thick + 1.0 
     ;lnres@gsLineLabelString    = "TP"
 
     res_axis                      = True
@@ -444,24 +446,24 @@ end if
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
 else                               
-    vcref         = (/0.5, 1,1 ,1 /)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref         = (/0.5, 1,0.5 ,1 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
-minlvl = (/-4.0,-4.0/)  ;q1 ;-80,-80
-maxlvl = (/ 4.0, 4.0/)      ; 80, 80
-spacig = (/ 0.5, 0.5/)      ; 10, 10
+minlvl = (/-4.0,-1.6/)  ;q1 ;-80,-80
+maxlvl = (/ 4.0, 1.6/)      ; 80, 80
+spacig = (/ 0.5, 0.2/)      ; 10, 10
 
 res@cnFillPalette = "BlueDarkRed18"
 res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
-do nlg = 0,nlag-1,1
-;do nlg = nlag-1, 0, -1
 np = -1
+do nlg = 0,nlag-1,1
+nlg1 = (nlag-1)-nlg
 do nc = 0,ncase-1,1
     np = np + 1
-    if(nlg.eq.0) then 
-    res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " (" + nlg + " day)" 
-    else
-    res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " (-" + nlg + " day)" 
+    if(nlg1.eq.0) then 
+    res@gsnLeftString   = case2(nc) + " (" + nlg1 + " day)" ;pre_case(np) + ") " +  
+    else                                                                           
+    res@gsnLeftString   = case2(nc) + " (-" + nlg1 + " day)";pre_case(np) + ") " +  
     end if
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -505,7 +507,7 @@ do nc = 0,ncase-1,1
     print(max(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     print(min(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
-gsn_panel(wks,plot,(/2,2/),resp)
 end do 
+gsn_panel(wks,plot,(/6,4/),resp)
 end
 

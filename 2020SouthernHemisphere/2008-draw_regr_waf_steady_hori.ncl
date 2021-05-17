@@ -9,7 +9,7 @@ bar_share = False;
 barvert   = False;
 lev    = (/925,850,500,300,200,  100,50,10/) 
 nl = 4 ;(/925,850,700,500,200/)
-na = 0 ; "NH","ME","EA","NA"
+na = 1 ; "NH","ME","EA","NA"
 DJF_option = True ;False;
 siglvl= 0.05
 
@@ -25,14 +25,13 @@ ntime = dimsizes(months2)
 case = (/"NCEP2","ERA-Interim"/)
 nc = 0
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    ="pdf";"x11"
+fig_out    = "eps";"pdf";"x11"
 
 ;area: east Asia
-;area = (/"NH","ME","EA","NA","TP"/)
-lats = (/ 5  , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 89 , 89 , 89 , 89 , 50 /) ;55 ;60
+lats = (/ 5  , 5  ,  0 ,  0 , 10 /);10 ;-20
+latn = (/ 89 , 70 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
-lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
+lonr = (/360 ,360 ,175 , 320,130 /) ;150;220
 lat_spacing = 15
 lon_spacing = 20
 density = 1.1 ;km/m3
@@ -55,8 +54,8 @@ end if
 path   = "/home/ys17-19/renql/project/2020SouthernHemisphere/"
 gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 if(var_option.eq.0)
-    filename = path + "data/" + case(nc) + "_" + months + "steady_TN01-comp.nc"
-    fig_name = path + "fig/1p3x3_pcomp_horizontal_TN01_" + var_name(2)
+    filename = path + "data/" + case(nc) + "_" + months + "steady_TN01-p-n_comp.nc"
+    fig_name = path + "fig/1p3x3_pncomp_horizontal_TN01_" + var_name(2)
     ;filename = path + "data/" + case(nc) + "_" + months + "steady_TN01-reg.nc"
 ;    fig_name = path + "fig/1p3x3_regr_horizontal_TN01_" + var_name(2)
 end if
@@ -143,7 +142,7 @@ end if
 
 if(var_option.eq.0) then 
 ;var_m = var_m*1000
-vcref := (/4,150,150/) ;(/925,850,700,500,200/)
+vcref := (/10,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/150,150,150/) ;(/925,850,700,500,200/)
 ;vcref := (/50,50,50/) ;(/925,850,700,500,200/)
 prob(0,:,:) = f->prob({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -159,9 +158,9 @@ if(shad_option.eq.0) then ;divg
 end if
 if(shad_option.eq.1) then ;edd_sf
     var_m(2,0,:,:) = (1.0/1000000.0)*f->$var_name(2)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    minlvl := (/-7,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 7, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 1, 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    minlvl := (/-16,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 16, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 2 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
 if(shad_option.eq.2) then ;wafz
     var_name(2) = "wafz"
@@ -195,9 +194,9 @@ printVarSummary(var_m)
     res@mpMaxLonF        = 330 ;lonr(na)
     res@mpMinLonF        = -30 ;lonl(na)
     else
-    res@gsnAddCyclic     = False;True;
-    res@mpMaxLonF        = lonr(na)
-    res@mpMinLonF        = lonl(na)
+    res@gsnAddCyclic     = True;False;
+    res@mpMaxLonF        = 180 ;lonr(na)
+    res@mpMinLonF        = -30 ;lonl(na)
     end if
     res@gsnMajorLatSpacing = lat_spacing 
     res@gsnMajorLonSpacing = lon_spacing
@@ -267,7 +266,7 @@ printVarSummary(var_m)
     res_gtop@cnLineThicknessF = 4.0
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res_gtop@cnLevels         = (/1500/)
+    res_gtop@cnLevels         = (/3000/)
     res_gtop@gsnCenterString      = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
@@ -290,7 +289,7 @@ printVarSummary(var_m)
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.3           ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.37           ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.5            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -392,8 +391,8 @@ printVarSummary(var_m)
     else
         res@lbOrientation        = "Horizontal";"Vertical";
         res@pmLabelBarWidthF  = 0.7
-        res@pmLabelBarHeightF = 0.1
-        res@pmLabelBarOrthogonalPosF     = 0.25 ;y direction
+        res@pmLabelBarHeightF = 0.05
+        res@pmLabelBarOrthogonalPosF     = 0.1 ;y direction
         res@pmLabelBarParallelPosF       = 0.5
     end if
     end if
@@ -407,12 +406,12 @@ printVarSummary(var_m)
     ;res@cnFillPalette = "BlueDarkRed18"
     ;blue and red, has 18 colors,2-10 is blue
     
-    res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+    res@cnFillColors  = (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19/)
 
 do nt = 0, ntime-1,1
 do nv = 0, nvar-1, 1
     np = nl-4
-    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa positive5";negitive6"
+    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa 5pos-6neg";positive5" ;negitive6" ;
     if(var_option.eq.0) then 
     if(shad_option.eq.0) then 
     res@gsnRightString  = draw_var(nv) + " WAF  divg (" + unit(2) + ")"

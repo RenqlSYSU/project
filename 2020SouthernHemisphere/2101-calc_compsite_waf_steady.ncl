@@ -21,13 +21,15 @@ var_name = (/"uwnd","vwnd","air","hgt"/)
 ;2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
 ;-3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
 ts     = asciiread(path2+"JET_index_MEJindx_2040N5080E_7918_DJF.txt",-1,"float")
-index  = ind(ts.lt.-1)
-;index  = ind(ts.gt.1)
-nindex = dimsizes(index)
+ind_neg  = ind(ts.lt.-1)
+ind_pos  = ind(ts.gt.1)
+nind_neg = dimsizes(ind_neg)
+nind_pos = dimsizes(ind_pos)
 printVarSummary(ts)
-print(nindex)
+print(nind_neg)
+print(nind_pos)
 
-fileout  = path2 + case(nc) + "_DJF_steady_TN01-neg_comp.nc"
+fileout  = path2 + case(nc) + "_DJF_steady_TN01-p-n_comp.nc"
 DJF_option = True
 
 g  = 9.8 ;m/(s*s)
@@ -267,11 +269,19 @@ NN := wgt_areaave(NN*abs(NN), a*cos(lat)*(lon(1)-lon(0)), 1.0, 0) ;(lev)
 ;uv2sfvpf ( u, v, sf, vp )
 ;delete(vp)
 
-edd_sf = dim_avg_n(z(index,:,:,:),0) - dim_avg_n(z,0)
-prob = ttest(dim_avg_n(z(index,:,:,:),0),dim_variance_n(z(index,:,:,:),0),nindex \
-            ,dim_avg_n(z,0),dim_variance_n(z,0),nyear,True,False)
+;edd_sf = dim_avg_n(z(ind_pos,:,:,:),0) - dim_avg_n(z,0)
+;prob = ttest(dim_avg_n(z(index,:,:,:),0),dim_variance_n(z(index,:,:,:),0),nindex \
+;            ,dim_avg_n(z,0),dim_variance_n(z,0),nyear,True,False)
+
+nind = nind_neg + nind_pos
+eddz = new((/nind,nlev,nlat,nlon/),float)
+eddz(0:nind_neg-1,:,:,:) = - z(ind_neg,:,:,:)
+eddz(nind_neg:nind-1,:,:,:)= z(ind_pos,:,:,:)
+edd_sf = dim_avg_n(z(ind_pos,:,:,:),0) - dim_avg_n(z(ind_neg,:,:,:),0)
+prob = ttest(dim_avg_n(z(ind_pos,:,:,:),0),dim_variance_n(z(ind_pos,:,:,:),0),nind_pos \
+            ,dim_avg_n(z(ind_neg,:,:,:),0),dim_variance_n(z(ind_neg,:,:,:),0),nind_neg,True,False)
 printVarSummary(edd_sf)
-delete(z)
+delete([/eddz,z/])
 
 f0     = conform(edd_sf, 2.0*(2.0*pi/24.0/3600.0)*sin(lat), ilat-2)
 edd_sf = edd_sf/f0

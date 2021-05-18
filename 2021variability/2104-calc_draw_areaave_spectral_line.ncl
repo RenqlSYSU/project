@@ -24,7 +24,7 @@ allcase = True ;False ;if True, four case be draw in one figure
 ifrunave= True ;False;
 nave = 8 ;five days run ave
 month_s = 5 
-month_e = 8
+month_e = 9
 
 first_areaave = True ;False;
 case_option  = 0 
@@ -33,14 +33,16 @@ na = 0 ;"EA","TP","SEA","NEA"
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
 if(case_option.eq.0) then
-    case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    case2   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
     years   = ispan(1979,2005,1)   ;the calculate time
-    path2   = "/home/ys17-19/renql"
-    filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
-                       "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
-                       "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
+    path2   = "/home/ys17-19"
+    filein  = path2 +(/"/data-observation/CN05.1/CN05.1_Pre_1961_2018_daily_025x025.nc",\
+                       "/data-observation/APHRO_MA_025deg_V1003R1/APHRO_MA_025deg_V1003R1.",\; + years(nt) + ".nc"
+                       "/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                       "/renql/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
+                       "/renql/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                       "/renql/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 end if
 
 fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + stand(ns) + "_area_spec_line_" + var_name(nv)
@@ -48,8 +50,7 @@ pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
-f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
-vars:= f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+f    = addfile(filein(2)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
 if(month_s.gt.month_e) then 
 select_time = ind(time(:,1).ge.month_s.or.time(:,1).le.month_e)
@@ -59,8 +60,6 @@ end if
 ntime = dimsizes(select_time)
 ncase = dimsizes(case1)
 nyear = dimsizes(years)
-nlat  = dimsizes(vars&lat)
-nlon  = dimsizes(vars&lon)
 nfrq = toint(ntime/2.0) 
 indx = 4 ;the result of specx_ci
 
@@ -79,21 +78,56 @@ vari3 = new((/ncase/),float)
   pct = 0.1;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
 do nc = 0, ncase-1 ,1
+print("")
 print("handle with " + case1(nc) + " " + area(na))
+if(nc.eq.0) then ;CN051
+    f   = addfile(filein(nc),"r")
+    vars:= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+end if
+if(nc.eq.1) then ;APHRO
+    f   = addfile(filein(nc)+years(0)+".nc","r")
+    vars:= f->precip(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+end if
+if(nc.ge.2) then
+    f   = addfile(filein(nc)+years(0)+".daily.PRECC.nc","r")
+    vars:= f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+dim  = dimsizes(vars)
+nlat = dim(0)
+nlon = dim(1)
 
 ;========= read data ======================================
 term := new((/nyear,ntime,nlat,nlon/),float)
-if (nv.eq.0) then ;preci
-do nt = 0, nyear-1 ,1
+if(nv.eq.0) then ;preci
+if(nc.eq.0) then
+    f   = addfile(filein(nc),"r")
+    t   = cd_calendar(f->time,0)
+    select_time1 = ind(t(:,0).ge.years(0).and.t(:,0).le.years(nyear-1) \
+                    .and.t(:,1).ge.month_s.and.t(:,1).le.month_e)
+    term = reshape(f->pre(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)}),(/nyear,ntime,nlat,nlon/));mm/day
+end if
+if(nc.eq.1) then
+    do nt = 0, nyear-1 ,1
+    f   = addfile(filein(nc)+years(nt)+".nc","r")
+    if(isleapyear(years(nt))) then ;leap year,366 day
+    term(nt,:,:,:) = f->precip(select_time+1,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+    else
+    term(nt,:,:,:) = f->precip(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+    end if
+    end do
+end if
+if(nc.ge.2) then
+    do nt = 0, nyear-1 ,1
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
     term(nt,:,:,:) = f->PRECC(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
     f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
     term(nt,:,:,:) = term(nt,:,:,:) + f->PRECL(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
-end do
-term = term*1000*3600*24 ;convert m/s to mm/day
+    end do
+    term = term*1000*3600*24 ;convert m/s to mm/day
+end if
 end if
 
-if (nv.eq.1) then ;vort
+if(nv.eq.1) then ;vort
 do nt = 0, nyear-1 ,1
     f  = addfile(filein(nc)+years(nt)+".daily.U.nc","r")
     u  = f->U(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -104,6 +138,7 @@ end do
 term = term*10^5 ;10^-5 s^-1
 end if
 
+print(term(0,10,4:9,10))
 ;========= data processing and calc spectrum ======================================
 term  = linmsg_n(term, -1, 3)
 term  = linmsg_n(term, -1, 2)
@@ -255,10 +290,10 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@lgLabelFontHeightF     = label_font
     resxy@lgLabelFont            = font_index
     resxy@pmLegendWidthF   = 0.1
-    resxy@pmLegendHeightF  = 0.18
+    resxy@pmLegendHeightF  = 0.22
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-    resxy@pmLegendOrthogonalPosF  = - 0.35   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.3    ; move ref vector along X-axis
+    resxy@pmLegendOrthogonalPosF  = - 0.30   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -308,9 +343,9 @@ ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
 
 np = 0
 if(allcase) then 
-    resxy@xyDashPatterns    = (/0,0,0,0/)
-    resxy@xyLineThicknesses = (/5.0,3.0,3.0,3.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"grey","red","blue","black"/)
+    resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
+    resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"black","black","black","red","blue","grey"/)
     resxy@pmLegendDisplayMode = "Always"
     resxy@gsnLeftString   = pre_case(np) + ") " ;+ case2(nc)
     plot(np) = gsn_csm_xy(wks, ave&frq, ave(:,0,:), resxy)     

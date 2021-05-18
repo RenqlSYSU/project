@@ -11,14 +11,17 @@ case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 var_name = (/"vort","preci"/)
 unit     = (/"10~S~-6~N~ m~S~-1~N~","mm/day"/)
 draw_var = (/"vort","preci"/)      
-ca = 90.0;60.0 ;day
-cb = 8.0 ;25.0
+ca = 60.0 ;day
+cb = 25.0
 month_s = 5
 month_e = 9
 lev = (/850,500,200,700,600,  100,10/)
-nl = 2
+nl = 0
 nv = 1
 nlag = 6
+lagg = (/5,4,3,2,1,0/)
+;agg = 2*lagg
+lagg = 4*lagg
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
@@ -93,7 +96,7 @@ prob  = new((/ncase,nvar,nlag,nlat,nlon/),float)
 ;==================================================
 do nc = 0, ncase-1, 1
 do nt = 0, nyear-1 ,1
-    print("year " + years(nt))
+    print("year " + years(nt)+ " "+case1(nc))
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
     preci(nc,nt,:) = wgt_areaave_Wrap(f->PRECC(select_time,{lats1:latn1},{lonl1:lonr1}),1.0,1.0,0)
     f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
@@ -137,8 +140,7 @@ var := reshape(bw_bandpass_filter(var,fca,fcb,opt,3),(/ncase,nvar,nyear*ntime,nl
 
 do nc = 0, ncase-1, 1
 do nlg = 0, nlag-1, 1
-    nlg1 = (nlag-1)-nlg
-    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,nlg1:(nyear*ntime-1)),var(nc,:,0:(nyear*ntime-nlg1-1),:,:),0,1)
+    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,lagg(nlg):(nyear*ntime-1)),var(nc,:,0:(nyear*ntime-lagg(nlg)-1),:,:),0,1)
     tval(nc,:,nlg,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
     df(nc,:,nlg,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
 end do
@@ -156,6 +158,9 @@ else
 regr = mask(regr,prob.lt.siglvl,True)
 end if
 prob   = mask(prob,prob.lt.siglvl,True)
+copy_VarCoords(phis, notsiguv(0,0,0,:,:))
+printVarSummary(regr)
+printVarSummary(notsiguv)
 
 ;the number of the panel plot
     plot   = new((/28/),graphic)
@@ -277,7 +282,7 @@ end if
     resvc                  = True
     resvc@gsnDraw          = False
     resvc@gsnFrame         = False
-    resvc@vcGlyphStyle               = "CurlyVector";"LineArrow";
+    resvc@vcGlyphStyle               = "LineArrow";"CurlyVector";
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
     resvc@vcMonoLineArrowColor       = True
@@ -446,7 +451,7 @@ end if
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
 else                               
-    vcref         = (/0.5, 1,0.5 ,1 /)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref         = (/0.5, 1, 1,1 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
 minlvl = (/-4.0,-1.6/)  ;q1 ;-80,-80
@@ -457,13 +462,12 @@ res@cnFillPalette = "BlueDarkRed18"
 res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 np = -1
 do nlg = 0,nlag-1,1
-nlg1 = (nlag-1)-nlg
 do nc = 0,ncase-1,1
     np = np + 1
-    if(nlg1.eq.0) then 
-    res@gsnLeftString   = case2(nc) + " (" + nlg1 + " day)" ;pre_case(np) + ") " +  
+    if(lagg(nlg).eq.0) then 
+    res@gsnLeftString   = case2(nc) + " (" + lagg(nlg) + " day)" ;pre_case(np) + ") " +  
     else                                                                           
-    res@gsnLeftString   = case2(nc) + " (-" + nlg1 + " day)";pre_case(np) + ") " +  
+    res@gsnLeftString   = case2(nc) + " (-" + lagg(nlg) + " day)";pre_case(np) + ") " +  
     end if
     res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

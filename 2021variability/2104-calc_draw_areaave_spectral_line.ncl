@@ -15,7 +15,7 @@ latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
 var_name = (/"preci","vort"/)
-nv = 0 ;
+nv = 1 ;
 lev = (/850,500,200,700,600,  100,10/)
 nl = 0
 stand = (/"","_stand"/)
@@ -27,12 +27,11 @@ month_s = 5
 month_e = 9
 
 first_areaave = True ;False;
-case_option  = 0 
 siglvl = 0.1
 na = 0 ;"EA","TP","SEA","NEA"
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
-if(case_option.eq.0) then
+if(nv.eq.0) then
     case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
     case2   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
     years   = ispan(1979,2005,1)   ;the calculate time
@@ -44,13 +43,25 @@ if(case_option.eq.0) then
                        "/renql/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                        "/renql/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 end if
-
+if(nv.eq.1) then
+    case1   = (/"ERAI","NCEP1","NCEP2","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    case2   = (/"ERAI","NCEP1","NCEP2","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+    years   = ispan(1979,2005,1)   ;the calculate time
+    path2   = "/home/ys17-19"
+    filein  = path2 +(/"/data-observation/ERA-interim/pressure/",\ ;/uwnd/uwnd.interim.1993.nc 1979-2018
+                       "/data-observation/NCEP_NCAR/daily/",\ ;/uwnd/uwnd.1979.nc 1948-2018
+                       "/data-observation/NCEP_DOE/daily/",\  ;/uwnd/uwnd.1979.nc,   short  1979-2020
+                       "/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                       "/renql/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
+                       "/renql/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                       "/renql/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
+end if
 fig_name = path + "/fig/" + case1(0) + "-" + month_s + month_e + stand(ns) + "_area_spec_line_" + var_name(nv)
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
-f    = addfile(filein(2)+years(0)+".daily.PRECC.nc","r")
+f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
 if(month_s.gt.month_e) then 
 select_time = ind(time(:,1).ge.month_s.or.time(:,1).le.month_e)
@@ -80,6 +91,9 @@ vari3 = new((/ncase/),float)
 do nc = 0, ncase-1 ,1
 print("")
 print("handle with " + case1(nc) + " " + area(na))
+
+;========= read data ======================================
+if(nv.eq.0) then ;preci
 if(nc.eq.0) then ;CN051
     f   = addfile(filein(nc),"r")
     vars:= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
@@ -96,9 +110,7 @@ dim  = dimsizes(vars)
 nlat = dim(0)
 nlon = dim(1)
 
-;========= read data ======================================
 term := new((/nyear,ntime,nlat,nlon/),float)
-if(nv.eq.0) then ;preci
 if(nc.eq.0) then
     f   = addfile(filein(nc),"r")
     t   = cd_calendar(f->time,0)
@@ -127,18 +139,56 @@ if(nc.ge.2) then
 end if
 end if
 
+;-------------------vort------------------------------
 if(nv.eq.1) then ;vort
+if(nc.le.2) then 
+if(nc.eq.0) then 
+    f   = addfile(filein(nc)+"uwnd/uwnd.interim."+years(0)+".nc","r")
+else
+    f   = addfile(filein(nc)+"uwnd/uwnd."+years(0)+".nc","r")
+end if
+vars := f->uwnd(0,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc.ge.3) then
+    f   = addfile(filein(nc)+years(0)+".daily.PRECC.nc","r")
+    vars:= f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+
+dim  := dimsizes(vars)
+nlat := dim(0)
+nlon := dim(1)
+term := new((/nyear,ntime,nlat,nlon/),float)
 do nt = 0, nyear-1 ,1
+if(nc.eq.0) then 
+    f  = addfile(filein(nc)+"uwnd/uwnd.interim."+years(nt)+".nc","r")
+    u := f->uwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f  = addfile(filein(nc)+"vwnd/vwnd.interim."+years(nt)+".nc","r")
+    v := f->vwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc.eq.1) then 
+    f  = addfile(filein(nc)+"uwnd/uwnd."+years(nt)+".nc","r")
+    u := f->uwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    f  = addfile(filein(nc)+"vwnd/vwnd."+years(nt)+".nc","r")
+    v := f->vwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc.eq.2) then 
+    f  = addfile(filein(nc)+"uwnd/uwnd."+years(nt)+".nc","r")
+    u := short2flt(f->uwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    f  = addfile(filein(nc)+"vwnd/vwnd."+years(nt)+".nc","r")
+    v := short2flt(f->vwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+end if
+if(nc.ge.3)
     f  = addfile(filein(nc)+years(nt)+".daily.U.nc","r")
-    u  = f->U(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    u := f->U(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
     f  = addfile(filein(nc)+years(nt)+".daily.V.nc","r")
-    v  = f->V(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    term(nt,:,:,:) = uv2vr_cfd(u,v,v&lat,v&lon,2) 
+    v := f->V(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+term(nt,:,:,:) = uv2vr_cfd(u,v,v&lat,v&lon,2) 
 end do
 term = term*10^5 ;10^-5 s^-1
 end if
 
-print(term(0,10,4:9,10))
+;print(term(0,10,4:9,10))
 ;========= data processing and calc spectrum ======================================
 term  = linmsg_n(term, -1, 3)
 term  = linmsg_n(term, -1, 2)
@@ -290,9 +340,9 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@lgLabelFontHeightF     = label_font
     resxy@lgLabelFont            = font_index
     resxy@pmLegendWidthF   = 0.1
-    resxy@pmLegendHeightF  = 0.22
+    resxy@pmLegendHeightF  = 0.25
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-    resxy@pmLegendOrthogonalPosF  = - 0.30   ; move ref vector along Y-axis
+    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
     
     resxy@tmBorderThicknessF  = mp_thick
@@ -342,10 +392,16 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
 
 np = 0
-if(allcase) then 
+if(allcase) then
+if(nv.eq.0)
     resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
     resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)   ; make second line thicker
     resxy@xyLineColors      = (/"black","black","black","red","blue","grey"/)
+else
+    resxy@xyDashPatterns    = (/3,1,2,0,0,0,0/)
+    resxy@xyLineThicknesses = (/3.0,3.0,3.0,3.0,5.0,5.0,5.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"black","black","black","black","red","blue","grey"/)
+end if
     resxy@pmLegendDisplayMode = "Always"
     resxy@gsnLeftString   = pre_case(np) + ") " ;+ case2(nc)
     plot(np) = gsn_csm_xy(wks, ave&frq, ave(:,0,:), resxy)     

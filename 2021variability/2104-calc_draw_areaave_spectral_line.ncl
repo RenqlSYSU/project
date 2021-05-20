@@ -15,9 +15,9 @@ latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
 lonr = (/125 ,130  ,130  /)
 var_name = (/"preci","vort"/)
-nv = 1 ;
+nv = 0 ;
 lev = (/850,500,200,700,600,  100,10/)
-nl = 0
+nl = 1
 stand = (/"","_stand"/)
 ns = 0
 allcase = True ;False ;if True, four case be draw in one figure
@@ -195,12 +195,12 @@ term  = linmsg_n(term, -1, 2)
 if (any(ismissing(term))) then
     print("term has missing values")
 end if
+term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
 opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
 if(ifrunave) then 
 term = runave_n_Wrap(term, nave, opt, dimh)
 end if
-term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
 printVarSummary(term)
 
 if(first_areaave) then 

@@ -13,8 +13,8 @@ draw_var = (/"vort","preci"/)
 month_s = 5
 month_e = 9
 lev = (/850,500,200,700,600,  100,10/)
-nl = 2
-nv = 0
+nl = 0
+nv = 1
 nlag = 6
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
@@ -359,10 +359,18 @@ if(nc1.eq.0) then
     nlon := dim(2)
     term  := reshape(term,(/nyear,ntime,nlat,nlon/));mm/day
     preci = wgt_areaave_Wrap(term, 1.0, 1.0, 0)
+
+    if(nv.eq.1) then 
+    term := f->pre(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    dim  := dimsizes(term)
+    nlat1 := dim(1)
+    nlon1 := dim(2)
+    rain  = reshape(term,(/nyear,ntime,nlat1,nlon1/));mm/day
+    end if
 end if
 if(nc1.eq.1) then 
     do nt = 0, nyear-1 ,1
-    f   = addfile(filein1(nc)+years(nt)+".nc","r")
+    f   = addfile(filein1(nc1)+years(nt)+".nc","r")
     if(isleapyear(years(nt))) then ;leap year,366 day
     preci(nt,:) = wgt_areaave_Wrap(f->precip(select_time+1,{lats1:latn1},{lonl1:lonr1}),1.0,1.0,0);mm/day
     else
@@ -445,6 +453,28 @@ ts = reshape(bw_bandpass_filter(preci,fca,fcb,opt,1),(/nyear*ntime/))
 var := reshape(bw_bandpass_filter(var1,fca,fcb,opt,2),(/nvar,nyear*ntime,nlat,nlon/))
 ;var := reshape(var1,(/ncase,nvar,nyear*ntime,nlat,nlon/))
 
+if(nv.eq.1) then 
+rain1 := reshape(bw_bandpass_filter(rain,fca,fcb,opt,2),(/nyear*ntime,nlat1,nlon1/))
+regr1 := new((/nlag,nlat1,nlon1/),float)
+tval1 := new((/nlag,nlat1,nlon1/),float)
+df1   := new((/nlag,nlat1,nlon1/),float)
+prob1 := new((/nlag,nlat1,nlon1/),float)
+do nlg = 0, nlag-1, 1
+    regr1(nlg,:,:) = regCoef_n(ts(lagg(nlg):(nyear*ntime-1)),rain1(0:(nyear*ntime-lagg(nlg)-1),:,:),0,0)
+    tval1(nlg,:,:) = onedtond(regr1@tval ,(/nlat1,nlon1/))
+    df1(nlg,:,:)   = onedtond(regr1@nptxy,(/nlat1,nlon1/))
+end do
+b := tval1 
+b = 0.5
+prob1  := betainc( df1/(df1+tval1^2), df1/2.0, b )
+delete([/tval1,df1/])
+
+regr1 = mask(regr1,prob1.lt.siglvl,True)
+copy_VarCoords(term(0,:,:), regr1(0,:,:))
+copy_VarCoords(term(0,:,:), prob1(0,:,:))
+printVarSummary(regr1)
+end if
+
 regr := new((/nvar,nlag,nlat,nlon/),float)
 tval := new((/nvar,nlag,nlat,nlon/),float)
 df   := new((/nvar,nlag,nlat,nlon/),float)
@@ -483,7 +513,11 @@ do nlg = 0,nlag-1,1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
+    if(nv.eq.1) then 
+    plot(np)    = gsn_csm_contour_map_ce(wks,regr1(nlg,:,:),res)
+    else
     plot(np)    = gsn_csm_contour_map_ce(wks,regr(2,nlg,:,:),res)
+    end if
     if(sig_option) then 
     sig(np) = gsn_csm_contour(wks,prob(2,nlg,:,:),res_sig)
     overlay(plot(np),sig(np))

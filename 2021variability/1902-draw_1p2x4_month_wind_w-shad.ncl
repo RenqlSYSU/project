@@ -38,13 +38,12 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 5
+nv = 6
 diff = True ;False;
-perc = False;True ;
+perc = True ;False;
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = True ;False;
-ifannual = True ;Whether to do the annual average
+vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
@@ -720,9 +719,9 @@ end if
 
 if(nv.ge.6.and.nv.le.11) then ;intEKE
 if(perc) then 
-    minlvl = (/ 2 ,-70,-70,-70/);-8,-8,-8,-8
-    maxlvl = (/32 , 70, 70, 70/);8 ,8 ,8 ,8 
-    spacig = (/ 2 , 10, 10, 10/);1 ,1 ,1 ,1 
+    minlvl = (/10,-70,-70,-70/);-8,-8,-8,-8
+    maxlvl = (/85, 70, 70, 70/);8 ,8 ,8 ,8 
+    spacig = (/5 , 10, 10, 10/);1 ,1 ,1 ,1 
 else
 ;    minlvl = (/2 ,-14,-14/);-8,-8,-8,-8
 ;    maxlvl = (/32, 14, 14/);8 ,8 ,8 ,8 
@@ -775,8 +774,8 @@ if(nv.eq.20) then  ;200
     spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
-do nc = 0,ncase-1,1
 np = -1
+do nc = 0,ncase-1,1
 ;do nm = 0,nmonth-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -791,7 +790,7 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 0,nmonth-1,1 ;2,1;
+    do nm = 2,2,1;nmonth-1,1 ;
         np = np + 1
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
@@ -895,14 +894,14 @@ end if
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;   gsn_panel(wks,plot,(/4,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
-;    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 end
 

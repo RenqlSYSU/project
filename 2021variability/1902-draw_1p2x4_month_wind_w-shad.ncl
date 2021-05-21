@@ -6,7 +6,7 @@
 ;                                                    2019/02/01
 ;*********************************************************************************
 begin
-path    = "/home/ys17-19/renql/project/2021variability"
+path  = "/home/ys17-19/renql/project/2021variability"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"

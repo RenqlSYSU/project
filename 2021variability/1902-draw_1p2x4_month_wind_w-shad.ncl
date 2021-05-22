@@ -23,26 +23,26 @@ draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT" /)
+             "uppT"         ,"preci-8-80day"/)
 
-unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
+unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
              "J"            ,"J"           ,"m/s"             ,"~S~o~N~C"       ,"hPa"       , \
              "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/day"    ,"K/day"          ,"K/day"     , \ 
-             "K"/)
+             "K"            ,"mm~S~2~N~/day~S~2~N~"/)
 
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
-                 "uppT" /)
+                 "uppT"     ,"preci-8-80day"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 6
+nv = 1
 diff = True ;False;
 perc = True ;False;
 siglvl = 0.05
-sig_option  = False;True ;if False, only the significant values are shaded 
+sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
@@ -53,7 +53,7 @@ contsig  = True ;False;;if True, only the significant values are contoured
 barshare = False;True ;
 barvert  = False;True ;
 
-var_option = 0
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -85,13 +85,13 @@ fig_name = path + "/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_"
 end if
 
 ;area: east Asia
-lats = (/-89,0  ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
-latn = (/89 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
-lonl = (/0  ,150,270,  30 ,150, 270,  25 ,0  ,30 /);20
-lonr = (/360,270,390,  150,270, 390,  85 ,360,150/);220
-lat_spacing = 30
-lon_spacing = 40
-na = 0
+lats = (/-10,5  ,-70,10 /);-20
+latn = (/89 ,45 ,70 ,55 /);60
+lonl = (/0  ,25 ,0  ,90 /);20
+lonr = (/360,85 ,360,150/);220
+lat_spacing = 15
+lon_spacing = 20
+na = 3
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -106,17 +106,17 @@ vari   = new((/ncase  ,nvar,nmonth,nlat,nlon/),float)
 prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
-    plot   = new((/12/),graphic)
-    plot2  = new((/12/),graphic)
-    plot3  = new((/12/),graphic)
-    wind   = new((/12/),graphic)
-    wind2  = new((/12/),graphic)
-    gtop   = new((/12/),graphic)
-    line   = new((/12/),graphic)
-    line1  = new((/12/),graphic)
-    axis   = new((/12/),graphic)
-    jetl   = new((/12/),graphic)
-    sig    = new((/12/),graphic)
+    plot   = new((/30/),graphic)
+    plot2  = new((/30/),graphic)
+    plot3  = new((/30/),graphic)
+    wind   = new((/30/),graphic)
+    wind2  = new((/30/),graphic)
+    gtop   = new((/30/),graphic)
+    line   = new((/30/),graphic)
+    line1  = new((/30/),graphic)
+    axis   = new((/30/),graphic)
+    jetl   = new((/30/),graphic)
+    sig    = new((/30/),graphic)
 
 ;set the area of the box
 maxlon = (/lonr(na),lonr(na)/)
@@ -203,7 +203,7 @@ end if
 
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
-if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
+if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
 var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
@@ -321,16 +321,21 @@ var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.si
 copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
 copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
 end if
+
 if(sig_option) then 
 prob(:,2,:,:,:) = mask(prob(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 else
 var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 end if
+
 if(cont_option.and.contsig) then 
 var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
 end if
+
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(prob)
+else
+case2 = case1
 end if
 printVarSummary(var)
 
@@ -665,9 +670,15 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
+if(perc) then 
+    minlvl = (/ 1 ,-70,-70,-70/);-8,-8,-8,-8
+    maxlvl = (/16 , 70, 70, 70/);8 ,8 ,8 ,8 
+    spacig = (/ 1 , 10, 10, 10/);1 ,1 ,1 ,1 
+else
     minlvl = (/ 1 ,-7,-7,-7/);-3.5 -8,-8,-8,-8
     maxlvl = (/16 , 7, 7, 7/); 3.5  8 ,8 ,8 ,8 
     spacig = (/ 1 , 1, 1, 1/); 0.5  1 ,1 ,1 ,1 
+end if
 end if
 
 if(nv.eq.2) 
@@ -774,9 +785,21 @@ if(nv.eq.20) then  ;200
     spacig = (/1  , 0.1,0.5 /);1.2   3,  3
 end if
 
+if(nv.eq.21) then ;preci-variance
+if(perc) then 
+    minlvl = (/0 ,-70,-70,-70/);-8,-8,-8,-8
+    maxlvl = (/75, 70, 70, 70/);8 ,8 ,8 ,8 
+    spacig = (/5 , 10, 10, 10/);1 ,1 ,1 ,1 
+else
+    minlvl = (/0 ,-35,-35,-35/);-8,-8,-8,-8
+    maxlvl = (/75, 35, 35, 35/);8 ,8 ,8 ,8 
+    spacig = (/5 , 5 , 5 , 5 /);1 ,1 ,1 ,1 
+end if
+end if
+
 np = -1
+do nm = 4,8,1;,nmonth-1,1
 do nc = 0,ncase-1,1
-;do nm = 0,nmonth-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -790,14 +813,15 @@ else
    res@cnFillPalette = "precip3_16lev"
    res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
 end if 
-    do nm = 2,2,1;nmonth-1,1 ;
+;    do nm = 0, nmonth-1,1 ;2,2,1;
         np = np + 1
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
-        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
+        res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
+        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
+        if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
         else
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")";lev(nl) + "hPa wind & " +  
+        res@gsnRightString  = ""; draw_varname(nv) + " (" + unit(nv) + ")";lev(nl) + "hPa wind & " +  
         end if
         else
         if(cont_option) then 
@@ -893,7 +917,6 @@ end if
     ;attach5 = gsn_attach_plots(plot(8),plot(9),res1,res2)
     ;attach6 = gsn_attach_plots(plot(10),plot(11),res1,res2)
     ;gsn_panel(wks,plot(0:10:2),(/6,1/),resp)
-;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/2,2/),resp)
 ;   gsn_panel(wks,plot,(/4,1/),resp)
 ;    gsn_panel(wks,plot,(/6,2/),resp)
@@ -901,7 +924,8 @@ end if
 end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
-    gsn_panel(wks,plot,(/2,2/),resp)
+    resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
+    gsn_panel(wks,plot,(/5,4/),resp)
 ;end do
 end
 

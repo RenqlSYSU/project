@@ -9,7 +9,6 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
-area = (/"EA","SEA","NEA"/); "TP","STP","CTP", ;S mean south,N mean North,EA mean East Asia
 lats = (/ 27 , 22  , 30  /)
 latn = (/ 37 , 30  , 45  /)
 lonl = (/105 ,107  ,115  /)
@@ -90,7 +89,7 @@ vari3 = new((/ncase/),float)
 
 do nc = 0, ncase-1 ,1
 print("")
-print("handle with " + case1(nc) + " " + area(na))
+print("handle with " + case1(nc))
 
 ;========= read data ======================================
 if(nv.eq.0) then ;preci

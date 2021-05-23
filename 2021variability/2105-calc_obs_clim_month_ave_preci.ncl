@@ -46,8 +46,9 @@ end if
 fileout = path + "/renql/project/2021variability/data/" + case + "-Clim_month_ave_"
 
 f1 = addfile("/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc","r")
-nlat  = dimsizes(vars&lat)
-nlon  = dimsizes(vars&lon)
+dims  = dimsizes(vars)
+nlat  = dims(0)
+nlon  = dims(1)
 nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 ncase = dimsizes(filein)
@@ -121,9 +122,10 @@ if(nv.ge.4) then
     fca = 1.0/ca
     fcb = 1.0/cb
     opt = False
-    var = linmsg_n(var,(/-1/),2)
-    var = bw_bandpass_filter(var,fca,fcb,opt,1)
-    var = var*var 
+    var1 = linmsg_n(var,(/-1/),3)
+    var1 = bw_bandpass_filter(var1,fca,fcb,opt,1)
+    var1 = where(ismissing(var),var1@_FillValue,var1)
+    var = var1*var1 
     var@long_name = "variance"
     var@units     = "mm2/day2" 
     end if
@@ -179,8 +181,13 @@ filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
 filevardef(ncdf,"month" ,"integer",(/"month" /))
 filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"lev","integer",(/"lev"/))
+if(case_option.eq.0) then 
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
+else
+filevardef(ncdf,"lat",typeof(vars&latitude),(/"lat"/))
+filevardef(ncdf,"lon",typeof(vars&longitude),(/"lon"/))
+end if
 if((nv.le.3)) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_ave",typeof(season_ave),(/"season","lev","lat","lon"/))
@@ -195,8 +202,13 @@ filevardef(ncdf,"season_vari",typeof(season_vari),(/"season","lat","lon"/))
 end if
 
 ;Define the attribute of the variables
+if(case_option.eq.0) then 
 filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
+else
+filevarattdef(ncdf,"lat",vars&latitude)
+filevarattdef(ncdf,"lon",vars&longitude)
+end if
 filevarattdef(ncdf,"month_ave",var)
 filevarattdef(ncdf,"season_ave",var)
 filevarattdef(ncdf,"month_vari",var)
@@ -205,8 +217,13 @@ filevarattdef(ncdf,"season_vari",var)
 ncdf->month  = ispan(1,12,1)
 ncdf->season  = (/1212,345,678,91011/)
 ncdf->lev = (/lev/)
+if(case_option.eq.0) then 
 ncdf->lat = (/vars&lat/)
 ncdf->lon = (/vars&lon/)
+else
+ncdf->lat = (/vars&latitude/)
+ncdf->lon = (/vars&longitude/)
+end if
 ncdf->month_ave   = (/month_ave/)
 ncdf->season_ave  = (/season_ave/)
 ncdf->month_vari  = (/month_vari/)

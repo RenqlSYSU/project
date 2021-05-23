@@ -38,7 +38,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT"     ,"preci-8-80day"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 1
+nv = 21
 diff = True ;False;
 perc = True ;False;
 siglvl = 0.05
@@ -50,8 +50,8 @@ cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = False;True ;
-barvert  = False;True ;
+barshare = True ;False;
+barvert  = True ;False;
 
 var_option = 1
 if(var_option.eq.0) then 
@@ -85,13 +85,13 @@ fig_name = path + "/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_"
 end if
 
 ;area: east Asia
-lats = (/-10,5  ,-70,10 /);-20
-latn = (/89 ,45 ,70 ,55 /);60
-lonl = (/0  ,25 ,0  ,90 /);20
-lonr = (/360,85 ,360,150/);220
+lats = (/-10,5  ,-70,10 ,15 /);-20
+latn = (/89 ,45 ,70 ,55 ,55 /);60
+lonl = (/0  ,25 ,0  ,90 ,90 /);20
+lonr = (/360,85 ,360,150,140/);220
 lat_spacing = 15
 lon_spacing = 20
-na = 3
+na = 4
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -799,7 +799,7 @@ end if
 
 np = -1
 do nm = 4,8,1;,nmonth-1,1
-do nc = 0,ncase-1,1
+do nc = 0,0,1;ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -879,8 +879,8 @@ end if
         end if
         
         if(nc.eq.0.or.nc.eq.3) then
-        line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
-        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
+        ;line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
+        ;line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
         else
         line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
         end if
@@ -925,7 +925,7 @@ end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
-    gsn_panel(wks,plot,(/5,4/),resp)
+    gsn_panel(wks,plot,(/5,1/),resp)
 ;end do
 end
 

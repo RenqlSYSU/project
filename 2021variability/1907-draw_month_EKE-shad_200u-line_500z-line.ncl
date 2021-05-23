@@ -33,14 +33,14 @@ var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
-nnv = 1
+nnv = 0
 imonth = ispan(0,3,1)
 filename = path + "/data/" + case(nc) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.1) then 
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-nnv = 1
+nnv = 0
 imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/data/" + case(nc) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
@@ -417,9 +417,9 @@ if(nvc.eq.0) then ;Z3
     cont_spacing = (/20,30,50,80/)
 end if
 
-minlvl = (/0 ,0 /)  ;0.13 0.5 2  ;,-80
-maxlvl = (/15,150/)  ;0.58 3.5 62 ;, 80
-spacig = (/1 ,10/)  ;0.03 0.2 4  ;, 10
+minlvl = (/1 ,0 /)  ;0.13 0.5 2  ;,-80
+maxlvl = (/16,75/)  ;0.58 3.5 62 ;, 80
+spacig = (/1 ,5 /)  ;0.03 0.2 4  ;, 10
 
 if(nv.eq.2) then
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -444,7 +444,7 @@ do nm = 4,8,1;0,nmonth-1,1
     res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
     else
     if(nv.le.1) then
-    res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ")" 
+    res@gsnRightString  = "";draw_varname(nv) + " (" + unit(nv) + ")" 
     else
     res@gsnRightString  = lev(nl) + "hPa " + draw_varname(nv) + " (" + unit(nv) + ") "
     end if
@@ -487,6 +487,7 @@ do nm = 4,8,1;0,nmonth-1,1
     ;frame(wks)
 end do 
 
+resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
 ;gsn_panel(wks,plot,(/nmonth,1/),resp)
 ;gsn_panel(wks,plot,(/6,2/),resp)
 gsn_panel(wks,plot,(/5,1/),resp)

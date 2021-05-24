@@ -9,19 +9,22 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
-lats = (/ 27 , 22  , 30  /)
-latn = (/ 37 , 30  , 45  /)
-lonl = (/105 ,107  ,115  /)
-lonr = (/125 ,130  ,130  /)
+lats = (/ 27, 27, 29, 20, 35, 27, 29/)
+latn = (/ 37, 37, 34, 25, 42, 37, 34/)
+lonl = (/105,115,115,115,115,110,110/)
+lonr = (/125,120,120,120,125,120,120/)
 var_name = (/"preci","vort"/)
 nv = 0 ;
+na = 0
 lev = (/850,500,200,700,600,  100,10/)
 nl = 1
 stand = (/"","_stand"/)
 ns = 0
 allcase = True ;False ;if True, four case be draw in one figure
-ifrunave= True ;False;
-nave = 8 ;five days run ave
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter
+nave = 5 ;five days run ave
+ca = 80.0;90.0 ;day
+cb = 8.0 ;2.5  ;10.0 ;
 month_s = 5 
 month_e = 9
 
@@ -87,6 +90,9 @@ vari3 = new((/ncase/),float)
   sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
   pct = 0.1;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
+np = 0
+wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
+;do na = 1,6,1
 do nc = 0, ncase-1 ,1
 print("")
 print("handle with " + case1(nc))
@@ -194,16 +200,22 @@ term  = linmsg_n(term, -1, 2)
 if (any(ismissing(term))) then
     print("term has missing values")
 end if
-term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
+;term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
+if(ifrunave.eq.1) then 
 opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
-if(ifrunave) then 
 term = runave_n_Wrap(term, nave, opt, dimh)
 end if
 printVarSummary(term)
 
 if(first_areaave) then 
     term := wgt_areaave_Wrap(term,1.0,1.0,0) ;area average
+    if(ifrunave.eq.2) then 
+    fca  = 1.0/ca
+    fcb  = 1.0/cb
+    opt1 = False
+    term = bw_bandpass_filter(term,fca,fcb,opt1,1)
+    end if
     if(ns.eq.1) then
     term = dim_standardize_n(term,1,1) ;dim_standardize_n(x, opt, dims)
     end if
@@ -299,8 +311,6 @@ ave@units     = "1/day"
    mp_thick       = 2.0
    font_index     = 22
 
-wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
-
     resxy     = True
     ;resxy@vpWidthF  = 0.45
     ;resxy@vpHeightF = 0.15
@@ -385,16 +395,24 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    resp@txString      = "sm="+sm+" pct="+pct+" runave="+ifrunave+" nave="+nave
+    if(ifrunave.eq.0) then 
+    resp@txString      = "sm="+sm+" pct="+pct+" no filter"
+    end if
+    if(ifrunave.eq.1) then 
+    resp@txString      = "sm="+sm+" pct="+pct+" runave="+nave+"day"
+    end if
+    if(ifrunave.eq.2) then 
+    resp@txString      = "sm="+sm+" pct="+pct+" bw_filter="+cb+"-"+ca+"day"
+    end if
 
 ;ip   = ind(frq.le.0.2)    ; all indices for "short" periods
 ip   = ind(frq.ge.0.01)    ; all indices for "short" periods
 
-np = 0
+;np = 0
 if(allcase) then
 if(nv.eq.0)
     resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
-    resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)   ; make second line thicker
+    resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
     resxy@xyLineColors      = (/"black","black","black","red","blue","grey"/)
 else
     resxy@xyDashPatterns    = (/3,1,2,0,0,0,0/)
@@ -405,7 +423,7 @@ end if
     resxy@gsnLeftString   = pre_case(np) + ") " ;+ case2(nc)
     plot(np) = gsn_csm_xy(wks, ave&frq, ave(:,0,:), resxy)     
     np = np + 1
-    gsn_panel(wks,plot,(/1,1/),resp)
+;    gsn_panel(wks,plot,(/1,1/),resp)
 else
     resxy@xyDashPatterns    = (/0,0,1,3/)
     resxy@xyLineThicknesses = (/2.0,3.0,3.0,3.0/)   ; make second line thicker
@@ -418,4 +436,7 @@ else
     end do
     gsn_panel(wks,plot,(/1,ncase/),resp)
 end if
+;end do
+gsn_panel(wks,plot,(/1,1/),resp)
+;gsn_panel(wks,plot,(/3,2/),resp)
 end

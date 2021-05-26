@@ -30,7 +30,7 @@ if(case_option.eq.3) then
     if(option.eq.0) then
         fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+".nc"
     else
-        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"2-" + cb + "-" + ca + "day.nc"
     end if  
 end if
 
@@ -103,6 +103,7 @@ print(var(0,10,10:20,30))
 fca = 1.0/ca
 fcb = 1.0/cb
 opt = False
+var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 var = bw_bandpass_filter(var,fca,fcb,opt,1)
 var = var*var 
 var@long_name = "variance"

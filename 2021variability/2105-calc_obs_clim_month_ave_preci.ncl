@@ -122,6 +122,7 @@ if(nv.ge.4) then
     fca = 1.0/ca
     fcb = 1.0/cb
     opt = False
+    var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
     var1 = linmsg_n(var,(/-1/),3)
     var1 = bw_bandpass_filter(var1,fca,fcb,opt,1)
     var1 = where(ismissing(var),var1@_FillValue,var1)

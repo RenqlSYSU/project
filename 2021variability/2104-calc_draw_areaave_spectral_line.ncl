@@ -21,10 +21,10 @@ nl = 1
 stand = (/"","_stand"/)
 ns = 0
 allcase = True ;False ;if True, four case be draw in one figure
-ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter
-nave = 5 ;five days run ave
-ca = 80.0;90.0 ;day
-cb = 8.0 ;2.5  ;10.0 ;
+ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+nave = 8 ;five days run ave
+ca = 90.0;90.0 ;day
+cb = 12.0 ;2.5  ;10.0 ;
 month_s = 5 
 month_e = 9
 
@@ -200,9 +200,9 @@ term  = linmsg_n(term, -1, 2)
 if (any(ismissing(term))) then
     print("term has missing values")
 end if
-;term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
+term = term - conform(term,dim_avg_n(term,0),(/1,2,3/))  ;remove annual cycle
 if(ifrunave.eq.1) then 
-opt  = 1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
+opt  = -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
 term = runave_n_Wrap(term, nave, opt, dimh)
 end if
@@ -215,6 +215,15 @@ if(first_areaave) then
     fcb  = 1.0/cb
     opt1 = False
     term = bw_bandpass_filter(term,fca,fcb,opt1,1)
+    end if
+    if(ifrunave.eq.3) then 
+    fca  = 1.0/ca
+    fcb  = 1.0/cb
+    fcf = fspan(0, 0.5, ntime/2) 
+    filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
+    cf = ezfftf_n(term,1)
+    cf(:,:,filt_cf) = 0.0  
+    term = ezfftb_n(cf,0,2)
     end if
     if(ns.eq.1) then
     term = dim_standardize_n(term,1,1) ;dim_standardize_n(x, opt, dims)
@@ -403,6 +412,9 @@ ave@units     = "1/day"
     end if
     if(ifrunave.eq.2) then 
     resp@txString      = "sm="+sm+" pct="+pct+" bw_filter="+cb+"-"+ca+"day"
+    end if
+    if(ifrunave.eq.3) then 
+    resp@txString      = "sm="+sm+" pct="+pct+" Fourier_filter="+cb+"-"+ca+"day"
     end if
 
 ;ip   = ind(frq.le.0.2)    ; all indices for "short" periods

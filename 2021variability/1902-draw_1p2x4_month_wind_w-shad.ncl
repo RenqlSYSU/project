@@ -23,7 +23,7 @@ draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT"         ,"preci-8-80day"/)
+             "uppT"         ,"preci2-8-80day"/)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -40,7 +40,7 @@ lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 21
 diff = True ;False;
-perc = True ;False;
+perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
@@ -799,7 +799,7 @@ end if
 
 np = -1
 do nm = 4,8,1;,nmonth-1,1
-do nc = 0,0,1;ncase-1,1
+do nc = 0,ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -925,7 +925,7 @@ end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
-    gsn_panel(wks,plot,(/5,1/),resp)
+    gsn_panel(wks,plot,(/5,4/),resp)
 ;end do
 end
 

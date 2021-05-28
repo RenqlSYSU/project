@@ -23,7 +23,7 @@ draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT"         ,"preci2-8-80day"/)
+             "uppT"         ,"preci3-8-80day"/)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -38,8 +38,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT"     ,"preci-8-80day"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 21
-diff = True ;False;
+nv = 1
+diff = False;True ;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
@@ -50,10 +50,10 @@ cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
-barshare = True ;False;
-barvert  = True ;False;
+barshare = False;True ;
+barvert  = False;True ;
 
-var_option = 1
+var_option = 0
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -798,7 +798,7 @@ end if
 end if
 
 np = -1
-do nm = 4,8,1;,nmonth-1,1
+do nm = 2,2,1;,nmonth-1,1
 do nc = 0,ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -879,8 +879,8 @@ end if
         end if
         
         if(nc.eq.0.or.nc.eq.3) then
-        ;line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
-        ;line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
+        line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
+        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
         else
         line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
         end if
@@ -925,7 +925,7 @@ end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
-    gsn_panel(wks,plot,(/5,4/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 end
 

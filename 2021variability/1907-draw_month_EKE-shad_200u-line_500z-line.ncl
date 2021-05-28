@@ -18,8 +18,8 @@ cont_option = False;True ;
 cont_var  = (/"hgt"/)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"hgt"/)    ;this can be used as right string 
 nvc = 0 
-barshare = True ;False;
-barvert  = True ;False;
+barshare = False;True ;
+barvert  = False;True ;
 
 gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 path    = "/home/ys17-19/renql/project/2021variability"
@@ -28,22 +28,6 @@ nc  = 0
 nc2 = 2
 pre_case = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out  = "pdf";"x11";"eps";
-
-var_option = 1
-if(var_option.eq.0) then 
-var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
-months   = (/"DJF","MAM","JJA","SON"/)
-nnv = 0
-imonth = ispan(0,3,1)
-filename = path + "/data/" + case(nc) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-end if
-if(var_option.eq.1) then 
-var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
-months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
-nnv = 0
-imonth = ispan(0,11,1);(/4,5,6,7/)
-filename = path + "/data/" + case(nc) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
-end if
 
 if(nv.le.1) then 
     fig_name = path + "/fig/" + case(nc) + "-month_" + draw_var(nv)
@@ -56,9 +40,6 @@ else
     fig_name = path + "/fig/" + case(nc) + "-month_" + lev(nl) + draw_var(nv) + "_" + cont_var(nvc)
     end if
 end if
-
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11""eps";
 
 ;area: east Asia
 lats = (/-89,14 ,15 /);-20
@@ -107,7 +88,25 @@ else
    font_index     = 22
 end if
 
-    wks = gsn_open_wks(fig_out,fig_name)
+np = -1
+wks = gsn_open_wks(fig_out,fig_name)
+do nc = 0, 1, 1
+var_option = 0
+if(var_option.eq.0) then 
+var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
+months   = (/"DJF","MAM","JJA","SON"/)
+nnv = 0
+imonth = ispan(0,3,1)
+filename = path + "/data/" + case(nc) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
+end if
+if(var_option.eq.1) then 
+var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
+months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
+nnv = 0
+imonth = ispan(0,11,1);(/4,5,6,7/)
+filename = path + "/data/" + case(nc) + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
+end if
+
 ;================================================================
 ;read data
 ;====================================================================
@@ -131,25 +130,25 @@ printVarSummary(axlat)
 end if
 
 if(vect_option) then 
-f = addfile(path+"/mdata/"+case(nc2)+"_clim_month_ave_uwnd.nc","r")
-u = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-f = addfile(path+"/mdata/"+case(nc2)+"_clim_month_ave_vwnd.nc","r")
-v = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+f  = addfile(path+"/mdata/"+case(nc2)+"_clim_month_ave_uwnd.nc","r")
+u := f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+f  = addfile(path+"/mdata/"+case(nc2)+"_clim_month_ave_vwnd.nc","r")
+v := f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 
 f = addfile(filename + draw_var(nv) + ".nc","r")
 if(nv.le.1) then
-shad  = f->$var_name(nnv)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+shad  := f->$var_name(nnv)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
-shad  = f->$var_name(nnv)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+shad  := f->$var_name(nnv)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 
 if(cont_option) then
 f = addfile(filename+cont_var(nvc) + ".nc","r")
 if(nvc.gt.1) then
-cont  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+cont  := f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
-cont  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+cont  := f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 end if
 printVarSummary(shad)
@@ -435,9 +434,8 @@ else
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 end if
 
-np = -1
 ;do nm = 0,nmonth-1,1
-do nm = 4,8,1;0,nmonth-1,1
+do nm = 2,2,1;0,nmonth-1,1
     np = np + 1
     res@gsnLeftString   = pre_case(np) + ") " + case(nc) + " " + months(imonth(nm))
     if(cont_option) then 
@@ -487,10 +485,12 @@ do nm = 4,8,1;0,nmonth-1,1
     ;frame(wks)
 end do 
 
-resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
 ;gsn_panel(wks,plot,(/nmonth,1/),resp)
 ;gsn_panel(wks,plot,(/6,2/),resp)
-gsn_panel(wks,plot,(/5,1/),resp)
+;gsn_panel(wks,plot,(/5,1/),resp)
 end do
+end do
+;resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
+gsn_panel(wks,plot,(/2,2/),resp)
 end
 

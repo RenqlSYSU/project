@@ -10,7 +10,7 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
 calc_var = (/"intEKE","preci"/)
 cnv = 1
 
@@ -28,7 +28,7 @@ if(case_option.eq.3) then
                       "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+".nc"
+        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"3.nc"
     else
         fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"2-" + cb + "-" + ca + "day.nc"
     end if  
@@ -100,11 +100,19 @@ var = linmsg_n(var,(/-1/),2)
 var = var*3600*24*1000 ;mm/day
 print(var(0,10,10:20,30))
 
+if(option.eq.0) then 
+var  = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
+opt  = -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
+nave = 8
+dimh = 1
+var  = runave_n_Wrap(var, nave, opt, dimh)
+else
 fca = 1.0/ca
 fcb = 1.0/cb
 opt = False
 var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 var = bw_bandpass_filter(var,fca,fcb,opt,1)
+end if
 var = var*var 
 var@long_name = "variance"
 var@units     = "mm2/day2" 

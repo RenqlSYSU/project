@@ -21,12 +21,12 @@ nl = 1
 stand = (/"","_stand"/)
 ns = 0
 allcase = True ;False ;if True, four case be draw in one figure
-ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 8 ;five days run ave
-ca = 90.0;90.0 ;day
-cb = 12.0 ;2.5  ;10.0 ;
-month_s = 5 
-month_e = 9
+ca = 80.0;90.0 ;day
+cb = 8.0 ;2.5  ;10.0 ;
+month_s = 6 
+month_e = 8
 
 first_areaave = True ;False;
 siglvl = 0.1
@@ -92,7 +92,7 @@ vari3 = new((/ncase/),float)
 
 np = 0
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
-;do na = 1,6,1
+do na = 1,6,1
 do nc = 0, ncase-1 ,1
 print("")
 print("handle with " + case1(nc))
@@ -338,8 +338,8 @@ ave@units     = "1/day"
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
     resxy@trYMaxF = max(ave(:,0,:))
-    resxy@trXMinF = log(min(frq))
-    resxy@trXMaxF = log(max(frq)) 
+    resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
+    resxy@trXMaxF = log(1.0/8.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
     ;resxy@trXLog  = True
     resxy@tmXBMode    = "Explicit"
@@ -360,8 +360,13 @@ ave@units     = "1/day"
     resxy@pmLegendWidthF   = 0.1
     resxy@pmLegendHeightF  = 0.25
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
+    if(ifrunave.ge.2) then 
+    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = -0.28    ; move ref vector along X-axis
+    else
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    end if
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -432,7 +437,7 @@ else
     resxy@xyLineColors      = (/"black","black","black","black","red","blue","grey"/)
 end if
     resxy@pmLegendDisplayMode = "Always"
-    resxy@gsnLeftString   = pre_case(np) + ") " ;+ case2(nc)
+    resxy@gsnLeftString   = pre_case(np) + ") " + month_s + "-" + month_e 
     plot(np) = gsn_csm_xy(wks, ave&frq, ave(:,0,:), resxy)     
     np = np + 1
 ;    gsn_panel(wks,plot,(/1,1/),resp)
@@ -448,7 +453,7 @@ else
     end do
     gsn_panel(wks,plot,(/1,ncase/),resp)
 end if
-;end do
-gsn_panel(wks,plot,(/1,1/),resp)
-;gsn_panel(wks,plot,(/3,2/),resp)
+end do
+;gsn_panel(wks,plot,(/1,1/),resp)
+gsn_panel(wks,plot,(/3,2/),resp)
 end

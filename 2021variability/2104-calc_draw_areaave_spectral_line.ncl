@@ -24,7 +24,7 @@ allcase = True ;False ;if True, four case be draw in one figure
 ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 8 ;five days run ave
 ca = 80.0;90.0 ;day
-cb = 8.0 ;2.5  ;10.0 ;
+cb = 2.5 ;2.5  ;10.0 ;
 month_s = 6 
 month_e = 8
 

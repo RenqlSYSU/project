@@ -17,6 +17,7 @@ cnv = 1
 ;parameter for bw_bandpass_filter
 ca = 80.0;90.0 ;day
 cb = 8.0 ;2.5  ;10.0 ;
+nave = 8
 
 if(case_option.eq.3) then
     case    = (/"CTRL","NG15S","NG4550","NGEN","NG45N","NG1520"/) ;
@@ -103,7 +104,6 @@ print(var(0,10,10:20,30))
 if(option.eq.0) then 
 var  = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 opt  = -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
-nave = 8
 dimh = 1
 var  = runave_n_Wrap(var, nave, opt, dimh)
 else

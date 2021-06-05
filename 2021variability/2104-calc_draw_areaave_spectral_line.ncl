@@ -9,10 +9,14 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
-lats = (/ 27, 27, 29, 20, 35, 27, 29/)
-latn = (/ 37, 37, 34, 25, 42, 37, 34/)
-lonl = (/105,115,115,115,115,110,110/)
-lonr = (/125,120,120,120,125,120,120/)
+lats = (/ 27, 32 , 25 , 40 /)
+latn = (/ 37, 32 , 25 , 40 /)
+lonl = (/105, 118, 115, 115/)
+lonr = (/125, 118, 115, 115/)
+;lats = (/ 27, 27, 29, 20, 35, 27, 29/)
+;latn = (/ 37, 37, 34, 25, 42, 37, 34/)
+;lonl = (/105,115,115,115,115,110,110/)
+;lonr = (/125,120,120,120,125,120,120/)
 var_name = (/"preci","vort"/)
 nv = 0 ;
 na = 0
@@ -24,7 +28,7 @@ allcase = True ;False ;if True, four case be draw in one figure
 ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 8 ;five days run ave
 ca = 80.0;90.0 ;day
-cb = 2.5 ;2.5  ;10.0 ;
+cb = 8.0 ;2.5  ;10.0 ;
 month_s = 6 
 month_e = 8
 
@@ -73,6 +77,7 @@ end if
 ntime = dimsizes(select_time)
 ncase = dimsizes(case1)
 nyear = dimsizes(years)
+narea = dimsizes(lats)
 nfrq = toint(ntime/2.0) 
 indx = 4 ;the result of specx_ci
 
@@ -90,9 +95,10 @@ vari3 = new((/ncase/),float)
   sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
   pct = 0.1;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
 
-np = 0
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
-do na = 1,6,1
+do ifrunave = 0,2,1
+np = 0
+do na = 0,narea-1,1;1,6,1
 do nc = 0, ncase-1 ,1
 print("")
 print("handle with " + case1(nc))
@@ -455,5 +461,6 @@ else
 end if
 end do
 ;gsn_panel(wks,plot,(/1,1/),resp)
-gsn_panel(wks,plot,(/3,2/),resp)
+gsn_panel(wks,plot,(/2,2/),resp)
+end do
 end

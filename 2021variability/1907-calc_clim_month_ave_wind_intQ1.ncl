@@ -27,7 +27,7 @@ if(case_option.eq.3) then
 end if
 var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
              "Q1" ,"preci","TMQ","TS" ,"PS"  , \
-             "PSL" /) ;,"OMEGA","RELHUM" 
+             "PSL","PRECC","PRECL" /) ;,"OMEGA","RELHUM" 
 
 ;Q1 is vertically integrated 
 
@@ -63,7 +63,7 @@ season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
 ;do nv = 9,9,1; ,nvar-1 ,1 
-do nv = 6,6,1; ,nvar-1 ,1 
+do nv = 11,12,1; ,nvar-1 ,1 
 do nf = 0,3,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -205,7 +205,10 @@ if(nv.gt.6) then
     f  = addfile(files(nt),"r")
 ;    f  = addfile(filein(nf)+years(nt)+".daily."+var_name(nv)+".nc","r")
     var(nt,:,:,:) = tofloat(f->$var_name(nv)$(:,{lats:latn},{lonl:lonr}))
-    end do 
+    end do
+    if (nv.eq.11.or.nv.eq.12) then
+    var  = var*1000*3600*24 ;convert m/s to mm/day
+    end if
 end if
 
 time = cd_calendar(f->time,0)

@@ -22,8 +22,10 @@ nl = 1
 stand = (/"","_stand"/)
 ns = 0
 nave = 8 ;five days run ave
-ca = 80.0;90.0 ;day
-cb = 8.0 ;2.5  ;10.0 ;
+ca1 = 80.0;90.0 ;day
+cb1 = 8.0 ;2.5  ;10.0 ;
+ca2 = 80.0;90.0 ;day
+cb2 = 16.0 ;2.5  ;10.0 ;
 month_s = 6 
 month_e = 8
 
@@ -55,18 +57,16 @@ ncase = dimsizes(case1)
 nyear = dimsizes(years)
 narea = dimsizes(lats)
 
-legend = (/"raw",nave+" runave",cb+"-"+ca+" bwfilter"/)
+legend = (/"raw",nave+" runave",cb1+"-"+ca1+" bwfilter",cb2+"-"+ca2+" bwfilter"/)
 term   = new((/nyear,ntime/),float)
 plot   = new((/ncase/),graphic)
-vari2  = new((/ncase/),float)
-vari3  = new((/ncase/),float)
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the yearly power spectra 
 ;--------------------------------------------------------------
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 do na = 0,narea-1,1
-var  := new((/ncase,3,nyear,ntime/),float)
+var  := new((/ncase,4,nyear,ntime/),float)
 do nc = 0, ncase-1 ,1
 print("")
 print("handle with " + case1(nc))
@@ -119,12 +119,19 @@ opt  = -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing valu
 dimh = 1
 var(nc,1,:,:) = runave_n_Wrap(term, nave, opt, dimh)
 
-fca  = 1.0/ca
-fcb  = 1.0/cb
+fca  = 1.0/ca1
+fcb  = 1.0/cb1
 opt1 = True
 opt1@remove_mean = True
 annu = conform(term,dim_avg_n(term,0),(/1/))  ;remove annual cycle
 var(nc,2,:,:) = bw_bandpass_filter((term-annu),fca,fcb,opt1,1)+annu
+
+fca  = 1.0/ca2
+fcb  = 1.0/cb2
+opt1 = True
+opt1@remove_mean = True
+annu = conform(term,dim_avg_n(term,0),(/1/))  ;remove annual cycle
+var(nc,3,:,:) = bw_bandpass_filter((term-annu),fca,fcb,opt1,1)+annu
 ;fcf = fspan(0, 0.5, ntime/2) 
 ;filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
 ;cf = ezfftf_n(term,1)
@@ -133,7 +140,7 @@ var(nc,2,:,:) = bw_bandpass_filter((term-annu),fca,fcb,opt1,1)+annu
 end do
 vari := dim_variance_n((var-conform(var,dim_avg_n(var,2),(/0,1,3/))),3)
 vari := dim_avg_n(vari,2)
-var := reshape(var,(/ncase,3,nyear*ntime/))
+var := reshape(var,(/ncase,4,nyear*ntime/))
 ;vari = dim_variance_n(var,2)
 ;vari = dim_avg_n(var*var,2)
 xtim = ispan(0,nyear*ntime-1,1)
@@ -237,13 +244,13 @@ xtim = ispan(0,nyear*ntime-1,1)
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
-    resxy@xyDashPatterns    = (/0,0,0/)
-    resxy@xyLineThicknesses = (/2.0,2.0,2.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"black","red","blue"/)
+    resxy@xyDashPatterns    = (/0,0,0,0/)
+    resxy@xyLineThicknesses = (/2.0,2.0,2.0,2.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"black","red","blue","green"/)
     
     np = 0
     do nc = 0, ncase-1, 1
-    resxy@gsnLeftString   = pre_case(np) + ") " + case2(nc)+": "+vari(nc,0)+"; "+vari(nc,1)+"; "+vari(nc,2)
+    resxy@gsnLeftString   = pre_case(np) + ") " + case2(nc)+": "+vari(nc,0)+"; "+vari(nc,1)+"; "+vari(nc,2)+"; "+vari(nc,3)
     plot(np) = gsn_csm_xy(wks, xtim, var(nc,:,:), resxy)     
     np = np + 1
     end do

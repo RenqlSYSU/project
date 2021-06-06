@@ -10,9 +10,9 @@
 begin
 path    = "/home/ys17-19/renql"
 case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-calc_var = (/"intEKE","preci"/)
-cnv = 1
+option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+calc_var = (/"intEKE","preci","PRECC","PRECL"/)
+cnv = 2
 
 ;parameter for bw_bandpass_filter
 ca = 80.0;90.0 ;day
@@ -29,9 +29,9 @@ if(case_option.eq.3) then
                       "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     if(option.eq.0) then
-        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"3.nc"
+        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"_runave.nc"
     else
-        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"2-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"-" + cb + "-" + ca + "day.nc"
     end if  
 end if
 
@@ -72,8 +72,13 @@ u  = new((/nyear,ntime,nlev,nlat,nlon/),float)
 v  = new((/nyear,ntime,nlev,nlat,nlon/),float)
 dp = new((/nyear,ntime,nlev,nlat,nlon/),float)
 ps = new((/nyear,ntime,nlat,nlon/),float)
-else
+end if
+if(cnv.eq.1) then 
 var_name= (/"PRECC","PRECL"/)
+var = new((/nyear,ntime,nlat,nlon/),float)
+end if
+if(cnv.ge.2) then 
+var_name= calc_var(cnv) 
 var = new((/nyear,ntime,nlat,nlon/),float)
 end if
 
@@ -84,19 +89,29 @@ end if
 ;==========================================================
 ;read the data
 ;============================================================
+if(cnv.ge.1) then 
 if(cnv.eq.1) then 
 do nt = 0,nyear-1,1
-nv = 0
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f  = addfile(files(nt),"r")
-print(" handle with " + files(nt))
-var(nt,:,:,:) = f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
+    nv = 0
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f  = addfile(files(nt),"r")
+    print(" handle with " + files(nt))
+    var(nt,:,:,:) = f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
 
-nv = 1
-files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
-f  = addfile(files(nt),"r")
-var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
+    nv = 1
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+    f  = addfile(files(nt),"r")
+    var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name(nv)$(select_time,{lats:latn},{lonl:lonr})
 end do
+end if
+if(cnv.ge.2) then 
+do nt = 0,nyear-1,1
+    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name+".nc" )
+    f  = addfile(files(nt),"r")
+    print(" handle with " + files(nt))
+    var(nt,:,:,:) = var(nt,:,:,:) + f->$var_name$(select_time,{lats:latn},{lonl:lonr})
+end do
+end if
 var = linmsg_n(var,(/-1/),2)
 var = var*3600*24*1000 ;mm/day
 print(var(0,10,10:20,30))

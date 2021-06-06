@@ -68,6 +68,7 @@ phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ntime = dimsizes(select_time)
 ncase = dimsizes(case1)
 nyear = dimsizes(years)
+narea = dimsizes(lats1)
 
 ;the number of the panel plot
     plot   = new((/28/),graphic)
@@ -127,6 +128,7 @@ end if
 ;read data and filter and regression
 ;==================================================
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
+do na1 = 0, narea-1, 1
 np = 0
 do nc = 0, ncase-1, 1
 if(nc.eq.0) then ;CN051
@@ -184,16 +186,25 @@ nsample = nyear*ntime
 fca = 1.0/ca
 fcb = 1.0/cb
 opt = False
-ts  = reshape(bw_bandpass_filter(preci,fca,fcb,opt,1),(/nyear*ntime/))
-var:= reshape(bw_bandpass_filter(var,fca,fcb,opt,1),(/nyear*ntime,nlat,nlon/))
-corr := escorc_n(ts, var ,0 ,0)
-prob := rtest(corr,nsample,0)
-if(sig_option) then 
-prob = mask(prob,prob.lt.siglvl,True)
-else
-corr = mask(corr,prob.lt.siglvl,True)
-end if
-copy_VarMeta(vars,prob)
+ts  = bw_bandpass_filter(preci,fca,fcb,opt,1)
+var = bw_bandpass_filter(var,fca,fcb,opt,1)
+corr := var(0,0,:,:)
+corr = 0
+do nt = 0, nyear-1, 1
+    corr = corr + escorc_n(ts(nt,:), var(nt,:,:,:) ,0 ,0)
+end do
+corr = corr/nyear
+printVarSummary(corr)
+;ts := reshape(ts,(/nyear*ntime/))
+;var:= reshape(var,(/nyear*ntime,nlat,nlon/))
+;corr := escorc_n(ts, var ,0 ,0)
+;prob := rtest(corr,nsample,0)
+;if(sig_option) then 
+;prob = mask(prob,prob.lt.siglvl,True)
+;else
+;corr = mask(corr,prob.lt.siglvl,True)
+;end if
+;copy_VarMeta(vars,prob)
 copy_VarMeta(vars,corr)
 
 ;==============================================================
@@ -392,5 +403,6 @@ res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
     printMinMax(corr,True)
 end do 
 gsn_panel(wks,plot,(/3,2/),resp)
+end do
 end
 

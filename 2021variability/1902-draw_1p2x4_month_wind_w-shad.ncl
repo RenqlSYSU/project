@@ -19,7 +19,7 @@ fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
-draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
+draw_var = (/"intQ1"        ,"PRECC"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
@@ -31,7 +31,7 @@ unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            
              "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/day"    ,"K/day"          ,"K/day"     , \ 
              "K"            ,"mm~S~2~N~/day~S~2~N~"/)
 
-draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
+draw_varname = (/"Q1"       ,"PRECC"       ,"q1"        , \
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
@@ -39,7 +39,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
-diff = False;True ;
+diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
@@ -53,7 +53,7 @@ contsig  = True ;False;;if True, only the significant values are contoured
 barshare = False;True ;
 barvert  = False;True ;
 
-var_option = 0
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -91,7 +91,7 @@ lonl = (/0  ,25 ,0  ,90 ,90 /);20
 lonr = (/360,85 ,360,150,140/);220
 lat_spacing = 15
 lon_spacing = 20
-na = 4
+na = 0
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -798,7 +798,7 @@ end if
 end if
 
 np = -1
-do nm = 2,2,1;,nmonth-1,1
+do nm = 4,8,1;,nmonth-1,1
 do nc = 0,ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -925,7 +925,7 @@ end do
 ;    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/5,4/),resp)
 ;end do
 end
 

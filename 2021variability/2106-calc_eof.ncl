@@ -15,13 +15,14 @@ ca = 80.0 ;day
 cb = 8.0
 month_s = 6
 month_e = 8
-savedata = True
+savedata = False;True
 barshare = True ;False;
 barvert  = True ;False;
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
 neval = 4
+siglvl = 0.1
 
 area = (/"EA"/);,"GB"
 lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
@@ -92,6 +93,8 @@ else
    vc_thick       = mp_thick + 0.5 
    font_index     = 22
 end if
+   label_font     = 0.018
+   label_thick    = 1.5
 
     res                  = True
     res@gsnFrame         = False
@@ -235,6 +238,88 @@ spacig = (/ 1/)      ; 10, 10
 res@cnFillPalette = "BlueDarkRed18"
 res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 
+p_draw = (/120,90,60,40,30,20,15,10,7,5/)
+    
+    resxy     = True
+    ;resxy@vpWidthF  = 0.45
+    ;resxy@vpHeightF = 0.15
+    resxy@gsnFrame      = False
+    resxy@gsnDraw       = False
+    resxy@gsnMaximize   = True
+    resxy@gsnPaperOrientation = "portrait"
+    
+    resxy@tmYLAutoPrecision = False
+    resxy@tmYLPrecision     = 2 
+    ;resxy@tiXAxisOn = False
+    ;resxy@tiYAxisOn = False
+    resxy@tiXAxisString = "Period (day)"          ; xaxis
+    resxy@tiYAxisString = "Power*frq"           ; yaxis
+    ;resxy@tiYAxisString = "Variance"           ; yaxis
+    ;resxy@trYLog  = True
+    ;resxy@trYMinF = 0
+    ;resxy@trYMaxF = max(ave(:,0,:))
+    resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
+    resxy@trXMaxF = log(1.0/8.0)  ;log(max(frq)) 
+    resxy@xyComputeXMin = True
+    ;resxy@trXLog  = True
+    resxy@tmXBMode    = "Explicit"
+    resxy@tmXBValues  = log(1.0/p_draw)
+    resxy@tmXBLabels  = p_draw
+    
+    ;legend
+    resxy@pmLegendDisplayMode = "Always"
+    resxy@lgOrientation       = "Vertical"
+    resxy@lgPerimOn           = False
+    resxy@lgPerimFill         = "SolidFill"
+    resxy@lgPerimFillColor    = "white"
+    ;resxy@xyExplicitLegendLabels = case2 + " " + vari1
+    resxy@lgLabelFontColor       = "black"
+    resxy@lgLabelFontThicknessF  = label_thick
+    resxy@lgLabelFontHeightF     = label_font
+    resxy@lgLabelFont            = font_index
+    resxy@pmLegendWidthF   = 0.1
+    resxy@pmLegendHeightF  = 0.25
+    resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
+    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    
+    resxy@tmBorderThicknessF  = mp_thick
+    resxy@tmXBLabelFont         = font_index
+    resxy@tmYLLabelFont         = font_index
+    resxy@tmXBLabelFontHeightF     = tick_font 
+    resxy@tmXBLabelFontThicknessF  = tick_thick
+    resxy@tmYLLabelFontHeightF     = tick_font
+    resxy@tmYLLabelFontThicknessF  = tick_thick
+
+    ;resxy@tmXBMinorOn          = False ; Turn off x-axis (bottom) minor ticks
+    ;resxy@tmXTMinorOn          = False ; Turn off x-axis (tottom)minor ticks
+    ;resxy@tmXTOn               = False ; Turn off x-axis (top) major ticks
+    ;resxy@tmYRMinorOn          = False ; Turn off y-axis (right) minor ticks
+    ;resxy@tmYLMinorOn          = False ; Turn off y-axis (left) minor ticks
+    ;resxy@tmYROn               = False ; Turn off y-axis (right) major ticks
+    
+    resxy@tmXBMajorThicknessF     = mp_thick
+    resxy@tmYLMajorThicknessF     = mp_thick
+    resxy@tmXBMinorThicknessF     = mp_thick
+    resxy@tmYLMinorThicknessF     = mp_thick
+    ;resxy@tmXBMajorLengthF = 0.01
+    ;resxy@tmYRMajorLengthF = 0.01
+    
+    resxy@tmXMajorGrid                   = True
+    resxy@tmXMajorGridLineDashPattern    = 2
+    resxy@tmXMajorGridLineColor          = "gray"
+    resxy@tmXMajorGridThicknessF         = 2.0
+                             
+    resxy@gsnStringFont        = font_index
+    resxy@gsnStringFontHeightF = subtitle_font
+    resxy@gsnCenterString  = "";lev(nl) + " hPa"
+    resxy@gsnRightString   = var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+
+; set spectral function arguments
+  d   = 0    ; detrending opt: 0=>remove mean 1=>remove mean + detrend
+  sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
+  pct = 0.1;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
+
 ;=====================================================
 ;read data and filter and regression
 ;==================================================
@@ -293,7 +378,7 @@ var = bw_bandpass_filter(var,fca,fcb,opt,1)
 var:= reshape(var,(/nyear*ntime,nlat,nlon/))
 
 if(nc.ge.2) then 
-    var = mask(var, conform(var,ldmk,(/1,2/)).eq.0, False)
+    var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
 end if
 eof     := eofunc_n(var,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 sig     := eofunc_north(eof@pcvar,nsample,True)
@@ -318,7 +403,7 @@ do ne = 0, 2, 1
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
-    plot(np)    = gsn_csm_contour_map_ce(wks,eof(ne,:,:),res)
+    plot(np) = gsn_csm_contour_map_ce(wks,eof(ne,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
     np = np + 1
@@ -326,6 +411,42 @@ do ne = 0, 2, 1
 end do 
 end do 
 gsn_panel(wks,plot,(/6,3/),resp)
+
+nfrq = toint(nsample/2.0) 
+indx = 4 ;the result of specx_ci
+splt = new((/ncase,indx,nfrq/),float)
+np = 0
+do ne = 0, 2, 1
+nee = ne+1
+do nc = 0, ncase-1, 1
+    sdof := specx_anal(eof_ts(nc,ne,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+    splt(nc,:,:) = specx_ci(sdof, siglvl, 1.0-siglvl)
+end do
+varia = splt*(1.0/nsample)
+varia(:,:,0) = varia(:,:,0)/2.0
+varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
+frq  = sdof@frq
+splt = splt*conform(splt,frq,2)
+vari1 = dim_sum_n(varia(:,0,:),1)
+
+print(sdof)
+printVarSummary(splt)
+splt!2   = "frq"
+splt&frq = log(frq)
+splt@long_name = "power*frequency"
+splt@units     = "1/day"
+
+    resxy@xyExplicitLegendLabels = case2 + " " + vari1
+    resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
+    resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
+    resxy@xyLineColors      = (/"black","black","black","red","blue","grey"/)
+    resxy@pmLegendDisplayMode = "Always"
+    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee
+    plot(np) = gsn_csm_xy(wks, splt&frq, splt(:,0,:), resxy)     
+    np = np + 1
+end do
+resp@gsnPanelLabelBar = False 
+gsn_panel(wks,plot,(/1,3/),resp)
 
 ;========================================================================
 ;save the data

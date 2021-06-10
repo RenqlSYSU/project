@@ -412,17 +412,38 @@ end do
 end do 
 gsn_panel(wks,plot,(/6,3/),resp)
 
-nfrq = toint(nsample/2.0) 
 indx = 4 ;the result of specx_ci
+nsample2 = ntime
+eofts = reshape(eof_ts,(/ncase,neval,nyear,ntime/))
+nfrq  = toint(nsample2/2.0) 
 splt = new((/ncase,indx,nfrq/),float)
+
 np = 0
 do ne = 0, 2, 1
 nee = ne+1
 do nc = 0, ncase-1, 1
-    sdof := specx_anal(eof_ts(nc,ne,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
-    splt(nc,:,:) = specx_ci(sdof, siglvl, 1.0-siglvl)
+    spcavg = new ((/nfrq/),typeof(eofts))
+    spcavg = 0.0
+    r1zsum = 0.0
+    do nt = 0, nyear-1, 1
+        ; calculate spectrum
+        sdof := specx_anal(eofts(nc,ne,nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spcavg = spcavg + sdof@spcx                ; sum spc of each segment
+        r1     = sdof@xlag1                        ; extract segment lag-1
+        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
+    end do 
+    r1z  = r1zsum/nyear                 ; average r1z
+    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
+    spcavg  = spcavg/nyear              ; average spectrum
+    df      = 2.0*nyear   ; deg of freedom
+    df@spcx = spcavg      ; assign the mean spc
+    df@frq  = sdof@frq
+    df@xlag1= r1          ; assign mean lag-1
+    splt(nc,:,:) = specx_ci(df, siglvl, 1.0-siglvl) 
+;    sdof := specx_anal(eof_ts(nc,ne,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+;    splt(nc,:,:) = specx_ci(sdof, siglvl, 1.0-siglvl)
 end do
-varia = splt*(1.0/nsample)
+varia = splt*(1.0/nsample2)
 varia(:,:,0) = varia(:,:,0)/2.0
 varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
 frq  = sdof@frq

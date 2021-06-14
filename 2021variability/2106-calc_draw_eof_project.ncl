@@ -7,18 +7,17 @@
 ;                                           2021/06/08
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql/project/2021variability"
+path     = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
 ca = 80.0 ;day
 cb = 8.0
-fnc = 0
+fnc = 2
 month_s = 6
 month_e = 8
 savedata = False;True
-barshare = True ;False;
-barvert  = True ;False;
+mkoc = False ; True mean mask rainfall on ocean
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
@@ -60,8 +59,6 @@ select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 end if
 f = addfile(gtopfile,"r")
 ldmk   = f->LANDM_COSLAT({lats(na):latn(na)},{lonl(na):lonr(na)})
-phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
-phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ntime = dimsizes(select_time)
 ncase = dimsizes(case1)
 nyear = dimsizes(years)
@@ -117,7 +114,7 @@ end if
     ;resxy@trYMinF = 0
     ;resxy@trYMaxF = max(ave(:,0,:))
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
-    resxy@trXMaxF = log(1.0/8.0)  ;log(max(frq)) 
+    resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
     ;resxy@trXLog  = True
     resxy@tmXBMode    = "Explicit"
@@ -139,7 +136,7 @@ end if
     resxy@pmLegendHeightF  = 0.25
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = - 0.25    ; move ref vector along X-axis
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -242,15 +239,16 @@ opt = False
 fvar = bw_bandpass_filter(fvar,fca,fcb,opt,1)
 pi   = atan(1.0)*4
 wgt := sqrt(cos( lat*pi/180.0 ))
-fvar = tofloat(fvar*conform(var,wgt,2))
+fvar = tofloat(fvar*conform(fvar,wgt,2))
 fvar:= reshape(fvar,(/nyear*ntime,nlat,nlon/))
 
-if(fnc.ge.2) then 
-    fvar = mask(fvar, conform(var,ldmk,(/1,2/)).eq.1, True)
+if(fnc.ge.2.and.mkoc) then 
+    fvar = mask(fvar, conform(fvar,ldmk,(/1,2/)).eq.1, True)
 end if
 eof  := eofunc_n(fvar,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 sig  := eofunc_north(eof@pcvar,nsample,True)
-eof = eof*conform(eof,sqrt(eof@eval),0)
+;eof = eof*conform(eof,sqrt(eof@eval),0)
+printVarSummary(eof)
 
 ;=====================================================
 ;read all case and then do projection 
@@ -313,11 +311,11 @@ wgt := sqrt(cos( lat*pi/180.0 ))
 var = tofloat(var*conform(var,wgt,2))
 var:= reshape(var,(/nyear*ntime,nlat,nlon/))
 
-if(nc.ge.2) then 
+if(nc.ge.2.and.mkoc) then 
     var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
 end if
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
-eof_ts(nc,:,:)= eof_ts_temp;/conform(eof_ts_temp,sqrt(eof@eval),0)
+eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)
 ts_mean(nc,:) = eof_ts_temp@ts_mean
 end do
 
@@ -334,7 +332,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 np = 0
 do ne = 0, 2, 1
 nee = ne+1
-do nc = 0, ncase-1, 1
+do nc = 2, ncase-1, 1
 if(nsample2.eq.ntime) then 
     spcavg = new ((/nfrq/),typeof(eofts))
     spcavg = 0.0
@@ -375,8 +373,11 @@ splt@units     = "1/day"
 
     resxy@xyExplicitLegendLabels = case2 + " " + vari1
     resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
-    resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
+    resxy@xyLineThicknesses = (/3.0,3.0,5.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
     resxy@xyLineColors      = (/"black","black","black","red","blue","grey"/)
+    ;resxy@xyDashPatterns    = (/0,0,0,0/)
+    ;resxy@xyLineThicknesses = (/5.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
+    ;resxy@xyLineColors      = (/"black","red","blue","grey"/)
     resxy@pmLegendDisplayMode = "Always"
     resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(:,0,:), resxy)     

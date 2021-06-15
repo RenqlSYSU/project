@@ -11,13 +11,15 @@ path     = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+nave = 5 ;five days run ave
 ca = 80.0 ;day
-cb = 8.0
+cb = 12.0
 fnc = 2
 month_s = 6
 month_e = 8
 savedata = False;True
-mkoc = False ; True mean mask rainfall on ocean
+mkoc = True ; True mean mask rainfall on ocean
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
@@ -135,8 +137,13 @@ end if
     resxy@pmLegendWidthF   = 0.1
     resxy@pmLegendHeightF  = 0.25
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
+    if(ifrunave.ge.2) then 
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = - 0.25    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = - 0.24    ; move ref vector along X-axis
+    else
+    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    end if
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -168,14 +175,25 @@ end if
     resxy@gsnStringFont        = font_index
     resxy@gsnStringFontHeightF = subtitle_font
     resxy@gsnCenterString  = "";lev(nl) + " hPa"
-    resxy@gsnRightString   = var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
+    resxy@gsnRightString   = "";var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    ;resp@txString      = "sm="+sm+" pct="+pct+" Fourier_filter="+cb+"-"+ca+"day"
+    if(ifrunave.eq.0) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" no filter"
+    end if
+    if(ifrunave.eq.1) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" runave="+nave+"day"
+    end if
+    if(ifrunave.eq.2) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" bw_filter="+cb+"-"+ca+"day"
+    end if
+    if(ifrunave.eq.3) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" Fourier_filter="+cb+"-"+ca+"day"
+    end if
 
 ; set spectral function arguments
   d   = 0    ; detrending opt: 0=>remove mean 1=>remove mean + detrend
@@ -233,10 +251,18 @@ if(fnc.ge.2) then
 end if
 printVarSummary(fvar)
 
+dimh = 1
+if(ifrunave.eq.1) then 
+opt1 = -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
+fvar = runave_n_Wrap(fvar, nave, opt1, dimh)
+fvar = fvar -conform(fvar,dim_avg_n(fvar,0),(/1,2,3/))  ;remove annual cycle
+end if
+if(ifrunave.eq.2) then 
 fca = 1.0/ca
 fcb = 1.0/cb
-opt = False
-fvar = bw_bandpass_filter(fvar,fca,fcb,opt,1)
+opt2 = False
+fvar = bw_bandpass_filter(fvar,fca,fcb,opt2,dimh)
+end if
 pi   = atan(1.0)*4
 wgt := sqrt(cos( lat*pi/180.0 ))
 fvar = tofloat(fvar*conform(fvar,wgt,2))
@@ -247,6 +273,7 @@ if(fnc.ge.2.and.mkoc) then
 end if
 eof  := eofunc_n(fvar,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 sig  := eofunc_north(eof@pcvar,nsample,True)
+subtitle_color = where(sig,"red","black") 
 ;eof = eof*conform(eof,sqrt(eof@eval),0)
 printVarSummary(eof)
 
@@ -302,10 +329,18 @@ if(nc.ge.2) then
 end if
 printVarSummary(var)
 
+dimh = 1
+if(ifrunave.eq.1) then 
+opt1= -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
+var = runave_n_Wrap(var, nave, opt1, dimh)
+var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
+end if
+if(ifrunave.eq.2) then 
 fca = 1.0/ca
 fcb = 1.0/cb
-opt = False
-var = bw_bandpass_filter(var,fca,fcb,opt,1)
+opt2= False
+var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
+end if
 pi   = atan(1.0)*4
 wgt := sqrt(cos( lat*pi/180.0 ))
 var = tofloat(var*conform(var,wgt,2))
@@ -379,7 +414,8 @@ splt@units     = "1/day"
     ;resxy@xyLineThicknesses = (/5.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
     ;resxy@xyLineColors      = (/"black","red","blue","grey"/)
     resxy@pmLegendDisplayMode = "Always"
-    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee
+    resxy@gsnLeftStringFontColor   = subtitle_color(ne)
+    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee+": "+eof@eval(ne)+"  "+eof@pcvar(ne)+"%" 
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(:,0,:), resxy)     
     np = np + 1
 end do

@@ -11,8 +11,10 @@ path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+nave = 5 ;five days run ave
 ca = 80.0 ;day
-cb = 8.0
+cb = 12.0
 month_s = 6
 month_e = 8
 savedata = False;True
@@ -30,7 +32,7 @@ latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90
 lonl = (/105 /);, 0   ;30 ;20
 lonr = (/135 /);, 360 ;150;220
 lat_spacing = 10
-lon_spacing = 20
+lon_spacing = 15
 na = 0
 
 case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
@@ -72,7 +74,7 @@ gtop    = new((/18/),graphic)
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.025
    title_font     = 0.02
    vcref_font     = 0.008
    tick_thick     = 8.0
@@ -229,7 +231,18 @@ end if
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
-    resp@txString      = cb+"-"+ca+"-day filter, month: "+month_s+"-"+month_e+", preci" 
+    if(ifrunave.eq.0) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" no filter"
+    end if
+    if(ifrunave.eq.1) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" runave="+nave+"day"
+    end if
+    if(ifrunave.eq.2) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" bw_filter="+cb+"-"+ca+"day"
+    end if
+    if(ifrunave.eq.3) then 
+    resp@txString      = "month: "+month_s+"-"+month_e+" Fourier_filter="+cb+"-"+ca+"day"
+    end if
 
 minlvl = (/-8/)  ;q1 ;-80,-80
 maxlvl = (/ 8/)      ; 80, 80
@@ -374,10 +387,18 @@ if(nc.ge.2) then
 end if
 printVarSummary(var)
 
+dimh = 1
+if(ifrunave.eq.1) then 
+opt1= -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
+var = runave_n(var, nave, opt1, dimh)
+var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
+end if
+if(ifrunave.eq.2) then 
 fca = 1.0/ca
 fcb = 1.0/cb
-opt = False
-var = bw_bandpass_filter(var,fca,fcb,opt,1)
+opt2= False
+var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
+end if
 pi   = atan(1.0)*4
 wgt := sqrt(cos( lat*pi/180.0 ))
 var = tofloat(var*conform(var,wgt,2))

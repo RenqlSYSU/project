@@ -14,7 +14,7 @@ nv = 0
 ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
-cb = 12.0
+cb = 8.0
 month_s = 6
 month_e = 8
 savedata = False;True
@@ -23,7 +23,7 @@ barvert  = True ;False;
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
-neval = 4
+neval = 7
 siglvl = 0.1
 
 area = (/"EA"/);,"GB"
@@ -54,22 +54,24 @@ fig_out    = "pdf";"x11";"eps";
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
 if(month_s.gt.month_e) then 
-select_time = ind(time(:,1).ge.month_s.or.time(:,1).le.month_e)
+select_time1 = ind(time(:,1).ge.month_s.or.time(:,1).le.month_e)
 else
-select_time = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
+select_time1 = ind(time(:,1).ge.(month_s-1).and.time(:,1).le.(month_e+1))
+time := cd_calendar(f->time(select_time1),0)
+select_time2 = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 end if
 f = addfile(gtopfile,"r")
 ldmk   = f->LANDM_COSLAT({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
-ntime = dimsizes(select_time)
+ntime = dimsizes(select_time2)
 ncase = dimsizes(case1)
 nyear = dimsizes(years)
 nsample = nyear*ntime
 eof_ts  = new((/ncase,neval,nsample/),float)
 ts_mean = new((/ncase,neval/),float)
-plot    = new((/18/),graphic)
-gtop    = new((/18/),graphic)
+plot    = new((/36/),graphic)
+gtop    = new((/36/),graphic)
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
@@ -244,9 +246,9 @@ end if
     resp@txString      = "month: "+month_s+"-"+month_e+" Fourier_filter="+cb+"-"+ca+"day"
     end if
 
-minlvl = (/-8/)  ;q1 ;-80,-80
-maxlvl = (/ 8/)      ; 80, 80
-spacig = (/ 1/)      ; 10, 10
+minlvl = (/-4 /)  ;q1 ;-80,-80
+maxlvl = (/ 4 /)      ; 80, 80
+spacig = (/0.5/)      ; 10, 10
 
 res@cnFillPalette = "BlueDarkRed18"
 res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
@@ -358,30 +360,31 @@ dim  = dimsizes(vars)
 nlat = dim(0)
 nlon = dim(1)
 
+ntime = dimsizes(select_time1)
 var := new((/nyear,ntime,nlat,nlon/),float)
 if(nc.eq.0) then ;CN051
     f   = addfile(filein(nc),"r")
     t   = cd_calendar(f->time,0)
-    select_time1 = ind(t(:,0).ge.years(0).and.t(:,0).le.years(nyear-1) \
-                    .and.t(:,1).ge.month_s.and.t(:,1).le.month_e)
-    var = reshape(f->pre(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)}),(/nyear,ntime,nlat,nlon/));mm/day
+    select_time0 = ind(t(:,0).ge.years(0).and.t(:,0).le.years(nyear-1) \
+                    .and.t(:,1).ge.(month_s-1).and.t(:,1).le.(month_e+1))
+    var = reshape(f->pre(select_time0,{lats(na):latn(na)},{lonl(na):lonr(na)}),(/nyear,ntime,nlat,nlon/));mm/day
 end if
 if(nc.eq.1) then
     do nt = 0, nyear-1 ,1
     f   = addfile(filein(nc)+years(nt)+".nc","r")
     if(isleapyear(years(nt))) then ;leap year,366 day
-    var(nt,:,:,:) = f->precip(select_time+1,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+    var(nt,:,:,:) = f->precip(select_time1+1,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     else
-    var(nt,:,:,:) = f->precip(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+    var(nt,:,:,:) = f->precip(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     end if
     end do
 end if
 if(nc.ge.2) then
     do nt = 0, nyear-1 ,1
     f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
-    var(nt,:,:,:) = f->PRECC(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var(nt,:,:,:) = f->PRECC(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)})
     f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
-    var(nt,:,:,:) = var(nt,:,:,:) + f->PRECL(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+    var(nt,:,:,:) = var(nt,:,:,:) + f->PRECL(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)})
     end do
     var = var*1000*3600*24 ;convert m/s to mm/day
 end if
@@ -397,11 +400,15 @@ if(ifrunave.eq.2) then
 fca = 1.0/ca
 fcb = 1.0/cb
 opt2= False
+var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
 pi   = atan(1.0)*4
 wgt := sqrt(cos( lat*pi/180.0 ))
 var = tofloat(var*conform(var,wgt,2))
+
+var := var(:,select_time2,:,:)
+ntime = dimsizes(select_time2)
 var:= reshape(var,(/nyear*ntime,nlat,nlon/))
 
 if(nc.ge.2) then 
@@ -421,7 +428,7 @@ copy_VarMeta(vars,eof(0,:,:))
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-do ne = 0, 2, 1
+do ne = 0, neval-2, 1
     nee = ne+1
     res@gsnLeftString   = case2(nc);+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
     res@gsnRightStringFontColor   = subtitle_color(ne)
@@ -437,7 +444,7 @@ do ne = 0, 2, 1
     printMinMax(eof(ne,:,:),True)
 end do 
 end do 
-gsn_panel(wks,plot,(/6,3/),resp)
+gsn_panel(wks,plot,(/6,(neval-1)/),resp)
 
 indx = 4 ;the result of specx_ci
 nsample2 = ntime;nyear*
@@ -446,7 +453,7 @@ splt = new((/ncase,indx,nfrq/),float)
 eofts = reshape(eof_ts,(/ncase,neval,nyear,ntime/))
 
 np = 0
-do ne = 0, 2, 1
+do ne = 0, neval-2, 1
 nee = ne+1
 do nc = 0, ncase-1, 1
 if(nsample2.eq.ntime) then 
@@ -497,7 +504,7 @@ splt@units     = "1/day"
     np = np + 1
 end do
 resp@gsnPanelLabelBar = False 
-gsn_panel(wks,plot,(/1,3/),resp)
+gsn_panel(wks,plot,(/2,3/),resp)
 
 ;========================================================================
 ;save the data

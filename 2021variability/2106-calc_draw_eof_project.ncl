@@ -11,20 +11,21 @@ path     = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
-cb = 12.0
+cb = 8.0
+rmv = False ;remove annaul cycle when bandpass filter
 fnc = 2
 month_s = 6
 month_e = 8
-savedata = False;True
+savedata = True ;False;
 mkoc = True ; True mean mask rainfall on ocean
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
 neval = 7
-siglvl = 0.1
+siglvl = 0.05
 
 area = (/"EA"/);,"GB"
 lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
@@ -47,8 +48,18 @@ filein  = path2 +(/"/data-observation/CN05.1/CN05.1_Pre_1961_2018_daily_025x025.
                    "/renql/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                    "/renql/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/renql/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
+if(ifrunave.eq.2)
+if(rm) then
+fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+"-rmv.nc"
+else
 fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+".nc"
+end if
 fig_name = path + "/fig/" +case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca
+end if
+if(ifrunave.eq.1) then 
+fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
+fig_name = path + "/fig/" +case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
+end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 
@@ -264,7 +275,9 @@ if(ifrunave.eq.2) then
 fca = 1.0/ca
 fcb = 1.0/cb
 opt2 = False
+if(rmv) then 
 fvar = fvar -conform(fvar,dim_avg_n(fvar,0),(/1,2,3/))  ;remove annual cycle
+end if
 fvar = bw_bandpass_filter(fvar,fca,fcb,opt2,dimh)
 end if
 pi   = atan(1.0)*4
@@ -347,7 +360,9 @@ if(ifrunave.eq.2) then
 fca = 1.0/ca
 fcb = 1.0/cb
 opt2= False
+if(rmv) then 
 var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
+end if
 var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
 pi   = atan(1.0)*4
@@ -459,14 +474,16 @@ filevardef(ncdf,"case","character",(/"case"/))
 filevardef(ncdf,"neval","integer",(/"neval"/))
 filevardef(ncdf,"time","integer",(/"time"/))
 filevardef(ncdf,"eof_ts",typeof(eof_ts),(/"case","neval","time"/))
+filevardef(ncdf,"eval",typeof(eof@eval),(/"neval"/))
+filevardef(ncdf,"pcvar",typeof(eof@pcvar),(/"neval"/))
 
 ;Define var Attribute
 filevarattdef(ncdf,"time",time)
 filevarattdef(ncdf,"eof_ts",eof_ts)
 
-ncdf->case  = case1 
-ncdf->time  = ispan(1,nsample-1,1) 
 ncdf->eof_ts = (/eof_ts/)
+ncdf->pcvar = (/eof@pcvar/)
+ncdf->eval = (/eof@eval/)
 end if
 end
 

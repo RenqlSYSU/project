@@ -11,20 +11,21 @@ path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
+rmv = False;True ;remove annaul cycle when bandpass filter
 month_s = 6
 month_e = 8
-savedata = False;True
+savedata = True ;False;
 barshare = True ;False;
 barvert  = True ;False;
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
 neval = 7
-siglvl = 0.1
+siglvl = 0.05
 
 area = (/"EA"/);,"GB"
 lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
@@ -46,8 +47,18 @@ filein  = path2 +(/"/data-observation/CN05.1/CN05.1_Pre_1961_2018_daily_025x025.
                    "/renql/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                    "/renql/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/renql/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
-fileout  = path + "/data/eof_ts_"+area(na)+"_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+".nc"
-fig_name = path + "/fig/" + case1(0) + "-eof_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca
+if(ifrunave.eq.2)
+if(rmv) then
+fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+"-rmv.nc"
+else
+fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+".nc"
+end if
+fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca
+end if
+if(ifrunave.eq.1) then 
+fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
+fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
+end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 
@@ -70,6 +81,8 @@ nyear = dimsizes(years)
 nsample = nyear*ntime
 eof_ts  = new((/ncase,neval,nsample/),float)
 ts_mean = new((/ncase,neval/),float)
+eval    = new((/ncase,neval/),float)
+pcvar   = new((/ncase,neval/),float)
 plot    = new((/36/),graphic)
 gtop    = new((/36/),graphic)
 
@@ -400,16 +413,17 @@ if(ifrunave.eq.2) then
 fca = 1.0/ca
 fcb = 1.0/cb
 opt2= False
+if(rmv) then 
 var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
+end if
 var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
 pi   = atan(1.0)*4
 wgt := sqrt(cos( lat*pi/180.0 ))
 var = tofloat(var*conform(var,wgt,2))
 
-var := var(:,select_time2,:,:)
 ntime = dimsizes(select_time2)
-var:= reshape(var,(/nyear*ntime,nlat,nlon/))
+var:= reshape(var(:,select_time2,:,:),(/nyear*ntime,nlat,nlon/))
 
 if(nc.ge.2) then 
     var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
@@ -419,6 +433,8 @@ sig     := eofunc_north(eof@pcvar,nsample,True)
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
 eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)
 ts_mean(nc,:) = eof_ts_temp@ts_mean
+eval(nc,:)  = eof@eval
+pcvar(nc,:) = eof@pcvar
 eof = eof*conform(eof,sqrt(eof@eval),0)
 print(case1(nc)+" eval : " + eof@eval(0) + ", " + eof@eval(1) \
         + ", " + eof@eval(2) + ", " + eof@eval(3)) 
@@ -531,14 +547,16 @@ filevardef(ncdf,"case","character",(/"case"/))
 filevardef(ncdf,"neval","integer",(/"neval"/))
 filevardef(ncdf,"time","integer",(/"time"/))
 filevardef(ncdf,"eof_ts",typeof(eof_ts),(/"case","neval","time"/))
+filevardef(ncdf,"eval",typeof(eval),(/"case","neval"/))
+filevardef(ncdf,"pcvar",typeof(pcvar),(/"case","neval"/))
 
 ;Define var Attribute
 filevarattdef(ncdf,"time",time)
 filevarattdef(ncdf,"eof_ts",eof_ts)
 
-ncdf->case  = case1 
-ncdf->time  = ispan(1,nsample-1,1) 
-ncdf->eof_ts = (/eof_ts/)
+ncdf->eof_ts= (/eof_ts/)
+ncdf->eval  = (/eval/)
+ncdf->pcvar = (/pcvar/)
 end if
 end
 

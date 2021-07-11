@@ -121,29 +121,34 @@ if(nv.eq.0) then ;vort
     var(2,:,:,:,:) = uv2vr_cfd(var(0,:,:,:,:),var(1,:,:,:,:),var&lat,var&lon,2) 
     var(2,:,:,:,:) = var(2,:,:,:,:)*10^6
 end if
-if(nv.eq.1) then 
+if(nv.eq.1) then
+    var(2,:,:,:,:) = linint2(lon,lat,pvar,False,var&lon,var&lat,0)
+    ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
+    delete([/vars1,pvar,lat,lon,nlat1,nlon1/])
+end if
+if(nv.eq.2) then 
     if(nc1.eq.0) then ;CN051
         f   = addfile(filein1(nc1),"r")
         vars1:= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
-        lat = pvar&lat
-        lon = pvar&lon
+        lat = vars1&lat
+        lon = vars1&lon
     end if
     if(nc1.eq.1) then ;APHRO
         f   = addfile(filein1(nc1)+years(0)+".nc","r")
         vars1:= f->precip(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
-        lat = pvar&latitude
-        lon = pvar&longitude
+        lat = vars1&latitude
+        lon = vars1&longitude
     end if
     dim  = dimsizes(vars1)
-    nlat = dim(0)
-    nlon = dim(1)
-    pvar := new((/nyear,ntime,nlat,nlon/),float)
+    nlat1 = dim(0)
+    nlon1 = dim(1)
+    pvar := new((/nyear,ntime,nlat1,nlon1/),float)
     if(nc1.eq.0) then 
         f   = addfile(filein1(nc1),"r")
         t   = cd_calendar(f->time,0)
         select_time0 = ind(t(:,0).ge.years(0).and.t(:,0).le.years(nyear-1) \
                         .and.t(:,1).ge.(month_s-1).and.t(:,1).le.(month_e+1))
-        pvar = reshape(f->pre(select_time0,{lats(na):latn(na)},{lonl(na):lonr(na)}),(/nyear,ntime,nlat,nlon/));mm/day
+        pvar = reshape(f->pre(select_time0,{lats(na):latn(na)},{lonl(na):lonr(na)}),(/nyear,ntime,nlat1,nlon1/));mm/day
     end if
     if(nc1.eq.1) then 
         do nt = 0, nyear-1 ,1
@@ -157,6 +162,7 @@ if(nv.eq.1) then
     end if
     var(2,:,:,:,:) = linint2(lon,lat,pvar,False,var&lon,var&lat,0)
     ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
+    delete([/vars1,pvar,lat,lon,nlat1,nlon1/])
 end if
 
 dimh = 2
@@ -519,14 +525,14 @@ printVarSummary(notsiguv)
 np = -1
 nne = ne+1
 do nlg = 0,nlag-1,1
-    np = nlag*ne+nlg
+    np = nlg*4+ne
     ;np = np + 1
     if(lagg(nlg).eq.0) then 
     res@gsnLeftString   = case1(nc1) + " (" + lagg(nlg) + " day)" ;pre_case(np) + ") " +  
     else                                                                           
     res@gsnLeftString   = case1(nc1) + " (-" + lagg(nlg) + " day)";pre_case(np) + ") " +  
     end if
-    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
+    res@gsnRightString  = "EOF"+nne+": "+pcvar(ne)+"%" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
@@ -567,7 +573,7 @@ do nlg = 0,nlag-1,1
     print(min(regr(2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
 end do
-resp@txString = case2(nc2)+" "+figtle+" month: "+month_s+"-"+month_e+" EOF1"+": "+eval(0)+"  "+pcvar(0)+"%" 
+resp@txString = case2(nc2)+" "+figtle+" "+month_s+"-"+month_e+" "+lev(nl) + "hPa " + draw_var(nv) + "(" + unit(nv) + ") " ;
 gsn_panel(wks,plot,(/6,4/),resp)
 end
 

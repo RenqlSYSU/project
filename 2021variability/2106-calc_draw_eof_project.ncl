@@ -54,11 +54,11 @@ fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var
 else
 fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+".nc"
 end if
-fig_name = path + "/fig/" +case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca
+fig_name = path + "/fig/" +case1(fnc)+"-project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca
 end if
 if(ifrunave.eq.1) then 
 fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
-fig_name = path + "/fig/" +case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
+fig_name = path + "/fig/" +case1(fnc)+"-project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
@@ -155,7 +155,7 @@ end if
     resxy@pmLegendParallelPosF    = - 0.24    ; move ref vector along X-axis
     else
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = -0.24    ; move ref vector along X-axis
     end if
     
     resxy@tmBorderThicknessF  = mp_thick

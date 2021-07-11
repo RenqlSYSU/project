@@ -11,14 +11,15 @@ path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
-rmv = False;True ;remove annaul cycle when bandpass filter
+rmv = True ;False;remove annaul cycle when bandpass filter
+allcase = False ;True ;if True, four case be draw in one figure
 month_s = 6
 month_e = 8
-savedata = True ;False;
+savedata = False;True ;
 barshare = True ;False;
 barvert  = True ;False;
 
@@ -287,7 +288,7 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     ;resxy@trYMinF = 0
     ;resxy@trYMaxF = max(ave(:,0,:))
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
-    resxy@trXMaxF = log(1.0/8.0)  ;log(max(frq)) 
+    resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
     ;resxy@trXLog  = True
     resxy@tmXBMode    = "Explicit"
@@ -309,7 +310,7 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     resxy@pmLegendHeightF  = 0.25
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    resxy@pmLegendParallelPosF    = - 0.24    ; move ref vector along X-axis
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index
@@ -341,7 +342,6 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     resxy@gsnStringFont        = font_index
     resxy@gsnStringFontHeightF = subtitle_font
     resxy@gsnCenterString  = "";lev(nl) + " hPa"
-    resxy@gsnRightString   = var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 
 ; set spectral function arguments
   d   = 0    ; detrending opt: 0=>remove mean 1=>remove mean + detrend
@@ -510,6 +510,8 @@ splt&frq = log(frq)
 splt@long_name = "power*frequency"
 splt@units     = "1/day"
 
+resp@gsnPanelLabelBar = False 
+if(allcase) then
     resxy@xyExplicitLegendLabels = case2 + " " + vari1
     resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
     resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
@@ -518,9 +520,21 @@ splt@units     = "1/day"
     resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(:,0,:), resxy)     
     np = np + 1
+else
+    resxy@xyDashPatterns    = (/0,0,1,3/)
+    resxy@xyLineThicknesses = (/2.0,3.0,3.0,3.0/)   ; make second line thicker
+    resxy@xyLineColors      = (/"black","red","red","red"/)
+    resxy@pmLegendDisplayMode = "NoCreate"
+    np = 0
+    do nc = 0, ncase-1, 1
+    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee +" "+ case2(nc) + " " + vari1(nc)
+    plot(np) = gsn_csm_xy(wks, splt&frq, splt(nc,:,:), resxy)     
+    np = np + 1
+    end do
+    gsn_panel(wks,plot,(/2,3/),resp)
+end if
 end do
-resp@gsnPanelLabelBar = False 
-gsn_panel(wks,plot,(/2,3/),resp)
+;gsn_panel(wks,plot,(/2,3/),resp)
 
 ;========================================================================
 ;save the data

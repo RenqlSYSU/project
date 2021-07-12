@@ -20,9 +20,9 @@ cb = 8.0
 rmv = False;True ;remove annaul cycle when bandpass filter
 month_s = 6
 month_e = 8
-nlag = 6
-lagg = (/5,4,3,2,1,0/)
-lagg = 2*lagg
+lagg = (/3,2,1,0/)
+lagg = 3*lagg
+nlag = dimsizes(lagg)
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
@@ -53,8 +53,8 @@ end if
 
 ;area: east Asia
 lats = (/0  ,0  /);-20
-latn = (/90 ,60 /);60
-lonl = (/0  ,40 /);20
+latn = (/90 ,80 /);60
+lonl = (/0  ,0  /);20
 lonr = (/360,180/);220
 lat_spacing = 20
 lon_spacing = 20
@@ -454,6 +454,9 @@ do nlg = 0, nlag-1, 1
 end do
 end do
 copy_VarCoords(phis, regr(0,0,0,:,:))
+if(ifrunave.eq.1) then 
+df = toint(df/nave)
+end if
 b := tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )

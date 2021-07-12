@@ -7,9 +7,9 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
-var_name = (/"vort","preci"/)
-unit     = (/"10~S~-6~N~ m~S~-1~N~","mm/day"/)
-draw_var = (/"vort","preci"/)      
+var_name = (/"vort","OLR","preci"/)
+unit     = (/"10~S~-6~N~ m~S~-1~N~"," W m~S~-2~N~","mm/day"/)
+draw_var = (/"vort","OLR","preci"/)      
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
@@ -20,11 +20,12 @@ cb = 8.0
 rmv = False;True ;remove annaul cycle when bandpass filter
 month_s = 6
 month_e = 8
-nlag = 6
-lagg = (/5,4,3,2,1,0/)
-lagg = 2*lagg
-siglvl = 0.05
+lagg = (/3,2,1,0/)
+lagg = 3*lagg
+nlag = dimsizes(lagg)
+siglvl = 0.1
 sig_option  = False;True ;if False, only the significant values are shaded 
+uvsig_option= False;True ;if false, all wind will be drawed
 vect_option = True ;False;
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
@@ -56,8 +57,8 @@ end if
 
 ;area: east Asia
 lats = (/0  ,0  /);-20
-latn = (/90 ,60 /);60
-lonl = (/0  ,40 /);20
+latn = (/90 ,80 /);60
+lonl = (/0  ,0 /);20
 lonr = (/360,180/);220
 lat_spacing = 20
 lon_spacing = 20
@@ -92,6 +93,32 @@ ntime=dimsizes(select_time)
 var  = new((/nvar,nyear,ntime,nlat,nlon/),float)
 
 do nt = 0, nyear-1 ,1
+if(isleapyear(years(nt))) then ;leap year,366 day
+if(nc2.eq.0) then 
+    inv = 0
+    f   = addfile(filein2(nc2)+"uwnd/uwnd.interim."+years(nt)+".nc","r")
+    var(inv,nt,:,:,:) = f->uwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    inv = 1
+    f   = addfile(filein2(nc2)+"vwnd/vwnd.interim."+years(nt)+".nc","r")
+    var(inv,nt,:,:,:) = f->vwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc2.eq.1) then 
+    inv = 0
+    f   = addfile(filein2(nc2)+"uwnd/uwnd."+years(nt)+".nc","r")
+    var(inv,nt,:,:,:) = f->uwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    inv = 1
+    f   = addfile(filein2(nc2)+"vwnd/vwnd."+years(nt)+".nc","r")
+    var(inv,nt,:,:,:) = f->vwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc2.eq.2) then 
+    inv = 0
+    f   = addfile(filein2(nc2)+"uwnd/uwnd."+years(nt)+".nc","r")
+    var(inv,nt,:,:,:) = short2flt(f->uwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    inv = 1
+    f   = addfile(filein2(nc2)+"vwnd/vwnd."+years(nt)+".nc","r")
+    var(inv,nt,:,:,:) = short2flt(f->vwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+end if
+else
 if(nc2.eq.0) then 
     inv = 0
     f   = addfile(filein2(nc2)+"uwnd/uwnd.interim."+years(nt)+".nc","r")
@@ -116,12 +143,30 @@ if(nc2.eq.2) then
     f   = addfile(filein2(nc2)+"vwnd/vwnd."+years(nt)+".nc","r")
     var(inv,nt,:,:,:) = short2flt(f->vwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
 end if
+end if
 end do
 if(nv.eq.0) then ;vort
     var(2,:,:,:,:) = uv2vr_cfd(var(0,:,:,:,:),var(1,:,:,:,:),var&lat,var&lon,2) 
     var(2,:,:,:,:) = var(2,:,:,:,:)*10^6
 end if
 if(nv.eq.1) then
+    filein3 = "/home/ys17-19/data-observation/NOAA-OLR/daily/olr-daily_v01r02_"
+    f = addfile(filein3+years(0)+"0101_"+years(0)+"1231.nc","r")
+    vars1:= f->olr(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+    lat = vars1&lat
+    lon = vars1&lon
+    dim  = dimsizes(vars1)
+    nlat1 = dim(0)
+    nlon1 = dim(1)
+    pvar := new((/nyear,ntime,nlat1,nlon1/),float)
+    do nt = 0, nyear-1, 1
+        f = addfile(filein3+years(nt)+"0101_"+years(nt)+"1231.nc","r")
+        if(isleapyear(years(nt))) then ;leap year,366 day
+        pvar(nt,:,:,:) = f->olr(select_time+1,{lats(na):latn(na)},{lonl(na):lonr(na)})
+        else
+        pvar(nt,:,:,:) = f->olr(select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
+        end if
+    end do
     var(2,:,:,:,:) = linint2(lon,lat,pvar,False,var&lon,var&lat,0)
     ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
     delete([/vars1,pvar,lat,lon,nlat1,nlon1/])
@@ -170,18 +215,18 @@ if(ifrunave.eq.1) then
 opt1= -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 var = runave_n_Wrap(var, nave, opt1, dimh)
 var = var - conform(var,dim_avg_n(var,1),(/0,2,3,4/))  ;remove annual cycle
-tsfile = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
+tsfile = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(2)+"_"+nave+"run.nc"
 figtle = "runave="+nave+"day"
 end if
 if(ifrunave.eq.2) then 
 fca = 1.0/ca
 fcb = 1.0/cb
 opt2= False
-tsfile  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+".nc"
+tsfile  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(2)+"_"+cb+"-"+ca+".nc"
 figtle = "bw_filter="+cb+"-"+ca+"day"
 if(rmv) then 
 var = var - conform(var,dim_avg_n(var,1),(/0,2,3,4/))  ;remove annual cycle
-tsfile  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+"-rmv.nc"
+tsfile  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(2)+"_"+cb+"-"+ca+"-rmv.nc"
 figtle = "bw_filter="+cb+"-"+ca+"day rmv"
 end if
 var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
@@ -483,9 +528,9 @@ else
     vcref         = (/0.5, 3, 2,3 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
-minlvl = (/-4.0,-2.4/)  ;q1 ;-80,-80
-maxlvl = (/ 4.0, 2.4/)      ; 80, 80
-spacig = (/ 0.5, 0.3/)      ; 10, 10
+minlvl = (/-4.0,- 8 ,-2.4/)  ;q1 ;-80,-80
+maxlvl = (/ 4.0,  8 , 2.4/)      ; 80, 80
+spacig = (/ 0.5,  1 , 0.3/)      ; 10, 10
 
 res@cnFillPalette = "BlueDarkRed18"
 res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
@@ -505,22 +550,26 @@ do nlg = 0, nlag-1, 1
     tval(:,nlg,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
     df(:,nlg,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
 end do
+if(ifrunave.eq.1) then 
+df = toint(df/nave)
+end if
 copy_VarCoords(vars, regr(0,0,:,:))
 b := tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
 delete([/tval,df/])
 
+if(uvsig_option) then 
 notsiguv = mask(regr(0:1,:,:,:),prob(0:1,:,:,:).lt.siglvl,False)
-if(sig_option) then
 regr(0:1,:,:,:) = mask(regr(0:1,:,:,:),prob(0:1,:,:,:).lt.siglvl,True)
-else
-regr = mask(regr,prob.lt.siglvl,True)
+copy_VarCoords(vars, notsiguv(0,0,:,:))
+printVarSummary(notsiguv)
+end if
+if(.not.(sig_option)) then
+regr(2,:,:,:) = mask(regr(2,:,:,:),prob(2,:,:,:).lt.siglvl,True)
 end if
 prob   = mask(prob,prob.lt.siglvl,True)
-copy_VarCoords(phis, notsiguv(0,0,:,:))
 printVarSummary(regr)
-printVarSummary(notsiguv)
 
 np = -1
 nne = ne+1
@@ -553,8 +602,10 @@ do nlg = 0,nlag-1,1
     resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
     resvc2@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
     resvc2@vcRefAnnoString2     = vcref(nl)+"m/s"
+    if(uvsig_option) then
     wind2(np)   = gsn_csm_vector(wks,notsiguv(0,nlg,:,:),notsiguv(1,nlg,:,:),resvc2)
     overlay(plot(np),wind2(np))
+    end if
     wind(np)    = gsn_csm_vector(wks,regr(0,nlg,:,:),regr(1,nlg,:,:),resvc)
     overlay(plot(np),wind(np))
     end if
@@ -574,6 +625,6 @@ do nlg = 0,nlag-1,1
 end do 
 end do
 resp@txString = case2(nc2)+" "+figtle+" "+month_s+"-"+month_e+" "+lev(nl) + "hPa " + draw_var(nv) + "(" + unit(nv) + ") " ;
-gsn_panel(wks,plot,(/6,4/),resp)
+gsn_panel(wks,plot,(/4,4/),resp)
 end
 

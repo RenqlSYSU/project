@@ -7,9 +7,9 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
-var_name = (/"vort","preci"/)
-unit     = (/"10~S~-6~N~ m~S~-1~N~","mm/day"/)
-draw_var = (/"vort","preci"/)      
+var_name = (/"vort","OLR","preci"/)
+unit     = (/"10~S~-6~N~ m~S~-1~N~"," W m~S~-2~N~","mm/day"/)
+draw_var = (/"vort","OLR","preci"/)      
 month_s = 5
 month_e = 9
 lev = (/850,500,200,700,600,  100,10/)
@@ -393,6 +393,32 @@ nlon := dim(1)
 var1 := new((/nvar,nyear,ntime,nlat,nlon/),float)
 
 do nt = 0, nyear-1 ,1
+if(isleapyear(years(nt))) then ;leap year,366 day
+if(nc.eq.0) then 
+    inv = 0
+    f   = addfile(filein2(nc)+"uwnd/uwnd.interim."+years(nt)+".nc","r")
+    var1(inv,nt,:,:,:) = f->uwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    inv = 1
+    f   = addfile(filein2(nc)+"vwnd/vwnd.interim."+years(nt)+".nc","r")
+    var1(inv,nt,:,:,:) = f->vwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc.eq.1) then 
+    inv = 0
+    f   = addfile(filein2(nc)+"uwnd/uwnd."+years(nt)+".nc","r")
+    var1(inv,nt,:,:,:) = f->uwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+    inv = 1
+    f   = addfile(filein2(nc)+"vwnd/vwnd."+years(nt)+".nc","r")
+    var1(inv,nt,:,:,:) = f->vwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+end if
+if(nc.eq.2) then 
+    inv = 0
+    f   = addfile(filein2(nc)+"uwnd/uwnd."+years(nt)+".nc","r")
+    var1(inv,nt,:,:,:) = short2flt(f->uwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+    inv = 1
+    f   = addfile(filein2(nc)+"vwnd/vwnd."+years(nt)+".nc","r")
+    var1(inv,nt,:,:,:) = short2flt(f->vwnd(select_time+1,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+end if
+else
 if(nc.eq.0) then 
     inv = 0
     f   = addfile(filein2(nc)+"uwnd/uwnd.interim."+years(nt)+".nc","r")
@@ -416,6 +442,7 @@ if(nc.eq.2) then
     inv = 1
     f   = addfile(filein2(nc)+"vwnd/vwnd."+years(nt)+".nc","r")
     var1(inv,nt,:,:,:) = short2flt(f->vwnd(select_time,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}))
+end if
 end if
 end do
 if(nv.eq.0) then ;vort

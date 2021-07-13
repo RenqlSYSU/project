@@ -16,7 +16,7 @@ fig_name   = path + "/analysis/fig/topography_nudg_zone_gray"
 fig_title  = "CTRL";"CTRL" ; + var_name + " in " + lev + " hPa"
 fig_out    = "pdf";"eps";"x11"
 ;fig_out    = "eps";"pdf";"x11"
-var_name   = "PHIS"
+var_name   = "LANDM_COSLAT"; "PHIS"
 unit       = "x100 gpm"
 
 area = (/"buffer","NUDG"/)
@@ -59,7 +59,7 @@ plonr = 150
 
 f     = addfile(filename,"r")
 var1  = f->$var_name$  ;({plats:platn},{plonl:plonr})$ ;get an array (nlat,nlon)
-var   = var1/9.8/100
+;var   = var1/9.8/100
 copy_VarMeta(var1,var)
 
 ;==============================================================
@@ -116,16 +116,16 @@ copy_VarMeta(var1,var)
     ;  res@tmYRMinorOutwardLengthF = -0.
 
 ;---------set the attribute of the contour-----------------
-    res@cnFillOn         = False
-    res@cnLinesOn        = True
-    res@cnLineLabelsOn   = True
+    res@cnFillOn         = True;False
+    res@cnLinesOn        = False;True
+    res@cnLineLabelsOn   = False;True
     res@cnInfoLabelOn    = False
     res@cnLineThicknessF = 2
     ;res@gsnContourZeroLineThicknessF = 4.0
     res@cnMonoLineColor   = False
     res@cnLineColors      = (/"blue","red","green","purple"/)
-    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res@cnLevels         = (/15,25,30,40/)
+    ;res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    ;res@cnLevels         = (/15,25,30,40/)
     
     ;res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     ;res@cnMinLevelValF        = 10         ; set min contour level
@@ -135,7 +135,7 @@ copy_VarMeta(var1,var)
     ;res@gsnSpreadColorStart  = 11                ; start at color 17
     ;res@gsnSpreadColorEnd    = 2                ; end at color 200
     
-    res@lbLabelBarOn         = False;True   ; the label bar
+    res@lbLabelBarOn         = True   ; the label bar
     res@lbOrientation        = "vertical"
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelFontHeightF   = tick_font              ; make labels smaller

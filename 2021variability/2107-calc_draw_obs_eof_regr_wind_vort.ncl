@@ -23,9 +23,9 @@ month_e = 8
 lagg = (/3,2,1,0/)
 lagg = 3*lagg
 nlag = dimsizes(lagg)
-siglvl = 0.1
+siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
-uvsig_option= False;True ;if false, all wind will be drawed
+uvsig_option= True ;False;if false, all wind will be drawed
 vect_option = True ;False;
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
@@ -234,7 +234,7 @@ end if
 time := cd_calendar(ft->time(select_time),0)
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
-var := reshape(var(:,:,select_time,:,:),(/nvar,nyear*ntime,nlat,nlon/))
+;var := reshape(var(:,:,select_time,:,:),(/nvar,nyear*ntime,nlat,nlon/))
 printVarSummary(var)
 
 ;the number of the panel plot
@@ -275,7 +275,6 @@ if(na.eq.0) then
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 2.5
    mp_thick       = 1.5
    font_index     = 22
 else
@@ -286,8 +285,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5 ;3.0;
-   vc_thick       = mp_thick + 0.5 
+   mp_thick       = 1.0 ;3.0;
    font_index     = 22
 end if
 
@@ -357,9 +355,11 @@ end if
     resvc                  = True
     resvc@gsnDraw          = False
     resvc@gsnFrame         = False
-    resvc@vcGlyphStyle               = "LineArrow";"CurlyVector";
+    resvc@vcPositionMode            = "ArrowTail"  ;格点位置对应箭头的尾部
+    resvc@vcGlyphStyle              = "CurlyVector";"LineArrow"  ;"Fillarrow"
+    ;resvc@vcMinMagnitudeF           = 0.3          ; 小于该数值则不绘制
     resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcLineArrowThicknessF      = mp_thick+0.5 
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
@@ -369,7 +369,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
     resvc@vcMinDistanceF            = 0.02
-    resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
+    resvc@vcRefLengthF              = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
 end if
@@ -423,12 +423,6 @@ end if
     lnres@gsLineThicknessF     = mp_thick + 1.0 
     ;lnres@gsLineLabelString    = "TP"
 
-    res_axis                      = True
-    res_axis@gsLineColor          = "blueviolet";"black"
-    res_axis@gsLineDashPattern    = 1
-    res_axis@gsLineThicknessF     = mp_thick + 2.5 
-    ;res_axis@gsLineLabelString    = "Westly"
-
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
     res_gtop@gsnDraw          = False
@@ -437,7 +431,7 @@ end if
     res_gtop@cnLinesOn        = True      ; turn off contour lines
     res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
     res_gtop@cnInfoLabelOn    = False
-    res_gtop@cnLineThicknessF = mp_thick + 1.5 
+    res_gtop@cnLineThicknessF = mp_thick + 1.0 
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/3000/)
@@ -525,7 +519,7 @@ end if
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
 else                               
-    vcref         = (/0.5, 3, 2,3 /)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref         = (/0.5, 3, 1,3 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
 minlvl = (/-4.0,- 8 ,-2.4/)  ;q1 ;-80,-80
@@ -546,7 +540,8 @@ tval := new((/nvar,nlag,nlat,nlon/),float)
 df   := new((/nvar,nlag,nlat,nlon/),float)
 prob := new((/nvar,nlag,nlat,nlon/),float)
 do nlg = 0, nlag-1, 1
-    regr(:,nlg,:,:) = regCoef_n(ts(lagg(nlg):(nyear*ntime-1)),var(:,0:(nyear*ntime-lagg(nlg)-1),:,:),0,1)
+    rvar := reshape(var(:,:,select_time-lagg(nlg),:,:),(/nvar,nyear*ntime,nlat,nlon/))
+    regr(:,nlg,:,:) = regCoef_n(ts,rvar,0,1)
     tval(:,nlg,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
     df(:,nlg,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
 end do
@@ -560,10 +555,13 @@ prob  := betainc( df/(df+tval^2), df/2.0, b )
 delete([/tval,df/])
 
 if(uvsig_option) then 
-notsiguv = mask(regr(0:1,:,:,:),prob(0:1,:,:,:).lt.siglvl,False)
-regr(0:1,:,:,:) = mask(regr(0:1,:,:,:),prob(0:1,:,:,:).lt.siglvl,True)
-copy_VarCoords(vars, notsiguv(0,0,:,:))
-printVarSummary(notsiguv)
+notsigu = mask(regr(0,:,:,:),(prob(0,:,:,:).lt.siglvl).or.(prob(1,:,:,:).lt.siglvl),False)
+notsigv = mask(regr(1,:,:,:),(prob(0,:,:,:).lt.siglvl).or.(prob(1,:,:,:).lt.siglvl),False)
+regr(0,:,:,:) = mask(regr(0,:,:,:),(prob(0,:,:,:).lt.siglvl).or.(prob(1,:,:,:).lt.siglvl),True)
+regr(1,:,:,:) = mask(regr(1,:,:,:),(prob(0,:,:,:).lt.siglvl).or.(prob(1,:,:,:).lt.siglvl),True)
+copy_VarCoords(vars, notsigu(0,:,:))
+copy_VarCoords(vars, notsigv(0,:,:))
+printVarSummary(notsigu)
 end if
 if(.not.(sig_option)) then
 regr(2,:,:,:) = mask(regr(2,:,:,:),prob(2,:,:,:).lt.siglvl,True)
@@ -603,7 +601,7 @@ do nlg = 0,nlag-1,1
     resvc2@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
     resvc2@vcRefAnnoString2     = vcref(nl)+"m/s"
     if(uvsig_option) then
-    wind2(np)   = gsn_csm_vector(wks,notsiguv(0,nlg,:,:),notsiguv(1,nlg,:,:),resvc2)
+    wind2(np)   = gsn_csm_vector(wks,notsigu(nlg,:,:),notsigv(nlg,:,:),resvc2)
     overlay(plot(np),wind2(np))
     end if
     wind(np)    = gsn_csm_vector(wks,regr(0,nlg,:,:),regr(1,nlg,:,:),resvc)

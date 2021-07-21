@@ -25,6 +25,7 @@ lagg = 3*lagg
 nlag = dimsizes(lagg)
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
+uvsig_option= True ;False;if false, all wind will be drawed
 vect_option = True ;False;
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
@@ -136,7 +137,7 @@ end if
 time := cd_calendar(f->time(select_time),0)
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
-var := reshape(var(:,:,:,select_time,:,:),(/ncase,nvar,nyear*ntime,nlat,nlon/))
+;var := reshape(var(:,:,:,select_time,:,:),(/ncase,nvar,nyear*ntime,nlat,nlon/))
 
 ;the number of the panel plot
     plot   = new((/28/),graphic)
@@ -176,7 +177,6 @@ if(na.eq.0) then
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   vc_thick       = 2.5
    mp_thick       = 1.5
    font_index     = 22
 else
@@ -187,8 +187,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5 ;3.0;
-   vc_thick       = mp_thick + 0.5 
+   mp_thick       = 1.0;3.0;
    font_index     = 22
 end if
 
@@ -258,9 +257,10 @@ end if
     resvc                  = True
     resvc@gsnDraw          = False
     resvc@gsnFrame         = False
-    resvc@vcGlyphStyle               = "LineArrow";"CurlyVector";
+    resvc@vcPositionMode            = "ArrowTail"  ;格点位置对应箭头的尾部
+    resvc@vcGlyphStyle              = "CurlyVector";"LineArrow"  ;"Fillarrow"
     resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = vc_thick
+    resvc@vcLineArrowThicknessF      = mp_thick+0.5 
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
@@ -279,7 +279,7 @@ end if
     resvc@vcRefAnnoOn                = False;True;
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.5          ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.6          ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.4            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -426,7 +426,7 @@ end if
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
 else                               
-    vcref         = (/0.5, 3, 2,3 /)  ;the level of 850hpa    ctrl,nudg,diff
+    vcref         = (/0.5, 3, 1,3 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
 minlvl = (/-4.0,-2.4/)  ;q1 ;-80,-80
@@ -448,7 +448,8 @@ df   := new((/ncase,nvar,nlag,nlat,nlon/),float)
 prob := new((/ncase,nvar,nlag,nlat,nlon/),float)
 do nc = 0, ncase-1, 1
 do nlg = 0, nlag-1, 1
-    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,lagg(nlg):(nyear*ntime-1)),var(nc,:,0:(nyear*ntime-lagg(nlg)-1),:,:),0,1)
+    rvar := reshape(var(:,:,:,select_time-lagg(nlg),:,:),(/ncase,nvar,nyear*ntime,nlat,nlon/))
+    regr(nc,:,nlg,:,:) = regCoef_n(ts(nc,:),rvar(nc,:,:,:,:),0,1)
     tval(nc,:,nlg,:,:) = onedtond(regr@tval ,(/nvar,nlat,nlon/))
     df(nc,:,nlg,:,:)   = onedtond(regr@nptxy,(/nvar,nlat,nlon/))
 end do
@@ -462,16 +463,20 @@ b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
 delete([/tval,df/])
 
-notsiguv = mask(regr(:,0:1,:,:,:),prob(:,0:1,:,:,:).lt.siglvl,False)
-if(sig_option) then
-regr(:,0:1,:,:,:) = mask(regr(:,0:1,:,:,:),prob(:,0:1,:,:,:).lt.siglvl,True)
-else
-regr = mask(regr,prob.lt.siglvl,True)
+if(uvsig_option) then 
+notsigu = mask(regr(:,0,:,:,:),(prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl),False)
+notsigv = mask(regr(:,1,:,:,:),(prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl),False)
+regr(:,0,:,:,:) = mask(regr(:,0,:,:,:),(prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl),True)
+regr(:,1,:,:,:) = mask(regr(:,1,:,:,:),(prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl),True)
+copy_VarCoords(phis, notsigu(0,0,:,:))
+copy_VarCoords(phis, notsigv(0,0,:,:))
+printVarSummary(notsigu)
+end if
+if(.not.(sig_option)) then
+regr(:,2,:,:,:) = mask(regr(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
 end if
 prob   = mask(prob,prob.lt.siglvl,True)
-copy_VarCoords(phis, notsiguv(0,0,0,:,:))
 printVarSummary(regr)
-printVarSummary(notsiguv)
 
 np = -1
 nne = ne+1
@@ -505,8 +510,10 @@ do nc = 0,ncase-1,1
     resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
     resvc2@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
     resvc2@vcRefAnnoString2     = vcref(nl)+"m/s"
-    wind2(np)   = gsn_csm_vector(wks,notsiguv(nc,0,nlg,:,:),notsiguv(nc,1,nlg,:,:),resvc2)
+    if(uvsig_option) then
+    wind2(np)   = gsn_csm_vector(wks,notsigu(nc,nlg,:,:),notsigv(nc,nlg,:,:),resvc2)
     overlay(plot(np),wind2(np))
+    end if
     wind(np)    = gsn_csm_vector(wks,regr(nc,0,nlg,:,:),regr(nc,1,nlg,:,:),resvc)
     overlay(plot(np),wind(np))
     end if

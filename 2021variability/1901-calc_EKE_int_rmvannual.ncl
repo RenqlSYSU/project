@@ -9,40 +9,42 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
-option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+smth    = False;True ;where do the space smooth
+nsmth   = 25
 calc_var = (/"intEKE","preci","PRECC","PRECL"/)
-cnv = 2
+cnv = 1
 
 ;parameter for bw_bandpass_filter
 ca = 80.0;90.0 ;day
 cb = 8.0 ;2.5  ;10.0 ;
-nave = 8
+nave = 5
 
-if(case_option.eq.3) then
-    case    = (/"CTRL","NG15S","NG4550","NGEN","NG45N","NG1520"/) ;
-    filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
-                      "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
-                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
-                      "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR.",\
-                      "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
-                      "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
-    years   = ispan(1979,2005,1)   ;the calculate time
-    if(option.eq.0) then
-        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"_runave.nc"
-    else
-        fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"-" + cb + "-" + ca + "day.nc"
-    end if  
+case    = (/"CTRL","NG15S","NG4550","NGEN","NG45N","NG1520"/) ;
+filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
+                  "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
+                  "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
+                  "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR.",\
+                  "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
+                  "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR."/)
+years   = ispan(1979,2005,1)   ;the calculate time
+if(option.eq.0) then
+    fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"_"+nave+"run"
+else
+    fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"-" + cb + "-" + ca + "day"
+end if  
+if(smth) then
+fileout = fileout+"-smth"+nsmth
 end if
 
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
-lats = -10   ;-90 ;
-latn = 90  ; 90 ;
-lonl = 0   ; 0  ;
-lonr = 360 ;360 ;
+lats = 10   ;-90 ;
+latn = 70  ; 90 ;
+lonl = 60   ; 0  ;
+lonr = 180 ;360 ;
 lev  = (/1000,850,600,500,400, 300,200,100,50,10/) ;,150,100hPa
 ;lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100,50,20, 10,5/) 
 
@@ -83,9 +85,6 @@ var = new((/nyear,ntime,nlat,nlon/),float)
 end if
 
 do nf = 0,3,1
-if((case_option.eq.1).and.(nf.eq.1))
-    years   = ispan(41,50,1)   ;the calculate time
-end if
 ;==========================================================
 ;read the data
 ;============================================================
@@ -116,11 +115,28 @@ var = linmsg_n(var,(/-1/),2)
 var = var*3600*24*1000 ;mm/day
 print(var(0,10,10:20,30))
 
+if(smth) then
+if(nsmth.le.9) then
+    cyclic = False
+    p = 4.0/9.0 
+    q = 4.0/9.0 
+    var = smth9(var,p,q,cyclic)
+end if
+if(nsmth.gt.9) then
+    nsmth0 = toint(floor(sqrt(nsmth)/2.0))
+    do nla = nsmth0, nlat-nsmth0-1, 1
+    do nlo = nsmth0, nlon-nsmth0-1, 1
+    var(:,:,nla,nlo) = dim_avg_n(var(:,:,(nla-nsmth0):(nla+nsmth0),(nlo-nsmth0):(nlo+nsmth0)),(/2,3/))
+    end do
+    end do
+end if
+end if
+
 if(option.eq.0) then 
-var  = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 opt  = -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
 dimh = 1
 var  = runave_n_Wrap(var, nave, opt, dimh)
+var  = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 else
 fca = 1.0/ca
 fcb = 1.0/cb
@@ -239,8 +255,8 @@ print(month_ave(6,10,10:20))
 ;========================================================================
 ;save the data
 ;=======================================================================
-system("rm -f " + fileout(nf))
-ncdf = addfile(fileout(nf),"c")
+system("rm -f " + fileout(nf)+".nc")
+ncdf = addfile(fileout(nf)+".nc","c")
 setfileoption(ncdf,"definemode",True)
 
 ;set all field attribute

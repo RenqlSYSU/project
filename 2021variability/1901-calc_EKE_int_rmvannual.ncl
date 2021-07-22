@@ -10,8 +10,8 @@
 begin
 path    = "/home/ys17-19/renql"
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-smth    = False;True ;where do the space smooth
-nsmth   = 25
+smth    = True ;False;where do the space smooth
+nsmth   = 81
 calc_var = (/"intEKE","preci","PRECC","PRECL"/)
 cnv = 1
 
@@ -41,7 +41,7 @@ ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
-lats = 10   ;-90 ;
+lats = 0   ;-90 ;
 latn = 70  ; 90 ;
 lonl = 60   ; 0  ;
 lonr = 180 ;360 ;
@@ -116,17 +116,18 @@ var = var*3600*24*1000 ;mm/day
 print(var(0,10,10:20,30))
 
 if(smth) then
-if(nsmth.le.9) then
+if(nsmth.le.5) then
     cyclic = False
-    p = 4.0/9.0 
-    q = 4.0/9.0 
+    p = 4.0/5.0 
+    q = 0 
     var = smth9(var,p,q,cyclic)
 end if
-if(nsmth.gt.9) then
+if(nsmth.ge.9) then
     nsmth0 = toint(floor(sqrt(nsmth)/2.0))
+    print("nsmth="+nsmth+"; nsmth0="+nsmth0)
     do nla = nsmth0, nlat-nsmth0-1, 1
     do nlo = nsmth0, nlon-nsmth0-1, 1
-    var(:,:,nla,nlo) = dim_avg_n(var(:,:,(nla-nsmth0):(nla+nsmth0),(nlo-nsmth0):(nlo+nsmth0)),(/2,3/))
+    var(:,:,nla,nlo) = wgt_areaave(var(:,:,(nla-nsmth0):(nla+nsmth0),(nlo-nsmth0):(nlo+nsmth0)),1.0,1.0,0)
     end do
     end do
 end if

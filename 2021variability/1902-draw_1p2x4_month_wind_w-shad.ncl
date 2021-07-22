@@ -23,7 +23,7 @@ draw_var = (/"intQ1"        ,"PRECC"       ,"OMEGA"           ,"Z3"             
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT"         ,"preci_5run-smth9"/)
+             "uppT"         ,"preci_5run-smth81"/)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -35,12 +35,12 @@ draw_varname = (/"Q1"       ,"PRECC"       ,"OMEGA"           ,"Z3"             
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
-                 "uppT"     ,"preci_5run-smth9"/)
+                 "uppT"     ,"preci_5run-smth81"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 21
 diff = True ;False;
-perc = False;True ;
+perc = True ;False;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;

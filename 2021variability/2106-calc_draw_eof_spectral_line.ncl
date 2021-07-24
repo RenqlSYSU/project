@@ -65,43 +65,6 @@ splt = new((/ncase,indx,nfrq/),float)
 eofts= reshape(ts,(/ncase,neval,nyear,nsample/))
 
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
-do ne = 0, neval-2, 1
-np = 0
-nee = ne+1
-do nc = 0, ncase-1, 1
-    spcavg = new ((/nfrq/),typeof(eofts))
-    spcavg = 0.0
-    r1zsum = 0.0
-    do nt = 0, nyear-1, 1
-        ; calculate spectrum
-        sdof := specx_anal(eofts(nc,ne,nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
-        spcavg = spcavg + sdof@spcx                ; sum spc of each segment
-        r1     = sdof@xlag1                        ; extract segment lag-1
-        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
-    end do 
-    r1z  = r1zsum/nyear                 ; average r1z
-    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
-    spcavg  = spcavg/nyear              ; average spectrum
-    df      = 2.0*nyear   ; deg of freedom
-    df@spcx = spcavg      ; assign the mean spc
-    df@frq  = sdof@frq
-    df@xlag1= r1          ; assign mean lag-1
-    splt(nc,:,:) = specx_ci(df, siglvl, 1.0-siglvl) 
-end do
-varia = splt*(1.0/nsample)
-varia(:,:,0) = varia(:,:,0)/2.0
-varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
-frq  = sdof@frq
-splt = splt*conform(splt,frq,2)
-vari1 = dim_sum_n(varia(:,0,:),1)
-
-print(sdof)
-printVarSummary(splt)
-splt!2   = "frq"
-splt&frq = log(frq)
-splt@long_name = "power*frequency"
-splt@units     = "1/day"
-
 ;************************************************
 ; plotting
 ;************************************************
@@ -134,7 +97,7 @@ splt@units     = "1/day"
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
-    resxy@trYMaxF = max(splt(:,0,:))
+    ;resxy@trYMaxF = max(splt(:,0,:))
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
     resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
@@ -214,6 +177,45 @@ splt@units     = "1/day"
     resp@txString      = "sm="+sm+" pct="+pct+" Fourier_filter="+cb+"-"+ca+"day"
     end if
 
+do ne = 0, neval-2, 1
+np = 0
+nee = ne+1
+do nc = 0, ncase-1, 1
+    spcavg = new ((/nfrq/),typeof(eofts))
+    spcavg = 0.0
+    r1zsum = 0.0
+    do nt = 0, nyear-1, 1
+        ; calculate spectrum
+        sdof := specx_anal(eofts(nc,ne,nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spcavg = spcavg + sdof@spcx                ; sum spc of each segment
+        r1     = sdof@xlag1                        ; extract segment lag-1
+        r1zsum = r1zsum  + 0.5*log((1+r1)/(1-r1)) ; sum the Fischer Z
+    end do 
+    r1z  = r1zsum/nyear                 ; average r1z
+    r1   = (exp(2*r1z)-1)/(exp(2*r1z)+1); transform back, this is the mean r1
+    spcavg  = spcavg/nyear              ; average spectrum
+    df      = 2.0*nyear   ; deg of freedom
+    df@spcx = spcavg      ; assign the mean spc
+    df@frq  = sdof@frq
+    df@xlag1= r1          ; assign mean lag-1
+    splt(nc,:,:) = specx_ci(df, siglvl, 1.0-siglvl) 
+end do
+varia = splt*(1.0/nsample)
+varia(:,:,0) = varia(:,:,0)/2.0
+varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
+frq  = sdof@frq
+splt = splt*conform(splt,frq,2)
+vari1 = dim_sum_n(varia(:,0,:),1)
+
+print(sdof)
+printVarSummary(splt)
+splt!2   = "frq"
+splt&frq = log(frq)
+splt@long_name = "power*frequency"
+splt@units     = "1/day"
+
+    resxy@trYMaxF = max(splt(:,0,:))
+
 if(allcase) then
     resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
     resxy@xyLineThicknesses = (/3.0,3.0,3.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
@@ -228,12 +230,13 @@ else
     resxy@xyLineThicknesses = (/2.0,3.0,3.0,3.0/)   ; make second line thicker
     resxy@xyLineColors      = (/"black","red","red","red"/)
     resxy@pmLegendDisplayMode = "NoCreate"
+    np = 0
     do nc = 0, ncase-1, 1
     resxy@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + vari1(nc)
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(nc,:,:), resxy)     
     np = np + 1
     end do
-    gsn_panel(wks,plot,(/1,ncase/),resp)
+    gsn_panel(wks,plot,(/2,3/),resp)
 end if
 end do
 ;gsn_panel(wks,plot,(/1,1/),resp)

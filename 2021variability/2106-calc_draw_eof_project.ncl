@@ -33,7 +33,7 @@ latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90
 lonl = (/105 /);, 0   ;30 ;20
 lonr = (/135 /);, 360 ;150;220
 lat_spacing = 10
-lon_spacing = 20
+lon_spacing = 10
 na = 0
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
@@ -82,6 +82,9 @@ eof_ts  = new((/ncase,neval,nsample/),float)
 ts_mean = new((/ncase,neval/),float)
 plot = new((/18/),graphic)
 gtop = new((/18/),graphic)
+
+f   = addfile(filein(0),"r")
+grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
@@ -289,7 +292,11 @@ ntime = dimsizes(select_time2)
 fvar:= reshape(fvar,(/nyear*ntime,nlat,nlon/))
 
 if(fnc.ge.2.and.mkoc) then 
-    fvar = mask(fvar, conform(fvar,ldmk,(/1,2/)).eq.1, True)
+    ;fvar = mask(fvar, conform(fvar,ldmk,(/1,2/)).eq.1, True)
+    fvar := linint2(ldmk&lon,ldmk&lat,fvar,False,grid&lon,grid&lat,0)
+    ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
+    fvar = mask(fvar, ismissing(grid), False)
+    vars := grid
 end if
 eof  := eofunc_n(fvar,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 sig  := eofunc_north(eof@pcvar,nsample,True)
@@ -374,7 +381,11 @@ ntime = dimsizes(select_time2)
 var:= reshape(var,(/nyear*ntime,nlat,nlon/))
 
 if(nc.ge.2.and.mkoc) then 
-    var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
+    ;var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
+    var := linint2(ldmk&lon,ldmk&lat,var,False,grid&lon,grid&lat,0)
+    ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
+    var = mask(var, ismissing(grid), False)
+    vars := grid
 end if
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
 eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)

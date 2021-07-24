@@ -11,7 +11,7 @@ path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
@@ -20,6 +20,7 @@ allcase = False ;True ;if True, four case be draw in one figure
 month_s = 6
 month_e = 8
 savedata = False;True ;
+spectral = True ;False; ;whether draw the spectral line of ts
 barshare = True ;False;
 barvert  = True ;False;
 
@@ -32,13 +33,15 @@ area = (/"EA"/);,"GB"
 lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/105 /);, 0   ;30 ;20
-lonr = (/135 /);, 360 ;150;220
+lonr = (/130 /);, 360 ;150;220
 lat_spacing = 10
-lon_spacing = 15
+lon_spacing = 10
 na = 0
 
-case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
-case2   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+dcase   = (/0,2/)
+;dcase   = (/0,1,2,3,4,5/)
+case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) 
+case2   = (/"OBS"   ,"APHRO","CTL" ,"NT"   ,"NM"    ,"NMT" /) 
 gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 years   = ispan(1979,2005,1)   ;the calculate time
 path2   = "/home/ys17-19"
@@ -72,12 +75,13 @@ select_time1 = ind(time(:,1).ge.(month_s-1).and.time(:,1).le.(month_e+1))
 time := cd_calendar(f->time(select_time1),0)
 select_time2 = ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 end if
+
 f = addfile(gtopfile,"r")
 ldmk   = f->LANDM_COSLAT({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ntime = dimsizes(select_time2)
-ncase = dimsizes(case1)
+ncase = dimsizes(dcase)
 nyear = dimsizes(years)
 nsample = nyear*ntime
 eof_ts  = new((/ncase,neval,nsample/),float)
@@ -85,7 +89,11 @@ ts_mean = new((/ncase,neval/),float)
 eval    = new((/ncase,neval/),float)
 pcvar   = new((/ncase,neval/),float)
 plot    = new((/36/),graphic)
+plot1   = new((/36/),graphic)
 gtop    = new((/36/),graphic)
+
+f   = addfile(filein(0),"r")
+grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
@@ -100,14 +108,14 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.02
+   tick_font      = 0.025
    subtitle_font  = 0.02
    title_font     = 0.02
    vcref_font     = 0.015
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5 ;3.0;
+   mp_thick       = 2.5 ;3.0;
    vc_thick       = mp_thick + 0.5 
    font_index     = 22
 end if
@@ -354,18 +362,18 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 np = 0
 do nc = 0, ncase-1, 1
-if(nc.eq.0) then ;CN051
-    f   = addfile(filein(nc),"r")
+if(dcase(nc).eq.0) then ;CN051
+    f   = addfile(filein(dcase(nc)),"r")
     vars:= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     lat := vars&lat
 end if
-if(nc.eq.1) then ;APHRO
-    f   = addfile(filein(nc)+years(0)+".nc","r")
+if(dcase(nc).eq.1) then ;APHRO
+    f   = addfile(filein(dcase(nc))+years(0)+".nc","r")
     vars:= f->precip(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     lat := vars&latitude
 end if
-if(nc.ge.2) then
-    f   = addfile(filein(nc)+years(0)+".daily.PRECC.nc","r")
+if(dcase(nc).ge.2) then
+    f   = addfile(filein(dcase(nc))+years(0)+".daily.PRECC.nc","r")
     vars:= f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
     lat := vars&lat
 end if
@@ -375,16 +383,16 @@ nlon = dim(1)
 
 ntime = dimsizes(select_time1)
 var := new((/nyear,ntime,nlat,nlon/),float)
-if(nc.eq.0) then ;CN051
-    f   = addfile(filein(nc),"r")
+if(dcase(nc).eq.0) then ;CN051
+    f   = addfile(filein(dcase(nc)),"r")
     t   = cd_calendar(f->time,0)
     select_time0 = ind(t(:,0).ge.years(0).and.t(:,0).le.years(nyear-1) \
                     .and.t(:,1).ge.(month_s-1).and.t(:,1).le.(month_e+1))
     var = reshape(f->pre(select_time0,{lats(na):latn(na)},{lonl(na):lonr(na)}),(/nyear,ntime,nlat,nlon/));mm/day
 end if
-if(nc.eq.1) then
+if(dcase(nc).eq.1) then
     do nt = 0, nyear-1 ,1
-    f   = addfile(filein(nc)+years(nt)+".nc","r")
+    f   = addfile(filein(dcase(nc))+years(nt)+".nc","r")
     if(isleapyear(years(nt))) then ;leap year,366 day
     var(nt,:,:,:) = f->precip(select_time1+1,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     else
@@ -392,11 +400,11 @@ if(nc.eq.1) then
     end if
     end do
 end if
-if(nc.ge.2) then
+if(dcase(nc).ge.2) then
     do nt = 0, nyear-1 ,1
-    f   = addfile(filein(nc)+years(nt)+".daily.PRECC.nc","r")
+    f   = addfile(filein(dcase(nc))+years(nt)+".daily.PRECC.nc","r")
     var(nt,:,:,:) = f->PRECC(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)})
-    f   = addfile(filein(nc)+years(nt)+".daily.PRECL.nc","r")
+    f   = addfile(filein(dcase(nc))+years(nt)+".daily.PRECL.nc","r")
     var(nt,:,:,:) = var(nt,:,:,:) + f->PRECL(select_time1,{lats(na):latn(na)},{lonl(na):lonr(na)})
     end do
     var = var*1000*3600*24 ;convert m/s to mm/day
@@ -425,8 +433,12 @@ var = tofloat(var*conform(var,wgt,2))
 ntime = dimsizes(select_time2)
 var:= reshape(var(:,select_time2,:,:),(/nyear*ntime,nlat,nlon/))
 
-if(nc.ge.2) then 
-    var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
+if(dcase(nc).ge.2) then 
+;    var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
+    var := linint2(phis&lon,phis&lat,var,False,grid&lon,grid&lat,0)
+    ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
+    var = mask(var, ismissing(grid), False)
+    vars := grid
 end if
 eof     := eofunc_n(var,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 sig     := eofunc_north(eof@pcvar,nsample,True)
@@ -436,7 +448,7 @@ ts_mean(nc,:) = eof_ts_temp@ts_mean
 eval(nc,:)  = eof@eval
 pcvar(nc,:) = eof@pcvar
 eof = eof*conform(eof,sqrt(eof@eval),0)
-print(case1(nc)+" eval : " + eof@eval(0) + ", " + eof@eval(1) \
+print(case1(dcase(nc))+" eval : " + eof@eval(0) + ", " + eof@eval(1) \
         + ", " + eof@eval(2) + ", " + eof@eval(3)) 
 subtitle_color = where(sig,"red","black") 
 copy_VarMeta(vars,eof(0,:,:))
@@ -444,11 +456,12 @@ copy_VarMeta(vars,eof(0,:,:))
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-do ne = 0, neval-2, 1
+do ne = 0, 1, 1;neval-2, 1
     nee = ne+1
-    res@gsnLeftString   = case2(nc);+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
-    res@gsnRightStringFontColor   = subtitle_color(ne)
-    res@gsnRightString            = "EOF"+nee+": "+eof@eval(ne)+"  "+eof@pcvar(ne)+"%" 
+    np = 2*ne+nc
+    res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+eof@pcvar(ne)+"%";+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
+    ;res@gsnRightStringFontColor   = subtitle_color(ne)
+    ;res@gsnRightString            = "EOF"+nee+": "+eof@pcvar(ne)+"%" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
@@ -460,16 +473,19 @@ do ne = 0, neval-2, 1
     printMinMax(eof(ne,:,:),True)
 end do 
 end do 
-gsn_panel(wks,plot,(/6,(neval-1)/),resp)
+gsn_panel(wks,plot,(/2,2/),resp)
+;gsn_panel(wks,plot,(/6,(neval-1)/),resp)
 
+if(spectral) then 
 indx = 4 ;the result of specx_ci
 nsample2 = ntime;nyear*
 nfrq  = toint(nsample2/2.0) 
 splt = new((/ncase,indx,nfrq/),float)
 eofts = reshape(eof_ts,(/ncase,neval,nyear,ntime/))
+selindex = (/0,1,3/)
 
 np = 0
-do ne = 0, neval-2, 1
+do ne = 0, 1, 1;neval-2, 1
 nee = ne+1
 do nc = 0, ncase-1, 1
 if(nsample2.eq.ntime) then 
@@ -521,20 +537,29 @@ if(allcase) then
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(:,0,:), resxy)     
     np = np + 1
 else
-    resxy@xyDashPatterns    = (/0,0,1,3/)
-    resxy@xyLineThicknesses = (/2.0,3.0,3.0,3.0/)   ; make second line thicker
-    resxy@xyLineColors      = (/"black","red","red","red"/)
+    resxy@xyDashPatterns    = (/0,1,3/)
+    resxy@xyLineThicknesses = (/3.0,2.0,2.0/)   ; make second line thicker
+;    resxy@xyLineColors      = (/"black","red","red","red"/)
     resxy@pmLegendDisplayMode = "NoCreate"
     np = 0
     do nc = 0, ncase-1, 1
-    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee +" "+ case2(nc) + " " + vari1(nc)
-    plot(np) = gsn_csm_xy(wks, splt&frq, splt(nc,:,:), resxy)     
+    resxy@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc)) + " spectrum"
+    ;resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee +" "+ case2(dcase(nc)) + " " + vari1(nc)
+    if(ne.gt.0) then
+    resxy@xyLineColors  = (/"blue","blue","blue"/)
+    plot1(np) = gsn_csm_xy(wks, splt&frq, splt(nc,selindex,:), resxy)     
+    overlay(plot(np),plot1(np))
+    else
+    resxy@xyLineColors  = (/"red","red","red"/)
+    plot(np) = gsn_csm_xy(wks, splt&frq, splt(nc,selindex,:), resxy)     
+    end if
     np = np + 1
     end do
-    gsn_panel(wks,plot,(/2,3/),resp)
+    ;gsn_panel(wks,plot,(/2,3/),resp)
 end if
 end do
-;gsn_panel(wks,plot,(/2,3/),resp)
+gsn_panel(wks,plot,(/1,2/),resp)
+end if
 
 ;========================================================================
 ;save the data

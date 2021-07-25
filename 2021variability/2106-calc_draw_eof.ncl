@@ -21,6 +21,7 @@ month_s = 6
 month_e = 8
 savedata = False;True ;
 spectral = True ;False; ;whether draw the spectral line of ts
+eofmap   = False;True ; ;whether draw the eof map
 barshare = True ;False;
 barvert  = True ;False;
 
@@ -63,8 +64,8 @@ if(ifrunave.eq.1) then
 fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
+pre_case   = (/"(e","(f","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+fig_out    = "eps";"pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -115,7 +116,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 2.5 ;3.0;
+   mp_thick       = 3.0;
    vc_thick       = mp_thick + 0.5 
    font_index     = 22
 end if
@@ -216,7 +217,7 @@ end if
     resp@gsnMaximize   = True
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
-    resp@gsnPaperOrientation = "landscape";"portrait"
+    resp@gsnPaperOrientation = "portrait";"landscape";
     resp@gsnPanelLabelBar = True
     if(barvert) then 
     resp@lbOrientation     = "Vertical"
@@ -293,8 +294,8 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     resxy@tiYAxisString = "Power*frq"           ; yaxis
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
-    ;resxy@trYMinF = 0
-    ;resxy@trYMaxF = max(ave(:,0,:))
+    resxy@trYMinF = 0
+    resxy@trYMaxF = 0.8 
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
     resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
@@ -473,8 +474,10 @@ do ne = 0, 1, 1;neval-2, 1
     printMinMax(eof(ne,:,:),True)
 end do 
 end do 
+if(eofmap) then 
 gsn_panel(wks,plot,(/2,2/),resp)
 ;gsn_panel(wks,plot,(/6,(neval-1)/),resp)
+end if
 
 if(spectral) then 
 indx = 4 ;the result of specx_ci

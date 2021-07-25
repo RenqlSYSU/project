@@ -21,8 +21,8 @@ lonr1 = (/125, 118, 115, 115/)
 var_name = (/"PRECC","PRECL"/)
 na = 1
 ndist = 10
-diff  = False
-perc  = False;True
+diff  = True ;False
+perc  = True ;False;
 
 ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
@@ -31,7 +31,8 @@ cb = 8.0 ;2.5  ;10.0 ;
 month_s = 6 
 month_e = 8
 
-case    = (/"CTRL","NG15S","NG4550","NGEN"/) ;
+case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;
+case2   = (/"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
 filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                   "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
@@ -50,7 +51,7 @@ select_time = ind(time(:,1).ge.(month_s-1).and.time(:,1).le.(month_e+1))
 end if
 vars := f->PRECC(0,{lats(na):latn(na)},{lonl(na):lonr(na)})
 ntime = dimsizes(select_time)
-ncase = dimsizes(case)
+ncase = dimsizes(case1)
 nyear = dimsizes(years)
 narea = dimsizes(lats1)
 nlat  = dimsizes(vars&lat)
@@ -148,10 +149,10 @@ end if
 ;define the thickness and height of the title,tick and label
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 
-    tick_font      = 0.015
-    subtitle_font  = 0.018
+    tick_font      = 0.025
+    subtitle_font  = 0.025
     title_font     = 0.03
-    label_font     = 0.018
+    label_font     = 0.025
     tick_thick     = 5.0
     subtitle_thick = 5.0  ;not have this attribute
     title_thick    = 5.0
@@ -177,9 +178,13 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     ;resxy@trYMaxF = max(ave(:,0,:))
     resxy@trXMinF = 0
     resxy@trXMaxF = ndist-1
-    resxy@xyDashPatterns    = 0 
-    resxy@xyLineThicknesses = 3.0 
-    resxy@xyLineColors      = (/"black","red","blue","grey"/)
+    resxy@xyDashPattern    = 0 
+    resxy@xyLineThicknessF = 3.0 
+    resxy@xyLineColors     = (/"red","blue","grey"/)
+    resxy@trYMaxF = max(ave(:,0,:))
+    resxy@trXMinF = 0
+    resxy@trXMaxF = ndist-1
+    resxy@xyDashPattern    = 0 
     
     ;legend
     resxy@pmLegendDisplayMode = "Always"
@@ -187,13 +192,13 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@lgPerimOn           = False
     resxy@lgPerimFill         = "SolidFill"
     resxy@lgPerimFillColor    = "white"
-    resxy@xyExplicitLegendLabels = case
+    resxy@xyExplicitLegendLabels = case2(1:3)
     resxy@lgLabelFontColor       = "black"
     resxy@lgLabelFontThicknessF  = label_thick
     resxy@lgLabelFontHeightF     = label_font
     resxy@lgLabelFont            = font_index
     resxy@pmLegendWidthF   = 0.1
-    resxy@pmLegendHeightF  = 0.25
+    resxy@pmLegendHeightF  = 0.15
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
@@ -251,7 +256,7 @@ np = 0
 do na1 = 0, narea-1, 1
     resxy@gsnLeftString   = pre_case(np) + ") " + month_s + "-" + month_e 
     resxy@gsnRightString   = "(" + lats1(na1) + "-" + latn1(na1) + "N," + lonl1(na1) + "-" + lonr1(na1) + "E)"
-    plot(np) = gsn_csm_xy(wks, ispan(0,ndist-1,1), smth(:,:,na1), resxy)    
+    plot(np) = gsn_csm_xy(wks, ispan(0,ndist-1,1), smth(1:3,:,na1), resxy)    
     np = np + 1
 end do 
 gsn_panel(wks,plot,(/2,2/),resp)

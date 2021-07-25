@@ -19,7 +19,7 @@ rmv = False ;remove annaul cycle when bandpass filter
 fnc = 2
 month_s = 6
 month_e = 8
-savedata = True ;False;
+savedata = False;True ;
 mkoc = True ; True mean mask rainfall on ocean
 
 opt = True
@@ -31,14 +31,14 @@ area = (/"EA"/);,"GB"
 lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/105 /);, 0   ;30 ;20
-lonr = (/135 /);, 360 ;150;220
+lonr = (/130 /);, 360 ;150;220
 lat_spacing = 10
 lon_spacing = 10
 na = 0
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 
 case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
-case2   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+case2   = (/"OBS"   ,"APHRO","CTL" ,"NT"   ,"NM"    ,"NMT" /) 
 gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 years   = ispan(1979,2005,1)   ;the calculate time
 path2   = "/home/ys17-19"
@@ -80,8 +80,9 @@ nyear = dimsizes(years)
 nsample = nyear*ntime
 eof_ts  = new((/ncase,neval,nsample/),float)
 ts_mean = new((/ncase,neval/),float)
-plot = new((/18/),graphic)
-gtop = new((/18/),graphic)
+plot  = new((/18/),graphic)
+plot1 = new((/18/),graphic)
+plot2 = new((/18/),graphic)
 
 f   = addfile(filein(0),"r")
 grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
@@ -106,7 +107,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5 ;3.0;
+   mp_thick       = 3.0;
    vc_thick       = mp_thick + 0.5 
    font_index     = 22
 end if
@@ -129,8 +130,8 @@ end if
     resxy@tiYAxisString = "Power*frq"           ; yaxis
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
-    ;resxy@trYMinF = 0
-    ;resxy@trYMaxF = max(ave(:,0,:))
+    resxy@trYMinF = 0
+    resxy@trYMaxF = 0.8 
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
     resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
@@ -140,7 +141,7 @@ end if
     resxy@tmXBLabels  = p_draw
     
     ;legend
-    resxy@pmLegendDisplayMode = "Always"
+    resxy@pmLegendDisplayMode = "NoCreate";"Always"
     resxy@lgOrientation       = "Vertical"
     resxy@lgPerimOn           = False
     resxy@lgPerimFill         = "SolidFill"
@@ -151,14 +152,14 @@ end if
     resxy@lgLabelFontHeightF     = label_font
     resxy@lgLabelFont            = font_index
     resxy@pmLegendWidthF   = 0.1
-    resxy@pmLegendHeightF  = 0.25
+    resxy@pmLegendHeightF  = 0.18
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     if(ifrunave.ge.2) then 
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = - 0.24    ; move ref vector along X-axis
     else
-    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = -0.24    ; move ref vector along X-axis
+    resxy@pmLegendOrthogonalPosF  = - 0.25   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.24    ; move ref vector along X-axis
     end if
     
     resxy@tmBorderThicknessF  = mp_thick
@@ -193,6 +194,17 @@ end if
     resxy@gsnCenterString  = "";lev(nl) + " hPa"
     resxy@gsnRightString   = "";var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 
+    resxy@xyDashPattern    = 0 
+    resxy@xyLineThicknessF = 2.5 
+    resxy@xyLineColors      = (/"black","red","blue","grey"/)
+
+    resxy1 = resxy
+    resxy1@xyDashPattern    = 3 
+    resxy1@xyLineThicknessF = 1.5 
+    resxy2 = resxy
+    resxy2@xyDashPattern    = 2 
+    resxy2@xyLineThicknessF = 1.5 
+    
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait" ;"landscape";
@@ -444,17 +456,18 @@ splt&frq = log(frq)
 splt@long_name = "power*frequency"
 splt@units     = "1/day"
 
-    resxy@xyExplicitLegendLabels = case2 + " " + vari1
-    resxy@xyDashPatterns    = (/1,2,0,0,0,0/)
-    resxy@xyLineThicknesses = (/3.0,3.0,5.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
-    resxy@xyLineColors      = (/"black","black","black","red","blue","grey"/)
+    resxy@xyExplicitLegendLabels = case2(2:5) + " " + vari1(2:5)
     ;resxy@xyDashPatterns    = (/0,0,0,0/)
     ;resxy@xyLineThicknesses = (/5.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
     ;resxy@xyLineColors      = (/"black","red","blue","grey"/)
     resxy@pmLegendDisplayMode = "Always"
-    resxy@gsnLeftStringFontColor   = subtitle_color(ne)
+;    resxy@gsnLeftStringFontColor   = subtitle_color(ne)
     resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee+": "+eof@eval(ne)+"  "+eof@pcvar(ne)+"%" 
-    plot(np) = gsn_csm_xy(wks, splt&frq, splt(:,0,:), resxy)     
+    plot(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,0,:), resxy)     
+    plot1(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,1,:), resxy1)     
+    plot2(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,3,:), resxy2)     
+    overlay(plot(np),plot1(np))
+    overlay(plot(np),plot2(np))
     np = np + 1
 end do
 resp@gsnPanelLabelBar = False 

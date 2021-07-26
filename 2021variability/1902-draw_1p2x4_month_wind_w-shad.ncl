@@ -10,20 +10,20 @@ path  = "/home/ys17-19/renql/project/2021variability"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
-    case2   = (/"CTRL","NG15S-CTRL","NG4550-CTRL","NGEN-CTRL"/) ;,"NG24h-CTRL"
+    case2   = (/"CTL","NT-CTL","NM-CTL","NMT-CTL"/) ;,"NG24h-CTRL"
     gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
-;fig_out    = "eps";"x11";"eps";
+pre_case   = (/"(e","(f","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
+;fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"PRECC"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT"         ,"preci_5run-smth81"/)
+             "uppT"         ,"preci_5run-smth49"/)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -35,7 +35,7 @@ draw_varname = (/"Q1"       ,"PRECC"       ,"OMEGA"           ,"Z3"             
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
-                 "uppT"     ,"preci_5run-smth81"/)
+                 "uppT"     ,"preci_5run-smth49"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 21
@@ -86,15 +86,15 @@ end if
 
 ;area: east Asia
 lats = (/-10,5  ,-70,10 ,15 /);-20
-latn = (/89 ,45 ,70 ,55 ,55 /);60
-lonl = (/0  ,25 ,0  ,90 ,90 /);20
-lonr = (/360,85 ,360,150,140/);220
-lat_spacing = 15
-lon_spacing = 20
+latn = (/89 ,45 ,70 ,55 ,50 /);60
+lonl = (/0  ,25 ,0  ,90 ,100 /);20
+lonr = (/360,85 ,360,150,130/);220
+lat_spacing = 10
+lon_spacing = 10
 na = 4
 
 f = addfile(gtopfile,"r")
-phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
+phis   = f->PHIS({lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)})
 phis   = phis/9.8   ;convert unit from m2/s2 to gpm
 ncase  = dimsizes(case1)
 nmonth = dimsizes(imonth)
@@ -142,9 +142,9 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
+   tick_font      = 0.02
+   subtitle_font  = 0.02
+   title_font     = 0.02
    vcref_font     = 0.015
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
@@ -169,7 +169,7 @@ lat1 = phis&lat
 u    = new((/ncase  ,nmonth,nlat,nlon/),float)
 do nf = 0 ,ncase-1, 1
     u_f = addfile(filename(nf)+"U.nc","r")
-    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
+    u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
         lat_ind = maxind(u(nf,nm,{10:55},inln))
@@ -183,20 +183,20 @@ end if
 
 do nf = 0 ,ncase-1, 1
 f = addfile(filename(nf)+"PS.nc","r")
-ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+ps= f->$var_name(0)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 printVarSummary(ps)
 
 if(vect_option) then 
 inv = 0
 f = addfile(filename(nf)+"U.nc","r")
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 inv = 1
 f = addfile(filename(nf)+"V.nc","r")
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 end if
@@ -204,15 +204,15 @@ end if
 inv = 2
 f = addfile(filename(nf) + draw_var(nv) + ".nc","r")
 if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
 if(nv.ge.17.and.nv.le.19) then 
-var(nf,inv,:,:,:)  = tofloat(f->$var_name(0)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = tofloat(f->$var_name(1)$(nv-17,imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = tofloat(f->$var_name(0)$(nv-17,imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)})) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = tofloat(f->$var_name(1)$(nv-17,imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)})) ;get an array (ncase,nmonth,nlat,nlon)
 else
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 end if
 var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
@@ -222,11 +222,11 @@ if(cont_option) then
 inv = 3
 f = addfile(filename(nf)+cont_var(nvc) + ".nc","r")
 if(nvc.eq.1.or.nvc.eq.2) then
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 else
-var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+var(nf,inv,:,:,:)  = f->$var_name(0)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
+vari(nf,inv,:,:,:) = f->$var_name(1)$(imonth,{lev(nl)},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 var(nf,inv,:,:,:)  = mask( var(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 vari(nf,inv,:,:,:) = mask(vari(nf,inv,:,:,:),ps.ge.lev(nl)*100,True)
 end if
@@ -335,7 +335,7 @@ end if
 copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
 printVarSummary(prob)
 else
-case2 = case1
+case2   = (/"CTL","NT","NM","NMT"/) ;,"NG24h-CTRL"
 end if
 printVarSummary(var)
 
@@ -630,8 +630,8 @@ end if
     res@pmLabelBarParallelPosF       = 0.5
     else
     res@lbOrientation        = "Horizontal";"Vertical";
-    res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.04
+    res@pmLabelBarWidthF  = 0.5
+    res@pmLabelBarHeightF = 0.06
     res@pmLabelBarOrthogonalPosF  = 0.2 ;y direction
     res@pmLabelBarParallelPosF    = 0.5
     end if
@@ -799,7 +799,7 @@ end if
 
 np = -1
 do nm = 2,2,1;,nmonth-1,1
-do nc = 0,ncase-1,1
+do nc = 0,3,3;ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -815,8 +815,8 @@ else
 end if 
 ;    do nm = 0, nmonth-1,1 ;2,2,1;
         np = np + 1
-        res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
-        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
+        ;res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth49";+ "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
@@ -879,10 +879,10 @@ end if
         end if
         
         if(nc.eq.0.or.nc.eq.3) then
-        line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
-        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
+        ;line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
+        ;line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
         else
-        line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
+        ;line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
         end if
         
         if(jet_option.ge.1) then 
@@ -890,8 +890,8 @@ end if
         jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
         overlay(plot(np),jetl(np))
         end if
-        print(max(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
-        print(min(var(nc,2,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
+        print(max(var(nc,2,nm,{lats(na):latn(na)},{(lonl(na)-2):(lonr(na)+2)})))
+        print(min(var(nc,2,nm,{lats(na):latn(na)},{(lonl(na)-2):(lonr(na)+2)})))
         ;draw(plot(np))
         ;frame(wks)
     end do 
@@ -926,7 +926,7 @@ end do
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
     ;gsn_panel(wks,plot,(/5,4/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 ;end do
 end
 

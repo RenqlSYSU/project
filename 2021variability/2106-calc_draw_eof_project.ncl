@@ -61,7 +61,7 @@ fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var
 fig_name = path + "/fig/" +case1(fnc)+"-project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -158,8 +158,8 @@ end if
     resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = - 0.24    ; move ref vector along X-axis
     else
-    resxy@pmLegendOrthogonalPosF  = - 0.25   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.24    ; move ref vector along X-axis
+    resxy@pmLegendOrthogonalPosF  = - 0.34   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.37   ; move ref vector along X-axis
     end if
     
     resxy@tmBorderThicknessF  = mp_thick
@@ -195,15 +195,15 @@ end if
     resxy@gsnRightString   = "";var_name(nv) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 
     resxy@xyDashPattern    = 0 
-    resxy@xyLineThicknessF = 2.5 
+    resxy@xyLineThicknessF = 3.0 
     resxy@xyLineColors      = (/"black","red","blue","grey"/)
 
     resxy1 = resxy
     resxy1@xyDashPattern    = 3 
-    resxy1@xyLineThicknessF = 1.5 
+    resxy1@xyLineThicknessF = 2.5 
     resxy2 = resxy
-    resxy2@xyDashPattern    = 2 
-    resxy2@xyLineThicknessF = 1.5 
+    resxy2@xyDashPattern    = 14 
+    resxy2@xyLineThicknessF = 2.5 
     
     resp  = True    
     resp@gsnMaximize   = True
@@ -415,7 +415,7 @@ eofts = reshape(eof_ts,(/ncase,neval,nyear,ntime/))
 
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 np = 0
-do ne = 0, neval-2, 1
+do ne = 0, 1,1;neval-2, 1
 nee = ne+1
 do nc = 2, ncase-1, 1
 if(nsample2.eq.ntime) then 
@@ -456,22 +456,23 @@ splt&frq = log(frq)
 splt@long_name = "power*frequency"
 splt@units     = "1/day"
 
-    resxy@xyExplicitLegendLabels = case2(2:5) + " " + vari1(2:5)
+    resxy@xyExplicitLegendLabels = case2(2:5); + " " + vari1(2:5)
     ;resxy@xyDashPatterns    = (/0,0,0,0/)
     ;resxy@xyLineThicknesses = (/5.0,5.0,5.0,5.0/)-1.5   ; make second line thicker
     ;resxy@xyLineColors      = (/"black","red","blue","grey"/)
     resxy@pmLegendDisplayMode = "Always"
 ;    resxy@gsnLeftStringFontColor   = subtitle_color(ne)
-    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee+": "+eof@eval(ne)+"  "+eof@pcvar(ne)+"%" 
+    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee+": "+eof@pcvar(ne)+"%";+eof@eval(ne)+"  " 
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,0,:), resxy)     
-    plot1(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,1,:), resxy1)     
+    ;plot1(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,1,:), resxy1)     
+    ;overlay(plot(np),plot1(np))
     plot2(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,3,:), resxy2)     
-    overlay(plot(np),plot1(np))
     overlay(plot(np),plot2(np))
     np = np + 1
 end do
 resp@gsnPanelLabelBar = False 
-gsn_panel(wks,plot,(/2,3/),resp)
+gsn_panel(wks,plot,(/1,2/),resp)
+;gsn_panel(wks,plot,(/2,3/),resp)
 
 ;========================================================================
 ;save the data

@@ -13,14 +13,14 @@ path = "/home/ys17-19/renql"
 lats = (/15 ,10 /)
 latn = (/50 ,60 /)
 lonl = (/90 ,90 /)
-lonr = (/150,150/)
-lats1 = (/ 27, 32 , 25 , 40 /)
-latn1 = (/ 37, 32 , 25 , 40 /)
-lonl1 = (/110, 118, 115, 115/)
-lonr1 = (/125, 118, 115, 115/)
+lonr = (/150,140/)
+lats1 = (/ 26, 32 , 25 , 40 /)
+latn1 = (/ 34, 32 , 25 , 40 /)
+lonl1 = (/112, 118, 115, 115/)
+lonr1 = (/120, 118, 115, 115/)
 var_name = (/"PRECC","PRECL"/)
 na = 1
-ndist = 10
+ndist = 6
 diff  = True ;False
 perc  = True ;False;
 
@@ -136,7 +136,7 @@ delete(var)
 if(diff) then 
 do nc = 1, ncase-1, 1
     if(perc) then 
-    smth(nc,:,:) = (smth(nc,:,:)-smth(0,:,:))/smth(0,:,:)
+    smth(nc,:,:) = ((smth(nc,:,:)-smth(0,:,:))/smth(0,:,:))*100
     else
     smth(nc,:,:) = smth(nc,:,:)-smth(0,:,:)
     end if
@@ -181,10 +181,10 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@xyDashPattern    = 0 
     resxy@xyLineThicknessF = 3.0 
     resxy@xyLineColors     = (/"red","blue","grey"/)
-    resxy@trYMaxF = max(ave(:,0,:))
-    resxy@trXMinF = 0
-    resxy@trXMaxF = ndist-1
-    resxy@xyDashPattern    = 0 
+    resxy@gsnYRefLine            = 0.0
+    resxy@gsnYRefLineDashPattern = 12
+    resxy@gsnYRefLineThicknessF  = 3.0 
+    resxy@gsnYRefLineColor       = "black" 
     
     ;legend
     resxy@pmLegendDisplayMode = "Always"
@@ -200,8 +200,8 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@pmLegendWidthF   = 0.1
     resxy@pmLegendHeightF  = 0.15
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
-    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
-    resxy@pmLegendParallelPosF    = 0.28    ; move ref vector along X-axis
+    resxy@pmLegendOrthogonalPosF  = - 0.32   ; move ref vector along Y-axis
+    resxy@pmLegendParallelPosF    = 0.30    ; move ref vector along X-axis
     
     resxy@tmBorderThicknessF  = mp_thick
     resxy@tmXBLabelFont         = font_index

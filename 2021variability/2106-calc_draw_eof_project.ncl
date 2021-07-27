@@ -61,7 +61,7 @@ fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var
 fig_name = path + "/fig/" +case1(fnc)+"-project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"pdf";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -404,6 +404,11 @@ eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)
 ts_mean(nc,:) = eof_ts_temp@ts_mean
 end do
 
+vari = dim_variance_n(eof_ts,2)
+do ne = 0,1,1
+    print(vari(:,ne))
+end do
+
 ;=====================================================
 ;do power spectrum
 ;==================================================
@@ -412,6 +417,12 @@ nsample2 = ntime;nyear*
 nfrq  = toint(nsample2/2.0) 
 splt = new((/ncase,indx,nfrq/),float)
 eofts = reshape(eof_ts,(/ncase,neval,nyear,ntime/))
+
+vari = dim_avg_n(dim_variance_n(eofts,3),2)
+do ne = 0,1,1
+    print("climatology ave EOF"+ne)
+    print(vari(:,ne))
+end do
 
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 np = 0
@@ -448,6 +459,7 @@ varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
 frq  = sdof@frq
 splt = splt*conform(splt,frq,2)
 vari1 = dim_sum_n(varia(:,0,:),1)
+print(vari1)
 
 print(sdof)
 printVarSummary(splt)

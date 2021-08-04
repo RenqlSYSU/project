@@ -10,17 +10,18 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
 begin
 path = "/home/ys17-19/renql"
-lats = (/15 ,10 /)
-latn = (/50 ,60 /)
-lonl = (/90 ,90 /)
-lonr = (/150,140/)
+lats = (/15 ,20 /)
+latn = (/50 ,45 /)
+lonl = (/90 ,100/)
+lonr = (/150,130/)
 lats1 = (/ 26, 32 , 25 , 40 /)
 latn1 = (/ 34, 32 , 25 , 40 /)
 lonl1 = (/112, 118, 115, 115/)
 lonr1 = (/120, 118, 115, 115/)
 var_name = (/"PRECC","PRECL"/)
 na = 1
-ndist = 6
+radiu = fspan(0,16,17)
+ndist = dimsizes(radiu)
 diff  = True ;False
 perc  = True ;False;
 
@@ -39,7 +40,7 @@ filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 years   = ispan(1979,2005,1)   ;the calculate time
 fig_name = path + "/project/2021variability/fig/smth_JJApreci_vari"
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(e","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
@@ -63,7 +64,7 @@ plot = new((/6/),graphic)
 ;==========================================================
 ;read the data
 ;============================================================
-do nf = 0,3,1
+do nf = 0,3,3
 do nt = 0,nyear-1,1
     nv = 0
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
@@ -89,7 +90,7 @@ select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 lat = vars&lat
 lon = vars&lon
 do ndis = 0, ndist-1, 1
-threshold = ndis
+threshold = radiu(ndis)
 if(threshold.gt.0) then 
 do nla = 1, nlat-2, 1
 do nlo = 1, nlon-2, 1
@@ -173,21 +174,24 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     ;resxy@tiXAxisOn = False
     ;resxy@tiYAxisOn = False
     resxy@tiXAxisString = "smooth radius"
-    resxy@tiYAxisString = "preci variance"           ; yaxis
+    resxy@tiYAxisString = "percent diff"
+    resxy@tiXAxisFont   = font_index
+    resxy@tiYAxisFont   = font_index
+
     ;resxy@trYMinF = 0
     ;resxy@trYMaxF = max(ave(:,0,:))
     resxy@trXMinF = 0
-    resxy@trXMaxF = ndist-1
+    resxy@trXMaxF = radiu(ndist-1) 
     resxy@xyDashPattern    = 0 
     resxy@xyLineThicknessF = 3.0 
-    resxy@xyLineColors     = (/"red","blue","grey"/)
+    resxy@xyLineColors     = (/"red","blue","black"/)
     resxy@gsnYRefLine            = 0.0
     resxy@gsnYRefLineDashPattern = 12
     resxy@gsnYRefLineThicknessF  = 3.0 
     resxy@gsnYRefLineColor       = "black" 
     
     ;legend
-    resxy@pmLegendDisplayMode = "Always"
+    resxy@pmLegendDisplayMode = "NoCreate";"Always"
     resxy@lgOrientation       = "Vertical"
     resxy@lgPerimOn           = False
     resxy@lgPerimFill         = "SolidFill"
@@ -254,9 +258,13 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 
 np = 0
 do na1 = 0, narea-1, 1
-    resxy@gsnLeftString   = pre_case(np) + ") " + month_s + "-" + month_e 
-    resxy@gsnRightString   = "(" + lats1(na1) + "-" + latn1(na1) + "N," + lonl1(na1) + "-" + lonr1(na1) + "E)"
-    plot(np) = gsn_csm_xy(wks, ispan(0,ndist-1,1), smth(1:3,:,na1), resxy)    
+    if(na1.eq.0) then 
+    resxy@gsnLeftString   = pre_case(np) + ") ISV variance (" + lats1(na1) + "-" + latn1(na1) + "N," + lonl1(na1) + "-" + lonr1(na1) + "E)"; + month_s + "-" + month_e 
+    else
+    resxy@gsnLeftString   = pre_case(np) + ") ISV variance (" + lats1(na1) + "N," + lonl1(na1) + "E)"; + month_s + "-" + month_e 
+    end if
+    resxy@gsnRightString  = "";"(" + lats1(na1) + "-" + latn1(na1) + "N," + lonl1(na1) + "-" + lonr1(na1) + "E)"
+    plot(np) = gsn_csm_xy(wks, radiu, smth(1:3,:,na1), resxy)    
     np = np + 1
 end do 
 gsn_panel(wks,plot,(/2,2/),resp)

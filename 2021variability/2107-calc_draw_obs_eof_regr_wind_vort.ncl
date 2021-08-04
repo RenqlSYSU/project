@@ -47,8 +47,9 @@ filein2 = path2 +(/"/ERA-interim/pressure/",\ ;/uwnd/uwnd.interim.1993.nc 1979-2
                    "/NCEP_DOE/daily/"/)  ;/uwnd/uwnd.1979.nc,   short  1979-2020
 nc1 = 0
 nc2 = 0
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
+pre_case   = (/"(a","(b","(c","(d","(a","(b","(c","(d","(i","(j","(k","(l","(i","(j","(k","(l","(i","(j","(k","(l"/)
+fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(nc1) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -56,13 +57,13 @@ fig_name = path + "/fig/" + case1(nc1) + "-project_ts_regr_" + lev(nl) + draw_va
 end if
 
 ;area: east Asia
-lats = (/0  ,0  /);-20
-latn = (/90 ,80 /);60
-lonl = (/0  ,0 /);20
-lonr = (/360,180/);220
+lats = (/0  ,0  ,0  /);-20
+latn = (/90 ,80 ,70 /);60
+lonl = (/0  ,0  ,40 /);20
+lonr = (/360,180,160/);220
 lat_spacing = 20
 lon_spacing = 20
-na = 1
+na = 2
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -285,7 +286,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.0 ;3.0;
+   mp_thick       = 1.5 ;3.0;
    font_index     = 22
 end if
 
@@ -316,7 +317,7 @@ end if
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
     res@mpGeophysicalLineThicknessF = mp_thick
-    res@mpGeophysicalLineColor      = "black";"white"
+    res@mpGeophysicalLineColor      = "lightsalmon3";"black";"white"
 
 ;--------set the form of the coordinate-----------------
     res@tmBorderThicknessF  = mp_thick
@@ -359,7 +360,7 @@ end if
     resvc@vcGlyphStyle              = "CurlyVector";"LineArrow"  ;"Fillarrow"
     ;resvc@vcMinMagnitudeF           = 0.3          ; 小于该数值则不绘制
     resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = mp_thick+0.5 
+    resvc@vcLineArrowThicknessF      = mp_thick;+0.5 
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
@@ -378,7 +379,7 @@ end if
     resvc@vcRefAnnoOn                = False;True;
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.6          ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.7          ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.4            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -431,8 +432,8 @@ end if
     res_gtop@cnLinesOn        = True      ; turn off contour lines
     res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
     res_gtop@cnInfoLabelOn    = False
-    res_gtop@cnLineThicknessF = mp_thick + 1.0 
-    res_gtop@cnLineColor      = "black"
+    res_gtop@cnLineThicknessF = mp_thick + 0.5 
+    res_gtop@cnLineColor      = "lightsalmon3";"black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/3000/)
     res_gtop@gsnCenterString      = ""
@@ -532,6 +533,7 @@ res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 tsf = addfile(tsfile,"r")
 eval = tsf->eval(nc1,:)
 pcvar= tsf->pcvar(nc1,:)
+np = -1
 do ne = 0, 3, 1
 ts = tsf->eof_ts(nc1,ne,:)
 printVarSummary(ts)
@@ -569,17 +571,16 @@ end if
 prob   = mask(prob,prob.lt.siglvl,True)
 printVarSummary(regr)
 
-np = -1
 nne = ne+1
 do nlg = 0,nlag-1,1
-    np = nlg*4+ne
-    ;np = np + 1
+    ;np = nlg*4+ne
+    np = np + 1
     if(lagg(nlg).eq.0) then 
-    res@gsnLeftString   = case1(nc1) + " (" + lagg(nlg) + " day)" ;pre_case(np) + ") " +  
-    else                                                                           
-    res@gsnLeftString   = case1(nc1) + " (-" + lagg(nlg) + " day)";pre_case(np) + ") " +  
+    res@gsnLeftString   = pre_case(np) + ") OBS (" + lagg(nlg) + " day)" ;  
+    else                                                    
+    res@gsnLeftString   = pre_case(np) + ") OBS (-" + lagg(nlg) + " day)";  
     end if
-    res@gsnRightString  = "EOF"+nne+": "+pcvar(ne)+"%" 
+    res@gsnRightString  ="" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level

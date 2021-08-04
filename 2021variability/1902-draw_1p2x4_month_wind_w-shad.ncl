@@ -14,7 +14,8 @@ if(case_option.eq.0) then
     gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
-pre_case   = (/"(e","(f","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
+pre_case = (/"(e","(f"/)
+;pre_case   = (/"(e","(f","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
 ;fig_out    = "pdf";"x11";"eps";
 fig_out    = "eps";"x11";"eps";
 

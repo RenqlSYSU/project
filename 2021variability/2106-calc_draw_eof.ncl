@@ -20,10 +20,10 @@ allcase = False ;True ;if True, four case be draw in one figure
 month_s = 6
 month_e = 8
 savedata = False;True ;
-spectral = True ;False; ;whether draw the spectral line of ts
+spectral = True ;False;True ; ;whether draw the spectral line of ts
 eofmap   = False;True ; ;whether draw the eof map
 barshare = True ;False;
-barvert  = True ;False;
+barvert  = False;True ;
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
@@ -64,7 +64,11 @@ if(ifrunave.eq.1) then
 fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
-pre_case   = (/"(e","(f","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+if(eofmap)
+pre_case   = (/"(a","(b","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
+else
+pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
+end if
 fig_out    = "eps";"pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
@@ -459,7 +463,7 @@ copy_VarMeta(vars,eof(0,:,:))
 ;==================================================================
 do ne = 0, 1, 1;neval-2, 1
     nee = ne+1
-    np = 2*ne+nc
+    ;np = 2*ne+nc
     res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+eof@pcvar(ne)+"%";+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
     ;res@gsnRightStringFontColor   = subtitle_color(ne)
     ;res@gsnRightString            = "EOF"+nee+": "+eof@pcvar(ne)+"%" 
@@ -561,7 +565,7 @@ else
     ;gsn_panel(wks,plot,(/2,3/),resp)
 end if
 end do
-gsn_panel(wks,plot,(/1,2/),resp)
+gsn_panel(wks,plot,(/2,1/),resp)
 end if
 
 ;========================================================================

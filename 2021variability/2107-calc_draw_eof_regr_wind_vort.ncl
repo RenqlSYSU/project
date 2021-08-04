@@ -36,7 +36,7 @@ barshare = True ;False;
 barvert  = False;True ;
 
 case1   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
-case2   = (/"CTRL","NG15S","NG4550","NGEN"/) ;,"NUDG24h"
+case2   = (/"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
 gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 years   = ispan(1979,2005,1)   ;the calculate time
 path2   = "/home/ys17-19/renql"
@@ -44,8 +44,9 @@ filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                    "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
+pre_case   = (/"(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
+fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(0) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -54,9 +55,9 @@ end if
 
 ;area: east Asia
 lats = (/0  ,0  /);-20
-latn = (/90 ,80 /);60
-lonl = (/0  ,0  /);20
-lonr = (/360,180/);220
+latn = (/90 ,70 /);60
+lonl = (/0  ,40  /);20
+lonr = (/360,160/);220
 lat_spacing = 20
 lon_spacing = 20
 na = 1
@@ -187,7 +188,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.0;3.0;
+   mp_thick       = 1.5;3.0;
    font_index     = 22
 end if
 
@@ -218,7 +219,7 @@ end if
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
     res@mpGeophysicalLineThicknessF = mp_thick
-    res@mpGeophysicalLineColor      = "black";"white"
+    res@mpGeophysicalLineColor      = "lightsalmon3";"black";"white"
 
 ;--------set the form of the coordinate-----------------
     res@tmBorderThicknessF  = mp_thick
@@ -260,7 +261,7 @@ end if
     resvc@vcPositionMode            = "ArrowTail"  ;格点位置对应箭头的尾部
     resvc@vcGlyphStyle              = "CurlyVector";"LineArrow"  ;"Fillarrow"
     resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = mp_thick+0.5 
+    resvc@vcLineArrowThicknessF      = mp_thick;+0.5 
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
@@ -279,7 +280,7 @@ end if
     resvc@vcRefAnnoOn                = False;True;
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.6          ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.7          ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.4            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -338,8 +339,8 @@ end if
     res_gtop@cnLinesOn        = True      ; turn off contour lines
     res_gtop@cnLineLabelsOn   = False      ; turn off contour line labels
     res_gtop@cnInfoLabelOn    = False
-    res_gtop@cnLineThicknessF = mp_thick + 1.5 
-    res_gtop@cnLineColor      = "black"
+    res_gtop@cnLineThicknessF = mp_thick + 0.5 
+    res_gtop@cnLineColor      = "lightsalmon3";"black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/3000/)
     res_gtop@gsnCenterString      = ""
@@ -439,7 +440,7 @@ res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 tsf = addfile(tsfile,"r")
 eval = tsf->eval
 pcvar= tsf->pcvar
-do ne = 0, 5, 1
+do ne = 1, 1, 1;5, 1
 ts = tsf->eof_ts(2:5,ne,:)
 printVarSummary(ts)
 regr := new((/ncase,nvar,nlag,nlat,nlon/),float)
@@ -481,15 +482,15 @@ printVarSummary(regr)
 np = -1
 nne = ne+1
 resp@txString = figtle+" month: "+month_s+"-"+month_e+" EOF"+nne+": "+eval(ne)+"  "+pcvar(ne)+"%" 
-do nlg = 0,nlag-1,1
 do nc = 0,ncase-1,1
+do nlg = 0,nlag-1,1
     np = np + 1
     if(lagg(nlg).eq.0) then 
-    res@gsnLeftString   = case2(nc) + " (" + lagg(nlg) + " day)" ;pre_case(np) + ") " +  
-    else                                                                           
-    res@gsnLeftString   = case2(nc) + " (-" + lagg(nlg) + " day)";pre_case(np) + ") " +  
+    res@gsnLeftString   = pre_case(np) + ") " +case2(nc) + " (" + lagg(nlg) + " day)" ;  
+    else                                                                               
+    res@gsnLeftString   = pre_case(np) + ") " +case2(nc) + " (-" + lagg(nlg) + " day)";  
     end if
-    res@gsnRightString  = lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
+    res@gsnRightString  = "" ;lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
@@ -528,10 +529,11 @@ do nc = 0,ncase-1,1
     overlay(plot(np),plot2(np))
     end if
     
-    if(nc.eq.0.or.nc.eq.3) then
+    if(nc.eq.3) then
     line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
     line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
-    else
+    end if
+    if(nc.eq.1.or.nc.eq.2) then
     line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
     end if
     
@@ -539,7 +541,7 @@ do nc = 0,ncase-1,1
     print(min(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
 end do 
-gsn_panel(wks,plot,(/6,4/),resp)
+gsn_panel(wks,plot,(/4,4/),resp)
 end do
 end
 

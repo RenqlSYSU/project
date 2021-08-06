@@ -86,8 +86,8 @@ fig_name = path + "/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_"
 end if
 
 ;area: east Asia
-lats = (/-10,5  ,-70,10 ,15 /);-20
-latn = (/89 ,45 ,70 ,55 ,50 /);60
+lats = (/-10,5  ,-70,10 ,20 /);-20
+latn = (/89 ,45 ,70 ,55 ,45 /);60
 lonl = (/0  ,25 ,0  ,90 ,100 /);20
 lonr = (/360,85 ,360,150,130/);220
 lat_spacing = 10

@@ -13,16 +13,20 @@ draw_var = (/"vort","OLR","preci"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
-ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+
+ifrunave2= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave = 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
-ca = 80.0 ;day
+ca = 60.0 ;day
 cb = 8.0
 rmv = False;True ;remove annaul cycle when bandpass filter
+
 month_s = 6
 month_e = 8
-lagg = (/3,2,1,0/)
-lagg = 3*lagg
+lagg = ispan(15,0,1) 
+;lagg = 2*lagg
 nlag = dimsizes(lagg)
+
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 uvsig_option= True ;False;if false, all wind will be drawed
@@ -48,8 +52,8 @@ filein2 = path2 +(/"/ERA-interim/pressure/",\ ;/uwnd/uwnd.interim.1993.nc 1979-2
 nc1 = 0
 nc2 = 0
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(c","(d","(i","(j","(k","(l","(i","(j","(k","(l","(i","(j","(k","(l"/)
-fig_out    = "eps";"x11";"eps";
-;fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(nc1) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -232,6 +236,14 @@ figtle = "bw_filter="+cb+"-"+ca+"day rmv"
 end if
 var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
+
+if(ifrunave2.eq.2) then 
+    fca = 1.0/ca
+    fcb = 1.0/cb
+    opt2= False
+    var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
+end if
+
 time := cd_calendar(ft->time(select_time),0)
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
@@ -250,22 +262,6 @@ printVarSummary(var)
     axis   = new((/28/),graphic)
     jetl   = new((/28/),graphic)
     sig    = new((/28/),graphic)
-
-;set the area of the box
-maxlon = (/lonr(na),lonr(na)/)
-minlon = (/lonl(na),lonl(na)/)
-mdlon1 = (/120,120/)
-mdlon2 = (/240,240/)
-maxlat = (/ 15,50/) 
-minlat = (/-15,45/)
-if(na.eq.1) then 
-lonx = (/minlon,mdlon1,mdlon2,maxlon,maxlon,mdlon2,mdlon1,minlon,minlon/)
-latx = (/minlat,minlat,minlat,minlat,maxlat,maxlat,maxlat,maxlat,minlat/)
-else
-lonx = (/minlon,maxlon,maxlon,minlon,minlon/)
-latx = (/minlat,minlat,maxlat,maxlat,minlat/)
-end if
-printVarSummary(lonx)
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
@@ -286,7 +282,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5 ;3.0;
+   mp_thick       = 1.7 ;3.0;
    font_index     = 22
 end if
 
@@ -360,7 +356,7 @@ end if
     resvc@vcGlyphStyle              = "CurlyVector";"LineArrow"  ;"Fillarrow"
     ;resvc@vcMinMagnitudeF           = 0.3          ; 小于该数值则不绘制
     resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = mp_thick;+0.5 
+    resvc@vcLineArrowThicknessF      = mp_thick-0.4 
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
@@ -369,7 +365,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.02
+    resvc@vcMinDistanceF            = 0.023
     resvc@vcRefLengthF              = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
@@ -416,13 +412,6 @@ end if
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
-
-;--------set the attribute of polygon--------------
-    lnres                      = True
-    lnres@gsLineColor          = "blueviolet";"black"
-    lnres@gsLineDashPattern    = 0
-    lnres@gsLineThicknessF     = mp_thick + 1.0 
-    ;lnres@gsLineLabelString    = "TP"
 
 ;--------set the attribute of gtop--------------
     res_gtop                  = True
@@ -475,6 +464,7 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
+    resp@gsnPanelDebug = True
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "landscape";"portrait"
@@ -536,6 +526,13 @@ pcvar= tsf->pcvar(nc1,:)
 np = -1
 do ne = 0, 3, 1
 ts = tsf->eof_ts(nc1,ne,:)
+if(ifrunave2.eq.2) then 
+    fca = 1.0/ca
+    fcb = 1.0/cb
+    opt2= False
+    ts = bw_bandpass_filter(ts,fca,fcb,opt2,0)
+end if
+
 printVarSummary(ts)
 regr := new((/nvar,nlag,nlat,nlon/),float)
 tval := new((/nvar,nlag,nlat,nlon/),float)
@@ -574,7 +571,7 @@ printVarSummary(regr)
 nne = ne+1
 do nlg = 0,nlag-1,1
     ;np = nlg*4+ne
-    np = np + 1
+    np = nlg;np + 1
     if(lagg(nlg).eq.0) then 
     res@gsnLeftString   = pre_case(np) + ") OBS (" + lagg(nlg) + " day)" ;  
     else                                                    
@@ -622,8 +619,8 @@ do nlg = 0,nlag-1,1
     print(max(regr(2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     print(min(regr(2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
-end do
 resp@txString = case2(nc2)+" "+figtle+" "+month_s+"-"+month_e+" "+lev(nl) + "hPa " + draw_var(nv) + "(" + unit(nv) + ") " ;
 gsn_panel(wks,plot,(/4,4/),resp)
+end do
 end
 

@@ -13,16 +13,20 @@ draw_var = (/"vort","preci"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
-ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+
+ifrunave2= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave = 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
-ca = 80.0 ;day
+ca = 40.0 ;day
 cb = 8.0
 rmv = False;True ;remove annaul cycle when bandpass filter
+
 month_s = 6
 month_e = 8
-lagg = (/3,2,1,0/)
-lagg = 3*lagg
+lagg = ispan(15,0,1) 
+;lagg = 3*lagg
 nlag = dimsizes(lagg)
+
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 uvsig_option= True ;False;if false, all wind will be drawed
@@ -45,8 +49,8 @@ filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 pre_case   = (/"(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
-fig_out    = "eps";"x11";"eps";
-;fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(0) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -135,6 +139,14 @@ figtle = "bw_filter="+cb+"-"+ca+"day rmv"
 end if
 var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
+
+if(ifrunave2.eq.2) then 
+    fca = 1.0/ca
+    fcb = 1.0/cb
+    opt2= False
+    var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
+end if
+
 time := cd_calendar(f->time(select_time),0)
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 ntime = dimsizes(select_time)
@@ -188,7 +200,7 @@ else
    tick_thick     = 8.0
    subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
-   mp_thick       = 1.5;3.0;
+   mp_thick       = 1.7;3.0;
    font_index     = 22
 end if
 
@@ -261,7 +273,7 @@ end if
     resvc@vcPositionMode            = "ArrowTail"  ;格点位置对应箭头的尾部
     resvc@vcGlyphStyle              = "CurlyVector";"LineArrow"  ;"Fillarrow"
     resvc@vcVectorDrawOrder          = "PostDraw"
-    resvc@vcLineArrowThicknessF      = mp_thick;+0.5 
+    resvc@vcLineArrowThicknessF      = mp_thick-0.4 
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
@@ -270,7 +282,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.02
+    resvc@vcMinDistanceF            = 0.023
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
@@ -440,8 +452,16 @@ res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 tsf = addfile(tsfile,"r")
 eval = tsf->eval
 pcvar= tsf->pcvar
+pcvar= round(pcvar*10,1)/10.0 ;Round to one decimal place
 do ne = 1, 1, 1;5, 1
 ts = tsf->eof_ts(2:5,ne,:)
+if(ifrunave2.eq.2) then 
+    fca = 1.0/ca
+    fcb = 1.0/cb
+    opt2= False
+    ts = bw_bandpass_filter(ts,fca,fcb,opt2,1)
+end if
+
 printVarSummary(ts)
 regr := new((/ncase,nvar,nlag,nlat,nlon/),float)
 tval := new((/ncase,nvar,nlag,nlat,nlon/),float)
@@ -484,7 +504,7 @@ nne = ne+1
 resp@txString = figtle+" month: "+month_s+"-"+month_e+" EOF"+nne+": "+eval(ne)+"  "+pcvar(ne)+"%" 
 do nc = 0,ncase-1,1
 do nlg = 0,nlag-1,1
-    np = np + 1
+    np = nlg;np + 1
     if(lagg(nlg).eq.0) then 
     res@gsnLeftString   = pre_case(np) + ") " +case2(nc) + " (" + lagg(nlg) + " day)" ;  
     else                                                                               
@@ -540,8 +560,8 @@ do nlg = 0,nlag-1,1
     print(max(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     print(min(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
-end do 
 gsn_panel(wks,plot,(/4,4/),resp)
+end do 
 end do
 end
 

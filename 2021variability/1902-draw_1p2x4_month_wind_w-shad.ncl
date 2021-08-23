@@ -14,13 +14,13 @@ if(case_option.eq.0) then
     gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
 end if
-pre_case = (/"(e","(f"/)
-;pre_case   = (/"(e","(f","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
-;fig_out    = "pdf";"x11";"eps";
-fig_out    = "eps";"x11";"eps";
+;pre_case = (/"(e","(f"/)
+pre_case   = (/"(a","(b","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
+fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
-draw_var = (/"intQ1"        ,"PRECC"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
+draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
@@ -32,16 +32,16 @@ unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            
              "mm/day"       ,"10~S~-6~N~s~S~-1~N~","K/day"    ,"K/day"          ,"K/day"     , \ 
              "K"            ,"mm~S~2~N~/day~S~2~N~"/)
 
-draw_varname = (/"Q1"       ,"PRECC"       ,"OMEGA"           ,"Z3"             ,"q1"        , \
+draw_varname = (/"Q1"       ,"preci"       ,"OMEGA"           ,"Z3"             ,"q1"        , \
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT"     ,"preci_5run-smth49"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 21
+nv = 1 
 diff = True ;False;
-perc = True ;False;
+perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
@@ -86,12 +86,12 @@ fig_name = path + "/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_"
 end if
 
 ;area: east Asia
-lats = (/-10,5  ,-70,10 ,20 /);-20
+lats = (/-89,5  ,-70,10 ,20 /);-20
 latn = (/89 ,45 ,70 ,55 ,45 /);60
 lonl = (/0  ,25 ,0  ,90 ,100 /);20
 lonr = (/360,85 ,360,150,130/);220
-lat_spacing = 10
-lon_spacing = 10
+lat_spacing = (/30,10 ,30,10,10/)
+lon_spacing = (/40,20 ,40,20,10/)
 na = 4
 
 f = addfile(gtopfile,"r")
@@ -306,37 +306,37 @@ if(nv.ge.17.and.nv.le.19) then
 end if
 
 if(diff) then 
-do nf = 0 ,ncase-2,1
-var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
-if(perc) then 
-var(0,2,:,:,:) = where(abs(var(0,2,:,:,:)).le.0.000001,0.1,var(0,2,:,:,:))
-var(nf+1,2,:,:,:)= var(nf+1,2,:,:,:)*100.0/var(0,2,:,:,:)   ;get the difference between CTRL and NUDG
-end if
-end do
+    do nf = 0 ,ncase-2,1
+    var(nf+1,:,:,:,:)= var(nf+1,:,:,:,:) - var(0,:,:,:,:)   ;get the difference between CTRL and NUDG
+    if(perc) then 
+    var(0,2,:,:,:) = where(abs(var(0,2,:,:,:)).le.0.000001,0.1,var(0,2,:,:,:))
+    var(nf+1,2,:,:,:)= var(nf+1,2,:,:,:)*100.0/var(0,2,:,:,:)   ;get the difference between CTRL and NUDG
+    end if
+    end do
 
-if(vect_option) then 
-uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
-vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
-var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
-var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
-copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
-copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
-end if
+    if(vect_option) then 
+    uvar = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
+    vvar = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),False)
+    var(1:(ncase-1),0,:,:,:) = mask(var(1:(ncase-1),0,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+    var(1:(ncase-1),1,:,:,:) = mask(var(1:(ncase-1),1,:,:,:),((prob(:,0,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:).lt.siglvl)),True)
+    copy_VarMeta(var(0,0,0,:,:),uvar(0,0,:,:))
+    copy_VarMeta(var(0,0,0,:,:),vvar(0,0,:,:))
+    end if
 
-if(sig_option) then 
-prob(:,2,:,:,:) = mask(prob(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+    if(sig_option) then 
+    prob(:,2,:,:,:) = mask(prob(:,2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+    else
+    var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
+    end if
+
+    if(cont_option.and.contsig) then 
+    var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
+    end if
+
+    copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
+    printVarSummary(prob)
 else
-var(1:(ncase-1),2,:,:,:) = mask(var(1:(ncase-1),2,:,:,:),prob(:,2,:,:,:).lt.siglvl,True)
-end if
-
-if(cont_option.and.contsig) then 
-var(1:(ncase-1),3,:,:,:) = mask(var(1:(ncase-1),3,:,:,:),prob(:,3,:,:,:).lt.siglvl,True)
-end if
-
-copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
-printVarSummary(prob)
-else
-case2   = (/"CTL","NT","NM","NMT"/) ;,"NG24h-CTRL"
+    case2   = (/"CTL","NT","NM","NMT"/) ;,"NG24h-CTRL"
 end if
 printVarSummary(var)
 
@@ -366,8 +366,8 @@ end if
     res@mpMinLatF        = lats(na)
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
-    res@gsnMajorLatSpacing = lat_spacing
-    res@gsnMajorLonSpacing = lon_spacing
+    res@gsnMajorLatSpacing = lat_spacing(na)
+    res@gsnMajorLonSpacing = lon_spacing(na)
     res@gsnAddCyclic     = False
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
@@ -541,7 +541,7 @@ end if
 
 ;--------set the attribute of polygon--------------
     lnres                      = True
-    lnres@gsLineColor          = "black"
+    lnres@gsLineColor          = "blueviolet"
     lnres@gsLineDashPattern    = 0
     lnres@gsLineThicknessF     = 4.0
     ;lnres@gsLineLabelString    = "TP"
@@ -564,7 +564,7 @@ end if
     res_gtop@cnLineColor      = "black"
     res_gtop@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res_gtop@cnLevels         = (/3000/)
-    res_gtop@gsnCenterString      = ""
+    res_gtop@gsnCenterString  = ""
     res_gtop@gsnLeftString    = " "
     res_gtop@gsnRightString   = " "
 
@@ -676,9 +676,9 @@ if(perc) then
     maxlvl = (/16 , 70, 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 1 , 10, 10, 10/);1 ,1 ,1 ,1 
 else
-    minlvl = (/ 1 ,-7,-7,-7/);-3.5 -8,-8,-8,-8
-    maxlvl = (/16 , 7, 7, 7/); 3.5  8 ,8 ,8 ,8 
-    spacig = (/ 1 , 1, 1, 1/); 0.5  1 ,1 ,1 ,1 
+    minlvl = (/ 1 ,-3.5,-3.5,-3.5/);
+    maxlvl = (/16 , 3.5, 3.5, 3.5/);
+    spacig = (/ 1 , 0.5, 0.5, 0.5/);
 end if
 end if
 
@@ -800,7 +800,7 @@ end if
 
 np = -1
 do nm = 2,2,1;,nmonth-1,1
-do nc = 0,3,3;ncase-1,1
+do nc = 0,ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -817,7 +817,8 @@ end if
 ;    do nm = 0, nmonth-1,1 ;2,2,1;
         np = np + 1
         ;res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth49";+ "  " + months(imonth(nm))
+        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth49";+ " " + months(imonth(nm))
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (" + unit(nv) + ")"
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
@@ -879,10 +880,11 @@ end if
         overlay(plot(np),plot2(np))
         end if
         
-        if(nc.eq.0.or.nc.eq.3) then
+        if(nc.eq.3) then
         ;line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
         ;line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
-        else
+        end if
+        if(nc.eq.1.or.nc.eq.2) then
         ;line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
         end if
         
@@ -927,7 +929,7 @@ end do
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
     ;gsn_panel(wks,plot,(/5,4/),resp)
-    gsn_panel(wks,plot,(/1,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 end
 

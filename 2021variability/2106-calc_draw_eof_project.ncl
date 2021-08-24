@@ -11,11 +11,11 @@ path     = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
-rmv = False ;remove annaul cycle when bandpass filter
+rmv = True ;False ;remove annaul cycle when bandpass filter
 fnc = 2
 month_s = 6
 month_e = 8
@@ -49,7 +49,7 @@ filein  = path2 +(/"/data-observation/CN05.1/CN05.1_Pre_1961_2018_daily_025x025.
                    "/renql/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/renql/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 if(ifrunave.eq.2)
-if(rm) then
+if(rmv) then
 fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+"-rmv.nc"
 else
 fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+cb+"-"+ca+".nc"
@@ -128,10 +128,16 @@ end if
     ;resxy@tiYAxisOn = False
     resxy@tiXAxisString = "Period (day)"          ; xaxis
     resxy@tiYAxisString = "Power*frq"           ; yaxis
+    resxy@tiXAxisFont   = font_index
+    resxy@tiYAxisFont   = font_index
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
+    if(ifrunave.eq.1) then 
     resxy@trYMaxF = 0.8 
+    else
+    resxy@trYMaxF = 1.2
+    end if
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
     resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
@@ -155,7 +161,7 @@ end if
     resxy@pmLegendHeightF  = 0.18
     resxy@pmLegendZone  = 0   ;set the positional origin in the center of the plot
     if(ifrunave.ge.2) then 
-    resxy@pmLegendOrthogonalPosF  = - 0.28   ; move ref vector along Y-axis
+    resxy@pmLegendOrthogonalPosF  = - 0.34   ; move ref vector along Y-axis
     resxy@pmLegendParallelPosF    = - 0.24    ; move ref vector along X-axis
     else
     resxy@pmLegendOrthogonalPosF  = - 0.34   ; move ref vector along Y-axis
@@ -474,7 +480,8 @@ splt@units     = "1/day"
     ;resxy@xyLineColors      = (/"black","red","blue","grey"/)
     resxy@pmLegendDisplayMode = "Always"
 ;    resxy@gsnLeftStringFontColor   = subtitle_color(ne)
-    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee+": "+eof@pcvar(ne)+"%";+eof@eval(ne)+"  " 
+    pcvar1 = round(eof@pcvar(ne)*10,1)/10.0
+    resxy@gsnLeftString   = pre_case(np) + ") EOF"+nee+": "+pcvar1+"%";+eof@eval(ne)+"  " 
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,0,:), resxy)     
     ;plot1(np) = gsn_csm_xy(wks, splt&frq, splt(2:5,1,:), resxy1)     
     ;overlay(plot(np),plot1(np))

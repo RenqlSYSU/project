@@ -11,17 +11,17 @@ path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
 rmv = True ;False;remove annaul cycle when bandpass filter
-allcase = False ;True ;if True, four case be draw in one figure
+allcase = False ;True ;if True, four case PC spectral be draw in one figure
 month_s = 6
 month_e = 8
 savedata = False;True ;
 spectral = True ;False;True ; ;whether draw the spectral line of ts
-eofmap   = False;True ; ;whether draw the eof map
+eofmap   = True ;False; ;whether draw the eof map
 barshare = True ;False;
 barvert  = False;True ;
 
@@ -69,7 +69,7 @@ pre_case   = (/"(a","(b","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 else
 pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 end if
-fig_out    = "eps";"pdf";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -296,10 +296,16 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     ;resxy@tiYAxisOn = False
     resxy@tiXAxisString = "Period (day)"          ; xaxis
     resxy@tiYAxisString = "Power*frq"           ; yaxis
+    resxy@tiXAxisFont   = font_index
+    resxy@tiYAxisFont   = font_index
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
+    if(ifrunave.eq.1) then 
     resxy@trYMaxF = 0.8 
+    else
+    resxy@trYMaxF = 1.2
+    end if
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
     resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
@@ -464,7 +470,8 @@ copy_VarMeta(vars,eof(0,:,:))
 do ne = 0, 1, 1;neval-2, 1
     nee = ne+1
     ;np = 2*ne+nc
-    res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+eof@pcvar(ne)+"%";+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
+    pcvar1 = round(eof@pcvar(ne)*10,1)/10.0
+    res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+pcvar1+"%";+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
     ;res@gsnRightStringFontColor   = subtitle_color(ne)
     ;res@gsnRightString            = "EOF"+nee+": "+eof@pcvar(ne)+"%" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels

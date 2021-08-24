@@ -14,12 +14,12 @@ lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
 
-ifrunave2= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
-ifrunave = 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave2= 0 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave = 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
-ca = 60.0 ;day
+ca = 80.0 ;day
 cb = 8.0
-rmv = False;True ;remove annaul cycle when bandpass filter
+rmv = True ;False;remove annaul cycle when bandpass filter
 
 month_s = 6
 month_e = 8

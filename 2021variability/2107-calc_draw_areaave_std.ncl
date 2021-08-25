@@ -14,12 +14,13 @@ lats = (/15 ,20 /)
 latn = (/50 ,45 /)
 lonl = (/90 ,100/)
 lonr = (/150,130/)
+na = 1
 lats1 = (/ 26, 32 , 25 , 40 /)
 latn1 = (/ 34, 32 , 25 , 40 /)
 lonl1 = (/112, 118, 115, 115/)
 lonr1 = (/120, 118, 115, 115/)
 var_name = (/"PRECC","PRECL"/)
-na = 1
+rad_unit = 4 ;0=degree byself ;use gc_latlon, 2=degree, 4=km
 radiu = fspan(0,8,17)
 ndist = dimsizes(radiu)
 diff  = True ;False
@@ -40,7 +41,7 @@ filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 years   = ispan(1979,2005,1)   ;the calculate time
 fig_name = path + "/project/2021variability/fig/smth_JJApreci_vari"
-pre_case   = (/"(a","(e","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(d","(d","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="eps";"x11"
 ;fig_out    ="pdf";"x11"
 
@@ -90,11 +91,16 @@ time := cd_calendar(f->time(select_time),0)
 select_time := ind(time(:,1).ge.month_s.and.time(:,1).le.month_e)
 lat = vars&lat
 lon = vars&lon
+lat1 = conform(var(0,0,0,:,:),tofloat(lat),(/0/))
+lon1 = conform(var(0,0,0,:,:),tofloat(lon),(/1/))
+
 do ndis = 0, ndist-1, 1
-threshold = radiu(ndis)
+threshold = radiu(ndis)*100.0
+mpoint = 1
 if(threshold.gt.0) then 
 do nla = 1, nlat-2, 1
 do nlo = 1, nlon-2, 1
+if(rad_unit.eq.0) then 
     nsmth = 1
     do nla1 = 0, nlat-1, 1
     do nlo1 = 0, nlon-1, 1
@@ -105,10 +111,23 @@ do nlo = 1, nlon-2, 1
     end if
     end do
     end do
-    var(:,:,:,nla,nlo) = var(:,:,:,nla,nlo)/nsmth
-    print(lat(nla)+"N, "+lon(nlo)+"E : threshold = "+threshold+", nsmth = "+nsmth)
+else
+    distance = gc_latlon(lat(nla),lon(nlo),lat1,lon1,2,rad_unit)
+    term := ndtooned(distance)
+    size  = dimsizes(distance)
+    indices := ind_resolve( ind(term.le.threshold.and.term.ge.0), size )
+    nsmth = dimsizes(indices(:,0))
+    if(nsmth.gt.1) then
+    var(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
+    end if
+end if
+if(nsmth.gt.mpoint) then
+    mpoint = nsmth
+end if
+var(:,:,:,nla,nlo) = var(:,:,:,nla,nlo)/nsmth
 end do
 end do 
+print("threshold = "+threshold+", nsmth = "+mpoint)
 end if
 
 dimh = 2
@@ -127,9 +146,9 @@ if(ifrunave.eq.2) then
     var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
 
+term := dim_avg_n(dim_avg_n(var(:,:,select_time,:,:)^2,2),1)
+copy_VarMeta(vars,term(0,:,:))
 do na1 = 0, narea-1, 1
-    term = dim_avg_n(dim_avg_n(var(:,:,select_time,:,:)^2,2),1)
-    copy_VarMeta(vars,term(0,:,:))
     smth(:,ndis,na1) = wgt_areaave(term(:,{lats1(na1):latn1(na1)},{lonl1(na1):lonr1(na1)}),1.0,1.0,0)
 end do
 end do
@@ -174,7 +193,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@tmYLPrecision     = 2 
     ;resxy@tiXAxisOn = False
     ;resxy@tiYAxisOn = False
-    resxy@tiXAxisString = "smooth radius"
+    resxy@tiXAxisString = "smooth radius (x100 km)"
     resxy@tiYAxisString = "percent diff"
     resxy@tiXAxisFont   = font_index
     resxy@tiYAxisFont   = font_index

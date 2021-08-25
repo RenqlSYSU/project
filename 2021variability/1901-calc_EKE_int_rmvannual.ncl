@@ -9,9 +9,9 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-smth    = True ;False;where do the space smooth
-nsmth   = 81
+option   = 0 ;0 means remove annual cycle or runave, 1 means bandpass filter
+smth    = 2 ; 1 = number point space smooth ; 2 = radius space smooth
+nsmth   = 250 ;km
 calc_var = (/"intEKE","preci","PRECC","PRECL"/)
 cnv = 1
 
@@ -33,8 +33,11 @@ if(option.eq.0) then
 else
     fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"+calc_var(cnv)+"-" + cb + "-" + ca + "day"
 end if  
-if(smth) then
+if(smth.eq.1) then
 fileout = fileout+"-smth"+nsmth
+end if
+if(smth.eq.2) then
+fileout = fileout+"-smth"+nsmth+"km"
 end if
 
 ncase   = dimsizes(case)
@@ -84,7 +87,7 @@ var_name= calc_var(cnv)
 var = new((/nyear,ntime,nlat,nlon/),float)
 end if
 
-do nf = 0,3,1
+do nf = 0,3,3
 ;==========================================================
 ;read the data
 ;============================================================
@@ -115,7 +118,7 @@ var = linmsg_n(var,(/-1/),2)
 var = var*3600*24*1000 ;mm/day
 print(var(0,10,10:20,30))
 
-if(smth) then
+if(smth.eq.1) then
 if(nsmth.le.5) then
     cyclic = False
     p = 4.0/5.0 
@@ -131,6 +134,32 @@ if(nsmth.ge.9) then
     end do
     end do
 end if
+end if
+
+if(smth.eq.2) then
+mpoint = 1
+lat = vars&lat
+lon = vars&lon
+lat1 = conform(var(0,0,0,:,:),tofloat(lat),(/0/))
+lon1 = conform(var(0,0,0,:,:),tofloat(lon),(/1/))
+rad_unit = 4 ;use gc_latlon, 2=degree, 4=km
+
+do nla = 1, nlat-2, 1
+do nlo = 1, nlon-2, 1
+    distance = gc_latlon(lat(nla),lon(nlo),lat1,lon1,2,rad_unit)
+    term := ndtooned(distance)
+    size  = dimsizes(distance)
+    indices := ind_resolve( ind(term.le.nsmth.and.term.ge.0), size )
+    npoint = dimsizes(indices(:,0))
+    var(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
+    var(:,:,:,nla,nlo) = var(:,:,:,nla,nlo)/nsmth
+    
+    if(npoint.gt.mpoint) then
+    mpoint = npoint
+    end if
+end do
+end do
+print("threshold = "+nsmth+", nsmth = "+mpoint)
 end if
 
 if(option.eq.0) then 

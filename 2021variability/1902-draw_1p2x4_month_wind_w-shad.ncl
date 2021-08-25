@@ -39,9 +39,9 @@ draw_varname = (/"Q1"       ,"preci"       ,"OMEGA"           ,"Z3"             
                  "uppT"     ,"preci_5run-smth49"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 1 
+nv = 21 
 diff = True ;False;
-perc = False;True ;
+perc = True ;False;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
@@ -53,6 +53,7 @@ nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
 barshare = False;True ;
 barvert  = False;True ;
+dcircle  = True ;False;
 
 var_option = 0
 if(var_option.eq.0) then 
@@ -800,7 +801,7 @@ end if
 
 np = -1
 do nm = 2,2,1;,nmonth-1,1
-do nc = 0,ncase-1,1
+do nc = 0,3,3;ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -893,6 +894,32 @@ end if
         jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
         overlay(plot(np),jetl(np))
         end if
+        
+        if(dcircle) then
+        clon = 118.0
+        clat = 32.0
+        rad  = 7.0;250 ;radius of the circle
+        rad_unit = 1 ;0=degree; 1=km
+        N   = 180 ;points; more points nicer 'circle'
+        opt = False ;not used. Set to False.
+        ;cir = geolocation_circle(clat, clon, rad, rad_unit, N, opt) ; circle is type list
+        ;printVarSummary(cir)                  ; variable of type list with 2 variables
+        cir_lat = new(180,float);cir[0];                   ; For clarity: explicitly extract list elements
+        cir_lon = new(180,float);cir[1];
+        ;printVarSummary(cir_lat)
+        nggcog(clat,clon,rad,cir_lat,cir_lon)
+        
+        color  = "blueviolet"
+        plres  = True
+        plres@gsMarkerIndex = 16
+        plres@gsMarkerSizeF = 10.       
+        plres@gsMarkerColor = color 
+        mark = gsn_add_polymarker(wks, plot(np), clon, clat, plres) ; name is arbitrary
+        plres@gsLineColor      = color
+        plres@gsLineThicknessF = mp_thick+2.0 
+        cir = gsn_add_polyline(wks, plot(np), cir_lon, cir_lat, plres)
+        end if
+        
         print(max(var(nc,2,nm,{lats(na):latn(na)},{(lonl(na)-2):(lonr(na)+2)})))
         print(min(var(nc,2,nm,{lats(na):latn(na)},{(lonl(na)-2):(lonr(na)+2)})))
         ;draw(plot(np))
@@ -929,7 +956,7 @@ end do
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
     ;gsn_panel(wks,plot,(/5,4/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 ;end do
 end
 

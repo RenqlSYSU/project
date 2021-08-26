@@ -39,7 +39,7 @@ if(ifrunave.eq.1) then
 tsfile  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+nave+"run-spectral"
 end if
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(c","(f","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out    ="pdf";"x11"
 ;fig_out    ="eps";"x11"
 
@@ -69,12 +69,12 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 ; plotting
 ;************************************************
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.015
-   subtitle_font  = 0.018
+   tick_font      = 0.03
+   subtitle_font  = 0.03
    title_font     = 0.03
    label_font     = 0.018
-   tick_thick     = 5.0
-   subtitle_thick = 5.0  ;not have this attribute
+   tick_thick     = 8.0
+   subtitle_thick = 8.0  ;not have this attribute
    title_thick    = 5.0
    label_thick    = 1.5
    mp_thick       = 2.0
@@ -94,10 +94,16 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     ;resxy@tiYAxisOn = False
     resxy@tiXAxisString = "Period (day)"          ; xaxis
     resxy@tiYAxisString = "Power*frq"           ; yaxis
+    resxy@tiXAxisFont   = font_index
+    resxy@tiYAxisFont   = font_index
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
-    ;resxy@trYMaxF = max(splt(:,0,:))
+    if(ifrunave.eq.1) then 
+    resxy@trYMaxF = 0.8 
+    else
+    resxy@trYMaxF = 1.2
+    end if
     resxy@trXMinF = log(1.0/90.0) ;log(min(frq))
     resxy@trXMaxF = log(1.0/7.0)  ;log(max(frq)) 
     resxy@xyComputeXMin = True
@@ -180,7 +186,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 do ne = 0, neval-2, 1
 np = 0
 nee = ne+1
-do nc = 0, ncase-1, 1
+do nc = 0, 2,2;ncase-1, 1
     spcavg = new ((/nfrq/),typeof(eofts))
     spcavg = 0.0
     r1zsum = 0.0

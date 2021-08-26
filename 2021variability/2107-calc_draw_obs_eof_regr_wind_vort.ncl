@@ -8,23 +8,23 @@
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"vort","OLR","preci"/)
-unit     = (/"10~S~-6~N~ m~S~-1~N~"," W m~S~-2~N~","mm/day"/)
+unit     = (/"10~S~-6~N~ m~S~-1~N~"," W/m~S~2~N~","mm/day"/)
 draw_var = (/"vort","OLR","preci"/)      
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 1
 
-ifrunave2= 0 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
-ifrunave = 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave2= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave = 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
-ca = 80.0 ;day
+ca = 40.0 ;day
 cb = 8.0
 rmv = True ;False;remove annaul cycle when bandpass filter
 
 month_s = 6
 month_e = 8
-lagg = ispan(15,0,1) 
-;lagg = 2*lagg
+lagg = ispan(3,0,1) 
+lagg = 3*lagg
 nlag = dimsizes(lagg)
 
 siglvl = 0.05
@@ -52,8 +52,8 @@ filein2 = path2 +(/"/ERA-interim/pressure/",\ ;/uwnd/uwnd.interim.1993.nc 1979-2
 nc1 = 0
 nc2 = 0
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(c","(d","(i","(j","(k","(l","(i","(j","(k","(l","(i","(j","(k","(l"/)
-;fig_out    = "eps";"x11";"eps";
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(nc1) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -375,7 +375,7 @@ end if
     resvc@vcRefAnnoOn                = False;True;
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.7          ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.8          ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.4            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -465,17 +465,19 @@ end if
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPanelDebug = True
+    ;resp@gsnPanelScalePlotIndex     = 2 
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
+    resp@lbTitleOn    =  True                ; turn on title
     if(barvert) then 
     resp@lbOrientation     = "Vertical"
     resp@pmLabelBarWidthF  = 0.05
     resp@pmLabelBarHeightF = 0.7
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
-    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarWidthF  = 0.9 ;0.05
     resp@pmLabelBarHeightF = 0.05;0.8
     end if
     else
@@ -506,6 +508,12 @@ end if
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+    resp@lbTitleString            = unit(nv) 
+    resp@lbTitlePosition          = "Right"              ; title position
+    resp@lbTitleFontHeightF       = .015                ; make title smaller
+    resp@lbTitleFont              = font_index
+    resp@lbTitleOffsetF           = 0.012
+    resp@lbTitleDirection         = "Across"             ; title direction
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
@@ -571,12 +579,22 @@ printVarSummary(regr)
 nne = ne+1
 do nlg = 0,nlag-1,1
     ;np = nlg*4+ne
-    np = nlg;np + 1
+    np = np + 1
     if(lagg(nlg).eq.0) then 
-    res@gsnLeftString   = pre_case(np) + ") OBS (" + lagg(nlg) + " day)" ;  
+    res@gsnLeftString   = pre_case(np) + ") OBS (" + lagg(nlg) + " day)" ; 
     else                                                    
     res@gsnLeftString   = pre_case(np) + ") OBS (-" + lagg(nlg) + " day)";  
     end if
+    ;if(nlg.eq.0) then 
+    ;res@tmYLLabelsOn         = True 
+    ;else
+    ;res@tmYLLabelsOn         = False
+    ;end if
+    ;if(ne.eq.3)
+    ;res@tmXBLabelsOn         = True 
+    ;else
+    ;res@tmXBLabelsOn         = False
+    ;end if
     res@gsnRightString  ="" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
@@ -619,8 +637,8 @@ do nlg = 0,nlag-1,1
     print(max(regr(2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     print(min(regr(2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
+end do
 resp@txString = case2(nc2)+" "+figtle+" "+month_s+"-"+month_e+" "+lev(nl) + "hPa " + draw_var(nv) + "(" + unit(nv) + ") " ;
 gsn_panel(wks,plot,(/4,4/),resp)
-end do
 end
 

@@ -21,10 +21,13 @@ lonl1 = (/112, 118, 115, 115/)
 lonr1 = (/120, 118, 115, 115/)
 var_name = (/"PRECC","PRECL"/)
 rad_unit = 4 ;0=degree byself ;use gc_latlon, 2=degree, 4=km
-radiu = fspan(0,8,17)
+radiu = fspan(1,8,8)
+radiu_unit = "x100 km"
 ndist = dimsizes(radiu)
 diff  = True ;False
 perc  = True ;False;
+savedata = True
+onlydraw = False
 
 ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
@@ -41,9 +44,10 @@ filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                   "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 years   = ispan(1979,2005,1)   ;the calculate time
 fig_name = path + "/project/2021variability/fig/smth_JJApreci_vari"
+fileout  = path + "/project/2021variability/data/smth_JJApreci_vari.nc"
 pre_case   = (/"(d","(d","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    ="eps";"x11"
-;fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -63,6 +67,10 @@ var  = new((/ncase,nyear,ntime,nlat,nlon/),float)
 smth = new((/ncase,ndist,narea/),float)
 plot = new((/6/),graphic)
 
+if(onlydraw) then 
+f    = addfile(fileout,"r")
+smth = f->smth
+else
 ;==========================================================
 ;read the data
 ;============================================================
@@ -129,6 +137,7 @@ end do
 end do 
 print("threshold = "+threshold+", nsmth = "+mpoint)
 end if
+printVarSummary(distance)
 
 dimh = 2
 if(ifrunave.eq.1) then 
@@ -163,6 +172,42 @@ do nc = 1, ncase-1, 1
     end if
 end do
 end if
+end if
+printVarSummary(smth)
+
+if(savedata) then
+radiu@long_name = "smooth radius"
+radiu@units     = radiu_unit 
+
+system("rm -f " + fileout)
+ncdf = addfile(fileout,"c")
+setfileoption(ncdf,"DefineMode",True)
+
+;Set All field attribution
+fileAtt =  True
+fileAtt@creation_date = systemfunc("date")
+fileAtt@discription   = "space smooth according to the circle radius, case difference"
+fileattdef(ncdf,fileAtt)  
+
+;Define all Coordinate
+dimNames = (/"case","ndist","narea"/)
+dimSizes = (/ ncase ,ndist  ,narea /)
+dimUnlim = (/False  ,False  ,False /)
+filedimdef(ncdf, dimNames, dimSizes, dimUnlim)
+
+;Define var_names, type(string) and dims_names(string)
+filevardef(ncdf,"ndist","integer",(/"ndist"/))
+filevardef(ncdf,"narea","integer",(/"narea"/))
+filevardef(ncdf,"smth",typeof(smth),(/"case","ndist","narea"/))
+filevardef(ncdf,"radiu",typeof(radiu),(/"ndist"/))
+
+;Define var Attribute
+filevarattdef(ncdf,"smth",smth)
+filevarattdef(ncdf,"radiu",radiu)
+
+ncdf->smth  = (/smth/)
+ncdf->radiu = (/radiu/)
+end if
 
 ;************************************************
 ; plotting
@@ -189,11 +234,11 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
     
-    resxy@tmYLAutoPrecision = False
+    resxy@tmYLAutoPrecision = True
     resxy@tmYLPrecision     = 2 
     ;resxy@tiXAxisOn = False
     ;resxy@tiYAxisOn = False
-    resxy@tiXAxisString = "smooth radius (x100 km)"
+    resxy@tiXAxisString = "smooth radius ("+radiu_unit+")"
     resxy@tiYAxisString = "percent diff"
     resxy@tiXAxisFont   = font_index
     resxy@tiYAxisFont   = font_index

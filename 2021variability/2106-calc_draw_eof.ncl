@@ -11,7 +11,7 @@ path    = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
@@ -21,7 +21,7 @@ month_s = 6
 month_e = 8
 savedata = False;True ;
 spectral = True ;False;True ; ;whether draw the spectral line of ts
-eofmap   = True ;False; ;whether draw the eof map
+eofmap   = False; ;whether draw the eof map
 barshare = True ;False;
 barvert  = False;True ;
 
@@ -69,7 +69,7 @@ pre_case   = (/"(a","(b","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 else
 pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 end if
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"pdf";"x11";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -452,6 +452,9 @@ if(dcase(nc).ge.2) then
     vars := grid
 end if
 eof     := eofunc_n(var,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
+if(ifrunave.eq.1.and.dcase(nc).eq.2) then 
+    eof = -1*eof
+end if
 sig     := eofunc_north(eof@pcvar,nsample,True)
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
 eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)

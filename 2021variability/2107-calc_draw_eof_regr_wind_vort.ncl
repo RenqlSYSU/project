@@ -23,8 +23,8 @@ rmv = False;True ;remove annaul cycle when bandpass filter
 
 month_s = 6
 month_e = 8
-lagg = ispan(15,0,1) 
-;lagg = 3*lagg
+lagg = ispan(3,0,1) 
+lagg = 3*lagg
 nlag = dimsizes(lagg)
 
 siglvl = 0.05
@@ -49,8 +49,8 @@ filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 pre_case   = (/"(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
-;fig_out    = "eps";"x11";"eps";
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(0) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -282,7 +282,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.023
+    resvc@vcMinDistanceF            = 0.024
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
@@ -292,7 +292,7 @@ end if
     resvc@vcRefAnnoOn                = False;True;
     ;resvc@vcRefAnnoSide              = "Bottom"          
     ;resvc@vcRefAnnoJust              = "TopRight"
-    resvc@vcRefAnnoOrthogonalPosF    = 0.7          ; move ref vector along Y-axis
+    resvc@vcRefAnnoOrthogonalPosF    = 0.8          ; move ref vector along Y-axis
     resvc@vcRefAnnoParallelPosF      = 0.4            ; move ref vector along X-axis
     resvc@vcRefAnnoPerimOn           = False         ;close the border
     resvc@vcRefAnnoFont              = font_index
@@ -398,13 +398,14 @@ end if
     res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "landscape";"portrait"
     resp@gsnPanelLabelBar = True
+    resp@lbTitleOn    =  True                ; turn on title
     if(barvert) then 
     resp@lbOrientation     = "Vertical"
     resp@pmLabelBarWidthF  = 0.05
     resp@pmLabelBarHeightF = 0.7
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
-    resp@pmLabelBarWidthF  = 0.8 ;0.05
+    resp@pmLabelBarWidthF  = 0.9 ;0.05
     resp@pmLabelBarHeightF = 0.05;0.8
     end if
     else
@@ -435,6 +436,12 @@ end if
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
+    resp@lbTitleString            = unit(nv) 
+    resp@lbTitlePosition          = "Right"              ; title position
+    resp@lbTitleFontHeightF       = .015                 ; make title smaller
+    resp@lbTitleFont              = font_index
+    resp@lbTitleOffsetF           = 0.012
+    resp@lbTitleDirection         = "Across"             ; title direction
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/5  ,5 ,5 ,5 /)  ;the level of 850hpa    ctrl,nudg,diff
@@ -453,7 +460,7 @@ tsf = addfile(tsfile,"r")
 eval = tsf->eval
 pcvar= tsf->pcvar
 pcvar= round(pcvar*10,1)/10.0 ;Round to one decimal place
-do ne = 1, 1, 1;5, 1
+do ne = 0, 0, 1;5, 1
 ts = tsf->eof_ts(2:5,ne,:)
 if(ifrunave2.eq.2) then 
     fca = 1.0/ca
@@ -504,7 +511,7 @@ nne = ne+1
 resp@txString = figtle+" month: "+month_s+"-"+month_e+" EOF"+nne+": "+eval(ne)+"  "+pcvar(ne)+"%" 
 do nc = 0,ncase-1,1
 do nlg = 0,nlag-1,1
-    np = nlg;np + 1
+    np = np + 1
     if(lagg(nlg).eq.0) then 
     res@gsnLeftString   = pre_case(np) + ") " +case2(nc) + " (" + lagg(nlg) + " day)" ;  
     else                                                                               
@@ -560,8 +567,8 @@ do nlg = 0,nlag-1,1
     print(max(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     print(min(regr(nc,2,nlg,{lats(na):latn(na)},{lonl(na):lonr(na)})))
 end do 
-gsn_panel(wks,plot,(/4,4/),resp)
 end do 
+gsn_panel(wks,plot,(/4,4/),resp)
 end do
 end
 

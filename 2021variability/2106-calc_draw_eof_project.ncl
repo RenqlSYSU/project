@@ -11,7 +11,7 @@ path     = "/home/ys17-19/renql/project/2021variability"
 var_name = (/"preci"/)
 unit     = (/"mm/day"/)
 nv = 0
-ifrunave= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
+ifrunave= 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 nave = 5 ;five days run ave
 ca = 80.0 ;day
 cb = 8.0
@@ -19,7 +19,7 @@ rmv = True ;False ;remove annaul cycle when bandpass filter
 fnc = 2
 month_s = 6
 month_e = 8
-savedata = True ;False;
+savedata = False;True ;
 mkoc = True ; True mean mask rainfall on ocean
 
 opt = True
@@ -61,7 +61,7 @@ fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var
 fig_name = path + "/fig/" +case1(fnc)+"-project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"pdf";"x11";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -101,7 +101,7 @@ if(na.eq.0) then
    font_index     = 22
 else
    tick_font      = 0.02
-   subtitle_font  = 0.02
+   subtitle_font  = 0.025
    title_font     = 0.02
    vcref_font     = 0.015
    tick_thick     = 8.0

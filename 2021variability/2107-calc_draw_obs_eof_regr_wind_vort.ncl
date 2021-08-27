@@ -477,7 +477,7 @@ end if
     resp@pmLabelBarHeightF = 0.7
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
-    resp@pmLabelBarWidthF  = 0.9 ;0.05
+    resp@pmLabelBarWidthF  = 0.95 ;0.05
     resp@pmLabelBarHeightF = 0.05;0.8
     end if
     else
@@ -512,7 +512,7 @@ end if
     resp@lbTitlePosition          = "Right"              ; title position
     resp@lbTitleFontHeightF       = .015                ; make title smaller
     resp@lbTitleFont              = font_index
-    resp@lbTitleOffsetF           = 0.012
+    resp@lbTitleOffsetF           = 0.01
     resp@lbTitleDirection         = "Across"             ; title direction
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10

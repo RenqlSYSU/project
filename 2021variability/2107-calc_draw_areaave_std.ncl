@@ -64,6 +64,7 @@ narea = dimsizes(lats1)
 nlat  = dimsizes(vars&lat)
 nlon  = dimsizes(vars&lon)
 var  = new((/ncase,nyear,ntime,nlat,nlon/),float)
+var1 = new((/ncase,nyear,ntime,nlat,nlon/),float)
 smth = new((/ncase,ndist,narea/),float)
 plot = new((/6/),graphic)
 
@@ -90,7 +91,14 @@ end do
 end do
 var = linmsg_n(var,(/-1/),3)
 var = var*3600*24*1000 ;mm/day
+var1= var
 printVarSummary(var)
+if(any(ismissing(var(0,:,:,:,:)))) then
+    print("var(0,:,:,:,:) contains some missing values. Beware.")
+end if
+if(any(ismissing(var(3,:,:,:,:)))) then
+    print("var(3,:,:,:,:) contains some missing values. Beware.")
+end if
 
 ;==========================================================
 ;space smooth, time filter and variance
@@ -114,54 +122,63 @@ if(rad_unit.eq.0) then
     do nlo1 = 0, nlon-1, 1
     distance = sqrt((lat(nla1)-lat(nla))^2+(lon(nlo1)-lon(nlo))^2)
     if(distance.le.threshold.and.distance.gt.0) then
-        var(:,:,:,nla,nlo) = var(:,:,:,nla,nlo) + var(:,:,:,nla1,nlo1)
+        var1(:,:,:,nla,nlo) = var(:,:,:,nla,nlo) + var(:,:,:,nla1,nlo1)
         nsmth = nsmth + 1
     end if
     end do
     end do
 else
     distance = gc_latlon(lat(nla),lon(nlo),lat1,lon1,2,rad_unit)
+    ;print(distance(10,10:14))
     term := ndtooned(distance)
     size  = dimsizes(distance)
     indices := ind_resolve( ind(term.le.threshold.and.term.ge.0), size )
     nsmth = dimsizes(indices(:,0))
     if(nsmth.gt.1) then
-    var(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
+    var1(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
     end if
 end if
 if(nsmth.gt.mpoint) then
     mpoint = nsmth
 end if
-var(:,:,:,nla,nlo) = var(:,:,:,nla,nlo)/nsmth
+var1(:,:,:,nla,nlo) = var1(:,:,:,nla,nlo)/nsmth
 end do
 end do 
 print("threshold = "+threshold+", nsmth = "+mpoint)
 end if
-printVarSummary(distance)
+;printVarSummary(distance)
+if(any(ismissing(var1(0,:,:,:,:)))) then
+    print("var1(0,:,:,:,:) contains some missing values. Beware.")
+end if
+if(any(ismissing(var1(3,:,:,:,:)))) then
+    print("var1(3,:,:,:,:) contains some missing values. Beware.")
+end if
 
 dimh = 2
 if(ifrunave.eq.1) then 
     opt1= -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
-    var = runave_n(var, nave, opt1, dimh)
-    var = var - conform(var,dim_avg_n(var,1),(/0,2,3,4/))  ;remove annual cycle
+    var2 = runave_n(var1, nave, opt1, dimh)
+    var2 = var2 - conform(var2,dim_avg_n(var2,1),(/0,2,3,4/))  ;remove annual cycle
 end if
 if(ifrunave.eq.2) then 
     fca = 1.0/ca
     fcb = 1.0/cb
     opt2= False
     if(rmv) then 
-    var = var - conform(var,dim_avg_n(var,1),(/0,2,3,4/))  ;remove annual cycle
+    var2 = var1 - conform(var1,dim_avg_n(var1,1),(/0,2,3,4/))  ;remove annual cycle
+    var2 = bw_bandpass_filter(var2,fca,fcb,opt2,dimh)
+    else
+    var2 = bw_bandpass_filter(var1,fca,fcb,opt2,dimh)
     end if
-    var = bw_bandpass_filter(var,fca,fcb,opt2,dimh)
 end if
 
-term := dim_avg_n(dim_avg_n(var(:,:,select_time,:,:)^2,2),1)
+term := dim_avg_n(dim_avg_n(var2(:,:,select_time,:,:)^2,2),1)
 copy_VarMeta(vars,term(0,:,:))
 do na1 = 0, narea-1, 1
     smth(:,ndis,na1) = wgt_areaave(term(:,{lats1(na1):latn1(na1)},{lonl1(na1):lonr1(na1)}),1.0,1.0,0)
 end do
 end do
-delete(var)
+delete([/var,var1,var2/])
 
 if(diff) then 
 do nc = 1, ncase-1, 1
@@ -234,7 +251,7 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@gsnMaximize   = True
     resxy@gsnPaperOrientation = "portrait"
     
-    resxy@tmYLAutoPrecision = True
+    resxy@tmYLAutoPrecision = False;True
     resxy@tmYLPrecision     = 2 
     ;resxy@tiXAxisOn = False
     ;resxy@tiYAxisOn = False

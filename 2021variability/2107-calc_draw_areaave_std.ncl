@@ -21,7 +21,7 @@ lonl1 = (/112, 118, 115, 115/)
 lonr1 = (/120, 118, 115, 115/)
 var_name = (/"PRECC","PRECL"/)
 rad_unit = 4 ;0=degree byself ;use gc_latlon, 2=degree, 4=km
-radiu = fspan(1,8,8)
+radiu = fspan(0,8,9)
 radiu_unit = "x100 km"
 ndist = dimsizes(radiu)
 diff  = True ;False
@@ -46,8 +46,8 @@ years   = ispan(1979,2005,1)   ;the calculate time
 fig_name = path + "/project/2021variability/fig/smth_JJApreci_vari"
 fileout  = path + "/project/2021variability/data/smth_JJApreci_vari.nc"
 pre_case   = (/"(d","(d","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-;fig_out    ="eps";"x11"
-fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)

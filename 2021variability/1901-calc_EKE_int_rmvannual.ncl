@@ -11,7 +11,7 @@ begin
 path    = "/home/ys17-19/renql"
 option   = 0 ;0 means remove annual cycle or runave, 1 means bandpass filter
 smth    = 2 ; 1 = number point space smooth ; 2 = radius space smooth
-nsmth   = 250 ;km
+nsmth   = 400 ;km
 calc_var = (/"intEKE","preci","PRECC","PRECL"/)
 cnv = 1
 
@@ -140,8 +140,8 @@ if(smth.eq.2) then
 mpoint = 1
 lat = vars&lat
 lon = vars&lon
-lat1 = conform(var(0,0,0,:,:),tofloat(lat),(/0/))
-lon1 = conform(var(0,0,0,:,:),tofloat(lon),(/1/))
+lat1 = conform(var(0,0,:,:),tofloat(lat),(/0/))
+lon1 = conform(var(0,0,:,:),tofloat(lon),(/1/))
 rad_unit = 4 ;use gc_latlon, 2=degree, 4=km
 
 do nla = 1, nlat-2, 1
@@ -151,8 +151,8 @@ do nlo = 1, nlon-2, 1
     size  = dimsizes(distance)
     indices := ind_resolve( ind(term.le.nsmth.and.term.ge.0), size )
     npoint = dimsizes(indices(:,0))
-    var(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
-    var(:,:,:,nla,nlo) = var(:,:,:,nla,nlo)/nsmth
+    var(:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,indices(:,0),indices(:,1)),3),2)
+    var(:,:,nla,nlo) = var(:,:,nla,nlo)/npoint
     
     if(npoint.gt.mpoint) then
     mpoint = npoint

@@ -15,7 +15,7 @@ if(case_option.eq.0) then
     nsample = 27
 end if
 ;pre_case = (/"(e","(f"/)
-pre_case   = (/"(a","(b","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
+pre_case   = (/"(a","(c","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
@@ -24,7 +24,7 @@ draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT"         ,"preci_5run-smth49"/)
+             "uppT"         ,"preci_5run-smth400km"/)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -36,7 +36,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"OMEGA"           ,"Z3"             
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
-                 "uppT"     ,"preci_5run-smth49"/)
+                 "uppT"     ,"preci_5run-smth400km"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 21 
@@ -818,8 +818,8 @@ end if
 ;    do nm = 0, nmonth-1,1 ;2,2,1;
         np = np + 1
         ;res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
-        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth49";+ " " + months(imonth(nm))
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (" + unit(nv) + ")"
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth400km";+ " " + months(imonth(nm))
+        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (" + unit(nv) + ")"
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
@@ -898,7 +898,7 @@ end if
         if(dcircle) then
         clon = 118.0
         clat = 32.0
-        rad  = 7.0;250 ;radius of the circle
+        rad  = 4.0;250 ;radius of the circle
         rad_unit = 1 ;0=degree; 1=km
         N   = 180 ;points; more points nicer 'circle'
         opt = False ;not used. Set to False.

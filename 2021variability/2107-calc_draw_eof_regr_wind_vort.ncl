@@ -49,8 +49,8 @@ filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 pre_case   = (/"(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
-fig_out    = "eps";"x11";"eps";
-;fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(0) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -282,7 +282,7 @@ if(na.eq.0) then
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
-    resvc@vcMinDistanceF            = 0.024
+    resvc@vcMinDistanceF            = 0.025
     resvc@vcRefLengthF              = 0.05 ;0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.008;0.015
     resvc@vcLineArrowHeadMaxSizeF   = 0.008;0.015
@@ -406,7 +406,7 @@ end if
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.9 ;0.05
-    resp@pmLabelBarHeightF = 0.05;0.8
+    resp@pmLabelBarHeightF = 0.04;0.8
     end if
     else
     res@lbLabelBarOn         = True   ; the label bar
@@ -432,13 +432,13 @@ end if
     resp@gsnPanelLabelBar = False; True
     end if
     resp@lbLabelFont        = font_index              ; make labels smaller
-    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontHeightF = 0.012 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
     resp@lbTitleString            = unit(nv) 
     resp@lbTitlePosition          = "Right"              ; title position
-    resp@lbTitleFontHeightF       = .015                 ; make title smaller
+    resp@lbTitleFontHeightF       = .012                 ; make title smaller
     resp@lbTitleFont              = font_index
     resp@lbTitleOffsetF           = 0.012
     resp@lbTitleDirection         = "Across"             ; title direction

@@ -118,19 +118,20 @@ var = linmsg_n(var,(/-1/),2)
 var = var*3600*24*1000 ;mm/day
 print(var(0,10,10:20,30))
 
+var1 = var
 if(smth.eq.1) then
 if(nsmth.le.5) then
     cyclic = False
     p = 4.0/5.0 
     q = 0 
-    var = smth9(var,p,q,cyclic)
+    var = smth9(var1,p,q,cyclic)
 end if
 if(nsmth.ge.9) then
     nsmth0 = toint(floor(sqrt(nsmth)/2.0))
     print("nsmth="+nsmth+"; nsmth0="+nsmth0)
     do nla = nsmth0, nlat-nsmth0-1, 1
     do nlo = nsmth0, nlon-nsmth0-1, 1
-    var(:,:,nla,nlo) = wgt_areaave(var(:,:,(nla-nsmth0):(nla+nsmth0),(nlo-nsmth0):(nlo+nsmth0)),1.0,1.0,0)
+    var(:,:,nla,nlo) = wgt_areaave(var1(:,:,(nla-nsmth0):(nla+nsmth0),(nlo-nsmth0):(nlo+nsmth0)),1.0,1.0,0)
     end do
     end do
 end if
@@ -151,7 +152,7 @@ do nlo = 1, nlon-2, 1
     size  = dimsizes(distance)
     indices := ind_resolve( ind(term.le.nsmth.and.term.ge.0), size )
     npoint = dimsizes(indices(:,0))
-    var(:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,indices(:,0),indices(:,1)),3),2)
+    var(:,:,nla,nlo) = dim_sum_n(dim_sum_n(var1(:,:,indices(:,0),indices(:,1)),3),2)
     var(:,:,nla,nlo) = var(:,:,nla,nlo)/npoint
     
     if(npoint.gt.mpoint) then

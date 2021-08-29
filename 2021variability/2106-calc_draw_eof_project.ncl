@@ -19,7 +19,7 @@ rmv = True ;False ;remove annaul cycle when bandpass filter
 fnc = 2
 month_s = 6
 month_e = 8
-savedata = False;True ;
+savedata = True ;False;
 mkoc = True ; True mean mask rainfall on ocean
 
 opt = True

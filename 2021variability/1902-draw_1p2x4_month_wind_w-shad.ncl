@@ -183,7 +183,7 @@ do nf = 0 ,ncase-1, 1
 end do
 end if
 
-do nf = 0 ,ncase-1, 1
+do nf = 0,3,3;ncase-1, 1
 f = addfile(filename(nf)+"PS.nc","r")
 ps= f->$var_name(0)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 printVarSummary(ps)
@@ -898,16 +898,16 @@ end if
         if(dcircle) then
         clon = 118.0
         clat = 32.0
-        rad  = 4.0;250 ;radius of the circle
+        rad  = 400 ;radius of the circle
         rad_unit = 1 ;0=degree; 1=km
         N   = 180 ;points; more points nicer 'circle'
         opt = False ;not used. Set to False.
-        ;cir = geolocation_circle(clat, clon, rad, rad_unit, N, opt) ; circle is type list
-        ;printVarSummary(cir)                  ; variable of type list with 2 variables
-        cir_lat = new(180,float);cir[0];                   ; For clarity: explicitly extract list elements
-        cir_lon = new(180,float);cir[1];
+        cir = geolocation_circle(clat, clon, rad, rad_unit, N, opt) ; circle is type list
+        printVarSummary(cir)                  ; variable of type list with 2 variables
+        cir_lat = cir[0];new(180,float); 
+        cir_lon = cir[1];new(180,float);
         ;printVarSummary(cir_lat)
-        nggcog(clat,clon,rad,cir_lat,cir_lon)
+        ;nggcog(clat,clon,rad,cir_lat,cir_lon)
         
         color  = "blueviolet"
         plres  = True

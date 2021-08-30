@@ -46,8 +46,8 @@ years   = ispan(1979,2005,1)   ;the calculate time
 fig_name = path + "/project/2021variability/fig/smth_JJApreci_vari"
 fileout  = path + "/project/2021variability/data/smth_JJApreci_vari.nc"
 pre_case   = (/"(d","(d","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    ="eps";"x11"
-;fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -125,6 +125,7 @@ if(rad_unit.eq.0) then
         var1(:,:,:,nla,nlo) = var(:,:,:,nla,nlo) + var(:,:,:,nla1,nlo1)
         nsmth = nsmth + 1
     end if
+    var1(:,:,:,nla,nlo) = var1(:,:,:,nla,nlo)/nsmth
     end do
     end do
 else
@@ -135,13 +136,16 @@ else
     indices := ind_resolve( ind(term.le.threshold.and.term.ge.0), size )
     nsmth = dimsizes(indices(:,0))
     if(nsmth.gt.1) then
-    var1(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
+    var1(:,:,:,nla,nlo) = wgt_areaave(var(:,:,:,indices(:,0),indices(:,1)),1.0,1.0,0)
+    ;var1(:,:,:,nla,nlo) = dim_sum_n(dim_sum_n(var(:,:,:,indices(:,0),indices(:,1)),3),3)
     end if
+end if
+if(lat(nla).gt.31.and.lat(nla).lt.32.and.lon(nlo).gt.117.and.lon(nlo).le.118.5) then 
+    print(lat(nla)+"N, "+lon(nlo)+"E, threshold = "+threshold+", nsmth = "+nsmth)
 end if
 if(nsmth.gt.mpoint) then
     mpoint = nsmth
 end if
-var1(:,:,:,nla,nlo) = var1(:,:,:,nla,nlo)/nsmth
 end do
 end do 
 print("threshold = "+threshold+", nsmth = "+mpoint)

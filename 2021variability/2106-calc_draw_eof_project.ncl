@@ -319,6 +319,9 @@ end if
 eof  := eofunc_n(fvar,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 sig  := eofunc_north(eof@pcvar,nsample,True)
 subtitle_color = where(sig,"red","black") 
+if(ifrunave.eq.1.and.fnc.eq.2) then 
+    eof = -1*eof
+end if
 ;eof = eof*conform(eof,sqrt(eof@eval),0)
 printVarSummary(eof)
 

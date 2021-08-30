@@ -49,8 +49,8 @@ filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
 pre_case   = (/"(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
-;fig_out    = "eps";"x11";"eps";
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
 
 fig_name = path + "/fig/" + case1(0) + "-project_ts_regr_" + lev(nl) + "wind_" + draw_var(nv)+"_"+cb+"-"+ca
 if(cont_option) then 
@@ -460,7 +460,7 @@ tsf = addfile(tsfile,"r")
 eval = tsf->eval
 pcvar= tsf->pcvar
 pcvar= round(pcvar*10,1)/10.0 ;Round to one decimal place
-do ne = 0, 0, 1;5, 1
+do ne = 1, 1, 1;5, 1
 ts = tsf->eof_ts(2:5,ne,:)
 if(ifrunave2.eq.2) then 
     fca = 1.0/ca

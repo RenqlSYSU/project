@@ -9,7 +9,7 @@
 ;******************************************************************************
 begin
 path    = "/home/ys17-19/renql"
-option   = 0 ;0 means remove annual cycle or runave, 1 means bandpass filter
+option  = 0 ;0 means remove annual cycle or runave, 1 means bandpass filter
 smth    = 2 ; 1 = number point space smooth ; 2 = radius space smooth
 nsmth   = 400 ;km
 calc_var = (/"intEKE","preci","PRECC","PRECL"/)
@@ -152,8 +152,8 @@ do nlo = 1, nlon-2, 1
     size  = dimsizes(distance)
     indices := ind_resolve( ind(term.le.nsmth.and.term.ge.0), size )
     npoint = dimsizes(indices(:,0))
-    var(:,:,nla,nlo) = dim_sum_n(dim_sum_n(var1(:,:,indices(:,0),indices(:,1)),3),2)
-    var(:,:,nla,nlo) = var(:,:,nla,nlo)/npoint
+    var(:,:,nla,nlo) = wgt_areaave(var1(:,:,indices(:,0),indices(:,1)),1.0,1.0,0)
+    ;var(:,:,nla,nlo) = dim_sum_n(dim_sum_n(var1(:,:,indices(:,0),indices(:,1)),3),2)/npoint
     
     if(npoint.gt.mpoint) then
     mpoint = npoint

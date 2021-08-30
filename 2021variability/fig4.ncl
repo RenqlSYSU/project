@@ -1,4 +1,4 @@
-;;*********************************************************************
+;*********************************************************************
 ;Draw the shaded map of monthly or seasonal average precipitation in east asia. 
 ;And there are three cases,1AMIP-CTRL,2CTRL-NDUG24h,3CTRL-NUDG6h 
 ;then do the significance testing, the dot mean the difference is significance
@@ -15,7 +15,7 @@ if(case_option.eq.0) then
     nsample = 27
 end if
 ;pre_case = (/"(e","(f"/)
-pre_case   = (/"(a","(b","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
+pre_case   = (/"(a","(c","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
 ;fig_out    = "pdf";"x11";"eps";
 fig_out    = "eps";"x11";"eps";
 
@@ -39,11 +39,11 @@ draw_varname = (/"Q1"       ,"preci"       ,"OMEGA"           ,"Z3"             
                  "uppT"     ,"preci_5run-smth400km"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 6 
+nv = 21 
 diff = True ;False;
 perc = True ;False;
 siglvl = 0.05
-sig_option  = False;True ;if False, only the significant values are shaded 
+sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
@@ -53,7 +53,7 @@ nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
 barshare = False;True ;
 barvert  = False;True ;
-dcircle  = False;True ;
+dcircle  = True ;False;
 
 var_option = 0
 if(var_option.eq.0) then 
@@ -93,7 +93,7 @@ lonl = (/0  ,25 ,0  ,90 ,100 /);20
 lonr = (/360,85 ,360,150,130/);220
 lat_spacing = (/30,10 ,30,10,10/)
 lon_spacing = (/40,20 ,40,20,10/)
-na = 0
+na = 4
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)})
@@ -183,7 +183,7 @@ do nf = 0 ,ncase-1, 1
 end do
 end if
 
-do nf = 0, ncase-1, 1
+do nf = 0,3,3;ncase-1, 1
 f = addfile(filename(nf)+"PS.nc","r")
 ps= f->$var_name(0)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 printVarSummary(ps)
@@ -632,8 +632,8 @@ end if
     res@pmLabelBarParallelPosF       = 0.5
     else
     res@lbOrientation        = "Horizontal";"Vertical";
-    res@pmLabelBarWidthF  = 0.8
-    res@pmLabelBarHeightF = 0.05
+    res@pmLabelBarWidthF  = 0.5
+    res@pmLabelBarHeightF = 0.06
     res@pmLabelBarOrthogonalPosF  = 0.2 ;y direction
     res@pmLabelBarParallelPosF    = 0.5
     end if
@@ -677,9 +677,9 @@ if(perc) then
     maxlvl = (/16 , 70, 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 1 , 10, 10, 10/);1 ,1 ,1 ,1 
 else
-    minlvl = (/ 1 ,-7,-7,-7/);
-    maxlvl = (/16 , 7, 7, 7/);
-    spacig = (/ 1 , 1, 1, 1/);
+    minlvl = (/ 1 ,-3.5,-3.5,-3.5/);
+    maxlvl = (/16 , 3.5, 3.5, 3.5/);
+    spacig = (/ 1 , 0.5, 0.5, 0.5/);
 end if
 end if
 
@@ -801,7 +801,7 @@ end if
 
 np = -1
 do nm = 2,2,1;,nmonth-1,1
-do nc = 0,ncase-1,1
+do nc = 0,3,3;ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -818,11 +818,8 @@ end if
 ;    do nm = 0, nmonth-1,1 ;2,2,1;
         np = np + 1
         ;res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
-        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth400km";+ " " + months(imonth(nm))
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (" + unit(nv) + ")"
-        if(diff.and.perc.and.nc.gt.0) then 
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (%)"
-        end if
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth400km";+ " " + months(imonth(nm))
+        ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (" + unit(nv) + ")"
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
         if(cont_option) then 
         res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
@@ -885,11 +882,11 @@ end if
         end if
         
         if(nc.eq.3) then
-        line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
-        line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
+        ;line(np)  = gsn_add_polyline( wks, plot(np), lonx(:,0), latx(:,0), lnres )
+        ;line1(np) = gsn_add_polyline( wks, plot(np), lonx(:,1), latx(:,1), lnres )
         end if
         if(nc.eq.1.or.nc.eq.2) then
-        line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
+        ;line(np) = gsn_add_polyline( wks, plot(np), lonx(:,nc-1), latx(:,nc-1), lnres )
         end if
         
         if(jet_option.ge.1) then 
@@ -961,7 +958,7 @@ end do
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
     ;gsn_panel(wks,plot,(/5,4/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+    gsn_panel(wks,plot,(/1,2/),resp)
 ;end do
 end
 

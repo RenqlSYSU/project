@@ -477,8 +477,8 @@ end if
     resp@pmLabelBarHeightF = 0.7
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
-    resp@pmLabelBarWidthF  = 0.95 ;0.05
-    resp@pmLabelBarHeightF = 0.05;0.8
+    resp@pmLabelBarWidthF  = 0.9 ;0.05
+    resp@pmLabelBarHeightF = 0.04;0.8
     end if
     else
     res@lbLabelBarOn         = True   ; the label bar
@@ -504,15 +504,15 @@ end if
     resp@gsnPanelLabelBar = False; True
     end if
     resp@lbLabelFont        = font_index              ; make labels smaller
-    resp@lbLabelFontHeightF = 0.015 
+    resp@lbLabelFontHeightF = 0.012 
     resp@lbLabelFontThicknessF = tick_thick
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
     resp@lbTitleString            = unit(nv) 
     resp@lbTitlePosition          = "Right"              ; title position
-    resp@lbTitleFontHeightF       = .015                ; make title smaller
+    resp@lbTitleFontHeightF       = .012                ; make title smaller
     resp@lbTitleFont              = font_index
-    resp@lbTitleOffsetF           = 0.01
+    resp@lbTitleOffsetF           = 0.012
     resp@lbTitleDirection         = "Across"             ; title direction
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10

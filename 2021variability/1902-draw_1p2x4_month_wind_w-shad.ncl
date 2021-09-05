@@ -732,8 +732,8 @@ end if
 
 if(nv.ge.6.and.nv.le.11) then ;intEKE
 if(perc) then 
-    minlvl = (/10,-70,-70,-70/);-8,-8,-8,-8
-    maxlvl = (/85, 70, 70, 70/);8 ,8 ,8 ,8 
+    minlvl = (/10,-80,-80,-80/);-8,-8,-8,-8
+    maxlvl = (/85, 80, 80, 80/);8 ,8 ,8 ,8 
     spacig = (/5 , 10, 10, 10/);1 ,1 ,1 ,1 
 else
 ;    minlvl = (/2 ,-14,-14/);-8,-8,-8,-8
@@ -807,7 +807,7 @@ if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     ;blue and red, has 18 colors,2-10 is blue
    res@cnFillPalette = "BlueDarkRed18"
-   res@cnFillColors  := (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
+   res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 else
    ;gsn_define_colormap(wks,"precip3_16lev")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18/)

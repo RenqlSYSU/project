@@ -20,8 +20,8 @@ allcase = False ;True ;if True, four case PC spectral be draw in one figure
 month_s = 6
 month_e = 8
 savedata = True ;False;
-spectral = False;True ; ;whether draw the spectral line of ts
-eofmap   = False; ;whether draw the eof map
+spectral = True ;False; ;whether draw the spectral line of ts
+eofmap   = True ;False; ;whether draw the eof map
 barshare = True ;False;
 barvert  = False;True ;
 
@@ -31,18 +31,18 @@ neval = 7
 siglvl = 0.05
 
 area = (/"EA"/);,"GB"
-lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
+lats = (/ 18 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/105 /);, 0   ;30 ;20
-lonr = (/130 /);, 360 ;150;220
+lonr = (/145 /);, 360 ;150;220
 lat_spacing = 10
 lon_spacing = 10
 na = 0
 
-dcase   = (/0,2/)
+dcase   = (/1,2/)
 ;dcase   = (/0,1,2,3,4,5/)
 case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) 
-case2   = (/"OBS"   ,"APHRO","CTL" ,"NT"   ,"NM"    ,"NMT" /) 
+case2   = (/"OBS"   ,"OBS"  ,"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
 gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
 years   = ispan(1979,2005,1)   ;the calculate time
 path2   = "/home/ys17-19"
@@ -69,7 +69,7 @@ pre_case   = (/"(a","(b","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 else
 pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 end if
-fig_out    = "eps";"pdf";"x11";
+fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -96,9 +96,6 @@ pcvar   = new((/ncase,neval/),float)
 plot    = new((/36/),graphic)
 plot1   = new((/36/),graphic)
 gtop    = new((/36/),graphic)
-
-f   = addfile(filein(0),"r")
-grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
@@ -377,11 +374,13 @@ if(dcase(nc).eq.0) then ;CN051
     f   = addfile(filein(dcase(nc)),"r")
     vars:= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     lat := vars&lat
+    grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 end if
 if(dcase(nc).eq.1) then ;APHRO
     f   = addfile(filein(dcase(nc))+years(0)+".nc","r")
     vars:= f->precip(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     lat := vars&latitude
+    grid= f->precip(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 end if
 if(dcase(nc).ge.2) then
     f   = addfile(filein(dcase(nc))+years(0)+".daily.PRECC.nc","r")
@@ -446,7 +445,8 @@ var:= reshape(var(:,select_time2,:,:),(/nyear*ntime,nlat,nlon/))
 
 if(dcase(nc).ge.2) then 
 ;    var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
-    var := linint2(phis&lon,phis&lat,var,False,grid&lon,grid&lat,0)
+    var := linint2(phis&lon,phis&lat,var,False,grid&longitude,grid&latitude,0)
+    ;var := linint2(phis&lon,phis&lat,var,False,grid&lon,grid&lat,0)
     ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
     var = mask(var, ismissing(grid), False)
     vars := grid

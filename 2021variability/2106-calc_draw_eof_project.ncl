@@ -28,10 +28,10 @@ neval = 7
 siglvl = 0.05
 
 area = (/"EA"/);,"GB"
-lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
+lats = (/ 18 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/105 /);, 0   ;30 ;20
-lonr = (/130 /);, 360 ;150;220
+lonr = (/145 /);, 360 ;150;220
 lat_spacing = 10
 lon_spacing = 10
 na = 0
@@ -61,7 +61,7 @@ fileout  = path + "/data/"+case1(fnc)+"-eof_project_ts_"+month_s+month_e+"_"+var
 fig_name = path + "/fig/" +case1(fnc)+"-project_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-fig_out    = "eps";"pdf";"x11";
+fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -83,9 +83,6 @@ ts_mean = new((/ncase,neval/),float)
 plot  = new((/18/),graphic)
 plot1 = new((/18/),graphic)
 plot2 = new((/18/),graphic)
-
-f   = addfile(filein(0),"r")
-grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 
 ;define the thickness and height of the title,tick and label
 if(na.eq.0) then 
@@ -310,8 +307,14 @@ ntime = dimsizes(select_time2)
 fvar:= reshape(fvar,(/nyear*ntime,nlat,nlon/))
 
 if(fnc.ge.2.and.mkoc) then 
+    ;f   = addfile(filein(0),"r")
+    ;grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+    f   = addfile(filein(1)+years(0)+".nc","r")
+    grid= f->precip(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
+
     ;fvar = mask(fvar, conform(fvar,ldmk,(/1,2/)).eq.1, True)
-    fvar := linint2(ldmk&lon,ldmk&lat,fvar,False,grid&lon,grid&lat,0)
+    ;fvar := linint2(ldmk&lon,ldmk&lat,fvar,False,grid&lon,grid&lat,0)
+    fvar := linint2(ldmk&lon,ldmk&lat,fvar,False,grid&longitude,grid&latitude,0)
     ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
     fvar = mask(fvar, ismissing(grid), False)
     vars := grid
@@ -403,7 +406,8 @@ var:= reshape(var,(/nyear*ntime,nlat,nlon/))
 
 if(nc.ge.2.and.mkoc) then 
     ;var = mask(var, conform(var,ldmk,(/1,2/)).eq.1, True)
-    var := linint2(ldmk&lon,ldmk&lat,var,False,grid&lon,grid&lat,0)
+    var := linint2(ldmk&lon,ldmk&lat,var,False,grid&longitude,grid&latitude,0)
+    ;var := linint2(ldmk&lon,ldmk&lat,var,False,grid&lon,grid&lat,0)
     ;the last number 0 is Reserved for future use.Currently not used, but set it to 0.
     var = mask(var, ismissing(grid), False)
     vars := grid

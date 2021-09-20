@@ -18,15 +18,15 @@ if(case_option.eq.0) then
 end if
 ;pre_case = (/"(e","(f"/)
 pre_case   = (/"(a","(c","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
-fig_out    = "pdf";"x11";"eps";
-;fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"intEKE"      ,"intEKE-2.5-10day","intEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
-             "uppT"         ,"preci_5run-smth0"/)
+             "uppT"         ,"preci_5run-smth400km"/)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~S~-2~N~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
              "~S~o~N~C"     ,"10~S~4~N~J"  ,"10~S~4~N~J"      ,"10~S~4~N~J"     ,"J"         , \
@@ -38,7 +38,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"OMEGA"           ,"Z3"             
                  "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
-                 "uppT"     ,"preci_5run-smth0"/)
+                 "uppT"     ,"preci_5run-smth400km"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
 nv = 21 
@@ -55,7 +55,7 @@ nvc = 4
 contsig  = True ;False;;if True, only the significant values are contoured 
 barshare = False;True ;
 barvert  = False;True ;
-dcircle  = False;True ;
+dcircle  = True ;False;
 
 var_option = 0
 if(var_option.eq.0) then 
@@ -89,10 +89,10 @@ fig_name = path + "/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_"
 end if
 
 ;area: east Asia
-lats = (/-89,5  ,-70,10 ,15 /);-20
-latn = (/89 ,45 ,70 ,55 ,50 /);60
+lats = (/-89,5  ,-70,10 ,20 /);-20
+latn = (/89 ,45 ,70 ,55 ,45 /);60
 lonl = (/0  ,25 ,0  ,90 ,105 /);20
-lonr = (/360,85 ,360,150,150/);220
+lonr = (/360,85 ,360,150,145/);220
 lat_spacing = (/30,10 ,30,10,10/)
 lon_spacing = (/40,20 ,40,20,10/)
 na = 4
@@ -634,12 +634,12 @@ end if
     res@pmLabelBarParallelPosF       = 0.5
     else
     res@lbOrientation        = "Horizontal";"Vertical";
-    res@pmLabelBarWidthF  = 0.5
+    res@pmLabelBarWidthF  = 0.7
     res@pmLabelBarHeightF = 0.06
     res@pmLabelBarOrthogonalPosF  = 0.2 ;y direction
     res@pmLabelBarParallelPosF    = 0.5
     end if
-    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    resp@gsnPaperOrientation = "portrait"
     resp@gsnPanelLabelBar = False; True
     end if
     resp@lbLabelFont        = font_index              ; make labels smaller
@@ -820,7 +820,7 @@ end if
 ;    do nm = 0, nmonth-1,1 ;2,2,1;
         np = np + 1
         ;res@gsnLeftString   = case2(nc) + "  " + months(imonth(nm))
-        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth0";+ " " + months(imonth(nm))
+        res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " smth400km";+ " " + months(imonth(nm))
         ;res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm)) + " " + draw_varname(nv) + " (" + unit(nv) + ")"
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20.or.nv.eq.21) then
         if(cont_option) then 

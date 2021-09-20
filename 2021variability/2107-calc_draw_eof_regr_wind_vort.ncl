@@ -48,7 +48,7 @@ filein  = path2 +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
                    "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                    "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",\
                    "/model/AMIP_NGEN/AMIP_CAM5_NGEN.cam.h1.YEAR."/)
-pre_case   = (/"(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
+pre_case   = (/"(b","(c","(d","(e","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t"/)
 fig_out    = "eps";"x11";"eps";
 ;fig_out    = "pdf";"x11";"eps";
 
@@ -63,7 +63,7 @@ latn = (/90 ,70 /);60
 lonl = (/0  ,40  /);20
 lonr = (/360,160/);220
 lat_spacing = 20
-lon_spacing = 20
+lon_spacing = 30
 na = 1
 
 f    = addfile(filein(0)+years(0)+".daily.PRECC.nc","r")
@@ -275,7 +275,7 @@ end if
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = mp_thick-0.4 
     resvc@vcMonoLineArrowColor       = True
-    resvc@vcLineArrowColor           = "gray20"
+    resvc@vcLineArrowColor           = "grey20"
 if(na.eq.0) then 
     resvc@vcMinDistanceF            = 0.009
     resvc@vcRefLengthF              = 0.05           ; define length of vec ref
@@ -449,18 +449,18 @@ else
     vcref         = (/0.5, 3, 1,3 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
-minlvl = (/-4.0,-2.4/)  ;q1 ;-80,-80
-maxlvl = (/ 4.0, 2.4/)      ; 80, 80
-spacig = (/ 0.5, 0.3/)      ; 10, 10
+minlvl = (/-4.0,-3.5/)  ;q1 ;-80,-80
+maxlvl = (/ 4.0, 3.5/)      ; 80, 80
+spacig = (/ 0.5, 0.5/)      ; 10, 10
 
 res@cnFillPalette = "BlueDarkRed18"
-res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
+res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
 
 tsf = addfile(tsfile,"r")
 eval = tsf->eval
 pcvar= tsf->pcvar
 pcvar= round(pcvar*10,1)/10.0 ;Round to one decimal place
-do ne = 1, 1, 1;5, 1
+do ne = 0,0, 1;5, 1
 ts = tsf->eof_ts(2:5,ne,:)
 if(ifrunave2.eq.2) then 
     fca = 1.0/ca
@@ -513,11 +513,11 @@ do nc = 0,ncase-1,1
 do nlg = 0,nlag-1,1
     np = np + 1
     if(lagg(nlg).eq.0) then 
-    res@gsnLeftString   = pre_case(np) + ") " +case2(nc) + " (" + lagg(nlg) + " day)" ;  
+    res@gsnLeftString   = case2(nc) +" (" + lagg(nlg) + " day)";  
     else                                                                               
-    res@gsnLeftString   = pre_case(np) + ") " +case2(nc) + " (-" + lagg(nlg) + " day)";  
+    res@gsnLeftString   = case2(nc) +" (-" + lagg(nlg) + " day)";  
     end if
-    res@gsnRightString  = "" ;lev(nl) + "hPa " + draw_var(nv) + " (" + unit(nv) + ") " ;
+    res@gsnRightString  = "" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
@@ -538,10 +538,10 @@ do nlg = 0,nlag-1,1
     resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
     resvc2@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
     resvc2@vcRefAnnoString2     = vcref(nl)+"m/s"
-    if(uvsig_option) then
-    wind2(np)   = gsn_csm_vector(wks,notsigu(nc,nlg,:,:),notsigv(nc,nlg,:,:),resvc2)
-    overlay(plot(np),wind2(np))
-    end if
+    ;if(uvsig_option) then
+    ;wind2(np)   = gsn_csm_vector(wks,notsigu(nc,nlg,:,:),notsigv(nc,nlg,:,:),resvc2)
+    ;overlay(plot(np),wind2(np))
+    ;end if
     wind(np)    = gsn_csm_vector(wks,regr(nc,0,nlg,:,:),regr(nc,1,nlg,:,:),resvc)
     overlay(plot(np),wind(np))
     end if

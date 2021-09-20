@@ -51,7 +51,8 @@ filein2 = path2 +(/"/ERA-interim/pressure/",\ ;/uwnd/uwnd.interim.1993.nc 1979-2
                    "/NCEP_DOE/daily/"/)  ;/uwnd/uwnd.1979.nc,   short  1979-2020
 nc1 = 0
 nc2 = 0
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(c","(d","(i","(j","(k","(l","(i","(j","(k","(l","(i","(j","(k","(l"/)
+;pre_case   = (/"(a","(b","(c","(d","(a","(b","(c","(d","(i","(j","(k","(l","(i","(j","(k","(l","(i","(j","(k","(l"/)
+pre_case   = (/"(a)","(a)","(c)","(d)"/)
 fig_out    = "eps";"x11";"eps";
 ;fig_out    = "pdf";"x11";"eps";
 
@@ -66,7 +67,7 @@ latn = (/90 ,80 ,70 /);60
 lonl = (/0  ,0  ,40 /);20
 lonr = (/360,180,160/);220
 lat_spacing = 20
-lon_spacing = 20
+lon_spacing = 30
 na = 2
 
 f = addfile(gtopfile,"r")
@@ -358,7 +359,7 @@ end if
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = mp_thick-0.4 
     resvc@vcMonoLineArrowColor       = True
-    resvc@vcLineArrowColor           = "gray20"
+    resvc@vcLineArrowColor           = "grey20"
 if(na.eq.0) then 
     resvc@vcMinDistanceF            = 0.009
     resvc@vcRefLengthF              = 0.05           ; define length of vec ref
@@ -521,12 +522,12 @@ else
     vcref         = (/0.5, 3, 1,3 /)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
-minlvl = (/-4.0,- 8 ,-2.4/)  ;q1 ;-80,-80
-maxlvl = (/ 4.0,  8 , 2.4/)      ; 80, 80
-spacig = (/ 0.5,  1 , 0.3/)      ; 10, 10
+minlvl = (/-4.0,-14 ,-2.4/)  ;q1 ;-80,-80
+maxlvl = (/ 4.0, 14 , 2.4/)      ; 80, 80
+spacig = (/ 0.5, 2 , 0.3/)      ; 10, 10
 
 res@cnFillPalette = "BlueDarkRed18"
-res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
+res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/)
 
 tsf = addfile(tsfile,"r")
 eval = tsf->eval(nc1,:)
@@ -581,9 +582,9 @@ do nlg = 0,nlag-1,1
     ;np = nlg*4+ne
     np = np + 1
     if(lagg(nlg).eq.0) then 
-    res@gsnLeftString   = pre_case(np) + ") OBS (" + lagg(nlg) + " day)" ; 
+    res@gsnLeftString   = "OBS (" + lagg(nlg) + " day)";  
     else                                                    
-    res@gsnLeftString   = pre_case(np) + ") OBS (-" + lagg(nlg) + " day)";  
+    res@gsnLeftString   = "OBS (-" + lagg(nlg) + " day)";  
     end if
     ;if(nlg.eq.0) then 
     ;res@tmYLLabelsOn         = True 
@@ -595,7 +596,7 @@ do nlg = 0,nlag-1,1
     ;else
     ;res@tmXBLabelsOn         = False
     ;end if
-    res@gsnRightString  ="" 
+    res@gsnRightString  = "" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
     res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
@@ -616,10 +617,10 @@ do nlg = 0,nlag-1,1
     resvc@vcRefAnnoString2     = vcref(nl)+"m/s"
     resvc2@vcRefMagnitudeF      = vcref(nl)             ; define vector ref mag
     resvc2@vcRefAnnoString2     = vcref(nl)+"m/s"
-    if(uvsig_option) then
-    wind2(np)   = gsn_csm_vector(wks,notsigu(nlg,:,:),notsigv(nlg,:,:),resvc2)
-    overlay(plot(np),wind2(np))
-    end if
+    ;if(uvsig_option) then
+    ;wind2(np)   = gsn_csm_vector(wks,notsigu(nlg,:,:),notsigv(nlg,:,:),resvc2)
+    ;overlay(plot(np),wind2(np))
+    ;end if
     wind(np)    = gsn_csm_vector(wks,regr(0,nlg,:,:),regr(1,nlg,:,:),resvc)
     overlay(plot(np),wind(np))
     end if

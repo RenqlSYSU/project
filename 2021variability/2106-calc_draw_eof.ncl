@@ -23,7 +23,7 @@ savedata = True ;False;
 spectral = True ;False; ;whether draw the spectral line of ts
 eofmap   = True ;False; ;whether draw the eof map
 barshare = True ;False;
-barvert  = False;True ;
+barvert  = True ;
 
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
@@ -31,7 +31,7 @@ neval = 7
 siglvl = 0.05
 
 area = (/"EA"/);,"GB"
-lats = (/ 18 /);, 10  ;-90 ,-90 ,-90 ,-90 
+lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/105 /);, 0   ;30 ;20
 lonr = (/145 /);, 360 ;150;220
@@ -64,12 +64,7 @@ if(ifrunave.eq.1) then
 fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
-if(eofmap)
-pre_case   = (/"(a","(b","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
-else
-pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
-end if
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -223,7 +218,7 @@ end if
     if(barvert) then 
     resp@lbOrientation     = "Vertical"
     resp@pmLabelBarWidthF  = 0.05
-    resp@pmLabelBarHeightF = 0.7
+    resp@pmLabelBarHeightF = 0.6
     else
     resp@lbOrientation     = "Horizontal" ;"Vertical"
     resp@pmLabelBarWidthF  = 0.8 ;0.05
@@ -280,8 +275,8 @@ res@cnFillColors  = (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17/)
 p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     
     resxy     = True
-    ;resxy@vpWidthF  = 0.45
-    ;resxy@vpHeightF = 0.15
+    resxy@vpWidthF  = 0.45
+    resxy@vpHeightF = 0.4
     resxy@gsnFrame      = False
     resxy@gsnDraw       = False
     resxy@gsnMaximize   = True
@@ -295,6 +290,8 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
     resxy@tiYAxisString = "Power*frq"           ; yaxis
     resxy@tiXAxisFont   = font_index
     resxy@tiYAxisFont   = font_index
+    resxy@tiXAxisFontHeightF = tick_font
+    resxy@tiYAxisFontHeightF = tick_font
     ;resxy@tiYAxisString = "Variance"           ; yaxis
     ;resxy@trYLog  = True
     resxy@trYMinF = 0
@@ -368,6 +365,7 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 ;read data and filter and regression
 ;==================================================
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
+pre_case   = (/"(a","(d","(b","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 np = 0
 do nc = 0, ncase-1, 1
 if(dcase(nc).eq.0) then ;CN051
@@ -453,7 +451,7 @@ if(dcase(nc).ge.2) then
 end if
 eof     := eofunc_n(var,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nlon)
 if(ifrunave.eq.1.and.dcase(nc).eq.2) then 
-    eof = -1*eof
+    eof(1,:,:) = -1*eof(1,:,:)
 end if
 sig     := eofunc_north(eof@pcvar,nsample,True)
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
@@ -472,7 +470,7 @@ copy_VarMeta(vars,eof(0,:,:))
 ;==================================================================
 do ne = 0, 1, 1;neval-2, 1
     nee = ne+1
-    ;np = 2*ne+nc
+    np = 2*ne+nc
     pcvar1 = round(eof@pcvar(ne)*10,1)/10.0
     res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+pcvar1+"%";+" " +var_name(nv) + " (" + unit(nv) + ") " ; 
     ;res@gsnRightStringFontColor   = subtitle_color(ne)
@@ -484,7 +482,7 @@ do ne = 0, 1, 1;neval-2, 1
     plot(np) = gsn_csm_contour_map_ce(wks,eof(ne,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
     overlay(plot(np),gtop(np))
-    np = np + 1
+    ;np = np + 1
     printMinMax(eof(ne,:,:),True)
 end do 
 end do 
@@ -494,6 +492,10 @@ gsn_panel(wks,plot,(/2,2/),resp)
 end if
 
 if(spectral) then 
+fig_name = fig_name+"-spec"
+pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
+wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
+
 indx = 4 ;the result of specx_ci
 nsample2 = ntime;nyear*
 nfrq  = toint(nsample2/2.0) 
@@ -575,7 +577,7 @@ else
     ;gsn_panel(wks,plot,(/2,3/),resp)
 end if
 end do
-gsn_panel(wks,plot,(/2,1/),resp)
+gsn_panel(wks,plot,(/1,2/),resp)
 end if
 
 ;========================================================================

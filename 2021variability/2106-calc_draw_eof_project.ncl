@@ -28,7 +28,7 @@ neval = 7
 siglvl = 0.05
 
 area = (/"EA"/);,"GB"
-lats = (/ 18 /);, 10  ;-90 ,-90 ,-90 ,-90 
+lats = (/ 20 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 45 /);, 60  ;90 , 90 , 90 , 90 
 lonl = (/105 /);, 0   ;30 ;20
 lonr = (/145 /);, 360 ;150;220
@@ -323,7 +323,7 @@ eof  := eofunc_n(fvar,neval,opt,0) ;last one is the dim ; get the (neval,nlat,nl
 sig  := eofunc_north(eof@pcvar,nsample,True)
 subtitle_color = where(sig,"red","black") 
 if(ifrunave.eq.1.and.fnc.eq.2) then 
-    eof = -1*eof
+    eof(1,:,:) = -1*eof(1,:,:)
 end if
 ;eof = eof*conform(eof,sqrt(eof@eval),0)
 printVarSummary(eof)

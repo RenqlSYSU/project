@@ -64,7 +64,7 @@ if(ifrunave.eq.1) then
 fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
-fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -572,6 +572,7 @@ else
     resxy@xyLineColors  = (/"red","red","red"/)
     plot(np) = gsn_csm_xy(wks, splt&frq, splt(nc,selindex,:), resxy)     
     end if
+    print("EOF"+nee +" "+ case2(dcase(nc))+" "+splt(nc,0,:))
     np = np + 1
     end do
     ;gsn_panel(wks,plot,(/2,3/),resp)
@@ -579,6 +580,7 @@ end if
 end do
 gsn_panel(wks,plot,(/1,2/),resp)
 end if
+print("perid: "+1.0/frq)
 
 ;========================================================================
 ;save the data

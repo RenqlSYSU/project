@@ -10,7 +10,7 @@ region_line = True ;False; draw the line for ME, EA, NA
 vect_option = True ;False;
 cont_option = False;True ;
 bar_share = True ;False;
-nl = 4 ;
+nl = 2 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -29,7 +29,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -12,-12,1 
+do var_option = -16,-16,1 
 do nnv = 1,1,1
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
@@ -359,7 +359,7 @@ if(jet_option) then
     f = addfile(path + "data/" + case + "_" + months + "uwnd-year.nc","r")
     u_m = new((/ntime,nlat,nlon/),float)
     if(DJF_option) then
-    u_m(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    u_m(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{300},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     else
     u_m = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if

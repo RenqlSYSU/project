@@ -422,7 +422,7 @@ printVarSummary(var)
 dimh = 1
 if(ifrunave.eq.1) then 
 opt1= -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
-var = runave_n(var, nave, opt1, dimh)
+;var = runave_n(var, nave, opt1, dimh)
 var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 end if
 if(ifrunave.eq.2) then 
@@ -579,8 +579,8 @@ else
 end if
 end do
 gsn_panel(wks,plot,(/1,2/),resp)
-end if
 print("perid: "+1.0/frq)
+end if
 
 ;========================================================================
 ;save the data

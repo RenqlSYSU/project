@@ -11,11 +11,11 @@ begin
 path    = "/home/ys17-19/renql/project/2021variability"
 filein  = path + "/data/CN05.1-eof_ts_68_preci_5run.nc"
 fig_name = path + "/fig/CN05.1-eof_ts_68_preci_5run"
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
-fig_out    ="pdf";"x11"
-case2   = (/"OBS"   ,"OBS"  ,"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
-dcase   = (/1,2/)
-years   = ispan(1979,2005,1)   ;the calculate time
+pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
+fig_out  ="pdf";"x11"
+case2 = (/"OBS"   ,"OBS"  ,"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
+dcase = (/1,2/)
+years = ispan(1979,2005,1)   ;the calculate time
 nyear = dimsizes(years)
 ntime = 92
 
@@ -23,10 +23,10 @@ ntime = 92
 ;read the data, then calculate the yearly power spectra 
 ;--------------------------------------------------------------
 f    = addfile(filein,"r")
-time = cd_calendar(f->time,0)
 var  = f->eof_ts(:,0:1,:)
+var := dim_avg_n(reshape(var,(/2,2,nyear,ntime/)),2)
 
-plot   = new((/2/),graphic)
+plot = new((/2/),graphic)
 
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 
@@ -64,11 +64,13 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     resxy@trYMinF = min(var)
     resxy@trYMaxF = max(var)
     resxy@trXMinF = 0 
-    resxy@trXMaxF = dimsizes(time) 
+    resxy@trXMaxF = ntime 
     resxy@xyComputeXMin = True
-    resxy@tmXBMode    = "Explicit"
-    resxy@tmXBValues  = ispan(0,nyear*ntime-1,ntime) 
-    resxy@tmXBLabels  = years
+    ;resxy@tmXBMode    = "Explicit"
+    ;resxy@tmXBValues  = ispan(0,nyear*ntime-1,ntime) 
+    ;resxy@tmXBLabels  = years
+    ;resxy@tmXBValues  = ispan(0,ntime-1,ntime) 
+    ;resxy@tmXBLabels  = ispan(0,ntime-1,1)
     
     ;legend
     resxy@pmLegendDisplayMode = "Always"
@@ -131,9 +133,10 @@ wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
     
     np = 0
     do nc = 0, 1, 1
-    resxy@gsnLeftString   = pre_case(np) + ") PC" + (np+1)
-    plot(np) = gsn_csm_xy(wks,ispan(0,nyear*ntime-1,1), var(:,nc,:), resxy)     
-    np = np + 1
+        resxy@gsnLeftString   = pre_case(np) + ") PC" + (np+1)
+        plot(np) = gsn_csm_xy(wks,ispan(0,ntime-1,1), var(:,nc,:), resxy)     
+        ;plot(np) = gsn_csm_xy(wks,ispan(0,nyear*ntime-1,1), var(:,nc,:), resxy)     
+        np = np + 1
     end do
     gsn_panel(wks,plot,(/2,1/),resp)
 end

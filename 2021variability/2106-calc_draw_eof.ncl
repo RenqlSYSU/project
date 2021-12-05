@@ -422,7 +422,7 @@ printVarSummary(var)
 dimh = 1
 if(ifrunave.eq.1) then 
 opt1= -1 ;end-point option.  -1, utilize cyclic conditions; 0, set missing values; 1, utilize reflective (symmetric) conditions
-;var = runave_n(var, nave, opt1, dimh)
+var = runave_n(var, nave, opt1, dimh)
 var = var - conform(var,dim_avg_n(var,0),(/1,2,3/))  ;remove annual cycle
 end if
 if(ifrunave.eq.2) then 
@@ -453,7 +453,7 @@ eof     := eofunc_n(var,neval,opt,0) ;last one is the dim ; get the (neval,nlat,
 if(ifrunave.eq.1.and.dcase(nc).eq.2) then 
     eof(1,:,:) = -1*eof(1,:,:)
 end if
-sig     := eofunc_north(eof@pcvar,nsample,True)
+sig     := eofunc_north(eof@pcvar,toint(nsample/nave),True)
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
 eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)
 ts_mean(nc,:) = eof_ts_temp@ts_mean
@@ -493,7 +493,7 @@ end if
 
 if(spectral) then 
 fig_name = fig_name+"-spec"
-pre_case   = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case = (/"(c","(f","(d","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
 
 indx = 4 ;the result of specx_ci

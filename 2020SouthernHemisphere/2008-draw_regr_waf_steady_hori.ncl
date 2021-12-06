@@ -25,7 +25,7 @@ ntime = dimsizes(months2)
 case = (/"NCEP2","ERA-Interim"/)
 nc = 0
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    = "eps";"pdf";"x11"
+fig_out    = "pdf";"x11"
 
 ;area: east Asia
 lats = (/ 5  , 5  ,  0 ,  0 , 10 /);10 ;-20
@@ -158,9 +158,9 @@ if(shad_option.eq.0) then ;divg
 end if
 if(shad_option.eq.1) then ;edd_sf
     var_m(2,0,:,:) = (1.0/1000000.0)*f->$var_name(2)$({lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-    minlvl := (/-16,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
-    maxlvl := (/ 16, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
-    spacig := (/ 2 , 3 , 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
+    minlvl := (/-12,-21,-21/);-3.5,-3.5,-3.54.2,-4.2,-4.2
+    maxlvl := (/ 12, 21, 21/); 3.5, 3.5, 3.54.2, 4.2, 4.2
+    spacig := (/ 1.5, 3 /); 0.5, 0.5, 0.50.6, 0.6, 0.6
 end if
 if(shad_option.eq.2) then ;wafz
     var_name(2) = "wafz"
@@ -334,14 +334,14 @@ printVarSummary(var_m)
     res_sig@gsnFrame         = False
     res_sig@gsnDraw          = False
     res_sig@cnLineLabelsOn   = False      ; turn off contour line labels
-    res_sig@cnLineThicknessF = 2
+    res_sig@cnLineThicknessF = 3
     res_sig@cnInfoLabelOn    = False
     res_sig@cnMonoFillPattern= True;False
     res_sig@cnFillPattern    = 11
     res_sig@cnMonoFillScale  = True
     res_sig@cnFillScaleF     = 0.5
     res_sig@cnMonoFillColor  = True
-    res_sig@cnFillColor      = "gray50";"darkslategray"
+    res_sig@cnFillColor      = "darkslategray";"gray50";
     res_sig@cnFillDotSizeF   = 0.1
     res_sig@lbLabelBarOn     = False;True   ; turn off the label bar
     ;res_sig@cnLevelSelectionMode ="ExplicitLevels"

@@ -24,6 +24,13 @@ ntime = 92
 ;--------------------------------------------------------------
 f    = addfile(filein,"r")
 var  = f->eof_ts(:,0:1,:)
+
+do nc = 0,1,1
+    r = escorc(var(nc,0,:),var(nc,1,:))
+    prob = rtest(r,toint(nyear*ntime/5),0)
+    print(case2(dcase(nc))+"  r: "+r+"  prob: "+prob)
+end do
+
 var := dim_avg_n(reshape(var,(/2,2,nyear,ntime/)),2)
 
 plot = new((/2/),graphic)

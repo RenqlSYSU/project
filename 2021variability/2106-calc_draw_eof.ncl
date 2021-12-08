@@ -19,9 +19,9 @@ rmv = True ;False;remove annaul cycle when bandpass filter
 allcase = False ;True ;if True, four case PC spectral be draw in one figure
 month_s = 6
 month_e = 8
-savedata = True ;False;
-spectral = True ;False; ;whether draw the spectral line of ts
-eofmap   = True ;False; ;whether draw the eof map
+savedata = False;
+spectral = False; ;whether draw the spectral line of ts
+eofmap   = False; ;whether draw the eof map
 barshare = True ;False;
 barvert  = True ;
 
@@ -64,7 +64,8 @@ if(ifrunave.eq.1) then
 fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
-fig_out    = "pdf";"x11";"eps";
+fig_out    = "eps";"x11";"eps";
+;fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -89,6 +90,7 @@ ts_mean = new((/ncase,neval/),float)
 eval    = new((/ncase,neval/),float)
 pcvar   = new((/ncase,neval/),float)
 plot    = new((/36/),graphic)
+plotrv  = new((/36/),graphic)
 plot1   = new((/36/),graphic)
 gtop    = new((/36/),graphic)
 
@@ -143,6 +145,9 @@ end if
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
 
+    river                          = True
+    river@gsLineThicknessF         = mp_thick+1.0
+    river@gsLineColor              = "black"
 ;--------set the form of the coordinate-----------------
     res@tmBorderThicknessF  = mp_thick
     res@tmXBLabelFont   = font_index
@@ -481,6 +486,7 @@ do ne = 0, 1, 1;neval-2, 1
     res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
     plot(np) = gsn_csm_contour_map_ce(wks,eof(ne,:,:),res)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
+    plotrv(np) = gsn_add_shapefile_polylines(wks,plot(np),"/home/ys17-19/renql/project/river.nc",river)
     overlay(plot(np),gtop(np))
     ;np = np + 1
     printMinMax(eof(ne,:,:),True)

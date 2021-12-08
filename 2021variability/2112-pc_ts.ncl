@@ -9,29 +9,47 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
 begin
 path    = "/home/ys17-19/renql/project/2021variability"
-filein  = path + "/data/CN05.1-eof_ts_68_preci_5run.nc"
+;filein  = path + "/data/CN05.1-eof_ts_68_preci_5run.nc"
+;dcase = (/1,2/)
+filein  = path + "/data/CTRL-eof_project_ts_68_preci_5run.nc"
+dcase = (/2,3,4,5/)
+
 fig_name = path + "/fig/CN05.1-eof_ts_68_preci_5run"
 pre_case = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l"/)
 fig_out  ="pdf";"x11"
 case2 = (/"OBS"   ,"OBS"  ,"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
-dcase = (/1,2/)
 years = ispan(1979,2005,1)   ;the calculate time
 nyear = dimsizes(years)
 ntime = 92
+ncase = dimsizes(dcase)
 
 ;---------------------------------------------------------------
 ;read the data, then calculate the yearly power spectra 
 ;--------------------------------------------------------------
 f    = addfile(filein,"r")
-var  = f->eof_ts(:,0:1,:)
+var  = f->eof_ts(2:5,0:1,:)
 
-do nc = 0,1,1
+;significant test of variation
+eofts = reshape(var,(/ncase,2,nyear,ntime/))
+vari  = dim_avg_n(dim_avg_n(eofts^2,3),2)
+vari2 = dim_variance_n(dim_avg_n(eofts^2,3),2)
+do nc = 1, ncase-1, 1
+    prob = ttest(vari(0,:),vari2(0,:),nyear,vari(nc,:),vari2(nc,:),nyear,True,False)
+    do ne = 0,1,1
+        print("climatology ave EOF"+ne+" "+case2(nc))
+        print("vari:"+vari(nc,ne)+" diff:"+(vari(nc,ne)-vari(0,ne))+" prob:"+prob(ne))
+    end do
+    print("")
+end do
+
+;significant test of correlation factor
+do nc = 0,ncase-1,1
     r = escorc(var(nc,0,:),var(nc,1,:))
     prob = rtest(r,toint(nyear*ntime/5),0)
     print(case2(dcase(nc))+"  r: "+r+"  prob: "+prob)
 end do
 
-var := dim_avg_n(reshape(var,(/2,2,nyear,ntime/)),2)
+var := dim_avg_n(reshape(var,(/ncase,2,nyear,ntime/)),2)
 
 plot = new((/2/),graphic)
 

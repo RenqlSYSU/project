@@ -16,8 +16,8 @@ if(case_option.eq.0) then
 end if
 ;pre_case = (/"(e","(f"/)
 pre_case   = (/"(a","(b","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
-;fig_out    = "pdf";"x11";"eps";
-fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
@@ -39,7 +39,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"OMEGA"           ,"Z3"             
                  "uppT"     ,"preci_5run-smth400km"/)
 lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 6 
+nv = 21 
 diff = True ;False;
 perc = True ;False;
 siglvl = 0.05
@@ -93,7 +93,7 @@ lonl = (/0  ,25 ,0  ,90 ,100 /);20
 lonr = (/360,85 ,360,150,130/);220
 lat_spacing = (/30,10 ,30,10,10/)
 lon_spacing = (/40,20 ,40,20,10/)
-na = 0
+na = 4
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)})
@@ -109,6 +109,7 @@ prob   = new((/ncase-1,nvar,nmonth,nlat,nlon/),float)
 
 ;the number of the panel plot
     plot   = new((/30/),graphic)
+    plotrv = new((/30/),graphic)
     plot2  = new((/30/),graphic)
     plot3  = new((/30/),graphic)
     wind   = new((/30/),graphic)
@@ -183,7 +184,7 @@ do nf = 0 ,ncase-1, 1
 end do
 end if
 
-do nf = 0, ncase-1, 1
+do nf = 0, ncase-1, 3
 f = addfile(filename(nf)+"PS.nc","r")
 ps= f->$var_name(0)$(imonth,{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon)
 printVarSummary(ps)
@@ -370,11 +371,16 @@ end if
     res@gsnMajorLatSpacing = lat_spacing(na)
     res@gsnMajorLonSpacing = lon_spacing(na)
     res@gsnAddCyclic     = False
-    res@mpFillOn         = False
+    res@mpFillOn         = False;True
+    ;res@mpInlandWaterFillColor = "black"
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
     res@mpGeophysicalLineThicknessF = mp_thick
     res@mpGeophysicalLineColor      = "black";"white"
+
+    river                          = True
+    river@gsLineThicknessF         = mp_thick
+    river@gsLineColor              = "black"
 
 ;--------set the form of the coordinate-----------------
     res@tmBorderThicknessF  = mp_thick
@@ -801,7 +807,7 @@ end if
 
 np = -1
 do nm = 2,2,1;,nmonth-1,1
-do nc = 0,ncase-1,1
+do nc = 0,ncase-1,3
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
@@ -849,6 +855,7 @@ end if
         res@cnMinLevelValF        := minlvl(0)       ; set min contour level
         end if
         plot(np)    = gsn_csm_contour_map_ce(wks,var(nc,2,nm,:,:),res)
+        plotrv(np) = gsn_add_shapefile_polylines(wks,plot(np),"/home/ys17-19/renql/project/river.nc",river)
         if(diff.and.sig_option.and.nc.gt.0) then 
         sig(np) = gsn_csm_contour(wks,prob(nc-1,2,nm,:,:),res_sig)
         overlay(plot(np),sig(np))
@@ -957,11 +964,11 @@ end if
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
-;    gsn_panel(wks,plot,(/2,1/),resp)
+    gsn_panel(wks,plot,(/2,1/),resp)
 ;end do
     resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
     ;gsn_panel(wks,plot,(/5,4/),resp)
-    gsn_panel(wks,plot,(/2,2/),resp)
+;    gsn_panel(wks,plot,(/2,2/),resp)
 ;end do
 end
 

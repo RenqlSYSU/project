@@ -21,7 +21,7 @@ month_s = 6
 month_e = 8
 savedata = False;
 spectral = False; ;whether draw the spectral line of ts
-eofmap   = False; ;whether draw the eof map
+eofmap   = True ;False; ;whether draw the eof map
 barshare = True ;False;
 barvert  = True ;
 

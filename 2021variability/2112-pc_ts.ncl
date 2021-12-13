@@ -36,8 +36,64 @@ vari2 = dim_variance_n(dim_avg_n(eofts^2,3),2)
 do nc = 1, ncase-1, 1
     prob = ttest(vari(0,:),vari2(0,:),nyear,vari(nc,:),vari2(nc,:),nyear,True,False)
     do ne = 0,1,1
-        print("climatology ave EOF"+ne+" "+case2(nc))
+        print("climatology ave EOF"+ne+" "+case2(dcase(nc)))
         print("vari:"+vari(nc,ne)+" diff:"+(vari(nc,ne)-vari(0,ne))+" prob:"+prob(ne))
+    end do
+    print("")
+end do
+
+;variance based on spectral and its significant test
+; set spectral function arguments
+d   = 0    ; detrending opt: 0=>remove mean 1=>remove mean + detrend
+sm  = 1  ; smooth: should be at least 3 and odd; if small than 3, it would do no smoothing
+pct = 0.1;.10 ; percent taper: (0.0 <= pct <= 1.0) 0.10 common. If pct =0.0, no tapering will be done. If pct = 1.0, the whole series is affected
+nsample = ntime;nyear*
+nfrq  = toint(nsample/2.0) 
+vari40  = vari 
+vari402 = vari2
+do nc = 0, ncase-1, 1
+do ne = 0,1,1
+    spc = new ((/nyear,nfrq/),typeof(eofts))
+    do nt = 0, nyear-1, 1
+        sdof := specx_anal(eofts(nc,ne,nt,:),d,sm,pct) ;returns the degrees of freedom as a scalar.
+        spc(nt,:) = sdof@spcx                ; sum spc of each segment
+    end do 
+    perid  = 1.0/(sdof@frq)
+
+    index := ind(perid.gt.80.or.perid.lt.8) 
+    spc1 = spc
+    spc1(:,index) = 0
+    varia = spc1*(1.0/nsample)
+    varia(:,0) = varia(:,0)/2.0
+    varia(:,nfrq-1) = varia(:,nfrq-1)/2.0
+    vari(nc,ne) = dim_avg_n(dim_sum_n(varia,1),0)
+    vari2(nc,ne) = dim_variance_n(dim_sum_n(varia,1),0)
+    
+    index := ind(perid.gt.40.or.perid.lt.8) 
+    spc1 = spc
+    spc1(:,index) = 0
+    varia = spc1*(1.0/nsample)
+    varia(:,0) = varia(:,0)/2.0
+    varia(:,nfrq-1) = varia(:,nfrq-1)/2.0
+    vari40(nc,ne) = dim_avg_n(dim_sum_n(varia,1),0)
+    vari402(nc,ne) = dim_variance_n(dim_sum_n(varia,1),0)
+end do
+end do
+print("CTL 8-80-day vari: "+vari(0,0)+"; EOF2: "+vari(0,1))
+do nc = 1, ncase-1, 1
+    prob = ttest(vari(0,:),vari2(0,:),nyear,vari(nc,:),vari2(nc,:),nyear,True,False)
+    do ne = 0,1,1
+        print("climatology ave EOF"+ne+" "+case2(dcase(nc)))
+        print("8-80-day vari:"+vari(nc,ne)+" diff:"+(vari(nc,ne)-vari(0,ne))+" prob:"+prob(ne))
+    end do
+    print("")
+end do
+print("CTL 8-40-day vari: "+vari40(0,0)+"; EOF2: "+vari40(0,1))
+do nc = 1, ncase-1, 1
+    prob = ttest(vari40(0,:),vari402(0,:),nyear,vari40(nc,:),vari402(nc,:),nyear,True,False)
+    do ne = 0,1,1
+        print("climatology ave EOF"+ne+" "+case2(dcase(nc)))
+        print("8-40-day vari:"+vari40(nc,ne)+" diff:"+(vari40(nc,ne)-vari40(0,ne))+" prob:"+prob(ne))
     end do
     print("")
 end do

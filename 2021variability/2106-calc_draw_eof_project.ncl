@@ -413,16 +413,16 @@ if(nc.ge.2.and.mkoc) then
     vars := grid
 end if
 eof_ts_temp   = eofunc_ts_n(var,eof,False,0) ;get the (neval,nyear)
-eof_ts(nc,:,:)= eof_ts_temp;/conform(eof_ts_temp,sqrt(eof@eval),0)
+eof_ts(nc,:,:)= eof_ts_temp/conform(eof_ts_temp,sqrt(eof@eval),0)
 ts_mean(nc,:) = eof_ts_temp@ts_mean
 end do
 
-depart = eof_ts(fnc,:,:)-conform(eof_ts(fnc,:,:),dim_avg_n(eof_ts(fnc,:,:),1),(/0/))
-vari := dim_avg_n((depart)^2,1)
-eof_ts = eof_ts/conform(eof_ts,sqrt(vari),(/1/))
+;depart = eof_ts(fnc,:,:)-conform(eof_ts(fnc,:,:),dim_avg_n(eof_ts(fnc,:,:),1),(/0/))
+;vari := dim_avg_n((depart)^2,1)
+;eof_ts = eof_ts/conform(eof_ts,sqrt(vari),(/1/))
 
-vari := dim_avg_n(eof_ts^2,2)
-;vari = dim_variance_n(eof_ts,2) ;calc unbiased estimates of the variance
+;vari := dim_avg_n(eof_ts^2,2)
+vari = dim_variance_n(eof_ts,2) ;calc unbiased estimates of the variance
 do ne = 0,1,1
     print("nyear*ntime variance")
     print(vari(:,ne))
@@ -437,8 +437,8 @@ nfrq  = toint(nsample2/2.0)
 splt = new((/ncase,indx,nfrq/),float)
 eofts = reshape(eof_ts,(/ncase,neval,nyear,ntime/))
 
-vari = dim_avg_n(dim_avg_n(eofts^2,3),2)
-;vari = dim_avg_n(dim_variance_n(eofts,3),2)
+;vari = dim_avg_n(dim_avg_n(eofts^2,3),2)
+vari = dim_avg_n(dim_variance_n(eofts,3),2)
 do ne = 0,1,1
     print("climatology ave EOF"+ne)
     print(vari(:,ne))
@@ -476,11 +476,11 @@ end do
 varia = splt*(1.0/nsample2)
 varia(:,:,0) = varia(:,:,0)/2.0
 varia(:,:,nfrq-1) = varia(:,:,nfrq-1)/2.0
-frq  = sdof@frq
-splt = splt*conform(splt,frq,2)
 vari1 = dim_sum_n(varia(:,0,:),1)
 print(vari1)
 
+frq  = sdof@frq
+splt = splt*conform(splt,frq,2)
 print(sdof)
 printVarSummary(splt)
 splt!2   = "frq"

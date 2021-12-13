@@ -1,0 +1,60 @@
+ Copyright (C) 1995-2018 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.5.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+(0)	climatology ave EOF0 NT
+(0)	vari:0.72732 diff:-0.336018 prob:0.0047391
+(0)	climatology ave EOF1 NT
+(0)	vari:0.747137 diff:-0.316202 prob:0.0196279
+(0)	
+(0)	climatology ave EOF0 NM
+(0)	vari:0.765346 diff:-0.297992 prob:0.0162453
+(0)	climatology ave EOF1 NM
+(0)	vari:0.993025 diff:-0.070314 prob:0.585778
+(0)	
+(0)	climatology ave EOF0 NMT
+(0)	vari:0.493276 diff:-0.570063 prob:7.94203e-06
+(0)	climatology ave EOF1 NMT
+(0)	vari:0.649272 diff:-0.414067 prob:0.000921655
+(0)	
+(0)	CTL 8-80-day vari: 0.812897; EOF2: 0.848859
+(0)	climatology ave EOF0 NT
+(0)	8-80-day vari:0.563453 diff:-0.249444 prob:0.0135656
+(0)	climatology ave EOF1 NT
+(0)	8-80-day vari:0.566515 diff:-0.282343 prob:0.00947711
+(0)	
+(0)	climatology ave EOF0 NM
+(0)	8-80-day vari:0.617736 diff:-0.195161 prob:0.0587883
+(0)	climatology ave EOF1 NM
+(0)	8-80-day vari:0.783331 diff:-0.0655272 prob:0.569607
+(0)	
+(0)	climatology ave EOF0 NMT
+(0)	8-80-day vari:0.36901 diff:-0.443888 prob:1.67693e-05
+(0)	climatology ave EOF1 NMT
+(0)	8-80-day vari:0.500014 diff:-0.348844 prob:0.000853715
+(0)	
+(0)	CTL 8-40-day vari: 0.626771; EOF2: 0.662654
+(0)	climatology ave EOF0 NT
+(0)	8-40-day vari:0.437845 diff:-0.188926 prob:0.0215674
+(0)	climatology ave EOF1 NT
+(0)	8-40-day vari:0.394328 diff:-0.268326 prob:0.00073626
+(0)	
+(0)	climatology ave EOF0 NM
+(0)	8-40-day vari:0.477058 diff:-0.149713 prob:0.066101
+(0)	climatology ave EOF1 NM
+(0)	8-40-day vari:0.567447 diff:-0.0952072 prob:0.24138
+(0)	
+(0)	climatology ave EOF0 NMT
+(0)	8-40-day vari:0.301954 diff:-0.324817 prob:6.17264e-05
+(0)	climatology ave EOF1 NMT
+(0)	8-40-day vari:0.388926 diff:-0.273729 prob:0.000612264
+(0)	
+(0)	CTL  r: 2.25338e-09  prob: 1
+(1)	CTL  r: 2.25338e-09  prob: 1
+(0)	NT  r: 0.236172  prob: 1.02631e-07
+(1)	NT  r: 0.236172  prob: 1.02631e-07
+(0)	NM  r: 0.0114164  prob: 0.799788
+(1)	NM  r: 0.0114164  prob: 0.799788
+(0)	NMT  r: 0.237662  prob: 8.48153e-08
+(1)	NMT  r: 0.237662  prob: 8.48153e-08

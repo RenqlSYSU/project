@@ -369,8 +369,8 @@ p_draw = (/120,90,60,40,30,20,15,10,7,5/)
 ;=====================================================
 ;read data and filter and regression
 ;==================================================
-wks  = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
-pre_case   = (/"(a","(d","(b","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
+wks = gsn_open_wks(fig_out,fig_name)             ; send graphics to PNG file
+pre_case = (/"(a","(d","(b","(e","(a","(b","(g","(h","(i","(j","(k","(l"/)
 np = 0
 do nc = 0, ncase-1, 1
 if(dcase(nc).eq.0) then ;CN051

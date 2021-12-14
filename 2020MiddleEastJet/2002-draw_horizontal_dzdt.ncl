@@ -7,10 +7,10 @@ begin
 year_option = True ;calc yearly DJF 
 jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
-vect_option = True ;False;
+vect_option = False;True ;
 cont_option = False;True ;
 bar_share = True ;False;
-nl = 2 ;
+nl = 3 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -29,8 +29,13 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -16,-16,1 
+do var_option = -18,-18,1 
 do nnv = 1,1,1
+    if(var_option.eq.-18) then 
+        draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
+        var_name = (/"season_ave"/)  ;use to read variables
+        unit     = (/"m/s"/)  ;this can be used as right string 
+    end if
     if(var_option.eq.-17) then 
         draw_var = (/"hgt"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -341,8 +346,9 @@ end if
    font_index     = 22
 
     wks = gsn_open_wks(fig_out,fig_name)
-    if(var_option.eq.-10.or.var_option.eq.-15.or.var_option.eq.-16) then 
+    if(var_option.eq.-10.or.var_option.eq.-15.or.var_option.le.-16) then 
     gsn_define_colormap(wks,"precip3_16lev")
+    ;gsn_define_colormap(wks,"precip2_17lev")
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     else
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -830,6 +836,12 @@ end if
 
 if(var_option.le.-6) then 
     vcref = (/10,20,25,30,40/) ;(/925,850,700,500,200/)
+end if
+
+if(var_option.eq.-18) then ;Eady growth rate
+    minlvl := (/10/);
+    maxlvl := (/74/);
+    spacig := (/4 /);
 end if
 
 if(var_option.eq.-17) then ;Eady growth rate

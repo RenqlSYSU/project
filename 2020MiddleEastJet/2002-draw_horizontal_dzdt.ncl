@@ -9,12 +9,12 @@ jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
-bar_share = True ;False;
+bar_share = False;True ;
 nl = 3 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    = "pdf";"x11""eps";
+fig_out    = "eps";"pdf";"x11""eps";
 
 lev    = (/850,500,300,250,200/) 
 if(DJF_option) then
@@ -29,8 +29,8 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -18,-18,1 
-do nnv = 1,1,1
+do var_option = -10,-10,1 
+do nnv = 2,2,1
     if(var_option.eq.-18) then 
         draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -212,7 +212,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA","TP"/)
 lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 60 , 89 , 89 , 89 , 50 /) ;55 ;60
+latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -347,7 +347,8 @@ end if
 
     wks = gsn_open_wks(fig_out,fig_name)
     if(var_option.eq.-10.or.var_option.eq.-15.or.var_option.le.-16) then 
-    gsn_define_colormap(wks,"precip3_16lev")
+    gsn_define_colormap(wks,"precip_11lev")
+    ;gsn_define_colormap(wks,"precip3_16lev")
     ;gsn_define_colormap(wks,"precip2_17lev")
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     else
@@ -365,7 +366,7 @@ if(jet_option) then
     f = addfile(path + "data/" + case + "_" + months + "uwnd-year.nc","r")
     u_m = new((/ntime,nlat,nlon/),float)
     if(DJF_option) then
-    u_m(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{300},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+    u_m(0,:,:) = dim_avg_n_Wrap(f->season_ave(:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     else
     u_m = dim_avg_n_Wrap(f->month_ave(:,:,{200},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
     end if
@@ -567,7 +568,7 @@ end if
 if(nnv.eq.2) then 
     minlvl := (/20 ,10 ,10 /);-8,-8,-8,-8,
     maxlvl := (/320,160,160/); 8, 8, 8, 8,
-    spacig := (/20 ,10 ,10 /); 1, 1, 1, 1,
+    spacig := (/30 ,15 ,15 /); 1, 1, 1, 1,
 end if
 if(nnv.eq.3) then 
     var_m = var_m/10000
@@ -839,9 +840,9 @@ if(var_option.le.-6) then
 end if
 
 if(var_option.eq.-18) then ;Eady growth rate
-    minlvl := (/10/);
-    maxlvl := (/74/);
-    spacig := (/4 /);
+    minlvl := (/20/);
+    maxlvl := (/70/);
+    spacig := (/5 /);
 end if
 
 if(var_option.eq.-17) then ;Eady growth rate
@@ -1036,7 +1037,7 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/5,1/),resp)
+    gsn_panel(wks,plot,(/1,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)

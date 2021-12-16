@@ -5,18 +5,18 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -10  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
+var_option = -1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 jet_option = True ;False;;control the draw of jet stream
-stream_option =  True ;False;
-egr_option = True ;False; Eady growth rate 
+stream_option = False;True ;
+egr_option = False;True ; Eady growth rate 
 vect_option = False;True ;
-cont_option = False;True ;
+cont_option = True ;False;
 ;lev  = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,200,175,150,125, 100/)
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 DJF_option = True ;False
-barshare = True ;False; 
+barshare = False;True ;
 barvert  = False
 
 if(DJF_option) then
@@ -26,7 +26,6 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 end if
 ntime = dimsizes(months)
 
-do var_option = -10,-10,1
 if(var_option.eq.-14) then 
     draw_var := (/"Ah","Al"/)  ;,"fva","adv","A","cur" this is the variable used to draw, can used as center string
     var_name := (/"Ah","Al"/)  ;,"fva","adv","A","cur" use to read variables
@@ -108,9 +107,9 @@ end if
 
 ;area: east Asia
 area = (/"ME","EA","NA"/);,"EEA","WNP","ENP","GB"
-lats = (/ 0  , 0  , 0  /);10  ,10  ,10 
-latn = (/90  ,90  ,90  /);60  ,60  ,60
-lonl = (/ 0  ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
+lats = (/10  ,10  ,10 /);
+latn = (/60  ,60  ,60 /);
+lonl = (/0   ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
 lonr = (/70  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
 lat_spacing = 10
 na = 0
@@ -172,8 +171,8 @@ if(var_option.eq.5)
 end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
-;fig_out    ="eps";"x11"
-fig_out    ="pdf";"x11"
+fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
 if(DJF_option) then
@@ -200,7 +199,7 @@ fps  = addfile(gtopfile,"r")
 do na = 0, narea-1, 1
 phis := short2flt(fps->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
 phis  = phis/9.8   ;convert unit from m2/s2 to gpm
-phis1:= 1013.25*(1-dim_max_n_Wrap(phis,1)*0.0065/288.15)^5.25145
+phis1:= 1013.25*(1-dim_avg_n_Wrap(phis,1)*0.0065/288.15)^5.25145
 phis1 = where(phis1.le.1000, phis1, 1000)
 ypoly(na,0:nlat-1)    = tofloat(phis1)
 ypoly(na,nlat:nlat+3) = (/tofloat(phis1(nlat-1)),1000,1000,tofloat(phis1(0))/)
@@ -520,7 +519,7 @@ printVarSummary(var_m)
     res_egr@cnLineThicknessF = 4.0
     res_egr@cnLineColor      = "blueviolet";"gray40"
     res_egr@gsnContourZeroLineThicknessF = 0
-    res_egr@gsnContourNegLineDashPattern = 2
+    res_egr@gsnContourNegLineDashPattern = 14
     res_egr@gsnContourPosLineDashPattern = 0
     
     ;res_egr@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
@@ -546,9 +545,9 @@ printVarSummary(var_m)
     res_line@cnLinesOn        = True
     res_line@cnLineLabelsOn   = True ;False
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 4.0
+    res_line@cnLineThicknessF = 3.5
     res_line@cnLineColor      = "black"
-    res_line@gsnContourZeroLineThicknessF = 8
+    res_line@gsnContourZeroLineThicknessF = 6
     ;res_line@gsnContourNegLineDashPattern = 5
     
     levels = new((/10/),integer)
@@ -782,7 +781,6 @@ end do
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/narea,nvar/),resp)
     gsn_panel(wks,plot,(/3,3/),resp)
-end do 
 end do 
 end
 

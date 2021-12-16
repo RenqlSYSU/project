@@ -5,16 +5,17 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
+var_option = 5
 jet_option  = True ;False;;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
-bar_share = False;True ;
-nl = 3 ;
+bar_share = True ;False;
+nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    = "eps";"pdf";"x11""eps";
+fig_out    = "pdf";"x11""eps";
 
 lev    = (/850,500,300,250,200/) 
 if(DJF_option) then
@@ -29,8 +30,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do var_option = -10,-10,1 
-do nnv = 2,2,1
+do nnv = 1,1,1
     if(var_option.eq.-18) then 
         draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -138,14 +138,14 @@ do nnv = 2,2,1
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.5) then 
-    draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
-    select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
-    ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
-    ;select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        ;draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        ;select := (/0,1,2/)
+        draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        select := (/2,3,1/) 
     end if
     if(var_option.eq.6) then 
-    draw_var := (/"Qd","Qte","Fte","b1","b2","b3x","b3y","turn","b1z","b4","total","dudt"/)  ;this is the variable used to draw, can used as center string
-    select := (/0,1,2,0,1,0,1,0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        draw_var := (/"Qd","Qte","Fte","b1","b2","b3x","b3y","turn","b1z","b4","total","dudt"/)  ;this is the variable used to draw, can used as center string
+        select := (/0,1,2,0,1,0,1,0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
 end if
 if(var_option.eq.13) then
@@ -212,7 +212,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA","TP"/)
 lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
+latn = (/ 60 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -495,8 +495,8 @@ end if
 end if
 
 if(var_option.eq.5) then
-;fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
-;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
+var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
@@ -818,7 +818,7 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape";"portrait" ;
+    resp@gsnPaperOrientation = "portrait" ;"landscape";
     if(bar_share) then
     res@lbLabelBarOn      = False;True   ; the label bar
     resp@gsnPanelLabelBar = True
@@ -911,9 +911,9 @@ if(var_option.eq.-6) then
     spacig := (/ 1, 1, 1/); 1, 1, 1, 1,
 end if
 if(var_option.eq.-4.or.var_option.eq.-5) then 
-    minlvl := (/-35,-35,-35,-35/);-14,-14,-14,-14
-    maxlvl := (/ 35, 35, 35, 35/); 14, 14, 14, 14
-    spacig := (/ 5 , 5 , 5 , 5 /); 2 , 2 , 2 , 2 
+    minlvl := (/-70,-70,-70,-70/);-14,-14,-14,-14
+    maxlvl := (/ 70, 70, 70, 70/); 14, 14, 14, 14
+    spacig := (/ 10 , 10 , 10 , 10 /); 2 , 2 , 2 , 2 
 end if
 if(var_option.le.-2.and.var_option.ge.-3)
     minlvl := (/-2.1,-14/);-8,-8,-8,-8,
@@ -1037,11 +1037,10 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/1,1/),resp)
+    gsn_panel(wks,plot,(/3,1/),resp)
 ;     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)
-end do 
 ;end do 
 end
 

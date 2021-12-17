@@ -19,7 +19,7 @@ ntype = 0
 year_option = True ;False ;True means yearly
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nyear = 37
-freq = True ;False;
+freq = False;True ;
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
@@ -43,7 +43,7 @@ a  = 6378388 ;the radius of earth, m
 pi = atan(1.0)*4
 
 ;area: east Asia
-lats = 10  ;-90 ;
+lats = 15  ;-90 ;
 latn = 90  ; 90 ;
 lonl = 0   ; 30  ; 0  ;
 lonr = 360 ;150 ;360 ;

@@ -9,8 +9,8 @@
 !******************************************************************************
 program iteration 
     implicit none
-    integer, parameter :: pr = 8 ,  nvar = 4 ,nvar2 = 2, ntime = 37, nlev = 21 !ERA 
-    integer, parameter :: nlat = 54 , nlon = 240 , ilog  = 10 , ifile = 12
+    integer, parameter :: pr = 8 ,  nvar = 3 ,nvar2 = 2, ntime = 37, nlev = 21 !ERA 
+    integer, parameter :: nlat = 51 , nlon = 240 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
     character(len=200) :: logname, fileout, filename
@@ -37,7 +37,7 @@ program iteration
     
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
-    nc = 2
+    nc = 1
     if(nc.eq.0) then 
         filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_4f6c_freq.dat"
         fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_freq.dat"     
@@ -48,13 +48,13 @@ program iteration
         filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_4f6c.dat"
         fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt.dat"     
         logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor-era.txt"
-        !var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
+        var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
     end if
     if(nc.eq.2) then 
         filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_3b6c.dat"
         fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_advect_xy.dat"     
         logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_advect-era.txt"
-        var_name  = (/"b3x","b3y","b1x","b1y"/)  !this is the variable used to draw, can used as center string
+        !var_name  = (/"b3x","b3y","b1x","b1y"/)  !this is the variable used to draw, can used as center string
     end if
     
     open(unit=ilog,file=logname,form='formatted',status='replace')

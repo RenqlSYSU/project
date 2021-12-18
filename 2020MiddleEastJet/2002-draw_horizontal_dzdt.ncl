@@ -5,8 +5,8 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = 5
-jet_option  = True ;False;;20191205, control the draw of jet stream
+var_option = -5
+jet_option  = True ;False;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
@@ -138,10 +138,10 @@ do nnv = 1,1,1
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.5) then 
-        ;draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
-        ;select := (/0,1,2/)
-        draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
-        select := (/2,3,1/) 
+        draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        select := (/0,1,2/)
+        ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        ;select := (/2,3,1/) 
     end if
     if(var_option.eq.6) then 
         draw_var := (/"Qd","Qte","Fte","b1","b2","b3x","b3y","turn","b1z","b4","total","dudt"/)  ;this is the variable used to draw, can used as center string
@@ -245,7 +245,7 @@ if(var_option.eq.-10)
     fig_name = path + "fig/1p3x3_horizontal_" + var_calc(nnv)
 end if
 if(var_option.eq.-5.or.var_option.eq.-6)
-    filename = path + "data/" + case + "_"+months+"forc_in2-year.nc"
+    filename = path + "data/" + case + "_"+months+"forc_in3-year.nc"
     contname = path + "data/" + case + "_"+months+"dzdt_in3-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + lev(nl) + var_name(0)
 end if
@@ -431,21 +431,25 @@ else
     var_m(nv,:,:,:)  = dim_avg_n_Wrap(f->$var_name(nv)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
     end if
     end do
-    ;var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
+    var_m(nvar-1,:,:,:) = dim_sum_n_Wrap(var_m(0:nvar-2,:,:,:),0)
     if(cont_option) then 
     fc = addfile(contname,"r")
     if(var_option.ge.-6) then 
-    var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
-    var_c(nvar-1,:,:,:) = dim_sum_n_Wrap(var_c(:,:,:,:),0)
-    ;var_c = var_c*10^3
-    var_c = var_c*10^6
+        if (nnv.eq.0) then 
+            var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dzdt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+            var_c = var_c*10^3
+        else
+            var_c(:,0,:,:) = dim_avg_n_Wrap(fc->dudt(select,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1) ;get an array (ncase,nmonth,nlat,nlon)
+            var_c = var_c*10^6
+        end if
+        var_c(nvar-1,:,:,:) = dim_sum_n_Wrap(var_c(0:nvar-2,:,:,:),0)
     else
-    if(DJF_option) then
-    var_c(0,0,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-    else
-    var_c(0,:,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
-    end if
-    var_c = var_c/9.8
+        if(DJF_option) then
+        var_c(0,0,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+        else
+        var_c(0,:,:,:) = dim_avg_n_Wrap(fc->$var_name(0)$(:,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0) ;get an array (ncase,nmonth,nlat,nlon)
+        end if
+        var_c = var_c/9.8
     end if 
     end if 
 end if
@@ -484,8 +488,8 @@ f = addfile(filename,"r")
 end if
 
 if(var_option.eq.-5) then
-fbv = addfile(path + "data/" + case + "_" + months + "forc_in-year.nc","r")
-var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+;fbv = addfile(path + "data/" + case + "_" + months + "forc_in-year.nc","r")
+var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(f->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 if(cont_option) then 
     fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
@@ -495,8 +499,8 @@ end if
 end if
 
 if(var_option.eq.5) then
-fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
-var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+;fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
+;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
@@ -554,7 +558,7 @@ end if
 if(var_option.eq.-12) then
     pi = atan(1.0)*4
     lat  = (var_m&lat)*pi/180.0
-    var_m = var_m + conform(var_m,2*(2*pi/24.0/3600.0)*sin(lat),2)
+;    var_m = var_m + conform(var_m,2*(2*pi/24.0/3600.0)*sin(lat),2)
     var_m = var_m*1000000
 end if
 
@@ -758,7 +762,8 @@ end if
     res_line@cnLineThicknessF = 4.0
     res_line@cnLineColor      = "blueviolet";"green4";"black"
     res_line@gsnContourZeroLineThicknessF = 0
-    res_line@gsnContourNegLineDashPattern = 5
+    res_line@gsnContourNegLineDashPattern = 2
+    res_line@gsnContourPosLineDashPattern = 0
     
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
     res_line@cnLevelSpacingF       = 10        ; set contour interval
@@ -776,14 +781,14 @@ end if
     res_cont@cnLineLabelsOn   = False ;True ;
     res_cont@cnLineLabelFontHeightF = 0.005
     res_cont@cnInfoLabelOn    = False
-    res_cont@cnLineThicknessF = 4.0
+    res_cont@cnLineThicknessF = 3.5
     if(jet_option) then 
     res_cont@cnLineColor      = "green4";"black";"blueviolet";
     else
     res_cont@cnLineColor      = "blueviolet";"green4";"black";
     end if
     res_cont@gsnContourZeroLineThicknessF = 0
-    res_cont@gsnContourNegLineDashPattern = 5
+    res_cont@gsnContourNegLineDashPattern = 7
     res_cont@gsnContourPosLineDashPattern = 0
   
     levels = new((/10/),integer)
@@ -792,7 +797,7 @@ end if
     ;res_cont@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_cont@cnLevels             = levels       ; set contour interval
     res_cont@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_cont@cnLevelSpacingF      = 50        ; set contour interval
+    res_cont@cnLevelSpacingF      = 1        ; set contour interval
     res_cont@lbLabelBarOn     = False   ; the label bar
     res_cont@gsnCenterString  = ""
     res_cont@gsnLeftString    = " "
@@ -896,9 +901,9 @@ if(var_option.eq.-13) then
     spacig := (/ 5 , 5 , 2 , 2 /); 1, 1, 1, 1,
 end if
 if(var_option.eq.-12) then
-    minlvl := (/-35 /)
-    maxlvl := (/ 35 /)
-    spacig := (/ 5  /)
+    minlvl := (/-49 /)
+    maxlvl := (/ 49 /)
+    spacig := (/ 7  /)
 end if
 if(var_option.eq.-11) then
     minlvl := (/-14 /)
@@ -906,9 +911,9 @@ if(var_option.eq.-11) then
     spacig := (/ 2 /)
 end if
 if(var_option.eq.-6) then
-    minlvl := (/-7,-7,-7/);-8,-8,-8,-8,
-    maxlvl := (/ 7, 7, 7/); 8, 8, 8, 8,
-    spacig := (/ 1, 1, 1/); 1, 1, 1, 1,
+    minlvl := (/-10.5,-10.5,-10.5/);-8,-8,-8,-8,
+    maxlvl := (/ 10.5, 10.5, 10.5/); 8, 8, 8, 8,
+    spacig := (/ 1.5, 1.5, 1.5/); 1.5, 1.5, 1.5, 1.5,
 end if
 if(var_option.eq.-4.or.var_option.eq.-5) then 
     minlvl := (/-70,-70,-70,-70/);-14,-14,-14,-14

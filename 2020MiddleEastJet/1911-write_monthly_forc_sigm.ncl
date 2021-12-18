@@ -30,7 +30,7 @@ fileout = path + case + "_DJF_4f6c_freq.dat"
 var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  
 var_name2 = (/"Qeddh","Qeddl"/)  
 else
-filein  = path + case + "_DJF_Qd_Qeddy_A-year.nc"
+filein  = path + case + "_DJF_forc_ex-year.nc"
 fileout = path + case + "_DJF_4f6c.dat"
 var_name  = (/"f_Qd","f_Qeddy","A"/)  
 var_name2 = (/"Qd","Qeddy"/)  

@@ -36,9 +36,12 @@ program iteration
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
      filename = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_3b6c.dat"
-     fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_re.dat"     
-     logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_re-era.txt"
-     var_name  = (/"turn","b1z ","b4  "/)  
+     fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_in.dat"     
+     logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_b1xb1yb2.txt"
+     var_name  = (/"b1x","b1y","b2"/)  !this is the variable used to draw, can used as center string
+     !fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_re.dat"     
+     !logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_re-era.txt"
+     !var_name  = (/"turn","b1z ","b4  "/)  
      !fileout  = "/home/ys17-19/renql/project/2020MiddleEastJet/data/ERA-Interim_DJF_dzdt_advect_xy.dat"     
      !logname  = "/home/ys17-19/renql/project/2020MiddleEastJet/f90_iter_infor_advect-era.txt"
     ! var_name = (/"b1","b2","b3"/) !,"f_Qd_t "
@@ -119,8 +122,8 @@ program iteration
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
-        dzdt(:,:,1   ,:,:) = 0  !lower boundary for A
-        dzdt(:,:,nlev,:,:) = 0  !upper boundary for A
+        dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
+        dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
         
         do nv = 1, nvar ,1 
             write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,16,1,nv)

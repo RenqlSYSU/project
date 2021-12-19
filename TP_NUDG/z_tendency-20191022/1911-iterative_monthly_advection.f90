@@ -149,8 +149,8 @@ program iteration
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
-        dzdt(:,:,1   ,:,:) = 0  !lower boundary for A
-        dzdt(:,:,nlev,:,:) = 0  !upper boundary for A
+        dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
+        dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
         
         do nv = 1, nvar ,1 
             write(ilog,*) "dzdt induced by "//trim(var_name(nv))//" is " ,dzdt(120,30,16,1,nv)

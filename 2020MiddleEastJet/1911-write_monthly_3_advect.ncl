@@ -30,10 +30,11 @@ fileout = path + case + "_DJF_3b6c.dat"
 var_name  = (/"b3x","b3y","b1x","b1y"/)  ;this is the variable used to draw, can used as center string
 var_name2 = (/"t3x","t3y"/)  
 else
-filein  = path + case + "_DJF_forc_re-year.nc"
+filein  = path + case + "_DJF_forc_in3-year.nc"
 fileout = path + case + "_DJF_3b6c.dat"
-var_name  = (/"turn","b1z","b4"/)  ;this is the variable used to draw, can used as center string
+;var_name  = (/"turn","b1z","b4"/)  ;this is the variable used to draw, can used as center string
 ;var_name  = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"b1x","b1y","b2"/)  ;this is the variable used to draw, can used as center string
 end if
 
 g  = 9.8 ;m/(s*s)

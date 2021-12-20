@@ -16,7 +16,7 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 data_type = (/"double","float"/)
 ntype = 0
 ntime = 37 
-freq = 1
+freq = 5
 
 case   = "ERA-Interim"
 ;case   = "NCEP1"
@@ -50,6 +50,12 @@ filedat = path + case + "_DJF_dzdt_re.dat"
 fileout = path + case + "_DJF_dzdt_re-year.nc"
 var_name= (/"turn","b1z","b4"/)  ;this is the variable used to draw, can used as center string
 end if
+if(freq.eq.5) then 
+filein  = path + case + "_DJF_forc_in3-year.nc"
+filedat = path + case + "_DJF_dzdt_in.dat"
+fileout = path + case + "_DJF_dzdt_b1xb1yb2-year.nc"
+var_name= (/"b1x","b1y","b2"/)  ;this is the variable used to draw, can used as center string
+end if
 
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 
@@ -59,7 +65,7 @@ pi = atan(1.0)*4
 print(pi)
 
 ;area: east Asia
-lats = 15 ;-20 ;-90 ;
+lats = 10 ;-20 ;-90 ;
 latn = 90  ; 90 ;
 lonl =  0  ;30  ;
 lonr = 360 ;150 ;

@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -5
+var_option = 5
 jet_option  = True ;False;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
@@ -15,7 +15,8 @@ nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    = "pdf";"x11""eps";
+fig_out    = "eps";"x11""eps";
+;fig_out    = "pdf";"x11""eps";
 
 lev    = (/850,500,300,250,200/) 
 if(DJF_option) then
@@ -85,9 +86,9 @@ do nnv = 1,1,1
     end if
     if(var_option.eq.-5) then 
         draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
-        var_name := (/"b1x","b1y","b3x"/)  ;,"b3y" use to read variables
+        var_name := (/"b1x","b1y","b2"/)  ;,"b3y" use to read variables
         unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
-        select := (/2,3,0/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.-4) then 
         draw_var := (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
@@ -138,10 +139,10 @@ do nnv = 1,1,1
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.5) then 
-        draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
-        select := (/0,1,2/)
-        ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
-        ;select := (/2,3,1/) 
+        ;draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        ;select := (/0,1,2/)
+        draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        select := (/0,1,2/);(/2,3,1/) 
     end if
     if(var_option.eq.6) then 
         draw_var := (/"Qd","Qte","Fte","b1","b2","b3x","b3y","turn","b1z","b4","total","dudt"/)  ;this is the variable used to draw, can used as center string
@@ -277,7 +278,8 @@ if(var_option.eq.4)
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.5)
-    filename = path + "data/" + case + "_DJF_dzdt_in3-year.nc"
+    filename = path + "data/" + case + "_DJF_dzdt_b1xb1yb2-year.nc"
+    ;filename = path + "data/" + case + "_DJF_dzdt_in3-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + var_name(nnv) + "_" + draw_var(0)
 end if
 if(var_option.eq.6)
@@ -501,6 +503,7 @@ end if
 if(var_option.eq.5) then
 ;fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
 ;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(1:2,:,:,:),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
@@ -939,9 +942,9 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.ge.1.and.var_option.le.6) then
-    minlvl = (/-3.5,-70,-16,-24/);-35,35
-    maxlvl = (/ 3.5, 70, 16, 24/); 35,35
-    spacig = (/ 0.5, 10,  2,  3/);  5,5 
+    minlvl = (/-3.5,-175,-16,-24/);-35,35
+    maxlvl = (/ 3.5, 175, 16, 24/); 35,35
+    spacig = (/ 0.5, 25,  2,  3/);  5,5 
 end if
 
 if(var_option.ge.13.and.var_option.lt.20) then ;dbdt

@@ -66,12 +66,12 @@ printVarSummary(vars)
 nlev = dimsizes(vars&lev)
 nlat = dimsizes(vars&lat)
 nlon = dimsizes(vars&lon)
+
+if(filter) then
 remove_mean = True
 return_info = True
 var := dtrend_msg_n(years,vars,remove_mean,return_info,0)
-;var := vars
 
-if(filter) then
 ca = 9.0 ;year
 fca = 1.0/ca
 fcf = fspan(0, 0.5, nyear/2) 
@@ -82,6 +82,8 @@ term = cf
 term(:,low_cf,:,:,:) = 0.0  
 var = ezfftb_n(term,0,1)
 delete([/term,cf/])
+else
+var := vars
 end if
 
 print("time is " + months2(nt))

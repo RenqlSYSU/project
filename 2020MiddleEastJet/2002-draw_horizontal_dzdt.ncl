@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = 5
+var_option = -5
 jet_option  = True ;False;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
@@ -15,8 +15,8 @@ nl = 4 ;
 na = 0 ; "NH","ME","EA","NA"
 DJF_option = True ;True ;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
-fig_out    = "eps";"x11""eps";
-;fig_out    = "pdf";"x11""eps";
+;fig_out    = "eps";"x11""eps";
+fig_out    = "pdf";"x11""eps";
 
 lev    = (/850,500,300,250,200/) 
 if(DJF_option) then
@@ -85,7 +85,8 @@ do nnv = 1,1,1
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.-5) then 
-        draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        draw_var := (/"vort","b2","total"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
         var_name := (/"b1x","b1y","b2"/)  ;,"b3y" use to read variables
         unit     := "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
         select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
@@ -141,7 +142,8 @@ do nnv = 1,1,1
     if(var_option.eq.5) then 
         ;draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
         ;select := (/0,1,2/)
-        draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        ;draw_var := (/"vort_x","vort_y","vort"/)  ;,"b3y" this is the variable used to draw, can used as center string
+        draw_var := (/"vort","b2","total"/)  ;,"b3y" this is the variable used to draw, can used as center string
         select := (/0,1,2/);(/2,3,1/) 
     end if
     if(var_option.eq.6) then 
@@ -491,7 +493,10 @@ end if
 
 if(var_option.eq.-5) then
 ;fbv = addfile(path + "data/" + case + "_" + months + "forc_in-year.nc","r")
-var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(f->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(f->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
+;var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+var_m(0,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+var_m(1,0,:,:) = dim_avg_n_Wrap(f->b2(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 if(cont_option) then 
     fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
@@ -503,7 +508,9 @@ end if
 if(var_option.eq.5) then
 ;fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
 ;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
-var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(1:2,:,:,:),0)
+;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(1:2,:,:,:),0)
+var_m(0,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+var_m(1,:,:,:) = var_m(2,:,:,:)
 var_m(2,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
 end if
 ;var_m(1,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)

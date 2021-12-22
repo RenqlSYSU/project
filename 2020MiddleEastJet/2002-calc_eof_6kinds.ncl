@@ -17,7 +17,7 @@ nv = 0
 opt = True
 opt@jopt = 0 ;use covariance matrix (0) or correlation matrix (1) to compute EOFs
 neval = 4
-filter = True;False;
+filter = False;True ;
 DJF_option = True;;
 
 if(DJF_option) then
@@ -34,13 +34,13 @@ case   = "ERA-Interim"
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 15 , 20 , 25 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 40 , 45 , 50 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/ 20 ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 60 ,175 , 320/);, 360 ;150;220
+lonl = (/  0 ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 70 ,175 , 320/);, 360 ;150;220
 narea = dimsizes(area)
 
 path     = "/home/ys17-19/renql/project/2020MiddleEastJet"
 filein   = path + "/data/" + case + "_" + months + var_name(nv) + "-year.nc"
-fileout  = path + "/data/eof2_u_6kinds-" + months2(nt) + "_" + area + ".nc"
+fileout  = path + "/data/eof_u_6kinds-" + months2(nt) + "_" + area + ".nc"
 
 f2 = addfile(path + "/data/" + case + "_" + months + "ps-year.nc","r")
 f  = addfile(filein,"r")
@@ -88,10 +88,10 @@ end if
 
 print("time is " + months2(nt))
 print(area(na) + " : " + lonl(na) + "-" + lonr(na) + "E " + lats(na) + "-" + latn(na) + "N ")
-print("max slope is " + max(var@slope))
-print("min slope is " + min(var@slope))
-print("max intercept is " + max(var@y_intercept))
-print("min intercept is " + min(var@y_intercept))
+;print("max slope is " + max(var@slope))
+;print("min slope is " + min(var@slope))
+;print("max intercept is " + max(var@y_intercept))
+;print("min intercept is " + min(var@y_intercept))
 copy_VarMeta(vars,var)
 pi   = atan(1.0)*4
 wgt  = sqrt(cos( vars&lat*pi/180.0 ))
@@ -173,19 +173,19 @@ ts_mean(nk,:) = eof_ts_temp@ts_mean
 print("eval : " + eof5@eval(0) + ", " + eof5@eval(1)\ 
         + ", " + eof5@eval(2) + ", " + eof5@eval(3)) 
 
-print("")
-do ne = 0,neval-1,1
-ne2 = ne + 1
-print(area(na) + " EOF" + ne2)
-do nk1 = 0    , 4, 1
-do nk2 = nk1+1, 5, 1
-    r = escorc(eof_ts(nk1,ne,:),eof_ts(nk2,ne,:))
-    ;print("correlation between EOF" + nk1 + " and EOF" + nk2 + " neval = " + ne + " : " + r)
-    print(" " + r)
-end do
-print("")
-end do
-end do
+;print("")
+;do ne = 0,neval-1,1
+;ne2 = ne + 1
+;print(area(na) + " EOF" + ne2)
+;do nk1 = 0    , 4, 1
+;do nk2 = nk1+1, 5, 1
+;    r = escorc(eof_ts(nk1,ne,:),eof_ts(nk2,ne,:))
+;    ;print("correlation between EOF" + nk1 + " and EOF" + nk2 + " neval = " + ne + " : " + r)
+;    print(" " + r)
+;end do
+;print("")
+;end do
+;end do
 
 ;========================================================================
 ;save the data
@@ -197,7 +197,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "there are six types of EOF." 
+fileAtt@discription   = "there are six types of EOF. (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"   
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

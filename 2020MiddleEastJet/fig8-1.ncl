@@ -14,25 +14,26 @@ draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center st
 unit     = (/"m/s"/)  ;this can be used as right string
 var_name = (/"season_ave"/)  ;use to read variables
 nv = 0
-lat_option = True
-case   = "ERA-Interim"
+lev  = (/850,500,200,100/)
+nl = 2
 
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/  0 ,105 , 250/);, 0   ;30 ;20
+lonl = (/ 0  ,105 , 250/);, 0   ;30 ;20
 lonr = (/ 70 ,175 , 320/);, 360 ;150;220
 lon_spacing = 20
 lat_spacing = 10
 narea = dimsizes(area)
 neval = 4
 siglvl = 0.05
+years = ispan(1979,2015,1)
 
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
 filename   = path + "/data/eof2_u_6kinds-DJF_" + area + ".nc"
-fig_name   = path + "/fig/eof_regression_ver-" + draw_var(nv)
+fig_name   = path + "/fig/eof2_regression_hor-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
-pre_case   = (/"(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/) ;"(a","(b","(c", "(d","(e","(f", 
+pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
 plot   = new((/18/),graphic)
 line   = new((/18/),graphic)
 sigl   = new((/18/),graphic)
@@ -61,8 +62,6 @@ sigl   = new((/18/),graphic)
     res@gsnDraw          = False
     res@gsnMaximize      = True
     res@gsnAddCyclic     = False
-    res@vpWidthF  = 0.8
-    res@vpHeightF = 0.6
     res@gsnCenterString      = ""
     res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
@@ -79,10 +78,6 @@ sigl   = new((/18/),graphic)
     res@tmYLMajorThicknessF     = mp_thick
     res@tmXBMinorThicknessF     = mp_thick
     res@tmYLMinorThicknessF     = mp_thick
-    res@gsnPresHgtHeightLabelOn = False
-    res@tiYAxisOn = False
-    res@tmYRLabelsOn = False
-    res@tmXBMode = "Manual"
 
 ;---------set the attribute of the contour-----------------
     res@cnFillOn         = True
@@ -102,6 +97,19 @@ sigl   = new((/18/),graphic)
     ;res@pmLabelBarWidthF  = 0.7
     ;res@pmLabelBarHeightF = 0.1
 
+do na = 0, narea-1,1
+;-------set the attribute of the map-------------------
+    res@mpCenterLonF     = 180.
+    res@mpMaxLatF        = latn(na) 
+    res@mpMinLatF        = lats(na)
+    res@mpMaxLonF        = lonr(na)
+    res@mpMinLonF        = lonl(na)
+    res@gsnMajorLatSpacing = lat_spacing 
+    res@gsnMajorLonSpacing = lon_spacing
+    res@mpFillOn         = False
+    res@mpGeophysicalLineThicknessF = mp_thick
+    res@mpGeophysicalLineColor      = "black";"white"
+
 ;---------set the attribute of the contour-----------------
     res_line = True
     res_line@gsnDraw          = False
@@ -118,14 +126,13 @@ sigl   = new((/18/),graphic)
     levels = new((/10/),integer)
     levels(0) = 0
     levels(1:9) = ispan(5,85,10)
+;    levels(0:9) = ispan(5,85,10)
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     res_line@lbLabelBarOn     = False   ; the label bar
     res_line@gsnCenterString  = ""
     res_line@gsnLeftString    = " "
     res_line@gsnRightString   = " "
-    res_line@gsnPresHgtHeightLabelOn = False
-    res_line@tiYAxisOn = False
 
 ;----------Set res sig-----------
     res_sig                  = True       ; use plot options
@@ -149,16 +156,14 @@ sigl   = new((/18/),graphic)
     ;res_sig@cnLevels             = (/3000,1000/)
     res_sig@gsnLeftString    = " "
     res_sig@gsnRightString   = " "
-    res_sig@gsnPresHgtHeightLabelOn = False
-    res_sig@tiYAxisOn = False
 
     resp  = True    
     resp@gsnMaximize   = True
     resp@gsnPaperOrientation = "portrait" ;"landscape";
     resp@gsnPanelLabelBar = True
-    resp@lbOrientation    = "Vertical"
-    resp@pmLabelBarWidthF  = 0.06
-    resp@pmLabelBarHeightF = 0.8
+    resp@lbOrientation    = "Horizontal"
+    resp@pmLabelBarWidthF  = 0.8
+    resp@pmLabelBarHeightF = 0.06
     resp@lbLabelFont        = font_index              ; make labels smaller
     resp@lbLabelFontHeightF = 0.015 
     resp@lbLabelFontThicknessF = tick_thick
@@ -171,10 +176,14 @@ if(nv.eq.0) then
     spacig = (/ 0.5 /)
 end if
 
-do ne = 0, 1, 1;neval-2, 1
-do na = 0, narea-1,1
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
+;if(na.eq.1) then
+;    ts(0,0,:)=-ts(0,0,:)
+;end if
+;if(na.eq.2) then
+;    ts(0,1,:)=-ts(0,1,:)
+;end if
 nyear = dimsizes(ts&year)
 sig   = new((/6,neval/),logical)
 eval  = new((/6,neval/),float)
@@ -206,33 +215,17 @@ eof5 := f->eof5
 ts = ts/conform(ts,sqrt(eval),(/0,1/))
 subtitle_color = where(sig,"red","black") 
 
-f2 = addfile(path + "/data/ERA-Interim_DJF_" + draw_var(nv) + "-year.nc","r")
-vars:= f2->season_ave(:,:,{lats(na):latn(na)},{lonl(na):lonr(na)})
+f2 = addfile(path + "/data/ERA-Interim_DJF_uwnd-year.nc","r")
+vars := f2->season_ave(:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)})
+u := dim_avg_n_Wrap(vars,0)
 nlat = dimsizes(vars&lat)
 nlon = dimsizes(vars&lon)
-nlev = dimsizes(vars&lev)
 
-if(lat_option) then 
-    res@tmXBTickSpacingF   = lat_spacing 
-    res@tmXBTickStartF     = lats(na)
-    res@tmXBTickEndF       = latn(na)
-    vars := dim_avg_n_Wrap(vars,3)
-    u    := dim_avg_n_Wrap(vars,0)
-    var  := regCoef_n(ts,vars,2,0)
-    tval := onedtond(var@tval ,(/6,neval,nlev,nlat/))
-    df   := onedtond(var@nptxy,(/6,neval,nlev,nlat/))
-else
-    res@tmXBTickSpacingF   = lon_spacing 
-    res@tmXBTickStartF     = lonl(na)
-    res@tmXBTickEndF       = lonr(na)
-    vars := dim_avg_n_Wrap(vars,2)
-    u    := dim_avg_n_Wrap(vars,0)
-    var  := regCoef_n(ts,vars,2,0)
-    tval := onedtond(var@tval ,(/6,neval,nlev,nlon/))
-    df   := onedtond(var@nptxy,(/6,neval,nlev,nlon/))
-end if
+var := regCoef_n(ts,vars,2,0)
 copy_VarCoords(vars(0,:,:), var(0,0,:,:))
 printVarSummary(var)
+tval  := onedtond(var@tval ,(/6,neval,nlat,nlon/))
+df    := onedtond(var@nptxy,(/6,neval,nlat,nlon/))
 b = tval 
 b = 0.5
 prob  := betainc( df/(df+tval^2), df/2.0, b )
@@ -245,11 +238,12 @@ print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 0, 1
-;do ne = 0, 1, 1;neval-2, 1
+do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
     np = ne*narea + na 
     ;np = na*(neval-2) + ne 
     res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
+    ;res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
     res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
     if(nv.gt.10) then
@@ -260,17 +254,17 @@ do nk = 0, 0, 1
     res@cnMaxLevelValF        := maxlvl ;32    ; set max contour level
     res@cnMinLevelValF        := minlvl       ; set min contour level
     end if
-    plot(np) = gsn_csm_pres_hgt(wks, var(nk,ne,:,:),res)
-    sigl(np) = gsn_csm_pres_hgt(wks,prob(nk,ne,:,:),res_sig)
+    plot(np)    = gsn_csm_contour_map_ce(wks,var(nk,ne,:,:),res)
+    sigl(np)    = gsn_csm_contour(wks,prob(nk,ne,:,:),res_sig)
     overlay(plot(np),sigl(np))
-    line(np) = gsn_csm_pres_hgt(wks,u,res_line)
+    line(np)    = gsn_csm_contour(wks,u,res_line)
     overlay(plot(np),line(np))
     print(max(var(nk,ne,:,:)))
     print(min(var(nk,ne,:,:)))
 end do 
 end do 
-    ;resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
-    ;gsn_panel(wks,plot,(/6,3/),resp)
+;    resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
+;    gsn_panel(wks,plot,(/6,3/),resp)
 end do ;area 
     gsn_panel(wks,plot,(/2,3/),resp)
 end

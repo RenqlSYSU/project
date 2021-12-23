@@ -20,8 +20,8 @@ case   = "ERA-Interim"
 area = (/"ME","EA","NA"/);,"GB"
 lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90 
-lonl = (/  0 ,105 , 250/);, 0   ;30 ;20
-lonr = (/ 70 ,175 , 320/);, 360 ;150;220
+lonl = (/ 20 ,105 , 250/);, 0   ;30 ;20
+lonr = (/ 60 ,175 , 320/);, 360 ;150;220
 lon_spacing = 20
 lat_spacing = 10
 narea = dimsizes(area)
@@ -32,7 +32,7 @@ path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
 filename   = path + "/data/eof2_u_6kinds-DJF_" + area + ".nc"
 fig_name   = path + "/fig/eof_regression_ver-" + draw_var(nv)
 fig_out    = "pdf" ;"eps";"x11"
-pre_case   = (/"(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/) ;"(a","(b","(c", "(d","(e","(f", 
+pre_case   = (/"(a","(b","(c", "(d","(e","(f","(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/) ; 
 plot   = new((/18/),graphic)
 line   = new((/18/),graphic)
 sigl   = new((/18/),graphic)
@@ -171,7 +171,7 @@ if(nv.eq.0) then
     spacig = (/ 0.5 /)
 end if
 
-do ne = 0, 1, 1;neval-2, 1
+;do ne = 0, 1, 1;neval-2, 1
 do na = 0, narea-1,1
 f  = addfile(filename(na),"r")
 ts = f->eof_ts
@@ -244,10 +244,12 @@ print(max(df))
 print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nk = 0, 0, 1
-;do ne = 0, 1, 1;neval-2, 1
+np = -1
+do nk = 0, 3, 1
+do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
-    np = ne*narea + na 
+    np = np + 1 
+    ;np = ne*narea + na 
     ;np = na*(neval-2) + ne 
     res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
     res@gsnRightStringFontColor   = subtitle_color(nk,ne)
@@ -269,9 +271,9 @@ do nk = 0, 0, 1
     print(min(var(nk,ne,:,:)))
 end do 
 end do 
-    ;resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
-    ;gsn_panel(wks,plot,(/6,3/),resp)
+    resp@txString = area(na) + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"  
+    gsn_panel(wks,plot,(/4,2/),resp)
 end do ;area 
-    gsn_panel(wks,plot,(/2,3/),resp)
+    ;gsn_panel(wks,plot,(/2,3/),resp)
 end
 

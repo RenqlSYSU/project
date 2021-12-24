@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = -5
+var_option = 1
 jet_option  = True ;False;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
@@ -949,9 +949,9 @@ if(var_option.eq.0) then
 end if
 
 if(var_option.ge.1.and.var_option.le.6) then
-    minlvl = (/-3.5,-175,-16,-24/);-35,35
-    maxlvl = (/ 3.5, 175, 16, 24/); 35,35
-    spacig = (/ 0.5, 25,  2,  3/);  5,5 
+    minlvl = (/-3.5,-70,-16,-24/);-35,35
+    maxlvl = (/ 3.5, 70, 16, 24/); 35,35
+    spacig = (/ 0.5, 10,  2,  3/);  5,5 
 end if
 
 if(var_option.ge.13.and.var_option.lt.20) then ;dbdt

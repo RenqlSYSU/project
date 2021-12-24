@@ -27,7 +27,7 @@ def draw_relation(corr,prob,labelx,labely,figdir):
     midfont=10
     smfont=14
     cnlevels = [-0.99,-0.95,-0.90,0.90,0.95,0.99]
-    listcolor = ["dodgerblue","deepskyblue","powderblue","white","gold","darkorange","red"]
+    listcolor = ["dodgerblue","aquamarine","powderblue","white","gold","darkorange","red"]
     fcolors = colors.ListedColormap(listcolor)
     norm = colors.BoundaryNorm(boundaries=cnlevels, ncolors=fcolors.N,extend='both')
     

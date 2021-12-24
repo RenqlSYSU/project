@@ -36,7 +36,7 @@ end
 begin
 lev  = (/925,850,500,200,100/)
 nl = 3
-filter = True;False
+filter = False;True ;
 
 area = (/"ME","EA","NA"/);,"GB"
 if (.not.isvar("lats")) then

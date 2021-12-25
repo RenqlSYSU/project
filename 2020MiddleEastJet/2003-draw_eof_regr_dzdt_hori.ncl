@@ -11,15 +11,14 @@
 ;******************************************************************************
 begin
 lev  = (/925,850,500,200,100/)
-nl = 3
+nl = 1
 global = True
-bar_share   = True ;False;
+bar_share   = False;True ;
 bar_verti   = False;True ;
 jet_option  = True ;False
 regu_option = True ;False;
 
-var_option = 1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
-do var_option = -23,-23,1 
+var_option = -1  ;0 means Qd; 1 means f_Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1
 if(var_option.eq.-23) then 
     draw_var := (/"preci"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"precip"/)  ;this is the variable used to draw, can used as center string
@@ -66,7 +65,7 @@ if(var_option.eq.-2) then
     unit     := (/"K/Day","10~S~-11~N~s~S~-2~N~","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-1) then 
-    draw_var := (/"Qd","Qte","Fte"/)  ;this is the variable used to draw, can used as center string
+    draw_var := (/"Qd"   ,"Qte","Fte"/)  ;this is the variable used to draw, can used as center string
     var_name := (/"Qd"   ,"Qeddy","A"/)  ;use to read variables
     unit     := (/"K/Day","K/Day","10~S~-11~N~s~S~-2~N~"/)  ;this can be used as right string 
 end if
@@ -117,7 +116,7 @@ end if
 nvar = dimsizes(draw_var)
 
 area = (/"ME","EA","NA"/);,"GB"
-lats = (/ -10 , -10 , -10 /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
+lats = (/ 10 , 10 , 10 /);, 10  ;-90 ,-90 ,-90 ,-90 -20,-20 ,-20
 latn = (/ 60 , 60 , 60 /);, 60  ;90 , 90 , 90 , 90  60 , 60 , 60
 lonl = (/ 0  , 0  ,0   /);, 0   ;30 ;20  0  ,105 , 250
 lonr = (/ 360,360 ,360 /);, 360 ;150;220 70 ,175 , 320
@@ -134,7 +133,7 @@ years = ispan(1979,2015,1)
 
 case   = "ERA-Interim"
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-filename0  = path + "data/eof_u_6kinds-" + area + ".nc"
+filename0  = path + "data/eof2_u_6kinds-DJF_" + area + ".nc"
 if(var_option.eq.-23)
     filename = "/home/ys17-19/data-observation/GPCP/precip.mon.mean.197901.201809.nc"
     fig_name = path + "fig/eof_regression_hor-preci"
@@ -504,7 +503,8 @@ eof0 := f->eof0
 eof1 := f->eof1
 eof2 := f->eof2
 eof3 := f->eof3
-eof4 := f->eof44eof5 := f->eof5
+eof4 := f->eof4
+eof5 := f->eof5
     sig(0,:)  = eofunc_north(eof0@pcvar,nyear,False)
     sig(1,:)  = eofunc_north(eof1@pcvar,nyear,False)
     sig(2,:)  = eofunc_north(eof2@pcvar,nyear,False)
@@ -796,11 +796,11 @@ end if
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do nk = 0, 0, 1
-do ne = 0, neval-3, 1
+do ne = 0, 1, 1
 do nv = 0, nvar-1,1
 do nt = 0, ntime-1, 1
     nev = ne + 1
-    np = ne
+    np = nv
     ;np = ne*2+(nv-1)
     ;np  = 2*na + ne ;1 var ;2 area
     ;np = ne*nvar + nv ;1 var ;2 area
@@ -884,16 +884,15 @@ do nt = 0, ntime-1, 1
 end do 
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
-;    gsn_panel(wks,plot,(/nvar,1/),resp)
+    gsn_panel(wks,plot,(/nvar,1/),resp)
 end do 
 ;    resp@txString = lev(nl) + "hPa " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = lev(nl) + "hPa " + draw_var(nv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + area(na); + " (" + lats(na) + "-" + latn(na) + "N," + lonl(na) + "-" + lonr(na) + "E)"
 ;    resp@txString = var_name(nnv) + " " + nk + " EOF" + nev ;+ " " + eval(na,nk,ne) + "  " + pcvar(na,nk,ne)+"%" 
-    gsn_panel(wks,plot,(/2,1/),resp)
+;    gsn_panel(wks,plot,(/2,1/),resp)
 end do ;EOF kinds
 end do ;area 
 ;    gsn_panel(wks,plot,(/narea,2/),resp)
-end do ;var_option
 end
 

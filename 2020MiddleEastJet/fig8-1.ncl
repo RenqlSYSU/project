@@ -32,7 +32,7 @@ years = ispan(1979,2015,1)
 path   = "/home/ys17-19/renql/project/2020MiddleEastJet"
 filename   = path + "/data/eof2_u_6kinds-DJF_" + area + ".nc"
 fig_name   = path + "/fig/eof2_regression_hor-" + draw_var(nv)
-fig_out    = "pdf" ;"eps";"x11"
+fig_out    = "eps";"x11""pdf" ;
 pre_case   = (/"(a","(b","(c", "(d","(e","(f", "(g","(h","(i", "(j","(k","(l", "(m","(n","(o", "(p","(q","(r"/)
 plot   = new((/18/),graphic)
 line   = new((/18/),graphic)
@@ -237,15 +237,17 @@ print(max(df))
 print(min(df))
 
 res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+featre = (/" Meridional shift"," Intensity change"/)
 do nk = 0, 0, 1
 do ne = 0, 1, 1;neval-2, 1
     nev = ne + 1
     np = ne*narea + na 
     ;np = na*(neval-2) + ne 
-    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev
+    res@gsnLeftString   = pre_case(np) + ") " + area(na) + " EOF" + nev + featre(ne)
     ;res@gsnRightString  = draw_var(nv) + " (" + unit(nv) + ")" 
-    res@gsnRightStringFontColor   = subtitle_color(nk,ne)
-    res@gsnRightString            = eval(nk,ne) + "  " + pcvar(nk,ne)+"%" 
+    res@gsnRightStringFontColor   = "black";subtitle_color(nk,ne)
+    pcvar1 = round(pcvar(nk,ne),1)
+    res@gsnRightString            = pcvar1+"%" 
     if(nv.gt.10) then
     res@cnLevelSelectionMode  = "AutomaticLevels" ; set manual contour levels
     else

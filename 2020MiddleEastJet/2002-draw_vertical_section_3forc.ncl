@@ -171,9 +171,9 @@ if(var_option.eq.5)
     fig_name = path + "fig/1p2x3_height_lat_" + var_name(nnv) + "_" + draw_var(0)
 end if
 
-pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
-;fig_out    ="eps";"x11"
-fig_out    ="pdf";"x11"
+pre_case   = (/"(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
+fig_out    ="eps";"x11"
+;fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
 if(DJF_option) then
@@ -200,7 +200,7 @@ fps  = addfile(gtopfile,"r")
 do na = 0, narea-1, 1
 phis := short2flt(fps->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)}))
 phis  = phis/9.8   ;convert unit from m2/s2 to gpm
-phis1:= 1013.25*(1-dim_max_n_Wrap(phis,1)*0.0065/288.15)^5.25145
+phis1:= 1013.25*(1-dim_avg_n_Wrap(phis,1)*0.0065/288.15)^5.25145
 phis1 = where(phis1.le.1000, phis1, 1000)
 ypoly(na,0:nlat-1)    = tofloat(phis1)
 ypoly(na,nlat:nlat+3) = (/tofloat(phis1(nlat-1)),1000,1000,tofloat(phis1(0))/)

@@ -8,7 +8,7 @@ case = (/"NCEP2","ERA-Interim"/)
 nc = 0
 if(nc.eq.0) then 
 path1  = "/home/ys17-19/data-observation/NCEP_DOE/daily/" ;hgt unit is m 
-years = ispan(1979,2018,1)
+years = ispan(1979,2020,1)
 else
 path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/" ;hgt unit is m2/s2
 years = ispan(1979,2016,1)
@@ -20,7 +20,7 @@ var_name = (/"uwnd","vwnd","air","hgt"/)
 ;ts = (/-16.33339,-10.07344,-2.129999,-7.827043,26.10205,34.93106,7.237824,-2.88431,-4.954339,-0.844423,-5.536781,-6.130042,-14.13272,4.539642,-12.55697,\
 ;2.724565,-2.883797,-3.598295,-16.95587,19.35723,13.80637,13.8677,8.82702,-10.5183,-7.378797,-14.55946,-7.588447,5.988917,-8.355371,9.735603,6.808292,\
 ;-3.840728,7.263536,12.45822,3.979857,-8.741457,-12.33934,2.832654/) ;,2.65007,-2.947284
-ts     = asciiread(path2+"JET_index_MEJindx_2040N5080E_7918_DJF.txt",-1,"float")
+ts     = asciiread(path2+"JET_index_MEJindx_2040N5080E_7920_DJF.txt",-1,"float")
 ind_neg  = ind(ts.lt.-1)
 ind_pos  = ind(ts.gt.1)
 nind_neg = dimsizes(ind_neg)
@@ -91,7 +91,7 @@ cyclic = False ;used by center_finite_diff_n
 nlev  = dimsizes(lev)
 if(DJF_option) then 
 select_time  = ind(time(:,1).eq.12.or.time(:,1).le.2)
-select_time1 = select_time
+select_time1 = select_time ;use to read leap year
 select_time1(58:89) = select_time(58:89) + 1
 else
 select_time  = ind(time(:,1).ge.3.and.time(:,1).le.5)
@@ -173,7 +173,7 @@ u2 := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v2 := new((/nyear,ntime,nlev,nlat,nlon/),float)
 t2 := new((/nyear,ntime,nlev,nlat,nlon/),float)
 z2 := new((/nyear,ntime,nlev,nlat,nlon/),float)
-u2(0,31:89,:,:,:) = u(0,0:58,:,:,:)
+u2(0,31:89,:,:,:) = u(0,0:58,:,:,:) ;1979 winter only Jan and Feb
 v2(0,31:89,:,:,:) = v(0,0:58,:,:,:)
 t2(0,31:89,:,:,:) = t(0,0:58,:,:,:)
 z2(0,31:89,:,:,:) = z(0,0:58,:,:,:)

@@ -39,8 +39,8 @@ lat_spacing = 10
 lon_spacing = 10
 na = 0
 
-dcase   = (/1,2/)
-;dcase   = (/0,1,2,3,4,5/)
+;dcase   = (/1,2/)
+dcase   = (/0,1,2,3,4,5/)
 case1   = (/"CN05.1","APHRO","CTRL","NG15S","NG4550","NGEN"/) 
 case2   = (/"OBS"   ,"OBS"  ,"CTL" ,"NT"   ,"NM"    ,"NMT" /) 
 gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
@@ -64,8 +64,8 @@ if(ifrunave.eq.1) then
 fileout  = path + "/data/"+case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run.nc"
 fig_name = path + "/fig/" +case1(0)+"-eof_ts_"+month_s+month_e+"_"+var_name(nv)+"_"+nave+"run"
 end if
-fig_out    = "eps";"x11";"eps";
-;fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
 
 f    = addfile(filein(3)+years(0)+".daily.PRECC.nc","r")
 time = cd_calendar(f->time,0)
@@ -377,7 +377,6 @@ if(dcase(nc).eq.0) then ;CN051
     f   = addfile(filein(dcase(nc)),"r")
     vars:= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
     lat := vars&lat
-    grid= f->pre(0,{lats(na):latn(na)},{lonl(na):lonr(na)});mm/day
 end if
 if(dcase(nc).eq.1) then ;APHRO
     f   = addfile(filein(dcase(nc))+years(0)+".nc","r")
@@ -473,11 +472,14 @@ copy_VarMeta(vars,eof(0,:,:))
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
-do ne = 0, 1, 1;neval-2, 1
+do ne = 0, neval-2, 1
     nee = ne+1
-    np = 2*ne+nc
+    np = 6*nc+ne
+    ;np = 2*ne+nc
     pcvar1 = round(eof@pcvar(ne)*10,1)/10.0
-    res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+pcvar1+"%";
+    res@gsnLeftStringFontColor   = subtitle_color(ne)
+    res@gsnLeftString   = case2(dcase(nc))+" EOF"+nee+": "+pcvar1+"%";
+    ;res@gsnLeftString   = pre_case(np) + ") "+ case2(dcase(nc))+" EOF"+nee+": "+pcvar1+"%";
     ;res@gsnRightStringFontColor   = subtitle_color(ne)
     ;res@gsnRightString            = "EOF"+nee+": "+eof@pcvar(ne)+"%" 
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
@@ -493,8 +495,8 @@ do ne = 0, 1, 1;neval-2, 1
 end do 
 end do 
 if(eofmap) then 
-gsn_panel(wks,plot,(/2,2/),resp)
-;gsn_panel(wks,plot,(/6,(neval-1)/),resp)
+;gsn_panel(wks,plot,(/2,2/),resp)
+gsn_panel(wks,plot,(/6,(neval-1)/),resp)
 end if
 
 if(spectral) then 

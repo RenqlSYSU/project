@@ -16,7 +16,7 @@ nv = 1
 
 ifrunave2= 2 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
 ifrunave = 1 ;0 = not filter; 1 = runave; 2 = bandpass filter; 3 = Fourier filter
-nave = 5 ;five days run ave
+nave = 5  ;five days run ave
 ca = 40.0 ;day
 cb = 8.0
 rmv = False;True ;remove annaul cycle when bandpass filter
@@ -193,8 +193,8 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.025
-   subtitle_font  = 0.03
+   tick_font      = 0.035
+   subtitle_font  = 0.04
    title_font     = 0.03
    vcref_font     = 0.025
    tick_thick     = 8.0
@@ -460,7 +460,7 @@ tsf = addfile(tsfile,"r")
 eval = tsf->eval
 pcvar= tsf->pcvar
 pcvar= round(pcvar*10,1)/10.0 ;Round to one decimal place
-do ne = 0,0, 1;5, 1
+do ne = 1,1, 1;5, 1
 ts = tsf->eof_ts(2:5,ne,:)
 if(ifrunave2.eq.2) then 
     fca = 1.0/ca

@@ -276,8 +276,8 @@ if(na.eq.0) then
    mp_thick       = 1.5
    font_index     = 22
 else
-   tick_font      = 0.025
-   subtitle_font  = 0.03
+   tick_font      = 0.035
+   subtitle_font  = 0.04
    title_font     = 0.03
    vcref_font     = 0.025
    tick_thick     = 8.0

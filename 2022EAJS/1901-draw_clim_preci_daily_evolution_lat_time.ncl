@@ -15,9 +15,9 @@ if(case_option.eq.0) then
     case    = (/"F2000","JET_NUDG","diff"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
                       "/model/F2000_JET_NUDG/F2000_NUDG.cam.h1.YEAR.00"/)
-    years    = ispan(1,10,1)   ;the calculate time
+    years    = ispan(1,30,1)   ;the calculate time
 end if
-fig_name   = path + "/project/2022EASJ/fig/" + case(0) + "-clim_preci_daily_evolution_lat_time"
+fig_name   = path + "/project/2022EAJS/fig/" + case(0) + "-clim_preci_daily_evolution_lat_time"
 var_name = (/"PRECC","PRECL"/)
 fig_out    ="pdf"       ;"x11"
 unit       = "mm/day"   ;this can be used as right string 

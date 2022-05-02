@@ -58,7 +58,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 3,3,1; ,nvar-1 ,1 
+do nv = 9,9,1; ,nvar-1 ,1 
 do nf = 0,ncase-1,1
 ;---------------------------------------------------------------
 ;read the data

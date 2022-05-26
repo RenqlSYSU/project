@@ -12,7 +12,7 @@ if(case_option.eq.0) then
     case1   = (/"F2000","JET_NUDG"/)
     case2   = (/"F2000","diff"/)
     gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-    nsample = 27
+    nsample = 30
 end if
 pre_case   = (/"(a","(b","(c","(d","(g","(h","(i","(j","(k","(l"/);"(a","(b",
 fig_out    = "pdf";"x11";"eps";

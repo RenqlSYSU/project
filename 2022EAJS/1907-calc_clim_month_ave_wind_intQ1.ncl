@@ -21,21 +21,21 @@ if(case_option.eq.0) then
     years    = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/2022EAJS/data/" + case + "-Clim_month_ave_"
 end if
-var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
+var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"OMEGA","dudt","div",\
              "Q1" ,"preci","TMQ","TS" ,"PS"  , \
              "PSL","PRECC","PRECL" /) ;,"OMEGA","RELHUM" 
 
 ;Q1 is vertically integrated 
 
 ;area: east Asia
-lats = -90 ;;0  
-latn =  90  ;60 
-lonl =  0   ;20 
-lonr =  360 ;180
-;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+lats = 0  ;-90 ;;
+latn = 80 ; 90  ;
+lonl = 50 ; 0   ;
+lonr = 180; 360 ;
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 ;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200/) ;hPa
 ;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100,50,20, 10,5/) ;17levels hPa
-lev  = (/1000,925,850,700,500,400, 300,200,100,50,10/) ;,150,100hPa
+;lev  = (/1000,925,850,700,500,400, 300,200,100,50,10/) ;,150,100hPa
 ;lev  = (/850,500,200/) ;v,
 
 ;==========================================================
@@ -58,13 +58,13 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 9,9,1; ,nvar-1 ,1 
+do nv = 0,6,1; ,nvar-1 ,1 
 do nf = 0,ncase-1,1
 ;---------------------------------------------------------------
 ;read the data
 ;--------------------------------------------------------------
-if((nv.le.4)) then 
-if(nv.eq.4) then 
+if((nv.le.6)) then 
+if(nv.eq.5) then 
     var_name2 = (/"U","V","OMEGA"/)
     u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
@@ -108,7 +108,31 @@ if(nv.eq.4) then
     var@long_name = "dudt = dudt + u*dudx + v*dudy + w*dudz"
     var@units     = "m*s^-2"
     delete([/u,v,w,term,lat,lon,pi,coslat,a/])
-else
+end if
+if(nv.eq.6) then 
+    u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    
+    do nt = 0,nyear-1,1
+    files := systemfunc("ls "+filein(nf)+"*.daily.U.nc" )
+    print("handle with " + files(nt))
+    f      = addfile(files(nt),"r")
+    u(nt,:,:,:,:) = f->U(:,{lev},{lats:latn},{lonl:lonr})
+    
+    files := systemfunc("ls "+filein(nf)+"*.daily.V.nc" )
+    print("handle with " + files(nt))
+    f      = addfile(files(nt),"r")
+    v(nt,:,:,:,:) = f->V(:,{lev},{lats:latn},{lonl:lonr})
+    end do
+
+    u = linmsg_n(u,-1,4)
+    v = linmsg_n(v,-1,4)
+    var = -uv2dv_cfd ( u, v, u&lat, u&lon, 2 )
+    var@long_name = "divergence"
+    var@units     = "1/s"
+    delete([/u,v/])
+end if
+if(nv.le.4) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     do nt = 0,nyear-1,1
     print("handle with " + files(nt))
@@ -139,7 +163,7 @@ do ns = 0,3,1
 end do
 end if
 
-if(nv.ge.5) then
+if(nv.ge.7) then
 var        := new((/nyear,365,nlat,nlon/),float)
 var_month  := new((/nyear,12 ,nlat,nlon/),float)
 var_season := new((/nyear,4  ,nlat,nlon/),float)
@@ -147,7 +171,7 @@ month_ave  := new((/      12 ,nlat,nlon/),float)
 month_vari := new((/      12 ,nlat,nlon/),float) ;be used to exam the significance of the mean difference between the two groups
 season_ave := new((/       4 ,nlat,nlon/),float)
 season_vari:= new((/       4 ,nlat,nlon/),float)
-if(nv.eq.5) then 
+if(nv.eq.7) then 
 var_name(nv) = "T"
 files2 := systemfunc("ls "+filein(nf)+"*.daily.PS.nc" )
 q1    = new((/nyear,ntime,nlev,nlat,nlon/),float)
@@ -174,7 +198,7 @@ var@units     = "K"
 var_name(nv) = "uppT"
 end if
 
-if(nv.eq.6) then
+if(nv.eq.8) then
     var = 0.0
     files1 := systemfunc("ls "+filein(nf)+"*.daily.PRECC.nc" )
     files2 := systemfunc("ls "+filein(nf)+"*.daily.PRECL.nc" )
@@ -188,7 +212,7 @@ if(nv.eq.6) then
     var  = var*1000*3600*24 ;convert m/s to mm/day
 end if
 
-if(nv.gt.6) then 
+if(nv.gt.8) then 
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     do nt = 0,nyear-1,1
     print("handle with " + files(nt))
@@ -253,7 +277,7 @@ filevardef(ncdf,"season","integer",(/"season"/))
 filevardef(ncdf,"lev","integer",(/"lev"/))
 filevardef(ncdf,"lat",typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon",typeof(vars&lon),getvardims(vars&lon))
-if((nv.le.4)) then 
+if((nv.le.6)) then 
 filevardef(ncdf,"month_ave" ,typeof(month_ave) ,(/"month" ,"lev","lat","lon"/))
 filevardef(ncdf,"season_ave",typeof(season_ave),(/"season","lev","lat","lon"/))
 filevardef(ncdf,"month_vari" ,typeof(month_vari) ,(/"month" ,"lev","lat","lon"/))

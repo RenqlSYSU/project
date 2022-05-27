@@ -29,7 +29,8 @@ months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","
 imonth = ispan(5,7,1)
 end if
 nmonth = dimsizes(imonth)
-lev  = (/1000,925,850,700,500,400, 300,200,100/) ;,150,100hPa
+lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
+;lev  = (/1000,925,850,700,500,400, 300,200,100/) ;,150,100hPa
 
 ;area: east Asia
 area = (/"TP","EA","NH"/)

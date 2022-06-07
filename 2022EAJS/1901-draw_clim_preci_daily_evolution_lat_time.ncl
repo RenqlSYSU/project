@@ -17,6 +17,12 @@ if(case_option.eq.0) then
                       "/model/F2000_JET_NUDG/F2000_NUDG.cam.h1.YEAR.00"/)
     years    = ispan(1,30,1)   ;the calculate time
 end if
+if(case_option.eq.1) then
+    case    = (/"F2000","INT_NUDG","diff"/)
+    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model/F2000_JET_NUDG2/F2000_NUDG2.cam.h1.YEAR.00"/)
+    years    = ispan(1,30,1)   ;the calculate time
+end if
 fig_name   = path + "/project/2022EAJS/fig/" + case(0) + "-clim_preci_daily_evolution_lat_time"
 var_name = (/"PRECC","PRECL"/)
 fig_out    ="pdf"       ;"x11"

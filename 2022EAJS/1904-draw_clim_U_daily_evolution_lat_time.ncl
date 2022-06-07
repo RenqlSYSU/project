@@ -18,9 +18,10 @@ draw_var = (/"200hPa U"/)  ;this is the variable used to draw, can used as cente
 unit     = "m/s"   ;this can be used as right string 
 
 if(case_option.eq.0) then
-    case    = (/"F2000","JET_NUDG","diff"/)
+    case    = (/"F2000","JET_NUDG","INT_NUDG"/)
     filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_JET_NUDG/F2000_NUDG.cam.h1.YEAR.00"/)
+                      "/model/F2000_JET_NUDG/F2000_NUDG.cam.h1.YEAR.00",\
+                      "/model/F2000_JET_NUDG2/F2000_NUDG2.cam.h1.YEAR.00"/)
     years    = ispan(1,30,1)   ;the calculate time
 end if
 fig_name   = path + "/project/2022EAJS/fig/" + case(0) + "-clim_200U_daily_evolution_lat_time"
@@ -229,7 +230,7 @@ copy_VarMeta(temp(0,:),diff(0,:,0))
     lnres2                      = True
     lnres2@gsLineColor          = "black"
     lnres2@gsLineDashPattern    = 0
-    lnres2@gsLineThicknessF     = 8.0
+    lnres2@gsLineThicknessF     = 4.0
 
 ;------------------------------------------------------------------
 ;draw the subgraph and change the left and right titles

@@ -9,8 +9,8 @@ begin
 path  = "/home/ys17-19/renql/project/2022EAJS"
 case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
-    case1   = (/"F2000","JET_NUDG"/)
-    case2   = (/"F2000","diff"/)
+    case1   = (/"F2000","JET_NUDG","INT_NUDG"/)
+    case2   = (/"F2000","JET-F20000","INT-F2000"/)
     gtopfile= "/home/ys17-19/renql/project/TP_NUDG/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
@@ -53,7 +53,7 @@ contsig  = True ;False;;if True, only the significant values are contoured
 barshare = False;True ;
 barvert  = True ;False;
 
-var_option = 0
+var_option = 1
 if(var_option.eq.0) then 
 var_name = (/"season_ave","season_vari"/) ;this is the var_name in data file
 months   = (/"DJF","MAM","JJA","SON"/)
@@ -64,9 +64,9 @@ if(var_option.eq.1) then
 var_name = (/"month_ave","month_vari"/) ;this is the var_name in data file
 months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;imonth = ispan(0,3,1);(/4,5,6,7/)
-;imonth = ispan(4,7,1);(/4,5,6,7/)
+imonth = ispan(5,7,1);(/4,5,6,7/)
 ;imonth = ispan(8,11,1);(/4,5,6,7/)
-imonth = ispan(0,11,1);(/4,5,6,7/)
+;imonth = ispan(0,11,1);(/4,5,6,7/)
 filename = path + "/data/" + case1 + "-Clim_month_ave_" ;+ draw_var(nv) + ".nc"
 end if
 if(var_option.eq.2) then 
@@ -85,7 +85,7 @@ fig_name = path + "/fig/" + case1(0) + "-2month_" + lev(nl) + draw_var(nv) + "_"
 end if
 
 ;area: east Asia
-lats = (/-89,5  ,-70,0  ,20 /);-20
+lats = (/-89,5  ,-70,5  ,20 /);-20
 latn = (/89 ,45 ,70 ,70 ,45 /);60
 lonl = (/0  ,25 ,0  ,70 ,100 /);20
 lonr = (/360,85 ,360,160,130/);220
@@ -171,7 +171,7 @@ do nf = 0 ,ncase-1, 1
     u(nf,:,:,:)  = u_f->$var_name(0)$(imonth,{200},{lats(na)-2:latn(na)+2},{(lonl(na)-2):(lonr(na)+2)}) ;get an array (ncase,nmonth,nlat,nlon):,:);
     do nm = 0, nmonth-1,1
     do inln = 0, nlon-1,1
-        lat_ind = maxind(u(nf,nm,:,inln));{10:55}
+        lat_ind = maxind(u(nf,nm,{3:50},inln));{10:55}
         ;lat_ind = maxind(u(nf,nm,{20:50},inln)) + 37;ind(lat1.eq.20)
         axlat(nf,nm,inln) = lat1(lat_ind)
     end do
@@ -334,7 +334,7 @@ if(diff) then
     copy_VarMeta(var(0,0,0,:,:),prob(0,0,0,:,:))
     printVarSummary(prob)
 else
-    case2   = (/"F2000","JET_NUDG"/)
+    case2   = case2 
 end if
 printVarSummary(var)
 
@@ -601,7 +601,7 @@ end if
     ;res@tiMainFontHeightF    = 0.04
    ; res@tiMainFontColor      = "black"
     res@gsnCenterString      = ""
-    res@gsnStringFont         = font_index
+    res@gsnStringFont        = font_index
     res@gsnStringFontHeightF = subtitle_font
 
     resp  = True    
@@ -629,7 +629,7 @@ end if
     if(barvert) then
     res@lbOrientation        = "Vertical";
     res@pmLabelBarWidthF  = 0.05
-    res@pmLabelBarHeightF = 0.6
+    res@pmLabelBarHeightF = 0.5
     res@pmLabelBarOrthogonalPosF     = 0.05
     res@pmLabelBarParallelPosF       = 0.5
     else
@@ -655,9 +655,9 @@ if(na.eq.0) then ; 850,700,600,500,200,100,10
                       (/50,10,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
                       (/50,10,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
 else                               
-    vcref         = (/(/7 , 7,2 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/15,15,4 ,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/20,20,4 ,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
+    vcref         = (/(/7 , 7,7 ,2 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/15,15,15,4 /), \  ;the level of 500hpa    ctrl,nudg,diff
+                      (/20,20,20,4 /), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/10, 2,2 ,2 /), \  ;the level of 700hpa    ctrl,nudg,diff
                       (/15,4 ,4 ,4 /)/)   ;the level of 200hpa    ctrl,nudg,diff
 end if
@@ -801,8 +801,8 @@ else
 end if
 end if
 
-do nm = 2,2,1;2,2,1;0,nmonth-1,1
 np = -1
+do nm = 0,nmonth-1,1
 do nc = 0,ncase-1,1
 if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
@@ -927,7 +927,7 @@ end if
 ;    gsn_panel(wks,plot,(/6,2/),resp)
 ;    gsn_panel(wks,plot,(/4,3/),resp)
 end do
-    gsn_panel(wks,plot,(/2,1/),resp)
+    gsn_panel(wks,plot,(/ncase,3/),resp)
 ;end do
 ;    resp@txString      = draw_varname(nv) + " (" + unit(nv) + ")"
     ;gsn_panel(wks,plot,(/5,4/),resp)

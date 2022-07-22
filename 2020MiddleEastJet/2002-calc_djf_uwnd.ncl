@@ -10,17 +10,17 @@ path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
 path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
 path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt", \
-             "ps"  ,"EGR4","preci"/)
+             "ps"  ,"EGR","preci"/)
 
 years    = ispan(1979,2016,1)
 years@calendar = "standard"
-DJF_option = True ;False
+DJF_option = False
 
 ;area: east Asia
-lats =  -30;-20
-latn =  90 ;60
-lonl =  0  ;20
-lonr = 360 ;220
+lats =  5 ;-20
+latn =  80 ;60
+lonl =  5  ;20
+lonr = 155 ;220
 lev  = (/1000,925,850,700,600, 500,400,350,300,250, 200,175,150,125,100/)
 
 ;==========================================================
@@ -53,8 +53,7 @@ select_time1(59:364) = ispan(60,365,1)
 select_time          = ispan(0,364,1)
 end if
 
-do nv = 7,7,1
-year_option = True;False ;
+do nv = 6,6,1
 if(DJF_option) then 
 fileout  = path2 + "ERA-Interim_DJF_" + var_name(nv) + "-year.nc"
 else
@@ -137,21 +136,21 @@ if(nv.eq.6) then
     ;var(nt,:,:,:,:)  = 0.3098*(f0/static)*center_finite_diff_n(uwnd, hgt, cyclic, opt, lev_dim)
     
     th  = pot_temp(lev*100, air, lev_dim, False)
-    brunt = brunt_vaisala_atm(th, hgt, 0, lev_dim)
-    brunt@_FillValue = -999
-    brunt = where(brunt.le.0,brunt@_FillValue,brunt) 
+    ;brunt = brunt_vaisala_atm(th, hgt, 0, lev_dim)
+    ;brunt@_FillValue = -999
+    ;brunt = where(brunt.le.0,brunt@_FillValue,brunt) 
     ;brunt = where(brunt.lt.0.00000000001,0.000001,brunt) 
-    var(nt,:,:,:,:)  = 0.3098*(abs(f0)/brunt)*abs(center_finite_diff_n(uwnd, hgt, cyclic, opt, lev_dim))
+    ;var(nt,:,:,:,:)  = 0.3098*(abs(f0)/brunt)*abs(center_finite_diff_n(uwnd, hgt, cyclic, opt, lev_dim))
     
-    ;var(nt,:,:,:,:) = eady_growth_rate(th, uwnd, hgt, lat, opt, lev_dim)
+    var(nt,:,:,:,:) = eady_growth_rate(th, uwnd, hgt, lat, opt, lev_dim)
     end do
-    printVarSummary(brunt)
-    printMinMax(brunt,True)
+    ;printVarSummary(brunt)
+    ;printMinMax(brunt,True)
     printVarSummary(var)
     printMinMax(var,True)
-    delete([/brunt,th,air,uwnd,hgt,lat/])
+    ;delete([/brunt,th,air,uwnd,hgt,lat/])
     ;delete([/static,air,uwnd,hgt,lat/])
-    ;delete([/th,air,uwnd,hgt,lat/])
+    delete([/th,air,uwnd,hgt,lat/])
 end if
 
 ;------------------------------------------------------

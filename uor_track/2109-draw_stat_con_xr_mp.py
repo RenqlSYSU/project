@@ -60,7 +60,7 @@ draw_var = ["fden","gden","lden","marea","mgdr","",
             "mlif","msp" ,"mstr","mten" ,""    ,"",
             ""    ,""    ,"tden",""    ] # 7 variables
 #draw=[6,7,8]
-draw=[1,2,14]
+draw=[14,1,2]
 #draw=[14]
 #draw=[1,2,14,8,9,6]
 lev = [850,500,250]
@@ -91,7 +91,7 @@ if level == 2: # large range,use total cnlvlel bar
     cnlvl[ 2][:]=[0.5 ,0.5 ]
     cnlvl[14][:]=[1   ,2   ]
 
-figdir = "/home/ys17-23/Extension2/renql/uor_track/fig"
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic'
 files = '%s/ff_250_1980-2020_stat.nc'%path
 f = xr.open_dataset(files)
@@ -113,7 +113,7 @@ phis = phis/9.8 # transfer from m2/s2 to m
 del ds
 gc.collect()
 
-fig = plt.figure(figsize=(12,12),dpi=300)
+fig = plt.figure(figsize=(12,12),dpi=150)
 ax = fig.subplots(nrow, ncol, subplot_kw=dict(projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
 for nl in range(0,len(lev),1):
     files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
@@ -145,12 +145,13 @@ for nl in range(0,len(lev),1):
         norm = colors.BoundaryNorm(boundaries=cnlevels, ncolors=fcolors.N,extend='both')
         
         axe = ax[nl][nv]
-        axe.add_feature(cfeat.GSHHSFeature(levels=[1,2],edgecolor='k'), linewidth=0.8, zorder=1)
+        axe.add_feature(cfeat.GSHHSFeature(scale='coarse',levels=[1,2],
+            edgecolor='k'), linewidth=0.8, zorder=1)
         axe.set_title("(%s) %d %s"%(numod[nl*3+nv],lev[nl],var1.long_name),fontdict=font)
 
         shad = axe.contourf(ilon, ilat, var, cnlevels, 
                      transform=ccrs.PlateCarree(),cmap=fcolors,extend='both',norm=norm)
-        topo = axe.contour(ilon, ilat, phis, [1500,3000,4500], 
+        topo = axe.contour(ilon, ilat, phis, [500,1000,1500,3000,4500], 
                      transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
         if dbox >= 1 :
             axe.plot([flonl,flonl,flonr,flonr,flonl],[flatn,flats,flats,flatn,flatn], 

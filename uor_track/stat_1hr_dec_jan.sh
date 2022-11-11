@@ -30,15 +30,16 @@ fi
 echo ${nmonth[*]}
 
 input=indat/STATS.latlng_1hr.in
-sed -i "21s/.*/${filname}/" $input 
+sed -i "21s|.*|${filname}|" ${input}
 for nm in $(seq 1 1 ${#nday[*]});do #{1..${nm}};do
     if [ ! -f ${output}_${nmonth[$((nm-1))]}.nc ];then
         fras=$((frae+1))
         frae=$((fras+24*nday[$((nm-1))]-1))
+        if [ ${nmonth[$((nm-1))]} == 12 ];then fras=1;frae=744;fi
         echo "month=${nmonth[$((nm-1))]}, frame_s=${fras}, frame_e=${frae}"
 
-        sed -i "34s/.*/${fras}/" $input 
-        sed -i "35s/.*/${frae}/" $input
+        sed -i "34s|.*|${fras}|" $input 
+        sed -i "35s|.*|${frae}|" $input
         
         bin/track.linux < $input > ${output}_record
         mv outdat/stat_trs_scl.linux_1.nc ${output}_${nmonth[$((nm-1))]}.nc

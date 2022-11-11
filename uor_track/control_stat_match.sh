@@ -1,11 +1,6 @@
 #!/bin/bash
-#SBATCH --partition=cluster
-#SBATCH --output=/home/users/qd201969/ERA5-1HR-lev/TMP/slurm-%j.out 
-#SBATCH --error=/home/users/qd201969/ERA5-1HR-lev/TMP/slurm-%j.err
-#SBATCH --job-name=ew
-#SBATCH --time=10-00:00:00
 
-lev=(850 500 250)
+#lev=(850 500 250)
 OUTDIR=/home/ys17-23/Extension2/renql/project/uor_track/mdata/
 files[1]=ff_match_850local_500remote_6dist
 files[2]=ff_match_500local_250remote_6dist
@@ -29,14 +24,14 @@ fi
 
 np=0
 level=1 # 2=total cyclone level,1=middle range filt cyclone, 0=small range filt and match cyclone level
-for nf in {1..6} ; do
+for nf in {2..6} ; do
     filname="${OUTDIR}${files[nf]}"
     output=${OUTDIR}statistic/${outfiles[nf]}
     
     echo $filname
     season=0 # 0 = monthly; 1 = seasonal; -1 all year
     if [ ! -f ${output}.nc ];then
-        sh /home/ys17-23/Extension2/renql/project/uor_track/stat_1hr_dec_jan.sh ${filname} ${output} ${season}
+        bash /home/ys17-23/Extension2/renql/project/uor_track/stat_1hr_dec_jan.sh ${filname} ${output} ${season}
         cdo -r -copy ${output}_[1-9].nc ${output}_1[0-2].nc ${output}.nc 
         rm ${output}_[1-9].nc 
         rm ${output}_1[0-2].nc
@@ -53,6 +48,6 @@ for nf in {1..6} ; do
 done
 #python ~/uor_track/2109-draw_stat_con_xr_mp.py \
 #    ${prefix} ${suffix} ${level} 0 ${lats} ${latn} ${lonl} ${lonr}
-python ~/uor_track/2109-draw_stat_con_seasonal_xr_mp.py \
-    ${prefix} ${suffix} ${level} 0 0 0 0 0 
+#python ~/uor_track/2109-draw_stat_con_seasonal_xr_mp.py \
+#    ${prefix} ${suffix} ${level} 0 0 0 0 0 
 

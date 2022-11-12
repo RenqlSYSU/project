@@ -116,7 +116,8 @@ gc.collect()
 fig = plt.figure(figsize=(12,12),dpi=150)
 ax = fig.subplots(nrow, ncol, subplot_kw=dict(projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
 for nl in range(0,len(lev),1):
-    files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
+    files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
+    #files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
     print(files)
     f = xr.open_dataset(files)
     for nv in range(0,len(draw),1):#,len(f),1):

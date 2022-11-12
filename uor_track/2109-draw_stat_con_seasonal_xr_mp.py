@@ -59,10 +59,10 @@ cnlvl=[[0    ,320  ,20  ], # 0Feature Density
 draw_var = ["fden","gden","lden","marea","mgdr","",
             "mlif","msp" ,"mstr","mten" ,""    ,"",
             ""    ,""    ,"tden",""    ] # 7 variables
-draw=[7,8,]
+#draw=[7,8,6]
 #draw=[4,9,]
 #draw=[6,7,8,4,9]
-#draw=[1,2,14]
+draw=[1,2,14]
 #draw=[14]
 #draw=[1,2,14,8,9,6]
 lev = [850,500,250]
@@ -95,27 +95,27 @@ if level == 2: # large range,use total level bar
     cnlvl[14][:]=[0    ,32   ,2   ]
 titls=['DJF','MAM','JJA','SON']
 
-files = '/home/users/qd201969/ERA5-1HR-lev/statistic/ff_250_1980-2020_stat.nc'
+files = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_250_1980-2020_stat.nc'
 f = xr.open_dataset(files)
 lat = f.lat
 lon = f.long
 ilon = lon[(lon>=lonl) & (lon<=lonr)]
 ilat = lat[(lat>=lats) & (lat<=latn)]
 
-ds = xr.open_dataset('/gws/nopw/j04/ncas_generic/users/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc')
+ds = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc')
 da = ds['u'].sel(level=200,longitude=ilon,latitude=ilat,method="nearest").load()
 # increased performance by loading data into memory first, e.g., with load()
 uwnd = da.groupby(da.time.dt.month).mean('time')
 print(uwnd)
 del ds, da
 
-ds = xr.open_dataset("/home/users/qd201969/gtopo30_0.9x1.25.nc")
+ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
 phis = ds['PHIS'].sel(lon=ilon,lat=ilat,method="nearest").load()
 phis = phis/9.8 # transfer from m2/s2 to m
 del ds
 gc.collect()
 
-figdir = "/home/users/qd201969/uor_track/fig/stat_season"+suffix
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/stat_season"+suffix
 for nv in range(0,len(draw),1):#,len(f),1):
     fig = plt.figure(figsize=(12,12),dpi=300)
     ax = fig.subplots(nrow, ncol, subplot_kw=dict(projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
@@ -128,7 +128,8 @@ for nv in range(0,len(draw),1):#,len(f),1):
     norm = colors.BoundaryNorm(boundaries=cnlevels, ncolors=fcolors.N,extend='both')
     
     for nl in range(0,len(lev),1):
-        files = '/home/users/qd201969/ERA5-1HR-lev/statistic/%s_%d_1980-2020%s_stat.nc'%(prefix,lev[nl],suffix)
+        #files = '/home/users/qd201969/ERA5-1HR-lev/statistic/%s_%d_1980-2020%s_stat.nc'%(prefix,lev[nl],suffix)
+        files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
         print(files)
         f = xr.open_dataset(files)
         var = f[draw_var[draw[nv]]].sel(long=ilon,lat=ilat).load()

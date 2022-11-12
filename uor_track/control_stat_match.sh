@@ -23,8 +23,8 @@ if [ ! -d statistic ];then
 fi
 
 np=0
-level=1 # 2=total cyclone level,1=middle range filt cyclone, 0=small range filt and match cyclone level
-for nf in {2..6} ; do
+level=0 # 2=total cyclone level,1=middle range filt cyclone, 0=small range filt and match cyclone level
+for nf in {1..6} ; do
     filname="${OUTDIR}${files[nf]}"
     output=${OUTDIR}statistic/${outfiles[nf]}
     
@@ -36,18 +36,13 @@ for nf in {2..6} ; do
         rm ${output}_[1-9].nc 
         rm ${output}_1[0-2].nc
     fi
-    #if [ $filt == 1 ]; then 
-    #    python ~/uor_track/2109-draw_stat_con_monthly_xr_mp.py \
-    #        ${file} ${output}.nc ${level} ${lev[$np]}${suffix} \
-    #        1 ${lats} ${latn} ${lonl} ${lonr}
-    #else
-    #    python ~/uor_track/2109-draw_stat_con_monthly_xr_mp.py \
-    #        ${file} ${output}.nc 2 ${lev[$np]}${suffix} 0
-    #fi
-    np=$((np+1))
 done
-#python ~/uor_track/2109-draw_stat_con_xr_mp.py \
-#    ${prefix} ${suffix} ${level} 0 ${lats} ${latn} ${lonl} ${lonr}
-#python ~/uor_track/2109-draw_stat_con_seasonal_xr_mp.py \
-#    ${prefix} ${suffix} ${level} 0 0 0 0 0 
+#python /home/ys17-23/Extension2/renql/project/uor_track/2109-draw_stat_con_xr_mp.py \
+#    'ff' 'local' ${level} 0 0 0 0 0 
+python /home/ys17-23/Extension2/renql/project/uor_track/2109-draw_stat_con_seasonal_xr_mp.py \
+    'ff' 'local' ${level} 0 0 0 0 0 
+#python /home/ys17-23/Extension2/renql/project/uor_track/2109-draw_stat_con_xr_mp.py \
+#    'ff' 'remote' ${level} 0 0 0 0 0 
+python /home/ys17-23/Extension2/renql/project/uor_track/2109-draw_stat_con_seasonal_xr_mp.py \
+    'ff' 'remote' ${level} 0 0 0 0 0 
 

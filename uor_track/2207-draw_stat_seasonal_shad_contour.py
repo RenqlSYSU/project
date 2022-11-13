@@ -25,13 +25,14 @@ font = {'family': 'sans-serif',
 
 lev = [850,500,250]
 prefix = "ff"
-suffix = ''#'_6local'#,'_total']'_6outside'#,
+suffix = 'local'#'remote'# 
+#suffix = ''#'_6local'#,'_total']'_6outside'#,
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
-figdir = '/home/users/qd201969/uor_track/fig'
-path = '/home/users/qd201969/ERA5-1HR-lev/statistic'
-uwndpath = '/gws/nopw/j04/ncas_generic/users/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
-if suffix == '_6local':
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
+path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic'
+uwndpath = '/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
+if suffix in ['_6local','local','remote']:
     lonl=50  #0  #
     lonr=150#360#
     lats=15 #20 #
@@ -65,7 +66,7 @@ da = ds['u'].sel(level=200,longitude=ilon,
 uwnd = da.groupby(da.time.dt.month).mean('time').data
 del ds, da
 
-ds = xr.open_dataset("/home/users/qd201969/gtopo30_0.9x1.25.nc")
+ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
 phis = ds['PHIS'].sel(lon=ilon,lat=ilat,method="nearest").data
 phis = phis/9.8 # transfer from m2/s2 to m
 del ds
@@ -73,6 +74,7 @@ gc.collect()
 
 def main_run():
     '''
+    # 6local & 6outside
     cnlev1 = np.hstack((np.arange(1,4,1),np.arange(7,20,3)))
     cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
     draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
@@ -80,12 +82,23 @@ def main_run():
     draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
             'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[8.5,60])
     '''
+    # local match remote or local
+    cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
+    cnlev2 = np.hstack((np.arange(0.5,3.5, 1 ),np.arange(3.5,50 , 2))) # track
+    draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
+            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[2,60])
+    draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
+            'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[3.5,60])
+
+    '''
+    # total cyclones
     cnlev1 = np.hstack((np.arange(2,5,1),np.arange(7,20,3)))
     cnlev2 = np.hstack((np.arange(5,20,5),np.arange(26,80,6)))
-    #draw_shad_cont_seasonal_4x3(suffix,'gden',np.arange(0,7,0.5),'Genesis',
-    #        'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[20,80])
+    draw_shad_cont_seasonal_4x3(suffix,'gden',np.arange(0,7,0.5),'Genesis',
+            'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[20,80])
     draw_shad_cont_seasonal_4x3(suffix,'tden',np.arange(0,42,3),'Track',
             'gden',cnlev1,'Gensis','lden',cnlev1,'U200',True,[5,80])
+    '''
 
 def draw_shad_cont_seasonal_4x3(suffix,varname,cnlev,label,
     varname1,cnlev1,label1,varname2,cnlev2,label2,jetoption,dash):
@@ -94,7 +107,7 @@ def draw_shad_cont_seasonal_4x3(suffix,varname,cnlev,label,
     ncol = 3 #2 #
     bmlo = 0.4 #0.25 #
 
-    fig = plt.figure(figsize=(12,12),dpi=300)
+    fig = plt.figure(figsize=(12,12),dpi=150)
     ax = fig.subplots(nrow, ncol, subplot_kw=dict(
         projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
     
@@ -108,7 +121,8 @@ def draw_shad_cont_seasonal_4x3(suffix,varname,cnlev,label,
         ncolors=ncmap.N,extend='both')
     
     for nl in range(0,len(lev),1):
-        files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
+        files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
+        #files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
         f = xr.open_dataset(files)
         print("")
         print(files)
@@ -181,7 +195,7 @@ def draw_shad_cont_3x1(suffix,varname,cnlev,label,
     ncol = 1 #2 #
     bmlo = 0.5
 
-    fig = plt.figure(figsize=(12,12),dpi=300)
+    fig = plt.figure(figsize=(12,12),dpi=150)
     ax = fig.subplots(nrow, ncol, subplot_kw=dict(
         projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
 

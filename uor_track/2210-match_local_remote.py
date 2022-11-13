@@ -24,16 +24,19 @@ font = {'family': 'sans-serif',
 
 lev = [850, 500, 250]
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
-outdir = '/home/ys17-23/Extension2/renql/uor_track/mdata'
-figdir = '/home/ys17-23/Extension2/renql/uor_track/fig'
+outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
+figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 radiu1 = 6
 radiu2 = 6 # distance match 
 suffix = ["%dlocal"%radiu1,"%doutside"%radiu1]
 
 def main_run():
     varname = ['lifetime','distance','max vor','mean vor']
+    ylim1 = [1,1000, 2]
+    ylim2 = [7,5000,16]
     for nint in [0,2]:
-        draw_seasonal_box_3x1(varname[nint],nint)
+        #draw_seasonal_box_3x1(varname[nint],nint)
+        draw_seasonal_box_1x2(varname[nint], nint, ylim1[nint], ylim2[nint])
     ''' 
     for nl1 in lev:
         for nl2 in lev:
@@ -308,6 +311,113 @@ def draw_seasonal_box_3x1(varname,nint):
         #axe.set_ylim(1,10)
         axe.set_ylabel(varname,fontsize=label_font,fontdict=font)
         axe.set_xlabel('',fontsize=label_font,fontdict=font)
+        
+        width = 0.8
+        xloc = np.repeat(np.atleast_2d(np.arange(4)),3,axis=0
+            )+np.array([[-1*width/3.0],[0],[width/3.0]])
+        col = ['ro','bo','go']
+        for nl in range(len(lev)):
+            axe.plot(xloc[nl,:],p90[nl,:],col[nl])
+            #axe.plot(xloc.flatten(),p90.flatten(),'ko')
+        
+    plt.legend([],[], frameon=False)
+    plt.tight_layout()
+    plt.savefig('%s/box_%s.png'%(figdir,varname), 
+        bbox_inches='tight',pad_inches=0.01)
+
+def draw_seasonal_box_3x1(varname,nint):
+    # nint: 0 lifetime, 1 distance, 2 max-vor
+    # 3 mean-vor, 4 min-pres, 5 mean-pres
+    nrow = 3 #6 #
+    ncol = 1 #2 #
+    bmlo = 0.35 #0.25 #
+    titls = ['DJF','MAM','JJA','SON']
+    
+    fig = plt.figure(figsize=(6,12),dpi=150)
+    ax = fig.subplots(nrow, ncol)
+    
+    for nc in range(len(lev)):
+        p90 = np.zeros([len(lev),len(titls)], dtype=float ) # 4 or 12 
+        dicts = {'lev':[],'season':[],varname:[]}
+        for nl in range(len(lev)):
+            filname = '%s/fftadd_match_%dlocal_%dremote_%ddist'%(
+                outdir,lev[nc],lev[nl],radiu2)
+            var = life_intensity.calc_one_variable(filname,nint,
+                flats=10,flatn=60,flonl=50,flonr=120)
+            #var = life_intensity.calc_one_variable(filname,nint,
+            #    flats=0,flatn=90,flonl=0,flonr=180)
+            for nm in range(len(titls)):
+                p90[nl,nm] = np.percentile(np.array(var[nm]),90)
+                dicts['lev']  = dicts['lev']+[lev[nl]]*len(var[nm])
+                dicts['season'] = dicts['season']+[titls[nm]]*len(var[nm])
+                dicts[varname] = dicts[varname]+var[nm]
+                print('%s %d %d 90th %f'%(titls[nm],lev[nl],len(var[nm]),p90[nl,nm]))
+        df = pd.DataFrame(dicts)
+        print(df)
+
+        axe = ax[nc]
+        axe.set_title('%dhPa local'%lev[nc],fontsize=title_font,fontdict=font)
+        sns.boxplot(x='season', y=varname, hue='lev',hue_order=lev, 
+            data=df, palette="Set1",ax=axe, showfliers=False, whis=0,
+            showmeans=True,meanprops={"markerfacecolor":"k", "markeredgecolor":"k"})
+        #axe.set_ylim(1,10)
+        axe.set_ylabel(varname,fontsize=label_font,fontdict=font)
+        axe.set_xlabel('',fontsize=label_font,fontdict=font)
+        
+        width = 0.8
+        xloc = np.repeat(np.atleast_2d(np.arange(4)),3,axis=0
+            )+np.array([[-1*width/3.0],[0],[width/3.0]])
+        col = ['ro','bo','go']
+        for nl in range(len(lev)):
+            axe.plot(xloc[nl,:],p90[nl,:],col[nl])
+            #axe.plot(xloc.flatten(),p90.flatten(),'ko')
+        
+    plt.legend([],[], frameon=False)
+    plt.tight_layout()
+    plt.savefig('%s/box_%s.png'%(figdir,varname), 
+        bbox_inches='tight',pad_inches=0.01)
+
+def draw_seasonal_box_1x2(varname,nint,ylim1,ylim2):
+    # nint: 0 lifetime, 1 distance, 2 max-vor
+    # 3 mean-vor, 4 min-pres, 5 mean-pres
+    nrow = 1 #6 #
+    ncol = 2 #2 #
+    bmlo = 0.35 #0.25 #
+    titls = ['DJF','MAM','JJA','SON']
+    fname = [['850local_500remote','500local_250remote','250local_500remote'],
+             ['850local_500local' ,'500local_250local' ,'250local_500local']]
+    
+    fig = plt.figure(figsize=(12,5),dpi=150)
+    ax = fig.subplots(nrow, ncol)
+    
+    for nc in range(2):
+        p90 = np.zeros([len(lev),len(titls)], dtype=float ) # 4 or 12 
+        dicts = {'lev':[],'season':[],varname:[]}
+        for nl in range(len(lev)):
+            filname = '%s/fftadd_match_%s_%ddist'%(
+                outdir,fname[nc][nl],radiu2)
+            var = life_intensity.calc_one_variable(filname,nint,
+                flats=10,flatn=60,flonl=50,flonr=120)
+            #var = life_intensity.calc_one_variable(filname,nint,
+            #    flats=0,flatn=90,flonl=0,flonr=180)
+            for nm in range(len(titls)):
+                p90[nl,nm] = np.percentile(np.array(var[nm]),90)
+                dicts['lev']  = dicts['lev']+[lev[nl]]*len(var[nm])
+                dicts['season'] = dicts['season']+[titls[nm]]*len(var[nm])
+                dicts[varname] = dicts[varname]+var[nm]
+                print('%s %d %d 90th %f'%(titls[nm],lev[nl],len(var[nm]),p90[nl,nm]))
+        df = pd.DataFrame(dicts)
+        print(df)
+
+        axe = ax[nc]
+        axe.set_title(fname[nc][nl][12::],fontsize=title_font,fontdict=font)
+        sns.boxplot(x='season', y=varname, hue='lev',hue_order=lev, 
+            data=df, palette="Set1",ax=axe, showfliers=False, whis=0,
+            showmeans=True,meanprops={"markerfacecolor":"k", "markeredgecolor":"k"})
+        axe.set_ylim(ylim1,ylim2)
+        axe.set_ylabel(varname,fontsize=label_font,fontdict=font)
+        axe.set_xlabel('',fontsize=label_font,fontdict=font)
+        axe.grid(True, which="both", axis='y',color='grey', linestyle='--', linewidth=1)
         
         width = 0.8
         xloc = np.repeat(np.atleast_2d(np.arange(4)),3,axis=0

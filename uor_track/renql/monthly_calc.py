@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import cf
-import cfplot as cfp
+#import cf
+#import cfplot as cfp
 import xarray as xr
 import numpy as np
 import sys, os, subprocess, linecache, gc

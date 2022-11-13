@@ -35,9 +35,9 @@ font = {'family': 'serif',
         }
 
 lev  = [850,500,250]
-path = '/home/users/qd201969/ERA5-1HR-lev'
-outdir = "/home/users/qd201969/uor_track/mdata"
-figdir = "/home/users/qd201969/uor_track/fig"
+path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
+outdir = "/home/ys17-23/Extension2/renql/project/uor_track/mdata"
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
 prefix = 'ff'
 radiu = 6
 behv = ["%dtotal"%radiu,"%dlocal"%radiu,"%doutside"%radiu]
@@ -45,8 +45,10 @@ behv = ["%dtotal"%radiu,"%dlocal"%radiu,"%doutside"%radiu]
 def main_run():
     thre = 1500
     varname = ['lifetime','distance','max vor','mean vor']
+    ylim1 = [1,1000, 2]
+    ylim2 = [9,5000,16]
     for nint in [0,2]:
-        draw_seasonal_box_1x2(varname[nint],nint)
+        draw_seasonal_box_1x2(varname[nint], nint, ylim1[nint], ylim2[nint])
     '''
     if not os.path.isfile('%s/tp_loca_%d.txt'%(outdir,thre)):
         write_tp_grid(thre,'%s/tp_loca_%d.txt'%(outdir,thre))
@@ -62,7 +64,7 @@ def main_run():
         ret.wait()
     '''
 
-def draw_seasonal_box_1x2(varname,nint):
+def draw_seasonal_box_1x2(varname,nint,ylim1,ylim2):
     # nint: 0 lifetime, 1 distance, 2 max-vor
     # 3 mean-vor, 4 min-pres, 5 mean-pres
     nrow = 1 #6 #
@@ -96,9 +98,10 @@ def draw_seasonal_box_1x2(varname,nint):
         sns.boxplot(x='season', y=varname, hue='lev',hue_order=lev, 
             data=df, palette="Set1",ax=axe, showfliers=False, whis=0,
             showmeans=True,meanprops={"markerfacecolor":"k", "markeredgecolor":"k"})
-        #axe.set_ylim(1,10)
+        axe.set_ylim(ylim1,ylim2)
         axe.set_ylabel(varname,fontsize=label_font,fontdict=font)
         axe.set_xlabel('',fontsize=label_font,fontdict=font)
+        axe.grid(True, which="both", axis='y',color='grey', linestyle='--', linewidth=1)
         
         width = 0.8
         xloc = np.repeat(np.atleast_2d(np.arange(4)),3,axis=0
@@ -106,7 +109,6 @@ def draw_seasonal_box_1x2(varname,nint):
         col = ['ro','bo','go']
         for nl in range(len(lev)):
             axe.plot(xloc[nl,:],p90[nl,:],col[nl])
-            #axe.plot(xloc.flatten(),p90.flatten(),'ko')
         
     plt.legend([],[], frameon=False)
     plt.tight_layout()

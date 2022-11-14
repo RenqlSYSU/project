@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = 1
+var_option = 4
 jet_option  = True ;False;20191205, control the draw of jet stream
 region_line = True ;False; draw the line for ME, EA, NA
 vect_option = False;True ;
@@ -31,7 +31,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do nnv = 1,1,1
+do nnv = 0,0,1
     if(var_option.eq.-18) then 
         draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -136,8 +136,8 @@ do nnv = 1,1,1
         select := (/0,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.4) then 
-        draw_var := (/"b1","b2","Tadvect"/)  ;,"total" this is the variable used to draw, can used as center string
-        select := (/0,1,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+        draw_var := (/"b1","b2","Tadvect","Vort"/)  ;,"total" this is the variable used to draw, can used as center string
+        select := (/0,1,2,2/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
     end if
     if(var_option.eq.5) then 
         ;draw_var := (/"Tx","Ty","Tadvect"/)  ;,"b3y" this is the variable used to draw, can used as center string
@@ -215,7 +215,7 @@ end if
 ;area: east Asia
 area = (/"NH","ME","EA","NA","TP"/)
 lats = (/ 10 , 0  ,  0 ,  0 , 10 /);10 ;-20
-latn = (/ 60 , 89 , 89 , 89 , 50 /) ;55 ;60
+latn = (/ 90 , 89 , 89 , 89 , 50 /) ;55 ;60
 lonl = (/ 0  , 0  ,105 , 250, 40 /) ;30 ;20
 lonr = (/360 , 70 ,175 , 320,130 /) ;150;220
 lonx = (/ lonl, lonr, lonr, lonl, lonl /)
@@ -226,9 +226,8 @@ density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
 ;the path of the file
-path   = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
+path   = "/home/ys17-23/Extension2/renql/project/2020MiddleEastJet/"
+gtopfile = "/home/ys17-23/Extension2/renql/gtopo_1.5x1.5.nc"
 if(var_option.le.-16)
     filename = path + "data/" + case + "_" + months + draw_var(0) + "-year.nc"
     fig_name = path + "fig/1p3x3_horizontal_" + draw_var(0)
@@ -505,6 +504,11 @@ if(cont_option) then
 end if
 end if
 
+if(var_option.eq.4) then
+ft = addfile(path + "data/" + case + "_" + months + "dzdt_in3-year.nc","r")
+var_m(2,0,:,:) = dim_sum_n_Wrap(dim_avg_n_Wrap(ft->$var_name(nnv)$(0:1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),1),0)
+var_m(3,:,:,:) = dim_sum_n_Wrap(var_m(0:1,:,:,:),0)
+end if
 if(var_option.eq.5) then
 ;fbv = addfile(path + "data/" + case + "_" + months + "dzdt_in-year.nc","r")
 ;var_m(1,0,:,:) = var_m(1,0,:,:) + dim_avg_n_Wrap(fbv->$var_name(nnv)$(1,:,{lev(nl)},{lats(na):latn(na)},{lonl(na):lonr(na)}),0)
@@ -1052,8 +1056,8 @@ end do
 end do 
 
 ;    resp@txString      = fig_title
-    gsn_panel(wks,plot,(/3,1/),resp)
-;     gsn_panel(wks,plot,(/nvar,1/),resp)
+;    gsn_panel(wks,plot,(/3,1/),resp)
+     gsn_panel(wks,plot,(/nvar,1/),resp)
 end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)
 ;end do 

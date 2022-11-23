@@ -41,7 +41,7 @@ numod= [chr(i) for i in range(97,115)]
 vcref =[10,20,30] # different levels 
 q_mis=15
 
-figdir = "/home/ys17-23/Extension2/renql/uor_track/fig/"
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
 path = '/home/ys17-23/Extension2/renql/ERA5_mon'
 def main_run():
     cnlvl2=[20,60,100] # contour
@@ -83,8 +83,12 @@ def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):
         ds = xr.open_dataset('%s/ERA5_mon_%s_1979-2020.nc'%(path,varname))
         da = ds[varname].sel(level=lev[nl],latitude=ilat,longitude=ilon,method="nearest").load()
         if scale=='zonal':
-            var = da.groupby(da.time.dt.month).mean('time').data/9.8
-            var = np.moveaxis(np.moveaxis(var,2,0)-var.mean(2), 0, 2)
+            da = ds[varname].sel(level=lev[nl]).load()
+            var = da.groupby(da.time.dt.month).mean('time')/9.8
+            var.data = np.moveaxis(np.moveaxis(var.data,2,0)-var.data.mean(2), 0, 2)
+            var = var.sel(latitude=ilat,longitude=ilon,method="nearest").data
+            #var = da.groupby(da.time.dt.month).mean('time').data/9.8
+            #var = np.moveaxis(np.moveaxis(var,2,0)-var.mean(2), 0, 2)
         else:
             var = da.groupby(da.time.dt.month).mean('time').data*scale
         

@@ -25,8 +25,8 @@ font = {'family': 'sans-serif',
 
 lev = [850,500,250]
 prefix = "ff"
-suffix = 'local'#'remote'# 
-#suffix = ''#'_6local'#,'_total']'_6outside'#,
+#suffix = 'local'#'remote'# 
+suffix = '_6outside'#,''#'_6local'#,'_total']
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
@@ -73,13 +73,12 @@ del ds
 gc.collect()
 
 def main_run():
-    '''
     # 6local & 6outside
     cnlev1 = np.hstack((np.arange(1,4,1),np.arange(7,20,3)))
     cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
-    draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
-            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[4,60])
     draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
+            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[4,60])
+    draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
             'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[8.5,60])
     '''
     # local match remote or local
@@ -89,6 +88,7 @@ def main_run():
             'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[2,60])
     draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
             'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[3.5,60])
+    '''
 
     '''
     # total cyclones
@@ -121,8 +121,8 @@ def draw_shad_cont_seasonal_4x3(suffix,varname,cnlev,label,
         ncolors=ncmap.N,extend='both')
     
     for nl in range(0,len(lev),1):
-        files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
-        #files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
+        #files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
+        files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
         f = xr.open_dataset(files)
         print("")
         print(files)
@@ -132,20 +132,20 @@ def draw_shad_cont_seasonal_4x3(suffix,varname,cnlev,label,
     
         for nm in range(0,nrow,1):
             if nm == 0:
-                shad = (var[0,:,:]+var[1,:,:]+var[11,:,:])/3.0
-                cont1 = (var1[0,:,:]+var1[1,:,:]+var1[11,:,:])/3.0
-                cont2 = (var2[0,:,:]+var2[1,:,:]+var2[11,:,:])/3.0
-                uwnd1 = (uwnd[0,:,:]+uwnd[1,:,:]+uwnd[11,:,:])/3.0
+                shad = np.nanmean(np.array([var[0,:,:],var[1,:,:],var[11,:,:]]),axis=0)
+                cont1 = np.nanmean(np.array([var1[0,:,:],var1[1,:,:],var1[11,:,:]]),axis=0)
+                cont2 = np.nanmean(np.array([var2[0,:,:],var2[1,:,:],var2[11,:,:]]),axis=0)
+                uwnd1 = np.nanmean(np.array([uwnd[0,:,:],uwnd[1,:,:],uwnd[11,:,:]]),axis=0)
             else:
-                shad = np.mean(var[(3*nm-1):(3*nm+2),:,:],axis=0)
-                cont1 = np.mean(var1[(3*nm-1):(3*nm+2),:,:],axis=0)
-                cont2 = np.mean(var2[(3*nm-1):(3*nm+2),:,:],axis=0)
-                uwnd1 = np.mean(uwnd[(3*nm-1):(3*nm+2),:,:],axis=0)
+                shad = np.nanmean(var[(3*nm-1):(3*nm+2),:,:],axis=0)
+                cont1 = np.nanmean(var1[(3*nm-1):(3*nm+2),:,:],axis=0)
+                cont2 = np.nanmean(var2[(3*nm-1):(3*nm+2),:,:],axis=0)
+                uwnd1 = np.nanmean(uwnd[(3*nm-1):(3*nm+2),:,:],axis=0)
             axe = ax[nm][nl]
             axe.add_feature(cfeat.GSHHSFeature(levels=[1,2],
                 edgecolor='k'), linewidth=0.8, zorder=1)
             axe.set_title("(%s) %dhPa %s %s"%(numod[3*nm+nl],lev[nl],titls[nm],
-                suffix.strip('_')),fontsize=title_font,fontdict=font)
+                suf1),fontsize=title_font,fontdict=font)
 
             cont = axe.contourf(ilon, ilat, shad, cnlev, 
                  transform=ccrs.PlateCarree(),cmap=ncmap,extend='both',norm=norm)

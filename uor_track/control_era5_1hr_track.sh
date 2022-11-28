@@ -1,12 +1,6 @@
 #!/bin/bash
-#SBATCH --partition=cluster
-#SBATCH --output=/home/users/qd201969/ERA5-1HR-lev/TMP/slurm-%j.out 
-#SBATCH --error=/home/users/qd201969/ERA5-1HR-lev/TMP/slurm-%j.err
-#SBATCH --job-name=ew
-#SBATCH --time=10-00:00:00
-
 lev=(850 500 250)
-OUTDIR=/home/users/qd201969/ERA5-1HR-lev/
+OUTDIR=/home/ys17-23/Extension2/renql/ERA5-1HR-lev/
 prefix=$1 #ff # tr is original cyclone ; ff is the filtered cyclone
 # fft is the file that has been converted to real time
 
@@ -97,7 +91,6 @@ fi
 if [ $pro == 2 ];then
     echo "=========== statistics ================"
     cd ${OUTDIR} #match${suffix}
-    path=$(pwd)
     if [ ! -d statistic ];then
         mkdir statistic
     fi
@@ -106,15 +99,15 @@ if [ $pro == 2 ];then
     level=1 # 2=total cyclone level,1=middle range filt cyclone, 0=small range filt and match cyclone level
     for file in ${prefix}_*_1980-2020${suffix} ; do
     #for file in ${prefix}_*_match ; do
-        filname="\/home\/users\/qd201969\/ERA5-1HR-lev\/${file}"
-        output=${OUTDIR}statistic/${file}_ptstat
+        filname="/home\/ys17-23\/Extension2\/renql\/ERA5-1HR-lev\/${file}"
+        output=${OUTDIR}statistic/${file}_stat
         #filname="\/home\/users\/qd201969\/ERA5-1HR-lev\/match${suffix}\/${file}"
         #output=${OUTDIR}match${suffix}/statistic/${file}_stat
         
         echo $file
         season=0 # 0 = monthly; 1 = seasonal; -1 all year
         if [ ! -f ${output}.nc ];then
-            sh ~/uor_track/stat_1hr_dec_jan.sh ${filname} ${output} ${season}
+            bash /home/ys17-23/Extension2/renql/project/uor_track/stat_1hr_dec_jan.sh ${filname} ${output} ${season}
             cdo -r -copy ${output}_[1-9].nc ${output}_1[0-2].nc ${output}.nc 
             rm ${output}_[1-9].nc 
             rm ${output}_1[0-2].nc

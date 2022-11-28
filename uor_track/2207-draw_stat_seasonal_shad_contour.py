@@ -26,13 +26,21 @@ font = {'family': 'sans-serif',
 lev = [850,500,250]
 prefix = "ff"
 #suffix = 'local'#'remote'# 
-suffix = 'matched local' 
+#suffix = 'matched local' 
+suffix = 'moveout' 
 #suffix = '_6local'#,'_total']'_6outside'#,''#
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic'
 uwndpath = '/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
+if suffix in ['moveout']:
+    lonl=20  #0  #
+    lonr=140#360#
+    lats=15 #20 #
+    latn=60 #90 #
+    suf1=suffix
+    bmlo = 0.4 #0.25 #
 if suffix in ['matched local']:
     lonl=50  #0  #
     lonr=120#360#
@@ -97,7 +105,7 @@ def main_run():
     cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
     cnlev2 = np.hstack((np.arange(0.5,3.5, 1 ),np.arange(3.5,50 , 2))) # track
     draw_match_shad_cont_seasonal_4x3('gden',np.arange(0.5,7,0.5),'Genesis',
-            'gden',cnlev1,'Genesis','gden',cnlev1,'Gensis')
+            'gden',cnlev1,'Genesis','lden',cnlev1,'Gensis')
     #draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
     #        'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[2,60])
     #draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
@@ -316,10 +324,14 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
         f = xr.open_dataset(files)
         var = read_stat(f,varname,lev[nl])
 
-        f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocalremote_6dist.nc'%(lev[nl]))
+        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6outside_moveout_stat.nc'%(lev[nl]))
+        f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6local_moveout_stat.nc'%(lev[nl]))
+        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocalremote_6dist.nc'%(lev[nl]))
         var1 = read_stat(f,varname1,lev[nl])
 
-        f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocallocal_6dist.nc'%(lev[nl]))
+        f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6local_moveout_stat.nc'%(lev[nl]))
+        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6outside_moveout_stat.nc'%(lev[nl]))
+        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocallocal_6dist.nc'%(lev[nl]))
         var2 = read_stat(f,varname2,lev[nl])
         
         for nm in range(0,nrow,1):

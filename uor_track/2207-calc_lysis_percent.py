@@ -21,9 +21,10 @@ font = {'family': 'sans-serif',
         }
 
 lev = [850, 500, 250]
-path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
-outdir = '/home/ys17-23/Extension2/renql/uor_track/mdata'
-figdir = '/home/ys17-23/Extension2/renql/uor_track/fig'
+path  = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
+path1 = '/home/ys17-23/Extension2/renql/project/uor_track'
+outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
+figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 tp_file='%s/tp_loca_1500.txt'%(outdir)
 radiu1 = 6
 radiu2 = 6 # use to filte lysis cyclone
@@ -31,11 +32,22 @@ suffix = ["%dlocal"%radiu1,"%doutside"%radiu1]
 behv   = ['lysis','moveout']
 
 def main_run():
+    '''
     outfile = '%s/behv_season_%dcyclone_%drad.nc'%(
             outdir,radiu1,radiu2)
     calc_lysis_percent(outfile)
     draw_stacked_bar(outfile,'%s/bar_lysis_percent_%dcyc_%drad.png'%(
         figdir,radiu1,radiu2))
+    '''
+    for nc in range(len(suffix)):
+        for nl in range(len(lev)):
+            filname = '%s/ff_%d_1980-2020_%s'%(path,lev[nl],suffix[nc])
+            write_moveout_cyclone(filname,1)
+      # calc statistics and draw figure 
+        com = "bash %s/control_era5_1hr_track.sh ff 2 1 _%s_moveout"\
+            %(path1,suffix[nc])
+        ret=subprocess.Popen(com,shell=True)
+        ret.wait()
 
 def calc_lysis_percent(outfile):
     if os.path.exists(outfile):
@@ -101,6 +113,74 @@ def calc_season_cyclone(filname):
         line = ff.readline()
     ff.close()
     return var 
+
+def write_moveout_cyclone(filname,nb):
+    if os.path.exists(filname+"_"+behv[nb]):
+        print('%s_%s exists'%(filname,behv[nb]))
+        return
+    else:
+        print('handle %s_%s'%(filname,behv[nb]))
+    loca = np.loadtxt(tp_file,usecols = (0,1))
+
+    ff = open(filname,"r") 
+    line1 = ff.readline()
+    line2 = ff.readline()
+    line3 = ff.readline()
+    line4 = ff.readline()
+    a = line4.strip().split(" ",1)
+    term0 = a[1].strip().split(" ",1)
+    print("total cyclone number in %s : %s" %(ff.name,term0[0]))
+   
+    outfile = open(filname+"_"+behv[nb],"w")
+    outfile.write(line1)
+    outfile.write(line2)
+    outfile.write(line3)
+    outfile.write(line4)
+
+    tid=[]
+    line = ff.readline()
+    while line:
+        term = line.strip().split(" ")
+        if term[0] == "TRACK_ID":
+            lineid = line
+            linenum = ff.readline()
+            term1 =linenum.strip().split(" ")
+            num = int(term1[-1])
+            
+            data=[]
+            value=[]
+            for nl in range(0,num,1):
+                line = ff.readline()
+                value.append(line)
+                data.append(list(map(float, line.strip().split(" "))))
+           
+            signal=-10
+            if data[-1][1] > data[0][1]:
+                dist = np.square(data[-1][2]-loca[:,0])+np.square(data[-1][1]-loca[:,1]) 
+                if dist.min()<radiu2*radiu2:
+                    signal = 0 # lysis
+                else:
+                    signal = 1 # moveout
+                    
+            if signal == nb : 
+                tid.append(term[2])
+                outfile.write(lineid)
+                outfile.write(linenum)
+                for nll in value:
+                    outfile.write(nll)
+
+        line = ff.readline()
+
+    ff.close()
+    outfile.seek(0,0) # Go back to the beginning of the file
+    outfile.write(line1)
+    outfile.write(line2)
+    outfile.write(line3)
+    outfile.write("TRACK_NUM %9d %s"%(len(tid),term0[1]))
+
+    print("%s : %d" %(outfile.name,len(tid)))
+    outfile.close()
+    
 
 def mon2sea(nm):
 # convert month to season index

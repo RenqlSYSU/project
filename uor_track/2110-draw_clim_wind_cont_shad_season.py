@@ -49,7 +49,7 @@ def main_run():
     #read_draw_seasonal_4x3('w',1,[-0.08,0.01],'omega','Pa/s')
     #read_draw_seasonal_4x3('q',1000,[0,1],'q','g/kg')
     #read_draw_seasonal_4x3('z','zonal',[-105,15],'ano_z','gpm')
-    read_draw_seasonal_4x3('u',1,[-40,5],'U','km/s')
+    read_draw_seasonal_4x3('u',1,[-35,5],'U','km/s')
     #read_draw_seasonal_4x3('Q1',1,[-0.07,0.01],'Q1','W/kg')
 
 def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):

@@ -22,15 +22,20 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
+if len(sys.argv) < 2 :
+    radiu2 = 6
+else:
+    radiu2 = int(sys.argv[1])  #'ff_250_500_no'
+
 lev = [850, 500, 250]
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
 outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
 figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 radiu1 = 6
-radiu2 = 6 # distance match 
 suffix = ["%dlocal"%radiu1,"%doutside"%radiu1]
 
 def main_run():
+    '''
     varname = ['lifetime','distance','max vor','mean vor']
     ylim1 = [1,1000, 2]
     ylim2 = [7,5000,16]
@@ -50,7 +55,7 @@ def main_run():
     calc_month(outfile)
     draw_stacked_bar(outfile,'%s/bar_match_local_%dcyc_%drad.png'%(
         figdir,radiu1,radiu2))
-    '''
+
 def match_local_remote(filname1,filname2,dist,outfilename):
     if os.path.exists(outfilename):
         print('%s exists'%outfilename)

@@ -23,11 +23,16 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
+if len(sys.argv) < 2 :
+    radiu2 = 6
+else:
+    radiu2 = int(sys.argv[1])  #'ff_250_500_no'
+
 lev = [850,500,250]
 prefix = "ff"
 #suffix = 'local'#'remote'# 
-#suffix = 'matched local' 
-suffix = 'moveout' 
+suffix = 'matched local' 
+#suffix = 'moveout' 
 #suffix = '_6local'#,'_total']'_6outside'#,''#
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
@@ -46,7 +51,7 @@ if suffix in ['matched local']:
     lonr=120#360#
     lats=15 #20 #
     latn=55 #90 #
-    suf1=suffix
+    suf1='m%d local'%radiu2
     bmlo = 0.22 #0.25 #
 if suffix in ['_6local','local','remote']:
     lonl=55  #0  #
@@ -104,8 +109,8 @@ def main_run():
     # local match remote or local
     cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
     cnlev2 = np.hstack((np.arange(0.5,3.5, 1 ),np.arange(3.5,50 , 2))) # track
-    draw_match_shad_cont_seasonal_4x3('gden',np.arange(0.5,7,0.5),'Genesis',
-            'gden',cnlev1,'Genesis','lden',cnlev1,'Gensis')
+    draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
+            'gden',cnlev1,'Genesis','gden',cnlev1,'Gensis')
     #draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
     #        'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[2,60])
     #draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
@@ -325,13 +330,13 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
         var = read_stat(f,varname,lev[nl])
 
         #f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6outside_moveout_stat.nc'%(lev[nl]))
-        f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6local_moveout_stat.nc'%(lev[nl]))
-        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocalremote_6dist.nc'%(lev[nl]))
+        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6local_moveout_stat.nc'%(lev[nl]))
+        f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocalremote_%ddist.nc'%(lev[nl],radiu2))
         var1 = read_stat(f,varname1,lev[nl])
 
-        f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6local_moveout_stat.nc'%(lev[nl]))
+        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6local_moveout_stat.nc'%(lev[nl]))
         #f = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic/ff_%d_1980-2020_6outside_moveout_stat.nc'%(lev[nl]))
-        #f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocallocal_6dist.nc'%(lev[nl]))
+        f = xr.open_dataset('/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocallocal_%ddist.nc'%(lev[nl],radiu2))
         var2 = read_stat(f,varname2,lev[nl])
         
         for nm in range(0,nrow,1):
@@ -369,13 +374,13 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
                 axe.set_xticks(np.arange(lonl,lonr,lon_sp), crs=ccrs.PlateCarree())
                 axe.xaxis.set_major_formatter(LongitudeFormatter(degree_symbol=''))
 
-    position = fig.add_axes([0.45, bmlo-0.005, 0.45, 0.01]) #left, bottom, width, height
+    position = fig.add_axes([0.2, bmlo-0.01, 0.7, 0.01]) #left, bottom, width, height
     cb = plt.colorbar(cont, cax=position ,orientation='horizontal')#, shrink=.9)
-    plt.figtext(0.35,bmlo-0.005, label,fontsize=title_font,
+    plt.figtext(0.1,bmlo-0.015, label, fontsize=title_font,
         horizontalalignment='left',verticalalignment='bottom')
 
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
-    plt.savefig('%s/stat_seasonal%s_%s.png'%(figdir,suffix,varname), 
+    plt.savefig('%s/stat_seasonal%s_%s_%ddist.png'%(figdir,suffix,varname,radiu2), 
         bbox_inches='tight',pad_inches=0.01)
 
 if __name__=='__main__':

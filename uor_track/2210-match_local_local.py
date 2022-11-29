@@ -20,12 +20,16 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
+if len(sys.argv) < 2 :
+    radiu2 = 6
+else:
+    radiu2 = int(sys.argv[1])  #'ff_250_500_no'
+
 lev = [850, 500, 250]
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
-outdir = '/home/ys17-23/Extension2/renql/uor_track/mdata'
-figdir = '/home/ys17-23/Extension2/renql/uor_track/fig'
+outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
+figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 radiu1 = 6
-radiu2 = 6 # distance match 
 suffix = ["%dlocal"%radiu1,"%doutside"%radiu1]
 behv   = ['lysis','moveout']
 
@@ -142,7 +146,9 @@ def match_cyclone2(time,lon,lat,var,dist):
         distance = np.square(term[:,2]-lat)+np.square(term[:,1]-lon)
         print(distance)
         ind2 = np.argwhere(distance<=dist*dist)[:,0]
-        if len(ind2)>0:
+        if len(ind2)>1:
+            tid = ['%d/%d'%(term[i,3],term[i,4]) for i in ind2]
+        if len(ind2)==1 and term[ind2[0],3]!=1 :
             tid = ['%d/%d'%(term[i,3],term[i,4]) for i in ind2]
     print('%f %f %f : match number %d %s'%(time,lon,lat,len(tid),tid))
     return tid 

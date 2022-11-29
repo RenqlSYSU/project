@@ -8,13 +8,18 @@ import gc #garbage collector
 from datetime import datetime, timedelta
 #matplotlib.use('Agg')
 
+if len(sys.argv) < 2 :
+    radiu = 6
+else:
+    radiu = int(sys.argv[1])  #'ff_250_500_no'
+
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
 outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
 figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 
 def main_run():
-    fn_stream = subprocess.check_output('ls %s/fftadd_match_*_6dist'%(
-        outdir), shell=True).decode('utf-8')
+    fn_stream = subprocess.check_output('ls %s/fftadd_match_*_%ddist'%(
+        outdir,radiu), shell=True).decode('utf-8')
     fn_list = fn_stream.split()
     for filname in fn_list:
         fftadd2ff(filname)

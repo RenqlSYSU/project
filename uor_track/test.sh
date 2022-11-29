@@ -4,7 +4,7 @@ OUTDIR=/home/ys17-23/Extension2/renql/
 
 cd ${OUTDIR} #match${suffix}
 
-for file in * ; do
+for file in ${lev[@]} ; do
     echo $file
 done
 

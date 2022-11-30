@@ -53,7 +53,7 @@ def main_run():
     outfile = '%s/match_local_season_%dcyclone_%drad.nc'%(
             outdir,radiu1,radiu2)
     calc_month(outfile)
-    draw_stacked_bar(outfile,'%s/bar_match_local_%dcyc_%drad.png'%(
+    draw_stacked_bar(outfile,'%s/bar_match_localremote_%dcyc_%drad.png'%(
         figdir,radiu1,radiu2))
 
 def match_local_remote(filname1,filname2,dist,outfilename):
@@ -252,7 +252,7 @@ def draw_stacked_bar(outfile,figname):
     x = np.arange(len(titls))
     for nc in range(len(lev)):
         axe = ax[nc]
-        axe.set_title('%dhPa local'%lev[nc],fontsize=title_font,fontdict=font)
+        axe.set_title('%dhPa local remote %d'%(lev[nc],radiu2),fontsize=title_font,fontdict=font)
         axe.set_ylabel('number',fontsize=label_font,fontdict=font)
         
         for nl in range(len(lev)):

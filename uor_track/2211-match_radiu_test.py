@@ -25,56 +25,44 @@ path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
 outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
 figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 radiu1 = 6
-radiu2 = [3,6,9,12]
+radiu2 = range(2,13,1) #[3,6,9,12]
 suffix = ["%dlocal"%radiu1,"%doutside"%radiu1]
-behv   = ['lysis','moveout']
+behv   = ['local','remote']
 
 def main_run():
-    outfile = '%s/match_local_local_%dcyclone_%drad.nc'%(
-            outdir,radiu1,radiu2)
+    draw_stacked_bar('%s/match_radiu_test.png'%figdir)
 
-def draw_stacked_bar(outfile,figname):
+def draw_stacked_bar(figname):
     titls = ['DJF','MAM','JJA','SON']
     nrow = 3 #6 #
-    ncol = 1 #2 #
+    ncol = 2 #2 #
     bmlo = 0.35 #0.25 #
     
-    fig = plt.figure(figsize=(8,12),dpi=300)
-    ax = fig.subplots(nrow, ncol)
-
     ds = xr.open_dataset('%s/behv_season_6cyclone_6rad.nc'%outdir)
     total = ds['numb'].data[0,:,:,:].sum(axis=1) #[suffix,lev,behv,season]
-    print(total[0,0])
+    print(total[0,0]) #[lev,season]
     
-    ds = xr.open_dataset(outfile)
-    var = ds['numb'].data #[local_lev,remote_lev,season]
+    var = np.zeros([2,len(radiu2),len(lev),4], dtype=int)
+    for nb in range(len(behv)):
+        for nr in range(len(radiu2)):
+            outfile = '%s/match_local_%s_%dcyclone_%drad.nc'%(
+                    outdir,behv[nb],radiu1,radiu2[nr])
+            ds = xr.open_dataset(outfile)
+            numb = ds['numb'].data #[local_lev,remote_lev,season]
+            for nl,nll in enumerate([1,2,1]):
+                var[nb,nr,nl,:] = numb[nl,nll,:]*100.0/total[nl,:]
 
-    colors = ['c','y','violet']
-    x = np.arange(len(titls))
-    for nc in range(len(lev)):
-        axe = ax[nc]
-        axe.set_title('%dhPa local local %d'%(lev[nc],radiu2),fontsize=title_font,fontdict=font)
-        axe.set_ylabel('number',fontsize=label_font,fontdict=font)
-        
+    fig = plt.figure(figsize=(8,12),dpi=150)
+    ax = fig.subplots(nrow, ncol)
+    for nb in range(len(behv)):
         for nl in range(len(lev)):
-            axe.bar(x+0.3*nl, var[nc,nl,:], width=0.3, align='edge', 
-                    bottom=0, color=colors[nl])
-            
-            for nm,tota in enumerate(total[nc,:]):
-                if round(var[nc,nl,nm])>0:
-                    axe.text(x[nm]+0.3*nl+0.15, var[nc,nl,nm]*2./3., '%d\n%d%%'%(
-                        round(var[nc,nl,nm]),round(var[nc,nl,nm]*100/tota)),
-                        ha='center', color='k', weight='bold', size=10)
-
-        axe.set_xticks(x+0.45)
-        axe.set_xticklabels(titls)
-        
-        if nc == 0:
-            patchs = []
-            for nb in range(len(lev)):
-                patchs.append(Patch(color=colors[nb],label=lev[nb]))
-            axe.legend(handles=patchs,handleheight=1.5,ncol=3)
-
+            axe = ax[nl][nb]
+            axe.set_title('%dhPa %s'%(lev[nl],behv[nb]),fontsize=title_font,fontdict=font)
+            axe.set_ylabel('percent',fontsize=label_font,fontdict=font)
+            for ns in range(4):
+                #axe.plot(radiu2,var[nb,:,nl,ns],linewidth=3,marker="o",markersize=6)
+                axe.plot([x**2 for x in radiu2],var[nb,:,nl,ns],linewidth=3,marker="o",markersize=6)
+    axe.legend(titls)
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figname, 
         bbox_inches='tight',pad_inches=0.01)

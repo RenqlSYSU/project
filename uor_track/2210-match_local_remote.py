@@ -50,7 +50,7 @@ def main_run():
             match_local_remote('%s/fftadd_%d_1980-2020_%dlocal'%(path,nl1,radiu1),
                 '%s/fftadd_%d_1980-2020_%doutside'%(path,nl2,radiu1),radiu2,outfile)
     
-    outfile = '%s/match_local_season_%dcyclone_%drad.nc'%(
+    outfile = '%s/match_local_remote_%dcyclone_%drad.nc'%(
             outdir,radiu1,radiu2)
     calc_month(outfile)
     draw_stacked_bar(outfile,'%s/bar_match_localremote_%dcyc_%drad.png'%(

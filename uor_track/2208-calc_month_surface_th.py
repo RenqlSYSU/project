@@ -25,15 +25,15 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
-path = '/gws/nopw/j04/ncas_generic/users/renql/ERA5_mon'
-outdir = '/home/users/qd201969/uor_track/mdata'
-figdir = '/home/users/qd201969/uor_track/fig'
+path = '/home/ys17-23/Extension2/renql/ERA5_mon'
+outdir = "/home/ys17-23/Extension2/renql/project/uor_track/mdata/"
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
 lonl=15 
 lonr=145
 lats=15
 latn=70
-ilat = np.arange(lats, latn+0.1, 0.25)
-ilon = np.arange(lonl, lonr+0.1, 0.25)
+ilat = np.arange(lats, latn+0.1, 1)
+ilon = np.arange(lonl, lonr+0.1, 1)
 lat_sp = 20
 lon_sp = 30 #60 #
 ga = 9.80665 # Gravitational acceleration
@@ -41,10 +41,13 @@ a  = 6378388 # the radius of earth, m
 
 def main_run():
     #varname = '2m_th';dvar=varname;scale=1;unit='K';cnlev=np.arange(245,325.1,5)
-    varname = 'd2mthdy';dvar=varname;scale=-100000;unit='K/100km';cnlev=np.arange(-1.6,1.61,0.2)
-    outfile = '%s/month41_%s.nc'%(outdir,varname)
+    #varname = 'd2mthdy';dvar=varname;scale=-100000;unit='K/100km';cnlev=np.arange(-1.6,1.61,0.2)
+    #outfile = '%s/month41_%s.nc'%(outdir,varname)
     #calc_monthly_surface(outfile,varname)
-    calc_monthly_dtdy(outfile,varname)
+    #calc_monthly_dtdy(outfile,varname)
+    
+    varname = 'Q1';dvar='intQ1';scale=1;unit='W/kg';cnlev=np.arange(-160,161,20)
+    outfile = "/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_intQ1_1979-2020_sm9.nc"
     draw_season_4x1(outfile,varname,scale,unit,cnlev,dvar)
 
 def calc_monthly_dtdy(outfile,varname):
@@ -89,7 +92,9 @@ def draw_season_4x1(outfile,varname,scal,unit,cnlev,dvar):
     titls= ['DJF','MAM','JJA','SON']
     
     ds = xr.open_dataset(outfile)
-    var = scal*ds[varname].sel(longitude=ilon,latitude=ilat).data
+    #var = scal*ds[varname].sel(longitude=ilon,latitude=ilat).data
+    da = ds[varname].sel(longitude=ilon,latitude=ilat)
+    var = scal * da.groupby(da.time.dt.month).mean('time').data
 
     nrow = 4 #6 #
     ncol = 1 #2 #
@@ -108,14 +113,14 @@ def draw_season_4x1(outfile,varname,scal,unit,cnlev,dvar):
         ncolors=ncmap.N,extend='both')
     jetcolor = 'darkviolet'
     
-    uwndpath = '/gws/nopw/j04/ncas_generic/users/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
+    uwndpath = '%s/ERA5_mon_u_1979-2020.nc'%path
     ds = xr.open_dataset(uwndpath)
     da = ds['u'].sel(level=200,longitude=ilon,
         latitude=ilat,method="nearest").load()
     uwnd = da.groupby(da.time.dt.month).mean('time').data
     del ds, da
 
-    ds = xr.open_dataset("/home/users/qd201969/gtopo30_0.9x1.25.nc")
+    ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
     phis = ds['PHIS'].sel(lon=ilon,lat=ilat,method="nearest").data
     phis = phis/9.8 # transfer from m2/s2 to m
     del ds

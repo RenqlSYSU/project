@@ -28,11 +28,12 @@ figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 tp_file='%s/tp_loca_1500.txt'%(outdir)
 radiu1 = 6
 radiu2 = 6 # use to filte lysis cyclone
-suffix = ["%dlocal"%radiu1,"%doutside"%radiu1]
+suffix = ["%doutside"%radiu1,"%dlocal"%radiu1]
+suf1 = ['remote','local']
 behv   = ['lysis','moveout']
+numod= [chr(i) for i in range(97,115)]
 
 def main_run():
-    '''
     outfile = '%s/behv_season_%dcyclone_%drad.nc'%(
             outdir,radiu1,radiu2)
     calc_lysis_percent(outfile)
@@ -48,6 +49,7 @@ def main_run():
             %(path1,suffix[nc])
         ret=subprocess.Popen(com,shell=True)
         ret.wait()
+    '''
 
 def calc_lysis_percent(outfile):
     if os.path.exists(outfile):
@@ -98,9 +100,9 @@ def calc_season_cyclone(filname):
                 ct1.append(start+timedelta(hours=int(data[-1][0])))
 
             signal=-10
-            if data[-1][1] > data[0][1]:
+            if data[-1][1] > data[0][1] or data[0][1]>180:
                 dist = np.square(data[-1][2]-loca[:,0])+np.square(data[-1][1]-loca[:,1]) 
-                if dist.min()<radiu2*radiu2:
+                if dist.min()<=radiu2*radiu2:
                     signal = 0 # lysis
                 else:
                     signal = 1 # moveout
@@ -210,11 +212,11 @@ def draw_stacked_bar(outfile,figname):
     colors = ['c','y']
     dash   = ['--','//','x']
     x = np.arange(len(titls))
-    yoffset1 = [1,0.8]
-    yoffset2 = [-10,-5]
+    yoffset1 = [0.8,1  ]
+    yoffset2 = [-5 ,-10]
     for nc in range(len(var)):
         axe = ax[nc]
-        axe.set_title(suffix[nc],fontsize=title_font,fontdict=font)
+        axe.set_title('(%s) %s'%(numod[nc],suf1[nc]),fontsize=title_font,fontdict=font)
         axe.set_ylabel('number',fontsize=label_font,fontdict=font)
         
         for nl in range(len(lev)):
@@ -226,14 +228,15 @@ def draw_stacked_bar(outfile,figname):
             
             for nm,tota in enumerate(total[nc,nl,:]): 
                 axe.text(x[nm]+0.3*nl+0.15, tota+yoffset1[nc], round(tota),
-                      ha='center', color='k', weight='bold', size=10)
+                      ha='center', color='k', weight='bold', size=11)
 
                 bot = 0
                 for nb in range(len(behv)):
-                    axe.text(x[nm]+0.3*nl+0.15, bot+var[nc,nl,nb,nm]+yoffset2[nc], 
-                        '%d%%'%(round(var[nc,nl,nb,nm]*100/tota)),
-                        #round(var[nc,nl,nb,nm]),
-                        ha='center', color='k', weight='bold', size=10)
+                    if var[nc,nl,nb,nm] > -1*yoffset2[nc]: 
+                        axe.text(x[nm]+0.3*nl+0.15, bot+var[nc,nl,nb,nm]+yoffset2[nc], 
+                            '%d%%'%(round(var[nc,nl,nb,nm]*100/tota)),
+                            #round(var[nc,nl,nb,nm]),
+                            ha='center', color='k', weight='bold', size=11)
                     bot += var[nc,nl,nb,nm]
 
         axe.set_xticks(x+0.45)
@@ -246,7 +249,7 @@ def draw_stacked_bar(outfile,figname):
 #                  ha='center', color='k', weight='bold', size=10)
 #                  #backgroundcolor='w')
 
-        if nc == 0:
+        if nc == 1:
             patchs = []
             #for nl in range(len(lev)):
             #    patchs.append(Patch(facecolor='w',hatch=dash[nl],label='%dhPa'%lev[nl]))

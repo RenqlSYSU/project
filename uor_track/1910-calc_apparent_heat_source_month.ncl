@@ -26,8 +26,6 @@ latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
 lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;hPa
-month_s = 1 
-month_e = 12
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data

@@ -32,6 +32,7 @@ radiu2 = 6
 behv   = ['in','out']
 slon = 60
 elon = 110
+numod= [chr(i) for i in range(97,115)]
 
 def main_run():
     #outfile = '%s/movein_moveout_month_%dcyclone_%drad_%d.nc'%(
@@ -141,23 +142,23 @@ def calc_season_cyclone(filname):
                 ct1.append(start+timedelta(hours=int(data[-1][0])))
 
             signal=-10
-            #if data[-1][1] > data[0][1]:
-            dist = np.square(data[0][2]-loca[:,0])+np.square(data[0][1]-loca[:,1]) 
-            if dist.min()>radiu2*radiu2:
-                signal = 0 # movein 
-                if sum(i.year==1996 for i in ct1)/len(ct1) >= 0.5 : 
-                    if sum(i.month==ct1[0].month for i in ct1)/len(ct1) >= 0.5 : 
-                        var[signal,ct1[0].month-1] += 1
-                    else:
-                        var[signal,ct1[-1].month-1] += 1
-            dist = np.square(data[-1][2]-loca[:,0])+np.square(data[-1][1]-loca[:,1]) 
-            if dist.min()>radiu2*radiu2 and data[-1][1]>110:
-                signal = 1 # moveout
-                if sum(i.year==1996 for i in ct1)/len(ct1) >= 0.5 : 
-                    if sum(i.month==ct1[0].month for i in ct1)/len(ct1) >= 0.5 : 
-                        var[signal,ct1[0].month-1] += 1
-                    else:
-                        var[signal,ct1[-1].month-1] += 1
+            if data[-1][1] > data[0][1] or data[0][1]>180 :
+                dist = np.square(data[0][2]-loca[:,0])+np.square(data[0][1]-loca[:,1]) 
+                if dist.min()>radiu2*radiu2:
+                    signal = 0 # movein 
+                    if sum(i.year==1996 for i in ct1)/len(ct1) >= 0.5 : 
+                        if sum(i.month==ct1[0].month for i in ct1)/len(ct1) >= 0.5 : 
+                            var[signal,ct1[0].month-1] += 1
+                        else:
+                            var[signal,ct1[-1].month-1] += 1
+                dist = np.square(data[-1][2]-loca[:,0])+np.square(data[-1][1]-loca[:,1]) 
+                if dist.min()>radiu2*radiu2 :#and data[-1][1]>115: 
+                    signal = 1 # moveout
+                    if sum(i.year==1996 for i in ct1)/len(ct1) >= 0.5 : 
+                        if sum(i.month==ct1[0].month for i in ct1)/len(ct1) >= 0.5 : 
+                            var[signal,ct1[0].month-1] += 1
+                        else:
+                            var[signal,ct1[-1].month-1] += 1
         line = ff.readline()
     ff.close()
     return var 
@@ -220,7 +221,8 @@ def draw_ts_3x1(outfile,figname):
 
     for nl in range(len(lev)):
         axe = ax[nl]
-        axe.set_title('%dhPa'%lev[nl],fontsize=title_font,fontdict=font)
+        axe.set_title('(%s) %dhPa'%(numod[nl],lev[nl]),
+            fontsize=title_font,fontdict=font)
         axe.set_ylabel('number',fontsize=label_font,fontdict=font)
         for nb in range(len(behv)):
             axe.plot(x,var[nl,nb,:],linewidth=2,marker="o",markersize=6,
@@ -228,8 +230,7 @@ def draw_ts_3x1(outfile,figname):
         axe.grid(True, which="both", axis='y',color='grey', linestyle='--', linewidth=1)
         axe.set_xticks(x)
         axe.set_xticklabels(titls)
-    
-    ax[0].legend(behv)
+        axe.legend(behv,loc='lower left')
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figname,bbox_inches='tight',pad_inches=0.01)
 

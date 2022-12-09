@@ -32,19 +32,19 @@ lev = [850,500,250]
 prefix = "ff"
 #suffix = 'local'#'remote'# 
 #suffix = 'matched local' 
-suffix = 'moveout' 
-#suffix = '_6local'#,'_total']'_6outside'#,''#
+#suffix = '_6local_moveout'#'_6outside_moveout'#'moveout' 
+suffix = '_6local'#,'_total']'_6outside'#,''#
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
 path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic'
 uwndpath = '/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
-if suffix in ['moveout']:
+if suffix in ['moveout','_6outside_moveout','_6local_moveout']:
     lonl=45  #0  #
     lonr=160 #360#
     lats=15 #20 #
     latn=65 #90 #
-    suf1=suffix
+    suf1='moveout'
     bmlo = 0.35 #0.25 #
 if suffix in ['matched local']:
     lonl=50  #0  #
@@ -97,18 +97,21 @@ del ds
 gc.collect()
 
 def main_run():
-    '''
     # 6local & 6outside
     cnlev1 = np.hstack((np.arange(1,4,1),np.arange(7,20,3)))
     cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
-    draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
-            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[4,60])
     draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
+            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[4,60])
+    draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
             'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[8.5,60])
     '''
     # moveout 
-    draw_moveout_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
-            np.arange(0.5,13,1),np.arange(0.5,13,0.5))
+    #draw_moveout_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
+    #        np.arange(0.5,13,1),np.arange(0.5,13,0.5))
+    cnlev1 = np.hstack((np.arange(0.5, 10 ,1),np.arange( 10 ,20 , 1))) # genesis & lysis
+    #cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
+    draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
+            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[50,60])
     
     # local match remote or local
     #draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
@@ -119,6 +122,7 @@ def main_run():
     #        'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[2,60])
     #draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
     #        'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[3.5,60])
+    '''
 
     '''
     # total cyclones

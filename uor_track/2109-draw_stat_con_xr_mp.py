@@ -116,8 +116,8 @@ gc.collect()
 fig = plt.figure(figsize=(12,12),dpi=150)
 ax = fig.subplots(nrow, ncol, subplot_kw=dict(projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
 for nl in range(0,len(lev),1):
-    files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
-    #files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
+    #files = '/home/ys17-23/Extension2/renql/project/uor_track/mdata/statistic/ff_match_%dlocal%s_6dist.nc'%(lev[nl],suffix)
+    files = '%s/%s_%d_1980-2020%s_stat.nc'%(path,prefix,lev[nl],suffix)
     print(files)
     f = xr.open_dataset(files)
     for nv in range(0,len(draw),1):#,len(f),1):
@@ -152,14 +152,14 @@ for nl in range(0,len(lev),1):
 
         shad = axe.contourf(ilon, ilat, var, cnlevels, 
                      transform=ccrs.PlateCarree(),cmap=fcolors,extend='both',norm=norm)
-        topo = axe.contour(ilon, ilat, phis, [500,1000,1500,3000,4500], 
+        topo = axe.contour(ilon, ilat, phis, [1500,3000,4500],#500,1000, 
                      transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
         if dbox >= 1 :
             axe.plot([flonl,flonl,flonr,flonr,flonl],[flatn,flats,flats,flatn,flatn], 
                      linewidth=2.5, color='black', transform=ccrs.PlateCarree()) # filter box
 
-        jets = axe.contour(ilon, ilat, uwnd, [25,35,45,100], 
-                     transform=ccrs.PlateCarree(),colors='red',linewidths=2)
+        #jets = axe.contour(ilon, ilat, uwnd, [25,35,45,100], 
+        #             transform=ccrs.PlateCarree(),colors='red',linewidths=2)
 
         if nv == 0:
             axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())

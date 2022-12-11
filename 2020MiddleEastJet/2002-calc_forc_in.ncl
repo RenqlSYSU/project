@@ -5,10 +5,10 @@
 ;                                           2020/02/04
 ;******************************************************************************
 begin
-path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
+path1   = "/home/ys17-23/Extension/ERA-interim/pressure/"
 ;path1   = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
-path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
-path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
+path2   = "/home/ys17-23/ln/data/"
+path3   = "/home/ys17-23/Extension/ERA-interim/pressure/hgt/hgt.interim.1979.nc" ;to get time attribute
 var_name = (/"uwnd","vwnd","omega","air","hgt"/)
 
 year_option = True;False ;
@@ -213,7 +213,9 @@ b2@long_name = "Horizontal advection of absolute vorticity"
 b2@units     = "s^-2" 
 b3@long_name = "Vertical gradient of temperature horizontal advection"
 b3@units     = "s^-2" 
-
+printMinMax(b1,0)
+printMinMax(b2,0)
+printMinMax(b3,0)
 ;========================================================================
 ;save the data
 ;=======================================================================

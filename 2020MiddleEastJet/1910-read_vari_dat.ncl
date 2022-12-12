@@ -1,13 +1,7 @@
 ;***************************************************************************
-;use the f_Qd, f_Qd_t, f_Qeddy and A to calc dzdt by SOR (Successive Over Relaxation)
-;1. read f_Qd, f_Qd_t, f_Qeddy and A
-;2. define coefficient(coe) of linear equations and relaxing factor(rf)
-;3. calc dzdt by circulation 
-;4. store the results
-;
-;The ncl functions have been used are: 
-;   dim_avg_n_Wrap, center_finite_diff_n, conform
-;   dim_rmvmean_n_Wrap
+;1. read dzdt variable from .dat file
+;2. use dzdt to calc dudt, dTdt, dvdt, dbdt
+;3. write above variables into netcdf file
 ;                                            by Ql_Ren
 ;                                           2019/10/25
 ;******************************************************************************

@@ -9,6 +9,22 @@ def calc_distance(lat,dlon):
     a=6371 #km
     return a*np.cos(lat*np.pi/180.0)*dlon*np.pi/180
 
+def calc():
+    a=1
+    calc2(a)
+    calc2(a)
+    print(a)
+    a=calc2(a)
+    print(a)
+
+def calc2(b):
+    b=b+b
+    print(b)
+    return b
+
+calc()
+
+
 print('20N, 7 : %f km'%calc_distance(15,7))
 print('60N, 13 : %f km'%calc_distance(60,13))
 

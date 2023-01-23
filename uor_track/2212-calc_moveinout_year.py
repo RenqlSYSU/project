@@ -184,13 +184,14 @@ def draw_ts_3x1(outfile,figname):
         axe.grid(True, which="both", axis='y',color='grey', linestyle='--', linewidth=1)
         axe.set_xticks(x)
         axe.set_xticklabels(titls)
-        axe.legend(behv,loc='lower left')
         
         tvalue,pvalue = stats.ttest_ind(var[nl,0,:,:],var[nl,1,:,:], axis=0, equal_var=False)
         ax2 = axe.twinx()
-        ax2.plot(x,pvalue,linewidth=2,marker="o",markersize=6,color='k')
-        ax2.plot([1,12],[0.01,0.01],linewidth=2,color='k')
+        ax2.set_ylabel('p-value',fontsize=label_font,fontdict=font)
+        ax2.plot(x,pvalue,linewidth=2,color='gray')
+        #ax2.plot([1,12],[0.01,0.01],linewidth=2,color='k')
 
+    axe.legend(behv,loc='lower right')
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figname,bbox_inches='tight',pad_inches=0.01)
 

@@ -5,9 +5,9 @@
 ;*********************************************************************************
 begin
 year_option = True ;calc yearly DJF 
-var_option = 4
+var_option = -10
 jet_option  = True ;False;20191205, control the draw of jet stream
-region_line = True ;False; draw the line for ME, EA, NA
+region_line = False;True ; draw the line for ME, EA, NA
 vect_option = False;True ;
 cont_option = False;True ;
 bar_share = True ;False;
@@ -31,7 +31,7 @@ ntime = dimsizes(months2)
 case   = "ERA-Interim"
 ;case   = "NCEP1"
 
-do nnv = 0,0,1
+do nnv = 1,1,1
     if(var_option.eq.-18) then 
         draw_var = (/"uwnd"/)  ;this is the variable used to draw, can used as center string
         var_name = (/"season_ave"/)  ;use to read variables
@@ -73,7 +73,7 @@ do nnv = 0,0,1
         unit     = (/"10~S~-6~N~K/m"/)  ;this can be used as right string 
     end if
     if(var_option.eq.-10) then 
-        var_calc = (/"intAPE","intEKE","variV","variZ"/)
+        var_calc = (/"intAPE","uppEKE","variV","variZ"/)
         draw_var = (/"all"   ,"hgh"   ,"low"   /)  ;this is the variable used to draw, can used as center string
         var_name = (/"intEKE","hghEKE","lowEKE"/)  ;use to read variables
         unit     = (/"10~S~4~N~J","10~S~4~N~J","m~S~2~N~s~S~-2~N~","10~S~4~N~m~S~4~N~s~S~-4~N~"/)  ;this can be used as right string 
@@ -990,14 +990,15 @@ do nv = 0,nvar-1,1
     end if
     if(var_option.le.0) then
     res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa" 
-    res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")"
+    ;res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nv) + ")"
     if(var_option.eq.-11) then 
     res@gsnLeftString   = pre_case(np) + ") " + months2(nt) 
     end if
     end if
     if(var_option.eq.-10) then 
-    res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + var_calc(nnv)
-    res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nnv) + ")"
+    res@gsnLeftString   = pre_case(np) + ") DJF " + var_calc(nnv) + " (" + unit(nnv) + ")"
+    ;res@gsnLeftString   = pre_case(np) + ") " + lev(nl) + "hPa " + var_calc(nnv)
+    ;res@gsnRightString  = months2(nt) + " " + draw_var(nv) + " (" + unit(nnv) + ")"
     end if
     
     ;res@gsnSpreadColors       = False              ; turn of the full color map
@@ -1057,7 +1058,8 @@ end do
 
 ;    resp@txString      = fig_title
 ;    gsn_panel(wks,plot,(/3,1/),resp)
-     gsn_panel(wks,plot,(/nvar,1/),resp)
+     ;gsn_panel(wks,plot,(/nvar,1/),resp)
+     gsn_panel(wks,plot,(/1,1/),resp)
 end do ;lev 
 ;     gsn_panel(wks,plot,(/2,2/),resp)
 ;end do 

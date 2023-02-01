@@ -5,14 +5,13 @@
 ;                                           2020/02/04
 ;******************************************************************************
 begin
-path1   = "/home/ys17-19/data-observation/ERA-interim/pressure/"
-;path1   = "/home/ys17-19/data-observation/NCEP_NCAR/daily/"
-path2   = "/home/ys17-19/renql/project/2020MiddleEastJet/data/"
-path3   = "/home/ys17-19/renql/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
-path4   = "/home/ys17-19/data-observation/ERA-interim/surface/pres/sp.interim.nc"
+path1   = "/home/ys17-23/Extension/ERA-interim/pressure/"
+path2   = "/home/ys17-23/Extension2/renql/project/2020MiddleEastJet/data/"
+path3   = "/home/ys17-23/Extension2/renql/model_data/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.1979.daily.U.nc" ;to get time attribute
+path4   = "/home/ys17-23/Extension/ERA-interim/surface/pres/sp.interim.nc"
 var_name = (/"air"   ,"uwnd"  ,"vwnd" ,"hgt"  /)
-var_calc = (/"intAPE","intEKE","variV","variZ"/)
-nv = 0
+var_calc = (/"intAPE","uppEKE","variV","variZ"/)
+nv = 1
 
 year_option = True;False ;
 fileout  = path2 + "ERA-Interim_DJF_"+var_calc(nv)+"-year.nc"
@@ -186,15 +185,20 @@ end if
 
 if(nv.eq.1) then 
 delete([/clm_u/])
-var = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var = dim_sum_n((edd_v*edd_v + edd_u*edd_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var = dim_sum_n( (edd_v(:,:,5:10,:,:)*edd_v(:,:,5:10,:,:) + edd_u(:,:,5:10,:,:)*edd_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 EKE = dim_avg_n(var,1) 
 EKE@long_name = "DJF Integrated transient eddies kinetic energy"
 EKE@units     = "J" 
-var    = dim_sum_n((hgh_v*hgh_v + hgh_u*hgh_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+
+;var    = dim_sum_n((hgh_v*hgh_v + hgh_u*hgh_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var = dim_sum_n( (hgh_v(:,:,5:10,:,:)*hgh_v(:,:,5:10,:,:) + hgh_u(:,:,5:10,:,:)*hgh_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 hghEKE = dim_avg_n(var,1) 
 hghEKE@long_name = "DJF Integrated high frequency transient eddies kinetic energy"
 hghEKE@units     = "J" 
-var    = dim_sum_n((low_v*low_v + low_u*low_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+
+;var    = dim_sum_n((low_v*low_v + low_u*low_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var = dim_sum_n( (low_v(:,:,5:10,:,:)*low_v(:,:,5:10,:,:) + low_u(:,:,5:10,:,:)*low_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:), 2 )/g/2.0   ;500-200hPa integralget (nyear,ntime,nlat,nlon)
 lowEKE = dim_avg_n(var,1) 
 lowEKE@long_name = "DJF Integrated low frequecy transient eddies kinetic energy"
 lowEKE@units     = "J" 

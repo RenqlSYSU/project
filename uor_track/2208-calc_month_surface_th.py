@@ -25,13 +25,14 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
-path = '/home/ys17-23/Extension2/renql/ERA5_mon'
+path = '/home/ys17-23/Extension/ERA-interim/monthly/'
+#path = '/home/ys17-23/Extension2/renql/ERA5_mon'
 outdir = "/home/ys17-23/Extension2/renql/project/uor_track/mdata/"
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
-lonl=15 
-lonr=145
-lats=15
-latn=70
+lonl=0 
+lonr=359
+lats=0
+latn=90
 ilat = np.arange(lats, latn+0.1, 1)
 ilon = np.arange(lonl, lonr+0.1, 1)
 lat_sp = 20
@@ -41,13 +42,16 @@ a  = 6378388 # the radius of earth, m
 
 def main_run():
     #varname = '2m_th';dvar=varname;scale=1;unit='K';cnlev=np.arange(245,325.1,5)
-    #varname = 'd2mthdy';dvar=varname;scale=-100000;unit='K/100km';cnlev=np.arange(-1.6,1.61,0.2)
-    #outfile = '%s/month41_%s.nc'%(outdir,varname)
-    #calc_monthly_surface(outfile,varname)
-    #calc_monthly_dtdy(outfile,varname)
+    varname = 'th';dvar=varname;scale=1;unit='K';cnlev=np.arange(245,325.1,5)
+    outfile = '%s/month41_%s.nc'%(outdir,varname)
+    calc_monthly_surface(outfile,varname)
     
-    varname = 'Q1';dvar='intQ1';scale=1;unit='W/kg';cnlev=np.arange(-160,161,20)
-    outfile = "/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_intQ1_1979-2020_sm9.nc"
+    varname = 'd2mthdy';dvar=varname;scale=-100000;unit='K/100km';cnlev=np.arange(-1.6,1.61,0.2)
+    outfile = '%s/month41_%s.nc'%(outdir,varname)
+    calc_monthly_dtdy(outfile,varname)
+    
+    #varname = 'Q1';dvar='intQ1';scale=1;unit='W/kg';cnlev=np.arange(-160,161,20)
+    #outfile = "/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_intQ1_1979-2020_sm9.nc"
     draw_season_4x1(outfile,varname,scale,unit,cnlev,dvar)
 
 def calc_monthly_dtdy(outfile,varname):
@@ -74,11 +78,13 @@ def calc_monthly_surface(outfile,varname):
         return
     else:
         print('handle %s'%outfile)
-
-    ds = xr.open_dataset('%s/ERA5_mon_t2m_1979-2020.nc'%path)
+    
+    #ds = xr.open_dataset('%s/ERA5_mon_t2m_1979-2020.nc'%path)
+    ds = xr.open_dataset('%s/2_metre_temperature.mon.mean.nc'%path)
     var = ds['t2m'].sel(longitude=ilon,latitude=ilat).groupby(
             ds.time.dt.month).mean('time')
-    ds = xr.open_dataset('%s/ERA5_mon_sp_1979-2020.nc'%path)
+    #ds = xr.open_dataset('%s/ERA5_mon_sp_1979-2020.nc'%path)
+    ds = xr.open_dataset('%s/Surface_pressure.mon.mean.nc'%path)
     sp = ds['sp'].sel(longitude=ilon,latitude=ilat).groupby(
             ds.time.dt.month).mean('time').data
     del ds
@@ -92,9 +98,9 @@ def draw_season_4x1(outfile,varname,scal,unit,cnlev,dvar):
     titls= ['DJF','MAM','JJA','SON']
     
     ds = xr.open_dataset(outfile)
-    #var = scal*ds[varname].sel(longitude=ilon,latitude=ilat).data
-    da = ds[varname].sel(longitude=ilon,latitude=ilat)
-    var = scal * da.groupby(da.time.dt.month).mean('time').data
+    var = scal*ds[varname].sel(longitude=ilon,latitude=ilat).data
+    #da = ds[varname].sel(longitude=ilon,latitude=ilat)
+    #var = scal * da.groupby(da.time.dt.month).mean('time').data
 
     nrow = 4 #6 #
     ncol = 1 #2 #
@@ -112,13 +118,14 @@ def draw_season_4x1(outfile,varname,scal,unit,cnlev,dvar):
     norm = colors.BoundaryNorm(boundaries=cnlev,
         ncolors=ncmap.N,extend='both')
     jetcolor = 'darkviolet'
-    
+    '''
     uwndpath = '%s/ERA5_mon_u_1979-2020.nc'%path
     ds = xr.open_dataset(uwndpath)
     da = ds['u'].sel(level=200,longitude=ilon,
         latitude=ilat,method="nearest").load()
     uwnd = da.groupby(da.time.dt.month).mean('time').data
     del ds, da
+    '''
 
     ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
     phis = ds['PHIS'].sel(lon=ilon,lat=ilat,method="nearest").data
@@ -129,10 +136,10 @@ def draw_season_4x1(outfile,varname,scal,unit,cnlev,dvar):
     for nm in range(0,nrow,1):
         if nm == 0:
             shad = (var[0,:,:]+var[1,:,:]+var[11,:,:])/3.0
-            uwnd1 = (uwnd[0,:,:]+uwnd[1,:,:]+uwnd[11,:,:])/3.0
+            #uwnd1 = (uwnd[0,:,:]+uwnd[1,:,:]+uwnd[11,:,:])/3.0
         else:
             shad = np.mean(var[(3*nm-1):(3*nm+2),:,:],axis=0)
-            uwnd1 = np.mean(uwnd[(3*nm-1):(3*nm+2),:,:],axis=0)
+            #uwnd1 = np.mean(uwnd[(3*nm-1):(3*nm+2),:,:],axis=0)
         print('%s %s : min = %f ; max = %f'%(varname,titls[nm],
             np.nanmin(shad),np.nanmax(shad)))
         axe = ax[nm]
@@ -154,7 +161,7 @@ def draw_season_4x1(outfile,varname,scal,unit,cnlev,dvar):
             axe.set_xticks(np.arange(lonl,lonr,lon_sp), crs=ccrs.PlateCarree())
             axe.xaxis.set_major_formatter(LongitudeFormatter(degree_symbol=''))
 
-    position = fig.add_axes([0.65, bmlo+0.05, 0.01, 1-bmlo-0.1]) #left, bottom, width, height
+    position = fig.add_axes([0.8, bmlo+0.05, 0.01, 1-bmlo-0.1]) #left, bottom, width, height
     cb = plt.colorbar(cont, cax=position ,orientation='vertical')#, shrink=.9)
     plt.tight_layout(w_pad=0.1,rect=(0,bmlo,1,1))
     plt.savefig('%s/seasonal_%s.png'%(figdir,varname), bbox_inches='tight',pad_inches=0.01)

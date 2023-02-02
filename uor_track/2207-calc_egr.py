@@ -28,10 +28,14 @@ font = {'family': 'sans-serif',
 path = '/gws/nopw/j04/ncas_generic/users/renql/ERA5_subdaily'
 outdir = '/home/users/qd201969/uor_track/mdata'
 figdir = '/home/users/qd201969/uor_track/fig'
-lonl=15 
-lonr=145
-lats=15
-latn=70
+lonl=0 
+lonr=359
+lats=0
+latn=90
+#lonl=15 
+#lonr=145
+#lats=15
+#latn=70
 ilat = np.arange(lats, latn+0.1, 1)
 ilon = np.arange(lonl, lonr+0.1, 1)
 lat_sp = 20
@@ -41,18 +45,18 @@ a  = 6378388 # the radius of earth, m
 
 def main_run():
     #varname = 'th';dvar=varname;scale=1;unit='K';cnlev=np.arange(215,295.1,5)
-    #varname = 'dthdy';dvar=varname;scale=-100000;unit='K/100km';cnlev=np.arange(-1.6,1.61,0.2)
+    varname = 'dthdy';dvar=varname;scale=-100000;unit='K/100km';cnlev=np.arange(-1.6,1.61,0.2)
     #varname = 'dvdz';dvar=varname;scale=1000;unit='$10^3 s^{-1}$';cnlev=np.arange(0,8.1,0.5)
-    varname = 'egr';dvar='EGR';scale=1;unit='$day^{-1}$';cnlev=np.arange(0,1.61,0.1)
+    #varname = 'egr';dvar='EGR';scale=1;unit='$day^{-1}$';cnlev=np.arange(0,1.61,0.1)
     #varname = 'eff_egr';dvar='EGR_eff';scale=1;unit='$day^{-1}$';cnlev=np.arange(0,1.61,0.1)
     #varname = 'N2';dvar=varname;scale=100000;unit='10$^{-5}$ s$^{-2}$';cnlev=np.arange(1,34,2)
     #varname = 'dtdz';dvar=varname;scale=1000;unit='K/km';cnlev=np.arange(1,9.1,0.5)
     #varname = 'eff_dtdz';dvar=varname;scale=1000;unit='K/km';cnlev=np.arange(1,9.1,0.5)
     #varname = 'dtdz_moist';dvar=varname;scale=1000;unit='K/km';cnlev=np.arange(8.5,11.8,0.2)
     outfile = '%s/month41_%s_m.nc'%(outdir,varname)
-    calc_monthly_egr(outfile,varname)
+    #calc_monthly_egr(outfile,varname)
     #calc_monthly_n2(outfile,varname)
-    #calc_monthly_dtdy(outfile,varname)
+    calc_monthly_dtdy(outfile,varname)
     #alc_monthly_dudz(outfile,varname)
     draw_season_4x3(outfile,varname,scale,unit,cnlev,dvar)
 

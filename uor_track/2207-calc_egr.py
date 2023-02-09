@@ -14,7 +14,6 @@ import cartopy.feature as cfeat
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 import cmaps
 from renql import dynamic_calc 
-#matplotlib.use('Agg')
 
 title_font=14
 label_font=10
@@ -25,23 +24,24 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
-path = '/gws/nopw/j04/ncas_generic/users/renql/ERA5_subdaily'
-outdir = '/home/users/qd201969/uor_track/mdata'
-figdir = '/home/users/qd201969/uor_track/fig'
-lonl=0 
-lonr=359
-lats=0
-latn=90
-#lonl=15 
-#lonr=145
-#lats=15
-#latn=70
+path = '/home/ys17-23/Extension2/renql/ERA5_mon'
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
+outdir = "/home/ys17-23/Extension2/renql/project/uor_track/mdata"
+#lonl=0 
+#lonr=359
+#lats=0
+#latn=90
+lonl=20 
+lonr=140
+lats=15
+latn=70
 ilat = np.arange(lats, latn+0.1, 1)
 ilon = np.arange(lonl, lonr+0.1, 1)
 lat_sp = 20
 lon_sp = 30 #60 #
 ga = 9.80665 # Gravitational acceleration
 a  = 6378388 # the radius of earth, m
+numod= [chr(i) for i in range(97,115)]
 
 def main_run():
     #varname = 'th';dvar=varname;scale=1;unit='K';cnlev=np.arange(215,295.1,5)
@@ -53,7 +53,7 @@ def main_run():
     #varname = 'dtdz';dvar=varname;scale=1000;unit='K/km';cnlev=np.arange(1,9.1,0.5)
     #varname = 'eff_dtdz';dvar=varname;scale=1000;unit='K/km';cnlev=np.arange(1,9.1,0.5)
     #varname = 'dtdz_moist';dvar=varname;scale=1000;unit='K/km';cnlev=np.arange(8.5,11.8,0.2)
-    outfile = '%s/month41_%s_m.nc'%(outdir,varname)
+    outfile = '%s/month41_%s.nc'%(outdir,varname)
     #calc_monthly_egr(outfile,varname)
     #calc_monthly_n2(outfile,varname)
     calc_monthly_dtdy(outfile,varname)
@@ -307,7 +307,7 @@ def draw_season_4x3(outfile,varname,scal,unit,cnlev,dvar):
 
     nrow = 4 #6 #
     ncol = 3 #2 #
-    bmlo = 0.35 #0.25 #
+    bmlo = 0.3 #0.25 #
     
     fig = plt.figure(figsize=(12,12),dpi=300)
     ax = fig.subplots(nrow, ncol, subplot_kw=dict(
@@ -322,8 +322,7 @@ def draw_season_4x3(outfile,varname,scal,unit,cnlev,dvar):
         ncolors=ncmap.N,extend='both')
     jetcolor = 'darkviolet'
     
-    uwndpath = '/gws/nopw/j04/ncas_generic/users/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
-    ds = xr.open_dataset(uwndpath)
+    ds = xr.open_dataset('%s/ERA5_mon_u_1979-2020.nc'%path)
     da = ds['u'].sel(level=200,longitude=ilon,
         latitude=ilat,method="nearest").load()
     uwnd = da.groupby(da.time.dt.month).mean('time').data
@@ -350,15 +349,15 @@ def draw_season_4x3(outfile,varname,scal,unit,cnlev,dvar):
             axe = ax[nm][nl]
             axe.add_feature(cfeat.GSHHSFeature(levels=[1,2],
                 edgecolor='k'), linewidth=0.8, zorder=1)
-            axe.set_title("%dhPa %s %s"%(lev[nl],titls[nm],dvar
-                ),fontsize=title_font,fontdict=font)
+            axe.set_title("(%s) %dhPa %s"%(numod[3*nm+nl],lev[nl],titls[nm]),
+                fontsize=title_font,fontdict=font)
 
             cont = axe.contourf(ilon, ilat, shad, cnlev, 
                  transform=ccrs.PlateCarree(),cmap=ncmap,extend='both',norm=norm)
             topo = axe.contour(ilon, ilat, phis, [1500,3000], 
                  transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
-            #jets = axe.contour(ilon, ilat, uwnd1, [30,40,50], 
-            #     transform=ccrs.PlateCarree(),colors=jetcolor,linewidths=2.2)
+            jets = axe.contour(ilon, ilat, uwnd1, [30,40,50], 
+                 transform=ccrs.PlateCarree(),colors=jetcolor,linewidths=2.2)
             
             if nl == 0:
                 axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())

@@ -29,10 +29,11 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
-lonl=45  #0  #
-lonr=135#360#
-lats=15 #0  #
-latn=70 #90 #
+lonl =20 #0  # 50 #
+lonr =140#360# 140#
+lats =15 #0  # 15 #
+latn =70 #90 # 60 #
+bmlo =0.3    #0.25#
 lat_sp = 20
 lon_sp = 30
 lev = [850,500,250]
@@ -44,18 +45,17 @@ q_mis=15
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
 path = '/home/ys17-23/Extension2/renql/ERA5_mon'
 def main_run():
-    cnlvl2=[20,60,100] # contour
-    #read_draw_seasonal_4x3('vo',100000,[-3.5,0.5],'vor','s-1')
+    #read_draw_seasonal_4x3('vo',100000,[-3.5,0.5],'vor','s$^{-1}$')
     #read_draw_seasonal_4x3('w',1,[-0.08,0.01],'omega','Pa/s')
     #read_draw_seasonal_4x3('q',1000,[0,1],'q','g/kg')
     #read_draw_seasonal_4x3('z','zonal',[-105,15],'ano_z','gpm')
-    read_draw_seasonal_4x3('u',1,[-35,5],'U','km/s')
-    #read_draw_seasonal_4x3('Q1',1,[-0.07,0.01],'Q1','W/kg')
+    #read_draw_seasonal_4x3('u',1,[-35,5],'U','km/s')
+    read_draw_seasonal_4x3('Q1',1,[-0.07,0.01],'Q1','K/s')
+    #ead_draw_seasonal_4x3('t','dthdy',[-2.1,0.3],'dthdy','K/100km')
 
 def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):
     nrow = 4
     ncol = 3
-    bmlo = 0.4
 
     f = xr.open_dataset('%s/ERA5_mon_%s_1979-2020.nc'%(path,varname))
     lat = f.latitude.data
@@ -90,16 +90,33 @@ def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):
             #var = var.sel(latitude=ilat,longitude=ilon,method="nearest").data
             var = da.groupby(da.time.dt.month).mean('time').data/9.8
             var = np.moveaxis(np.moveaxis(var,2,0)-var.mean(2), 0, 2)
+        elif scale=='dthdy':
+            var = da.groupby(da.time.dt.month).mean('time').data*-100000
+            f0  = 2*(2*np.pi/24.0/3600.0)*np.sin(ilat*np.pi/180.0)
+            t = dynamic_calc.calc_pot_temp(var, lev[nl], -1)
+            a  = 6378388 # the radius of earth, m
+            var = dynamic_calc.center_diff(t, ilat*np.pi/180.0, 1)/a
         else:
             var = da.groupby(da.time.dt.month).mean('time').data*scale
         
+        ds = xr.open_dataset('%s/ERA5_mon_q_1979-2020.nc'%path)
+        da = ds['q'].sel(level=lev[nl],longitude=ilon,latitude=ilat,method="nearest").load()
+        var1 = da.groupby(da.time.dt.month).mean('time').data*1000
+        cnlvl2=[2,1,1] # contour
         '''
+        ds = xr.open_dataset('%s/ERA5_mon_u_1979-2020.nc'%path)
+        da = ds['u'].sel(level=200,longitude=ilon,latitude=ilat,method="nearest").load()
+        var1 = da.groupby(da.time.dt.month).mean('time').data
+        
         ds = xr.open_dataset('%s/ERA5_mon_z_1979-2020.nc'%path)
         da = ds['z'].sel(level=lev[nl],longitude=ilon,latitude=ilat,method="nearest").load()
         var1 = da.groupby(da.time.dt.month).mean('time').data/9.8
+        cnlvl2=[20,60,100] # contour
+        
         ds = xr.open_dataset('%s/ERA5_mon_u_1979-2020.nc'%path)
         da = ds['u'].sel(level=lev[nl],longitude=ilon,latitude=ilat,method="nearest").load()
         uwnd = da.groupby(da.time.dt.month).mean('time').data
+        
         ds = xr.open_dataset('%s/ERA5_mon_v_1979-2020.nc'%path)
         da = ds['v'].sel(level=lev[nl],longitude=ilon,latitude=ilat,method="nearest").load()
         vwnd = da.groupby(da.time.dt.month).mean('time').data
@@ -108,16 +125,18 @@ def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):
         del ds, da
         gc.collect()
         if lev[nl]==850:
+            var1 = np.ma.array(var1,mask=(
+                np.broadcast_to(phis,var.shape)>1500))
             var = np.ma.array(var,mask=(
                 np.broadcast_to(phis,var.shape)>1500))
 
         for nm in range(0,nrow,1):
             if nm == 0:
                 shad = (var[0,:,:]+var[1,:,:]+var[11,:,:])/3.0
-                #cont1 = (var1[0,:,:]+var1[1,:,:]+var1[11,:,:])/3.0
+                cont1 = (var1[0,:,:]+var1[1,:,:]+var1[11,:,:])/3.0
             else:
                 shad = np.mean(var[(3*nm-1):(3*nm+2),:,:],axis=0)
-                #cont1 = np.mean(var1[(3*nm-1):(3*nm+2),:,:],axis=0)
+                cont1 = np.mean(var1[(3*nm-1):(3*nm+2),:,:],axis=0)
             axe = ax[nm][nl]
             axe.add_feature(cfeat.COASTLINE.with_scale('110m'),edgecolor='black', linewidth=0.8, zorder=1) 
             axe.set_title("(%s) %dhPa %s"%(numod[3*nm+nl],lev[nl],titls[nm]),
@@ -133,6 +152,11 @@ def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):
 
             #cont = axe.contour(ilon, ilat, cont1, np.arange(1000,15000,cnlvl2[nl]), 
             #             transform=ccrs.PlateCarree(), colors='darkviolet', linewidths=2)
+            cont = axe.contour(ilon, ilat, cont1, np.arange(0,100,cnlvl2[nl]), 
+                         transform=ccrs.PlateCarree(), colors='darkviolet', linewidths=2)
+            axe.clabel(cont, cont.levels, inline=True, fmt="%d")
+            ##jets = axe.contour(ilon, ilat, cont1, [30,40,50], 
+            #     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=2.2)
 
             topo = axe.contour(ilon, ilat, phis, [1500,3000,4500],
                          transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
@@ -148,7 +172,7 @@ def read_draw_seasonal_4x3(varname,scale,cnlev,label,unit):
     cb = plt.colorbar(shad, cax=position ,orientation='horizontal')#, shrink=.9)
     #axe.quiverkey(wind, 0.92, bmlo-0.01, vcref[nl], r'$%d m/s$'%vcref[nl], labelpos='N',coordinates='figure')
 
-    plt.figtext(0.02,bmlo-0.005, "%s (%s)"%(label,unit), fontsize=title_font,
+    plt.figtext(0.08,bmlo-0.005, "%s (%s)"%(label,unit), fontsize=title_font,
             horizontalalignment='left',verticalalignment='bottom')
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figdir+"%s.png"%(varname), bbox_inches='tight',pad_inches=0.01)

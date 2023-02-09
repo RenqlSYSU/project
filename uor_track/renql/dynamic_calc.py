@@ -94,8 +94,11 @@ def calc_teqv(t,q):
 def calc_pot_temp(t,p,dim):
     # dim indicating which dimension of t 
     # is similar to p, unit of p is hPa
-    term = np.moveaxis(t,dim,-1)*np.power(1000.0/p,0.286)
-    return np.moveaxis(term,-1,dim)
+    if dim<0:
+        return t*np.power(1000.0/p,0.286)  
+    else:
+        term = np.moveaxis(t,dim,-1)*np.power(1000.0/p,0.286)
+        return np.moveaxis(term,-1,dim)
 
 def upward_diff_z(var,z):
     term1 = var.copy()

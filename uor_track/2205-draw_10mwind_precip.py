@@ -22,22 +22,16 @@ font = {'family': 'sans-serif',
         'color':  'black',
         }
 
-fileout="/home/users/qd201969/uor_track/mdata/"
-figdir = '/home/users/qd201969/uor_track/fig/'
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
+fileout = "/home/ys17-23/Extension2/renql/project/uor_track/mdata/"
+path = '/home/ys17-23/Extension2/renql/ERA5_mon'
 lev  = [850,500,250]
 dbox = False
 title= {'_local':'local',
         '_outside':'outside',
         '_total':'total',
         '':'All'}
-suffixs = ['_local','_outside','_total','']
-#title= {'_0_2545-60110':'local',
-#        '_5_2545-60110_2_4545-60110':'northern',
-#        '_5_2545-60110_2_2545-6060':'western',
-#        '_2_2545-60110':'passing',
-#        '':'All'}
-#suffixs = ['_0_2545-60110','_5_2545-60110_2_4545-60110',
-#        '_5_2545-60110_2_2545-6060','_2_2545-60110','']
+suffixs = ['_local','_outside']#,'_total',''
 lonl=0  #0  #
 lonr=150#360#
 lats=15  #
@@ -68,30 +62,30 @@ def main_run():
     ''' 
     
     ds = xr.open_dataset("%s/clim_max%dprecip_event.nc"%(fileout,perc))
-    ilon = ds.longitude
-    ilat = ds.latitude
     var = ds['tp'].data
-    draw_annual_contour3x3(var,'tp','%s/clim_max%dprecip_%drad_lag0'%(fileout,perc,radiu),
-        [2,104,6],'max precip (%)',
-        '%s/max%dprecip_contribution_3x3.jpg'%(figdir,perc),ilon,ilat,suffixs[0:3])
+    #draw_annual_contour3x3(var,'tp','%s/clim_max%dprecip_%drad_lag0'%(fileout,perc,radiu),
+    #    [2,104,6],'max precip (%)',
+    #    '%s/max%dprecip_contribution_3x3.jpg'%(figdir,perc),ilon,ilat,suffixs[0:3])
     for ns in range(len(suffixs)):
+        ilat = np.arange(latn, lats-0.1,-0.25)
+        ilon = np.arange(lonl, lonr+0.1, 0.25)
         draw_seasonal_contour4x3(var,'tp','%s/clim_max%dprecip_%drad_lag0'%(fileout,perc,radiu),
             suffixs[ns],[2,104,6],'maxpreci (%)',
             '%s/max%dprecip%s_contri_4x3.jpg'%(figdir,perc,suffixs[ns]),ilon,ilat)
     
     ds = xr.open_dataset("%sclim_%.1fmax10mwind_event.nc"%(fileout,perc))
-    ilon = ds.lon
-    ilat = ds.lat
     var = ds['event'].data
-    draw_annual_contour3x3(var,'event','%s/clim_%.1fmax10mwind_%drad_lag0'%(fileout,perc,radiu),
-        [2,104,6],'max10mwind (%)',
-        '%s/%.1fmax10mwind_contribution_3x3.jpg'%(figdir,perc),ilon,ilat,suffixs[0:3])
+    #draw_annual_contour3x3(var,'event','%s/clim_%.1fmax10mwind_%drad_lag0'%(fileout,perc,radiu),
+    #    [2,104,6],'max10mwind (%)',
+    #    '%s/%.1fmax10mwind_contribution_3x3.jpg'%(figdir,perc),ilon,ilat,suffixs[0:3])
     for ns in range(len(suffixs)):
+        ilat = np.arange(latn, lats-0.1,-0.25)
+        ilon = np.arange(lonl, lonr+0.1, 0.25)
         draw_seasonal_contour4x3(var,'event','%s/clim_%.1fmax10mwind_%drad_lag0'%(fileout,perc,radiu),
             suffixs[ns],[2,104,6],'max10mwind (%)',
             '%s/%.1fmax10mwind%s_contri_4x3.jpg'%(figdir,perc,suffixs[ns]),ilon,ilat)
-    draw_annual_contour3x2([2,104,6],'percent',
-        '%s/max%dprecip_10mwind_contri_3x2.jpg'%(figdir,perc),ilon,ilat)
+    #draw_annual_contour3x2([2,104,6],'percent',
+    #    '%s/max%dprecip_10mwind_contri_3x2.jpg'%(figdir,perc),ilon,ilat)
 
 def calc_associated_weather():
     for suffix in suffixs[0:2]: 
@@ -188,12 +182,12 @@ def draw_seasonal_contour4x3(var,varname,filname,suffix,cnlev,cblabel,figdir,ilo
     bmlo = 0.37 #0.25 #
     month = ['DJF','MAM','JJA','SON']
     
-    ds = xr.open_dataset('/gws/nopw/j04/ncas_generic/users/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc')
+    ds = xr.open_dataset('/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc')
     da = ds['u'].sel(level=200,longitude=ilon,latitude=ilat,method="nearest").load()
     uwnd = da.groupby(da.time.dt.month).mean('time')
     del ds, da
-
-    ds = xr.open_dataset("/home/users/qd201969/gtopo30_0.9x1.25.nc")
+    
+    ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
     phis = ds['PHIS'].sel(lon=ilon,lat=ilat,method="nearest").load()
     phis = phis/9.8 # transfer from m2/s2 to m
     del ds
@@ -208,7 +202,10 @@ def draw_seasonal_contour4x3(var,varname,filname,suffix,cnlev,cblabel,figdir,ilo
         projection=ccrs.PlateCarree(central_longitude=180.0)))
     for nc in range(0,ncol,1):
         ds = xr.open_dataset("%s_%d%s.nc"%(filname,lev[nc],suffix))
-        term = ds[varname].data
+        if varname=='tp':
+            term = ds[varname].sel(longitude=ilon,latitude=ilat).data
+        else:
+            term = ds[varname].sel(lon=ilon,lat=ilat).data
         for nr in range(0,nrow,1):
             if nr == 0:
                 term1 = term[0,:,:]+term[1,:,:]+term[11,:,:]

@@ -36,8 +36,8 @@ title= {'_local':'local',
 #        '':'All'}
 behv = ["ALL" ,"PAS" ,"NTP" ,"STP" ,"NTL" ,"STL" ,"LYS" ]#,"DIF"]
 
-fileout="/home/users/qd201969/uor_track/mdata/"
 lev  = [850,500,250]
+fileout="/home/users/qd201969/uor_track/mdata/"
 path = '/home/users/qd201969/ERA5-1HR-lev/'
 figdir = '/home/users/qd201969/uor_track/fig/'
 datapath = "/work/scratch-pw2/renql/ERA5_hourly/wind10/ERA5_speed10_1hr_dec-jan"
@@ -101,7 +101,7 @@ def main_run():
     ''' 
 
 def max10mwind_threshold(perc):
-    ds  = xr.open_dataset(datapath+"1980.nc")
+    ds = xr.open_dataset(datapath+"1980.nc")
     ilon = ds.lon
     ilat = ds.lat
     thre = np.empty( [12,len(ilat),len(ilon)],dtype=float ) 

@@ -31,10 +31,10 @@ title= {'_6local':'local',
         '_6outside':'outside',
         '_total':'total',
         '':'All'}
-#suffix = '_6local'#,'_total']'_6outside'#,''#
-suffix = '_6outside'
+suffix = ''#'_6local'#,'_total']'_6outside'#,''#
+#suffix = '_6outside'
 if suffix in ['_6local','local','remote']:
-    lonl=55  #0  #
+    lonl=50  #0  #
     lonr=150#360#
     lats=15 #20 #
     latn=55 #90 #
@@ -45,6 +45,16 @@ if suffix in ['_6outside','outside']:
     lats=15 #20 #
     latn=60 #90 #
     bmlo = 0.4 #0.25 #
+cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
+dash = [8.5,60]
+if suffix in ['']:
+    lonl=0  #0  #
+    lonr=150#360#
+    lats=15 #20 #
+    latn=70 #90 #
+    bmlo = 0.4 #0.25 #
+    cnlev2 = np.hstack((np.arange(4,19,5),np.arange(24,50,10)))
+    dash = [19,60]
 #lonl=0  #0  #
 #lonr=150#360#
 #lats=15  #
@@ -56,7 +66,6 @@ ilon = np.arange(lonl, lonr+0.1, 0.25)
 radiu = 6
 perc = 99
 numod= [chr(i) for i in range(97,115)]
-cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
 
 ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
 phis = ds['PHIS'].sel(lon=ilon,lat=ilat,method="nearest").load()
@@ -121,6 +130,8 @@ def draw_seasonal_contour4x3(var,varname,filname,suffix,cnlev,cblabel,figdir,ilo
                 var1 = np.sum(var[(3*nr-1):(3*nr+2),:,:],axis=0)
                 uwnd1 = np.mean(uwnd[(3*nr-1):(3*nr+2),:,:],axis=0)
             term1 = xr.where(var1>0,(var1-term1)*100/var1,0)
+            if lev[nc]==850:
+                term1 = np.ma.array(term1, mask=(phis>1500))
             print(term1.min())
             print(term1.max())
             axe = ax[nr][nc]
@@ -138,7 +149,7 @@ def draw_seasonal_contour4x3(var,varname,filname,suffix,cnlev,cblabel,figdir,ilo
             #     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
             line2 = axe.contour(ilon1, ilat1, uwnd1, cnlev2, linestyles='solid', 
                  transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
-            line4 = axe.contour(ilon1, ilat1, uwnd1, [8.5,60], linestyles='dashed', 
+            line4 = axe.contour(ilon1, ilat1, uwnd1, dash, linestyles='dashed', 
                  transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
             
             if nc == 0:
@@ -165,9 +176,13 @@ def read_stat(f,varname,nl,ilat1,ilon1):
         var.data = np.ma.array(var.data,mask=mask)
         del mask, tden
     
-    #if nl==850:
-    #    var.data = np.ma.array(var.data,mask=(
-    #        np.broadcast_to(phis, var.shape)>1500))
+    if nl==850:
+        ds = xr.open_dataset("/home/ys17-23/Extension2/renql/gtopo30_0.9x1.25.nc")
+        phis1 = ds['PHIS'].sel(lon=ilon1,lat=ilat1,method="nearest").load()
+        phis1 = phis1/9.8 # transfer from m2/s2 to m
+        del ds
+        var.data = np.ma.array(var.data,mask=(
+            np.broadcast_to(phis1, var.shape)>1500))
     
     print('%s: min:%f ; max:%f'%(var.long_name,
         np.nanmin(var.data),np.nanmax(var.data)))

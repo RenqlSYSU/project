@@ -32,8 +32,8 @@ title= {'_6local':'local',
         '_total':'total',
         '':'All'}
 #suffix = '_6local'#,'_total']'_6outside'#,''#
-#suffix = '_6outside'
-suffix = ''
+suffix = '_6outside'
+#suffix = ''
 if suffix in ['_6local','local','remote']:
     lonl=50  #0  #
     lonr=150#360#
@@ -77,6 +77,13 @@ phis = phis/9.8 # transfer from m2/s2 to m
 del ds
 
 def main_run():
+    ds = xr.open_dataset("%s/clim_precip.nc"%(fileout))
+    var = ds['tp'].sel(longitude=ilon,latitude=ilat).data
+    print(var)
+    draw_seasonal_contour4x3_diff(var,'tp','%s/clim_max%dprecip_%drad_lag0'%(fileout,perc,radiu),
+        suffix,[2,104,6],'maxpreci (%)',
+        '%s/max%dprecip%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
+    
     '''
     # draw extreme contribution 
     ds = xr.open_dataset("%s/clim_max%dprecip_event.nc"%(fileout,perc))
@@ -93,13 +100,13 @@ def main_run():
         [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
     draw_seasonal_4x3(1,'%s/max_mean_10mwind'%fileout,suffix,
         [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
-    '''
 
     # threshold
     draw_seasonal_2x2(1,'%s/max10mwind_99.0threshold_month.nc'%fileout,
         [2,19,1],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
     draw_seasonal_2x2(1000,'%s/maxprecip1h_99threshold_month.nc'%fileout,
         [0,8.5,0.5],'maxprecip (mm/h)','%s/threshold_precip.png'%(figdir),ilon,ilat)
+    '''
 
 def draw_seasonal_contour4x3_diff(var,varname,filname,suffix,cnlev,cblabel,figdir,ilon,ilat):
     nrow = 4 #6 #

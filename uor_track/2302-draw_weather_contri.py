@@ -32,8 +32,10 @@ title= {'_6local':'local',
         '_total':'total',
         '':'All'}
 #suffix = '_6local'#,'_total']'_6outside'#,''#
-suffix = '_6outside'
+suffix = sys.argv[1] 
+#suffix = '_6outside'
 #suffix = ''
+drawvar='contri'#'maxpreci'
 if suffix in ['_6local','local','remote']:
     lonl=50  #0  #
     lonr=150#360#
@@ -48,7 +50,7 @@ if suffix in ['_6outside','outside']:
     bmlo = 0.37 #0.25 #
 cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
 dash = [8.5,60]
-if suffix in ['']:
+if suffix in ['',]:
     lonl=0  #0  #
     lonr=150#360#
     lats=15 #20 #
@@ -61,12 +63,12 @@ if suffix in ['']:
 #latn=70 #
 lat_sp = 20
 lon_sp = 30 #60 #
-# grid used for contribution 
-#ilat = np.arange(latn, lats-0.1,-0.25)
-#ilon = np.arange(lonl, lonr+0.1, 0.25)
-# grid used for max preci induced by cyclone
-ilat = np.arange(lats, latn+0.1, 2.5)
-ilon = np.arange(lonl, lonr+0.1, 2.5)
+if drawvar in ['contri',]:# grid used for contribution 
+    ilat = np.arange(latn, lats-0.1,-0.25)
+    ilon = np.arange(lonl, lonr+0.1, 0.25)
+else:# grid used for max preci induced by cyclone
+    ilat = np.arange(lats, latn+0.1, 2.5)
+    ilon = np.arange(lonl, lonr+0.1, 2.5)
 radiu = 6
 perc = 99
 numod= [chr(i) for i in range(97,115)]
@@ -77,14 +79,14 @@ phis = phis/9.8 # transfer from m2/s2 to m
 del ds
 
 def main_run():
+    '''
     ds = xr.open_dataset("%s/clim_precip.nc"%(fileout))
     var = ds['tp'].sel(longitude=ilon,latitude=ilat).data
     print(var)
-    draw_seasonal_contour4x3_diff(var,'tp','%s/clim_max%dprecip_%drad_lag0'%(fileout,perc,radiu),
-        suffix,[2,104,6],'maxpreci (%)',
-        '%s/max%dprecip%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
+    draw_seasonal_contour4x3_diff(var,'tp','%s/clim_precip_%drad_lag0'%(fileout,radiu),
+        suffix,[2,104,6],'preci (%)',
+        '%s/precip%s_contri_4x3.png'%(figdir,suffix),ilon,ilat)
     
-    '''
     # draw extreme contribution 
     ds = xr.open_dataset("%s/clim_max%dprecip_event.nc"%(fileout,perc))
     var = ds['tp'].sel(longitude=ilon,latitude=ilat).data
@@ -95,18 +97,31 @@ def main_run():
     draw_seasonal_contour4x3_diff(var,'event','%s/clim_%.1fmax10mwind_%drad_lag0'%(fileout,perc,radiu),
         suffix,[2,104,6],'max10mwind (%)',
         '%s/%.1fmax10mwind%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
-    # draw max weather induced by cyclone
-    draw_seasonal_4x3(1,'%s/max_mean_preci'%fileout,suffix,
-        [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
-    draw_seasonal_4x3(1,'%s/max_mean_10mwind'%fileout,suffix,
-        [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
 
     # threshold
     draw_seasonal_2x2(1,'%s/max10mwind_99.0threshold_month.nc'%fileout,
         [2,19,1],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
     draw_seasonal_2x2(1000,'%s/maxprecip1h_99threshold_month.nc'%fileout,
         [0,8.5,0.5],'maxprecip (mm/h)','%s/threshold_precip.png'%(figdir),ilon,ilat)
+    
+    # draw max weather induced by cyclone
+    draw_seasonal_4x3(1,'%s/max_mean_preci'%fileout,suffix,
+        [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
+    draw_seasonal_4x3(1,'%s/max_mean_10mwind'%fileout,suffix,
+        [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
     '''
+    
+    figname='%s/threshold_10mwind.png'%(figdir)
+    if not os.path.exists(figname):
+        draw_seasonal_2x2(1,'%s/dailymax10mwind_99thre_month.nc'%fileout,
+            [2,19,1],'max10mwind (m/s)',figname,ilon,ilat)
+    
+    ds = xr.open_dataset("%s/clim_%ddailymax10mwind_event.nc"%(fileout,perc))
+    var = ds['event'].sel(lon=ilon,lat=ilat).data
+    print(var)
+    draw_seasonal_contour4x3_diff(var,'event','%s/%ddailymax10mwind_%drad_lag0'%(fileout,perc,radiu),
+        suffix,[2,104,6],'max10mwind (%)',
+        '%s/%dmax10mwind%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
 
 def draw_seasonal_contour4x3_diff(var,varname,filname,suffix,cnlev,cblabel,figdir,ilon,ilat):
     nrow = 4 #6 #
@@ -164,10 +179,11 @@ def draw_seasonal_contour4x3_diff(var,varname,filname,suffix,cnlev,cblabel,figdi
                  transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
             #jets = axe.contour(ilon, ilat, uwnd1, [30,40,50], 
             #     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
-            #line2 = axe.contour(ilon1, ilat1, uwnd1, cnlev2, linestyles='solid', 
-            #     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
-            #line4 = axe.contour(ilon1, ilat1, uwnd1, dash, linestyles='dashed', 
-            #     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
+            if suffix != '':
+                line2 = axe.contour(ilon1, ilat1, uwnd1, cnlev2, linestyles='solid', 
+                     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
+                line4 = axe.contour(ilon1, ilat1, uwnd1, dash, linestyles='dashed', 
+                     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
             
             if nc == 0:
                 axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())
@@ -324,7 +340,7 @@ def draw_seasonal_2x2(scale,filname,cnlev,cblabel,figdir,ilon,ilat):
         topo = axe.contour(ilon, ilat, phis, [1500,3000], 
              transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
         jets = axe.contour(ilon, ilat, uwnd1, [30,40,50], linestyles='solid', 
-             transform=ccrs.PlateCarree(),colors='r',linewidths=2.0)
+             transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=2.0)
         
         if nc == 0:
             axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())

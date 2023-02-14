@@ -31,7 +31,7 @@ title= {'_%dlocal'%radius:'local',
         '_%doutside'%radius:'outside',
         '_%dtotal'%radius:'total',
         '':'All'}
-suffixs = ["_%dtotal"%radius,"_%dlocal"%radius,"_%doutside"%radius]
+suffixs = ['',"_%dtotal"%radius,"_%dlocal"%radius,"_%doutside"%radius]
 lev  = [850,500,250]
 path = '/home/users/qd201969/ERA5-1HR-lev'
 datapath ="/home/users/qd201969/uor_track/mdata"

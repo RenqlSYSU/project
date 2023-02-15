@@ -28,14 +28,14 @@ path = '/home/ys17-23/Extension2/renql/ERA5_mon'
 path2= '/home/ys17-23/Extension2/renql/ERA5-1HR-lev/statistic'
 lev  = [850,500,250]
 title= {'_6local':'local',
-        '_6outside':'outside',
+        '_6outside':'remote',
         '_total':'total',
         '':'All'}
 #suffix = '_6local'#,'_total']'_6outside'#,''#
 suffix = sys.argv[1] 
 #suffix = '_6outside'
 #suffix = ''
-drawvar='contri'#'maxpreci'
+drawvar=sys.argv[2]#'contri'#'maxpreci'
 if suffix in ['_6local','local','remote']:
     lonl=50  #0  #
     lonr=150#360#
@@ -109,8 +109,8 @@ def main_run():
         [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
     draw_seasonal_4x3(1,'%s/max_mean_10mwind'%fileout,suffix,
         [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
-    '''
     
+    '''
     figname='%s/threshold_10mwind.png'%(figdir)
     if not os.path.exists(figname):
         draw_seasonal_2x2(1,'%s/dailymax10mwind_99thre_month.nc'%fileout,
@@ -250,10 +250,11 @@ def draw_seasonal_4x3(scale,filname,suffix,cnlev,cblabel,figdir,ilon,ilat):
                  extend='both',norm=norm)
             topo = axe.contour(ilon, ilat, phis, [1500,3000], 
                  transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
-            line2 = axe.contour(ilon1, ilat1, uwnd1, cnlev2, linestyles='solid', 
-                 transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
-            line4 = axe.contour(ilon1, ilat1, uwnd1, dash, linestyles='dashed', 
-                 transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
+            if suffix != '':
+                line2 = axe.contour(ilon1, ilat1, uwnd1, cnlev2, linestyles='solid', 
+                     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
+                line4 = axe.contour(ilon1, ilat1, uwnd1, dash, linestyles='dashed', 
+                     transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=1.5)
             
             if nc == 0:
                 axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())

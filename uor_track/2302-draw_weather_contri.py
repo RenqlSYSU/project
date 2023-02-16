@@ -51,7 +51,7 @@ if suffix in ['_6outside','outside']:
 cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
 dash = [8.5,60]
 if suffix in ['',]:
-    lonl=0  #0  #
+    lonl=10  #0  #
     lonr=150#360#
     lats=15 #20 #
     latn=70 #90 #
@@ -86,6 +86,8 @@ def main_run():
     draw_seasonal_contour4x3_diff(var,'tp','%s/clim_precip_%drad_lag0'%(fileout,radiu),
         suffix,[2,104,6],'preci (%)',
         '%s/precip%s_contri_4x3.png'%(figdir,suffix),ilon,ilat)
+    draw_seasonal_preci_2x2(1,'%s/clim_precip.nc'%fileout,
+        [0,8.5,0.5],'precip (mm/month)','%s/monthly_precip.png'%(figdir),ilon,ilat)
     
     # draw extreme contribution 
     ds = xr.open_dataset("%s/clim_max%dprecip_event.nc"%(fileout,perc))
@@ -98,23 +100,17 @@ def main_run():
         suffix,[2,104,6],'max10mwind (%)',
         '%s/%.1fmax10mwind%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
 
-    # threshold
-    draw_seasonal_2x2(1,'%s/max10mwind_99.0threshold_month.nc'%fileout,
-        [2,19,1],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
-    draw_seasonal_2x2(1000,'%s/maxprecip1h_99threshold_month.nc'%fileout,
-        [0,8.5,0.5],'maxprecip (mm/h)','%s/threshold_precip.png'%(figdir),ilon,ilat)
-    
     # draw max weather induced by cyclone
     draw_seasonal_4x3(1,'%s/max_mean_preci'%fileout,suffix,
         [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
     draw_seasonal_4x3(1,'%s/max_mean_10mwind'%fileout,suffix,
         [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
     
-    '''
-    figname='%s/threshold_10mwind.png'%(figdir)
-    if not os.path.exists(figname):
-        draw_seasonal_2x2(1,'%s/dailymax10mwind_99thre_month.nc'%fileout,
-            [2,19,1],'max10mwind (m/s)',figname,ilon,ilat)
+    # threshold
+    draw_seasonal_2x2(1,'%s/max10mwind_99.0threshold_month.nc'%fileout,
+        [2,19,1],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
+    draw_seasonal_2x2(1000,'%s/maxprecip1h_99threshold_month.nc'%fileout,
+        [0,8.5,0.5],'maxprecip (mm/h)','%s/threshold_precip.png'%(figdir),ilon,ilat)
     
     ds = xr.open_dataset("%s/clim_%ddailymax10mwind_event.nc"%(fileout,perc))
     var = ds['event'].sel(lon=ilon,lat=ilat).data
@@ -122,6 +118,12 @@ def main_run():
     draw_seasonal_contour4x3_diff(var,'event','%s/%ddailymax10mwind_%drad_lag0'%(fileout,perc,radiu),
         suffix,[2,104,6],'max10mwind (%)',
         '%s/%dmax10mwind%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
+    '''
+    draw_seasonal_2x2(1,'%s/dailymax10mwind_99thre_month.nc'%fileout,
+        [2,27.5,1.5],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
+    draw_seasonal_2x2(1000,'%s/99dailymaxpreci_thre_month.nc'%fileout,
+        [0,17,1],'maxprecip (mm/h)','%s/threshold_preci.png'%(figdir),ilon,ilat)
+    
 
 def draw_seasonal_contour4x3_diff(var,varname,filname,suffix,cnlev,cblabel,figdir,ilon,ilat):
     nrow = 4 #6 #
@@ -350,9 +352,75 @@ def draw_seasonal_2x2(scale,filname,cnlev,cblabel,figdir,ilon,ilat):
             axe.set_xticks(np.arange(lonl,lonr,lon_sp), crs=ccrs.PlateCarree())
             axe.xaxis.set_major_formatter(LongitudeFormatter(degree_symbol=''))
 
-    position = fig.add_axes([0.3, bmlo+0.08, 0.6, 0.01]) #left, bottom, width, height
+    position = fig.add_axes([0.3, bmlo+0.07, 0.6, 0.01]) #left, bottom, width, height
     cb = plt.colorbar(cont, cax=position ,orientation='horizontal')#, shrink=.9)
-    plt.figtext(0.1,bmlo+0.075, cblabel,fontsize=title_font,
+    plt.figtext(0.1,bmlo+0.06, cblabel,fontsize=title_font,
+            horizontalalignment='left',verticalalignment='bottom')
+    plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
+    plt.savefig(figdir, bbox_inches='tight',pad_inches=0.01)
+
+def draw_seasonal_preci_2x2(scale,filname,cnlev,cblabel,figdir,ilon,ilat):
+    nrow = 2 #6 #
+    ncol = 2 #2 #
+    bmlo = 0.4 #0.25 #
+    month = ['DJF','MAM','JJA','SON']
+    
+    #cnlevels = np.arange(cnlev[0], cnlev[1], cnlev[2])
+    cnlevels = [0.1, 1, 3, 6, 10, 15, 25, 40, 60, 80, 100, 120, 150, 200, 250, 300, 350] #24h accumulated preci
+    fcolors = cmaps.precip2_17lev
+    norm = colors.BoundaryNorm(boundaries=cnlevels, 
+        ncolors=fcolors.N,extend='both')
+    
+    ds = xr.open_dataset(filname)
+    term = ds['tp'].sel(longitude=ilon,latitude=ilat).data
+    
+    uwndpath = '/home/ys17-23/Extension2/renql/ERA5_mon/ERA5_mon_u_1979-2020.nc'
+    ds = xr.open_dataset(uwndpath)
+    da = ds['u'].sel(level=200,longitude=ilon,
+        latitude=ilat,method="nearest").load()
+    uwnd = da.groupby(da.time.dt.month).mean('time').data
+    del ds, da
+        
+    fig = plt.figure(figsize=(12,12),dpi=150)
+    ax = fig.subplots(nrow, ncol, subplot_kw=dict(
+        projection=ccrs.PlateCarree(central_longitude=180.0)))
+    for nm in range(0,len(month),1):
+        if nm == 0:
+            term1 = scale*np.mean(np.array(
+                [term[0,:,:],term[1,:,:],term[11,:,:]]),axis=0)
+            uwnd1 = (uwnd[0,:,:]+uwnd[1,:,:]+uwnd[11,:,:])/3.0
+        else:
+            term1 = scale*np.mean(term[(3*nm-1):(3*nm+2),:,:],axis=0)
+            uwnd1 = np.mean(uwnd[(3*nm-1):(3*nm+2),:,:],axis=0)
+            
+        print(term1.min())
+        print(term1.max())
+        nr = int(nm/2)
+        nc = nm-2*nr
+        axe = ax[nr][nc]
+        axe.add_feature(cfeat.GSHHSFeature(levels=[1,2],edgecolor='k')
+                , linewidth=0.8, zorder=1)
+        axe.set_title("(%s) %s"%(numod[nm],month[nm]),
+            fontsize=title_font,fontdict=font)
+
+        cont = axe.contourf(ilon, ilat, term1, cnlevels, 
+             transform=ccrs.PlateCarree(),cmap=fcolors,
+             extend='both',norm=norm)
+        topo = axe.contour(ilon, ilat, phis, [1500,3000], 
+             transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
+        jets = axe.contour(ilon, ilat, uwnd1, [30,40,50], linestyles='solid', 
+             transform=ccrs.PlateCarree(),colors='darkviolet',linewidths=2.0)
+        
+        if nc == 0:
+            axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())
+            axe.yaxis.set_major_formatter(LatitudeFormatter(degree_symbol=''))
+        if nr == (nrow-1):
+            axe.set_xticks(np.arange(lonl,lonr,lon_sp), crs=ccrs.PlateCarree())
+            axe.xaxis.set_major_formatter(LongitudeFormatter(degree_symbol=''))
+
+    position = fig.add_axes([0.3, bmlo+0.07, 0.6, 0.01]) #left, bottom, width, height
+    cb = plt.colorbar(cont, cax=position ,orientation='horizontal')#, shrink=.9)
+    plt.figtext(0.1,bmlo+0.06, cblabel,fontsize=title_font,
             horizontalalignment='left',verticalalignment='bottom')
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figdir, bbox_inches='tight',pad_inches=0.01)

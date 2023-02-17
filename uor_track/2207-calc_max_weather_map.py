@@ -31,11 +31,11 @@ title= {'_%dlocal'%radius:'local',
         '_%doutside'%radius:'outside',
         '_%dtotal'%radius:'total',
         '':'All'}
-suffixs = ['',"_%dtotal"%radius,"_%dlocal"%radius,"_%doutside"%radius]
+suffixs = ["_%dlocal"%radius,"_%doutside"%radius]#'',"_%dtotal"%radius,
 lev  = [850,500,250]
-path = '/home/users/qd201969/ERA5-1HR-lev'
-datapath ="/home/users/qd201969/uor_track/mdata"
-figdir = '/home/users/qd201969/uor_track/fig'
+path = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
+figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig/"
+datapath = "/home/ys17-23/Extension2/renql/project/uor_track/mdata/"
 
 lonl=0  #0  #
 lonr=150#360#
@@ -46,13 +46,13 @@ def main_run():
     #gene_grid()
     for ns in range(3):
         for nl in lev:
-            #calc_monthly_max_mean(suffixs[ns],nl,9,
-            #    '%s/max_mean_10mwind_%d%s.nc'%(datapath,nl,suffixs[ns]))
+            calc_monthly_max_mean(suffixs[ns],nl,9,
+                '%s/max_mean_10mwind_west%d%s.nc'%(datapath,nl,suffixs[ns]))
             
-            if not os.path.exists('%s/max_mean_preci_%d%s.nc'%(datapath,nl,suffixs[ns])):
+            if not os.path.exists('%s/max_mean_preci_west%d%s.nc'%(datapath,nl,suffixs[ns])):
                 calc_monthly_max_mean(suffixs[ns],nl,13,
-                    '%s/max_mean_preci_%d%s.nc'%(datapath,nl,suffixs[ns]))
-
+                    '%s/max_mean_preci_west%d%s.nc'%(datapath,nl,suffixs[ns]))
+    '''
         ds = xr.open_dataset('%s/max_mean_preci_%d%s.nc'%(datapath,850,suffixs[ns]))
         ilat = ds['lat'].data
         ilon = ds['lon'].data
@@ -67,7 +67,7 @@ def main_run():
             for dvar,cnlev in zip(dvars,cnlevs):
                 draw_seasonal_4x3(varname,suffixs[ns],dvar,cnlev,'%s %s'%(dvar,varname),
                     '%s/seasonal_%s_%s_%s.png'%(figdir,varname,dvar,suffixs[ns]),ilon,ilat,scale) 
-
+    '''
 def draw_seasonal_4x3(varname,suffix,dvar,cnlev,cblabel,figdir,ilon,ilat,scale):
     # varname = 'preci','10mwind', dvar='mean','maxv','numb'
     nrow = 4 #6 #

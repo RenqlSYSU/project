@@ -79,12 +79,18 @@ phis = phis/9.8 # transfer from m2/s2 to m
 del ds
 
 def main_run():
+    # draw max weather induced by cyclone
+    draw_seasonal_4x3(1,'%s/max_mean_preci_west'%fileout,suffix,
+        [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
+    draw_seasonal_4x3(1,'%s/max_mean_10mwind_west'%fileout,suffix,
+        [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
+    
     '''
     ds = xr.open_dataset("%s/clim_precip.nc"%(fileout))
     var = ds['tp'].sel(longitude=ilon,latitude=ilat).data
     print(var)
     draw_seasonal_contour4x3_diff(var,'tp','%s/clim_precip_%drad_lag0'%(fileout,radiu),
-        suffix,[2,104,6],'preci (%)',
+        suffix,[2,70,4],'preci (%)',
         '%s/precip%s_contri_4x3.png'%(figdir,suffix),ilon,ilat)
     draw_seasonal_preci_2x2(1,'%s/clim_precip.nc'%fileout,
         [0,8.5,0.5],'precip (mm/month)','%s/monthly_precip.png'%(figdir),ilon,ilat)
@@ -100,17 +106,18 @@ def main_run():
         suffix,[2,104,6],'max10mwind (%)',
         '%s/%.1fmax10mwind%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
 
-    # draw max weather induced by cyclone
-    draw_seasonal_4x3(1,'%s/max_mean_preci'%fileout,suffix,
-        [2,53,3],'maxprecip (mm/h)','%s/max_precip%s.png'%(figdir,suffix),ilon,ilat)
-    draw_seasonal_4x3(1,'%s/max_mean_10mwind'%fileout,suffix,
-        [2,27.5,1.5],'max10mwind (m/s)','%s/max_10mwind%s.png'%(figdir,suffix),ilon,ilat)
-    
     # threshold
     draw_seasonal_2x2(1,'%s/max10mwind_99.0threshold_month.nc'%fileout,
         [2,19,1],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
     draw_seasonal_2x2(1000,'%s/maxprecip1h_99threshold_month.nc'%fileout,
         [0,8.5,0.5],'maxprecip (mm/h)','%s/threshold_precip.png'%(figdir),ilon,ilat)
+    
+    ds = xr.open_dataset("%s/clim_%ddailymaxpreci_event.nc"%(fileout,perc))
+    var = ds['tp'].sel(longitude=ilon,latitude=ilat).data
+    print(var)
+    draw_seasonal_contour4x3_diff(var,'tp','%s/%ddailymaxpreci_%drad_lag0'%(fileout,perc,radiu),
+        suffix,[2,104,6],'maxpreci (%)',
+        '%s/%dmaxpreci%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
     
     ds = xr.open_dataset("%s/clim_%ddailymax10mwind_event.nc"%(fileout,perc))
     var = ds['event'].sel(lon=ilon,lat=ilat).data
@@ -118,11 +125,11 @@ def main_run():
     draw_seasonal_contour4x3_diff(var,'event','%s/%ddailymax10mwind_%drad_lag0'%(fileout,perc,radiu),
         suffix,[2,104,6],'max10mwind (%)',
         '%s/%dmax10mwind%s_contri_4x3.png'%(figdir,perc,suffix),ilon,ilat)
+    #draw_seasonal_2x2(1,'%s/dailymax10mwind_99thre_month.nc'%fileout,
+    #    [2,27.5,1.5],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
+    #draw_seasonal_2x2(1000,'%s/99dailymaxpreci_thre_month.nc'%fileout,
+    #    [0,17,1],'maxprecip (mm/h)','%s/threshold_preci.png'%(figdir),ilon,ilat)
     '''
-    draw_seasonal_2x2(1,'%s/dailymax10mwind_99thre_month.nc'%fileout,
-        [2,27.5,1.5],'max10mwind (m/s)','%s/threshold_10mwind.png'%(figdir),ilon,ilat)
-    draw_seasonal_2x2(1000,'%s/99dailymaxpreci_thre_month.nc'%fileout,
-        [0,17,1],'maxprecip (mm/h)','%s/threshold_preci.png'%(figdir),ilon,ilat)
     
 
 def draw_seasonal_contour4x3_diff(var,varname,filname,suffix,cnlev,cblabel,figdir,ilon,ilat):
@@ -215,7 +222,7 @@ def draw_seasonal_4x3(scale,filname,suffix,cnlev,cblabel,figdir,ilon,ilat):
     ax = fig.subplots(nrow, ncol, subplot_kw=dict(
         projection=ccrs.PlateCarree(central_longitude=180.0)))
     for nc in range(0,ncol,1):
-        ds = xr.open_dataset('%s_%d%s.nc'%(filname,lev[nc],suffix))
+        ds = xr.open_dataset('%s%d%s.nc'%(filname,lev[nc],suffix))
         term = ds['maxv'].sel(lon=ilon,lat=ilat).data
         
         files = '%s/ff_%d_1980-2020%s_stat.nc'%(path2,lev[nc],suffix)

@@ -26,18 +26,22 @@ def composite_time(filname,flats,flatn,flonl,flonr,nint):
             term1 =linenum.strip().split(" ")
             num = int(term1[-1])
             
+            data=[]
             for nl in range(0,num,1):
                 line = ff.readline()
                 if prefix in ['ffadd','fftadd']:
-                    data = list(map(float,line.strip().replace(" &","").split(" ")))
+                    data.append(list(map(float,line.strip().replace(" &","").split(" "))))
                 else:
-                    data = list(map(float,line.strip().split(" ")))
-                if data[1]<=flonr and data[1] >= flonl and\
-                data[2]<=flatn and data[2]>=flats :
-                    ctime.append(datetime.strptime(str(int(data[0])),'%Y%m%d%H'))
-                    clat.append(data[2])
-                    clon.append(data[1])
-                    cinte.append(data[nint])
+                    data.append(list(map(float,line.strip().split(" "))))
+
+            if data[-1][1] > data[0][1] or data[0][1]>180 :
+                for nl in range(0,num,1):
+                    if data[nl][1]<=flonr and data[nl][1] >= flonl and\
+                    data[nl][2]<=flatn and data[nl][2]>=flats :
+                        ctime.append(datetime.strptime(str(int(data[nl][0])),'%Y%m%d%H'))
+                        clat.append(data[nl][2])
+                        clon.append(data[nl][1])
+                        cinte.append(data[nl][nint])
 
         line = ff.readline()
     ff.close()

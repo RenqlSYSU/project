@@ -5,21 +5,21 @@
 ;                                                    2019/07/12
 ;*********************************************************************************
 begin
-var_option   = 1
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+var_option  = -1 ;-1 forcing; 1 dudt ;4 high-low
 nnv = 0 ;"dzdt","dudt","dTdt","dbdt","dvdt"
 
 month_option = True ;False
 uv_option    = False;True ;
 duvdt_option = False;True ;
-jet_option   = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
-case_option  = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nl   = 3 ;(/925,850,700,500,200/)
-diff = True;False ;whether draw the difference
+jet_option   = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
+nl   = 1 ;(/925,850,700,500,200/)
+diff = True ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 barshare = False;True ;
 barvert  = False;True
 
-months   = (/"DJF","MAM","JJA","SON"/)
+months   = (/"DJF","MAM"/);,"JJA","SON"
 ;months = (/"JF","MA","MJ","JA"/)
 nmonth = dimsizes(months)
 lev = (/925,850,700,500,200/)
@@ -82,18 +82,25 @@ if(var_option.eq.4) then
 end if
 
 ;the path of the file
-path    = "/home/ys17-19/renql/project/TP_NUDG"
+path    = "/home/ys17-23/Extension2/renql/project/TP_NUDG"
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"/)
     case2   = (/"CTRL","NG6h-CTRL"/);, "NG24h-CTRL"/)
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 27
-else
+end if
+if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"noTP"/)
     ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
     gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
+end if
+if(case_option.eq.2) then
+    case1   = (/"F2000","NGTR"/)
+    case2   = (/"F2000","NGTR-F2000"/)
+    gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
+    nsample = 30
 end if
 
 if((var_option.le.0))
@@ -102,7 +109,7 @@ if((var_option.le.0))
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
     if(var_option.ge.-1) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_season_Qd_Qeddy_A_lon.nc"
     end if
     if(var_option.eq.-3) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_advect2.nc"

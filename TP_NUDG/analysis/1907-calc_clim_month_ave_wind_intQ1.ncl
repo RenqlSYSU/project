@@ -11,8 +11,8 @@
 ;                                           2018/01/18
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql"
-case_option = 3 ;0 means NUDG experiment; 1 means noTP experiment
+path    = "/home/ys17-23/Extension2/renql"
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 
 if(case_option.eq.0) then
     filein  = path +(/"/model/AMIP-CTRL/AMIP_C5PM.cam.h1.YEAR.",\
@@ -30,8 +30,8 @@ if(case_option.eq.1) then
 end if
 if(case_option.eq.2) then
     case    = (/"F2000","NGTR","NUDG"/) ;
-    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
+    filein  = path +(/"/model_data/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model_data/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_"
@@ -42,7 +42,7 @@ if(case_option.eq.3) then
                       "/model/AMIP_NG15S/AMIP_CAM5_NG15S.cam.h1.YEAR.",\
                       "/model/AMIP_NG45N/AMIP_CAM5_NG45N.cam.h1.YEAR.",\
                       "/model/AMIP_NG1520/AMIP_CAM5_NG1520.cam.h1.YEAR.",\
-                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR.",/)
+                      "/model/AMIP_NG4550/AMIP_CAM5_NG4550.cam.h1.YEAR."/)
     years   = ispan(1979,2005,1)   ;the calculate time
     fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"
 end if
@@ -53,13 +53,13 @@ var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
 ;Q1 is vertically integrated 
 
 ;area: east Asia
-lats = -90 ;;0  
+lats = 0 ;;0  
 latn =  90  ;60 
 lonl =  0   ;20 
 lonr =  360 ;180
 ;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 ;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200/) ;hPa
-lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100,50,20, 10,5/) ;17levels hPa
+lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;17levels hPa,50,20, 10,5
 ;lev  = (/850,500,200/) ;v,
 
 ;==========================================================
@@ -82,8 +82,8 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 0,3,1; ,nvar-1 ,1 
-do nf = 4,4,1
+do nv = 8,8,1; ,nvar-1 ,1 
+do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
 end if

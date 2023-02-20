@@ -12,7 +12,8 @@
 begin
     if (.not. isvar("pre_dir") .or. .not. isvar("pro_dir") .or.\
         .not. isvar("fdname3d") .or. .not. isvar("layers") .or. .not. isvar("lstyear") .or.\
-        .not. isvar("case_name") .or. .not. isvar("frstyear") .or. .not. isvar("plev")) then 
+        .not. isvar("case_name") .or. .not. isvar("frstyear") .or. .not. isvar("plev") .or.\
+        .not. isvar("extrap_option") .or. .not. isvar("varflg")) then 
         print("3D EXTRACT: At least one argument has not been assigned, cannot continue!")
         exit
     end if
@@ -27,7 +28,7 @@ begin
         print("********Year: "+full_year+" 3D EXTRACT: Preparing********")
 
         all_files = systemfunc("ls "+pre_dir+"*cam.h1."+full_year+"*")  
-        ctrl_in      = addfiles (all_files, "r")   ; note the "s" of addfile
+        ctrl_in   = addfiles (all_files, "r")   ; note the "s" of addfile
         
        
         do i = 0,dimsizes(fdname3d)-1
@@ -45,17 +46,24 @@ begin
         ;************************************************
         ; type of interpolation: 1 = linear, 2 = log, 3 = loglog
             interp = 2 
-
-        ; is extrapolation desired if data is outside the range of PS
-            extrap = False
-
               
         ;************************************************
         ; calculate T on pressure levels
         ;************************************************
         ; note, the 7th argument is not used, and so is set to 1.
         ;************************************************
-            ctrl_var1p = vinth2p(ctrl_var1,hbcofa,hbcofb,plev,ctrl_psfc,interp,p0,1,extrap)
+            if(extrap_option.eq.1) then 
+                tbot   =   ctrl_in[:]->T(:,0,:,:)
+                f = addfile("/home/ys17-23/Extension2/renql/project/TP_NUDG/analysis/mdata/gtopo30_0.9x1.25.nc","r")
+                phis = f->PHIS 
+               ; is extrapolation desired if data is outside the range of PS
+                extrap = True 
+                ctrl_var1p = vinth2p_ecmwf(ctrl_var1,hbcofa,hbcofb,plev,ctrl_psfc,interp,p0,1,extrap,varflg(i),tbot,phis)
+            else
+               ; is extrapolation desired if data is outside the range of PS
+                extrap = False 
+                ctrl_var1p = vinth2p(ctrl_var1,hbcofa,hbcofb,plev,ctrl_psfc,interp,p0,1,extrap)
+            end if
             ctrl_var1p!1 = "level"
             ctrl_var1p&level@long_name="Level"
             ctrl_var1p&level@units="millibar"

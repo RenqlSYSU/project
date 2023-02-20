@@ -12,7 +12,7 @@
 ;                                           2019/10/25
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql"
+path    = "/home/ys17-23/Extension2/renql"
 data_type = (/"double","float"/)
 ntype = 0
 
@@ -22,7 +22,7 @@ year_option = False;True
 csa = False  ;cubic spline interpolation
 ave_sigm = False ;recalculate the f_Qd and f_Qeddy use fixed f
 nc = 1
-ntime = 4
+ntime = 2
 month_s = 1
 month_e = 8
 
@@ -46,7 +46,8 @@ fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4
 end if
 if(ntime.le.4.and.ntime.ge.2) then 
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_forc_te_season.nc"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_Qd_Qeddy_A_lon.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.1) then 

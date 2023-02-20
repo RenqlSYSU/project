@@ -13,11 +13,11 @@ program iteration
     !integer, parameter :: nlat = 54 , nlon = 240 , ilog  = 10 , ifile = 12
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 !NCEP1
     !integer, parameter :: nlat = 31 , nlon = 144 , ilog  = 10 , ifile = 12
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 4, nlev = 19
+    integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 2, nlev = 19
     integer, parameter :: nlat = 85 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
-    character(len=200) :: logname, fileout, filename
+    character(len=200) :: logname, fileout, filename, path
     character(len=7),dimension(nvar) :: var_name 
     
     real(kind=pr), parameter :: rf  = 1.25 ! relaxing factor
@@ -38,10 +38,11 @@ program iteration
     lev  = (/1000,950,900,850,800,750,700,650,600,550,500,450,400,350,300,250,200,150,100/)
     dlev(2:nlev) = (- lev(1:(nlev-1)) + lev(2:nlev))*100 
     dlev(1) = dlev(2)
+    path = "/home/ys17-23/Extension2/renql/project/TP_NUDG/z_tendency-20191022/"
     
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
-    nc = 4
+    nc = 6
     if(nc.eq.1) then 
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month.dat"     
@@ -61,17 +62,17 @@ program iteration
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG24h-Clim_dzdt_month.dat"     
         logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor-ng24h.txt"
     else if(nc.eq.4) then
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/F2000-Clim_4f6c_month.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/F2000-Clim_dzdt_month.dat"     
-        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor-F2000.txt"
+        filename = trim(path)//"mdata/F2000-Clim_4f6c_month.dat"
+        fileout  = trim(path)//"mdata/F2000-Clim_dzdt_month.dat"     
+        logname  = trim(path)//"f90_iter_infor-F2000.txt"
     else if(nc.eq.5) then
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG-Clim_dzdt_month.dat"     
-        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor-NUDG.txt"
+        logname  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor-NUDG.txt"
     else 
-        filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NGTR-Clim_4f6c_month.dat"
-        fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NGTR-Clim_dzdt_month.dat"     
-        logname = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/f90_iter_infor-NGTR.txt"
+        filename = trim(path)//"mdata/NGTR-Clim_4f6c_month.dat"
+        fileout  = trim(path)//"mdata/NGTR-Clim_dzdt_month.dat"     
+        logname  = trim(path)//"f90_iter_infor-ngtr.txt"
     end if
     
     var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
@@ -160,8 +161,6 @@ program iteration
         dzdt(:,1   ,:,:,:) = 0 !dzdt(:,2     ,:,:,:)
         dzdt(:,nlat,:,:,:) = dzdt(:,nlat-1,:,:,:)
         
-        !dzdt(:,:,1   ,:,:) = dzdt(:,:,2     ,:,:)  !lower boundary for A
-        !dzdt(:,:,nlev,:,:) = dzdt(:,:,nlev-1,:,:)  !upper boundary for A
         dzdt(:,:,1   ,:,(nvar2+1):nvar) = dzdt(:,:,2     ,:,(nvar2+1):nvar)  !lower boundary for A
         dzdt(:,:,nlev,:,(nvar2+1):nvar) = dzdt(:,:,nlev-1,:,(nvar2+1):nvar)  !upper boundary for A
         dzdt(:,:,1   ,:,1:nvar2) = dzdt(:,:,2     ,:,1:nvar2) + (R*dlev(1)/lev(1)/100)*q3(:,:,1,:,:)    !lower boundary for Qd, Qd_t,Qeddy

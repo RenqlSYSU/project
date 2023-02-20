@@ -146,7 +146,7 @@ if(case_option.eq.2) then
     case2   = (/"F2000","NGTR","NGTR-F2000"/)
     end if
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
-    nsample = 27
+    nsample = 30
 end if
 
 ;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"

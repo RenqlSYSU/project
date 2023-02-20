@@ -1,0 +1,4 @@
+"AMIP_CAM5_NG1015"
+"/WORK/sysu_hjkx_ys/renql/NUDG/post_AMIP_NG1015/"
+-----package 2D field    (1)-----
+-----package 3D field    (1)-----

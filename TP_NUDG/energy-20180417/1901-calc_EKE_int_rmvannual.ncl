@@ -13,8 +13,8 @@ case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 10.0 ;day
-cb = 2.5  ;10.0 ;
+ca = 90.0 ;10.0 ;day
+cb = 10.0 ;2.5  ;
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -51,7 +51,7 @@ if(case_option.eq.2) then
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
         ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intuv.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE-" + cb + "-" + ca + "day.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE-" + cb + "-" + ca + "day_ezfft.nc"
     end if  
 end if
 
@@ -124,25 +124,25 @@ v = linmsg_n(v,(/-1/),1)
 print(u(5,10,2,10:20,30))
 
 if(option.eq.1) then
-u := reshape(u,(/nyear*ntime,nlev,nlat,nlon/))
-v := reshape(v,(/nyear*ntime,nlev,nlat,nlon/))
+;u := reshape(u,(/nyear*ntime,nlev,nlat,nlon/))
+;v := reshape(v,(/nyear*ntime,nlev,nlat,nlon/))
+;opt = False
+;filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
+;filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
+;delete([/u,v/])
+;filt_u := reshape(filt_u,(/nyear,ntime,nlev,nlat,nlon/))
+;filt_v := reshape(filt_v,(/nyear,ntime,nlev,nlat,nlon/))
+
 fca = 1.0/ca
 fcb = 1.0/cb
-opt = False
-filt_u = bw_bandpass_filter(u,fca,fcb,opt,1)
-filt_v = bw_bandpass_filter(v,fca,fcb,opt,1)
-delete([/u,v/])
-filt_u := reshape(filt_u,(/nyear,ntime,nlev,nlat,nlon/))
-filt_v := reshape(filt_v,(/nyear,ntime,nlev,nlat,nlon/))
-
-;fcf = fspan(0, 0.5, ntime/2) 
-;filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
-;cf = ezfftf_n(u,1)
-;cf(:,:,filt_cf,:,:,:) = 0.0  
-;filt_u = ezfftb_n(cf,0,2)
-;cf = ezfftf_n(v,1)
-;cf(:,:,filt_cf,:,:,:) = 0.0  
-;filt_v = ezfftb_n(cf,0,2)
+fcf = fspan(0, 0.5, ntime/2) 
+filt_cf = ind(fcf.lt.fca.or.fcf.gt.fcb)
+cf = ezfftf_n(u,1)
+cf(:,:,filt_cf,:,:,:) = 0.0  
+filt_u = ezfftb_n(cf,0,2)
+cf = ezfftf_n(v,1)
+cf(:,:,filt_cf,:,:,:) = 0.0  
+filt_v = ezfftb_n(cf,0,2)
 
 ;var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 var   = dim_sum_n((filt_v(:,:,5:10,:,:)*filt_v(:,:,5:10,:,:) + filt_u(:,:,5:10,:,:)*filt_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)

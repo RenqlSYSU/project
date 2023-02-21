@@ -12,12 +12,12 @@
 ;                                           2019/10/25
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql"
+path    = "/home/ys17-23/Extension2/renql"
 obs_option = False
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 data_type = (/"double","float"/)
 ntype = 0
-ntime = 4
+ntime = 2
 nc = 1
 
 if(case_option.eq.0) then
@@ -39,9 +39,10 @@ if(.not.(obs_option)) then
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_daily_Qd_Qeddy_A.nc"
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.nc"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_Qd_Qeddy_A_lon.nc"
 filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_2month_lon18.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_season_lon.nc"
 ;ilein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect2_season.nc"
 ;iledat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_advetc_dzdt_month.dat"
 ;ileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_advect2_month_season.nc"

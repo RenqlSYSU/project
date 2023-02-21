@@ -28,8 +28,8 @@ if(case_option.eq.2) then
     nsample = 30
 end if
 pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
-;fig_out    = "pdf";"x11";"eps";
-fig_out    = "eps";"x11";"eps";
+fig_out    = "pdf";"x11";"eps";
+;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
@@ -51,7 +51,7 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/700,500,200,700,600,  100,10/)
 nl = 2
-nv = 6
+nv = 8
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;

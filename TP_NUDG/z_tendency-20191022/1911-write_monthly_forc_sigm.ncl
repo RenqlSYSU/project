@@ -45,9 +45,9 @@ filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_d
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.le.4.and.ntime.ge.2) then 
-;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_forc_te_season.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_forc_te.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_Qd_Qeddy_A_lon.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_Qd_Qeddy_A_lon.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.eq.1) then 
@@ -65,10 +65,10 @@ filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
 end if
 end if
-;var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
-;var_name2 = (/"Qeddh","Qeddl"/)  ;this is the variable used to draw, can used as center string
-var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
+var_name2 = (/"Qeddh","Qeddl"/)  ;this is the variable used to draw, can used as center string
+;var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
+;var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 cp = 1004.0 ; J/(K kg)  [ m2/(K s2) ] 

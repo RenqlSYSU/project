@@ -45,7 +45,8 @@ filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_d
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.le.4.and.ntime.ge.2) then 
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_forc_te.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_forc_te.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_forc_te.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_Qd_Qeddy_A_lon.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"

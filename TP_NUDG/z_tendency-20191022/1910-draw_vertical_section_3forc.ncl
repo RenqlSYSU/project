@@ -6,7 +6,7 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 1 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = 4 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = True ;False;
@@ -21,8 +21,10 @@ fig_out    = "pdf";"pdf";"x11"
 ;months  = (/"DJF"/)
 ;months  = (/"1","2","3","4","5"/) ;+ " May"
 ;months  = (/"JF","MJ","JA"/);,"MA"
-select_time = ispan(2,3,1)
-select_time_u = select_time 
+;select_time = ispan(2,3,1)
+;select_time_u = select_time 
+select_time_u = ispan(2,3,1)
+select_time = ispan(0,1,1)
 months  = (/"JF","MJ","MJ","JA"/)
 ;months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
@@ -120,7 +122,7 @@ lonl = (/70  ,110 , 40 , 1  , 0  ,150 /) ;30 ;20
 lonr = (/105 ,130 , 60 ,359 , 70 ,210 /) ;150;220
 
 ;the path of the file
-path    = "/home/ys17-19/renql/project/TP_NUDG"
+path    = "/home/ys17-23/Extension2/renql/project/TP_NUDG"
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/);,"NUDG24h"
     if(diff) then 
@@ -193,7 +195,7 @@ if(var_option.eq.2)
     fig_name = path + "/z_tendency-20191022/fig/"+case1(0)+"_height_lat_advect_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.4) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_2month_lon.nc"
     fig_name = path + "/z_tendency-20191022/fig/"+case1(0)+"_height_lat_te_" + var_name(nnv) + area(na)
 end if
 if(var_option.eq.5)
@@ -698,7 +700,7 @@ end if
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
 do fnc = 0,ncase-1,1
-do nv = 0, nvar-1,1
+do nv = 0, nvar-2,1
 do nm = 0, nmonth-1,1
     ;np = nv*2 + nm - 2 ;1 var, 2 month
     np = nv*nmonth + nm ;1 var, 2 month

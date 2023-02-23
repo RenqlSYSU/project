@@ -6,14 +6,14 @@
 ;*********************************************************************************
 begin
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-var_option  = 1 ;-1 forcing; 1 dudt ;4 high-low
+var_option  = 4 ;-1 forcing; 1 dudt ;4 high-low
 nnv = 0 ;"dzdt","dudt","dTdt","dbdt","dvdt"
 
 month_option = True ;False
 uv_option    = False;True ;
 duvdt_option = False;True ;
 jet_option   = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-nl   = 4 ;(/925,850,700,500,200/)
+nl   = 1 ;(/925,850,700,500,200/)
 diff = True ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 barshare = False;True ;
@@ -137,7 +137,7 @@ else
         filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect2_month_season.nc"
         end if
         if(var_option.eq.4) then 
-        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_month_season.nc"
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_season_lon.nc"
         end if
     end if
     else

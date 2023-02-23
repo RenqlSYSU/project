@@ -12,18 +12,17 @@ interannual = False;True ;
 allyear  = False ;use 365*nyear correlation data to draw last figure
 rmvannual= True ;False;if true, remove annual cycle
 tna = 0
-na = 1 ;0=EA; 1=NH
-nv = 3
-lev = 200 ; used for hgt
-time_option = 2
-;fig_out   ="eps"       ;"x11"
-fig_out   ="pdf"       ;"x11"
-gtopfile = "/home/ys17-23/Extension2/renql/gtopo_1.5x1.5.nc"
+na = 0 ;0=EA; 1=NH
+nv = 0
+time_option = 1
+fig_out   ="eps"       ;"x11"
+;fig_out   ="pdf"       ;"x11"
+gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
 case1    = "ERA-Interim"
-path2    = "/home/ys17-23/Extension2/renql/project/TP_NUDG/observation-20190127/"
+path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
 filename = path2 + "/mdata/" + case1 + "_Clim_month_ave_intEKE_filter.nc";
-draw_var = (/"preci" ,"intEKE"    ,"uppEKE"    ,"hgt"/)  ;this is the variable used to draw, can used as center string
-unit     = (/"mm/day","10~S~4~N~J","10~S~4~N~J","gpm"/)  
+draw_var = (/"preci" ,"intEKE"    ,"uppEKE"/)  ;this is the variable used to draw, can used as center string
+unit     = (/"mm/day","10~S~4~N~J","10~S~4~N~J"/)  
 if(time_option.eq.0) then 
 months = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 imonth = ispan(4,7,1);(/4,5,6,7/)
@@ -38,9 +37,9 @@ nm_e = 8
 end if
 if(time_option.eq.2) then
 months = (/"DJF","MAM","JJA","SON"/)
-imonth = ispan(0,0,1)
-nm_s = 12
-nm_e = 2
+imonth = ispan(2,2,1)
+nm_s = 6
+nm_e = 8
 end if
 nmonth = dimsizes(imonth)
 
@@ -71,17 +70,11 @@ years   = ispan(1979,2016,1)
 fig_name= path2 + "fig/Obs_corr_TE_CPCpreci"
 end if
 end if
-if(nv.eq.1.or.nv.eq.2) then
+if(nv.ge.1) then
 path4   = path2 + "/mdata/" + case1 + "_Clim_month_ave_" + draw_var(nv) + "_filter.nc"
 var_name= (/"EKE"/)
 years   = ispan(1979,2016,1)
 fig_name= path2 + "fig/Obs_corr_TE_EKE"
-end if
-if(nv.eq.3) then
-path4   = "/home/ys17-23/Extension/ERA-interim/pressure/hgt/hgt.interim."
-var_name= (/"hgt"/)
-years   = ispan(1979,2016,1)
-fig_name= path2 + "fig/Obs_corr_TE_hgt"
 end if
 
 pre_case  = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
@@ -108,11 +101,7 @@ phis = phis/9.8   ;convert unit from m2/s2 to gpm
 
 f1   = addfile(filename,"r") ;-2.5-10day
 time = cd_calendar(f1->time,0)
-if (months(imonth(0)).eq."DJF") then 
-    select_time = ind(time(:,1).eq.12.or.time(:,1).le.2)
-else
-    select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
-end if
+select_time = ind(time(:,1).ge.nm_s.and.time(:,1).le.nm_e)
 term = f1->EKE(0:(nyear-1),select_time,{tlats(tna):tlatn(tna)},{tlonl(tna):tlonr(tna)})
 term = mask(term,phis.gt.3000,True) 
 ts2 = wgt_areaave_Wrap(term,1.0,1.0,0)
@@ -122,7 +111,7 @@ plot  = new((/12/),graphic)
 plot2 = new((/12/),graphic)
 gtop  = new((/12/),graphic)
 
-phis := short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) 
+phis := short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
 phis = phis/9.8   ;convert unit from m2/s2 to gpm
 ;---------------------------------------------------------------
 ;read the data
@@ -146,26 +135,8 @@ if(nv.eq.0) then
     end do   ;the loop of 3 cases
     minlvl = (/-1.6/) ;-2.4 
     maxlvl = (/ 1.6/) ; 2.4 
-    spacig = (/ 0.2/) ; 0.3
-end if 
-if(nv.eq.3) then 
-    f     = addfile(path4 + years(0) + ".nc", "r")
-    vars  = f->$var_name$(0,0,{lats(na):latn(na)},{lonl(na):lonr(na)})
-    nlat  = dimsizes(vars&lat)
-    nlon  = dimsizes(vars&lon)
-    ntime = dimsizes(select_time)
-    rain  = new((/nyear,ntime,nlat,nlon/),float)
-    do nt = 0,nyear-1,1
-    f     = addfile(path4 + years(nt) + ".nc","r")
-    select = select_time
-    rain(nt,:,:,:) = f->$var_name$(select,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)})
-    end do   ;the loop of 3 cases
-    rain = rain/9.8
-    minlvl = (/-16/) ;-2.4 
-    maxlvl = (/ 16/) ; 2.4 
-    spacig = (/ 2/) ; 0.3
-end if 
-if(nv.eq.1.or.nv.eq.2) then
+    spacig = (/ 0.2/) ; 0.3 
+else
     f    = addfile(path4, "r")
     rain = f->$var_name(0)$(0:(nyear-1),select_time,{lats(na):latn(na)},{lonl(na):lonr(na)})
     nlat = dimsizes(rain&lat)
@@ -206,8 +177,8 @@ end if
     ;gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 
-np = -1
-do lag = 6,16,2
+;np = -1
+do lag = 1,1,1
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, nmonth-1, 1
 if(time_option.eq.0) then 
@@ -221,8 +192,9 @@ end if
 if(time_option.eq.2) then
     nm2_s = 3*nm + nm_s
     nm2_e = 3*nm + nm_s + 2
+    select2 := ind(time1(:,1).ge.nm2_s.and.time1(:,1).le.nm2_e)
 end if
-if (months(imonth(nm)).eq."DJF") then 
+if(time_option.eq.2.and.nm.eq.0.and.nm_s.eq.1) then 
     select2 := ind(time1(:,1).eq.12.or.time1(:,1).le.2)
 else
     select2 := ind(time1(:,1).ge.nm2_s.and.time1(:,1).le.nm2_e)
@@ -417,9 +389,9 @@ printVarSummary(var1)
     resp@txFontThicknessF = title_thick
 
 do nm = 0, nmonth-1, 1
-    ;np = nm
-    np = np + 1 
-    res@gsnLeftString  = pre_case(np) + ") " + months(imonth(nm)) + " " + draw_var(nv) + " " + lag
+    np = nm
+    ;np = np + 1 
+    res@gsnLeftString  = pre_case(np) + ") " + months(imonth(nm)) + " " + draw_var(nv); + " " + lag
     plot(np)  = gsn_csm_contour_map_ce(wks,var1(nm,:,:),res)
     plot2(np) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
@@ -437,9 +409,9 @@ if(allyear) then
     overlay(plot(np),plot2(np))
     overlay(plot(np),gtop(np))
 end if
-;    resp@txString  = "EKE leads precip" + lag + " day" 
-;    gsn_panel(wks,plot,(/1,1/),resp)
+    resp@txString  = "EKE leads precip" + lag + " day" 
+    gsn_panel(wks,plot,(/1,2/),resp)
 end do
-    gsn_panel(wks,plot,(/3,2/),resp)
+;    gsn_panel(wks,plot,(/3,2/),resp)
 end
 

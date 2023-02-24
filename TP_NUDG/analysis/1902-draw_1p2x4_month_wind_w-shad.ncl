@@ -50,20 +50,20 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/925,500,200,700,600,  100,10/)
-nl = 2
+nl = 1
 nv = 0
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = True ;False;
+vect_option = False;True ;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = False;True ;
+cont_option = True ;False;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 0
-contsig  = False;True ;;if True, only the significant values are contoured 
+contsig  = True ;False;;if True, only the significant values are contoured 
 barshare = False;True ;
 barvert  = True ;False;
 

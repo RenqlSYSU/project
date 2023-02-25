@@ -49,17 +49,17 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
-lev = (/925,500,200,700,600,  100,10/)
-nl = 1
+lev = (/850,500,200,700,600,  100,10/)
+nl = 2
 nv = 0
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
-vect_option = False;True ;
+vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = True ;False;
+cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 0
@@ -508,8 +508,8 @@ end if
     resvc@vcMonoLineArrowColor       = True
     resvc@vcLineArrowColor           = "gray20"
 if(na.eq.0) then 
-    resvc@vcMinDistanceF            = 0.009
-    resvc@vcRefLengthF              = 0.05           ; define length of vec ref
+    resvc@vcMinDistanceF            = 0.01
+    resvc@vcRefLengthF              = 0.025           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF   = 0.005
     resvc@vcLineArrowHeadMaxSizeF   = 0.005
 else
@@ -706,8 +706,8 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(na.eq.0) then ; 850,700,600,500,200,100,10
-    vcref         = (/(/10,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
-                      (/10,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
+    vcref         = (/(/15,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
+                      (/15,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
                       (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/50,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
                       (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
@@ -731,9 +731,9 @@ if(nv.eq.4)
 end if
 
 if(nv.eq.1) then ;preci
-    minlvl = (/ 1 ,-3.5,-1.4/);-3.5 -8,-8,-8,-8
-    maxlvl = (/16 , 3.5, 1.4/); 3.5  8 ,8 ,8 ,8 
-    spacig = (/ 1 , 0.5, 0.2/); 0.5  1 ,1 ,1 ,1 
+    minlvl = (/ 0 ,-1.4,-3.5/);-3.5 -8,-8,-8,-8
+    maxlvl = (/7.5, 1.4, 3.5/); 3.5  8 ,8 ,8 ,8 
+    spacig = (/0.5, 0.2, 0.5/); 0.5  1 ,1 ,1 ,1 
 end if
 
 if(perc_effect_by_weakTE) then 

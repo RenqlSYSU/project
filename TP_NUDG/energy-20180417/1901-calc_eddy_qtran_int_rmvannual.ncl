@@ -7,7 +7,7 @@
 ;                                           2018/04/17
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql"
+path    = "/home/ys17-23/Extension2/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -26,10 +26,10 @@ if(case_option.eq.1) then
 end if
 if(case_option.eq.2) then
     case    = (/"F2000","NGTR","NUDG"/) ;TP_CTRL is 0021-0030; TP_CR is 0041-0050
-    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
+    filein  = path +(/"/model_data/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model_data/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00"/)
-    years   = ispan(21,30,1)   ;the calculate time
+    years   = ispan(1,30,1)   ;the calculate time
     fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_qtran_int_rmvannual-30.nc"
 end if
 
@@ -39,10 +39,10 @@ ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)
 
 ;area: east Asia
-lats =  0  ;-20
-latn =  80 ;60
-lonl =  20 ;20
-lonr = 180 ;220
+lats = 0   ;-90 ;
+latn = 90  ; 90 ;
+lonl = 0   ; 0  ;
+lonr = 360 ;360 ;
 lev  = (/1000,925,850,700,600,500,400,300,200/)
 
 ;==========================================================

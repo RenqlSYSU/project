@@ -8,11 +8,12 @@
 ;                                           2019/01/25
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql"
+path    = "/home/ys17-23/Extension2/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+season = True 
 nmonth = 2
-month_s = 5
-month_e = 8
+month_s = 12
+month_e = 5
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -31,10 +32,11 @@ if(case_option.eq.1) then
 end if
 if(case_option.eq.2) then
     case    = (/"F2000","NGTR"/) ;
-    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
+    filein  = path +(/"/model_data/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model_data/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_2month_ave_qtran_int.nc"
+    ;fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_2month_ave_qtran_int.nc"
+    fileout = path + "/project/TP_NUDG/energy-20180417/mdata/" + case + "-Clim_season_ave_qtran_int.nc"
 end if
 
 var_name= (/"U","V","Q","PS"/)
@@ -63,7 +65,7 @@ nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
 
 do nf = 0,1,1
-if((case_option.eq.1).and.(nf.eq.1))
+if((case_option.eq.1).and.(nf.eq.1)) then 
     years   = ispan(41,50,1)   ;the calculate time
 end if
 ;==========================================================
@@ -74,10 +76,22 @@ month_qv  = new((/3,nyear,nmonth,nlat,nlon/),double)
 month_div = new((/3,nyear,nmonth,nlat,nlon/),double)
 
 do nm = 0, nmonth-1, 1
-mons = 2*nm + month_s
-mone = 2*nm + month_s+1
+if (season) then 
+if (month_s.eq.12.and.nm.eq.0) then 
+    mons = 12 
+    mone = 3*nm + 2
+    select_time := ind(time(:,1).eq.12.or.time(:,1).le.2)
+else
+    mons = 3*nm + 0 
+    mone = 3*nm + 2
+    select_time := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
+end if
+else
+    mons = 2*nm + month_s
+    mone = 2*nm + month_s+1
+    select_time := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
+end if
 print("month from " + mons + " to " + mone) 
-select_time := ind(time(:,1).ge.mons.and.time(:,1).le.mone)
 ntime = dimsizes(select_time)
 u  := new((/nyear,ntime,nlev,nlat,nlon/),float)
 v  := new((/nyear,ntime,nlev,nlat,nlon/),float)

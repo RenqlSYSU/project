@@ -46,7 +46,7 @@ if(case_option.eq.3) then
     years   = ispan(1979,2005,1)   ;the calculate time
     fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"
 end if
-var_name = (/"U"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
+var_name = (/"Q"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
              "Q1" ,"preci","TMQ","TS" ,"PS"  , \
              "PSL" /) ;,"OMEGA","RELHUM" 
 
@@ -59,8 +59,8 @@ lonl =  0   ;20
 lonr =  360 ;180
 ;lev  = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 ;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200/) ;hPa
-lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;17levels hPa,50,20, 10,5
-;lev  = (/850,500,200/) ;v,
+;lev  = (/1000,925,850,700,600,  500,400,350,300,250, 200,150,100/) ;17levels hPa,50,20, 10,5
+lev  = (/1000,925,850,500,200/) ;Q, Specific humidity
 
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
@@ -82,7 +82,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 8,8,1; ,nvar-1 ,1 
+do nv = 10,10,1; ,nvar-1 ,1 
 do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -265,7 +265,7 @@ setfileoption(ncdf,"DefineMode",True)
 ;Set All field attribution
 fileAtt =  True
 fileAtt@creation_date = systemfunc("date")
-fileAtt@discription   = "the monthly and seasonal average"
+fileAtt@discription   = "the monthly and seasonal average Specific humidity"
 fileattdef(ncdf,fileAtt)  
 
 ;Define all Coordinate

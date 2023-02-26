@@ -27,7 +27,7 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(c","(a","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
@@ -50,8 +50,8 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
-nl = 2
-nv = 0
+nl = 0
+nv = 13
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -59,7 +59,7 @@ siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = False;True ;
+cont_option = True ;False;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 0
@@ -254,7 +254,7 @@ if(nl.le.1) then ;850hPa
     cont_spacing = (/80,20/)
 end if
 if(nl.le.3.and.nl.ge.2) then ;200hPa
-    cont_spacing = (/20,20/)
+    cont_spacing = (/120,20/)
 end if
 if(nl.eq.4) then ;200hPa
     cont_spacing = (/80,80/)
@@ -708,7 +708,7 @@ end if
 if(na.eq.0) then ; 850,700,600,500,200,100,10
     vcref         = (/(/15,5 ,5 /), \  ;the level of 850hpa    ctrl,nudg,diff
                       (/15,5 ,5 /), \  ;the level of 500hpa    ctrl,nudg,diff
-                      (/30,10,10/), \  ;the level of 200hpa    ctrl,nudg,diff
+                      (/30,8,10/), \  ;the level of 200hpa    ctrl,nudg,diff
                       (/50,10,10/), \  ;the level of 100hpa    ctrl,nudg,diff
                       (/50,10,10/)/)   ;the level of 10hpa    ctrl,nudg,diff
 else
@@ -720,9 +720,9 @@ else
 end if
 
 if(nv.eq.0) 
-    minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
-    maxlvl = (/300, 140, 140/)      ; 80, 80
-    spacig = (/20 , 20 ,  20/)      ; 10, 10
+    minlvl = (/-210,-70,-140/)  ;q1 ;0  ,-140,-80,-80
+    maxlvl = (/ 210, 70, 140/)      ;300, 140, 80, 80
+    spacig = (/ 30 , 10,  20/)      ;20 , 20 , 10, 10
 end if
 if(nv.eq.4) 
     minlvl = (/0  ,-140,-140/)  ;q1 ;-80,-80
@@ -851,7 +851,7 @@ end if
 
 do nc = 0,1,1
 ;do nm = 0,nmonth-1,1
-if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.ge.16.and.nv.le.19)) then
+if((diff.and.nc.ge.1).or.(nv.eq.2).or.(nv.eq.0).or.(nv.ge.16.and.nv.le.19)) then
    ; gsn_define_colormap(wks,"BlueDarkRed18")
    ;res@cnFillColors  := (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
     ;blue and red, has 18 colors,2-10 is blue
@@ -872,7 +872,7 @@ end if
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + "  " + months(imonth(nm))
         if(nv.le.1.or.nv.eq.4.or.(nv.ge.6.and.nv.le.8).or.(nv.ge.13.and.nv.le.15).or.nv.eq.20) then
         if(cont_option) then 
-        res@gsnRightString  = draw_varname(nv) + " (" + unit(nv) + ") & " + cont_var(nvc) + " (" + cont_unit(nvc) + ") "
+        res@gsnRightString  =  lev(nl) + "hPa " +cont_var(nvc) + " (" + cont_unit(nvc) + ") & " + draw_varname(nv) + " (" + unit(nv) + ")"
         else
         if(vect_option) then
             res@gsnRightString  = lev(nl) + "hPa wind & " + draw_varname(nv) + " (" + unit(nv) + ")" 
@@ -929,8 +929,12 @@ end if
         overlay(plot(np),gtop(np))
         
         if(cont_option)
-        res_line@cnLevelSpacingF    = cont_spacing(nc) 
+        res_line@cnLevelSpacingF    = cont_spacing(nc)
+        if(jet_option.ge.1) then 
+        res_line@cnLineColor      = "black"
+        else 
         res_line@cnLineColor      = "blueviolet";"green4";"black"
+        end if
         plot2(np)   = gsn_csm_contour(wks,var(nc,3,nm,:,:),res_line)
         overlay(plot(np),plot2(np))
         if(nc.eq.1.and.lev(nl).eq.500.and.cont_var(nvc).eq."Z3") then 

@@ -6,27 +6,24 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = 4 ;0 means Qd; 1 means dzdt by Qd; 2 means dzdt; 3 means duTdx; 4 means dzdt induced by b1; 5 means eddy flux 
+var_option = -4 ;0 means Qd; 1 means dzdt by 3forc; 2 advection; 3 advect; 4 high and low 
 nnv = 1  ;used to read dzdt induced by different forcing
 
-barshare = True ;False;
+barshare = False;True ;
 barvert  = True ;False;
 jet_option    = True  ;20191205, control the draw of jet stream
 stream_option = False ;True ; 
+cont_option = True ;False; used to draw dudt
 fnc  = 1    ;chose which case to draw
-diff = False;True ;False;whether draw the difference ;False;
+diff = True ;whether draw the difference ;False;
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/)
 fig_out    = "pdf";"pdf";"x11"
 
-;months  = (/"DJF"/)
-;months  = (/"1","2","3","4","5"/) ;+ " May"
-;months  = (/"JF","MJ","JA"/);,"MA"
-;select_time = ispan(2,3,1)
 ;select_time_u = select_time 
-select_time_u = ispan(2,3,1)
+select_time_u = ispan(0,1,1)
 select_time = ispan(0,1,1)
-months  = (/"JF","MJ","MJ","JA"/)
-;months   = (/"DJF","MAM","JJA","SON"/)
+;months  = (/"JF","MJ","MJ","JA"/)
+months   = (/"DJF","MAM","JJA","SON"/)
 ;months   = (/"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"/)
 ;months  = (/"May","Jun","Jul","Aug"/)
 ;months  = (/"Apr","May","Jun","Jul"/)
@@ -37,14 +34,21 @@ lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,20
 ;lev_u = (/1000,925,850,800,750, 700,650,600,550,500, 450,400,350,300,250, 200,150,100/) ;18 levels ,hPa U
 lev_u = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa 13levels
 
-do na = 1,1,1 ;"TP","EA","UP","NH","CA","NP"
+;area: east Asia
+area = (/"TP","EA","NP","NP","UP","NH","CA"/)
+lats = (/15  , 15 , 10 , 10 , 15 , 10 , 10 /);15 ;-210
+latn = (/55  , 55 , 80 , 80 , 55 , 89 , 89 /) ;55 ;60
+lonl = (/70  ,110 ,150 ,170 , 40 , 1  , 0  /) ;30 ;20
+lonr = (/105 ,130 ,210 ,210 , 60 ,359 , 70 /) ;150;220
+
+do na = 1,2,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     unit     = "10~S~-11~N~" + (/"s~S~-2~N~","s~S~-2~N~","s~S~-2~N~","s~S~-1~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
 if(var_option.eq.-4) then 
-    draw_var = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
+    draw_var = (/"Qte_hgh","Qte_low","Fte_hgh","Fte_low","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"Qeddh","Qeddl","Ah","Al","total"/)  ;this is the variable used to draw, can used as center string
     unit     = (/"K/Day","K/Day","10~S~-11~N~ s~S~-2~N~","10~S~-11~N~ s~S~-2~N~","s~S~-2~N~"/)  ;this can be used as right string 
 end if
@@ -114,13 +118,6 @@ if(var_option.eq.5) then
     lev := lev_u
 end if
 
-;area: east Asia
-area = (/"TP","EA","UP","NH","CA","NP"/)
-lats = (/15  , 15 , 15 , 10 , 10 , 10 /);15 ;-210
-latn = (/55  , 55 , 55 , 89 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,110 , 40 , 1  , 0  ,150 /) ;30 ;20
-lonr = (/105 ,130 , 60 ,359 , 70 ,210 /) ;150;220
-
 ;the path of the file
 path    = "/home/ys17-23/Extension2/renql/project/TP_NUDG"
 if(case_option.eq.0) then
@@ -151,10 +148,11 @@ if(case_option.eq.2) then
     nsample = 30
 end if
 
-;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
-jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
+jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_month_ave_U.nc"
+;jetfile  = path + "/analysis/mdata/" + case1 + "-Clim_2month_ave_U.nc"
 if(var_option.eq.-4) then 
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_forc_te.nc"
+    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_season_forc_te.nc"
+    contname = path+"/z_tendency-20191022/mdata/"+case1+"-Clim_dzdt_te_season_lon.nc"
     fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
 end if
 if(var_option.eq.-2)
@@ -166,13 +164,14 @@ if(var_option.le.0.and.var_option.ge.-1)
     if(nmonth.eq.1) then 
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_DJF_Qd_Qeddy_A.nc"
     else
-    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_month_Qd_Qeddy_A_lon_season.nc"
-    filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
+    contname = path+"/z_tendency-20191022/mdata/"+case1+"-Clim_dzdt_season_lon.nc"
+    filename = path+"/z_tendency-20191022/mdata/"+case1+"-Clim_season_Qd_Qeddy_A_lon.nc"
+    ;filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_Qd_Qeddy.nc"
     end if
-    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_" + var_name(0) + area(na)
+    fig_name = path + "/z_tendency-20191022/fig/1p2x3_height_lat_"+var_name(0)+lonl(na)
 end if
 if(var_option.eq.1)
     if(month_option) then
@@ -243,6 +242,9 @@ end if
 nlev2 = dimsizes(lev_u)
 var_m := new((/ncase,nvar,nmonth,nlev,nlat,nlon/),double)
 var_u := new((/ncase,nmonth,nlev2,nlat/),double)
+if(cont_option) then
+var_c := new((/ncase,nvar,nmonth,nlev,nlat,nlon/),double)
+end if
 
 ;the number of the panel plot
     plot   = new((/nvar*nmonth/),graphic)
@@ -250,6 +252,7 @@ var_u := new((/ncase,nmonth,nlev2,nlat/),double)
     core   = new((/nvar*nmonth/),graphic)
     msfp   = new((/nvar*nmonth/),graphic)
     topo   = new((/nvar*nmonth/),graphic)
+    cont     := new((/12/),graphic)
 
 ;define the thickness and height of the title,tick and label
    tick_font      = 0.03
@@ -288,7 +291,6 @@ print(min(msf_m))
 end if
 
 if(month_option) then
-
 do nc = 0, nfile-1, 1
     if(jet_option) then
     f = addfile(jetfile(nc),"r")
@@ -347,6 +349,20 @@ var_m(:,nvar-1,:,:,:) = dim_sum_n(var_m(:,0:(nvar-2),:,:,:),1)
 copy_VarMeta(vars(:,:,0),var_m(0,0,0,:,:))
 printVarSummary(var_m)
 
+if(cont_option) then 
+do nc = 0, nfile-1, 1
+    fc = addfile(contname(nc),"r")
+    var_c(nc,0:(nvar-2),:,:,:,:) = fc->dudt(:,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) 
+end do
+var_c := dim_avg_n(var_c,5)*10^6
+if(diff) then
+    var_c(1,:,:,:,:) = var_c(1,:,:,:,:) - var_c(0,:,:,:,:)
+else
+    var_c(2,:,:,:,:) = var_c(1,:,:,:,:) - var_c(0,:,:,:,:)
+end if
+copy_VarMeta(vars(:,:,0),var_c(0,0,0,:,:))
+end if
+
 if(jet_option) then 
     ;var_u = mask(var_u,var_u.ge.-10,True)
     copy_VarMeta(u(0,:,:,0),var_u(0,0,:,:))
@@ -355,7 +371,7 @@ if(jet_option) then
     corey = new((/nfile,nmonth/),float)
     do nc = 0, nfile-1, 1
     do nt = 0, nmonth-1, 1
-        term = ndtooned(var_u(nc,nt,:,:))
+        term := ndtooned(var_u(nc,nt,:,:))
         indices = ind_resolve(maxind(term),(/nlev2,nlat/))
         corez(nc,nt) = tofloat(var_u&lev(indices(0,0)))
         corey(nc,nt) = tofloat(var_u&lat(indices(0,1)))
@@ -423,7 +439,7 @@ end if
 
 if(diff) then
     var_m(1,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
-    ;var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
+    var_u(1,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 else
     var_m(2,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
     var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
@@ -506,19 +522,16 @@ end if
     res_msf@cnLinesOn        = True
     res_msf@cnLineLabelsOn   = True ;False
     res_msf@cnInfoLabelOn    = False
-    res_msf@cnLineThicknessF = 4.0
-    res_msf@cnLineColor      = "black";"blueviolet";"gray40"
+    res_msf@cnLineThicknessF = 5.0
+    res_msf@cnLineColor      = "blueviolet";"gray40""black";
     res_msf@gsnContourZeroLineThicknessF = 0
-    res_msf@gsnContourNegLineDashPattern = 2
+    res_msf@gsnContourNegLineDashPattern = 14
     res_msf@gsnContourPosLineDashPattern = 0
     
-    ;levels2 = new((/20/),integer)
-    ;levels2(10:19) = ispan(5,50,5)
-    ;levels2(0:9) = ispan(-20,-2,2)
     ;res_msf@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     ;res_msf@cnLevels             = levels2       ; set contour interval
     res_msf@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_msf@cnLevelSpacingF      = 1.0        ; set contour interval
+    res_msf@cnLevelSpacingF      = 5.0        ; set contour interval
     res_msf@gsnPresHgtHeightLabelOn = False
     res_msf@tiYAxisOn = False
     res_msf@lbLabelBarOn     = False   ; the label bar
@@ -532,10 +545,10 @@ end if
     res_line@cnLinesOn        = True
     res_line@cnLineLabelsOn   = True
     res_line@cnInfoLabelOn    = False
-    res_line@cnLineThicknessF = 4.0  ;3.0
+    res_line@cnLineThicknessF = 3.0 ;4.0
     res_line@cnLineColor      = "black"
-    res_line@gsnContourZeroLineThicknessF = 8
-    res_line@gsnContourNegLineDashPattern = 2
+    res_line@gsnContourZeroLineThicknessF = 5.0
+    res_line@gsnContourNegLineDashPattern = 14
     res_line@gsnContourPosLineDashPattern = 0
    
     levels = new((/10/),integer)
@@ -562,7 +575,6 @@ end if
 
     resp  = True    
     resp@gsnMaximize   = True
-    resp@gsnPaperOrientation = "landscape";"portrait"
     if(barshare) then; .and.nmonth.eq.4
     res@lbLabelBarOn         = False   ; the label bar
     resp@gsnPaperOrientation = "landscaoe";"portrait"
@@ -585,8 +597,8 @@ end if
     res@pmLabelBarZone               = 0
     if(barvert) then
     res@lbOrientation        = "Vertical";
-    res@pmLabelBarWidthF  = 0.03
-    res@pmLabelBarHeightF = 0.17
+    res@pmLabelBarWidthF  = 0.1
+    res@pmLabelBarHeightF = 0.6
     res@pmLabelBarOrthogonalPosF     = 0.01
     res@pmLabelBarParallelPosF       = 0.5
     else
@@ -596,7 +608,7 @@ end if
     res@pmLabelBarOrthogonalPosF     = 0.15 ;y direction
     res@pmLabelBarParallelPosF       = 0.5
     end if
-    resp@gsnPaperOrientation = "landscape" ;"portrait"
+    resp@gsnPaperOrientation = "portrait"
     resp@gsnPanelLabelBar = False; True
     end if
     resp@lbLabelFont        = font_index              ; make labels smaller
@@ -606,9 +618,19 @@ end if
     resp@txFontThicknessF = title_thick
 
 if(var_option.eq.-4) then
-    minlvl = (/-2.1,-2.1,-14,-14,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 2.1, 14, 14, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 0.3, 2 , 2 , 2 /); 1, 1, 1, 1,
+if(na.eq.1) then 
+    minlvl = (/(/-2.1,-2.1,-7,-7,-7/),(/-2.1,-2.1,-7,-7,-7/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7, 7, 7/),(/ 2.1, 2.1, 7, 7, 7/)/)
+    spacig = (/(/ 0.3, 0.3, 1, 1, 1/),(/ 0.3, 0.3, 1, 1, 1/)/)
+    jet_spac = 1
+    dudt_spac= 5
+else
+    minlvl = (/(/-2.1,-2.1,-7,-7,-7/),(/-0.7,-0.7,-2.1,-2.1,-2.1/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7, 7, 7/),(/ 0.7, 0.7, 2.1, 2.1, 2.1/)/)
+    spacig = (/(/ 0.3, 0.3, 1, 1, 1/),(/ 0.1, 0.1, 0.3, 0.3, 0.3/)/)
+    jet_spac = 2
+    dudt_spac= 2
+end if
 end if
     
 if(var_option.eq.-2) then
@@ -618,9 +640,19 @@ if(var_option.eq.-2) then
 end if
     
 if(var_option.eq.-1) then
-    minlvl = (/-2.1,-2.1,-7,-14/);-8,-8,-8,-8,
-    maxlvl = (/ 2.1, 2.1, 7, 14/); 8, 8, 8, 8,
-    spacig = (/ 0.3, 0.3, 1, 2 /); 1, 1, 1, 1,
+if(na.eq.1) then 
+    minlvl = (/(/-2.1,-2.1,-7/),(/-2.1,-2.1,-7/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7/),(/ 2.1, 2.1, 7/)/)
+    spacig = (/(/ 0.3, 0.3, 1/),(/ 0.3, 0.3, 1/)/)
+    jet_spac = 1
+    dudt_spac= 5
+else
+    minlvl = (/(/-2.1,-2.1,-7/),(/-0.7,-0.7,-2.1/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7/),(/ 0.7, 0.7, 2.1/)/)
+    spacig = (/(/ 0.3, 0.3, 1/),(/ 0.1, 0.1, 0.3/)/)
+    jet_spac = 2
+    dudt_spac= 2
+end if
 end if
     
 if(var_option.eq.0) then 
@@ -699,16 +731,11 @@ end if
 ;    res@cnFillPalette = "BlueDarkRed18"
    ;blue and red, has 18 colors,2-10 is blue
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
+do nm = 0, nmonth-1,1
 do fnc = 0,ncase-1,1
 do nv = 0, nvar-2,1
-do nm = 0, nmonth-1,1
-    ;np = nv*2 + nm - 2 ;1 var, 2 month
-    np = nv*nmonth + nm ;1 var, 2 month
-    ;np = nm*3 + nv ;1 var, 2 month
-    ;np = fnc*nvar+nv
-    ;np = fnc*nmonth+nm
-    ;np = (nm-2)*(nvar-1) + nv   ;1 month,2 var
-    ;np = nm
+    np = nv*2 + fnc ;1 var, 2 month
+    ;np = nv*nmonth + nm ;1 var, 2 month
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
     if(var_option.ge.1.and.var_option.le.5) then 
     res@gsnRightString  = lonl(na) + "-" + lonr(na) + "E " + draw_var(nv) ;+ " (" + unit(nnv) + ")" ;
@@ -717,27 +744,36 @@ do nm = 0, nmonth-1,1
     end if
     res@gsnSpreadColors       = False              ; turn of the full color map
     res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnLevelSpacingF       := spacig(nv)        ; set contour interval
-    res@cnMaxLevelValF        := maxlvl(nv) ;32    ; set max contour level
-    res@cnMinLevelValF        := minlvl(nv)       ; set min contour level
+    res@cnLevelSpacingF       := spacig(fnc,nv)        ; set contour interval
+    res@cnMaxLevelValF        := maxlvl(fnc,nv) ;32    ; set max contour level
+    res@cnMinLevelValF        := minlvl(fnc,nv)       ; set min contour level
     plot(np) = gsn_csm_pres_hgt(wks,var_m(fnc,nv,nm,:,:),res)
-    print(max(var_m(fnc,nv,nm,:,:)))
-    print(min(var_m(fnc,nv,nm,:,:)))
+    printMinMax(var_m(fnc,nv,nm,:,:),0)
     
     if(jet_option) then 
-    if(fnc.eq.2) then 
+    if((diff.and.fnc.eq.1).or.fnc.eq.2) then
     ;res_line@gsnContourZeroLineThicknessF = 8
     res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 1       ; set contour interval
+    res_line@cnLevelSpacingF       = jet_spac       ; set contour interval
     else
     res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
     res_line@cnLevels             = levels       ; set contour interval
     end if
     line(np) = gsn_csm_pres_hgt(wks,var_u(fnc,nm,:,:),res_line)
     overlay(plot(np),line(np))
-    if(.not.(.not.(diff).and.fnc.eq.2)) then
-    core(np) = gsn_add_polymarker(wks,plot(np),corey(fnc,nm),corez(fnc,nm),polyres)
+    ;if(.not.(.not.(diff).and.fnc.eq.2)) then
+    ;core(np) = gsn_add_polymarker(wks,plot(np),corey(fnc,nm),corez(fnc,nm),polyres)
+    ;end if
     end if
+    
+    if(cont_option) then 
+    if((diff.and.fnc.eq.1).or.fnc.eq.2) then
+    res_msf@cnLevelSpacingF       = dudt_spac      ; set contour interval
+    else
+    res_msf@cnLevelSpacingF       = 5       ; set contour interval
+    end if
+    cont(np) = gsn_csm_pres_hgt(wks,var_c(fnc,nv,nm,:,:),res_msf)
+    overlay(plot(np),cont(np))
     end if
     
     if(stream_option) then 
@@ -755,10 +791,10 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
 end do 
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
-    gsn_panel(wks,plot,(/nvar,nmonth/),resp)
-    ;gsn_panel(wks,plot,(/1,3/),resp)
+    ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
 end do 
+    gsn_panel(wks,plot,(/nvar-1,2/),resp)
 end do 
 end
 

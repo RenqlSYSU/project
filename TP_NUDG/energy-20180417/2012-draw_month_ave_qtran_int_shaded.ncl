@@ -5,16 +5,18 @@
 ;                                                    2018/01/18
 ;*********************************************************************************
 begin
-draw_var  = (/"Total","Steady","Transient"/) 
+;draw_var  = (/"Total","Steady","Transient"/) 
+draw_var  = (/"850hPa Specific humidity (g/kg)","Steady","Transient"/) 
 var_name  = (/"qu_ave","qv_ave","div_ave"/)
 vari_name = (/"qu_vari","qv_vari","div_vari"/)
 unit      = "kg/(s*m)" ;"K"   ;this can be used as right string 
 diffterm  = False;True ;
 sig_option= False;True ;if False, only the significant values are shaded 
 barshare  = True ;False;
-barvert   = True ;False;
+barvert   = False;True ;
 
-months   = (/"MJ","JA"/)
+months   = (/"DJF","MAM"/)
+;months   = (/"MJ","JA"/)
 imonth = ispan(0,1,1);(/4,5,6,7/)
 ;months   = (/"JF","MA","MJ","JA"/)
 ;imonth = ispan(2,3,1);(/4,5,6,7/)
@@ -24,7 +26,7 @@ month_s = 5
 month_e = 8
 
 ;the path of the file
-path     = "/home/ys17-19/renql/project/TP_NUDG"
+path    = "/home/ys17-23/Extension2/renql/project/TP_NUDG"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
@@ -50,19 +52,20 @@ if(case_option.eq.2) then
     draw_var   := (/"q'V","qV'"/) 
     end if
 end if
-filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_2month_ave_qtran_int.nc" ;,"NUDG24h"
+filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_season_ave_qtran_int.nc" ;,"NUDG24h"
+;filename = path + "/energy-20180417/mdata/" + case1 + "-Clim_2month_ave_qtran_int.nc" ;,"NUDG24h"
 fig_name = path + "/energy-20180417/fig/" + case1(0) + "-qtran_int_2month"
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p"/)
-;fig_out    ="pdf";"x11"
-fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
 
 ;area: east Asia
-lats = (/10 ,-15/) ;-20
-latn = (/55 ,55 /) ;60
-lonl = (/90 ,30 /) ;20
-lonr = (/150,150/) ;220
+lats = (/10 ,10 ,10 ,-15/) ;-20
+latn = (/89 ,89 ,55 ,55 /) ;60
+lonl = (/0  ,90 ,90 ,30 /) ;20
+lonr = (/360,240,150,150/) ;220
 siglvl = 0.05
-na = 0
+na = 1
 
 f = addfile(gtopfile,"r")
 phis   = f->PHIS({lats(na):latn(na)},{lonl(na):lonr(na)})
@@ -134,13 +137,30 @@ var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),prob(:,2,:,:,:,:).l
 end if
 end if
 
+;just used to draw 850 hPa Specific humidity (g/kg) as shaded
+;f = addfile(path+"/analysis/mdata/F2000-Clim_month_ave_Q.nc","r")
+;var(0,2,0,:,:,:) = 1000*f->season_ave(imonth,{850},{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+;printMinMax(var(0,2,0,:,:,:),0)
+
 ;==============================================================
 ;draw figure in twelve months (one month is a fgure)
 ;==================================================================
 ;define the thickness and height of the title,tick and label
-   tick_font      = 0.03
-   subtitle_font  = 0.03
-   title_font     = 0.03
+if(na.le.0) then 
+   tick_font      = 0.01
+   subtitle_font  = 0.01
+   title_font     = 0.01
+   vcref_font     = 0.008
+   tick_thick     = 8.0
+   subtitle_thick = 8.0  ;not have this attribute
+   title_thick    = 5.0
+   vc_thick       = 2.5
+   mp_thick       = 1.5
+   font_index     = 22
+else
+   tick_font      = 0.02
+   subtitle_font  = 0.02
+   title_font     = 0.02
    vcref_font     = 0.02
    tick_thick     = 5.0
    subtitle_thick = 5.0  ;not have this attribute
@@ -148,6 +168,7 @@ end if
    mp_thick       = 3.0
    vc_thick       = 3.0
    font_index     = 22
+end if
 
 wks = gsn_open_wks(fig_out,fig_name)
     ;gsn_define_colormap(wks,"GMT_polar") 
@@ -170,9 +191,9 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@mpMinLatF        = lats(na)
     res@mpMaxLonF        = lonr(na)
     res@mpMinLonF        = lonl(na)
-    res@gsnMajorLatSpacing = 15
-    res@gsnMinorLatSpacing = 15
-    res@gsnMajorLonSpacing = 20
+    res@gsnMajorLatSpacing = 20
+    res@gsnMinorLatSpacing = 20
+    res@gsnMajorLonSpacing = 40
     res@mpFillOn         = False
     ;res@mpLandFillColor = "gray"
     ;res@mpFillDrawOrder = "PreDraw"
@@ -244,11 +265,18 @@ wks = gsn_open_wks(fig_out,fig_name)
     resvc@vcGlyphStyle               = "LineArrow"  ;"CurlyVector"
     resvc@vcVectorDrawOrder          = "PostDraw"
     resvc@vcLineArrowThicknessF      = vc_thick
+if(na.eq.0) then 
+    resvc@vcMinDistanceF            = 0.01
+    resvc@vcRefLengthF              = 0.025           ; define length of vec ref
+    resvc@vcLineArrowHeadMinSizeF   = 0.005
+    resvc@vcLineArrowHeadMaxSizeF   = 0.005
+else
     resvc@vcMinDistanceF             = 0.028
+    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcLineArrowHeadMinSizeF    = 0.013
     resvc@vcLineArrowHeadMaxSizeF    = 0.013
+end if
     ;resvc@vcRefMagnitudeF            = 30.0             ; define vector ref mag
-    resvc@vcRefLengthF               = 0.05           ; define length of vec ref
     resvc@vcRefAnnoOn                = False
     resvc@vcRefAnnoZone              = 0     ;set the positional origin in the center of the plot
     ;resvc@vcRefAnnoSide              = "Bottom"          
@@ -339,7 +367,7 @@ wks = gsn_open_wks(fig_out,fig_name)
     res@lbLabelFontHeightF   = tick_font
     res@lbLabelFont          = font_index              ; make labels smaller
     res@lbLabelStride        = 1
-    res@lbBoxLineThicknessF  = mp_thick-2
+    res@lbBoxLineThicknessF  = mp_thick-1
     res@pmLabelBarZone       = 0
     if(barvert) then
     res@lbOrientation        = "Vertical";
@@ -364,22 +392,31 @@ wks = gsn_open_wks(fig_out,fig_name)
 if(diffterm) then 
     vcref  = (/(/50,50,20/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
 else
-    vcref  = (/(/200,200,50/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
+    ;vcref  = (/(/200,200,50/),(/50,50,20/),(/50,50,20/)/) ;summer, the level of 850hpa    ctrl,nudg,diff
+    vcref  = (/(/150,150,50/),(/50,50,20/),(/50,50,20/)/)  ;the level of 850hpa    ctrl,nudg,diff
 end if
 
     ;minlvl = (/(/15 ,45 , 0/),(/-80,-16,-16/),(/-80,-16,-16/)/) ;used for East Asian Shaded ration
     ;maxlvl = (/(/615,120,30/),(/ 80, 16, 16/),(/ 80, 16, 16/)/)
     ;spacig = (/(/40 ,5  , 2/),(/ 10, 2 , 2 /),(/ 10, 2 , 2 /)/)
+    ;res@cnFillPalette = "precip3_16lev"
+    ;res@cnFillColors  := (/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16/)
+    ;maxlvl = 7.5 ;used for East Asian moist transiation
+    ;minlvl = 0  ;used for CTRL-NUDG
+    ;spacig = 0.5
     res@cnFillPalette = "BlueDarkRed18"
     res@cnFillColors  = (/0,1,2,3,4,5,6,7,10,11,12,13,14,15,16,17/) ; If the color indexes are derived from cnFillPalette the first color comes from element 0
-    maxlvl = (/(/ 7, 7, 7/),(/ 7, 7, 7/),(/ 7, 7, 7/)/) ;used for East Asian moist transiation
-    minlvl = (/(/-7,-7,-7/),(/-7,-7,-7/),(/-7,-7,-7/)/) ;used for CTRL-NUDG
-    spacig = (/(/ 1, 1, 1/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
+    maxlvl = 7 ;used for East Asian moist transiation
+    minlvl = -7  ;used for CTRL-NUDG
+    spacig = 1
+    ;maxlvl = (/(/ 7, 7, 7/),(/ 7, 7, 7/),(/ 7, 7, 7/)/) ;used for East Asian moist transiation
+    ;minlvl = (/(/-7,-7,-7/),(/-7,-7,-7/),(/-7,-7,-7/)/) ;used for CTRL-NUDG
+    ;spacig = (/(/ 1, 1, 1/),(/ 1, 1, 1/),(/ 1, 1, 1/)/)
 
 np = -1
 do nc = 0, ncase-1,1
-do nv = 1 ,nvar1-1,1
-do nm = 0, nmonth-1,1
+do nm = 0, 0,1;nmonth-1,1
+do nv = 1,nvar1-1,1
         np = np + 1
         ;np = nvar*nc + nv
         ;np = nmonth*nc + nm
@@ -387,9 +424,9 @@ do nm = 0, nmonth-1,1
         res@gsnLeftString   = pre_case(np) + ") " + case2(nc) + " " + months(imonth(nm));+ " " + draw_var(nv)
         res@gsnRightString  = draw_var(nv)
         res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-        res@cnLevelSpacingF      := spacig(nc,nv)        ; set contour interval
-        res@cnMaxLevelValF       := maxlvl(nc,nv) ;32    ; set max contour level
-        res@cnMinLevelValF       := minlvl(nc,nv)       ; set min contour level
+        res@cnLevelSpacingF      := spacig;(nc,nv)        ; set contour interval
+        res@cnMaxLevelValF       := maxlvl;(nc,nv) ;32    ; set max contour level
+        res@cnMinLevelValF       := minlvl;(nc,nv)        ; set min contour level
         resvc@vcRefAnnoOn       = True
         resvc@vcRefMagnitudeF   = vcref(nc,nv)                ; define vector ref mag
         resvc@vcRefAnnoString2  = vcref(nc,nv); + " " + unit
@@ -416,6 +453,7 @@ do nm = 0, nmonth-1,1
         print(max(var(nc,2,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
         print(min(var(nc,2,nv,nm,{lats(na):latn(na)},{lonl(na):lonr(na)})))
     end do 
+    ;gsn_panel(wks,plot,(/3,1/),resp)
 end do 
     ;res1 = True
     ;res2 = True
@@ -427,6 +465,7 @@ end do
  ;   gsn_panel(wks,plot,(/ncase,nmonth/),resp)
 end do
 ;    gsn_panel(wks,plot,(/nvar1,nmonth/),resp)
-    gsn_panel(wks,plot,(/4,2/),resp)
+;    gsn_panel(wks,plot,(/4,2/),resp)
+    gsn_panel(wks,plot,(/2,2/),resp)
 end 
 

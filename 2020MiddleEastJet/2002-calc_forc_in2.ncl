@@ -193,7 +193,6 @@ b1y = - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)
 print(vort(0,9,10,20:30))
 print(b1x(0,9,10,20:30))
 
-
 sigm0 = conform(clm_u,wgt_areaave(sigm0,1.0,1.0,0),(/iyear,ilev/))
 f0   = conform(clm_u,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
 

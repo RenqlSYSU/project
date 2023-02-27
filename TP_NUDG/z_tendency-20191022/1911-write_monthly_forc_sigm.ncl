@@ -45,8 +45,9 @@ filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_d
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
 end if
 if(ntime.le.4.and.ntime.ge.2) then 
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_advect.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_forc_te.nc"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_forc_te.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_forc_te.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_Qd_Qeddy_A_lon.nc"
 fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_4f6c_month.dat"
@@ -66,8 +67,10 @@ filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim
 fileout = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_4f6c.dat" 
 end if
 end if
-var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
-var_name2 = (/"Qeddh","Qeddl"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"b3x","b3y","b2","b1x","b1y"/)  ;this is the variable used to draw, can used as center string
+var_name2 = (/"t3x","t3y"/)  ;this is the variable used to draw, can used as center string
+;var_name  = (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
+;var_name2 = (/"Qeddh","Qeddl"/)  ;this is the variable used to draw, can used as center string
 ;var_name  = (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name2 = (/"Qd","Qeddy"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
@@ -167,16 +170,22 @@ end if
 end do
 
 if(year_option) then 
-sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
-sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
+    sigm1 := dim_avg_n_Wrap( f->sigm1(:,{lev},{lats:latn},{lonl:lonr}),0)
+    sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
 else
     if(ntime.eq.1) then 
     sigm1 := f->sigm1({lev},{lats:latn},{lonl:lonr})
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/ilev/))
     end if
-    if(ntime.le.4.and.ntime.ge.2) then 
+    if(ntime.le.4.and.ntime.ge.2) then
+    if(nvar.lt.5) then  
     sigm1 := f->sigm1(:,{lev},{lats:latn},{lonl:lonr})
     sigm1 := conform(forc_m,wgt_areaave(sigm1, 1.0, 1.0, 0),(/itime,ilev/))
+    else
+    sigm0 := f->sigm0(:,{lev},{lats:latn},{lonl:lonr})
+    sigm0 := conform(forc_m,wgt_areaave(sigm0, 1.0, 1.0, 0),(/itime,ilev/))
+    sigm1 = sigm0*R/conform(forc_m,lev*100,ilev)
+    end if
     end if
     if(ntime.gt.12) then 
         if(ntype.eq.0) then 

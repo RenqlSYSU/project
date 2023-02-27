@@ -13,7 +13,7 @@ program iteration
     !integer, parameter :: nlat = 54 , nlon = 240 , ilog  = 10 , ifile = 12
     !integer, parameter :: pr = 8 , ncase = 3 , nvar = 3 ,nvar2 = 2, ntime = 1, nlev = 19 !NCEP1
     !integer, parameter :: nlat = 31 , nlon = 144 , ilog  = 10 , ifile = 12
-    integer, parameter :: pr = 8 , ncase = 3 , nvar = 4 ,nvar2 = 2, ntime = 2, nlev = 19
+    integer, parameter :: pr = 8 , nvar = 5 ,nvar2 = 2, ntime = 2, nlev = 19
     integer, parameter :: nlat = 85 , nlon = 288 , ilog  = 10 , ifile = 12
     integer :: nc, nv, nt, nz, ny, nx, iter, irec 
     
@@ -42,7 +42,7 @@ program iteration
     
 !    print*, "please input the number of case,1 or 2 or 3"
 !    read(*,*) nc
-    nc = 4
+    nc = 6
     if(nc.eq.1) then 
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/CTRL-Clim_dzdt_month.dat"     
@@ -64,7 +64,7 @@ program iteration
     else if(nc.eq.4) then
         filename = trim(path)//"mdata/F2000-Clim_4f6c_month.dat"
         fileout  = trim(path)//"mdata/F2000-Clim_dzdt_month.dat"     
-        logname  = trim(path)//"f90_iter_infor-F2000.txt"
+        logname  = trim(path)//"f90_iter_infor-f2000.txt"
     else if(nc.eq.5) then
         filename = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG-Clim_4f6c_month.dat"
         fileout  = "/home/ys17-19/renql/project/TP_NUDG/z_tendency-20191022/mdata/NUDG-Clim_dzdt_month.dat"     
@@ -76,7 +76,8 @@ program iteration
     end if
     
     !var_name = (/"f_Qd   ","f_Qeddy","A      "/) !,"f_Qd_t "
-    var_name  = (/"f_Qeddh","f_Qeddl","Ah     ","Al     "/)
+    !var_name  = (/"f_Qeddh","f_Qeddl","Ah     ","Al     "/)
+    var_name  = (/"b3x    ","b3y    ","b2     ","b1x    ","b1y    "/)  
     open(unit=ilog,file=logname,form='formatted',status='replace')
     write(ilog,*) "relaxing factor is ", rf
     write(ilog,*) "critical value is ", critical

@@ -6,7 +6,7 @@
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
 month_option = True 
-var_option = -4 ;0 means Qd; 1 means dzdt by 3forc; 2 advection; 3 advect; 4 high and low 
+var_option = -1 ;0 means Qd; 1 means dzdt by 3forc; 2 advection; 3 advect; 4 high and low 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = False;True ;
@@ -38,8 +38,8 @@ lev_u = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa 13levels
 area = (/"TP","EA","NP","NP","UP","NH","CA"/)
 lats = (/15  , 15 , 10 , 10 , 15 , 10 , 10 /);15 ;-210
 latn = (/55  , 55 , 80 , 80 , 55 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,110 ,150 ,170 , 40 , 1  , 0  /) ;30 ;20
-lonr = (/105 ,130 ,210 ,210 , 60 ,359 , 70 /) ;150;220
+lonl = (/70  ,110 ,150 ,150 , 40 , 1  , 0  /) ;30 ;20
+lonr = (/105 ,130 ,210 ,170 , 60 ,359 , 70 /) ;150;220
 
 do na = 1,2,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
@@ -640,7 +640,7 @@ if(var_option.eq.-2) then
 end if
     
 if(var_option.eq.-1) then
-if(na.eq.1) then 
+if(na.eq.1.or.na.eq.3) then 
     minlvl = (/(/-2.1,-2.1,-7/),(/-2.1,-2.1,-7/)/)
     maxlvl = (/(/ 2.1, 2.1, 7/),(/ 2.1, 2.1, 7/)/)
     spacig = (/(/ 0.3, 0.3, 1/),(/ 0.3, 0.3, 1/)/)
@@ -677,6 +677,7 @@ if(nnv.eq.1) then ;dudt
     minlvl = (/-35,-35,-35,-35/);-8,-8,-8,-8
     maxlvl = (/ 35, 35, 35, 35/); 8, 8, 8, 8
     spacig = (/ 5 , 5 , 5 , 5 /); 1, 1, 1, 1
+    jet_spac = 2
 end if
 if(nnv.eq.2) then ;dTdt
     minlvl = (/-14,-14,-14,-14/);
@@ -793,8 +794,8 @@ end do
     ;gsn_panel(wks,plot,(/nmonth,nvar/),resp)
     ;gsn_panel(wks,plot,(/nvar,nmonth/),resp)
     ;gsn_panel(wks,plot,(/nmonth,nvar-1/),resp)
-end do 
     gsn_panel(wks,plot,(/nvar-1,2/),resp)
+end do 
 end do 
 end
 

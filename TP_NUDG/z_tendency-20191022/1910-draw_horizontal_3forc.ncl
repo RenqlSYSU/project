@@ -6,14 +6,14 @@
 ;*********************************************************************************
 begin
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-var_option  = -4 ;-1 forcing; 1 dudt ;4 high-low
+var_option  = -5 ;-1 forcing; 1 dudt ;4 high-low
 nnv = 0 ;"dzdt","dudt","dTdt","dbdt","dvdt"
 
 month_option = True ;False
 uv_option    = False;True ;
 duvdt_option = False;True ;
 jet_option   = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-nl   = 4 ;(/925,850,700,500,200/)
+nl   = 1 ;(/925,850,700,500,200/)
 diff = True ;whether draw the difference
 na = 2 ;"TP","EA","NH"
 barshare = False;True ;
@@ -80,6 +80,12 @@ if(var_option.eq.4) then
     unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
     select = (/0,1,2,3/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
 end if
+if(var_option.eq.5) then 
+    draw_var = (/"b3x","b3y","b2","b1x","b1y","total"/)  ;this is the variable used to draw, can used as center string
+    var_name = (/"dzdt","dudt","dTdt","dbdt","dvdt"/)  ;
+    unit     = (/"10~S~-3~N~m~S~2~N~/s~S~3~N~","10~S~-6~N~m/s~S~2~N~","10~S~-6~N~K/s","10~S~-12~N~K/(m*s)","10~S~-6~N~m/s~S~2~N~"/)  ;this can be used as right string 
+    select = (/0,1,2,3,4/) ;(/1,2,3/) ;0 is Qd, 1 is Qd_t
+end if
 
 ;the path of the file
 path    = "/home/ys17-23/Extension2/renql/project/TP_NUDG"
@@ -139,6 +145,9 @@ else
         if(var_option.eq.4) then 
         filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_te_season_lon.nc"
         end if
+        if(var_option.eq.5) then 
+        filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_dzdt_advect_season.nc"
+        end if
     end if
     else
     filename = path + "/z_tendency-20191022/mdata/" + case1 + "-Clim_daily_dzdt.nc"
@@ -195,7 +204,7 @@ maxlat = 40
 minlat = 25
 lonx = (/ minlon, maxlon, maxlon, minlon, minlon /)
 latx = (/ minlat, minlat, maxlat, maxlat, minlat /)
-
+ 
 ;================================================================
 ;read data
 ;====================================================================
@@ -663,9 +672,15 @@ end if
     
 if(var_option.ge.1) then ;dzdt
 if(nnv.eq.0) then   ;dzdt
+if(fnc.eq.0) then  ;.and.diff 
     minlvl = (/-3.5,-3.5,-3.5,-3.5,-3.5/);
     maxlvl = (/ 3.5, 3.5, 3.5, 3.5, 3.5/);
     spacig = (/ 0.5, 0.5, 0.5, 0.5, 0.5/);
+else
+    minlvl = (/-1.4,-1.4,-1.4,-1.4,-1.4/);
+    maxlvl = (/ 1.4, 1.4, 1.4, 1.4, 1.4/);
+    spacig = (/ 0.2, 0.2, 0.2, 0.2, 0.2/);
+end if
 end if
 if(nnv.eq.1) then ;dudt
     minlvl = (/-35,-35,-35,-35,-35/);-8,-8,-8,-8,
@@ -765,10 +780,11 @@ end do
 
 ;    resp@txString      = fig_title
 ;    if(nmonth.eq.1) then
-    gsn_panel(wks,plot,(/nvar-1,1/),resp)
+;    gsn_panel(wks,plot,(/nvar-1,1/),resp)
 ;    else
 ;    gsn_panel(wks,plot,(/nmonth,3/),resp)
 ;    end if
+    gsn_panel(wks,plot,(/nvar-1,1/),resp)
 end do
 end
 

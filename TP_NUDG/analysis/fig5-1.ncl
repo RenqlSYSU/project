@@ -27,13 +27,13 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(a","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
+             "T"            ,"uppEKE"      ,"uppEKE-2.5-10day_ezfft","uppEKE-10-90day_ezfft","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
              "uppT" /)
@@ -49,16 +49,16 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
-lev = (/700,500,200,700,600,  100,10/)
+lev = (/850,500,200,700,600,  100,10/)
 nl = 2
-nv = 8
+nv = 11
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
-jet_option  = 1 ;0 = no jet, 1 = jet axis, 2 = jet contour
+jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
@@ -100,7 +100,7 @@ end if
 
 ;area: east Asia
 lats = (/0  ,10 ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
-latn = (/60 ,60 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
+latn = (/60 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
 lonl = (/0  ,30 ,270,  30 ,150, 270,  25 ,0  ,30 /);20
 lonr = (/360,240,390,  150,270, 390,  85 ,360,150/);220
 lat_spacing = 15
@@ -691,8 +691,8 @@ end if
     res@pmLabelBarParallelPosF       = 0.5
     else
     res@lbOrientation        = "Horizontal";"Vertical";
-    res@pmLabelBarWidthF  = 0.7
-    res@pmLabelBarHeightF = 0.04
+    res@pmLabelBarWidthF  = 0.8
+    res@pmLabelBarHeightF = 0.05
     res@pmLabelBarOrthogonalPosF  = 0.28 ;y direction
     res@pmLabelBarParallelPosF    = 0.5
     end if
@@ -795,18 +795,19 @@ if(perc) then
     maxlvl = (/32 , 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 2 , 10, 10/);1 ,1 ,1 ,1 
 else
- ;   minlvl = (/2 ,-14/);-8,-8,-8,-8
- ;   maxlvl = (/32, 14/);8 ,8 ,8 ,8 
- ;   spacig = (/2 , 2 /);1 ,1 ,1 ,1 
-  ;  minlvl = (/10,-35/);-8,-8,-8,-8
-  ;  maxlvl = (/85, 35/);8 ,8 ,8 ,8 
-  ;  spacig = (/5 , 5 /);1 ,1 ,1 ,1 
-    minlvl = (/10,-21/);-8,-8,-8,-8
-    maxlvl = (/85, 21/);8 ,8 ,8 ,8 
-    spacig = (/5 , 3 /);1 ,1 ,1 ,1 
+    minlvl = (/2 ,-14/);-8,-8,-8,-8
+    maxlvl = (/32, 14/);8 ,8 ,8 ,8 
+    spacig = (/2 , 2 /);1 ,1 ,1 ,1 
+  ;  minlvl = (/10,-21/);-8,-8,-8,-8
+  ;  maxlvl = (/85, 21/);8 ,8 ,8 ,8 
+  ;  spacig = (/5 , 3 /);1 ,1 ,1 ,1 
 end if
 end if
-
+if(nv.eq.10.or.nv.eq.11) 
+    minlvl = (/0  ,-35/);-8,-8,-8,-8
+    maxlvl = (/150, 35/);8 ,8 ,8 ,8 
+    spacig = (/10 , 5 /);1 ,1 ,1 ,1 
+end if
 if(nv.eq.12) 
     minlvl = (/ 0 ,-7 ,-7 /)  ;omega*100
     maxlvl = (/ 75, 7 , 7 /)

@@ -40,12 +40,11 @@ if(.not.(obs_option)) then
 ;filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.dat"
 ;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_daily.nc"
 ;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_Qd_Qeddy_A_lon18.nc"
-filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_forc_te.nc";"Qd_Qeddy_A_lon.nc"
+;filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_2month_forc_te.nc";"Qd_Qeddy_A_lon.nc"
 filedat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_month.dat"
-fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_te_2month_lon.nc"
-;ilein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect2_season.nc"
-;iledat = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_advetc_dzdt_month.dat"
-;ileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_advect2_month_season.nc"
+;fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_te_2month_lon.nc"
+filein  = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_advect.nc"
+fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_dzdt_advect_season.nc"
 else
 if(ntime.eq.1) then 
 filein  = path + "/project/TP_NUDG/observation-20190127/mdata/" + (/"ERA-Interim","NCEP1"/) + "_DJF_Qd_Qeddy_A_1204.nc"
@@ -59,7 +58,8 @@ end if
 end if
 ;var_name= (/"f_Qd","f_Qd_t","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
 ;var_name= (/"f_Qd","f_Qeddy","A"/)  ;this is the variable used to draw, can used as center string
-var_name= (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
+var_name  = (/"b3x","b3y","b2","b1x","b1y"/)  ;this is the variable used to draw, can used as center string
+;var_name= (/"f_Qeddh","f_Qeddl","Ah","Al"/)  ;this is the variable used to draw, can used as center string
 ;var_name = (/"b1","b2","b3"/)  ;this is the variable used to draw, can used as center string
 ncase   = dimsizes(case)
 g  = 9.8 ;m/(s*s)

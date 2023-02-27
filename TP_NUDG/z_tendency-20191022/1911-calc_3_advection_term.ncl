@@ -13,11 +13,12 @@
 ;                                           2019/01/25
 ;******************************************************************************
 begin
-path    = "/home/ys17-19/renql"
-case_option = 0 ;0 means NUDG experiment; 1 means noTP experiment
-nmonth = 4
+path    = "/home/ys17-23/Extension2/renql"
+case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment ; 2 means F2000
+option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
+nmonth = 2
 season = True ;False 
-geo = True ;False ;if true, only can calc 10N 
+geo = True ;if true, only can calc 10N 
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -37,12 +38,12 @@ if(case_option.eq.1) then
 end if
 
 if(case_option.eq.2) then
-    case    = (/"F2000","NUDG","NG58"/)
-    filein  = path +(/"/model/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
-                      "/model/F2000_CAM5_NUDG/F2000_CAM5.cam.h1.YEAR.00",\
+    case    = (/"F2000","NGTR","NG58"/)
+    filein  = path +(/"/model_data/F2000_CAM5/F2000_CAM5.cam.h1.YEAR.00",\
+                      "/model_data/F2000_CAM5_TP_NUDG/F2000_CAM5_TP_NUDG.cam.h1.YEAR.00",\
                       "/model/F2000_CAM5_NUDG5-8/F2000_CAM5.cam.h1.YEAR.00"/)
     years   = ispan(1,30,1)   ;the calculate time
-    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_month_advect.nc"
+    fileout = path + "/project/TP_NUDG/z_tendency-20191022/mdata/" + case + "-Clim_season_advect2.nc"
 end if
 
 var_name= (/"U","V","T","Z3"/)
@@ -59,7 +60,6 @@ lats =  10 ;-90 ;
 latn =  90 ;
 lonl =  0  ;
 lonr = 360 ;
-zlev = (/1000,925,850/) ;hPa ,700,600,500,400
 lev2 = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;13 levels,hPa
 lev3 = fspan(1000,100,19)
 lev = lev2
@@ -67,7 +67,7 @@ lev = lev2
 ;==========================================================
 ;create an array(nvar,ncase,nyear) to store the data
 ;============================================================
-f    = addfile(filein(0)+years(0)+".daily."+var_name(0)+".nc","r")
+f    = addfile(filein(0)+years(9)+".daily."+var_name(0)+".nc","r")
 time = cd_calendar(f->time,0)
 vars:= f->$var_name(0)$(0,{lev},{lats:latn},{lonl:lonr})
 nlat  = dimsizes(vars&lat)
@@ -76,12 +76,16 @@ nlev  = dimsizes(lev)
 nyear = dimsizes(years)
 nvar  = dimsizes(var_name)
 ncase = dimsizes(filein)
-nzlev = dimsizes(zlev)
+nzlev = 5 
 lev := lev3
 nlev  = dimsizes(lev)
-b1_m  = new((/nmonth,nlev,nlat,nlon/),float)
-b2_m  = new((/nmonth,nlev,nlat,nlon/),float)
-b3_m  = new((/nmonth,nlev,nlat,nlon/),float)
+b1x_m  = new((/nmonth,nlev,nlat,nlon/),float)
+b1y_m  = new((/nmonth,nlev,nlat,nlon/),float)
+b2_m   = new((/nmonth,nlev,nlat,nlon/),float)
+t3x_m  = new((/nmonth,nlev,nlat,nlon/),float)
+t3y_m  = new((/nmonth,nlev,nlat,nlon/),float)
+b3x_m = new((/nmonth,nlev,nlat,nlon/),float)
+b3y_m = new((/nmonth,nlev,nlat,nlon/),float)
 sigm0_m  = new((/nmonth,nlev,nlat,nlon/),float)
 vort_m   = new((/nmonth,nlev,nlat,nlon/),float)
 
@@ -129,21 +133,60 @@ z     := new((/nyear,ntime,nzlev,nlat,nlon/),float)
 do nt = 0,nyear-1,1
 print("handle with " + case(nf) + " " + years(nt))
 nv = 0
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 u(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 1
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 v(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
 nv = 2
-f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
 t(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
 
-;nv = 3
-;f      = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
-;z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev},{lats:latn},{lonl:lonr})
+nv = 3
+files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
+f      = addfile(files(nt),"r")
+;f  = addfile(filein(nf) + years(nt) + ".daily." + var_name(nv) + ".nc","r")
+z(nt,:,:,:,:)  = f->$var_name(nv)$(select_time,{lev(0:(nzlev-1))},{lats:latn},{lonl:lonr})
 end do
+
+if(geo) then
+coslat = conform(z(:,:,0,:,:),cos(lat),ilat)
+f0     = conform(z(:,:,0,:,:),2*(2*pi/24.0/3600.0)*sin(lat),ilat)
+z = z*g
+lat1 = vars&lat
+lat_ind = ind(lat1.le.90.0)
+lat2 = lat(lat_ind)
+do nlv = 0,1,1
+    nl = 1 - nlv
+    z1 = z(:,:,nl+1,lat_ind,:) + R*t(:,:,nl,lat_ind,:)*(lev(nl+1)-lev(nl))*100/lev(nl)/100
+    u1 = -center_finite_diff_n(z1,lat2,cyclic,opt,ilat)/f0(:,:,lat_ind,:)/a        ;(:,:,nl,lat_ind,:)
+    v1 =  center_finite_diff_n(z1,lon ,loncyc,opt,ilon)/f0(:,:,lat_ind,:)/a/coslat(:,:,lat_ind,:) ;(:,:,nl,lat_ind,:)
+    t1 = -lev(nl)*100*(z(:,:,nl+1,lat_ind,:)-z1)/((lev(nl+1)-lev(nl))*100)/R
+    print(max(abs(z(:,:,nl,:,:)-z1)))
+    print(max(abs(u(:,:,nl,:,:)-u1)))
+    print(max(abs(v(:,:,nl,:,:)-v1)))
+    print(max(abs(t(:,:,nl,:,:)-t1)))
+    print(z(1,1,nl,10,10:20)-z1(1,1,10,10:20))
+    print(u(1,1,nl,10,10:20)-u1(1,1,10,10:20))
+    print(v(1,1,nl,10,10:20)-v1(1,1,10,10:20))
+    print(t(1,1,nl,10,10:20)-t1(1,1,10,10:20))
+    z(:,:,nl,lat_ind,:) = (/tofloat(z1)/)
+    u(:,:,nl,lat_ind,:) = (/tofloat(u1)/)
+    v(:,:,nl,lat_ind,:) = (/tofloat(v1)/)
+    ;t(:,:,nl,lat_ind,:) = (/tofloat(t1)/)
+end do
+delete([/coslat,f0,u1,v1,z1,t1,z,lat1,lat_ind,lat2/])
+end if
+printVarSummary(u)
+
 clm_u = dim_avg_n(u,0)
 clm_v = dim_avg_n(v,0)
 clm_t = dim_avg_n(t,0)
@@ -158,11 +201,11 @@ print(clm_t(1,9,10,20:30))
 
 lev := lev3
 nlev = dimsizes(lev)
-b1 := new((/ntime,nlev,nlat,nlon/),double)
+b1x := new((/ntime,nlev,nlat,nlon/),double)
 
 linlog = 0 ;1 mean linear interpolation; 0 mean log interpolation
 p_in   = conform(clm_u,lev2,ilev)
-p_out  = conform(b1,lev3,ilev)
+p_out  = conform(b1x,lev3,ilev)
 clm_u := int2p_n(p_in,clm_u,p_out,linlog,ilev)
 clm_v := int2p_n(p_in,clm_v,p_out,linlog,ilev)
 clm_t := int2p_n(p_in,clm_t,p_out,linlog,ilev)
@@ -178,36 +221,42 @@ delete(lev4d)
 
 ;vort = (1/a/coslat)*(center_finite_diff_n(clm_v,lon,loncyc,opt,ilon) - center_finite_diff_n(clm_u*coslat,lat,cyclic,opt,ilat))
 vort = uv2vr_cfd(clm_u,clm_v,vars&lat,vars&lon,3) 
-b1 = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) 
-b2 = - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)-2*(2.0*pi/24.0/3600.0)*coslat*clm_v/a
+b1x = - (clm_u/a/coslat)*center_finite_diff_n(vort,lon,loncyc,opt,ilon) 
+b1y = - (clm_v/a       )*center_finite_diff_n(vort,lat,cyclic,opt,ilat)
+b2 = -2*(2.0*pi/24.0/3600.0)*coslat*clm_v/a
 print(vort(1,9,10,20:30))
-print(b1(1,9,10,20:30))
+print(b1x(1,9,10,20:30))
 vort_m(nm,:,:,:)  = tofloat(dim_avg_n(vort,0))
-b1_m(nm,:,:,:)    = tofloat(dim_avg_n(b1,0))
+b1x_m(nm,:,:,:)   = tofloat(dim_avg_n(b1x,0))
+b1y_m(nm,:,:,:)   = tofloat(dim_avg_n(b1y,0))
 b2_m(nm,:,:,:)    = tofloat(dim_avg_n(b2,0))
 sigm0_m(nm,:,:,:) = tofloat(dim_avg_n(sigm0,0))
-delete([/vort,b1,b2/])
+delete([/vort,b1x,b1y,b2/])
 
 sigm0 = conform(clm_u,wgt_areaave(sigm0,1.0,1.0,0),(/itime,ilev/))
 f0   = conform(clm_u,2*(2*pi/24.0/3600.0)*sin(lat),ilat)
-advT = (clm_u/a/coslat)*center_finite_diff_n(clm_t,lon,loncyc,opt,ilon) + \
-       (clm_v/a       )*center_finite_diff_n(clm_t,lat,cyclic,opt,ilat)
+t3x  = -1*(clm_u/a/coslat)*center_finite_diff_n(clm_t,lon,loncyc,opt,ilon)
+t3y  = -1*(clm_v/a       )*center_finite_diff_n(clm_t,lat,cyclic,opt,ilat)
 delete([/clm_u,clm_v,clm_t,coslat/])
-b3 = f0 * center_finite_diff_n(advT/sigm0,lev*100,cyclic,opt,ilev)
-b3_m(nm,:,:,:) = tofloat(dim_avg_n(b3,0))
-delete([/advT,f0,b3,sigm0/])
+b3x = -1*f0*center_finite_diff_n(t3x/sigm0,lev*100,cyclic,opt,ilev)
+b3y = -1*f0*center_finite_diff_n(t3y/sigm0,lev*100,cyclic,opt,ilev)
+b3x_m(nm,:,:,:) = tofloat(dim_avg_n(b3x,0))
+b3y_m(nm,:,:,:) = tofloat(dim_avg_n(b3y,0))
+t3x_m(nm,:,:,:) = tofloat(dim_avg_n(t3x,0))
+t3y_m(nm,:,:,:) = tofloat(dim_avg_n(t3y,0))
+delete([/f0,b3x,b3y,t3x,t3y,sigm0/])
 end do
 
 sigm0_m@long_name = "one kind of static stability measured by temperature"
 sigm0_m@units     = "K/Pa" 
 vort_m@long_name = "one kind of static stability measured by temperature"
 vort_m@units     = "K/Pa" 
-b1_m@long_name = "x transport of Absolute vorticity"
-b1_m@units     = "s^-2" 
+b1x_m@long_name = "x transport of Absolute vorticity"
+b1x_m@units     = "s^-2" 
 b2_m@long_name = "y transport of Absolute vorticity"
 b2_m@units     = "s^-2" 
-b3_m@long_name = "Vertical gradient of temperature horizontal advection"
-b3_m@units     = "s^-2" 
+b3x_m@long_name = "Vertical gradient of temperature horizontal advection"
+b3x_m@units     = "s^-2" 
 
 ;========================================================================
 ;save the data
@@ -235,9 +284,13 @@ filevardef(ncdf,"lat" ,typeof(vars&lat),getvardims(vars&lat))
 filevardef(ncdf,"lon" ,typeof(vars&lon),getvardims(vars&lon))
 filevardef(ncdf,"sigm0",typeof(sigm0_m),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"vort" ,typeof(vort_m) ,(/"time","lev","lat","lon"/))
-filevardef(ncdf,"b1",typeof(b1_m),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"b1x",typeof(b1x_m),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"b1y",typeof(b1y_m),(/"time","lev","lat","lon"/))
 filevardef(ncdf,"b2",typeof(b2_m),(/"time","lev","lat","lon"/))
-filevardef(ncdf,"b3",typeof(b3_m),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"b3x",typeof(b3x_m),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"b3y",typeof(b3y_m),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"t3x",typeof(t3x_m),(/"time","lev","lat","lon"/))
+filevardef(ncdf,"t3y",typeof(t3y_m),(/"time","lev","lat","lon"/))
 
 
 ;define var attribute
@@ -246,18 +299,26 @@ filevarattdef(ncdf,"lat",vars&lat)
 filevarattdef(ncdf,"lon",vars&lon)
 filevarattdef(ncdf,"sigm0",sigm0_m)
 filevarattdef(ncdf,"vort" ,vort_m)
-filevarattdef(ncdf,"b1",b1_m)
+filevarattdef(ncdf,"b1x",b1x_m)
+filevarattdef(ncdf,"b1y",b1y_m)
 filevarattdef(ncdf,"b2",b2_m)
-filevarattdef(ncdf,"b3",b3_m)
+filevarattdef(ncdf,"b3x",b3x_m)
+filevarattdef(ncdf,"b3y",b3y_m)
+filevarattdef(ncdf,"t3x",t3x_m)
+filevarattdef(ncdf,"t3y",t3y_m)
 
 ncdf->lev  = (/toint(lev)/)
 ncdf->lat  = (/vars&lat/)
 ncdf->lon  = (/vars&lon/)
 ncdf->sigm0 = (/sigm0_m/)
 ncdf->vort  = (/vort_m/)
-ncdf->b1 = (/b1_m/)
+ncdf->b1x = (/b1x_m/)
+ncdf->b1y = (/b1y_m/)
 ncdf->b2 = (/b2_m/)
-ncdf->b3 = (/b3_m/)
+ncdf->b3x = (/b3x_m/)
+ncdf->b3y = (/b3y_m/)
+ncdf->t3x = (/t3x_m/)
+ncdf->t3y = (/t3y_m/)
 end do
 end
 

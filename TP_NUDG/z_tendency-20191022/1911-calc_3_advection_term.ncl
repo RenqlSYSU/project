@@ -16,9 +16,9 @@ begin
 path    = "/home/ys17-23/Extension2/renql"
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment ; 2 means F2000
 option   = 0 ;0 means remove annual cycle, 1 means bandpass filter
-nmonth = 2
+nmonth = 3
 season = True ;False 
-geo = True ;if true, only can calc 10N 
+geo = False;True ;if true, only can calc 10N 
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)

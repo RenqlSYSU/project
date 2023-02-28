@@ -46,7 +46,7 @@ if(case_option.eq.3) then
     years   = ispan(1979,2005,1)   ;the calculate time
     fileout = path + "/project/2021variability/data/" + case + "-Clim_month_ave_"
 end if
-var_name = (/"Q"  ,"V"    ,"T"  ,"Z3" ,"dudt", \
+var_name = (/"Q"  ,"V"    ,"T"  ,"Z3" ,"vort", \ ;"dudt"
              "Q1" ,"preci","TMQ","TS" ,"PS"  , \
              "PSL" /) ;,"OMEGA","RELHUM" 
 
@@ -82,7 +82,7 @@ month_vari = new((/      12 ,nlev,nlat,nlon/),float) ;be used to exam the signif
 season_ave = new((/       4 ,nlev,nlat,nlon/),float)
 season_vari= new((/       4 ,nlev,nlat,nlon/),float)
 
-do nv = 10,10,1; ,nvar-1 ,1 
+do nv = 4,4,1;10,10,1; ,nvar-1 ,1 
 do nf = 0,1,1
 if((case_option.eq.1).and.(nf.eq.1))
     years   = ispan(41,50,1)   ;the calculate time
@@ -91,11 +91,11 @@ end if
 ;read the data
 ;--------------------------------------------------------------
 if((nv.le.4)) then 
-if(nv.eq.4) then 
+if(nv.eq.4) then ;calc vort or dudt 
     var_name2 = (/"U","V","OMEGA"/)
     u   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     v   = new((/nyear,ntime,nlev,nlat,nlon/),float)
-    w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
+    ;w   = new((/nyear,ntime,nlev,nlat,nlon/),float)
     
     do nt = 0,nyear-1,1
     nv2 = 0
@@ -106,35 +106,41 @@ if(nv.eq.4) then
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
     f      = addfile(files(nt),"r")
     v(nt,:,:,:,:) = f->$var_name2(nv2)$(:,{lev},{lats:latn},{lonl:lonr})
-    nv2 = 2
-    files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
-    f      = addfile(files(nt),"r")
-    w(nt,:,:,:,:) = f->$var_name2(nv2)$(:,{lev},{lats:latn},{lonl:lonr})
+    ;nv2 = 2
+    ;files := systemfunc("ls "+filein(nf)+"*.daily."+var_name2(nv2)+".nc" )
+    ;f      = addfile(files(nt),"r")
+    ;w(nt,:,:,:,:) = f->$var_name2(nv2)$(:,{lev},{lats:latn},{lonl:lonr})
     end do
 
-    iyear = 0
-    itime = 1
-    ilev  = 2
-    ilat  = 3
-    ilon  = 4
-    pi = atan(1.0)*4
-    a  = 6378388 ;the radius of earth, m
-    lat  = vars&lat
-    lon  = vars&lon
-    lat  = lat*pi/180.0
-    lon  = lon*pi/180.0
-    coslat = conform(u,cos(lat),ilat)
-    opt    = 0     ;used by center_finite_diff_n, no meanging 
-    loncyc = True ;used by center_finite_diff_n
-    cyclic = False ;used by center_finite_diff_n
-    term = (u/a/coslat)*center_finite_diff_n(u,lon,loncyc,opt,ilon) + \
-           (v/a       )*center_finite_diff_n(u,lat,cyclic,opt,ilat) + \
-           w*center_finite_diff_n(u,lev*100,cyclic,opt,ilev) + \
-           center_finite_diff_n(u,24*3600,cyclic,opt,itime)
-    var = tofloat(term)
-    var@long_name = "dudt = dudt + u*dudx + v*dudy + w*dudz"
-    var@units     = "m*s^-2"
-    delete([/u,v,w,term,lat,lon,pi,coslat,a/])
+    ;iyear = 0
+    ;itime = 1
+    ;ilev  = 2
+    ;ilat  = 3
+    ;ilon  = 4
+    ;pi = atan(1.0)*4
+    ;a  = 6378388 ;the radius of earth, m
+    ;lat  = vars&lat
+    ;lon  = vars&lon
+    ;lat  = lat*pi/180.0
+    ;lon  = lon*pi/180.0
+    ;coslat = conform(u,cos(lat),ilat)
+    ;opt    = 0     ;used by center_finite_diff_n, no meanging 
+    ;loncyc = True ;used by center_finite_diff_n
+    ;cyclic = False ;used by center_finite_diff_n
+    ;term = (u/a/coslat)*center_finite_diff_n(u,lon,loncyc,opt,ilon) + \
+    ;       (v/a       )*center_finite_diff_n(u,lat,cyclic,opt,ilat) + \
+    ;       w*center_finite_diff_n(u,lev*100,cyclic,opt,ilev) + \
+    ;       center_finite_diff_n(u,24*3600,cyclic,opt,itime)
+    ;var = tofloat(term)
+    ;var@long_name = "dudt = dudt + u*dudx + v*dudy + w*dudz"
+    ;var@units     = "m*s^-2"
+    ;delete([/u,v,w,term,lat,lon,pi,coslat,a/])
+    
+    vort = uv2vr_cfd(u,v,vars&lat,vars&lon,3) 
+    var = tofloat(vort)
+    var@long_name = "vort"
+    var@units     = "s^-1"
+    delete([/u,v,vort/])
 else
     files := systemfunc("ls "+filein(nf)+"*.daily."+var_name(nv)+".nc" )
     do nt = 0,nyear-1,1

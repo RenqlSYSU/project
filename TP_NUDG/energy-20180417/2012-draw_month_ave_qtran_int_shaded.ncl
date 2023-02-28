@@ -132,8 +132,8 @@ copy_VarMeta(var(0,0,0,0,:,:),vvar(0,0,0,:,:))
 if(sig_option) then 
 prob(:,2,:,:,:,:) = mask(prob(:,2,:,:,:,:),prob(:,2,:,:,:,:).lt.siglvl,True)
 else
-var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),prob(:,2,:,:,:,:).lt.siglvl,True)
-;var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl).or.(prob(:,2,:,:,:,:).lt.siglvl)),True)
+;var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),prob(:,2,:,:,:,:).lt.siglvl,True)
+var(1:(ncase-1),2,:,:,:,:) = mask(var(1:(ncase-1),2,:,:,:,:),((prob(:,0,:,:,:,:).lt.siglvl).or.(prob(:,1,:,:,:,:).lt.siglvl).or.(prob(:,2,:,:,:,:).lt.siglvl)),True)
 end if
 end if
 

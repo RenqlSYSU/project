@@ -34,7 +34,7 @@ latn = (/55  , 55 , 80 , 80 , 55 , 89 , 89 /) ;55 ;60
 lonl = (/70  ,110 ,150 ,150 , 40 , 1  , 0  /) ;30 ;20
 lonr = (/105 ,130 ,210 ,170 , 60 ,359 , 70 /) ;150;220
 
-do na = 1,2,1 ;"TP","EA","UP","NH","CA","NP"
+do na = 1,1,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
@@ -471,9 +471,9 @@ end if
     
 if(var_option.eq.-1) then
 if(na.eq.1.or.na.eq.3) then 
-    minlvl = (/(/-2.1,-2.1,-7/),(/-2.1,-2.1,-7/),(/-7,-7,-7/)/)
-    maxlvl = (/(/ 2.1, 2.1, 7/),(/ 2.1, 2.1, 7/),(/ 7, 7, 7/)/)
-    spacig = (/(/ 0.3, 0.3, 1/),(/ 0.3, 0.3, 1/),(/ 1, 1, 1/)/)
+    minlvl = (/(/-2.1,-2.1,-7/),(/-0.7,-0.7,-7/),(/-7,-7,-7/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7/),(/ 0.7, 0.7, 7/),(/ 7, 7, 7/)/)
+    spacig = (/(/ 0.3, 0.3, 1/),(/ 0.1, 0.1, 1/),(/ 1, 1, 1/)/)
     jet_spac = 1
     dudt_spac= 5
 else

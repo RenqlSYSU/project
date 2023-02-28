@@ -6,7 +6,7 @@
 ;*********************************************************************************
 begin
 case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
-var_option  = -7 ;-1 forcing; 1 dudt ;4 high-low; -6 vort adv; -7advT
+var_option  = -6 ;-1 forcing; 1 dudt ;4 high-low
 nnv = 0 ;"dzdt","dudt","dTdt","dbdt","dvdt"
 cont_option = True ;False; used to draw dudt
 month_option = True ;False
@@ -15,12 +15,8 @@ duvdt_option = False;True ;
 jet_option   = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
 nl   = 1 ;
 diff = True ;whether draw the difference
-na = 2 ;"TP","EA","NH"
-if (var_option.lt.0) then
-barshare = False;
-else
+na = 3 ;"TP","EA","NH"
 barshare = True ;False;
-end if
 barvert  = False;True
 
 months   = (/"DJF","MAM"/);,"JJA","SON"
@@ -31,7 +27,7 @@ area = (/"TP","EA","NH","NH"/)
 lats = (/15  ,10  , 10 , 10 /);20 ;-20
 latn = (/55  ,60  , 89 , 89 /) ;55 ;60
 lonl = (/70  ,30  , 0  , 90 /) ;30 ;20
-lonr = (/105 ,150 ,360 ,260 /) ;150;220
+lonr = (/105 ,150 ,360 ,270 /) ;150;220
 month_s = 1
 month_e = 8
 
@@ -235,8 +231,6 @@ end if
     ;gsn_define_colormap(wks,"matlab_jet") 
     ;has 64 colors blue green yellow,red
 
-do fnc= 0,1,1
-do nl = 0,1,1 
 ;================================================================
 ;read data
 ;====================================================================
@@ -689,6 +683,7 @@ end if
     resp@txFontHeightF = title_font 
     resp@txFontThicknessF = title_thick
 
+do fnc= 0,1,1
 if(duvdt_option) then 
 vcref         = (/(/5 ,2 ,2 /), \  ;the level of 925hpa    ctrl,nudg,diff
                   (/10,4 ,4 /), \  ;the level of 850hpa    ctrl,nudg,diff
@@ -719,9 +714,9 @@ end if
 
 if(var_option.eq.-7) then
 if(fnc.eq.1) then  ;.and.diff 
-    minlvl := (/-2.1,-2.1,-2.1,-2.1/);-8,-8,-8,-8,
-    maxlvl := (/ 2.1, 2.1, 2.1, 2.1/); 8, 8, 8, 8,
-    spacig := (/ 0.3, 0.3, 0.3, 0.3/); 1, 1, 1, 1,
+    minlvl = (/-2.1,-2.1,-2.1,-2.1/);-8,-8,-8,-8,
+    maxlvl = (/ 2.1, 2.1, 2.1, 2.1/); 8, 8, 8, 8,
+    spacig = (/ 0.3, 0.3, 0.3, 0.3/); 1, 1, 1, 1,
 else
     minlvl = (/-7,-7,-7,-7/);-8,-8,-8,-8,
     maxlvl = (/ 7, 7, 7, 7/); 8, 8, 8, 8,
@@ -823,9 +818,9 @@ end if
     ;res@cnFillPalette = "precip3_16lev"
     ;blue and yellow and red, has 17 colors,2-18,2 is white
     res@cnFillColors  = (/2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19/)
-do nv = 0,nvar-1,1
+do nv = 0,nvar-2,1
 do nm = 0,0,1
-    np = nv*2+nl
+    np = nv*2+fnc
    ; np = nm*3 + nv
    ; np = nv*nmonth + nm
     res@gsnLeftString   = pre_case(np) + ") " + case2(fnc) + " " + months(nm) 
@@ -864,15 +859,17 @@ do nm = 0,0,1
     end if
     
     if(cont_option) then 
+    ;levels = new((/20/),integer)
+    ;levels(5:14) = ispan(-5,5,1)
     if(fnc.eq.0) then 
     levels := ispan(-30,30,3)
     else
     levels := (/-12,-10,-8,-6,-4,-3,-2,-1,1,2,3,4,6,8,10,12/)
     end if    
-    ;res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
-    ;res_line@cnLevels             = levels       ; set contour interval
-    res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
-    res_line@cnLevelSpacingF       = 1        ; set contour interval
+    res_line@cnLevelSelectionMode = "ExplicitLevels"    ;set manual contour levels
+    res_line@cnLevels             := levels       ; set contour interval
+    ;res_line@cnLevelSelectionMode = "AutomaticLevels"   ; set manual contour levels
+    ;res_line@cnLevelSpacingF       = 1        ; set contour interval
     line(np) = gsn_csm_contour(wks,var_c(fnc,nv,nm,:,:),res_line)
     overlay(plot(np),line(np))
     end if 
@@ -897,7 +894,6 @@ end do
 ;    gsn_panel(wks,plot,(/nmonth,3/),resp)
 ;    end if
 end do
-    gsn_panel(wks,plot,(/nvar,2/),resp)
-end do
+    gsn_panel(wks,plot,(/nvar-1,2/),resp)
 end
 

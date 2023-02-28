@@ -27,7 +27,7 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
-pre_case   = (/"(c","(a","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
@@ -35,7 +35,7 @@ fig_out    = "pdf";"x11";"eps";
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
              "T"            ,"uppEKE"      ,"uppEKE-2.5-10day","uppEKE-10-90day","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
-             "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
+             "precs"        ,"vort"         ,"advT"            ,"advT"           ,"advT"      , \
              "uppT" /)
 
 unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            ,"W/m~S~2~N~" , \
@@ -47,11 +47,11 @@ unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
                  "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
-                 "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
+                 "snow"     ,"vort"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
 lev = (/850,500,200,700,600,  100,10/)
-nl = 0
-nv = 13
+nl = 2
+nv = 16
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
@@ -59,7 +59,7 @@ siglvl = 0.05
 sig_option  = False;True ;if False, only the significant values are shaded 
 vect_option = True ;False;
 jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
-cont_option = True ;False;
+cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
 nvc = 0
@@ -832,9 +832,12 @@ if(nv.eq.15) then ;precs
 end if
 
 if(nv.eq.16) then ;div
-    minlvl = (/-7,-7,-7/)
-    maxlvl = (/ 7, 7, 7/)
-    spacig = (/ 1, 1, 1/)
+    minlvl = (/-49,-14,-7/)
+    maxlvl = (/ 49, 14, 7/)
+    spacig = (/ 7 , 2 , 1/)
+    ;minlvl = (/-7,-7,-7/)
+    ;maxlvl = (/ 7, 7, 7/)
+    ;spacig = (/ 1, 1, 1/)
 end if
 
 if(nv.ge.17.and.nv.le.19) then 

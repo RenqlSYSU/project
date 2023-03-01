@@ -28,13 +28,13 @@ lev   = (/1000,950,900,850,800, 750,700,650,600,550, 500,450,400,350,300, 250,20
 lev_u = (/1000,925,850,700,600, 500,400,350,300,250, 200,150,100/) ;hPa 13levels
 
 ;area: east Asia
-area = (/"TP","EA","NP","NP","UP","NH","CA"/)
-lats = (/15  , 15 , 10 , 10 , 15 , 10 , 10 /);15 ;-210
-latn = (/55  , 55 , 80 , 80 , 55 , 89 , 89 /) ;55 ;60
-lonl = (/70  ,110 ,150 ,150 , 40 , 1  , 0  /) ;30 ;20
-lonr = (/105 ,130 ,210 ,170 , 60 ,359 , 70 /) ;150;220
+area = (/"TP","EA","NP","NP","UP","NH","ME","EA"/)
+lats = (/15  , 15 , 10 , 10 , 15 , 10 , 10 , 10 /);15 ;-210
+latn = (/55  , 55 , 80 , 80 , 55 , 89 , 60 , 60 /) ;55 ;60
+lonl = (/70  ,110 ,150 ,150 , 40 , 1  , 0  , 250/) ;30 ;20
+lonr = (/105 ,130 ,210 ,170 , 60 ,359 , 70 , 320/) ;150;220
 
-do na = 1,1,1 ;"TP","EA","UP","NH","CA","NP"
+do na = 6,7,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
@@ -193,7 +193,7 @@ do nc = 0, nfile-1, 1
     var_c(nc,0:(nvar-2),:,:,:,:) = fc->dudt(:,select_time,{lev},{lats(na):latn(na)},{lonl(na):lonr(na)}) 
 end do
 var_c := dim_avg_n(var_c,5)*10^6
-var_c(1,:,:,:,:) = var_c(1,:,:,:,:) - var_c(0,:,:,:,:)
+var_c(2,:,:,:,:) = var_c(1,:,:,:,:) - var_c(0,:,:,:,:)
 copy_VarMeta(vars(:,:,0),var_c(0,0,0,:,:))
 end if
 
@@ -272,7 +272,7 @@ end if
 end if
 
 var_m(1,:,:,:,:) = var_m(1,:,:,:,:) - var_m(0,:,:,:,:)
-var_m(2,:,:,:,:) = var_c(1,:,:,:,:)
+var_m(2,:,:,:,:) = var_c(2,:,:,:,:)
 var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 
 ;==============================================================
@@ -529,15 +529,15 @@ do nv = 0, nvar-2,1
     ;end if
     end if
     
-    ;if(cont_option) then 
+    if(cont_option.and.fnc.lt.2) then 
     ;if((diff.and.fnc.eq.1).or.fnc.eq.2) then
     ;res_msf@cnLevelSpacingF       = dudt_spac      ; set contour interval
     ;else
     ;res_msf@cnLevelSpacingF       = 5       ; set contour interval
     ;end if
-    ;cont(np) = gsn_csm_pres_hgt(wks,var_c(fnc,nv,nm,:,:),res_msf)
-    ;overlay(plot(np),cont(np))
-    ;end if
+    cont(np) = gsn_csm_pres_hgt(wks,var_c(fnc,nv,nm,:,:),res_msf)
+    overlay(plot(np),cont(np))
+    end if
     
     topo(np) = gsn_add_polygon(wks, plot(np), xpoly, ypoly, pres)
 end do 

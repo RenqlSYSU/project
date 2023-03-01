@@ -109,17 +109,16 @@ end if
 area = (/"ME","EA","NA"/);,"EEA","WNP","ENP","GB"
 lats = (/10  ,10  ,10 /);
 latn = (/60  ,60  ,60 /);
-lonl = (/0   ,105 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
-lonr = (/70  ,175 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
+lonl = (/110 ,150 , 250/);, 105 , 140 , 180 , 0   ;30 ;20    105,140 , 180  0 ,105 , 250
+lonr = (/130 ,210 , 320/);, 140 , 180 , 220 , 360 ;150;220   140,180 , 220 70 ,175 , 320
 lat_spacing = 10
 na = 0
 density = 1.1 ;km/m3
 g = 9.8 ;m2/s2
 
 ;the path of the file
-path     = "/home/ys17-19/renql/project/2020MiddleEastJet/"
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
-;gtopfile = "/home/ys17-19/data-observation/NCEP_NCAR/hgt.sfc.nc"
+path    = "/home/ys17-23/Extension2/renql/project/2020MiddleEastJet/"
+gtopfile = "/home/ys17-23/Extension2/renql/gtopo_1.5x1.5.nc"
 if(var_option.eq.-13.or.var_option.eq.-14)
     filename = path + "data/" + case + "_" + months + "_zonal_momentum-year.nc"
     fig_name = path + "fig/1p3x3_height_lat_" + var_name(0)
@@ -171,8 +170,8 @@ if(var_option.eq.5)
 end if
 
 pre_case   = (/"(a","(b","(c","(d","(e","(f","(g","(h","(i","(j","(k","(l","(m","(n","(o","(p","(q","(r","(s","(t","(u"/);"(a",
-fig_out    ="eps";"x11"
-;fig_out    ="pdf";"x11"
+;fig_out    ="eps";"x11"
+fig_out    ="pdf";"x11"
 
 f = addfile(filename,"r")
 if(DJF_option) then

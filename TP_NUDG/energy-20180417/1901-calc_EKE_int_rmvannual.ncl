@@ -13,8 +13,8 @@ case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
 option   = 1 ;0 means remove annual cycle, 1 means bandpass filter
 
 ;parameter for bw_bandpass_filter
-ca = 90.0 ;10.0 ;day
-cb = 10.0 ;2.5  ;
+ca = 10.0 ;day
+cb = 2.5  ;
 
 if(case_option.eq.0) then
     case    = (/"CTRL","NG6h","NG24h"/)
@@ -51,7 +51,7 @@ if(case_option.eq.2) then
         fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_lowEKE.nc"
         ;fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intuv.nc"
     else
-        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_uppEKE-" + cb + "-" + ca + "day_ezfft.nc"
+        fileout = path + "/project/TP_NUDG/analysis/mdata/" + case + "-Clim_month_ave_intEKE-" + cb + "-" + ca + "day_ezfft.nc"
     end if  
 end if
 
@@ -144,8 +144,8 @@ cf = ezfftf_n(v,1)
 cf(:,:,filt_cf,:,:,:) = 0.0  
 filt_v = ezfftb_n(cf,0,2)
 
-;var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
-var   = dim_sum_n((filt_v(:,:,5:10,:,:)*filt_v(:,:,5:10,:,:) + filt_u(:,:,5:10,:,:)*filt_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+var   = dim_sum_n((filt_v*filt_v + filt_u*filt_u)*dp,2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
+;var   = dim_sum_n((filt_v(:,:,5:10,:,:)*filt_v(:,:,5:10,:,:) + filt_u(:,:,5:10,:,:)*filt_u(:,:,5:10,:,:))*dp(:,:,5:10,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 ;var   = dim_sum_n((filt_v(:,:,0:5,:,:)*filt_v(:,:,0:5,:,:) + filt_u(:,:,0:5,:,:)*filt_u(:,:,0:5,:,:))*dp(:,:,0:5,:,:),2)/g/2.0   ;get (nyear,ntime,nlat,nlon)
 delete(filt_u)
 delete(filt_v)

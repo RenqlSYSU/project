@@ -27,13 +27,13 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
-pre_case   = (/"(a","(a","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
 ;Q1 is calculated from temperature equation; q1 is calculated from (QRL,QRS,DTCOND,DTV)
 draw_var = (/"intQ1"        ,"preci"       ,"OMEGA"           ,"Z3"             ,"intq1"     , \
-             "T"            ,"uppEKE"      ,"uppEKE-2.5-10day_ezfft","uppEKE-10-90day_ezfft","EKE"       , \
+             "T"            ,"intEKE"      ,"intEKE-2.5-10day_ezfft","intEKE-10-90day_ezfft","EKE"       , \
              "EKE-2.5-10day","EKE-10-90day","U"               ,"TS"             ,"PSL"       , \
              "precs"        ,"Div"         ,"advT"            ,"advT"           ,"advT"      , \
              "uppT" /)
@@ -45,11 +45,11 @@ unit     = (/"W/m~S~2~N~"   ,"mm/day"      ,"10~s~-2~n~ pa/s" ,"gpm"            
              "K"/)
 
 draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             ,"q1"        , \
-                 "T"        ,"uppEKE"      ,"uppEKEhgh"       ,"uppEKElow"      ,"EKE"       , \
+                 "T"        ,"intEKE"      ,"intEKEhgh"       ,"intEKElow"      ,"EKE"       , \
                  "EKEhgh"   ,"EKElow"      ,"U"               ,"TS"             ,"PSL"       , \
                  "snow"     ,"div"         ,"advT"            ,"advT_s"         ,"advT_e"    , \
                  "uppT" /)
-lev = (/850,500,200,700,600,  100,10/)
+lev = (/850,500,300,700,600,  100,10/)
 nl = 2
 nv = 11
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
@@ -100,7 +100,7 @@ end if
 
 ;area: east Asia
 lats = (/0  ,10 ,0  ,  -70,-70, -70,  5  ,-70,10 /);-20
-latn = (/60 ,70 ,70 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
+latn = (/60 ,89 ,89 ,   0 , 0 ,  0 ,  45 ,70 ,55 /);60
 lonl = (/0  ,30 ,270,  30 ,150, 270,  25 ,0  ,30 /);20
 lonr = (/360,240,390,  150,270, 390,  85 ,360,150/);220
 lat_spacing = 15

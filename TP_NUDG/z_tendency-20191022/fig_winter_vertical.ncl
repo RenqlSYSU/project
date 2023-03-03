@@ -5,7 +5,7 @@
 ;*********************************************************************************
 begin
 case_option  = 2 ;0 means NUDG experiment; 1 means noTP experiment
-var_option = -1 ;0 means Qd; 1 means dzdt by 3forc; 2 advection; 3 advect; 4 high and low 
+var_option = -4 ;0 means Qd; 1 means dzdt by 3forc; 2 advection; 3 advect; 4 high and low 
 nnv = 1  ;used to read dzdt induced by different forcing
 
 barshare = False;True ;
@@ -34,7 +34,7 @@ latn = (/55  , 55 , 80 , 80 , 55 , 89 , 60 , 60 /) ;55 ;60
 lonl = (/70  ,110 ,150 ,150 , 40 , 1  , 0  , 250/) ;30 ;20
 lonr = (/105 ,130 ,210 ,170 , 60 ,359 , 70 , 320/) ;150;220
 
-do na = 6,7,1 ;"TP","EA","UP","NH","CA","NP"
+do na = 1,2,1 ;"TP","EA","UP","NH","CA","NP"
 if(var_option.eq.-2) then 
     draw_var = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
     var_name = (/"b1","b2","b3","vort","total"/)  ;this is the variable used to draw, can used as center string
@@ -449,15 +449,15 @@ var_u(2,:,:,:) = var_u(1,:,:,:) - var_u(0,:,:,:)
 
 if(var_option.eq.-4) then
 if(na.eq.1) then 
-    minlvl = (/(/-2.1,-2.1,-7,-7,-7/),(/-2.1,-2.1,-7,-7,-7/)/)
-    maxlvl = (/(/ 2.1, 2.1, 7, 7, 7/),(/ 2.1, 2.1, 7, 7, 7/)/)
-    spacig = (/(/ 0.3, 0.3, 1, 1, 1/),(/ 0.3, 0.3, 1, 1, 1/)/)
+    minlvl = (/(/-2.1,-2.1,-7,-7,-7/),(/-2.1,-2.1,-7,-7,-7/),(/-7,-7,-7,-7,-7/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7, 7, 7/),(/ 2.1, 2.1, 7, 7, 7/),(/ 7, 7, 7, 7, 7/)/)
+    spacig = (/(/ 0.3, 0.3, 1, 1, 1/),(/ 0.3, 0.3, 1, 1, 1/),(/ 1, 1, 1, 1, 1/)/)
     jet_spac = 1
     dudt_spac= 5
 else
-    minlvl = (/(/-2.1,-2.1,-7,-7,-7/),(/-0.7,-0.7,-2.1,-2.1,-2.1/)/)
-    maxlvl = (/(/ 2.1, 2.1, 7, 7, 7/),(/ 0.7, 0.7, 2.1, 2.1, 2.1/)/)
-    spacig = (/(/ 0.3, 0.3, 1, 1, 1/),(/ 0.1, 0.1, 0.3, 0.3, 0.3/)/)
+    minlvl = (/(/-2.1,-2.1,-7,-7,-7/),(/-0.7,-0.7,-2.1,-2.1,-2.1/),(/-7,-7,-7,-7,-7/)/)
+    maxlvl = (/(/ 2.1, 2.1, 7, 7, 7/),(/ 0.7, 0.7, 2.1, 2.1, 2.1/),(/ 7, 7, 7, 7, 7/)/)
+    spacig = (/(/ 0.3, 0.3, 1, 1, 1/),(/ 0.1, 0.1, 0.3, 0.3, 0.3/),(/ 1, 1, 1, 1, 1/)/)
     jet_spac = 2
     dudt_spac= 2
 end if

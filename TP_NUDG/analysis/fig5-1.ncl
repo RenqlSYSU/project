@@ -7,7 +7,7 @@
 ;*********************************************************************************
 begin
 path    = "/home/ys17-23/Extension2/renql/project/TP_NUDG"
-case_option = 2 ;0 means NUDG experiment; 1 means noTP experiment
+case_option = 1 ;0 means NUDG experiment; 1 means noTP experiment
 if(case_option.eq.0) then
     case1   = (/"CTRL","NUDG6h"/) ;,"NUDG24h"
     case2   = (/"CTRL","NG6h-CTRL"/) ;,"NG24h-CTRL"
@@ -17,8 +17,7 @@ end if
 if(case_option.eq.1) then
     case1   = (/"TP_CTRL","TP_CR"/)
     case2   = (/"CTRL"   ,"CTRL-noTP"/)
-    ;gtopfile = "/home/ys17-19/renql/model/TP_CR/USGS-gtopo30_1.9x2.5_noTP_c050602C.nc" 
-    gtopfile = "/home/ys17-19/renql/model/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
+    gtopfile = "/home/ys17-23/Extension2/renql/model_data/TP_CTRL/USGS-gtopo30_1.9x2.5_remap_c050602.nc" 
     nsample = 10
 end if
 if(case_option.eq.2) then
@@ -27,7 +26,7 @@ if(case_option.eq.2) then
     gtopfile = path + "/analysis/mdata/" + "gtopo30_0.9x1.25.nc"
     nsample = 30
 end if
-pre_case   = (/"(a","(b","(c","(d","(a","(b","(g","(h","(i","(j","(k","(l"/)
+pre_case   = (/"(a","(a","(c","(b","(a","(b","(g","(h","(i","(j","(k","(l"/)
 fig_out    = "pdf";"x11";"eps";
 ;fig_out    = "eps";"x11";"eps";
 
@@ -51,14 +50,14 @@ draw_varname = (/"Q1"       ,"preci"       ,"omega"           ,"Z3"             
                  "uppT" /)
 lev = (/850,500,300,700,600,  100,10/)
 nl = 2
-nv = 11
+nv = 6
 perc_effect_by_weakTE = False;True ; if True, will calc (CTRL-noTP)/(NGTR-F2000)
 diff = True ;False;
 perc = False;True ;
 siglvl = 0.05
 sig_option  = True ;False;if False, only the significant values are shaded 
 vect_option = False;True ;
-jet_option  = 0 ;0 = no jet, 1 = jet axis, 2 = jet contour
+jet_option  = 2 ;0 = no jet, 1 = jet axis, 2 = jet contour
 cont_option = False;True ;
 cont_var  = (/"Z3" ,"intQ1"      ,"PSL","Div"                ,"OMEGA","U"  /)  ;this is the variable used to draw, can used as center string
 cont_unit = (/"gpm","W/m~S~2~N~" ,"hPa","10~S~-6~N~s~S~-1~N~","Pa/s" ,"m/s"/)
@@ -192,9 +191,9 @@ end do
 end if
 
 do nf = 0 ,ncase-1, 1
-f = addfile(filename(nf)+"PS.nc","r")
-ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
-printVarSummary(ps)
+;f = addfile(filename(nf)+"PS.nc","r")
+;ps= f->$var_name(0)$(imonth,{lats(na):latn(na)},{lonl(na):lonr(na)}) ;get an array (ncase,nmonth,nlat,nlon)
+;printVarSummary(ps)
 
 if(vect_option) then 
 inv = 0
@@ -795,9 +794,9 @@ if(perc) then
     maxlvl = (/32 , 70, 70/);8 ,8 ,8 ,8 
     spacig = (/ 2 , 10, 10/);1 ,1 ,1 ,1 
 else
-    minlvl = (/2 ,-14/);-8,-8,-8,-8
-    maxlvl = (/32, 14/);8 ,8 ,8 ,8 
-    spacig = (/2 , 2 /);1 ,1 ,1 ,1 
+    minlvl = (/2 ,-28/);-14-8,-8,-8,-8
+    maxlvl = (/32, 28/); 148 ,8 ,8 ,8 
+    spacig = (/2 , 4 /); 2 1 ,1 ,1 ,1 
   ;  minlvl = (/10,-21/);-8,-8,-8,-8
   ;  maxlvl = (/85, 21/);8 ,8 ,8 ,8 
   ;  spacig = (/5 , 3 /);1 ,1 ,1 ,1 
@@ -951,6 +950,12 @@ end if
         
         if(jet_option.ge.1) then 
         ;axis(np) = gsn_add_polyline( wks, plot(np), axlon, axlat(nc,nm,:), res_axis )
+        if(nc.eq.1) then
+        res_jet@cnLineColor      = "green";"black"
+        axis(np) = gsn_csm_contour(wks,u(0,nm,:,:),res_jet)
+        overlay(plot(np),axis(np))
+        end if
+        res_jet@cnLineColor      = "blueviolet";"black"
         jetl(np) = gsn_csm_contour(wks,u(nc,nm,:,:),res_jet)
         overlay(plot(np),jetl(np))
         end if

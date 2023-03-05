@@ -15,11 +15,11 @@ tna = 0
 na = 0 ;0=EA; 1=NH
 nv = 0
 time_option = 1
-fig_out   ="eps"       ;"x11"
-;fig_out   ="pdf"       ;"x11"
-gtopfile = "/home/ys17-19/data-observation/ERA-interim/gtopo_1.5x1.5.nc"
+;fig_out   ="eps"       ;"x11"
+fig_out   ="pdf"       ;"x11"
+gtopfile = "/home/ys17-23/Extension2/renql/gtopo_1.5x1.5.nc"
 case1    = "ERA-Interim"
-path2    = "/home/ys17-19/renql/project/TP_NUDG/observation-20190127/"
+path2    = "/home/ys17-23/Extension2/renql/project/TP_NUDG/observation-20190127/"
 filename = path2 + "/mdata/" + case1 + "_Clim_month_ave_intEKE_filter.nc";
 draw_var = (/"preci" ,"intEKE"    ,"uppEKE"/)  ;this is the variable used to draw, can used as center string
 unit     = (/"mm/day","10~S~4~N~J","10~S~4~N~J"/)  
@@ -64,7 +64,7 @@ var_name= (/"r"/)
 years   = ispan(1979,2010,1)
 fig_name= path2 + "fig/Obs_corr_TE_ERApreci"
 else
-path4   = "/home/ys17-19/data-observation/CAMS/CPC_daily_precip/precip."; + years(nt) + ".nc"
+path4   = "/home/ys17-23/Extension/CPC/daily/precip."; + years(nt) + ".nc"
 var_name= (/"precip"/)
 years   = ispan(1979,2016,1)
 fig_name= path2 + "fig/Obs_corr_TE_CPCpreci"
@@ -107,9 +107,9 @@ term = mask(term,phis.gt.3000,True)
 ts2 = wgt_areaave_Wrap(term,1.0,1.0,0)
 delete(term)
 
-plot  = new((/12/),graphic)
-plot2 = new((/12/),graphic)
-gtop  = new((/12/),graphic)
+plot  = new((/20/),graphic)
+plot2 = new((/20/),graphic)
+gtop  = new((/20/),graphic)
 
 phis := short2flt(f->z(0,{lats(na):latn(na)},{lonl(na):lonr(na)})) ;hgt for NCEP1,unit is gpm ;z for ERA-I, unit is m2/s2
 phis = phis/9.8   ;convert unit from m2/s2 to gpm
@@ -177,8 +177,8 @@ end if
     ;gsn_define_colormap(wks,"precip3_16lev") 
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 
-;np = -1
-do lag = 1,1,1
+np = -1
+do lag = 1,10,1
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, nmonth-1, 1
 if(time_option.eq.0) then 
@@ -389,9 +389,9 @@ printVarSummary(var1)
     resp@txFontThicknessF = title_thick
 
 do nm = 0, nmonth-1, 1
-    np = nm
-    ;np = np + 1 
-    res@gsnLeftString  = pre_case(np) + ") " + months(imonth(nm)) + " " + draw_var(nv); + " " + lag
+    ;np = nm
+    np = np + 1 
+    res@gsnLeftString  = pre_case(np) + ") " + months(imonth(nm)) + " " + draw_var(nv) + " " + lag
     plot(np)  = gsn_csm_contour_map_ce(wks,var1(nm,:,:),res)
     plot2(np) = gsn_csm_contour(wks,prob(nm,:,:),res_sig)
     gtop(np) = gsn_csm_contour(wks,phis,res_gtop)
@@ -410,8 +410,8 @@ if(allyear) then
     overlay(plot(np),gtop(np))
 end if
     resp@txString  = "EKE leads precip" + lag + " day" 
-    gsn_panel(wks,plot,(/1,2/),resp)
+;    gsn_panel(wks,plot,(/1,2/),resp)
 end do
-;    gsn_panel(wks,plot,(/3,2/),resp)
+    gsn_panel(wks,plot,(/10,2/),resp)
 end
 

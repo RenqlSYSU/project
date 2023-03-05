@@ -207,7 +207,7 @@ end if
     ;blue and yellow and red, has 17 colors,2-18,2 is white
 
 np = -1
-do lag = 6,16,2
+do lag = 1,13,2 
 time1 = cd_calendar(f1->time(select_time),0)
 do nm = 0, nmonth-1, 1
 if(time_option.eq.0) then 

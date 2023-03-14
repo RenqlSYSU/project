@@ -137,14 +137,14 @@ def draw_ts_3x1(outfile,figname):
         axe.grid(True, which="both", axis='y',color='grey', linestyle='--', linewidth=1)
         axe.set_xticks(x)
         axe.set_xticklabels(titls)
-        
+        ''' 
         ax2 = axe.twinx()
         tvalue,pvalue = stats.ttest_ind(var[nl,0,:,:],var[nl,1,:,:], axis=0, equal_var=False)
         ax2.plot(x,pvalue,linewidth=2,color='brown')
         tvalue,pvalue = stats.ttest_ind(var[nl,2,:,:],var[nl,1,:,:], axis=0, equal_var=False)
         ax2.plot(x,pvalue,linewidth=2,color='c')
         #ax2.plot([1,12],[0.01,0.01],linewidth=2,color='k')
-
+        '''
     axe.legend(behv,loc='upper right')
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figname,bbox_inches='tight',pad_inches=0.01)

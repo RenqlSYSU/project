@@ -14,7 +14,7 @@ class Net(nn.Module):
         o = self.act(self.input_layer(x))
         for i, li in enumerate(self.hidden_layers):
             o = self.act(li(o))
-            out = self.output_layer(o)
+        out = self.output_layer(o)
         return out
 
     def act(self, x):

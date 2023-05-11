@@ -31,9 +31,9 @@ else:
 lev = [850,500,250]
 prefix = "ff"
 #suffix = 'local'#'remote'# 
-#suffix = 'matched local' 
+suffix = 'matched local' 
 #suffix = '_6local_moveout'#'_6outside_moveout'#'moveout' 
-suffix = '_6local'#,'_total']'_6outside'#,''#
+#suffix = '_6local'#,'_total']'_6outside'#,''#
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
@@ -98,13 +98,13 @@ gc.collect()
 
 def main_run():
     # 6local & 6outside
+    '''
     cnlev1 = np.hstack((np.arange(1,4,1),np.arange(7,20,3)))
     cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
     draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
             'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[4,60])
     draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
             'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[8.5,60])
-    '''
     # moveout 
     #draw_moveout_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
     #        np.arange(0.5,13,1),np.arange(0.5,13,0.5))
@@ -112,17 +112,17 @@ def main_run():
     #cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
     draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
             'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[50,60])
+    '''
     
     # local match remote or local
-    #draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
-    #        'gden',np.arange(0.5,13,0.5),'Genesis','gden',np.arange(0.5,13,0.5),'Gensis')
+    draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
+            'gden',np.arange(0.5,13,0.5),'Genesis','gden',np.arange(0.5,13,0.5),'Gensis')
     #cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
     #cnlev2 = np.hstack((np.arange(0.5,3.5, 1 ),np.arange(3.5,50 , 2))) # track
     #draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
     #        'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[2,60])
     #draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
     #        'tden',cnlev2,'Track','lden',cnlev1,'U200',True,[3.5,60])
-    '''
 
     '''
     # total cyclones
@@ -257,7 +257,7 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
     nrow = 4 #6 #
     ncol = 3 #2 #
 
-    fig = plt.figure(figsize=(12,12),dpi=300)
+    fig = plt.figure(figsize=(12,12),dpi=150)
     ax = fig.subplots(nrow, ncol, subplot_kw=dict(
         projection=ccrs.PlateCarree(central_longitude=180.0))) #sharex=True, sharey=True
     
@@ -306,13 +306,13 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
                  transform=ccrs.PlateCarree(),cmap=ncmap,extend='both',norm=norm)
             topo = axe.contour(ilon, ilat, phis, [1500,3000,4500], linestyles='solid', 
                  transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
-
+            '''
             line1 = axe.contour(ilon, ilat, cont1, cnlev1, linestyles='solid',
                  transform=ccrs.PlateCarree(),colors='b',linewidths=2.5)
             
             line2 = axe.contour(ilon, ilat, cont2, cnlev2, linestyles='solid', 
                  transform=ccrs.PlateCarree(),colors='r',linewidths=2.5)
-            
+            '''
             if nl == 0:
                 axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())
                 axe.yaxis.set_major_formatter(LatitudeFormatter(degree_symbol=''))

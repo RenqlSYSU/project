@@ -32,7 +32,7 @@ numod= [chr(i) for i in range(97,115)]
 
 def main_run():
     #draw_radiu_ts('%s/match_radiu_test.png'%figdir)
-    draw_stacked_bar(6,'%s/match_remote_local_percent.png'%figdir)
+    draw_stacked_bar(3,'%s/match_remote_local_percent.png'%figdir)
 
 def draw_stacked_bar(radiu,figname):
     titls = ['DJF','MAM','JJA','SON']
@@ -41,7 +41,7 @@ def draw_stacked_bar(radiu,figname):
     bmlo = 0.3 #0.25 #
     
     ds = xr.open_dataset('%s/behv_season_6cyclone_6rad.nc'%outdir)
-    total = ds['numb'].data[0,:,:,:].sum(axis=1) #[suffix,lev,behv,season]
+    total = ds['numb'].data[1,:,:,:].sum(axis=1) #[suffix,lev,behv,season]
     print(total[0,0])
     
     var = np.zeros([2,len(lev),len(lev),4], dtype=int)

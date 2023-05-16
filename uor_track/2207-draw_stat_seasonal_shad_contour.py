@@ -24,7 +24,7 @@ font = {'family': 'sans-serif',
         }
 
 if len(sys.argv) < 2 :
-    radiu2 = 6
+    radiu2 = 3
 else:
     radiu2 = int(sys.argv[1])  #'ff_250_500_no'
 
@@ -115,8 +115,10 @@ def main_run():
     '''
     
     # local match remote or local
+    #draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
+    #        'gden',np.arange(0.5,13,0.5),'Genesis','gden',np.arange(0.5,13,0.5),'Gensis')
     draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
-            'gden',np.arange(0.5,13,0.5),'Genesis','gden',np.arange(0.5,13,0.5),'Gensis')
+            'gden',np.arange(0.2,13,0.4),'Genesis','gden',np.arange(0.2,13,0.4),'Gensis')
     #cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
     #cnlev2 = np.hstack((np.arange(0.5,3.5, 1 ),np.arange(3.5,50 , 2))) # track
     #draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
@@ -306,13 +308,13 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
                  transform=ccrs.PlateCarree(),cmap=ncmap,extend='both',norm=norm)
             topo = axe.contour(ilon, ilat, phis, [1500,3000,4500], linestyles='solid', 
                  transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
-            '''
+          
             line1 = axe.contour(ilon, ilat, cont1, cnlev1, linestyles='solid',
                  transform=ccrs.PlateCarree(),colors='b',linewidths=2.5)
             
             line2 = axe.contour(ilon, ilat, cont2, cnlev2, linestyles='solid', 
                  transform=ccrs.PlateCarree(),colors='r',linewidths=2.5)
-            '''
+            
             if nl == 0:
                 axe.set_yticks(np.arange(lats,latn,lat_sp), crs=ccrs.PlateCarree())
                 axe.yaxis.set_major_formatter(LatitudeFormatter(degree_symbol=''))

@@ -21,7 +21,7 @@ font = {'family': 'sans-serif',
         'color':  'black', 
         }
 
-lev = [850, 500, 250]
+lev = [500, 250]#850, 
 path  = '/home/ys17-23/Extension2/renql/ERA5-1HR-lev'
 path1 = '/home/ys17-23/Extension2/renql/project/uor_track'
 outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
@@ -33,7 +33,7 @@ nmonth = 12
 behv   = ['upstm','TP','downstm']
 lon = [40,65,105,130]
 #lat = [15,60]
-lat = [20,60]
+lat = [20,55]
 nyear = 41
 numod= [chr(i) for i in range(97,115)]
 
@@ -109,12 +109,14 @@ def mon2sea(nm):
     return sea
 
 def draw_ts_3x1(outfile,figname):
-    nrow = 3 #6 #
+    nrow = 2 #6 #
     ncol = 1 #2 #
-    bmlo = 0.35 #0.25 #
+    bmlo = 0.55 #0.25 #
     
     ds = xr.open_dataset(outfile)
-    var = ds['inte'].data[:,:,:,:,0] 
+    #var = ds['inte'].data[:,:,:,:,0] 
+    var1 = ds['inte'].data 
+    var  = var1[:,:,:,:,0]*var1[:,:,:,:,1]
     
     pcolor  = ["r","b",'g'] # change with option
     x = np.arange(1,nmonth+1,1)
@@ -137,14 +139,15 @@ def draw_ts_3x1(outfile,figname):
         axe.grid(True, which="both", axis='y',color='grey', linestyle='--', linewidth=1)
         axe.set_xticks(x)
         axe.set_xticklabels(titls)
-        ''' 
+        
         ax2 = axe.twinx()
+        ax2.set_ylabel('p-value',fontsize=label_font,fontdict=font)
         tvalue,pvalue = stats.ttest_ind(var[nl,0,:,:],var[nl,1,:,:], axis=0, equal_var=False)
-        ax2.plot(x,pvalue,linewidth=2,color='brown')
+        ax2.plot(x,pvalue,linewidth=2,color='k')
         tvalue,pvalue = stats.ttest_ind(var[nl,2,:,:],var[nl,1,:,:], axis=0, equal_var=False)
-        ax2.plot(x,pvalue,linewidth=2,color='c')
+        ax2.plot(x,pvalue,linewidth=2,color='gray')
         #ax2.plot([1,12],[0.01,0.01],linewidth=2,color='k')
-        '''
+       
     axe.legend(behv,loc='upper right')
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
     plt.savefig(figname,bbox_inches='tight',pad_inches=0.01)

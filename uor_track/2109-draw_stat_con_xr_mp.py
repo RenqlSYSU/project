@@ -151,7 +151,7 @@ for nl in range(0,len(lev),1):
         axe.set_title("(%s) %d %s"%(numod[nl*3+nv],lev[nl],var1.long_name),fontdict=font)
 
         shad = axe.contourf(ilon, ilat, var, cnlevels, 
-                     transform=ccrs.PlateCarree(),cmap=fcolors,extend='both',norm=norm)
+                     transform=ccrs.PlateCarree(),cmap=fcolors,extend='both',norm=norm,rasterized=True)
         topo = axe.contour(ilon, ilat, phis, [1500,3000,4500],#500,1000, 
                      transform=ccrs.PlateCarree(),colors='black',linewidths=1.5)
         if dbox >= 1 :
@@ -171,6 +171,6 @@ for nl in range(0,len(lev),1):
             cb = plt.colorbar(shad, cax=position ,orientation='horizontal')#, shrink=.9)
 
 plt.tight_layout(rect=(0,bmlo,1,1))
-plt.savefig("%s/stat_annual%s.png"%(figdir,suffix), bbox_inches='tight',pad_inches=0.01)
+plt.savefig("%s/stat_annual%s.pdf"%(figdir,suffix), bbox_inches='tight',pad_inches=0.01)
 
 

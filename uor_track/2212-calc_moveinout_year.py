@@ -28,7 +28,7 @@ outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
 figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 tp_file='%s/tp_loca_1500.txt'%(outdir)
 nmonth = 12
-radiu1 = 3
+radiu1 = 6
 radiu2 = 6
 behv   = ['in','out']
 slon = 60
@@ -42,9 +42,9 @@ def main_run():
     outfile = '%s/movein_moveout_month_%dcyclone_%drad_year.nc'%(
             outdir,radiu1,radiu2)
     calc_lysis_percent(outfile)
-    draw_ts_3x1(outfile,'%s/moveinout_%dcyc_%drad.png'%(
+    draw_ts_3x1(outfile,'%s/moveinout_%dcyc_%drad.pdf'%(
         figdir,radiu1,radiu2))
-    #draw_6ts(outfile,'%s/moveinout_%dcyc_%drad.png'%(
+    #draw_6ts(outfile,'%s/moveinout_%dcyc_%drad.pdf'%(
     #    figdir,radiu1,radiu2))
 
 def calc_lysis_percent(outfile):

@@ -40,7 +40,7 @@ numod= [chr(i) for i in range(97,115)]
 def main_run():
     outfile = '%s/region_intensity_month.nc'%(outdir)
     calc_region_intensity(outfile)
-    draw_ts_3x1(outfile,'%s/intensity_%dcyc_%drad.png'%(
+    draw_ts_3x1(outfile,'%s/intensity_%dcyc_%drad.pdf'%(
         figdir,radiu1,radiu2))
 
 def calc_region_intensity(outfile):
@@ -114,9 +114,9 @@ def draw_ts_3x1(outfile,figname):
     bmlo = 0.55 #0.25 #
     
     ds = xr.open_dataset(outfile)
-    #var = ds['inte'].data[:,:,:,:,0] 
-    var1 = ds['inte'].data 
-    var  = var1[:,:,:,:,0]*var1[:,:,:,:,1]
+    var = ds['inte'].data[:,:,:,:,0] 
+    #var1 = ds['inte'].data 
+    #var  = var1[:,:,:,:,0]*var1[:,:,:,:,1]
     
     pcolor  = ["r","b",'g'] # change with option
     x = np.arange(1,nmonth+1,1)

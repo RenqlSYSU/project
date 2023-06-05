@@ -26,8 +26,8 @@ path1 = '/home/ys17-23/Extension2/renql/project/uor_track'
 outdir = '/home/ys17-23/Extension2/renql/project/uor_track/mdata'
 figdir = '/home/ys17-23/Extension2/renql/project/uor_track/fig'
 tp_file='%s/tp_loca_1500.txt'%(outdir)
-radiu1 = 3
-radiu2 = 3 # use to filte lysis cyclone
+radiu1 = 6
+radiu2 = 6 # use to filte lysis cyclone
 suffix = ["%doutside"%radiu1,"%dlocal"%radiu1]
 suf1 = ['remote','local']
 behv   = ['lysis','moveout']
@@ -37,7 +37,7 @@ def main_run():
     outfile = '%s/behv_season_%dcyclone_%drad.nc'%(
             outdir,radiu1,radiu2)
     calc_lysis_percent(outfile)
-    draw_stacked_bar(outfile,'%s/bar_lysis_percent_%dcyc_%drad.png'%(
+    draw_stacked_bar(outfile,'%s/bar_lysis_percent_%dcyc_%drad.pdf'%(
         figdir,radiu1,radiu2))
     '''
     for nc in range(len(suffix)):

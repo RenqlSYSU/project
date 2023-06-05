@@ -32,7 +32,7 @@ numod= [chr(i) for i in range(97,115)]
 
 def main_run():
     #draw_radiu_ts('%s/match_radiu_test.png'%figdir)
-    draw_stacked_bar(3,'%s/match_remote_local_percent.png'%figdir)
+    draw_stacked_bar(6,'%s/match_remote_local_percent.pdf'%figdir)
 
 def draw_stacked_bar(radiu,figname):
     titls = ['DJF','MAM','JJA','SON']

@@ -24,16 +24,16 @@ font = {'family': 'sans-serif',
         }
 
 if len(sys.argv) < 2 :
-    radiu2 = 3
+    radiu2 = 6
 else:
     radiu2 = int(sys.argv[1])  #'ff_250_500_no'
 
 lev = [850,500,250]
 prefix = "ff"
 #suffix = 'local'#'remote'# 
-suffix = 'matched local' 
+#suffix = 'matched local' 
 #suffix = '_6local_moveout'#'_6outside_moveout'#'moveout' 
-#suffix = '_6local'#,'_total']'_6outside'#,''#
+suffix = '_6outside'#,''#'_6local'#,'_total']
 titls= ['DJF','MAM','JJA','SON']
 numod= [chr(i) for i in range(97,115)]
 figdir = "/home/ys17-23/Extension2/renql/project/uor_track/fig"
@@ -98,7 +98,6 @@ gc.collect()
 
 def main_run():
     # 6local & 6outside
-    '''
     cnlev1 = np.hstack((np.arange(1,4,1),np.arange(7,20,3)))
     cnlev2 = np.hstack((np.arange(1,8.5,2.5),np.arange(13.5,50,5)))
     draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
@@ -108,17 +107,16 @@ def main_run():
     # moveout 
     #draw_moveout_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
     #        np.arange(0.5,13,1),np.arange(0.5,13,0.5))
-    cnlev1 = np.hstack((np.arange(0.5, 10 ,1),np.arange( 10 ,20 , 1))) # genesis & lysis
+    #cnlev1 = np.hstack((np.arange(0.5, 10 ,1),np.arange( 10 ,20 , 1))) # genesis & lysis
     #cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
-    draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
-            'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[50,60])
-    '''
+    #draw_shad_cont_seasonal_4x3(suffix,'mstr',np.arange(0,14,1),'Intensity',
+    #        'gden',cnlev1,'Genesis','lden',cnlev1,'Lysis',False,[50,60])
     
     # local match remote or local
     #draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
     #        'gden',np.arange(0.5,13,0.5),'Genesis','gden',np.arange(0.5,13,0.5),'Gensis')
-    draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
-            'gden',np.arange(0.2,13,0.4),'Genesis','gden',np.arange(0.2,13,0.4),'Gensis')
+    #draw_match_shad_cont_seasonal_4x3('gden',np.arange(0,13,1),'Genesis',
+    #        'gden',np.arange(0.2,13,0.4),'Genesis','gden',np.arange(0.2,13,0.4),'Gensis')
     #cnlev1 = np.hstack((np.arange(0.5, 2 ,0.5),np.arange( 2 ,20 , 1))) # genesis & lysis
     #cnlev2 = np.hstack((np.arange(0.5,3.5, 1 ),np.arange(3.5,50 , 2))) # track
     #draw_shad_cont_seasonal_4x3(suffix,'msp',np.arange(15,85,5),'Speed',
@@ -228,11 +226,15 @@ def draw_shad_cont_seasonal_4x3(suffix,varname,cnlev,label,
 
     position = fig.add_axes([0.45, bmlo+0.005, 0.45, 0.01]) #left, bottom, width, height
     cb = plt.colorbar(cont, cax=position ,orientation='horizontal')#, shrink=.9)
-    plt.figtext(0.35,bmlo-0.005, label,fontsize=title_font,
+    plt.figtext(0.35,bmlo-0.005, label,fontsize=title_font,color='black',
+        horizontalalignment='left',verticalalignment='bottom')
+    plt.figtext(0.05,bmlo-0.005, label1,fontsize=title_font,color='b',
+        horizontalalignment='left',verticalalignment='bottom')
+    plt.figtext(0.20,bmlo-0.005, label2,fontsize=title_font,color='r',
         horizontalalignment='left',verticalalignment='bottom')
 
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
-    plt.savefig('%s/stat_seasonal%s_%s.png'%(figdir,suffix,varname), 
+    plt.savefig('%s/stat_seasonal%s_%s.pdf'%(figdir,suffix,varname), 
         bbox_inches='tight',pad_inches=0.01)
 
 def read_stat(f,varname,nl):
@@ -328,7 +330,7 @@ def draw_match_shad_cont_seasonal_4x3(varname,cnlev,label,
         horizontalalignment='left',verticalalignment='bottom')
 
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
-    plt.savefig('%s/stat_seasonal%s_%s_%ddist.png'%(figdir,suffix,varname,radiu2), 
+    plt.savefig('%s/stat_seasonal%s_%s_%ddist.pdf'%(figdir,suffix,varname,radiu2), 
         bbox_inches='tight',pad_inches=0.01)
 
 def draw_moveout_shad_cont_seasonal_4x3(varname,cnlev,label,cnlev1,cnlev2):
@@ -403,7 +405,7 @@ def draw_moveout_shad_cont_seasonal_4x3(varname,cnlev,label,cnlev1,cnlev2):
         horizontalalignment='left',verticalalignment='bottom')
 
     plt.tight_layout(w_pad=0.5,rect=(0,bmlo,1,1))
-    plt.savefig('%s/stat_seasonal%s_%s.png'%(figdir,suffix,varname), 
+    plt.savefig('%s/stat_seasonal%s_%s.pdf'%(figdir,suffix,varname), 
         bbox_inches='tight',pad_inches=0.01)
 
 if __name__=='__main__':
